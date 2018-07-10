@@ -1,0 +1,15 @@
+ -- Fatal Error --------------------------------------------------------------
+  Logic exception on Performer 'PlatoMain': 
+    Error message: Plato::SharedValue:  unknown data type requested ('BOGUSSCALAR')
+ -----------------------------------------------------------------------------
+
+ -- Fatal Error --------------------------------------------------------------
+  Logic exception on Performer 'LightMP_static_load1': 
+    Error message: Plato::SharedValue:  unknown data type requested ('BOGUSSCALAR')
+ -----------------------------------------------------------------------------
+
+ -- Fatal Error --------------------------------------------------------------
+  Logic exception on Performer 'LightMP_static_load2': 
+    Error message: Plato::SharedValue:  unknown data type requested ('BOGUSSCALAR')
+ -----------------------------------------------------------------------------
+

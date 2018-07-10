@@ -1,0 +1,117 @@
+/*
+ * XMLGenerator_UnitTester.hpp
+ *
+ *  Created on: Sep 28, 2017
+ *
+ */
+
+#ifndef SRC_XMLGENERATOR_UNITTESTER_HPP_
+#define SRC_XMLGENERATOR_UNITTESTER_HPP_
+
+#include "XMLGenerator.hpp"
+
+
+class XMLGenerator_UnitTester : public XMLGenerator
+{
+
+public:
+    XMLGenerator_UnitTester();
+    ~XMLGenerator_UnitTester();
+
+    bool publicParseSingleValue(const std::vector<std::string> &aTokens,
+                                const std::vector<std::string> &aInputStrings,
+                                std::string &aReturnStringValue);
+    bool publicParseTokens(char *buffer, std::vector<std::string> &tokens);
+    bool publicParseSingleUnLoweredValue(const std::vector<std::string> &aTokens,
+                                         const std::vector<std::string> &aUnLoweredTokens,
+                                         const std::vector<std::string> &aInputStrings,
+                                         std::string &aReturnStringValue);
+    bool publicParseObjectives(std::istream &sin);
+    bool publicParseOptimizationParameters(std::istream &sin);
+    bool publicParseConstraints(std::istream &sin);
+    bool publicParseMesh(std::istream &sin);
+    bool publicParseCodePaths(std::istream &sin);
+    bool publicParseBlocks(std::istream &sin);
+    bool publicParseMaterials(std::istream &sin);
+    std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name;}
+    std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].type;}
+    std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}
+    std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area;}
+    std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
+    std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].material_id;}
+    std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].penalty_exponent;}
+    std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].youngs_modulus;}
+    std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].poissons_ratio;}
+    std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].thermal_conductivity;}
+    std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].density;}
+    std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
+    std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
+    std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
+    std::string getObjCodeName(const int &aIndex) {return m_InputData.objectives[aIndex].code_name;}
+    std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].performer_name;}
+    std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
+    std::string getObjFreqMax(const int &aIndex) {return m_InputData.objectives[aIndex].freq_max;}
+    std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
+    std::string getBCApplicationType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].app_type;}
+    std::string getBCApplicationID(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].app_id;}
+    std::string getBCApplicationDOF(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].dof;}
+    std::string getLoadType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].type;}
+    std::string getLoadApplicationType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].app_type;}
+    std::string getLoadApplicationID(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].app_id;}
+    std::string getLoadDirectionX(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].x;}
+    std::string getLoadDirectionY(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].y;}
+    std::string getLoadDirectionZ(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].z;}
+    std::string getLoadScale(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].scale;}
+    std::string getMatBoxMinCoords() {return m_InputData.levelset_material_box_min;}
+    std::string getMatBoxMaxCoords() {return m_InputData.levelset_material_box_max;}
+    std::string getInitDensityValue() {return m_InputData.initial_density_value;}
+    std::string getCreateLevelsetSpheres() {return m_InputData.create_levelset_spheres;}
+    std::string getLevelsetInitMethod() {return m_InputData.levelset_initialization_method;}
+    std::string getMaxIterations() {return m_InputData.max_iterations;}
+    std::string getRestartIteration() {return m_InputData.restart_iteration;}
+    std::string getRestartFieldName() {return m_InputData.initial_guess_field_name;}
+    std::string getRestartMeshFilename() {return m_InputData.initial_guess_filename;}
+    std::string getKSMaxTrustIterations() {return m_InputData.KS_max_trust_region_iterations;}
+    std::string getKSExpansionFactor() {return m_InputData.KS_trust_region_expansion_factor;}
+    std::string getKSContractionFactor() {return m_InputData.KS_trust_region_contraction_factor;}
+    std::string getKSOuterGradientTolerance() {return m_InputData.KS_outer_gradient_tolerance;}
+    std::string getKSOuterStationarityTolerance() {return m_InputData.KS_outer_stationarity_tolerance;}
+    std::string getKSOuterStagnationTolerance() {return m_InputData.KS_outer_stagnation_tolerance;}
+    std::string getKSOuterControlStagnationTolerance() {return m_InputData.KS_outer_control_stagnation_tolerance;}
+    std::string getKSOuterActualReductionTolerance() {return m_InputData.KS_outer_actual_reduction_tolerance;}
+    std::string getGCMMAMaxInnerIterations() {return m_InputData.GCMMA_max_inner_iterations;}
+    std::string getGCMMAInnerKKTTolerance() {return m_InputData.GCMMA_inner_kkt_tolerance;}
+    std::string getGCMMAInnerControlStagnationTolerance() {return m_InputData.GCMMA_inner_control_stagnation_tolerance;}
+    std::string getGCMMAOuterKKTTolerance() {return m_InputData.GCMMA_outer_kkt_tolerance;}
+    std::string getGCMMAOuterControlStagnationTolerance() {return m_InputData.GCMMA_outer_control_stagnation_tolerance;}
+    std::string getGCMMAOuterObjectiveStagnationTolerance() {return m_InputData.GCMMA_outer_objective_stagnation_tolerance;}
+    std::string getGCMMAOuterStationarityTolerance() {return m_InputData.GCMMA_outer_stationarity_tolerance;}
+    std::string getGCMMAInitialMovingAsymptotesScaleFactor() {return m_InputData.GCMMA_initial_moving_asymptotes_scale_factor;}
+    std::string getLevelsetSpherePackingFactor() {return m_InputData.levelset_sphere_packing_factor;}
+    std::string getLevelsetSphereRadius() {return m_InputData.levelset_sphere_radius;}
+    std::string getLevelsetNodeset(const int &aIndex) {return m_InputData.levelset_nodesets[aIndex];}
+    std::string getFixedBlock(const int &aIndex) {return m_InputData.fixed_block_ids[aIndex];}
+    std::string getOutputFrequency() {return m_InputData.output_frequency;}
+    std::string getOutputMethod() {return m_InputData.output_method;}
+    std::string getFixedSideset(const int &aIndex) {return m_InputData.fixed_sideset_ids[aIndex];}
+    std::string getFixedNodeset(const int &aIndex) {return m_InputData.fixed_nodeset_ids[aIndex];}
+    std::string getNumberProcessors() {return m_InputData.num_opt_processors;}
+    std::string getFilterScale() {return m_InputData.filter_radius_scale;}
+    std::string getFilterAbsolute() {return m_InputData.filter_radius_absolute;}
+    std::string getAlgorithm() {return m_InputData.optimization_algorithm;}
+    std::string getDiscretization() {return m_InputData.discretization;}
+    std::string getCheckGradient() {return m_InputData.check_gradient;}
+    std::string getCheckHessian() {return m_InputData.check_hessian;}
+    std::string getMeshName() {return m_InputData.mesh_name;}
+    std::string getSalinasPath() {return m_InputData.salinas_path;}
+    std::string getAlbanyPath() {return m_InputData.albany_path;}
+    std::string getLightMPPath() {return m_InputData.lightmp_path;}
+    std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
+    void clearInputData();
+
+
+
+};
+
+
+#endif /* SRC_XMLGENERATOR_UNITTESTER_HPP_ */

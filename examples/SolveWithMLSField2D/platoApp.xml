@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>InitializeMLSPoints</Function>
+  <Name>Initialize MLS Point Values</Name>
+  <Output>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+  <Field>Initial Porous Design</Field>
+</Operation>
+
+<Operation>
+  <Function>ComputeMLSField</Function>
+  <Name>Compute Nodal Field</Name>
+  <Input>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>MLS Field Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+</Operation>

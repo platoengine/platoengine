@@ -1,0 +1,5 @@
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer 'PlatoMain': 
+    Error message: Plato::ConvergenceTest: invalid ComboType 'BOGUSOR'. Choose from {'OR','AND'}.
+ -----------------------------------------------------------------------------
+

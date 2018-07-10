@@ -1,0 +1,39 @@
+## /projects/cubit/claro.Lin64.15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 412665
+## Revised 2018-06-05 14:19:56 -0600 (Tue, 05 Jun 2018)
+## Running 07/03/2018 09:27:01 AM
+## Command Options:
+#{zdim=1}
+#{ankle_depth=5}
+#{foot_depth=4}
+#{ankle_height=8}
+#{foot_length=5}
+#{shift_in=1.2}
+#{hole_radius=0.5}
+#{mesh_size=0.11}
+create brick x {ankle_depth+foot_length} y {foot_depth} z {zdim}
+create brick x {ankle_depth} y {ankle_height} z {zdim}
+move surface 9 location surface 5
+move surface 10 location surface 4 except y z
+unite volume all
+create cylinder height {zdim} radius {hole_radius}
+move volume 3 location curve 12
+move volume 3 x {-shift_in} y {-shift_in}
+subtract volume 3 from volume 1
+create cylinder height {zdim} radius {hole_radius}
+move volume 4 location curve 24
+move volume 4 x {-shift_in} y {-shift_in}
+subtract volume 4 from volume 1
+create cylinder height {zdim} radius {hole_radius}
+move volume 5 location curve 23
+move volume 5 x {shift_in} y {-shift_in}
+subtract volume 5 from volume 1
+volume all size {mesh_size}
+volume all scheme tetmesh
+mesh volume all
+block 1 surface 30
+block 1 element type TRI
+nodeset 2 curve 39 35
+sideset 1 curve 31
+export mesh "lbracket_2d.gen" dimension 2 overwrite

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>InitializeMLSPoints</Function>
+  <Name>Initialize MLS Point Values</Name>
+  <Output>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+  <Field>Initial Uniform Design</Field>
+</Operation>
+
+<Operation>
+  <Function>ComputeMLSField</Function>
+  <Name>Compute Nodal Field</Name>
+  <Input>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>MLS Field Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+</Operation>
+
+<Operation>
+  <Function>MapMLSField</Function>
+  <Name>Map Field to Points</Name>
+  <Input>
+    <ArgumentName>MLS Field Values</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Mapped MLS Point Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+</Operation>
+

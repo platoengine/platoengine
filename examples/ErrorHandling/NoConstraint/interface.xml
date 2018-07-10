@@ -1,0 +1,414 @@
+<?xml version="1.0"?>
+
+<!-- 
+  In this example, the 'Volume' stage definition is given an extra input argument that isn't provided by the 
+  calling optimizer.  
+  Current behavior:  The problem runs fine.  When stages are parsed/constructed, if the requested inputs and 
+  outputs aren't found, they're not added and no warning/error is issues.
+  Desired behavior:  This should be a fatal error.  
+-->
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <CommID>0</CommID>
+</Performer> 
+
+<Performer> 
+  <Name>LightMP_static_load1</Name>
+  <Code>LightMP</Code>
+  <CommID>1</CommID>
+</Performer> 
+
+<Performer> 
+  <Name>LightMP_static_load2</Name>
+  <Code>LightMP</Code>
+  <CommID>2</CommID>
+</Performer> 
+
+<SharedData>
+  <Name>Internal Energy 1 Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>LightMP_static_load1</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy 2 Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>LightMP_static_load2</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Volume Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Optimization DOFs</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>LightMP_static_load1</UserName>
+  <UserName>LightMP_static_load2</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Topology</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>LightMP_static_load1</UserName>
+  <UserName>LightMP_static_load2</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Volume</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Design Volume</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy 1</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>LightMP_static_load1</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy 2</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>LightMP_static_load2</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<Stage>
+  <Name>Output To File</Name>
+  <Operation>
+    <Name>PlatoMainOutput</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+  </Operation>
+</Stage>
+
+<Stage>
+  <Name>Initialize Optimization DOFs</Name>
+  <Operation>
+    <Name>Initialize Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Initialized Field</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Design Volume</Name>
+  <Operation>
+    <Name>Design Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Design Volume</ArgumentName>
+      <SharedDataName>Design Volume</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Design Volume</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Volume</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>Compute Current Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Volume</ArgumentName>
+      <SharedDataName>Volume</SharedDataName>
+    </Output>
+    <Output>
+      <ArgumentName>Volume Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>FilterGradient</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Volume</SharedDataName>
+  </Output>
+  <Output>
+    <SharedDataName>Volume Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Internal Energy</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+
+    <Operation>
+
+      <PerformerName>LightMP_static_load1</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 1</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+      </Output>
+    </Operation>
+
+    <Operation>
+      <PerformerName>LightMP_static_load2</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 2</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
+      </Output>
+    </Operation>
+
+  </Operation>
+
+
+
+  <Operation>
+    <Name>AggregateEnergy</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+      <SharedDataName>Internal Energy 1</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Value 2</ArgumentName>
+      <SharedDataName>Internal Energy 2</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+      <SharedDataName>Internal Energy</SharedDataName>
+    </Output>
+
+    <Input>
+      <ArgumentName>Field 1</ArgumentName>
+      <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Field 2</ArgumentName>
+      <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Internal Energy Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>FilterGradient</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Internal Energy Gradient</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Internal Energy Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Internal Energy</SharedDataName>
+  </Output>
+  <Output>
+    <SharedDataName>Internal Energy Gradient</SharedDataName>
+  </Output>
+
+</Stage>
+
+<Optimizer>
+  <Package>OC</Package>
+  <NLopt>
+    <Method>MMA</Method>
+  </NLopt>
+  <Output>
+    <OutputStage>Output To File</OutputStage>
+  </Output>
+  <OC>
+    <MoveLimiter>1.0</MoveLimiter>
+    <StabilizationParameter>0.5</StabilizationParameter>
+    <UseNewtonSearch>True</UseNewtonSearch>
+    <ConstraintMaxIterations>25</ConstraintMaxIterations>
+  </OC>
+  <OptimizationVariables>
+    <ValueName>Optimization DOFs</ValueName>
+    <InitializationStage>Initialize Optimization DOFs</InitializationStage>
+  </OptimizationVariables>
+  <Objective>
+    <ValueName>Internal Energy</ValueName>
+    <GradientName>Internal Energy Gradient</GradientName>
+    <ValueStageName>Internal Energy</ValueStageName>
+    <GradientStageName>Internal Energy Gradient</GradientStageName>
+  </Objective>
+  <BoundConstraint>
+    <Upper>1.0</Upper>
+    <Lower>0.0</Lower>
+  </BoundConstraint>
+<!--
+  <Constraint>
+    <Equality>True</Equality>
+    <Linear>True</Linear>
+    <ValueName>Volume</ValueName>
+    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <GradientName>Volume Gradient</GradientName>
+    <NormalizedTargetValue>0.2</NormalizedTargetValue>
+    <Tolerance>1e-3</Tolerance>
+  </Constraint>
+-->
+  <Convergence>
+    <ComboType>OR</ComboType>
+    <Test>
+      <Type>Maximum Iterations</Type>
+      <Value>10</Value>
+    </Test>
+    <Test>
+      <ComboType>AND</ComboType>
+      <Test>
+        <Type>Minimum Iterations</Type>
+        <Value>5</Value>
+      </Test>
+      <Test>
+        <ComboType>OR</ComboType>
+        <Test> 
+          <Type>Relative Topology Change</Type>
+          <Value>1e-4</Value>
+        </Test>
+        <Test> 
+          <Type>Relative Objective Change</Type>
+          <Value>1e-4</Value>
+        </Test>
+      </Test>
+    </Test>
+  </Convergence>
+</Optimizer>
+
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>unsmesh</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <material>1</material>
+  </block>
+</mesh>
+
+<output>
+  <file>plato</file>
+  <format>exodus</format>
+</output>

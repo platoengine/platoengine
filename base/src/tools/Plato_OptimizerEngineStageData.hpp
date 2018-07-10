@@ -1,0 +1,263 @@
+/*
+ * Plato_OptimizerEngineStageData.hpp
+ *
+ *  Created on: Oct 27, 2017
+ */
+
+#ifndef PLATO_OPTIMIZERENGINESTAGEDATA_HPP_
+#define PLATO_OPTIMIZERENGINESTAGEDATA_HPP_
+
+#include <map>
+#include <string>
+#include <vector>
+
+#include "Plato_InputData.hpp"
+
+namespace Plato
+{
+
+class OptimizerEngineStageData : public Plato::InputData
+{
+public:
+    OptimizerEngineStageData();
+    ~OptimizerEngineStageData();
+
+    void setCheckGradient(const bool & aInput);
+    void setCheckHessian(const bool & aInput);
+    void setUserInitialGuess(const bool & aInput);
+    void setOutputControlToFile(const bool & aInput);
+    void setOutputDiagnosticsToFile(const bool & aInput);
+
+    bool getCheckGradient() const;
+    bool getCheckHessian() const;
+    bool getUserInitialGuess() const;
+    bool getOutputControlToFile() const;
+    bool getOutputDiagnosticsToFile() const;
+
+    std::vector<double> getLowerBoundValues() const;
+    std::vector<double> getUpperBoundValues() const;
+    void setLowerBoundValues(const std::vector<double> & aInput);
+    void setUpperBoundValues(const std::vector<double> & aInput);
+
+    size_t getMaxNumIterations() const;
+    void setMaxNumIterations(const size_t & aInput);
+
+    int getDerivativeCheckerFinalSuperscript() const;
+    void setDerivativeCheckerFinalSuperscript(const int & aInput);
+    int getDerivativeCheckerInitialSuperscript() const;
+    void setDerivativeCheckerInitialSuperscript(const int & aInput);
+
+    std::vector<double> getInitialGuess() const;
+    void setInitialGuess(const std::vector<double> & aInput);
+    void setInitialGuess(const std::vector<std::string> & aInput);
+
+    double getGCMMAInitialMovingAsymptoteScaleFactor() const;
+    void setGCMMAInitialMovingAsymptoteScaleFactor(const double & aInput);
+
+    double getGCMMAInnerKKTTolerance() const;
+    void setGCMMAInnerKKTTolerance(const double & aInput);
+
+    double getGCMMAOuterKKTTolerance() const;
+    void setGCMMAOuterKKTTolerance(const double & aInput);
+
+    int getGCMMAMaxInnerIterations() const;
+    void setGCMMAMaxInnerIterations(const int & aInput);
+
+    double getGCMMAInnerControlStagnationTolerance() const;
+    void setGCMMAInnerControlStagnationTolerance(const double & aInput);
+
+    double getGCMMAOuterControlStagnationTolerance() const;
+    void setGCMMAOuterControlStagnationTolerance(const double & aInput);
+
+    double getGCMMAOuterObjectiveStagnationTolerance() const;
+    void setGCMMAOuterObjectiveStagnationTolerance(const double & aInput);
+
+    double getGCMMAOuterStationarityTolerance() const;
+    void setGCMMAOuterStationarityTolerance(const double & aInput);
+
+    double getKSTrustRegionExpansionFactor() const;
+    void setKSTrustRegionExpansionFactor(const double & aInput);
+
+    double getKSTrustRegionContractionFactor() const;
+    void setKSTrustRegionContractionFactor(const double & aInput);
+
+    int getKSMaxTrustRegionIterations() const;
+    void setKSMaxTrustRegionIterations(const int & aInput);
+
+    double getKSOuterGradientTolerance() const;
+    void setKSOuterGradientTolerance(const double & aInput);
+
+    double getKSOuterStationarityTolerance() const;
+    void setKSOuterStationarityTolerance(const double & aInput);
+
+    double getKSOuterStagnationTolerance() const;
+    void setKSOuterStagnationTolerance(const double & aInput);
+
+    double getKSOuterControlStagnationTolerance() const;
+    void setKSOuterControlStagnationTolerance(const double & aInput);
+
+    double getKSOuterActualReductionTolerance() const;
+    void setKSOuterActualReductionTolerance(const double & aInput);
+
+    std::string getStateName() const;
+    void setStateNames(const std::string & aInput);
+
+    std::string getInputFileName() const;
+    void setInputFileName(const std::string & aInput);
+
+    size_t getNumControlVectors() const;
+    std::vector<std::string> getControlNames() const;
+    std::string getControlName(const size_t & aIndex) const;
+    void addControlName(const std::string & aInput);
+    void setControlNames(const std::vector<std::string> & aInput);
+
+    std::string getLowerBoundVectorName() const;
+    std::string getLowerBoundValueName() const;
+    void setLowerBoundValueName(const std::string & aInput);
+    void setLowerBoundVectorName(const std::string & aInput);
+
+    std::string getUpperBoundVectorName() const;
+    std::string getUpperBoundValueName() const;
+    void setUpperBoundValueName(const std::string & aInput);
+    void setUpperBoundVectorName(const std::string & aInput);
+
+    std::vector<std::string> getDescentDirectionNames() const;
+    std::string getDescentDirectionName(const size_t & aIndex) const;
+    void addDescentDirectionName(const std::string & aInput);
+    void setDescentDirectionNames(const std::vector<std::string> & aInput);
+
+    std::string getAlgebra() const;
+    void setAlgebra(const std::string & aInput);
+
+    std::string getOutputStageName() const;
+    void setOutputStageName(const std::string & aInput);
+
+    std::string getCacheStageName() const;
+    void setCacheStageName(const std::string & aInput);
+
+    std::string  getObjectiveValueOutputName() const;
+    void setObjectiveValueOutputName(const std::string & aInput);
+    std::string  getObjectiveValueStageName() const;
+    void setObjectiveValueStageName(const std::string & aInput);
+
+    std::string getObjectiveHessianOutputName() const;
+    void setObjectiveHessianOutputName(const std::string & aInput);
+    std::string  getObjectiveHessianStageName() const;
+    void setObjectiveHessianStageName(const std::string & aInput);
+
+    std::string getObjectiveGradientOutputName() const;
+    void setObjectiveGradientOutputName(const std::string & aInput);
+    std::string getObjectiveGradientStageName() const;
+    void setObjectiveGradientStageName(const std::string & aInput);
+
+    std::string getInitializationStageName() const;
+    void setInitializationStageName(const std::string & aInput);
+
+    std::string getSetLowerBoundsStageName() const;
+    void setSetLowerBoundsStageName(const std::string & aInput);
+
+    std::string getSetUpperBoundsStageName() const;
+    void setSetUpperBoundsStageName(const std::string & aInput);
+
+    size_t getNumConstraints() const;
+
+    std::vector<std::string> getConstraintValueNames() const;
+    std::string getConstraintValueName(const size_t & aIndex) const;
+    void addConstraintValueName(const std::string & aValueName);
+    void setConstraintValueNames(const std::vector<std::string> & aInput);
+
+    double getConstraintNormalizedTargetValue(const size_t & aIndex) const;
+    double getConstraintNormalizedTargetValue(const std::string & aValueName) const;
+    void addConstraintNormalizedTargetValue(const std::string & aValueName, const double & aInput);
+    bool constraintNormalizedTargetValueWasSet(const std::string & aValueName) const;
+
+    double getConstraintAbsoluteTargetValue(const size_t & aIndex) const;
+    double getConstraintAbsoluteTargetValue(const std::string & aValueName) const;
+    void addConstraintAbsoluteTargetValue(const std::string & aValueName, const double & aInput);
+    bool constraintAbsoluteTargetValueWasSet(const std::string & aValueName) const;
+
+    double getConstraintReferenceValue(const size_t & aIndex) const;
+    double getConstraintReferenceValue(const std::string & aValueName) const;
+    void addConstraintReferenceValue(const std::string & aValueName, const double & aInput);
+    bool constraintReferenceValueWasSet(const std::string & aValueName) const;
+
+    std::string getConstraintReferenceValueName(const size_t & aIndex) const;
+    std::string getConstraintReferenceValueName(const std::string & aValueName) const;
+    void addConstraintReferenceValueName(const std::string & aValueName, const std::string & aReferenceValueName);
+
+    std::string getConstraintHessianName(const size_t & aIndex) const;
+    std::string getConstraintHessianName(const std::string & aValueName) const;
+    void addConstraintHessianName(const std::string & aValueName, const std::string & aHessianName);
+
+    std::string getConstraintGradientName(const size_t & aIndex) const;
+    std::string getConstraintGradientName(const std::string & aValueName) const;
+    void addConstraintGradientName(const std::string & aValueName, const std::string & aGradientName);
+
+private:
+    bool mCheckGradient;
+    bool mCheckHessian;
+    bool mUserInitialGuess;
+    bool mOutputControlToFile;
+    bool mOutputDiagnosticsToFile;
+
+    double mGCMMAInitialMovingAsymptoteScaleFactor;
+    double mGCMMAInnerKKTTolerance;
+    double mGCMMAOuterKKTTolerance;
+    double mGCMMAOuterControlStagnationTolerance;
+    double mGCMMAInnerControlStagnationTolerance;
+    double mGCMMAOuterObjectiveStagnationTolerance;
+    double mGCMMAOuterStationarityTolerance;
+    double mKSTrustRegionExpansionFactor;
+    double mKSTrustRegionContractionFactor;
+    double mKSOuterGradientTolerance;
+    double mKSOuterStationarityTolerance;
+    double mKSOuterStagnationTolerance;
+    double mKSOuterControlStagnationTolerance;
+    double mKSOuterActualReductionTolerance;
+
+    size_t mMaxNumIterations;
+
+    int mDerivativeCheckerFinalSuperscript;
+    int mDerivativeCheckerInitialSuperscript;
+    int mGCMMAMaxInnerIterations;
+    int mKSMaxTrustRegionIterations;
+
+    std::string mAlgebra;
+    std::string mStateName;
+    std::string mInputFileName;
+    std::string mCacheStageName;
+    std::string mOutputStageName;
+    std::string mObjectiveValueOutputName;
+    std::string mObjectiveHessianOutputName;
+    std::string mObjectiveGradientOutputName;
+    std::string mInitializationStageName;
+    std::string mSetLowerBoundsStageName;
+    std::string mSetUpperBoundsStageName;
+    std::string mLowerBoundValueName;
+    std::string mLowerBoundVectorName;
+    std::string mUpperBoundValueName;
+    std::string mUpperBoundVectorName;
+    std::string mObjectiveValueStageName;
+    std::string mObjectiveHessianStageName;
+    std::string mObjectiveGradientStageName;
+
+    std::vector<double> mInitialGuess;
+    std::vector<double> mLowerBoundValues;
+    std::vector<double> mUpperBoundValues;
+    std::map<std::string, double> mConstraintNormalizedTargetValues;
+    std::map<std::string, double> mConstraintAbsoluteTargetValues;
+    std::map<std::string, double> mConstraintReferenceValues;
+
+    std::vector<std::string> mControlNames;
+    std::vector<std::string> mConstraintValueNames;
+    std::vector<std::string> mDescentDirectionNames;
+    std::map<std::string, std::string> mConstraintHessianNames;
+    std::map<std::string, std::string> mConstraintGradientNames;
+    std::map<std::string, std::string> mConstraintReferenceValueNames;
+
+    // USING DEFAULT COPY AND ASSIGNMENT CONSTRUCTORS
+};
+
+} // namespace Plato
+
+#endif /* PLATO_OPTIMIZERENGINESTAGEDATA_HPP_ */

@@ -1,0 +1,5 @@
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer '': 
+    Error message: Plato::Interface: Performer not defined for CommID 1
+ -----------------------------------------------------------------------------
+

@@ -1,0 +1,540 @@
+#include "data_container.hpp"
+#include "exception_handling.hpp"
+#include "types.hpp"
+#include <math.h>
+
+#ifdef DEBUG
+#include "communicator.hpp"
+#endif
+
+#include "topological_element.hpp"
+
+namespace Topological {
+std::string strint(const std::string s, const int i) {
+   std::ostringstream ss;
+    ss << s << "_" << i;
+    return ss.str();
+  }
+}
+
+using namespace Topological;
+
+/*****************************************************************************/
+ElementIntegration::~ElementIntegration()
+/*****************************************************************************/
+{
+  if(cubPoints) delete cubPoints;
+  if(cubWeights) delete cubWeights;
+}
+
+/*****************************************************************************/
+IntrepidIntegration::IntrepidIntegration(pugi::xml_node& node, 
+                                         shards::CellTopology *blockTopology )
+/*****************************************************************************/
+{
+  int integrationOrder = Plato::Parse::getInt( node, "order" );
+  cubature = cubfactory.create( *blockTopology, integrationOrder );
+  int dim = cubature->getDimension();
+  numPoints = cubature->getNumPoints();
+  cubPoints = new Intrepid::FieldContainer<double>(numPoints, dim);
+  cubWeights = new Intrepid::FieldContainer<double>(numPoints);
+  cubature->getCubature(*cubPoints, *cubWeights);
+}
+
+/*****************************************************************************/
+CustomIntegration::CustomIntegration(pugi::xml_node& node, int myDim )
+/*****************************************************************************/
+{
+  numPoints = Plato::Parse::numChildren(node, "weights" );
+  int xpoints = Plato::Parse::numChildren(node, "x" );
+  int ypoints = Plato::Parse::numChildren(node, "y" );
+  if( myDim == 3 ){
+    int zpoints = Plato::Parse::numChildren(node, "z" );
+    if( xpoints != ypoints || xpoints != zpoints || xpoints != numPoints )
+      throw ParsingException("custom integration points: !(len(x) == len(y) == len(z) == len(weights))" );
+  } else if( myDim == 2 ) {
+    if( xpoints != ypoints || xpoints != numPoints )
+      throw ParsingException("custom integration points: !(len(x) == len(y) == len(weights))" );
+  }
+
+  cubPoints = new Intrepid::FieldContainer<double>(numPoints, myDim);
+  cubWeights = new Intrepid::FieldContainer<double>(numPoints);
+
+  Intrepid::FieldContainer<double>& p = *cubPoints;
+  Intrepid::FieldContainer<double>& w = *cubWeights;
+    
+  pugi::xml_node cur_weight = node.child("weights");
+  pugi::xml_node cur_x = node.child("x");
+  pugi::xml_node cur_y = node.child("y");
+  pugi::xml_node cur_z = node.child("z");
+  for( int ip=0; ip<numPoints; ip++){
+    w(ip) = Plato::Parse::getDouble(cur_weight, "weight" );
+    p(0,ip) = Plato::Parse::getDouble(cur_x, "x" );
+    p(1,ip) = Plato::Parse::getDouble(cur_y, "y" );
+    if( myDim == 3 )
+    {
+      p(2,ip) = Plato::Parse::getDouble(cur_z, "z" );
+      cur_z = cur_z.child("z");
+    }
+    cur_weight = cur_weight.child("weights");
+    cur_x = cur_x.child("x");
+    cur_y = cur_y.child("y");
+  }
+}
+
+/*****************************************************************************/
+Element::~Element()
+/*****************************************************************************/
+{
+  if(elementIntegration) delete elementIntegration;
+  if(blockTopology) delete blockTopology;
+  if(blockBasis) delete blockBasis;
+}
+
+/*****************************************************************************/
+void Element::setIntegrationMethod(pugi::xml_node& node)
+/*****************************************************************************/
+{
+  // don't try to create an integration rule if the element is empty
+  if (myNel == 0) return;
+
+  string intgType = Plato::Parse::getString(node, "type");
+  if( intgType == "gauss" ){
+    elementIntegration = new IntrepidIntegration( node, blockTopology );
+  } else if( intgType == "external" ){
+  } else if( intgType == "custom" ){
+    elementIntegration = new CustomIntegration( node, myDim );
+  }
+}
+
+/*****************************************************************************/
+void Element::Connect(int* gid, int lid)
+/*****************************************************************************/
+{
+  int* top = nodeConnect + lid*myNnpe;
+  for(int i=0;i<myNnpe;i++) gid[i] = top[i];
+}
+
+void Element::setDataContainer(DataContainer* dc) { myData = dc; }
+int* Element::Connect(int lid) { return nodeConnect + lid*myNnpe; }
+int* Element::getNodeConnect() { return( nodeConnect ); }
+
+/*****************************************************************************/
+void Element::connectNodes( int lid, int gid, int* node_list )
+/*****************************************************************************/
+{
+#ifdef DEBUG
+  if( lid>myNel ) {
+    p0cout << "!!! Problem connecting nodes to element" << endl;
+  }
+#endif
+  int element_offset = lid*myNnpe;
+  globalID[lid] = gid;
+  for( int i=0; i<myNnpe; i++ )
+    nodeConnect[element_offset+i] = node_list[i];
+}
+
+/*****************************************************************************/
+Element::Element( int number, int nattr ){ 
+/*****************************************************************************/
+  zeroset();
+  myNattr = nattr;
+  myNel  = number;
+}
+
+
+void Tri3::init()
+{
+  myType = "TRI3";
+  myData = NULL;
+  myNnpe = 3;
+  myNnps = 2;
+  myDim = 2;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Triangle<3> >() );
+  blockBasis = new Intrepid::Basis_HGRAD_TRI_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
+}
+
+
+Tri3::~Tri3()
+{
+}
+
+
+void
+Tri3::registerData()
+{
+  int number = myNel*myNnpe;
+  
+  NODECONNECT = myData->registerVariable( IntType,
+					  "CONNT3",
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  "T3GID",
+					  ELEM,
+					  myNel );
+
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                          "T3ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+  
+  myData->getVariable( NODECONNECT, nodeConnect );
+  myData->getVariable( GLOBALID, globalID );
+  
+}
+
+void Tri3::CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+3] = y[node_gid_list[i]];
+  }
+}
+
+
+void Quad8::init()
+{
+  myType = "QUAD8";
+  myData = NULL;
+  myNnpe = 8;
+  myNnps = 2;
+  myDim = 2;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+}
+
+Quad8::~Quad8()
+{
+}
+
+void
+Quad8::registerData()
+{
+  int number = myNel*myNnpe;
+  
+  NODECONNECT = myData->registerVariable( IntType,
+					  "CONNQ8",
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  "Q8GID",
+					  ELEM,
+					  myNel );
+  
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                          "Q8ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+  
+  myData->getVariable(NODECONNECT, nodeConnect);
+  myData->getVariable(GLOBALID, globalID);
+}
+
+void Quad8::CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+8] = y[node_gid_list[i]];
+  }
+
+
+}
+
+
+
+void Quad4::init()
+{
+  myType = "QUAD4";
+  myData = NULL;
+  myNnpe = 4;
+  myNnps = 2;
+  myDim = 2;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+}
+ 
+Quad4::~Quad4()
+{
+}
+
+void
+Quad4::registerData()
+{
+  int number = myNel*myNnpe;
+  
+  NODECONNECT = myData->registerVariable( IntType,
+					  "CONNQ4",
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  "Q4GID",
+					  ELEM,
+					  myNel );
+  
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                          "Q4ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+  
+  myData->getVariable(NODECONNECT, nodeConnect);
+  myData->getVariable(GLOBALID, globalID);
+  
+}
+
+
+
+void Quad4::CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+4] = y[node_gid_list[i]];
+  }
+
+
+}
+
+void Hex8::init()
+{
+  myType = "HEX8";
+  myData = NULL;
+  myNnpe = 8;
+  myNnps = 4;
+  myDim = 3;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Hexahedron<8> >() );
+  blockBasis = new Intrepid::Basis_HGRAD_HEX_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
+}
+
+Hex8::~Hex8()
+{
+}
+
+void Hex8::CurrentCoordinates(int* node_gid_list, 
+                              Real** X,
+                              Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  Real*& z = X[2];
+
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+8] = y[node_gid_list[i]];
+    curcoor[i+16]= z[node_gid_list[i]];
+  }
+}
+
+
+void
+Hex8::registerData()
+{
+  int number = myNel*myNnpe;
+
+
+  NODECONNECT = myData->registerVariable( IntType,
+					  strint("CONNH8",groupID),
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  strint("H8GID",groupID),
+					  ELEM,
+					  myNel );
+  
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                          "H8ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+  
+  myData->getVariable(NODECONNECT, nodeConnect);
+  myData->getVariable(GLOBALID, globalID);
+
+}
+
+
+void Hex20::init()
+{
+  myData = NULL;
+  myNnpe = 20;
+  myNnps = 8;
+  myDim = 3;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+}
+
+Hex20::~Hex20()
+{
+}
+
+void Hex20::CurrentCoordinates(int* node_gid_list, 
+                              Real** X,
+                              Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  Real*& z = X[2];
+
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+20]= y[node_gid_list[i]];
+    curcoor[i+40]= z[node_gid_list[i]];
+  }
+}
+
+
+void
+Hex20::registerData()
+{
+  int number = myNel*myNnpe;
+
+  NODECONNECT = myData->registerVariable( IntType,
+					  "CONNH20",
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  "H20GID",
+					  ELEM,
+					  myNel );
+  
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                          "H20ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+  
+  myData->getVariable(NODECONNECT, nodeConnect);
+  myData->getVariable(GLOBALID, globalID);
+
+}
+
+
+
+void Tet4::init()
+{
+  myType = "TET4";
+  myData = NULL;
+  myNnpe = 4;
+  myNnps = 3;
+  myDim = 3;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Tetrahedron<4> >() );
+  blockBasis = new Intrepid::Basis_HGRAD_TET_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
+}
+
+Tet4::~Tet4()
+{
+}
+
+void Tet4::CurrentCoordinates(int* node_gid_list, 
+                              Real** X,
+                              Real* curcoor)
+{
+  Real*& x = X[0];
+  Real*& y = X[1];
+  Real*& z = X[2];
+
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+    curcoor[i+4] = y[node_gid_list[i]];
+    curcoor[i+8] = z[node_gid_list[i]];
+  }
+}
+
+
+void
+Tet4::registerData()
+{
+  int number = myNel*myNnpe;
+  char conn_name[15];
+  char id_name[15];
+  char att_name[15];
+
+  sprintf(conn_name, "CONNT4_%d", this->groupID);
+  sprintf(id_name, "T4GID_%d", this->groupID);
+  sprintf(att_name, "T4ATR_%d", this->groupID);
+
+  NODECONNECT = myData->registerVariable( IntType,
+					  conn_name,
+					  UNSET,
+					  number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+					  id_name,
+					  ELEM,
+					  myNel );
+  
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType, 
+                                           att_name,
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+
+  myData->getVariable(NODECONNECT, nodeConnect);
+  myData->getVariable(GLOBALID, globalID);
+
+}
+
+void Element::zeroset()
+{
+  myData = NULL;
+  myNnpe = 0;
+  myNnps = 0;
+  myDim = 0;
+  myNel  = 0;
+  myNattr = 0;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+
+  elementIntegration = nullptr;
+  blockTopology = nullptr;
+  blockBasis = nullptr;
+}
+
+void NullElement::CurrentCoordinates(int* node_gid_list, Real** X,
+                              Real* curcoor) { assert(-1); }
+
+void
+NullElement::registerData()
+{
+  nodeConnect = NULL;
+  globalID    = NULL;
+}
+
+

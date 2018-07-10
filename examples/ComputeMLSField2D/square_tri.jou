@@ -1,0 +1,13 @@
+## /projects/cubit/claro.Lin64.15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 412665
+## Revised 2018-06-05 14:19:56 -0600 (Tue, 05 Jun 2018)
+## Running 06/21/2018 05:33:37 PM
+## Command Options:
+create brick x 6 y 6 z 1
+volume all size 0.1
+volume all scheme tetmesh
+mesh volume all
+block 1 surface 1
+block 1 element type TRI
+export mesh "square_tri.gen" dimension 2 overwrite

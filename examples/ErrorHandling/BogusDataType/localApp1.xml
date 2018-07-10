@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Operation>
+  <Name>Compute Internal Energy</Name>
+  <Function>InternalEnergy</Function>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Internal Energy</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Internal Energy Gradient</ArgumentName>
+  </Output>
+
+  <PenaltyModel>SIMP</PenaltyModel>
+  <SIMP>
+    <PenaltyExponent>3.0</PenaltyExponent>
+    <MinimumValue>0.001</MinimumValue>
+  </SIMP>
+</Operation>

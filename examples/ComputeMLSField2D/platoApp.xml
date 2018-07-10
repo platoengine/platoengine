@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>ComputeMLSField</Function>
+  <Name>Compute Nodal Field</Name>
+  <Input>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>MLS Field Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+</Operation>

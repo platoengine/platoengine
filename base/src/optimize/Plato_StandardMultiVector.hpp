@@ -1,0 +1,167 @@
+/*
+ * Plato_StandardMultiVector.hpp
+ *
+ *  Created on: Oct 17, 2017
+ */
+
+#ifndef PLATO_STANDARDMULTIVECTOR_HPP_
+#define PLATO_STANDARDMULTIVECTOR_HPP_
+
+#include <vector>
+#include <cassert>
+
+#include "Plato_MultiVector.hpp"
+#include "Plato_StandardVector.hpp"
+
+namespace Plato
+{
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class StandardMultiVector : public Plato::MultiVector<ScalarType, OrdinalType>
+{
+public:
+    StandardMultiVector() :
+        mData()
+    {
+    }
+    explicit StandardMultiVector(const OrdinalType & aNumVectors, const std::vector<ScalarType> & aVectorTemplate) :
+        mData(std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>>(aNumVectors))
+    {
+        this->initialize(aVectorTemplate);
+    }
+    explicit StandardMultiVector(const OrdinalType & aNumVectors, const Plato::Vector<ScalarType, OrdinalType> & aVectorTemplate) :
+        mData(std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>>(aNumVectors))
+    {
+        this->initialize(aVectorTemplate);
+    }
+    explicit StandardMultiVector(const std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>>& aMultiVectorTemplate) :
+        mData(std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>>(aMultiVectorTemplate.size()))
+    {
+        this->initialize(aMultiVectorTemplate);
+    }
+    explicit StandardMultiVector(const OrdinalType & aNumVectors, const OrdinalType & aVectorLength, ScalarType aBaseValue = 0) :
+        mData(std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>>(aNumVectors))
+    {
+        this->initialize(aVectorLength, aBaseValue);
+    }
+    virtual ~StandardMultiVector()
+    {
+    }
+
+    //! Adds vector to list
+    void add(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+    {
+        assert(aInput.size() > static_cast<OrdinalType>(0));
+        mData.push_back(aInput.create());
+    }
+    //! Adds vector to list
+    void add(const std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput)
+    {
+        assert(aInput.get() != nullptr);
+        assert(aInput->size() > static_cast<OrdinalType>(0));
+        mData.push_back(aInput->create());
+    }
+    //! Creates a copy of type MultiVector
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> create() const
+    {
+        const OrdinalType tVectorIndex = 0;
+        const OrdinalType tNumVectors = this->getNumVectors();
+        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tOutput;
+        const Plato::Vector<ScalarType, OrdinalType> & tVectorTemplate = *mData[tVectorIndex];
+        tOutput = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(tNumVectors, tVectorTemplate);
+        return (tOutput);
+    }
+    //! Number of vectors
+    OrdinalType getNumVectors() const
+    {
+        OrdinalType tNumVectors = mData.size();
+        return (tNumVectors);
+    }
+    //! Operator overloads the square bracket operator
+    virtual Plato::Vector<ScalarType, OrdinalType> & operator [](const OrdinalType & aVectorIndex)
+    {
+        assert(mData.empty() == false);
+        assert(aVectorIndex < this->getNumVectors());
+
+        return (mData[aVectorIndex].operator *());
+    }
+    //! Operator overloads the square bracket operator
+    virtual const Plato::Vector<ScalarType, OrdinalType> & operator [](const OrdinalType & aVectorIndex) const
+    {
+        assert(mData.empty() == false);
+        assert(mData[aVectorIndex].get() != nullptr);
+        assert(aVectorIndex < this->getNumVectors());
+
+        return (mData[aVectorIndex].operator *());
+    }
+    //! Operator overloads the square bracket operator
+    virtual ScalarType & operator ()(const OrdinalType & aVectorIndex, const OrdinalType & aElementIndex)
+    {
+        assert(aVectorIndex < this->getNumVectors());
+        assert(aElementIndex < mData[aVectorIndex]->size());
+
+        return (mData[aVectorIndex].operator *().operator [](aElementIndex));
+    }
+    //! Operator overloads the square bracket operator
+    virtual const ScalarType & operator ()(const OrdinalType & aVectorIndex, const OrdinalType & aElementIndex) const
+    {
+        assert(aVectorIndex < this->getNumVectors());
+        assert(aElementIndex < mData[aVectorIndex]->size());
+
+        return (mData[aVectorIndex].operator *().operator [](aElementIndex));
+    }
+
+private:
+    void initialize(const OrdinalType & aVectorLength, const ScalarType & aBaseValue)
+    {
+        Plato::StandardVector<ScalarType,OrdinalType> tVector(aVectorLength);
+
+        OrdinalType tNumVectors = mData.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            mData[tIndex] = tVector.create();
+            mData[tIndex]->fill(aBaseValue);
+        }
+    }
+    void initialize(const std::vector<ScalarType> & aVectorTemplate)
+    {
+        Plato::StandardVector<ScalarType,OrdinalType> tVector(aVectorTemplate);
+
+        OrdinalType tNumVectors = mData.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            mData[tIndex] = tVector.create();
+        }
+    }
+    void initialize(const Plato::Vector<ScalarType, OrdinalType> & aVectorTemplate)
+    {
+        OrdinalType tNumVectors = mData.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            mData[tIndex] = aVectorTemplate.create();
+        }
+    }
+    void initialize(const std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>> & aMultiVectorTemplate)
+    {
+        assert(mData.size() > 0);
+        assert(aMultiVectorTemplate.size() > 0);
+        OrdinalType tNumVectors = aMultiVectorTemplate.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            assert(aMultiVectorTemplate[tIndex]->size() > 0);
+            mData[tIndex] = aMultiVectorTemplate[tIndex]->create();
+            mData[tIndex]->update(static_cast<ScalarType>(1.), *aMultiVectorTemplate[tIndex], static_cast<ScalarType>(0.));
+        }
+    }
+
+private:
+    std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>> mData;
+
+private:
+    StandardMultiVector(const Plato::StandardMultiVector<ScalarType, OrdinalType>&);
+    Plato::StandardMultiVector<ScalarType, OrdinalType> & operator=(const Plato::StandardMultiVector<ScalarType, OrdinalType>&);
+};
+
+}
+
+#endif /* PLATO_STANDARDMULTIVECTOR_HPP_ */

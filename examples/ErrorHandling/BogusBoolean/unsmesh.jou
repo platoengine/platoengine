@@ -1,0 +1,22 @@
+## /home/jrobbin/bin/cubit/14.1/bin/cubitx
+## Cubit Version 14.1
+## Cubit Build 390841
+## Revised 2014-02-25 13:34:42 -0700 (Tue, 25 Feb 2014)
+## Running 04/20/2017 07:49:18 PM
+## Command Options:
+## -warning = On
+## -information = On
+## unsmesh.jou 
+create brick x 2 y 1 z 1
+webcut body all with plane zplane offset 0.2
+webcut body all with plane zplane offset -0.2
+webcut body all with plane yplane offset 0.2
+webcut body all with plane yplane offset -0.2
+imprint all
+merge all
+volume all size 0.1
+mesh volume all
+block 1 volume all
+nodeset 1 surface 53 86 79 71 73 45 35 63 61
+nodeset 2 surface 76
+export mesh "unsmesh.gen" overwrite

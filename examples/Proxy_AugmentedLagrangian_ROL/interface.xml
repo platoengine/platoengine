@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+
+<!-- 
+  Define performers.  
+  1.  CommIDs are created at the command line as arguments to mpirun, i.e., '-x PLATO_COMM_ID=0'.
+  2.  Only one performer can be assigned to a CommID.
+-->
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <CommID>0</CommID>
+</Performer> 
+
+<Performer> 
+  <Name>Proxy</Name>
+  <Code>StructuralTopologyOptimizationProxy</Code>
+  <CommID>1</CommID>
+</Performer> 
+
+<!---DEFINE OWNERS AND USERS OF SHARED DATA---->
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Control</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<!---DEFINE VOLUME CONSTRAINT STAGE---->
+<Stage>
+  <Name>Constraint Value</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Constraint</Name>
+    <PerformerName>Proxy</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Volume</ArgumentName>
+      <SharedDataName>Constraint Value</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Constraint Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---DEFINE VOLUME CONSTRAINT GRADIENT STAGE---->
+<Stage>
+  <Name>Constraint Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>ConstraintGradient</Name>
+    <PerformerName>Proxy</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>VolumeGradient</ArgumentName>
+      <SharedDataName>Constraint Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Constraint Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION STAGE---->
+<Stage>
+  <Name>Objective Value</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>Solve</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+  </Operation>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>Objective</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>InternalEnergy</ArgumentName>
+      <SharedDataName>Objective Value</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Objective Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION GRADIENT STAGE---->
+<Stage>
+  <Name>Objective Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveGradient</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>InternalEnergyGradient</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---SET OPTIMIZER'S OPTIONS---->
+<Optimizer>
+  <Package>ROL</Package>
+  <Options>
+    <InputFileName>rol_inputs.xml</InputFileName>
+    <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+  </Options>
+  <OptimizationVariables>
+    <ValueName>Control</ValueName>
+  </OptimizationVariables>
+  <Objective>
+    <ValueName>Objective Value</ValueName> <!---NEEDS TO MATCH OBJECTIVE VALUE STAGE NAME---->
+    <GradientName>Objective Gradient</GradientName> <!---NEEDS TO MATCH OBJECTIVE GRADIENT STAGE NAME---->
+  </Objective>
+  <BoundConstraint>
+    <Upper>1.0</Upper>
+    <Lower>1e-3</Lower>
+  </BoundConstraint>
+  <InitialGuess>
+    <Value>0.4</Value>
+  </InitialGuess>
+  <Constraint>
+    <ValueName>Constraint Value</ValueName> <!---NEEDS TO MATCH CONSTRAINT VALUE STAGE NAME---->
+    <GradientName>Constraint Gradient</GradientName> <!---NEEDS TO MATCH CONSTRAINT GRADIENT STAGE NAME---->
+  </Constraint>
+</Optimizer>

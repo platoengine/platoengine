@@ -1,0 +1,5 @@
+ -- Fatal Error --------------------------------------------------------------
+  Logic exception on Performer 'PlatoMain': 
+    Error message: Enforcement of measure constraint failed:  Exceeded max iterations
+ -----------------------------------------------------------------------------
+

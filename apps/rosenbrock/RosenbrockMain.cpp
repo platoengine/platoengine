@@ -1,0 +1,82 @@
+/*
+ * RosenbrockMain.cpp
+ *
+ *  Created on: Mar 23, 2018
+ */
+
+#include "Plato_RosenbrockApp.hpp"
+#include "Plato_Interface.hpp"
+
+#ifndef NDEBUG
+#include <fenv.h>
+#endif
+
+/******************************************************************************/
+int main(int aArgc, char **aArgv)
+/******************************************************************************/
+{
+
+#ifndef NDEBUG
+    feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
+
+    MPI_Init(&aArgc, &aArgv);
+
+    /************************* CREATE PLATO INTERFACE *************************/
+    Plato::Interface* tPlatoInterface = nullptr;
+    try
+    {
+        tPlatoInterface = new Plato::Interface();
+    }
+    catch(...)
+    {
+        MPI_Finalize();
+        exit(0);
+    }
+    /************************* CREATE PLATO INTERFACE *************************/
+
+    /*************************** SET PLATO INTERFACE **************************/
+    MPI_Comm tLocalComm;
+    tPlatoInterface->getLocalComm(tLocalComm);
+    /*************************** SET PLATO INTERFACE **************************/
+
+    /************************ CREATE LOCAL APPLICATION ************************/
+    Plato::RosenbrockApp<double>* tMyApp = nullptr;
+    try
+    {
+        tMyApp = new Plato::RosenbrockApp<double>;
+    }
+    catch(...)
+    {
+        MPI_Finalize();
+        exit(0);
+    }
+    /************************ CREATE LOCAL APPLICATION ************************/
+
+    /************************** REGISTER APPLICATION **************************/
+    try
+    {
+        tPlatoInterface->registerPerformer(tMyApp);
+    }
+    catch(...)
+    {
+        MPI_Finalize();
+        exit(0);
+    }
+    /************************** REGISTER APPLICATION **************************/
+
+    /******************************** PERFORM *********************************/
+    try
+    {
+        tPlatoInterface->perform();
+    }
+    catch(...)
+    {
+    }
+    /******************************** PERFORM *********************************/
+
+    delete tMyApp;
+
+    MPI_Finalize();
+
+} // RosenbrockMain

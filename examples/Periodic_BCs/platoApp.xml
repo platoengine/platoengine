@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>PlatoMainOutput</Function>
+  <Name>PlatoMainOutput</Name>
+  <Topology>
+    <Name>Topology</Name>
+  </Topology>
+  <ObjectiveGradient>
+    <Name>Internal Energy Gradient</Name>
+  </ObjectiveGradient>
+  <ConstraintGradient>
+    <Name>Volume Gradient</Name>
+  </ConstraintGradient>
+</Operation>
+
+<Operation>
+  <Function>FilterControl</Function>
+  <Name>FilterControl</Name>
+  <InputTopology>
+    <Name>Optimization DOFs</Name>
+  </InputTopology>
+  <OutputTopology>
+    <Name>Topology</Name>
+  </OutputTopology>
+</Operation>
+
+<Operation>
+  <Function>FilterObjectiveGradient</Function>
+  <Name>FilterObjectiveGradient</Name>
+  <InputTopology>
+    <Name>Optimization DOFs</Name>
+  </InputTopology>
+  <ObjectiveGradient>
+    <Name>Internal Energy Gradient</Name>
+  </ObjectiveGradient>
+</Operation>
+
+<Operation>
+  <Function>FilterConstraintGradient</Function>
+  <Name>FilterConstraintGradient</Name>
+  <InputTopology>
+    <Name>Optimization DOFs</Name>
+  </InputTopology>
+  <ConstraintGradient>
+    <Name>Volume Gradient</Name>
+  </ConstraintGradient>
+</Operation>
+
+<Operation>
+  <Function>InitializeField</Function>
+  <Name>Initialize Field</Name>
+  <Method>Uniform</Method>
+  <Uniform>
+    <Value>0.25</Value>
+  </Uniform>
+  <FromFile>
+    <Name>YoMama.exo</Name>
+    <VariableName>density</VariableName>
+  </FromFile>
+  <OutputValue>
+    <Name>Optimization DOFs</Name>
+  </OutputValue>
+</Operation>
+
+<Operation>
+  <Function>DesignVolume</Function>
+  <Name>Design Volume</Name>
+  <Blocks>1</Blocks>
+  <OutputValue>
+    <Name>Design Volume</Name>
+  </OutputValue>
+</Operation>
+
+<Operation>
+  <Function>ComputeVolume</Function>
+  <Name>Compute Current Volume</Name>
+  <Topology>
+    <Name>Topology</Name>
+  </Topology>
+  <PenaltyModel>SIMP</PenaltyModel>
+  <SIMP>
+    <PenaltyExponent>1.0</PenaltyExponent>
+    <MinimumValue>0.0</MinimumValue>
+  </SIMP>
+  <OutputValue>
+    <Name>Volume</Name>
+  </OutputValue>
+  <OutputGradient>
+    <Name>Volume Gradient</Name>
+  </OutputGradient>
+</Operation>
+
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateEnergy</Name>
+  <Weighting>
+    <Weight>
+      <Value>0.50</Value>
+    </Weight>
+    <Weight>
+      <Value>0.50</Value>
+    </Weight>
+  </Weighting>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <Input>
+      <Name>Internal Energy 1</Name>
+      <Weight>0.5</Weight>
+    </Input>
+    <Input>
+      <Name>Internal Energy 2</Name>
+      <Weight>0.5</Weight>
+    </Input>
+    <Output>
+      <Name>Internal Energy</Name>
+    </Output>
+  </Aggregate>
+  <Aggregate>
+    <Layout>Nodal Field</Layout>
+    <Input>
+      <Name>Internal Energy 1 Gradient</Name>
+      <Weight>0.5</Weight>
+    </Input>
+    <Input>
+      <Name>Internal Energy 2 Gradient</Name>
+      <Weight>0.5</Weight>
+    </Input>
+    <Output>
+      <Name>Internal Energy Gradient</Name>
+    </Output>
+  </Aggregate>
+</Operation>
+

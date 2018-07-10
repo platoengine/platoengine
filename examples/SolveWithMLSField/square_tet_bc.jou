@@ -1,0 +1,26 @@
+## /projects/cubit/claro.Lin64.15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 412665
+## Revised 2018-06-05 14:19:56 -0600 (Tue, 05 Jun 2018)
+## Running 06/22/2018 02:36:20 PM
+## Command Options:
+create brick x 6 y 6 z 1.5
+create cylinder radius 0.5 height 1
+rotate volume 2 about y angle 90
+volume 2 scale y 1.5
+move surface 9 location surface 6
+move surface 8 location surface 6
+imprint all
+move surface 9 location surface 4
+move body 2 y 2
+imprint all
+move body 2 y -4
+imprint all
+delete body 2
+volume all size 0.1
+volume all scheme tetmesh
+mesh volume all
+block 1 volume all
+sideset 1 surface 11
+nodeset 2 surface 13 15
+export mesh "square_tet_bc.gen" overwrite

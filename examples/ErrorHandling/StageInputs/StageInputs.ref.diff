@@ -1,0 +1,15 @@
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer 'PlatoMain': 
+    Error message: While parsing Stage 'Volume', requested SharedData ('Some Data') which doesn't exist.
+ -----------------------------------------------------------------------------
+
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer 'LightMP_static_load1': 
+    Error message: While parsing Stage 'Volume', requested SharedData ('Some Data') which doesn't exist.
+ -----------------------------------------------------------------------------
+
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer 'LightMP_static_load2': 
+    Error message: While parsing Stage 'Volume', requested SharedData ('Some Data') which doesn't exist.
+ -----------------------------------------------------------------------------
+

@@ -1,0 +1,5 @@
+ -- Fatal Error --------------------------------------------------------------
+  Parsing exception on Performer 'LightMP_static_load1': 
+    Error message: Plato::Statics: multiple Operations defined. currently only one allowed
+ -----------------------------------------------------------------------------
+

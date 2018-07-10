@@ -1,0 +1,3 @@
+#!python
+cubit.cmd('import mesh "/scratch/plato_engine_clean/plato_engine/examples/2Load_absolute_filter_OC/unsmesh.gen" no_geom')
+cubit.cmd('list block all geom')

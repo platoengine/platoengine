@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+
+
+<Operation>
+  <Name>Compute Constraint</Name>
+  <Function>ComputeConstraint</Function>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Constraint Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint Value</Name>
+  <Function>ComputeConstraintValue</Function>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+
+<Operation>
+  <Function>ComputeSolution</Function>
+  <Name>Compute Displacement Solution</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjectiveValue</Function>
+  <Name>Compute Objective Value</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjectiveGradient</Function>
+  <Name>Compute Objective Gradient</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjective</Function>
+  <Name>Compute Objective</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Solution X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Y</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Z</ArgumentName>
+  </Output>
+</Operation>
+

@@ -1,0 +1,453 @@
+/*
+ * Plato_Test_ROL.cpp
+ *
+ *  Created on: Nov 6, 2017
+ */
+
+#include <gtest/gtest.h>
+
+#include "Teuchos_XMLParameterListHelpers.hpp"
+
+#include "ROL_Bounds.hpp"
+#include "ROL_OptimizationSolver.hpp"
+#include "ROL_OptimizationProblem.hpp"
+
+#include "Plato_Parser.hpp"
+#include "Plato_Interface.hpp"
+#include "Plato_OptimizerInterface.hpp"
+#include "Plato_OptimizerEngineStageData.hpp"
+#include "Plato_StructuralTopologyOptimization.hpp"
+
+#include "Plato_ProxyVolumeROL.hpp"
+#include "Plato_SerialVectorROL.hpp"
+#include "Plato_ProxyComplianceROL.hpp"
+#include "Plato_DistributedVectorROL.hpp"
+#include "Plato_SerialEpetraVectorROL.hpp"
+#include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
+
+namespace PlatoTest
+{
+
+TEST(PlatoTest, DistributedVectorROL)
+{
+    double tScalarValue = 1;
+    int tNumElements = 10;
+    std::vector<double> tDataOne(tNumElements, tScalarValue);
+    Plato::DistributedVectorROL<double> tVectorOne(MPI_COMM_WORLD, tDataOne);
+
+    // *********** TEST DIMENSION FUNCTION ***********
+    int tCommSize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tCommSize);
+    int tOrdinalGold = tCommSize * tNumElements;
+    EXPECT_EQ(tVectorOne.dimension(), tOrdinalGold);
+
+    // *********** TEST SCALE FUNCTION ***********
+    tScalarValue = 2;
+    tVectorOne.scale(tScalarValue);
+    std::vector<double> tDataTwo(tNumElements, tScalarValue);
+    Plato::DistributedVectorROL<double> tVectorTwo(MPI_COMM_WORLD, tDataTwo);
+    const double tTolerance = 1e-6;
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST PLUS FUNCTION ***********
+    tVectorOne.plus(tVectorTwo);
+    tScalarValue = 4;
+    std::fill(tVectorTwo.vector().begin(), tVectorTwo.vector().end(), tScalarValue); // Set gold values
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST DOT FUNCTION ***********
+    tScalarValue = 1;
+    std::fill(tVectorOne.vector().begin(), tVectorOne.vector().end(), tScalarValue);
+    std::fill(tVectorTwo.vector().begin(), tVectorTwo.vector().end(), tScalarValue);
+    tScalarValue = tVectorOne.dot(tVectorTwo);
+    double tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST NORM FUNCTION ***********
+    tScalarValue = tVectorOne.norm();
+    tScalarGold = std::sqrt(static_cast<double>(tNumElements * tCommSize));
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST CLONE FUNCTION ***********
+    Teuchos::RCP<ROL::Vector<double>> tCopy = tVectorOne.clone();
+    tOrdinalGold = tVectorOne.dimension();
+    EXPECT_EQ(tCopy->dimension(), tOrdinalGold);
+
+    // *********** TEST REDUCE SUM FUNCTION ***********
+    ROL::Elementwise::ReductionSum<double> tReduceSum;
+    tScalarValue = tVectorOne.reduce(tReduceSum);
+    tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MIN FUNCTION ***********
+    ROL::Elementwise::ReductionMin<double> tReduceMin;
+    size_t tIndex = 4;
+    tVectorOne.vector()[tIndex] = 44;
+    tScalarValue = tVectorOne.reduce(tReduceMin);
+    tScalarGold = 1;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MAX FUNCTION ***********
+    ROL::Elementwise::ReductionMax<double> tReduceMax;
+    tScalarValue = tVectorOne.reduce(tReduceMax);
+    tScalarGold = 44;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+}
+
+TEST(PlatoTest, SerialVectorROL)
+{
+    double tScalarValue = 1;
+    int tNumElements = 10;
+    std::vector<double> tDataOne(tNumElements, tScalarValue);
+    Plato::SerialVectorROL<double> tVectorOne(tDataOne);
+
+    // *********** TEST DIMENSION FUNCTION ***********
+    int tOrdinalGold = tNumElements;
+    EXPECT_EQ(tVectorOne.dimension(), tOrdinalGold);
+
+    // *********** TEST SCALE FUNCTION ***********
+    tScalarValue = 2;
+    tVectorOne.scale(tScalarValue);
+    std::vector<double> tDataTwo(tNumElements, tScalarValue);
+    Plato::SerialVectorROL<double> tVectorTwo(tDataTwo);
+    const double tTolerance = 1e-6;
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST PLUS FUNCTION ***********
+    tVectorOne.plus(tVectorTwo);
+    tScalarValue = 4;
+    std::fill(tVectorTwo.vector().data(), tVectorTwo.vector().data() + tNumElements, tScalarValue); // Set gold values
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST DOT FUNCTION ***********
+    tScalarValue = 1;
+    std::fill(tVectorOne.vector().data(), tVectorOne.vector().data() + tNumElements, tScalarValue);
+    std::fill(tVectorTwo.vector().data(), tVectorTwo.vector().data() + tNumElements, tScalarValue);
+    tScalarValue = tVectorOne.dot(tVectorTwo);
+    double tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST NORM FUNCTION ***********
+    tScalarValue = tVectorOne.norm();
+    tScalarGold = std::sqrt(static_cast<double>(tNumElements));
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST CLONE FUNCTION ***********
+    Teuchos::RCP<ROL::Vector<double>> tCopy = tVectorOne.clone();
+    tOrdinalGold = tVectorOne.dimension();
+    EXPECT_EQ(tCopy->dimension(), tOrdinalGold);
+
+    // *********** TEST REDUCE SUM FUNCTION ***********
+    ROL::Elementwise::ReductionSum<double> tReduceSum;
+    tScalarValue = tVectorOne.reduce(tReduceSum);
+    tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MIN FUNCTION ***********
+    ROL::Elementwise::ReductionMin<double> tReduceMin;
+    size_t tIndex = 4;
+    tVectorOne.vector()[tIndex] = 44;
+    tScalarValue = tVectorOne.reduce(tReduceMin);
+    tScalarGold = 1;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MAX FUNCTION ***********
+    ROL::Elementwise::ReductionMax<double> tReduceMax;
+    tScalarValue = tVectorOne.reduce(tReduceMax);
+    tScalarGold = 44;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+}
+
+TEST(PlatoTest, SerialEpetraVectorROL)
+{
+    double tScalarValue = 1;
+    int tNumElements = 10;
+    std::vector<double> tDataOne(tNumElements, tScalarValue);
+    Plato::SerialEpetraVectorROL<double> tVectorOne(tDataOne);
+
+    // *********** TEST DIMENSION FUNCTION ***********
+    int tOrdinalGold = tNumElements;
+    EXPECT_EQ(tVectorOne.dimension(), tOrdinalGold);
+
+    // *********** TEST SCALE FUNCTION ***********
+    tScalarValue = 2;
+    tVectorOne.scale(tScalarValue);
+    std::vector<double> tDataTwo(tNumElements, tScalarValue);
+    Plato::SerialEpetraVectorROL<double> tVectorTwo(tDataTwo);
+    const double tTolerance = 1e-6;
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST PLUS FUNCTION ***********
+    tVectorOne.plus(tVectorTwo);
+    tScalarValue = 4;
+    std::fill(tVectorTwo.vector().A(), tVectorTwo.vector().A() + tNumElements, tScalarValue); // Set gold values
+    for(int tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
+    {
+        EXPECT_NEAR(tVectorOne.vector()[tElemIndex], tVectorTwo.vector()[tElemIndex], tTolerance);
+    }
+
+    // *********** TEST DOT FUNCTION ***********
+    tScalarValue = 1;
+    std::fill(tVectorOne.vector().A(), tVectorOne.vector().A() + tNumElements, tScalarValue);
+    std::fill(tVectorTwo.vector().A(), tVectorTwo.vector().A() + tNumElements, tScalarValue);
+    tScalarValue = tVectorOne.dot(tVectorTwo);
+    double tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST NORM FUNCTION ***********
+    tScalarValue = tVectorOne.norm();
+    tScalarGold = std::sqrt(static_cast<double>(tNumElements));
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST CLONE FUNCTION ***********
+    Teuchos::RCP<ROL::Vector<double>> tCopy = tVectorOne.clone();
+    tOrdinalGold = tVectorOne.dimension();
+    EXPECT_EQ(tCopy->dimension(), tOrdinalGold);
+
+    // *********** TEST REDUCE SUM FUNCTION ***********
+    ROL::Elementwise::ReductionSum<double> tReduceSum;
+    tScalarValue = tVectorOne.reduce(tReduceSum);
+    tScalarGold = static_cast<double>(tVectorOne.dimension());
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MIN FUNCTION ***********
+    ROL::Elementwise::ReductionMin<double> tReduceMin;
+    size_t tIndex = 4;
+    tVectorOne.vector()[tIndex] = 44;
+    tScalarValue = tVectorOne.reduce(tReduceMin);
+    tScalarGold = 1;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+
+    // *********** TEST REDUCE MAX FUNCTION ***********
+    ROL::Elementwise::ReductionMax<double> tReduceMax;
+    tScalarValue = tVectorOne.reduce(tReduceMax);
+    tScalarGold = 44;
+    EXPECT_NEAR(tScalarGold, tScalarValue, tTolerance);
+}
+
+TEST(PlatoTest, ProxyComplianceROL)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+    // ************** DISABLE CACHING FOR ROL: CACHING IS NOT CLEARLY UNDERSTOOD YET FOR ROL **************
+    tPDE->disableCacheState();
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tData = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tData.data(), tData.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE COMPLIANCE CRITERION **************
+    Plato::ProxyComplianceROL<double> tObjective(tPDE);
+
+    // ************** TEST COMPLIANCE CRITERION EVALUATION **************
+    const double tBaseValue = 1;
+    const int tNumControls = tPDE->getNumDesignVariables();
+    Plato::SerialEpetraVectorROL<double> tControl(tNumControls, tBaseValue);
+    double tDummyTolerance = 1e-8;
+    double tObjectiveValue = tObjective.value(tControl, tDummyTolerance);
+
+    const double tTolerance = 1e-6;
+    double tObjectiveGold = 123.0693511744326;
+    EXPECT_NEAR(tObjectiveGold, tObjectiveValue, tTolerance);
+
+    // ************** TEST COMPLIANCE CRITERION GRADIENT **************
+    Plato::SerialEpetraVectorROL<double> tGradient(tNumControls, tBaseValue);
+    tObjective.gradient(tGradient, tControl, tDummyTolerance);
+
+    std::vector<double> tGoldGradient = TopoProxy::getGoldFilteredGradient();
+    for(size_t tIndex = 0; tIndex < tGoldGradient.size(); tIndex++)
+    {
+        EXPECT_NEAR(tGradient.vector()[tIndex], tGoldGradient[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, ProxyVolumeROL)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tData = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tData.data(), tData.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE VOLUME CRITERION **************
+    Plato::ProxyVolumeROL<double> tConstraint(tPDE);
+
+    // ************** TEST VOLUME CRITERION EVALUATION **************
+    double tBaseValue = 1;
+    const int tNumControls = tPDE->getNumDesignVariables();
+    Plato::SerialEpetraVectorROL<double> tControl(tNumControls, tBaseValue);
+    const int tNumConstraints = 1;
+    Plato::SerialEpetraVectorROL<double> tConstraintValues(tNumConstraints);
+
+    double tDummyTolerance = 1e-8;
+    tConstraint.value(tConstraintValues, tControl, tDummyTolerance);
+    const double tTolerance = 1e-4;
+    double tConstraintGold = 0.6;
+    EXPECT_NEAR(tConstraintGold, tConstraintValues.vector()[0], tTolerance);
+
+    // ************** TEST VOLUME CRITERION JACOBIAN TIMES DIRECTION **************
+    tBaseValue = 1;
+    Plato::SerialEpetraVectorROL<double> tDirection(tNumControls, tBaseValue);
+    Plato::SerialEpetraVectorROL<double> tJacobianTimesDirection(tNumConstraints);
+    tConstraint.applyJacobian(tJacobianTimesDirection, tDirection, tControl, tDummyTolerance);
+    std::vector<double> tGoldOne(tNumConstraints, 1);
+    for(int tIndex = 0; tIndex < tJacobianTimesDirection.dimension(); tIndex++)
+    {
+        EXPECT_NEAR(tJacobianTimesDirection.vector()[tIndex], tGoldOne[tIndex], tTolerance);
+    }
+
+    // ************** TEST VOLUME CRITERION ADJOINT JACOBIAN TIMES DUAL **************
+    tBaseValue = 0;
+    Plato::SerialEpetraVectorROL<double> tDualDirection(tNumConstraints, 1);
+    Plato::SerialEpetraVectorROL<double> tAdjointJacobianTimesDirection(tNumControls);
+    tConstraint.applyAdjointJacobian(tAdjointJacobianTimesDirection, tDualDirection, tControl, tDummyTolerance);
+    std::vector<double> tGoldTwo(tNumControls, 1. / 300.);
+    for(int tIndex = 0; tIndex < tAdjointJacobianTimesDirection.dimension(); tIndex++)
+    {
+        EXPECT_NEAR(tAdjointJacobianTimesDirection.vector()[tIndex], tGoldTwo[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, ProxyStructuralTopologyOptimizationROL)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+
+    // ************** DISABLE CACHING FOR ROL: CACHING IS NOT CLEARLY UNDERSTOOD YET FOR ROL **************
+    tPDE->disableCacheState();
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tData = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tData.data(), tData.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE VOLUME CONSTRAINT **************
+    Teuchos::RCP<ROL::Constraint<double>> tConstraint =
+            Teuchos::rcp(new Plato::ProxyVolumeROL<double>(tPDE));
+
+    // ************** ALLOCATE COMPLIANCE OBJECTIVE **************
+    bool tDisableFilter = true;
+    Teuchos::RCP<ROL::Objective<double>> tObjective =
+            Teuchos::rcp(new Plato::ProxyComplianceROL<double>(tPDE, tDisableFilter));
+
+    // ************** ALLOCATE ROL'S BOUND CONSTRAINT INTERFACE **************
+    double tBaseValue = 1e-3;
+    const int tNumControls = tPDE->getNumDesignVariables();
+    Teuchos::RCP<ROL::Vector<double>> tControlLowerBound =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+    tBaseValue = 1;
+    Teuchos::RCP<ROL::Vector<double>> tControlUpperBound =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+    Teuchos::RCP<ROL::BoundConstraint<double> > tBoundConstraintInterface =
+            Teuchos::rcp(new ROL::Bounds<double>(tControlLowerBound, tControlUpperBound));
+
+    // ************** ALLOCATE CONTROL VECTOR **************
+    tBaseValue = tPDE->getVolumeFraction();
+    Teuchos::RCP<ROL::Vector<double>> tControls =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+
+    // ************** CHECK CLONE OPERATION **************
+    Teuchos::RCP<ROL::Vector<double>> tGradientOne =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    double tGradTolerance = 1e-8;
+    tObjective->gradient(*tGradientOne, *tControls, tGradTolerance);
+    Teuchos::RCP<ROL::Vector<double>> tControlTwo = tControls->clone();
+    tControlTwo->scale(2);
+    Teuchos::RCP<ROL::Vector<double>> tGradientTwo =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    tObjective->gradient(*tGradientTwo, *tControlTwo, tGradTolerance);
+    Teuchos::RCP<ROL::Vector<double>> tDifference =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    tDifference->set(*tGradientTwo);
+    tDifference->axpy(-2, *tGradientOne);
+    double tGold = 0;
+    double tTolerance = 1e-6;
+    EXPECT_NEAR(tGold, tDifference->norm(), tTolerance);
+
+    // ************** ALLOCATE DUAL VECTOR **************
+    tBaseValue = 0;
+    const int tNumConstraints = 1;
+    Teuchos::RCP<ROL::Vector<double>> tDual = Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumConstraints, tBaseValue));
+
+    // ************** READ XML INPUT FILE ************** //
+    std::string filename = "rol_unit_test_inputs.xml";
+    Teuchos::RCP<Teuchos::ParameterList> tParameterList = Teuchos::rcp(new Teuchos::ParameterList);
+    Teuchos::updateParametersFromXmlFile(filename, tParameterList.ptr());
+
+    // Run optimization.
+    ROL::OptimizationProblem<double> tProblem(tObjective, tControls, tBoundConstraintInterface, tConstraint, tDual);
+    bool tDerivCheck = false;  // Derivative check flag.
+    if(tDerivCheck)
+    {
+        tProblem.check(std::cout);
+    }
+    ROL::OptimizationSolver<double> tSolver(tProblem, *tParameterList);
+    tSolver.solve(std::cout);
+
+    // Get Optimal Solution
+    ROL::Ptr<ROL::Vector<double>> tOptimalControl = tProblem.getSolutionVector();
+    Plato::SerialEpetraVectorROL<double>& tOptimalControlRef =
+            dynamic_cast<Plato::SerialEpetraVectorROL<double>&>(*tOptimalControl.get());
+    Epetra_SerialDenseVector & tControlData = tOptimalControlRef.vector();
+    std::vector<double> tGoldControl = TopoProxy::getGoldControlRolTest();
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+        EXPECT_NEAR(tControlData[tIndex], tGoldControl[tIndex], tTolerance);
+    }
+}
+
+} // PlatoTest

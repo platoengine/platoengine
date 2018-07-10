@@ -1,0 +1,47 @@
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>square_tet_bc</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <materialID>1</materialID>
+  </block>
+</mesh>
+
+<PointArray>
+  <Name>Design Geometry</Name>
+  <Dimensions>3</Dimensions>
+  <N1>12</N1>
+  <N2>12</N2>
+  <N3>3</N3>
+  <Size1>6</Size1>
+  <Size2>6</Size2>
+  <Size3>1.5</Size3>
+  <Offset1>-3</Offset1>
+  <Offset2>-3</Offset2>
+  <Offset3>-0.75</Offset3>
+  <NumNeighbors>27</NumNeighbors>
+  <Radius>0.5</Radius>
+  <Field>
+    <Name>Initial Porous Design</Name>
+    <Initializer>SphereArray</Initializer>
+    <SphereArray>
+      <Radius>0.5</Radius>
+      <Spacing>1.5</Spacing>
+      <InsideValue>0.0</InsideValue>
+      <OutsideValue>1.0</OutsideValue>
+    </SphereArray>
+  </Field>
+  <Field>
+    <Name>Initial Uniform Design</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>1.0</Value>
+    </Uniform>
+  </Field>
+</PointArray>
+

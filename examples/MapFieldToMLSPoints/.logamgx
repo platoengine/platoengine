@@ -1,0 +1,7 @@
+AMGX_LOG	RUNTIME_VERSION=8.0
+AMGX_LOG	Devicetype=device
+AMGX_LOG	Devicetype=host
+AMGX_LOG	Number of Levels=5
+AMGX_LOG	Initial Residual=0
+AMGX_LOG	Final Residual=2.35221e-09
+AMGX_LOG	Avg. Conv. Rate=0

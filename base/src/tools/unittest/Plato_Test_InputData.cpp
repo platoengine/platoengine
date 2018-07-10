@@ -1,0 +1,285 @@
+/*
+ * Plato_Test_Geometry_MLS.cpp
+ *
+ *  Created on: Feb 27, 2018
+ */
+
+#include <gtest/gtest.h>
+#include "Plato_InputData.hpp"
+#include "Plato_Parser.hpp"
+
+namespace PlatoTestInputData
+{
+
+
+  TEST(PlatoTestInputData, UniqueStoreRecall)
+  {
+    Plato::InputData inputData("Input Data");
+
+    // store and recall some stuff
+
+    // double
+    //
+    double A_in = 1.0;
+    inputData.set("A", A_in);
+    auto A_out = inputData.get<decltype(A_in)>("A");
+    EXPECT_EQ( A_in, A_out );
+  
+    // long int
+    //
+    long int B_in = 1234;
+    inputData.set("B", B_in);
+    auto B_out = inputData.get<decltype(B_in)>("B");
+    EXPECT_EQ( B_in, B_out );
+
+    // string
+    //
+    std::string C_in = "Cval";
+    inputData.set("C", C_in);
+    auto C_out = inputData.get<decltype(C_in)>("C");
+    EXPECT_EQ( C_in, C_out );
+  }
+
+  TEST(PlatoTestInputData, NonUniqueStoreRecall)
+  {
+    Plato::InputData inputData("Input Data");
+
+    // store and recall some stuff
+
+    // double
+    //
+    double A_in = 1.0;
+    inputData.add("A", A_in);
+    auto A_out = inputData.get<decltype(A_in)>("A", 0);
+    EXPECT_EQ( A_in, A_out );
+    
+    // another double, same name
+    //
+    A_in = 2.0;
+    inputData.add("A", A_in);
+    A_out = inputData.get<decltype(A_in)>("A", 1);
+    EXPECT_EQ( A_in, A_out );
+
+    // different type
+    //
+    int intA_in = 10;
+    inputData.add("Int A", intA_in);
+    auto intA_out = inputData.get<decltype(intA_in)>("Int A");
+    EXPECT_EQ( intA_in, intA_out );
+    
+  }
+
+  TEST(PlatoTestInputData, NonUnique_size)
+  {
+    Plato::InputData inputData("Input Data");
+
+    // add some doubles
+    //
+    inputData.add<double>("A", 1.0);
+    inputData.add<double>("A", 2.0);
+
+    auto size = inputData.size<double>("A");
+    EXPECT_EQ(size, (unsigned int)2);
+
+    // add some ints
+    //
+    inputData.add<int>("Int A", 10);
+    inputData.add<int>("Int A", 20);
+
+    size = inputData.size<int>("Int A");
+    EXPECT_EQ(size, (unsigned int)2);
+  }
+
+
+
+  TEST(PlatoTestInputData, NonUnique_getByName)
+  {
+    Plato::InputData inputData("Input Data");
+
+    // add some doubles
+    //
+    inputData.add<double>("A", 1.0);
+    inputData.add<double>("A", 2.0);
+
+    // add some ints
+    //
+    inputData.add<int>("Int A", 10);
+    inputData.add<int>("Int A", 20);
+
+    auto realVals = inputData.getByName<double>("A");
+    EXPECT_EQ(realVals[0], 1.0);
+    EXPECT_EQ(realVals[1], 2.0);
+
+    auto intVals = inputData.getByName<int>("Int A");
+    EXPECT_EQ(intVals[0], 10);
+    EXPECT_EQ(intVals[1], 20);
+  }
+
+
+  TEST(PlatoTestInputData, NonUniqueSubData)
+  {
+
+    Plato::InputData inputData("Input Data");
+
+    // add an InputData
+    //
+    Plato::InputData subData1("SharedData");
+    double sd0_A_in = 1.23;
+    subData1.set<decltype(sd0_A_in)>("A", sd0_A_in);
+    inputData.add<Plato::InputData>("SD", subData1);
+  
+    // add another InputData
+    //
+    Plato::InputData subData2("SharedData");
+    double sd1_A_in = 4.56;
+    subData2.set<decltype(sd1_A_in)>("A", sd1_A_in);
+    inputData.add<Plato::InputData>("SD", subData2);
+  
+    // get values from the sub InputData
+    //
+    auto sd0 = inputData.get<Plato::InputData>("SD",0);
+    EXPECT_EQ(sd0.get<decltype(sd0_A_in)>("A"), sd0_A_in);
+
+    // get values from the sub InputData
+    //
+    auto sd1 = inputData.get<Plato::InputData>("SD",1);
+    EXPECT_EQ(sd1.get<decltype(sd1_A_in)>("A"), sd1_A_in);
+
+    // get the sub InputData by name, set a value, then get the value
+    //
+    auto sds = inputData.getByName<Plato::InputData>("SD");
+    sd0_A_in += 1.0;
+    sds[0].set<decltype(sd0_A_in)>("A", sd0_A_in);
+    EXPECT_EQ(inputData.get<Plato::InputData>("SD").get<decltype(sd0_A_in)>("A"), sd0_A_in);
+
+  }
+
+  TEST(PlatoTestInputData, NonUniqueSharedData)
+  {
+    Plato::InputData inputData("Input Data");
+
+    {
+      Plato::InputData sd("SharedData");
+      sd.set<std::string>("Name","Objective Gradient 1");
+      sd.set<std::string>("Type","Scalar");
+      sd.set<std::string>("Layout","Nodal Field");
+      sd.set<std::string>("OwnerName","Alexa 1");
+      sd.set<std::string>("UserName","PlatoMain");
+      inputData.add("SharedData",sd);
+    }
+    {
+      Plato::InputData sd("SharedData");
+      sd.set<std::string>("Name","Objective Gradient 2");
+      sd.set<std::string>("Type","Scalar");
+      sd.set<std::string>("Layout","Nodal Field");
+      sd.set<std::string>("OwnerName","Alexa 2");
+      sd.set<std::string>("UserName","PlatoMain");
+      inputData.add("SharedData",sd);
+    }
+    {
+      Plato::InputData sd("SharedData");
+      sd.set<std::string>("Name","Topology");
+      sd.set<std::string>("Type","Scalar");
+      sd.set<std::string>("Layout","Nodal Field");
+      sd.set<std::string>("OwnerName","PlatoMain");
+      sd.add<std::string>("UserName","PlatoMain");
+      sd.add<std::string>("UserName","Alexa 1");
+      sd.add<std::string>("UserName","Alexa 2");
+      inputData.add("SharedData",sd);
+    }
+  
+    auto sd = inputData.getByName<Plato::InputData>("SharedData");
+    EXPECT_EQ(sd[2].get<std::string>("UserName"), "PlatoMain");
+
+  }
+
+  TEST(PlatoTestInputData, ParseSharedData)
+  {
+    std::stringstream buffer;
+    buffer << "<SharedData>"                       << std::endl;
+    buffer << "  <Name>Topology</Name>"            << std::endl;
+    buffer << "  <Type>Scalar</Type>"              << std::endl;
+    buffer << "  <Layout>Nodal Field</Layout>"     << std::endl;
+    buffer << "  <OwnerName>PlatoMain</OwnerName>" << std::endl;
+    buffer << "  <UserName>PlatoMain</UserName>"   << std::endl;
+    buffer << "  <UserName>Alexa 1</UserName>"     << std::endl;
+    buffer << "  <UserName>Alexa 2</UserName>"     << std::endl;
+    buffer << "</SharedData>"                      << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+
+    auto sd = inputData.get<Plato::InputData>("SharedData");
+    EXPECT_EQ( sd.get<std::string>("Name"),      "Topology"    );
+    EXPECT_EQ( sd.get<std::string>("Type"),      "Scalar"      );
+    EXPECT_EQ( sd.get<std::string>("Layout"),    "Nodal Field" );
+    EXPECT_EQ( sd.get<std::string>("OwnerName"), "PlatoMain"   );
+
+    auto numUsers = sd.size<std::string>("UserName");
+    EXPECT_EQ( numUsers, (unsigned int)3);
+    
+    EXPECT_EQ( sd.get<std::string>("UserName",0), "PlatoMain" );
+    EXPECT_EQ( sd.get<std::string>("UserName",1), "Alexa 1"   );
+    EXPECT_EQ( sd.get<std::string>("UserName",2), "Alexa 2"   );
+
+  }
+
+  TEST(PlatoTestInputData, ParseNestedNested)
+  {
+    std::stringstream buffer;
+    buffer << "<Stage>"                  << std::endl;
+    buffer << " <Operation>"             << std::endl;
+    buffer << "  <Input>"                << std::endl;
+    buffer << "   <Name>Topology</Name>" << std::endl;
+    buffer << "  </Input>"               << std::endl;
+    buffer << " </operation>"            << std::endl;
+    buffer << "</Stage>"                 << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+
+    auto st = inputData.get<Plato::InputData>("Stage");
+    auto op = st.get<Plato::InputData>("Operation");
+    auto in = op.get<Plato::InputData>("Input");
+    EXPECT_EQ( in.get<std::string>("Name"), "Topology" );
+  }
+
+  TEST(PlatoTestInputData, ParseStage)
+  {
+    std::stringstream buffer;
+    buffer << "<Stage>" << std::endl;
+    buffer << "  <Name>Set Lower Bounds</Name>" << std::endl;
+    buffer << "  <Input>" << std::endl;
+    buffer << "    <SharedDataName>Lower Bound Value</SharedDataName>" << std::endl;
+    buffer << "  </Input>" << std::endl;
+    buffer << "  <Operation>" << std::endl;
+    buffer << "    <Name>Calculate Lower Bounds</Name>" << std::endl;
+    buffer << "    <PerformerName>PlatoMain</PerformerName>" << std::endl;
+    buffer << "    <Input>" << std::endl;
+    buffer << "      <ArgumentName>Lower Bound Value</ArgumentName>" << std::endl;
+    buffer << "      <SharedDataName>Lower Bound Value</SharedDataName>" << std::endl;
+    buffer << "    </Input>" << std::endl;
+    buffer << "    <Output>" << std::endl;
+    buffer << "      <ArgumentName>Lower Bound Vector</ArgumentName>" << std::endl;
+    buffer << "      <SharedDataName>Lower Bound Vector</SharedDataName>" << std::endl;
+    buffer << "    </Output>" << std::endl;
+    buffer << "  </Operation>" << std::endl;
+    buffer << "  <Output>" << std::endl;
+    buffer << "    <SharedDataName>Lower Bound Vector</SharedDataName>" << std::endl;
+    buffer << "  </Output>" << std::endl;
+    buffer << "</Stage>" << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+
+    auto st = inputData.get<Plato::InputData>("Stage");
+    auto in = st.get<Plato::InputData>("Input");
+    EXPECT_EQ( in.get<std::string>("SharedDataName"), "Lower Bound Value" );
+
+    EXPECT_EQ( inputData.get<Plato::InputData>("Stage")
+                        .get<Plato::InputData>("Input")
+                        .get<std::string>("SharedDataName"), 
+                "Lower Bound Value");
+  }
+
+} // end PlatoTestInputData namespace

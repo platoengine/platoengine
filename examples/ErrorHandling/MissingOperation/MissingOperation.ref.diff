@@ -1,0 +1,5 @@
+ -- Fatal Error --------------------------------------------------------------
+  Logic exception on Performer 'PlatoMain': 
+    Error message: Request for operation ('FilterControlThatDoesNotExist') that doesn't exist.
+ -----------------------------------------------------------------------------
+
