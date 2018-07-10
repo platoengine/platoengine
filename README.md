@@ -5,6 +5,20 @@
 # Description
 The Plato Engine computer program serves as a collaborative testbed rich in light-weight synthesis tools for optimization-based design. Plato Engine is a research code designed to facilitate collaboration with academia, labs and industries by providing interfaces for plug-n-play insertion of synthesis technologies in the areas of modeling, analysis and optimization. Currently, Plato Engine offers a set of light-weight synthesis tools for finite element analysis, linear- and nonlinear-programming, and non-gradient based optimization. The Plato Engine program is designed to run on high-performance computers.
 
+# Getting Started
+
+## Installation
+To checkout a copy of Plato Engine from the command line use from the directory of your choice (i.e. $HOME/codes):
+```
+git clone https://username:password@github.com/platoengine/platoengine.git
+```
+where username and password corresponds to your github.com account. At this stage, make sure all required environment variables are set and all tpls are installed. 
+
+### Branches
+There are two main branches of this repository; stable and master. 
+* **stable** - Most recent stable version of Plato Engine. This may not have all of the current features but will be more tested. Checkout the stable branch if you want to use Plato Engine to run some examples.
+* **master** - Constantly changing and may contain bugs. Checkout the master branch if you are actively developing.
+
 # Application
 The Plato Engine testbed is designed to support research in the area of synthesis optimization on high-performance distributed memory computer architectures. The Plato Engine testbed is being used to explore interoperability with multiple analysis, modeling and optimization numerical libraries on high-performance distributed memory computer architectures to synthesized designs. The testbed is also being used to test the viability of these analysis, modeling and optimization numerical libraries for the solution of synthesis optimization problems. 
 
