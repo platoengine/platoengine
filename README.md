@@ -33,4 +33,4 @@ Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/
 Pugixml library: https://pugixml.org 
 
 # Hardware Requirements
-Any hardware/OS supporting g++ 4.7.2 and intel 17.0.1 compiler. RAM requirements are problem size dependent.
+Tested compilers are g++ 4.7.2 and intel 17.0.1 compilers. Tested OS include Linux and Mac. RAM requirements are problem size dependent.
