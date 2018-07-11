@@ -3,7 +3,7 @@
 <p align="center"><img src="https://github.com/platoengine/platoengine/blob/master/figures/Plato_Logo.jpeg" width="400"/></p>
 
 # Description
-The Plato Engine computer program serves as a collaborative testbed rich in light-weight synthesis tools for optimization-based design. Plato Engine is a research code designed to facilitate collaboration with academia, labs and industries by providing interfaces for plug-n-play insertion of synthesis technologies in the areas of modeling, analysis and optimization. Currently, Plato Engine offers a set of light-weight synthesis tools for finite element analysis, linear- and nonlinear-programming, and non-gradient based optimization. The Plato Engine program is designed to run on high-performance computers.
+The Plato Engine computer program serves as a collaborative testbed rich in light-weight synthesis tools for optimization-based design. Plato Engine is a research code designed to facilitate collaboration with academia, labs and industries by providing interfaces for plug-n-play insertion of synthesis technologies in the areas of modeling, analysis and optimization. Currently, Plato Engine offers a set of light-weight tools for finite element analysis, linear- and nonlinear-programming, and non-gradient based optimization. The Plato Engine program is designed to run on high-performance computers.
 
 # Getting Started
 
