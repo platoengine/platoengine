@@ -345,6 +345,15 @@ ExodusIO::readHeader()
       Topological::NullElement* eb = new Topological::NullElement( 0, 0 );
       eb->setBlockId(ids[i]); 
       myMesh->addElemBlk(eb);
+    } else if (!strncasecmp(elemtype, "BEAM",   4)) {
+//      if(Ndim == 1){
+        Topological::Beam* eb = new Topological::Beam( num_elem_in_block, num_attr );
+        Nel_truss2+=num_elem_in_block;
+        eb->setDataContainer( myData );
+        eb->setBlockId(ids[i]);
+        eb->registerData();
+        myMesh->addElemBlk(eb);
+//      }
     } else if (!strncasecmp(elemtype, "TRI",   3)) {
       if(Ndim == 2){
         Topological::Tri3* eb = new Topological::Tri3( num_elem_in_block, num_attr );

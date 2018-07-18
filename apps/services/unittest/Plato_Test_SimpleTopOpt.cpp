@@ -662,12 +662,38 @@ TEST(PlatoTest, SolveStrucTopoWithOC)
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-5;
     const double tCurrentObjective = tDataMng->getCurrentObjectiveValue();
-    const double tGoldObjective = 0.177775;
+    const double tGoldObjective = 0.17786129647595;
     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
 
     const size_t tVectorIndex = 0;
     std::vector<double> tGoldControl = TopoProxy::getGoldControlOptimalityCriteriaTest();
     const Plato::Vector<double> & tMyCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
+
+    /* Code for regenerating gold data based on tMyCurrentControl */
+    /*
+    FILE *fp = fopen("gold_oc_control_data.txt", "w");
+    if(fp)
+    {
+        int tNumControlValues = tMyCurrentControl.size();
+        int tCounter = 0;
+        fprintf(fp, "{");
+        while(tCounter < tNumControlValues)
+        {
+            for(int g=0; g < 4 && tCounter < tNumControlValues; g++)
+            {
+                if(tCounter == (tNumControlValues-1))
+                    fprintf(fp, "%.14lf };", tMyCurrentControl[tCounter]);
+                else
+                    fprintf(fp, "%.14lf, ", tMyCurrentControl[tCounter]);
+                tCounter++;
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    */
+    /* Code for regenerating gold data based on tMyCurrentControl */
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tMyCurrentControl[tIndex], tGoldControl[tIndex], tTolerance);

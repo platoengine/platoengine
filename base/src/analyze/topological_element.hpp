@@ -162,6 +162,21 @@ private:
 };
 
 
+class Beam : public Element
+{
+public:
+    Beam( int number, int nattr=0 ): Element( number, nattr ){ init(); }
+    Beam( int number, pugi::xml_node& node): Element( number ){ init(); setIntegrationMethod(node); }
+    virtual ~Beam();
+    virtual void registerData();
+    virtual void CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor);
+
+private:
+    void init();
+    Beam(const Beam&);
+    Beam& operator=(const Beam&);
+};
+
 class Tri3 : public Element
 {
 public:

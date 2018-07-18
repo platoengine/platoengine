@@ -69,12 +69,12 @@ class NonlinearProgrammingSubProblemOC : public Plato::OptimalityCriteriaSubProb
 {
 public:
     explicit NonlinearProgrammingSubProblemOC(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory) :
-            mMoveLimit(1.0),
+            mMoveLimit(0.2),
             mScaleFactor(0.01),
             mDampingPower(0.5),
             mDualLowerBound(0),
             mDualUpperBound(1e7),
-            mBisectionTolerance(1e-6),
+            mBisectionTolerance(1e-4),
             mInequalityGradientDotDeltaControl(0),
             mWorkControl(aDataFactory->control().create()),
             mUpdateFunctor(nullptr)

@@ -1191,7 +1191,7 @@ TEST(PlatoTest, SynthesisOptimizationSubProblemOne)
     // ********* Allocate Synthesis Optimization Sub-Problem  *********
     Plato::NonlinearProgrammingSubProblemOC<double> tSubProblem(tFactory);
 
-    double tGold = 1e-6;
+    double tGold = 1e-4;
     double tValue = tSubProblem.getBisectionTolerance();
     double tTolerance = 1e-6;
     EXPECT_NEAR(tValue, tGold, tTolerance);
@@ -1200,7 +1200,7 @@ TEST(PlatoTest, SynthesisOptimizationSubProblemOne)
     tValue = tSubProblem.getBisectionTolerance();
     EXPECT_NEAR(tValue, tGold, tTolerance);
 
-    tGold = 1;
+    tGold = 0.2;
     tValue = tSubProblem.getMoveLimit();
     EXPECT_NEAR(tValue, tGold, tTolerance);
     tSubProblem.setMoveLimit(0.15);

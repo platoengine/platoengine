@@ -468,10 +468,21 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 for(size_t n=0; n<m_InputData.blocks.size(); ++n)
                 {
-                    fprintf(fp, "BLOCK %s\n", m_InputData.blocks[n].block_id.c_str());
-//                    if(!frf)
-//                        fprintf(fp, "  hex8u\n");
-                    fprintf(fp, "  material %s\n", m_InputData.blocks[n].material_id.c_str());
+                    if(m_InputData.blocks[n].block_id.empty() == false)
+                    {
+                        fprintf(fp, "BLOCK %s\n", m_InputData.blocks[n].block_id.c_str());
+                    }
+                    if(m_InputData.blocks[n].material_id.empty() == false)
+                    {
+                        fprintf(fp, "  material %s\n", m_InputData.blocks[n].material_id.c_str());
+                    }
+                    if(m_InputData.blocks[n].element_type.empty() == false)
+                    {
+                        // For now we will just let salinas determine the element type based
+                        // on what is in the exodus file (unless it is rbar).
+                        if(m_InputData.blocks[n].element_type == "rbar")
+                            fprintf(fp, "  rbar\n");
+                    }
                     if(frf)
                     {
                         fprintf(fp, "  inverse_material_type homogeneous\n");
@@ -521,14 +532,25 @@ bool XMLGenerator::generateSalinasInputDecks()
                 fprintf(fp, "LOADS\n");
                 for(size_t k=0; k<cur_obj.loads.size(); ++k)
                 {
-                    fprintf(fp, "  %s %s %s %s %s %s scale %s\n",
-                            cur_obj.loads[k].app_type.c_str(),
-                            cur_obj.loads[k].app_id.c_str(),
-                            cur_obj.loads[k].type.c_str(),
-                            cur_obj.loads[k].x.c_str(),
-                            cur_obj.loads[k].y.c_str(),
-                            cur_obj.loads[k].z.c_str(),
-                            cur_obj.loads[k].scale.c_str());
+                    if(cur_obj.loads[k].type == "acceleration")
+                    {
+                        fprintf(fp, "  body gravity %s %s %s scale %s\n",
+                                cur_obj.loads[k].x.c_str(),
+                                cur_obj.loads[k].y.c_str(),
+                                cur_obj.loads[k].z.c_str(),
+                                cur_obj.loads[k].scale.c_str());
+                    }
+                    else
+                    {
+                        fprintf(fp, "  %s %s %s %s %s %s scale %s\n",
+                                cur_obj.loads[k].app_type.c_str(),
+                                cur_obj.loads[k].app_id.c_str(),
+                                cur_obj.loads[k].type.c_str(),
+                                cur_obj.loads[k].x.c_str(),
+                                cur_obj.loads[k].y.c_str(),
+                                cur_obj.loads[k].z.c_str(),
+                                cur_obj.loads[k].scale.c_str());
+                    }
                 }
                 if(frf)
                 {
@@ -1462,6 +1484,31 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                                 return false;
                                             }
                                             ++j; // "scale"
+                                            new_load.scale = tokens[++j];
+                                        }
+                                        else if(!new_load.type.compare("acceleration"))
+                                        {
+                                            if(tokens.size() != 7)
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"acceleration\" load.\n";
+                                                return false;
+                                            }
+                                            new_load.app_type = "body";
+                                            ++j;  // "direction"
+                                            if(tokens[j] != "direction")
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"direction\" keyword not specified after \"acceleration\".\n";
+                                                return false;
+                                            }
+                                            new_load.x = tokens[++j];
+                                            new_load.y = tokens[++j];
+                                            new_load.z = tokens[++j];
+                                            ++j;
+                                            if(tokens[j] != "scale")
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"scale\" keyword not specified after direction components.\n";
+                                                return false;
+                                            }
                                             new_load.scale = tokens[++j];
                                         }
                                         else if(!new_load.type.compare("heat"))
@@ -2442,9 +2489,9 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
 
                         if(parseSingleValue(tokens, tInputStringList = {"end","block"}, tStringValue))
                         {
-                            if(new_block.block_id == "" || new_block.material_id == "")
+                            if(new_block.block_id == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseBlocks: Block and material ids were not specified for block.\n";
+                                std::cout << "ERROR:XMLGenerator:parseBlocks: Block id was not specified for block.\n";
                                 return false;
                             }
                             break;
@@ -2466,6 +2513,15 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
                                 return false;
                             }
                             new_block.material_id = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"element","type"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"element type\" keywords.\n";
+                                return false;
+                            }
+                            new_block.element_type = tStringValue;
                         }
                         else
                         {

@@ -233,6 +233,59 @@ Tri3::registerData()
   
 }
 
+Beam::~Beam()
+{
+}
+
+void Beam::registerData()
+{
+  int number = myNel*myNnpe;
+
+  NODECONNECT = myData->registerVariable( IntType,
+                                          "CONNB2",
+                                          UNSET,
+                                          number );
+
+  GLOBALID    = myData->registerVariable( IntType,
+                                          "B2GID",
+                                          ELEM,
+                                          myNel );
+
+  number = myNel*myNattr;
+  if(myNattr){
+    ATTRIBUTES = myData->registerVariable( RealType,
+                                          "B2ATR",
+                                          UNSET,
+                                          number );
+    myData->getVariable(ATTRIBUTES, attributes);
+  }
+
+  myData->getVariable( NODECONNECT, nodeConnect );
+  myData->getVariable( GLOBALID, globalID );
+
+}
+
+void Beam::CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor)
+{
+  Real*& x = X[0];
+  for(int i=0;i<myNnpe;i++){
+    curcoor[i]   = x[node_gid_list[i]];
+  }
+}
+
+void Beam::init()
+{
+  myType = "BEAM";
+  myData = NULL;
+  myNnpe = 2;
+  myNnps = 1;
+  myDim = 1;
+  NODECONNECT = UNSET_VAR_INDEX;
+  GLOBALID    = UNSET_VAR_INDEX;
+  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Line<2> >() );
+  blockBasis = new Intrepid::Basis_HGRAD_LINE_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
+}
+
 void Tri3::CurrentCoordinates(int* node_gid_list, Real** X, Real* curcoor)
 {
   Real*& x = X[0];

@@ -1153,7 +1153,7 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), false);
+    EXPECT_EQ(tester.publicParseBlocks(iss), true);
     stringInput = "begin block\n"
             "material 1\n"
             "end block\n";

@@ -107,6 +107,7 @@ struct Block
 {
     std::string block_id;
     std::string material_id;
+    std::string element_type;
 };
 struct Material
 {

@@ -66,6 +66,9 @@ double MeshServices::getTotalVolume()
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
 
+      // don't process blocks that don't have volume
+      if( elblock.getDim() != 3 ) continue;
+
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();
       int spaceDim = elblock.getDim();
@@ -151,6 +154,9 @@ MeshServices::getCurrentVolume(
 
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
+
+      // don't process blocks that don't have volume
+      if( elblock.getDim() != 3 ) continue;
 
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();
