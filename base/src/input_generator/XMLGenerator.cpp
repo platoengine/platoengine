@@ -540,6 +540,14 @@ bool XMLGenerator::generateSalinasInputDecks()
                                 cur_obj.loads[k].z.c_str(),
                                 cur_obj.loads[k].scale.c_str());
                     }
+                    else if(cur_obj.loads[k].type == "pressure")
+                    {
+                        fprintf(fp, "  %s %s %s %s\n",
+                                cur_obj.loads[k].app_type.c_str(),
+                                cur_obj.loads[k].app_id.c_str(),
+                                cur_obj.loads[k].type.c_str(),
+                                cur_obj.loads[k].scale.c_str());
+                    }
                     else
                     {
                         fprintf(fp, "  %s %s %s %s %s %s scale %s\n",
@@ -1484,6 +1492,28 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                                 return false;
                                             }
                                             ++j; // "scale"
+                                            new_load.scale = tokens[++j];
+                                        }
+                                        else if(!new_load.type.compare("pressure"))
+                                        {
+                                            if(tokens.size() != 5)
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"pressure\" load.\n";
+                                                return false;
+                                            }
+                                            new_load.app_type = tokens[++j];
+                                            if(new_load.app_type != "sideset")
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Pressures can currently only be specified on sidesets.\n";
+                                                return false;
+                                            }
+                                            new_load.app_id = tokens[++j];
+                                            ++j;  // "value"
+                                            if(tokens[3] != "value")
+                                            {
+                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"value\" keyword not specified after sideset id.\n";
+                                                return false;
+                                            }
                                             new_load.scale = tokens[++j];
                                         }
                                         else if(!new_load.type.compare("acceleration"))

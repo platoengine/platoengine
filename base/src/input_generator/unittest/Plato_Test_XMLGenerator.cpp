@@ -1589,6 +1589,56 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getLoadDirectionZ(0,0), "1");
     EXPECT_EQ(tester.getLoadScale(0,0), "1000");
 
+    // Pressure
+    // check number of parameters
+    stringInput = "begin objective\n"
+            "begin loads\n"
+            "pressure\n"
+            "end loads\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    // check applying to correct mesh type
+    stringInput = "begin objective\n"
+            "begin loads\n"
+            "pressure nodeset 1 value 1000\n"
+            "end loads\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    // check for value keyword
+    stringInput = "begin objective\n"
+            "begin loads\n"
+            "pressure sideset 1 bad_keyword 1000\n"
+            "end loads\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    // Do a correct example
+    stringInput = "begin objective\n"
+            "begin loads\n"
+            "pressure sideset 3 value 1000\n"
+            "end loads\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    EXPECT_EQ(tester.getLoadType(0,0), "pressure");
+    EXPECT_EQ(tester.getLoadApplicationType(0,0), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID(0,0), "3");
+    EXPECT_EQ(tester.getLoadScale(0,0), "1000");
+
     // Heat Flux
     // check number of parameters
     stringInput = "begin objective\n"
