@@ -230,7 +230,7 @@ bool XMLGenerator::generateLaunchScript()
             }
         }
 
-#ifdef USING_INTEL_MPI
+#ifndef USING_OPEN_MPI
         std::string envString = "-env";
         std::string separationString = " ";
 #else
