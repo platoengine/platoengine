@@ -188,7 +188,7 @@ bool XMLGenerator::generateLaunchScript()
             if(m_InputData.number_buffer_layers != "")
                 tNumBufferLayersString = m_InputData.number_buffer_layers;
 
-            std::string tCommand = "mpirun -np " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
+            std::string tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
             if(m_InputData.initial_guess_filename != "")
                 tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
             tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name + ".gen");
@@ -239,7 +239,7 @@ bool XMLGenerator::generateLaunchScript()
 #endif
 
         // Now add the main mpirun call.
-        fprintf(fp, "mpirun -np %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+        fprintf(fp, "mpiexec -np %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_main_path.length() != 0)
@@ -1293,6 +1293,18 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             {
                                 new_objective.complex_error_measure += " ";
                                 new_objective.complex_error_measure += tokens[j];
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"output","for","plotting"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No outputs specified after \"output for plotting\" keywords.\n";
+                                return false;
+                            }
+                            for(size_t j=3; j<tokens.size(); ++j)
+                            {
+                                new_objective.output_for_plotting.push_back(tokens[j]);
                             }
                         }
                         else if (parseSingleValue(tokens, tInputStringList = {"ls","tet","type"}, tStringValue))
@@ -3251,6 +3263,18 @@ bool XMLGenerator::generatePlatoOperationsXML()
             addChild(tmp_node1, "ArgumentName", "Surface Area Gradient");
         }
     }
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        {
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", m_InputData.objectives[i].performer_name + "_" + m_InputData.objectives[i].output_for_plotting[j]);
+            if(m_InputData.objectives[i].output_for_plotting[j] == "vonmises")
+            {
+                addChild(tmp_node1, "Layout", "Element Field");
+            }
+        }
+    }
     addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency.c_str());
     addChild(tmp_node, "OutputMethod", m_InputData.output_method.c_str());
     addChild(tmp_node, "Discretization", m_InputData.discretization);
@@ -4309,6 +4333,25 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(sd_node, "UserName", "PlatoMain");
     }
     
+    // Output shared data
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); ++j)
+        {
+            // create shared data for objectives
+            sd_node = doc.append_child("SharedData");
+            sprintf(tmp_buf, "%s_%s", m_InputData.objectives[i].performer_name.c_str(), m_InputData.objectives[i].output_for_plotting[j].c_str());
+            addChild(sd_node, "Name", tmp_buf);
+            addChild(sd_node, "Type", "Scalar");
+            if(m_InputData.objectives[i].output_for_plotting[j] == "vonmises")
+                addChild(sd_node, "Layout", "Element Field");
+            else
+                addChild(sd_node, "Layout", "Nodal Field");
+            addChild(sd_node, "OwnerName", m_InputData.objectives[i].performer_name);
+            addChild(sd_node, "UserName", "PlatoMain");
+        }
+    }
+
     // Hessian shared data
     if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
        m_InputData.optimization_algorithm.compare("ksal") == 0)
@@ -4507,6 +4550,16 @@ bool XMLGenerator::generateInterfaceXML()
             addChild(input_node, "SharedDataName", "Surface Area Gradient");
         }
     }
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        {
+            input_node = op_node.append_child("Input");
+            sprintf(tmp_buf, "%s_%s", m_InputData.objectives[i].performer_name.c_str(), m_InputData.objectives[i].output_for_plotting[j].c_str());
+            addChild(input_node, "ArgumentName", tmp_buf);
+            addChild(input_node, "SharedDataName", tmp_buf);
+        }
+    }
 
     // Initialize Optimization DOFs
     stage_node = doc.append_child("Stage");
@@ -4539,6 +4592,12 @@ bool XMLGenerator::generateInterfaceXML()
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Cache State");
         addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name);
+        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        {
+            output_node = op_node.append_child("Output");
+            addChild(output_node, "ArgumentName", m_InputData.objectives[i].output_for_plotting[j]);
+            addChild(output_node, "SharedDataName", m_InputData.objectives[i].performer_name + "_" + m_InputData.objectives[i].output_for_plotting[j]);
+        }
     }
 
     // Set Lower Bounds

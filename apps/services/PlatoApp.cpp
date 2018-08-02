@@ -1822,11 +1822,21 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
     MPI_Comm_size(mPlatoApp->mLocalComm, &num_procs);
     if(num_procs == 1)
         input_filename += ".1.0";
+
+    std::string tOutputFields = "";
+    for(size_t i=0; i<m_outputData.size(); ++i)
+    {
+        tOutputFields += m_outputData[i].mName;
+        if(i < (m_outputData.size()-1))
+        {
+            tOutputFields += ",";
+        }
+    }
     if(ex.create_mesh_apis_read_from_file(&mPlatoApp->mLocalComm, // MPI_Comm
                                           input_filename,         // input filename
                                           output_filename,        // output filename
                                           "Topology",             // iso field name
-                                          "",                     // names of fields to output
+                                          tOutputFields,          // names of fields to output
                                           1e-5,                   // min edge length
                                           0.5,                    // iso value
                                           0,                      // level_set data?

@@ -92,6 +92,7 @@ struct Objective
   std::string complex_error_measure;
   std::string convert_to_tet10;
   std::vector<std::string> frf_match_nodesets;
+  std::vector<std::string> output_for_plotting;
 };
 struct Constraint
 {
