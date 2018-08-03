@@ -181,13 +181,14 @@ struct InputData
 class XMLGenerator {
 
 public:
-  XMLGenerator(const std::string &input_filename);
+  XMLGenerator(const std::string &input_filename, bool use_launch = false);
   ~XMLGenerator();
   bool generate();
 
 protected:
-  XMLGenerator(){};
+  XMLGenerator();
   std::string m_InputFilename;
+  bool m_UseLaunch;
   InputData m_InputData;
 
   bool generateInterfaceXML();

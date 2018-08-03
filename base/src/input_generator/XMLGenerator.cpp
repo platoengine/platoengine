@@ -62,10 +62,20 @@ const char* const DELIMITER = " \t";
 
 
 /******************************************************************************/
-XMLGenerator::XMLGenerator(const std::string &input_filename) 
+XMLGenerator::XMLGenerator()
+/******************************************************************************/
+{
+    m_InputFilename = "";
+    m_UseLaunch = false;
+}
+
+
+/******************************************************************************/
+XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch)
 /******************************************************************************/
 {
     m_InputFilename = input_filename;
+    m_UseLaunch = use_launch;
 }
 
 /******************************************************************************/
@@ -188,7 +198,11 @@ bool XMLGenerator::generateLaunchScript()
             if(m_InputData.number_buffer_layers != "")
                 tNumBufferLayersString = m_InputData.number_buffer_layers;
 
-            std::string tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
+            std::string tCommand;
+            if(m_UseLaunch)
+                tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
+            else
+                tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
             if(m_InputData.initial_guess_filename != "")
                 tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
             tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name + ".gen");
@@ -239,7 +253,10 @@ bool XMLGenerator::generateLaunchScript()
 #endif
 
         // Now add the main mpirun call.
-        fprintf(fp, "mpiexec -np %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+        if(m_UseLaunch)
+            fprintf(fp, "launch -n %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+        else
+            fprintf(fp, "mpiexec -np %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_main_path.length() != 0)

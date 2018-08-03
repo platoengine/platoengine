@@ -45,7 +45,7 @@
 
 void print_usage()
 {
-    std::cout << "\n\nUsage: XMLGenerator <plato_input_deck_filename>\n\n";
+    std::cout << "\n\nUsage: XMLGenerator [use_launch] <plato_input_deck_filename>\n\n";
 }
 
 /******************************************************************************/
@@ -59,7 +59,14 @@ int main(int argc, char *argv[])
     }
     else
     {
-        XMLGenerator generator(argv[1]);
+        bool use_launch = false;
+        int filename_index = 1;
+        if(!strcmp(argv[1], "use_launch"))
+        {
+            use_launch = true;
+            filename_index = 2;
+        }
+        XMLGenerator generator(argv[filename_index], use_launch);
         generator.generate();
     }
 }
