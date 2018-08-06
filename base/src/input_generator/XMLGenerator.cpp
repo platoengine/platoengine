@@ -252,11 +252,20 @@ bool XMLGenerator::generateLaunchScript()
         std::string separationString = "=";
 #endif
 
-        // Now add the main mpirun call.
+        std::string tLaunchString = "";
+        std::string tNumProcsString = "";
         if(m_UseLaunch)
-            fprintf(fp, "launch -n %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+        {
+            tLaunchString = "launch";
+            tNumProcsString = "-n";
+        }
         else
-            fprintf(fp, "mpiexec -np %s %s PLATO_COMM_ID%s0 \\\n", num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+        {
+            tLaunchString = "mpiexec";
+            tNumProcsString = "-np";
+        }
+        // Now add the main mpirun call.
+        fprintf(fp, "%s %s %s %s PLATO_COMM_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
         fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_main_path.length() != 0)
@@ -267,9 +276,9 @@ bool XMLGenerator::generateLaunchScript()
         {
             const Objective& cur_obj = m_InputData.objectives[i];
             if(!cur_obj.num_procs.empty())
-                fprintf(fp, ": -np %s %s PLATO_COMM_ID%s%d \\\n", cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
+                fprintf(fp, ": %s %s %s PLATO_COMM_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
             else
-                fprintf(fp, ": -np 4 %s PLATO_COMM_ID%s%d \\\n",  envString.c_str(),separationString.c_str(),(int)(i+1));
+                fprintf(fp, ": %s 4 %s PLATO_COMM_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
             fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
             fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
                     cur_obj.name.c_str());
