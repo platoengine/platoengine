@@ -32,6 +32,7 @@ else()
   else()
     message(STATUS "A configuration file named 'config.cmake' was not provided in the build directory.")
     message(STATUS "Using command line arguments only to configure build.")
+    include( ${CMAKE_SOURCE_DIR}/base/config/defaults.cmake )
   endif()
 
 endif()
