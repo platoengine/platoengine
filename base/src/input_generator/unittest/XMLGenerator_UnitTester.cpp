@@ -95,6 +95,20 @@ bool XMLGenerator_UnitTester::publicParseObjectives(std::istream &sin)
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseLoads(std::istream &sin)
+/******************************************************************************/
+{
+    return parseLoads(sin);
+}
+
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
+/******************************************************************************/
+{
+    return parseBCs(sin);
+}
+
+/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
 /******************************************************************************/
 {
@@ -140,6 +154,8 @@ bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &si
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
+    m_InputData.bcs.clear();
+    m_InputData.loads.clear();
     m_InputData.objectives.clear();
     m_InputData.constraints.clear();
     m_InputData.materials.clear();
@@ -189,4 +205,114 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.KS_outer_control_stagnation_tolerance="";
     m_InputData.KS_outer_actual_reduction_tolerance="";
 }
+
+std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBCID)
+{
+    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    {
+        if(m_InputData.bcs[j].bc_id == aBCID)
+        {
+            return m_InputData.bcs[j].app_type;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getBCApplicationID(const std::string &aBCID)
+{
+    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    {
+        if(m_InputData.bcs[j].bc_id == aBCID)
+        {
+            return m_InputData.bcs[j].app_id;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getBCApplicationDOF(const std::string &aBCID)
+{
+    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    {
+        if(m_InputData.bcs[j].bc_id == aBCID)
+        {
+            return m_InputData.bcs[j].dof;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadType(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].type;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadApplicationType(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].app_type;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadApplicationID(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].app_id;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadDirectionX(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].x;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadDirectionY(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].y;
+        }
+    }
+    return "";
+}
+
+std::string XMLGenerator_UnitTester::getLoadDirectionZ(const std::string &aLoadID)
+{
+    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    {
+        if(m_InputData.loads[j].load_id == aLoadID)
+        {
+            return m_InputData.loads[j].z;
+        }
+    }
+    return "";
+}
+
+
 

@@ -556,34 +556,46 @@ bool XMLGenerator::generateSalinasInputDecks()
                 fprintf(fp, "  geometry_file '%s.gen'\n", m_InputData.mesh_name.c_str());
                 fprintf(fp, "END\n");
                 fprintf(fp, "LOADS\n");
-                for(size_t k=0; k<cur_obj.loads.size(); ++k)
+                for(size_t k=0; k<cur_obj.load_ids.size(); ++k)
                 {
-                    if(cur_obj.loads[k].type == "acceleration")
+                    bool found = false;
+                    Load cur_load;
+                    std::string cur_load_id = cur_obj.load_ids[k];
+                    for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
                     {
-                        fprintf(fp, "  body gravity %s %s %s scale %s\n",
-                                cur_obj.loads[k].x.c_str(),
-                                cur_obj.loads[k].y.c_str(),
-                                cur_obj.loads[k].z.c_str(),
-                                cur_obj.loads[k].scale.c_str());
+                        if(cur_load_id == m_InputData.loads[qq].load_id)
+                        {
+                            found = true;
+                            cur_load = m_InputData.loads[qq];
+                        }
                     }
-                    else if(cur_obj.loads[k].type == "pressure")
+                    if(found)
                     {
-                        fprintf(fp, "  %s %s %s %s\n",
-                                cur_obj.loads[k].app_type.c_str(),
-                                cur_obj.loads[k].app_id.c_str(),
-                                cur_obj.loads[k].type.c_str(),
-                                cur_obj.loads[k].scale.c_str());
-                    }
-                    else
-                    {
-                        fprintf(fp, "  %s %s %s %s %s %s scale %s\n",
-                                cur_obj.loads[k].app_type.c_str(),
-                                cur_obj.loads[k].app_id.c_str(),
-                                cur_obj.loads[k].type.c_str(),
-                                cur_obj.loads[k].x.c_str(),
-                                cur_obj.loads[k].y.c_str(),
-                                cur_obj.loads[k].z.c_str(),
-                                cur_obj.loads[k].scale.c_str());
+                        if(cur_load.type == "acceleration")
+                        {
+                            fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
+                                    cur_load.x.c_str(),
+                                    cur_load.y.c_str(),
+                                    cur_load.z.c_str());
+                        }
+                        else if(cur_load.type == "pressure")
+                        {
+                            fprintf(fp, "  %s %s %s %s\n",
+                                    cur_load.app_type.c_str(),
+                                    cur_load.app_id.c_str(),
+                                    cur_load.type.c_str(),
+                                    cur_load.scale.c_str());
+                        }
+                        else
+                        {
+                            fprintf(fp, "  %s %s %s %s %s %s scale 1.0\n",
+                                    cur_load.app_type.c_str(),
+                                    cur_load.app_id.c_str(),
+                                    cur_load.type.c_str(),
+                                    cur_load.x.c_str(),
+                                    cur_load.y.c_str(),
+                                    cur_load.z.c_str());
+                        }
                     }
                 }
                 if(frf)
@@ -592,20 +604,34 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 fprintf(fp, "END\n");
                 fprintf(fp, "BOUNDARY\n");
-                for(size_t k=0; k<cur_obj.bcs.size(); ++k)
+                for(size_t k=0; k<cur_obj.bc_ids.size(); ++k)
                 {
-                    if(cur_obj.bcs[k].dof.empty())
+                    bool found = false;
+                    BC cur_bc;
+                    std::string cur_bc_id = cur_obj.bc_ids[k];
+                    for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                     {
-                        fprintf(fp, "  %s %s fixed\n",
-                                cur_obj.bcs[k].app_type.c_str(),
-                                cur_obj.bcs[k].app_id.c_str());
+                        if(cur_bc_id == m_InputData.bcs[qq].bc_id)
+                        {
+                            found = true;
+                            cur_bc = m_InputData.bcs[qq];
+                        }
                     }
-                    else
+                    if(found)
                     {
-                        fprintf(fp, "  %s %s %s 0\n",
-                                cur_obj.bcs[k].app_type.c_str(),
-                                cur_obj.bcs[k].app_id.c_str(),
-                                cur_obj.bcs[k].dof.c_str());
+                        if(cur_bc.dof.empty())
+                        {
+                            fprintf(fp, "  %s %s fixed\n",
+                                    cur_bc.app_type.c_str(),
+                                    cur_bc.app_id.c_str());
+                        }
+                        else
+                        {
+                            fprintf(fp, "  %s %s %s 0\n",
+                                    cur_bc.app_type.c_str(),
+                                    cur_bc.app_id.c_str(),
+                                    cur_bc.dof.c_str());
+                        }
                     }
                 }
                 fprintf(fp, "END\n");
@@ -712,61 +738,89 @@ bool XMLGenerator::generateAlbanyInputDecks()
             // Dirichlet BCs
             n3 = n2.append_child("ParameterList");
             n3.append_attribute("name") = "Dirichlet BCs";
-            for(size_t j=0; j<cur_obj.bcs.size(); j++)
+            for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
             {
-                if(!cur_obj.type.compare("maximize stiffness"))
+                bool found = false;
+                BC cur_bc;
+                std::string cur_bc_id = cur_obj.bc_ids[j];
+                for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                 {
-                    if(cur_obj.bcs[j].dof.empty())
+                    if(cur_bc_id == m_InputData.bcs[qq].bc_id)
                     {
-                        sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                cur_obj.bcs[j].app_id.c_str(), "X");
-                        addNTVParameter(n3, string_var, "double", "0.0");
-                        sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                cur_obj.bcs[j].app_id.c_str(), "Y");
-                        addNTVParameter(n3, string_var, "double", "0.0");
-                        sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                cur_obj.bcs[j].app_id.c_str(), "Z");
-                        addNTVParameter(n3, string_var, "double", "0.0");
-                    }
-                    else
-                    {
-                        sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                cur_obj.bcs[j].app_id.c_str(), cur_obj.bcs[j].dof.c_str());
-                        addNTVParameter(n3, string_var, "double", "0.0");
+                        found = true;
+                        cur_bc = m_InputData.bcs[qq];
                     }
                 }
-                else if(!cur_obj.type.compare("maximize heat conduction"))
+                if(found)
                 {
-                    sprintf(string_var, "DBC on NS nodelist_%s for DOF P",
-                            cur_obj.bcs[j].app_id.c_str());
-                    addNTVParameter(n3, string_var, "double", "0.0");
+                    if(!cur_obj.type.compare("maximize stiffness"))
+                    {
+                        if(cur_bc.dof.empty())
+                        {
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                    cur_bc.app_id.c_str(), "X");
+                            addNTVParameter(n3, string_var, "double", "0.0");
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                    cur_bc.app_id.c_str(), "Y");
+                            addNTVParameter(n3, string_var, "double", "0.0");
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                    cur_bc.app_id.c_str(), "Z");
+                            addNTVParameter(n3, string_var, "double", "0.0");
+                        }
+                        else
+                        {
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                    cur_bc.app_id.c_str(), cur_bc.dof.c_str());
+                            addNTVParameter(n3, string_var, "double", "0.0");
+                        }
+                    }
+                    else if(!cur_obj.type.compare("maximize heat conduction"))
+                    {
+                        sprintf(string_var, "DBC on NS nodelist_%s for DOF P",
+                                cur_bc.app_id.c_str());
+                        addNTVParameter(n3, string_var, "double", "0.0");
+                    }
                 }
             }
 
             // Neumann BCs
             n3 = n2.append_child("ParameterList");
             n3.append_attribute("name") = "Neumann BCs";
-            for(size_t j=0; j<cur_obj.loads.size(); j++)
+            for(size_t j=0; j<cur_obj.load_ids.size(); j++)
             {
-                if(!cur_obj.type.compare("maximize stiffness"))
+                bool found = false;
+                Load cur_load;
+                std::string cur_load_id = cur_obj.load_ids[j];
+                for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
                 {
-                    sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
-                            cur_obj.loads[j].app_id.c_str());
-                    char tmp_buf[200];
-                    double x = std::atof(cur_obj.loads[j].x.c_str());
-                    double y = std::atof(cur_obj.loads[j].y.c_str());
-                    double z = std::atof(cur_obj.loads[j].z.c_str());
-                    double scale = std::atof(cur_obj.loads[j].scale.c_str());
-                    sprintf(tmp_buf, "{%lf,%lf,%lf}", x*scale, y*scale, z*scale);
-                    addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                    if(cur_load_id == m_InputData.loads[qq].load_id)
+                    {
+                        found = true;
+                        cur_load = m_InputData.loads[qq];
+                    }
                 }
-                else if(!cur_obj.type.compare("maximize heat conduction"))
+                if(found)
                 {
-                    sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
-                            cur_obj.loads[j].app_id.c_str());
-                    char tmp_buf[200];
-                    sprintf(tmp_buf, "{%s,0.0,0.0}", cur_obj.loads[j].scale.c_str());
-                    addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                    if(!cur_obj.type.compare("maximize stiffness"))
+                    {
+                        sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
+                                cur_load.app_id.c_str());
+                        char tmp_buf[200];
+                        double x = std::atof(cur_load.x.c_str());
+                        double y = std::atof(cur_load.y.c_str());
+                        double z = std::atof(cur_load.z.c_str());
+                        double scale = std::atof(cur_load.scale.c_str());
+                        sprintf(tmp_buf, "{%lf,%lf,%lf}", x*scale, y*scale, z*scale);
+                        addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                    }
+                    else if(!cur_obj.type.compare("maximize heat conduction"))
+                    {
+                        sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
+                                cur_load.app_id.c_str());
+                        char tmp_buf[200];
+                        sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
+                        addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                    }
                 }
             }
 
@@ -1087,96 +1141,124 @@ bool XMLGenerator::generateLightMPInputDecks()
             node5.set_value("1000");
             node3 = node2.append_child("boundary_conditions");
             pugi::xml_node node6;
-            for(size_t j=0; j<cur_obj.bcs.size(); ++j)
+            for(size_t j=0; j<cur_obj.bc_ids.size(); ++j)
             {
-                if(cur_obj.bcs[j].dof.empty())
+                bool found = false;
+                BC cur_bc;
+                std::string cur_bc_id = cur_obj.bc_ids[j];
+                for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                 {
-                    node4 = node3.append_child("displacement");
-                    node5 = node4.append_child("nodeset");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_obj.bcs[j].app_id.c_str());
-                    node5 = node4.append_child("direction");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("x");
-                    node5 = node4.append_child("value");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("0.0");
-                    node5 = node4.append_child("scale");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("1.0");
-                    node4 = node3.append_child("displacement");
-                    node5 = node4.append_child("nodeset");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_obj.bcs[j].app_id.c_str());
-                    node5 = node4.append_child("direction");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("y");
-                    node5 = node4.append_child("value");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("0.0");
-                    node5 = node4.append_child("scale");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("1.0");
-                    node4 = node3.append_child("displacement");
-                    node5 = node4.append_child("nodeset");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_obj.bcs[j].app_id.c_str());
-                    node5 = node4.append_child("direction");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("z");
-                    node5 = node4.append_child("value");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("0.0");
-                    node5 = node4.append_child("scale");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("1.0");
+                    if(cur_bc_id == m_InputData.bcs[qq].bc_id)
+                    {
+                        found = true;
+                        cur_bc = m_InputData.bcs[qq];
+                    }
                 }
-                else
+                if(found)
                 {
-                    node4 = node3.append_child("displacement");
-                    node5 = node4.append_child("nodeset");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_obj.bcs[j].app_id.c_str());
-                    node5 = node4.append_child("direction");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_obj.bcs[j].dof.c_str());
-                    node5 = node4.append_child("value");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("0.0");
-                    node5 = node4.append_child("scale");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("1.0");
+                    if(cur_bc.dof.empty())
+                    {
+                        node4 = node3.append_child("displacement");
+                        node5 = node4.append_child("nodeset");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_bc.app_id.c_str());
+                        node5 = node4.append_child("direction");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("x");
+                        node5 = node4.append_child("value");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("0.0");
+                        node5 = node4.append_child("scale");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("1.0");
+                        node4 = node3.append_child("displacement");
+                        node5 = node4.append_child("nodeset");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_bc.app_id.c_str());
+                        node5 = node4.append_child("direction");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("y");
+                        node5 = node4.append_child("value");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("0.0");
+                        node5 = node4.append_child("scale");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("1.0");
+                        node4 = node3.append_child("displacement");
+                        node5 = node4.append_child("nodeset");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_bc.app_id.c_str());
+                        node5 = node4.append_child("direction");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("z");
+                        node5 = node4.append_child("value");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("0.0");
+                        node5 = node4.append_child("scale");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("1.0");
+                    }
+                    else
+                    {
+                        node4 = node3.append_child("displacement");
+                        node5 = node4.append_child("nodeset");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_bc.app_id.c_str());
+                        node5 = node4.append_child("direction");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_bc.dof.c_str());
+                        node5 = node4.append_child("value");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("0.0");
+                        node5 = node4.append_child("scale");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("1.0");
+                    }
                 }
             }
-            for(size_t j=0; j<cur_obj.loads.size(); ++j)
+            for(size_t j=0; j<cur_obj.load_ids.size(); ++j)
             {
-                node4 = node3.append_child("traction");
-                node5 = node4.append_child("nodeset");
-                node6 = node5.append_child(pugi::node_pcdata);
-                node6.set_value(cur_obj.loads[j].app_id.c_str());
-                node5 = node4.append_child("direction");
-                node6 = node5.append_child(pugi::node_pcdata);
-                double x = std::atof(cur_obj.loads[j].x.c_str());
-                double y = std::atof(cur_obj.loads[j].y.c_str());
-                double z = std::atof(cur_obj.loads[j].z.c_str());
-                if(x > y && x > z)
+                bool found = false;
+                Load cur_load;
+                std::string cur_load_id = cur_obj.load_ids[j];
+                for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
                 {
-                    node6.set_value("x");
+                    if(cur_load_id == m_InputData.loads[qq].load_id)
+                    {
+                        found = true;
+                        cur_load = m_InputData.loads[qq];
+                    }
                 }
-                else if(y > x && y > z)
+                if(found)
                 {
-                    node6.set_value("y");
+                    node4 = node3.append_child("traction");
+                    node5 = node4.append_child("nodeset");
+                    node6 = node5.append_child(pugi::node_pcdata);
+                    node6.set_value(cur_load.app_id.c_str());
+                    node5 = node4.append_child("direction");
+                    node6 = node5.append_child(pugi::node_pcdata);
+                    double x = std::atof(cur_load.x.c_str());
+                    double y = std::atof(cur_load.y.c_str());
+                    double z = std::atof(cur_load.z.c_str());
+                    if(x > y && x > z)
+                    {
+                        node6.set_value("x");
+                    }
+                    else if(y > x && y > z)
+                    {
+                        node6.set_value("y");
+                    }
+                    else if(z > x && z > y)
+                    {
+                        node6.set_value("z");
+                    }
+                    node5 = node4.append_child("value");
+                    node6 = node5.append_child(pugi::node_pcdata);
+                    node6.set_value(cur_load.scale.c_str());
+                    node5 = node4.append_child("scale");
+                    node6 = node5.append_child(pugi::node_pcdata);
+                    node6.set_value("1.0");
                 }
-                else if(z > x && z > y)
-                {
-                    node6.set_value("z");
-                }
-                node5 = node4.append_child("value");
-                node6 = node5.append_child(pugi::node_pcdata);
-                node6.set_value(cur_obj.loads[j].scale.c_str());
-                node5 = node4.append_child("scale");
-                node6 = node5.append_child(pugi::node_pcdata);
-                node6.set_value("1.0");
             }
 
             // Write the file to disk
@@ -1301,6 +1383,30 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.name += tokens[j];
                             }
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"boundary","condition","ids"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"boundary condition ids\" keywords.\n";
+                                return false;
+                            }
+                            for(size_t j=3; j<tokens.size(); ++j)
+                            {
+                                new_objective.bc_ids.push_back(tokens[j]);
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"load ids\" keywords.\n";
+                                return false;
+                            }
+                            for(size_t j=2; j<tokens.size(); ++j)
+                            {
+                                new_objective.load_ids.push_back(tokens[j]);
+                            }
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"code"}, tStringValue))
                         {
                             if(tokens.size() < 2)
@@ -1418,241 +1524,6 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.raleigh_damping_beta = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"begin","bcs"}, tStringValue))
-                        {
-                            while (!fin.eof())
-                            {
-                                tokens.clear();
-                                fin.getline(buf, MAX_CHARS_PER_LINE);
-                                parseTokens(buf, tokens);
-                                // process the tokens
-                                if(tokens.size() > 0)
-                                {
-                                    for(size_t j=0; j<tokens.size(); ++j)
-                                        tokens[j] = toLower(tokens[j]);
-
-                                    BC new_bc;
-                                    if(parseSingleValue(tokens, tInputStringList = {"end","bcs"}, tStringValue))
-                                    {
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        if(tokens.size() < 4)
-                                        {
-                                            std::cout << "ERROR:XMLGenerator:parseObjectives: Valid number of BC parameters were not specified in \"bcs\" block.\n";
-                                            return false;
-                                        }
-                                        if(tokens[0] != "fixed")
-                                        {
-                                            std::cout << "ERROR:XMLGenerator:parseObjectives: First BC token must be \"fixed\".\n";
-                                            return false;
-                                        }
-                                        // token 0 is "fixed"
-                                        size_t j = 1;  // "displacement or temperature"
-                                        std::string cur_token1 = tokens[j];
-                                        if(cur_token1 != "displacement" && cur_token1 != "temperature")
-                                        {
-                                            std::cout << "ERROR:XMLGenerator:parseObjectives: Only \"displacement\" and \"temperature\" BCs are currently allowed.\n";
-                                            return false;
-                                        }
-                                        j++;  // "nodeset"
-                                        std::string cur_token2 = tokens[j];
-                                        if(cur_token2 != "nodeset")
-                                        {
-                                            std::cout << "ERROR:XMLGenerator:parseObjectives: BCs can only be applied to \"nodeset\" types at the moment.\n";
-                                            return false;
-                                        }
-                                        new_bc.app_type = cur_token2;
-                                        j++;  // nodeset id
-                                        std::string cur_token3 = tokens[j];
-                                        new_bc.app_id = cur_token3;
-                                        j++;
-                                        new_bc.dof = "";
-                                        if(j<tokens.size())
-                                        {
-                                            // x, y, or z
-                                            std::string cur_token4 = tokens[j];
-                                            if(cur_token4 != "x" &&
-                                               cur_token4 != "y" &&
-                                               cur_token4 != "z")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: BC degree of freedom must be either \"x\", \"y\", or \"z\".\n";
-                                                return false;
-                                            }
-                                            new_bc.dof = cur_token4;
-                                        }
-                                    }
-                                    new_objective.bcs.push_back(new_bc);
-                                }
-                            }
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
-                        {
-                            while (!fin.eof())
-                            {
-                                tokens.clear();
-                                fin.getline(buf, MAX_CHARS_PER_LINE);
-                                parseTokens(buf, tokens);
-                                // process the tokens
-                                if(tokens.size() > 0)
-                                {
-                                    for(size_t j=0; j<tokens.size(); ++j)
-                                        tokens[j] = toLower(tokens[j]);
-
-                                    Load new_load;
-                                    if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
-                                    {
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        int j=0;
-                                        new_load.type = tokens[j];  // traction or heat [flux] or force
-                                        if(!new_load.type.compare("traction"))
-                                        {
-                                            if(tokens.size() != 9)
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"traction\" load.\n";
-                                                return false;
-                                            }
-                                            new_load.app_type = tokens[++j];
-                                            if(new_load.app_type != "sideset")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Tractions can only be specified on sidesets currently.\n";
-                                                return false;
-                                            }
-                                            new_load.app_id = tokens[++j];
-                                            ++j;  // "direction"
-                                            if(tokens[3] != "direction")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"direction\" keyword not specified after sideset id.\n";
-                                                return false;
-                                            }
-                                            new_load.x = tokens[++j];
-                                            new_load.y = tokens[++j];
-                                            new_load.z = tokens[++j];
-                                            if(tokens[7] != "scale")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"scale\" keyword not specified after direction components.\n";
-                                                return false;
-                                            }
-                                            ++j; // "scale"
-                                            new_load.scale = tokens[++j];
-                                        }
-                                        else if(!new_load.type.compare("pressure"))
-                                        {
-                                            if(tokens.size() != 5)
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"pressure\" load.\n";
-                                                return false;
-                                            }
-                                            new_load.app_type = tokens[++j];
-                                            if(new_load.app_type != "sideset")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Pressures can currently only be specified on sidesets.\n";
-                                                return false;
-                                            }
-                                            new_load.app_id = tokens[++j];
-                                            ++j;  // "value"
-                                            if(tokens[3] != "value")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"value\" keyword not specified after sideset id.\n";
-                                                return false;
-                                            }
-                                            new_load.scale = tokens[++j];
-                                        }
-                                        else if(!new_load.type.compare("acceleration"))
-                                        {
-                                            if(tokens.size() != 7)
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"acceleration\" load.\n";
-                                                return false;
-                                            }
-                                            new_load.app_type = "body";
-                                            ++j;  // "direction"
-                                            if(tokens[j] != "direction")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"direction\" keyword not specified after \"acceleration\".\n";
-                                                return false;
-                                            }
-                                            new_load.x = tokens[++j];
-                                            new_load.y = tokens[++j];
-                                            new_load.z = tokens[++j];
-                                            ++j;
-                                            if(tokens[j] != "scale")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"scale\" keyword not specified after direction components.\n";
-                                                return false;
-                                            }
-                                            new_load.scale = tokens[++j];
-                                        }
-                                        else if(!new_load.type.compare("heat"))
-                                        {
-                                            if(tokens.size() != 5)
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"heat flux\" load.\n";
-                                                return false;
-                                            }
-                                            ++j;
-                                            if(!tokens[j].compare("flux"))
-                                            {
-                                                new_load.app_type = tokens[++j];
-                                                if(new_load.app_type != "sideset")
-                                                {
-                                                    std::cout << "ERROR:XMLGenerator:parseObjectives: Heat flux can only be specified on sidesets currently.\n";
-                                                    return false;
-                                                }
-                                                new_load.app_id = tokens[++j];
-                                                new_load.scale = tokens[++j];
-                                            }
-                                            else
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"flux\" keyword must follow \"heat\" keyword.\n";
-                                                return false;
-                                            }
-                                        }
-                                        else if(!new_load.type.compare("force"))
-                                        {
-                                            if(tokens.size() != 9)
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Wrong number of parameters specified for \"force\" load.\n";
-                                                return false;
-                                            }
-                                            new_load.app_type = tokens[++j];
-                                            if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: Forces can only be applied to nodesets or sidesets currently.\n";
-                                                return false;
-                                            }
-                                            new_load.app_id = tokens[++j];
-                                            ++j;  // "direction"
-                                            if(tokens[3] != "direction")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"direction\" keyword not specified after nodeset or sideset id.\n";
-                                                return false;
-                                            }
-                                            new_load.x = tokens[++j];
-                                            new_load.y = tokens[++j];
-                                            new_load.z = tokens[++j];
-                                            if(tokens[7] != "scale")
-                                            {
-                                                std::cout << "ERROR:XMLGenerator:parseObjectives: \"scale\" keyword not specified after direction components.\n";
-                                                return false;
-                                            }
-                                            ++j; // "scale"
-                                            new_load.scale = tokens[++j];
-                                        }
-                                        else
-                                        {
-                                            std::cout << "ERROR:XMLGenerator:parseObjectives: Unrecognized load type.  Must be traction, heat flux, or force.\n";
-                                            return false;
-                                        }
-                                    }
-                                    new_objective.loads.push_back(new_load);
-                                }
-                            }
-                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"begin","frequency"}, tStringValue))
                         {
                             while (!fin.eof())
@@ -1745,6 +1616,320 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
         m_InputData.objectives[i].performer_name =
                 m_InputData.objectives[i].code_name +
                 "_" + m_InputData.objectives[i].name;
+    }
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseLoads(std::istream &fin)
+/******************************************************************************/
+{
+    std::vector<std::string> tInputStringList;
+    char buf[MAX_CHARS_PER_LINE];
+    std::vector<std::string> tokens;
+    std::string tStringValue;
+
+    // read each line of the file
+    while (!fin.eof())
+    {
+        // read an entire line into memory
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+        tokens.clear();
+        parseTokens(buf, tokens);
+
+        // process the tokens
+        if(tokens.size() > 0)
+        {
+            for(size_t j=0; j<tokens.size(); ++j)
+                tokens[j] = toLower(tokens[j]);
+
+            if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
+            {
+                while (!fin.eof())
+                {
+                    tokens.clear();
+                    fin.getline(buf, MAX_CHARS_PER_LINE);
+                    parseTokens(buf, tokens);
+                    // process the tokens
+                    if(tokens.size() > 0)
+                    {
+                        for(size_t j=0; j<tokens.size(); ++j)
+                            tokens[j] = toLower(tokens[j]);
+
+                        if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            Load new_load;
+                            int j=0;
+                            new_load.type = tokens[j];  // traction or heat [flux] or force
+                            if(!new_load.type.compare("traction"))
+                            {
+                                if(tokens.size() != 10)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+                                    return false;
+                                }
+                                new_load.app_type = tokens[1];
+                                if(new_load.app_type != "sideset")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Tractions can only be specified on sidesets currently.\n";
+                                    return false;
+                                }
+                                new_load.app_id = tokens[2];
+                                if(tokens[3] != "value")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+                                    return false;
+                                }
+                                new_load.x = tokens[4];
+                                new_load.y = tokens[5];
+                                new_load.z = tokens[6];
+                                if(tokens[7] != "load" || tokens[8] != "id")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+                                    return false;
+                                }
+                                new_load.load_id = tokens[9];
+                            }
+                            else if(!new_load.type.compare("pressure"))
+                            {
+                                if(tokens.size() != 8)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"pressure\" load.\n";
+                                    return false;
+                                }
+                                new_load.app_type = tokens[1];
+                                if(new_load.app_type != "sideset")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
+                                    return false;
+                                }
+                                new_load.app_id = tokens[2];
+                                if(tokens[3] != "value")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+                                    return false;
+                                }
+                                new_load.scale = tokens[4];
+                                if(tokens[5] != "load" || tokens[6] != "id")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+                                    return false;
+                                }
+                                new_load.load_id = tokens[7];
+                            }
+                            else if(!new_load.type.compare("acceleration"))
+                            {
+                                if(tokens.size() != 7)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"acceleration\" load.\n";
+                                    return false;
+                                }
+                                new_load.app_type = "body";
+                                new_load.x = tokens[1];
+                                new_load.y = tokens[2];
+                                new_load.z = tokens[3];
+                                if(tokens[4] != "load" || tokens[5] != "id")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
+                                    return false;
+                                }
+                                new_load.load_id = tokens[6];
+                            }
+                            else if(!new_load.type.compare("heat"))
+                            {
+                                if(tokens.size() != 9)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"heat flux\" load.\n";
+                                    return false;
+                                }
+                                if(!tokens[1].compare("flux"))
+                                {
+                                    new_load.app_type = tokens[2];
+                                    if(new_load.app_type != "sideset")
+                                    {
+                                        std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
+                                        return false;
+                                    }
+                                    new_load.app_id = tokens[3];
+                                    // tokens[4] is "value"
+                                    new_load.scale = tokens[5];
+                                    if(tokens[6] != "load" || tokens[7] != "id")
+                                    {
+                                        std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+                                        return false;
+                                    }
+                                    new_load.load_id = tokens[8];
+                                }
+                                else
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
+                                    return false;
+                                }
+                            }
+                            else if(!new_load.type.compare("force"))
+                            {
+                                if(tokens.size() != 10)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"force\" load.\n";
+                                    return false;
+                                }
+                                new_load.app_type = tokens[1];
+                                if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
+                                    return false;
+                                }
+                                new_load.app_id = tokens[2];
+                                if(tokens[3] != "value")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
+                                    return false;
+                                }
+                                new_load.x = tokens[4];
+                                new_load.y = tokens[5];
+                                new_load.z = tokens[6];
+                                if(tokens[7] != "load" || tokens[8] != "id")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+                                    return false;
+                                }
+                                new_load.load_id = tokens[9];
+                            }
+                            else
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.  Must be traction, heat flux, or force.\n";
+                                return false;
+                            }
+                            m_InputData.loads.push_back(new_load);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseBCs(std::istream &fin)
+/******************************************************************************/
+{
+    std::vector<std::string> tInputStringList;
+    char buf[MAX_CHARS_PER_LINE];
+    std::vector<std::string> tokens;
+    std::string tStringValue;
+
+    // read each line of the file
+    while (!fin.eof())
+    {
+        // read an entire line into memory
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+        tokens.clear();
+        parseTokens(buf, tokens);
+
+        // process the tokens
+        if(tokens.size() > 0)
+        {
+            for(size_t j=0; j<tokens.size(); ++j)
+                tokens[j] = toLower(tokens[j]);
+
+            if(parseSingleValue(tokens, tInputStringList = {"begin","boundary","conditions"}, tStringValue))
+            {
+                // found an objective. parse it.
+                // parse the rest of the objective
+                while (!fin.eof())
+                {
+                    tokens.clear();
+                    fin.getline(buf, MAX_CHARS_PER_LINE);
+                    parseTokens(buf, tokens);
+                    // process the tokens
+                    if(tokens.size() > 0)
+                    {
+                        std::vector<std::string> unlowered_tokens = tokens;
+
+                        for(size_t j=0; j<tokens.size(); ++j)
+                            tokens[j] = toLower(tokens[j]);
+
+                        if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            BC new_bc;
+                            if(tokens.size() < 7)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseBCs: Valid number of BC parameters were not specified in \"boundary conditions\" block.\n";
+                                return false;
+                            }
+                            if(tokens[0] != "fixed")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
+                                return false;
+                            }
+                            // token 0 is "fixed"
+                            size_t j = 1;  // "displacement or temperature"
+                            std::string cur_token1 = tokens[j];
+                            if(cur_token1 != "displacement" && cur_token1 != "temperature")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
+                                return false;
+                            }
+                            j++;  // "nodeset"
+                            std::string cur_token2 = tokens[j];
+                            if(cur_token2 != "nodeset")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" types at the moment.\n";
+                                return false;
+                            }
+                            new_bc.app_type = cur_token2;
+                            j++;  // nodeset id
+                            std::string cur_token3 = tokens[j];
+                            new_bc.app_id = cur_token3;
+                            j++;
+                            new_bc.dof = "";
+                            std::string cur_token4 = tokens[j];
+                            ++j;
+                            std::string cur_token5 = tokens[j];
+                            ++j;
+                            std::string cur_token6 = tokens[j];
+                            if(cur_token4 == "bc" && cur_token5 == "id")
+                            {
+                                new_bc.bc_id = cur_token6;
+                            }
+                            else
+                            {
+                                if(cur_token4 != "x" && cur_token4 != "y" && cur_token4 != "z")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
+                                    return false;
+                                }
+                                new_bc.dof = cur_token4;
+                                if(cur_token5 != "bc" || cur_token6 != "id")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition id syntax is wrong.\n";
+                                    return false;
+                                }
+                                ++j;
+                                if(j<tokens.size())
+                                {
+                                    new_bc.bc_id = tokens[j];
+                                }
+                                else
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition id not specified.\n";
+                                }
+                            }
+                            m_InputData.bcs.push_back(new_bc);
+                        }
+                    }
+                }
+            }
+        }
     }
     return true;
 }
@@ -2865,6 +3050,12 @@ bool XMLGenerator::parseFile()
         return false; // exit if file not found
     }
 
+    parseBCs(fin);
+    fin.close();
+    fin.open(m_InputFilename.c_str()); // open a file
+    parseLoads(fin);
+    fin.close();
+    fin.open(m_InputFilename.c_str()); // open a file
     parseObjectives(fin);
     fin.close();
     fin.open(m_InputFilename.c_str()); // open a file

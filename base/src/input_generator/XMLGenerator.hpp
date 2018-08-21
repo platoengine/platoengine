@@ -64,12 +64,14 @@ struct Load
   std::string x, y, z; // direction vector
   std::string dof;  // x, y, or z
   std::string scale; // magnitude
+  std::string load_id;
 };
 struct BC
 {
   std::string app_type; // nodeset or sideset
   std::string app_id; // nodeset/sideset id
   std::string dof;
+  std::string bc_id;
 };
 struct Objective
 {
@@ -77,8 +79,6 @@ struct Objective
   std::string type;
   std::string code_name;
   std::string performer_name;
-  std::vector<Load> loads;
-  std::vector<BC> bcs;
   std::string weight;
   std::string num_procs;
   std::string freq_min;
@@ -93,6 +93,8 @@ struct Objective
   std::string convert_to_tet10;
   std::vector<std::string> frf_match_nodesets;
   std::vector<std::string> output_for_plotting;
+  std::vector<std::string> load_ids;
+  std::vector<std::string> bc_ids;
 };
 struct Constraint
 {
@@ -176,6 +178,8 @@ struct InputData
   std::vector<std::string> fixed_block_ids;
   std::vector<std::string> fixed_sideset_ids;
   std::vector<std::string> fixed_nodeset_ids;
+  std::vector<Load> loads;
+  std::vector<BC> bcs;
 };
 
 class XMLGenerator {
@@ -191,6 +195,8 @@ protected:
   bool m_UseLaunch;
   InputData m_InputData;
 
+  bool parseLoads(std::istream &fin);
+  bool parseBCs(std::istream &fin);
   bool generateInterfaceXML();
   bool generateLaunchScript();
   bool generatePlatoOperationsXML();

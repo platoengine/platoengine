@@ -1435,312 +1435,263 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
 
     // Test the "bcs" keywords
-    stringInput = "begin objective\n"
-            "begin bcs\n"
-            "fixed displacement nodeset 1 \n"
-            "end bcs\n"
-            "end objective\n";
+    stringInput =
+            "begin boundary conditions\n"
+            "fixed displacement nodeset 1 bc id 33\n"
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getBCApplicationType(0, 0), "nodeset");
-    EXPECT_EQ(tester.getBCApplicationID(0, 0), "1");
-    EXPECT_EQ(tester.getBCApplicationDOF(0, 0), "");
-    stringInput = "begin objective\n"
-            "begin bcs\n"
-            "fixed displacement nodeset 2 x\n"
-            "end bcs\n"
-            "end objective\n";
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    EXPECT_EQ(tester.getBCApplicationType("33"), "nodeset");
+    EXPECT_EQ(tester.getBCApplicationID("33"), "1");
+    EXPECT_EQ(tester.getBCApplicationDOF("33"), "");
+    stringInput =
+            "begin boundary conditions\n"
+            "fixed displacement nodeset 2 x bc id 33\n"
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getBCApplicationType(0, 0), "nodeset");
-    EXPECT_EQ(tester.getBCApplicationID(0, 0), "2");
-    EXPECT_EQ(tester.getBCApplicationDOF(0, 0), "x");
-    stringInput = "begin objective\n"
-            "begin bcs\n"
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    EXPECT_EQ(tester.getBCApplicationType("33"), "nodeset");
+    EXPECT_EQ(tester.getBCApplicationID("33"), "2");
+    EXPECT_EQ(tester.getBCApplicationDOF("33"), "x");
+    stringInput =
+            "begin boundary conditions\n"
             "fixed displacement\n"
-            "end bcs\n"
-            "end objective\n";
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "begin bcs\n"
+    EXPECT_EQ(tester.publicParseBCs(iss), false);
+    stringInput =
+            "begin boundary conditions\n"
             "displacement nodeset 1 x\n"
-            "end bcs\n"
-            "end objective\n";
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "begin bcs\n"
+    EXPECT_EQ(tester.publicParseBCs(iss), false);
+    stringInput =
+            "begin boundary conditions\n"
             "fixed flux nodeset 1 x\n"
-            "end bcs\n"
-            "end objective\n";
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "begin bcs\n"
-            "fixed displacement sideset 1 x\n"
-            "end bcs\n"
-            "end objective\n";
+    EXPECT_EQ(tester.publicParseBCs(iss), false);
+    stringInput =
+            "begin boundary conditions\n"
+            "fixed displacement sideset 1 x bc id 33\n"
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "begin bcs\n"
-            "fixed displacement nodeset 1 truck\n"
-            "end bcs\n"
-            "end objective\n";
+    EXPECT_EQ(tester.publicParseBCs(iss), false);
+    stringInput =
+            "begin boundary conditions\n"
+            "fixed displacement nodeset 1 truck bc id 33\n"
+            "end boundary conditions\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseBCs(iss), false);
 
     // Test loads.
     // Check for known load types.
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
             "pressure blah blah blah\n"
-            "end loads\n"
-            "end objective\n";
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
 
     // Tractions
     // check number of parameters
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
             "traction\n"
-            "end loads\n"
-            "end objective\n";
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check applying to correct mesh type
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "traction nodeset 1 direction 0 0 1 scale 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "traction nodeset 1 value 0 0 1 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check for direction keyword
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "traction sideset 1 bad_keyword 0 0 1 scale 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "traction sideset 1 bad_keyword 0 0 1 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    // check for scale keyword
-    stringInput = "begin objective\n"
-            "begin loads\n"
-            "traction sideset 1 direction 0 0 1 bad_keyword 1000\n"
-            "end loads\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // Do a correct example
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "traction sideset 3 direction .99 0 1 scale 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "traction sideset 3 value 990 0 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getLoadType(0,0), "traction");
-    EXPECT_EQ(tester.getLoadApplicationType(0,0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID(0,0), "3");
-    EXPECT_EQ(tester.getLoadDirectionX(0,0), ".99");
-    EXPECT_EQ(tester.getLoadDirectionY(0,0), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ(0,0), "1");
-    EXPECT_EQ(tester.getLoadScale(0,0), "1000");
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    EXPECT_EQ(tester.getLoadType("34"), "traction");
+    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34"), "3");
+    EXPECT_EQ(tester.getLoadDirectionX("34"), "990");
+    EXPECT_EQ(tester.getLoadDirectionY("34"), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("34"), "1000");
 
     // Pressure
     // check number of parameters
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
             "pressure\n"
-            "end loads\n"
-            "end objective\n";
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check applying to correct mesh type
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "pressure nodeset 1 value 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "pressure nodeset 1 value 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check for value keyword
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "pressure sideset 1 bad_keyword 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "pressure sideset 1 bad_keyword 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // Do a correct example
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "pressure sideset 3 value 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "pressure sideset 3 value 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getLoadType(0,0), "pressure");
-    EXPECT_EQ(tester.getLoadApplicationType(0,0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID(0,0), "3");
-    EXPECT_EQ(tester.getLoadScale(0,0), "1000");
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    EXPECT_EQ(tester.getLoadType("34"), "pressure");
+    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34"), "3");
 
     // Heat Flux
     // check number of parameters
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
             "heat flux\n"
-            "end loads\n"
-            "end objective\n";
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check applying to correct mesh type
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "heat flux nodeset 1 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "heat flux nodeset 1 value 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // Do a correct example
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "heat flux sideset 4 90\n"
-            "end loads\n"
-            "end objective\n";
+            "heat flux sideset 4 value 90 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getLoadType(0,0), "heat");
-    EXPECT_EQ(tester.getLoadApplicationType(0,0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID(0,0), "4");
-    EXPECT_EQ(tester.getLoadScale(0,0), "90");
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    EXPECT_EQ(tester.getLoadType("34"), "heat");
+    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34"), "4");
 
     // Force
     // check number of parameters
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
             "force\n"
-            "end loads\n"
-            "end objective\n";
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check applying to correct mesh type
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "force block 1 direction 0 0 1 scale 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "force block 1 value 0 0 1000 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check for direction keyword
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "force nodeset 1 bad_keyword 0 0 1 scale 1000\n"
-            "end loads\n"
-            "end objective\n";
+            "force nodeset 1 bad_keyword 0 0 1 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    // check for scale keyword
-    stringInput = "begin objective\n"
-            "begin loads\n"
-            "force sideset 2 direction 0 0 1 bad_keyword 1000\n"
-            "end loads\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // Do a good example
-    stringInput = "begin objective\n"
+    stringInput =
             "begin loads\n"
-            "force nodeset 2 direction 1 0 0 scale 222\n"
-            "end loads\n"
-            "end objective\n";
+            "force nodeset 2 value 222 0 0 load id 34\n"
+            "end loads\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getLoadType(0,0), "force");
-    EXPECT_EQ(tester.getLoadApplicationType(0,0), "nodeset");
-    EXPECT_EQ(tester.getLoadApplicationID(0,0), "2");
-    EXPECT_EQ(tester.getLoadDirectionX(0,0), "1");
-    EXPECT_EQ(tester.getLoadDirectionY(0,0), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ(0,0), "0");
-    EXPECT_EQ(tester.getLoadScale(0,0), "222");
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    EXPECT_EQ(tester.getLoadType("34"), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("34"), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("34"), "2");
+    EXPECT_EQ(tester.getLoadDirectionX("34"), "222");
+    EXPECT_EQ(tester.getLoadDirectionY("34"), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("34"), "0");
 
     // Test frequency block
     // check for scale keyword

@@ -69,6 +69,8 @@ public:
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
     bool publicParseObjectives(std::istream &sin);
+    bool publicParseLoads(std::istream &sin);
+    bool publicParseBCs(std::istream &sin);
     bool publicParseOptimizationParameters(std::istream &sin);
     bool publicParseConstraints(std::istream &sin);
     bool publicParseMesh(std::istream &sin);
@@ -94,16 +96,15 @@ public:
     std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
     std::string getObjFreqMax(const int &aIndex) {return m_InputData.objectives[aIndex].freq_max;}
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
-    std::string getBCApplicationType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].app_type;}
-    std::string getBCApplicationID(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].app_id;}
-    std::string getBCApplicationDOF(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].bcs[aBCIndex].dof;}
-    std::string getLoadType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].type;}
-    std::string getLoadApplicationType(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].app_type;}
-    std::string getLoadApplicationID(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].app_id;}
-    std::string getLoadDirectionX(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].x;}
-    std::string getLoadDirectionY(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].y;}
-    std::string getLoadDirectionZ(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].z;}
-    std::string getLoadScale(const int &aObjIndex, const int &aBCIndex) {return m_InputData.objectives[aObjIndex].loads[aBCIndex].scale;}
+    std::string getBCApplicationType(const std::string &aBCID);
+    std::string getBCApplicationID(const std::string &aBCID);
+    std::string getBCApplicationDOF(const std::string &aBCID);
+    std::string getLoadType(const std::string &aLoadID);
+    std::string getLoadApplicationType(const std::string &aLoadID);
+    std::string getLoadApplicationID(const std::string &aLoadID);
+    std::string getLoadDirectionX(const std::string &aLoadID);
+    std::string getLoadDirectionY(const std::string &aLoadID);
+    std::string getLoadDirectionZ(const std::string &aLoadID);
     std::string getMatBoxMinCoords() {return m_InputData.levelset_material_box_min;}
     std::string getMatBoxMaxCoords() {return m_InputData.levelset_material_box_max;}
     std::string getInitDensityValue() {return m_InputData.initial_density_value;}
