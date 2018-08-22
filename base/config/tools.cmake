@@ -118,7 +118,7 @@ endfunction(Plato_add_test_files)
 function( Plato_create_test RUN_COMMAND PLATOMAIN_BINARY PLATOMAIN_NPROCS INTERFACE_FILE APPFILE INPUTFILE )
 
   set( ${RUN_COMMAND} 
-       "mpirun -np ${PLATOMAIN_NPROCS} -x PLATO_COMM_ID=0 -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} -x PLATO_APP_FILE=${APPFILE} ${PLATOMAIN_BINARY} ${INPUTFILE}" PARENT_SCOPE )
+       "mpirun -np ${PLATOMAIN_NPROCS} -x PLATO_PERFORMER_ID=0 -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} -x PLATO_APP_FILE=${APPFILE} ${PLATOMAIN_BINARY} ${INPUTFILE}" PARENT_SCOPE )
 
 endfunction( Plato_create_test )
 
@@ -133,39 +133,39 @@ endfunction( Plato_create_test )
 function( Plato_create_simple_test RUN_COMMAND PLATOMAIN_BINARY PLATOMAIN_NPROCS INTERFACE_FILE )
 
   set( ${RUN_COMMAND} 
-       "mpirun -np ${PLATOMAIN_NPROCS} -x PLATO_COMM_ID=0 -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} ${PLATOMAIN_BINARY}" PARENT_SCOPE )
+       "mpirun -np ${PLATOMAIN_NPROCS} -x PLATO_PERFORMER_ID=0 -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} ${PLATOMAIN_BINARY}" PARENT_SCOPE )
 
 endfunction( Plato_create_simple_test )
 
 ###############################################################################
 ## Plato_add_performer
-#     RUN_COMMAND      == mpirun statement for MPMD configuration
-#     PERFORMER_BINARY == Performer executable
-#     PERFORMER_NPROCS == number of processes for this Performer
-#     LOCAL_COMM_ID    == Comm ID for this performer
-#     INTERFACE_FILE   == Plato interface file
-#     APPFILE          == Performer applicaiton file
-#     INPUTFILE        == Performer input file
+#     RUN_COMMAND        == mpirun statement for MPMD configuration
+#     PERFORMER_BINARY   == Performer executable
+#     PERFORMER_NPROCS   == number of processes for this Performer
+#     LOCAL_PERFORMER_ID == Performer ID for this performer
+#     INTERFACE_FILE     == Plato interface file
+#     APPFILE            == Performer applicaiton file
+#     INPUTFILE          == Performer input file
 ###############################################################################
 
-function( Plato_add_performer RUN_COMMAND PERFORMER_BINARY PERFORMER_NPROCS LOCAL_COMM_ID INTERFACE_FILE APPFILE INPUTFILE )
+function( Plato_add_performer RUN_COMMAND PERFORMER_BINARY PERFORMER_NPROCS LOCAL_PERFORMER_ID INTERFACE_FILE APPFILE INPUTFILE )
 
-  set( ${RUN_COMMAND} "${${RUN_COMMAND}} : -np ${PERFORMER_NPROCS} -x PLATO_COMM_ID=${LOCAL_COMM_ID} -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} -x PLATO_APP_FILE=${APPFILE} ${PERFORMER_BINARY} ${INPUTFILE}" PARENT_SCOPE )
+  set( ${RUN_COMMAND} "${${RUN_COMMAND}} : -np ${PERFORMER_NPROCS} -x PLATO_PERFORMER_ID=${LOCAL_PERFORMER_ID} -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} -x PLATO_APP_FILE=${APPFILE} ${PERFORMER_BINARY} ${INPUTFILE}" PARENT_SCOPE )
 
 endfunction( Plato_add_performer )
 
 ###############################################################################
 ## Plato_add_simple_performer
-#     RUN_COMMAND      == mpirun statement for MPMD configuration
-#     PERFORMER_BINARY == Performer executable
-#     PERFORMER_NPROCS == number of processes for this Performer
-#     LOCAL_COMM_ID    == Comm ID for this performer
-#     INTERFACE_FILE   == Plato interface file
+#     RUN_COMMAND        == mpirun statement for MPMD configuration
+#     PERFORMER_BINARY   == Performer executable
+#     PERFORMER_NPROCS   == number of processes for this Performer
+#     LOCAL_PERFORMER_ID == Performer ID for this performer
+#     INTERFACE_FILE     == Plato interface file
 ###############################################################################
 
-function( Plato_add_simple_performer RUN_COMMAND PERFORMER_BINARY PERFORMER_NPROCS LOCAL_COMM_ID INTERFACE_FILE )
+function( Plato_add_simple_performer RUN_COMMAND PERFORMER_BINARY PERFORMER_NPROCS LOCAL_PERFORMER_ID INTERFACE_FILE )
 
-  set( ${RUN_COMMAND} "${${RUN_COMMAND}} : -np ${PERFORMER_NPROCS} -x PLATO_COMM_ID=${LOCAL_COMM_ID} -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} ${PERFORMER_BINARY}" PARENT_SCOPE )
+  set( ${RUN_COMMAND} "${${RUN_COMMAND}} : -np ${PERFORMER_NPROCS} -x PLATO_PERFORMER_ID=${LOCAL_PERFORMER_ID} -x PLATO_INTERFACE_FILE=${INTERFACE_FILE} ${PERFORMER_BINARY}" PARENT_SCOPE )
 
 endfunction( Plato_add_simple_performer )
 

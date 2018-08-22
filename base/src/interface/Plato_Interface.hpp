@@ -101,7 +101,9 @@ public:
     void compute(const std::string & stageName, Teuchos::ParameterList & aArguments);
     void compute(const std::vector<std::string> & stageNames, Teuchos::ParameterList & aArguments);
 
-    void registerPerformer(Plato::Application* aPerformer);
+    // TODO: deprecate this function.  'registerPerformer' is misleading.  
+    void registerPerformer(Plato::Application* aApplication){ this->registerApplication(aApplication); }
+    void registerApplication(Plato::Application* aApplication);
     void perform();
 
     // data motion
@@ -135,7 +137,6 @@ private:
     void broadcastStageIndex(int & aStageIndex);
 
     void createStages();
-    void createLocalComm();
     void createPerformers();
     void createSharedData(Plato::Application* aApplication);
 
@@ -155,6 +156,7 @@ private:
     Plato::ExceptionHandler* mExceptionHandler;
 
     int mLocalCommID;
+    int mPerformerID;
     std::string mLocalPerformerName;
     Plato::InputData mInputData;
 

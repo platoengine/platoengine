@@ -172,7 +172,7 @@ Plato::InputData InputData(Plato::InputData & aNode, const std::string & aFieldN
     }
 }
 /******************************************************************************/
-int Int(const Plato::InputData & aNode, const std::string & aFieldname)
+int Int(const Plato::InputData & aNode, const std::string & aFieldname, int aDefaultValue)
 /******************************************************************************/
 {
     if( aNode.size<std::string>(aFieldname) )
@@ -182,7 +182,7 @@ int Int(const Plato::InputData & aNode, const std::string & aFieldname)
     }
     else
     {
-      return 0;
+      return aDefaultValue;
     }
 }
 /******************************************************************************/

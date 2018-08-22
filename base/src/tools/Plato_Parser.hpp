@@ -86,7 +86,7 @@ namespace Get
 bool                Bool      (const Plato::InputData & aInputData, const std::string & aFieldname);
 double              Double    (const Plato::InputData & aInputData, const std::string & aFieldname);
 std::vector<double> Doubles   (const Plato::InputData & aInputData, const std::string & aKeyword);
-int                 Int       (const Plato::InputData & aInputData, const std::string & aFieldname);
+int                 Int       (const Plato::InputData & aInputData, const std::string & aFieldname, int aDefaultValue=0 );
 std::vector<int>    Ints      (const Plato::InputData & aInputData, const std::string & aKeyword);
 std::string         String    (const Plato::InputData & aInputData, const std::string & aFieldname, bool aToUpper = false);
 std::string         String    (      Plato::InputData & aInputData, const std::string & aFieldname, const std::string& aDefault);

@@ -47,6 +47,7 @@
  *
  */
 
+#include <limits>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -75,6 +76,7 @@ Interface::Interface(MPI_Comm aGlobalComm) :
         mStages(),
         mExceptionHandler(nullptr),
         mLocalCommID(-1),
+        mPerformerID(-1),
         mLocalPerformerName(),
         mInputData("Input Data"),
         mLocalComm(),
@@ -83,11 +85,11 @@ Interface::Interface(MPI_Comm aGlobalComm) :
 /******************************************************************************/
 {
     // get the local program's communicator id from the environment.
-    // This value (PLATO_COMM_ID) is specified as an argument to mpirun.
-    const char* tCommChar = getenv("PLATO_COMM_ID");
-    if(tCommChar)
+    // This value (PLATO_PERFORMER_ID) is specified as an argument to mpirun.
+    const char* tPerfChar = getenv("PLATO_PERFORMER_ID");
+    if(tPerfChar)
     {
-        mLocalCommID = atoi(tCommChar);
+        mPerformerID = atoi(tPerfChar);
     }
     else
     {
@@ -99,7 +101,6 @@ Interface::Interface(MPI_Comm aGlobalComm) :
     mInputData = parser->parseFile(input_char);
     delete parser;
 
-    this->createLocalComm();
     this->createPerformers();
 }
 
@@ -110,6 +111,7 @@ Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_C
         mStages(),
         mExceptionHandler(nullptr),
         mLocalCommID(-1),
+        mPerformerID(-1),
         mLocalPerformerName(),
         mInputData("Input Data"),
         mLocalComm(),
@@ -128,7 +130,6 @@ Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_C
     Plato::Parser* parser = new Plato::PugiParser();
     mInputData = parser->parseFile(input_char);
 
-    this->createLocalComm();
     this->createPerformers();
 }
 
@@ -376,7 +377,7 @@ void Interface::importData(double* aTo, Plato::SharedData* aFrom)
 }
 
 /******************************************************************************/
-void Interface::registerPerformer(Plato::Application* aApplication)
+void Interface::registerApplication(Plato::Application* aApplication)
 /******************************************************************************/
 {
     Plato::Performer* tPerformer = nullptr;
@@ -435,21 +436,147 @@ void Interface::createStages()
 void Interface::createPerformers()
 /******************************************************************************/
 {
+    int tMyRank, tNumGlobalRanks;
+    MPI_Comm_rank(mGlobalComm, &tMyRank);
+    MPI_Comm_size(mGlobalComm, &tNumGlobalRanks);
+
+    std::vector<int> tPerfIDs;
+    std::map<int,int> tPerfCommSize;
     for( auto tNode : mInputData.getByName<Plato::InputData>("Performer") )
     {
-        std::string tPerformerName = Plato::Get::String(tNode, "Name");
-        int tLocalCommID = Plato::Get::Int(tNode, "CommID");
+        // is the PerformerID already used? If so, error out.
+        //
+        int tLocalPerformerID = Plato::Get::Int(tNode, "PerformerID", std::numeric_limits<int>::min());
 
-        // Only performers that are on this localComm are created
-        if(tLocalCommID != mLocalCommID)
+        if( tLocalPerformerID == std::numeric_limits<int>::min() )
         {
-            continue;
+            if( tMyRank == 0 )
+            {
+                std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+                std::cout << "  Each Performer definition must include a 'PerformerID'." << std::endl;
+                std::cout << " -----------------------------------------------------------------------------" << std::endl;
+            }
+            throw 1;
+        } 
+       
+        if( std::count( tPerfIDs.begin(), tPerfIDs.end(), tLocalPerformerID ) )
+        {
+            if( tMyRank == 0 )
+            {
+                std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+                std::cout << "  Duplicate PerformerID's.  Each performer must have a unique PerformerID." << std::endl;
+                std::cout << " -----------------------------------------------------------------------------" << std::endl;
+            }
+            throw 1;
+        } 
+        else 
+        {
+            tPerfIDs.push_back(tLocalPerformerID);
         }
 
-        mLocalPerformerName = tPerformerName;
-
-        mPerformers.push_back(new Plato::Performer(tPerformerName, tLocalCommID));
+        // Are any PerformerIDs specified in the interface definition that weren't 
+        // defined on the mpi command line?
+        //
+        int tMyPerformerSpec = (tLocalPerformerID == mPerformerID) ? 1 : 0;
+        int tNumRanksThisID = 0;
+        MPI_Allreduce(&tMyPerformerSpec, &tNumRanksThisID, 1, MPI_INT, MPI_SUM, mGlobalComm);
+        if( tNumRanksThisID == 0 ){
+            if( tMyRank == 0 )
+            {
+                std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+                std::cout << "  A Performer spec is defined for which no PerformerID is given on the mpi command line." << std::endl;
+                std::cout << " -----------------------------------------------------------------------------" << std::endl;
+            }
+            throw 1;
+        }
+        else 
+        {
+           tPerfCommSize[tLocalPerformerID] = tNumRanksThisID;
+        }
     }
+
+    // Is there a Performer spec for my local Performer ID?  
+    //
+    int tErrorNoSpec = ( std::count( tPerfIDs.begin(), tPerfIDs.end(), mPerformerID ) == 0 ) ? 1 : 0;
+    int tErrorNoSpecGlobal = 0;
+    MPI_Allreduce(&tErrorNoSpec, &tErrorNoSpecGlobal, 1, MPI_INT, MPI_MAX, mGlobalComm);
+    if( tErrorNoSpecGlobal ){
+        if( tMyRank == 0 )
+        {
+            std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+            std::cout << "  A Performer spec must be provided for each PerformerID defined on the mpi command line." << std::endl;
+            std::cout << " -----------------------------------------------------------------------------" << std::endl;
+        }
+        throw 1;
+    }
+
+    // If the Performer spec defines a CommSize, then the allocated ranks on that PerformerID are
+    // broken into one (trivial case) or more local comms.  To avoid any semantics of how ranks
+    // are assigned, manually color the local comms before splitting.
+    //
+    std::vector<int> tPerformerIDs(tNumGlobalRanks);
+    MPI_Allgather(&mPerformerID, 1, MPI_INT, tPerformerIDs.data(), 1, MPI_INT, mGlobalComm);
+
+    int tCommIndex = 0;
+    for( auto tNode : mInputData.getByName<Plato::InputData>("Performer") )
+    {
+        int tLocalPerformerID = Plato::Get::Int(tNode, "PerformerID");
+        int tNumRanksThisID = tPerfCommSize[tLocalPerformerID];
+        int tLocalPerformerCommSize = Plato::Get::Int(tNode, "CommSize", /*default_if_not_given=*/ tNumRanksThisID);
+
+        // Does the CommSize partition the ranks for this PerformerID without a remainder?
+        //
+        int tErrorUneven = ( tNumRanksThisID % tLocalPerformerCommSize == 0 ) ? 0 : 1;
+        int tErrorUnevenGlobal = 0;
+        MPI_Allreduce(&tErrorUneven, &tErrorUnevenGlobal, 1, MPI_INT, MPI_MAX, mGlobalComm);
+        if( tErrorUnevenGlobal ){
+            if( tMyRank == 0 )
+            {
+                    std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+                    std::cout << "  Each PerformerID must be allocated N*CommSize processes where N is a positive integer." << std::endl;
+                    std::cout << " -----------------------------------------------------------------------------" << std::endl;
+            }
+            throw 1;
+        }
+
+        // loop through the PerformerIDs and assign to local Comms
+        int tRankCount = 0;
+        for( int i=0; i<tNumGlobalRanks; i++ )
+        {
+            if( tPerformerIDs[i] == tLocalPerformerID )
+            {
+                if( i == tMyRank )
+                {
+                     mLocalPerformerName = Plato::Get::String(tNode, "Name");
+                     mLocalCommID = tCommIndex;
+                }
+                tRankCount++;
+                if( tRankCount % tLocalPerformerCommSize == 0 )
+                {
+                    tCommIndex++;
+                }
+            }
+        }
+    }
+
+    // Did any rank not find their local comm id?
+    //
+    int tErrorNoComm = ( mLocalCommID == -1 ) ? 1 : 0;
+    int tErrorNoCommGlobal = 0;
+    MPI_Allreduce(&tErrorNoComm, &tErrorNoCommGlobal, 1, MPI_INT, MPI_MAX, mGlobalComm);
+    if( tErrorNoCommGlobal ){
+        if( tMyRank == 0 )
+        {
+                std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
+                std::cout << "  Not all ranks were assigned to a local comm. " << std::endl;
+                std::cout << " -----------------------------------------------------------------------------" << std::endl;
+        }
+        throw 1;
+    }
+
+    MPI_Comm_split(mGlobalComm, mLocalCommID, tMyRank, &mLocalComm);
+
+    mPerformers.push_back(new Plato::Performer(mLocalPerformerName, mLocalCommID));
 
     mExceptionHandler = new Plato::ExceptionHandler(mLocalPerformerName, mLocalComm, mGlobalComm);
 }
@@ -557,15 +684,6 @@ int Interface::size(const std::string & aName) const
         // TODO: throw?  return zereo?
     }
     return tLength;
-}
-
-/******************************************************************************/
-void Interface::createLocalComm()
-/******************************************************************************/
-{
-    int tMyRank;
-    MPI_Comm_rank(mGlobalComm, &tMyRank);
-    MPI_Comm_split(mGlobalComm, mLocalCommID, tMyRank, &mLocalComm);
 }
 
 /******************************************************************************/
