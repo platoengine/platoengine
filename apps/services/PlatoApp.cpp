@@ -46,6 +46,13 @@
 #include "STKExtract.hpp"
 #endif
 
+#ifdef STK_ENABLED
+#include "stk_mesh/base/MetaData.hpp"
+#include <stk_mesh/base/Field.hpp>
+#include <stk_io/StkMeshIoBroker.hpp>
+#include <stk_mesh/base/CoordinateSystems.hpp>
+#endif
+
 #include "PlatoApp.hpp"
 #include "Plato_Parser.hpp"
 #include "Plato_Exceptions.hpp"
@@ -53,11 +60,7 @@
 #include "Plato_PenaltyModel.hpp"
 #include "PlatoEngine_FilterFactory.hpp"
 #include "PlatoEngine_AbstractFilter.hpp"
-#include "stk_mesh/base/MetaData.hpp"
 #include "Ioss_Region.h"                // for Region, NodeSetContainer, etc
-#include <stk_mesh/base/Field.hpp>
-#include <stk_io/StkMeshIoBroker.hpp>
-#include <stk_mesh/base/CoordinateSystems.hpp>
 
 /******************************************************************************/
 /*! \brief Get the layout.
@@ -569,6 +572,7 @@ double PlatoApp::InitializeField::evaluateSwissCheeseLevelSet(const double &aX, 
 void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
+#ifdef STK_ENABLED
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
     stk::mesh::MetaData *meta_data = new stk::mesh::MetaData;
     stk::mesh::BulkData *bulk_data = new stk::mesh::BulkData(*meta_data, mPlatoApp->mLocalComm);
@@ -738,12 +742,16 @@ void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(Distribut
     delete bulk_data;
     delete meta_data;
     delete broker;
+#else
+    throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/
 void PlatoApp::InitializeField::getInitialValuesForPrimitivesLevelSet(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
+#ifdef STK_ENABLED
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
     stk::mesh::MetaData *meta_data = new stk::mesh::MetaData;
     stk::mesh::BulkData *bulk_data = new stk::mesh::BulkData(*meta_data, mPlatoApp->mLocalComm);
@@ -822,12 +830,16 @@ void PlatoApp::InitializeField::getInitialValuesForPrimitivesLevelSet(Distribute
     delete bulk_data;
     delete meta_data;
     delete broker;
+#else
+    throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/
 void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
+#ifdef STK_ENABLED
     bool input_file_is_spread = true;
 
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
@@ -872,6 +884,9 @@ void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &fi
     delete meta_data;
     delete broker;
 
+#else
+    throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/

@@ -9,8 +9,8 @@ option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface" OFF)
 
 option( GEOMETRY      "Enable Geometry subcomponent"   OFF)
 option( EXPY          "Build exodus python API"        OFF)
-option( SEACAS        "Seacas tools"   ON)
-option( ENABLE_NLOPT  "Flag to turn on NLopt optimization library"    OFF )
+option( SEACAS        "Seacas tools"                    ON)
+option( ENABLE_STK    "Flag to turn on use of STK"      ON)
 
 
 ##################################################################
@@ -73,36 +73,6 @@ if( GTEST_INCLUDE )
 else( GTEST_INCLUDE )
   message( "-- Error: GTest headers not found." )
 endif( GTEST_INCLUDE )
-###############################################################################
-endif()
-###############################################################################
-
-
-
-############################## nlopt Setup ####################################
-if( ENABLE_NLOPT )
-###############################################################################
-find_library( NLOPT_LIBRARY NAMES nlopt
-              PATHS ${NLOPT_HOME}/lib NO_DEFAULT_PATH)
-
-if( NLOPT_LIBRARY )
-  message( "-- Info: Using NLopt library: ${NLOPT_LIBRARY}" )
-else( NLOPT_LIBRARY )
-  message( "-- Error: NLopt not found." )
-endif( NLOPT_LIBRARY )
-
-find_path( NLOPT_INCLUDE NAMES nlopt.h
-           PATHS ${NLOPT_HOME}/include NO_DEFAULT_PATH )
-find_path( NLOPT_INCLUDE NAMES nlopt.h )
-
-if( NLOPT_INCLUDE )
-  message( "-- Info: Using NLopt headers in ${NLOPT_INCLUDE}" )
-  include_directories( ${NLOPT_INCLUDE} )
-else( NLOPT_INCLUDE )
-  message( "-- Error: NLopt headers not found." )
-endif( NLOPT_INCLUDE )
-
-add_definitions(-DENABLE_NLOPT)
 ###############################################################################
 endif()
 ###############################################################################
@@ -198,6 +168,11 @@ if( ENABLE_ISO )
   message( "-- Compiling PlatoIso " )
   add_definitions(-DENABLE_ISO)
   add_subdirectory(base/src/iso/main)
+endif()
+
+if( ENABLE_STK )
+  message( "-- Compiling with STK " )
+  add_definitions(-DSTK_ENABLED)
 endif()
 
 if( PLATOMAIN )
