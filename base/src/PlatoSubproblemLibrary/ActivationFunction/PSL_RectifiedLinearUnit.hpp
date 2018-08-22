@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* So-called, "Rectified Linear Unit" activation function.
+ */
+
 #include "PSL_ActivationFunction.hpp"
 
 #include <vector>

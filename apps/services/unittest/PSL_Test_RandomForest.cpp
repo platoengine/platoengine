@@ -92,7 +92,7 @@ PSL_TEST(RandomForest,basicExample)
     const int num_train = 256;
     const int num_test = 99;
     const double testing_accuracy = tester.get_accuracy(&sampler, num_train, &parameter_data, num_test);
-    EXPECT_NEAR(testing_accuracy, .97, .031);
+    EXPECT_NEAR(testing_accuracy, .97, .041);
 }
 
 class RFErrorObjective : public CrossValidationErrorDiscreteObjective
@@ -155,7 +155,6 @@ PSL_TEST(RandomForest, errorMinimization)
 
     // define objective
     /* std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::german_credit_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
                                                     datasets_t::datasets_t::lsvt_dataset,

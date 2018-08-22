@@ -12,6 +12,7 @@ set(${LIB_NAME}_SOURCES
     )
 
 set(${LIB_NAME}_HEADERS 
+    PSL_Constants.hpp
     PSL_FreeHelpers.hpp
     PSL_FreeStandardization.hpp
     PSL_GradientCheck.hpp

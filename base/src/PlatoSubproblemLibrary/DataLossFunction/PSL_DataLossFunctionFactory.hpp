@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Abstract data loss function construction functionality.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 namespace PlatoSubproblemLibrary

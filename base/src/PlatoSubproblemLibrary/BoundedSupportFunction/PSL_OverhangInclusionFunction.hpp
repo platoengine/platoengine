@@ -43,6 +43,11 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Computes overhang projection function.
+ * Discourages density method material where it has no material support.
+ * Supporting material is determined by an angle within the build direction.
+ */
+
 #include "PSL_Abstract_BoundedSupportFunction.hpp"
 
 namespace PlatoSubproblemLibrary

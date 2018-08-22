@@ -43,6 +43,11 @@
 // PlatoSubproblemLibraryVersion(8): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Specifies an MPI-global region of interest in space, and receives back
+ * points within that region. Only able to send points which
+ * are locally interesting.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 #include <vector>
 #include <cstddef>

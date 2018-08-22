@@ -1,0 +1,572 @@
+<?xml version="1.0"?>
+
+<!-- 
+  Define performers.  
+  1.  CommIDs are created at the command line as arguments to mpirun, i.e., '-x PLATO_COMM_ID=0'.
+  2.  Only one performer can be assigned to a CommID.
+-->
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <CommID>0</CommID>
+</Performer> 
+
+<Performer> 
+  <Name>Alexa</Name>
+  <Code>Alexa</Code>
+  <CommID>1</CommID>
+</Performer> 
+
+
+
+
+
+
+
+<SharedData>
+  <Name>Internal Energy Gradient 1</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+
+
+
+
+
+
+<SharedData>
+  <Name>Displacement X</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Displacement Y</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+
+
+
+
+<SharedData>
+  <Name>Internal Energy Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>651</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy Gradient Node Field</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Volume Gradient Node Field</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Volume Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>651</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Optimization DOFs</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>651</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+
+<SharedData>
+  <Name>Topology</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Alexa</UserName>
+</SharedData>
+
+
+<SharedData>
+  <Name>Volume</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Design Volume</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Internal Energy 1</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+
+
+
+
+
+
+
+
+<SharedData>
+  <Name>Internal Energy</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Lower Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Lower Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>651</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>651</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<Stage>
+  <Name>Set Lower Bounds</Name>
+  <Input>
+    <SharedDataName>Lower Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Set Lower Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <!-- the following is ignored right now.  fix this.  -->
+    <Input>
+      <ArgumentName>Lower Bound Value</ArgumentName>
+      <SharedDataName>Lower Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Lower Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Lower Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Set Upper Bounds</Name>
+  <Input>
+    <SharedDataName>Upper Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Set Upper Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Upper Bound Value</ArgumentName>
+      <SharedDataName>Upper Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Upper Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Upper Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+
+<Stage>
+  <Name>Cache State</Name>
+</Stage>
+
+
+<Stage>
+    <Name>Output To File</Name>
+
+    <Operation>
+      <Name>Write Output</Name>
+      <PerformerName>Alexa</PerformerName>
+      <Output>
+        <ArgumentName>Solution X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Solution Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Output>
+    </Operation>
+
+    <Operation>
+      <Name>PlatoMainOutput</Name>
+      <PerformerName>PlatoMain</PerformerName>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy Gradient Node Field</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Volume Gradient</ArgumentName>
+        <SharedDataName>Volume Gradient Node Field</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Input>
+    </Operation>
+</Stage>
+
+<Stage>
+  <Name>Initialize Optimization DOFs</Name>
+  <Output>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Output>
+  <Operation>
+    <Name>Initialize MLS Point Values</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Output>
+  </Operation>
+</Stage>
+
+<Stage>
+  <Name>Design Volume</Name>
+  <Operation>
+    <Name>Design Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Design Volume</ArgumentName>
+      <SharedDataName>Design Volume</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Design Volume</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Volume</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Compute Nodal Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>Compute Constraint Value</Name>
+    <PerformerName>Alexa</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Constraint Value</ArgumentName>
+      <SharedDataName>Volume</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Volume</SharedDataName>
+  </Output>
+</Stage>
+
+
+<Stage>
+  <Name>Volume Gradient</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Compute Nodal Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>Compute Constraint Gradient</Name>
+    <PerformerName>Alexa</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Constraint Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient Node Field</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>Map Field to Points</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Volume Gradient Node Field</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Mapped MLS Point Values</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Volume Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+
+<Stage>
+  <Name>Internal Energy</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <Operation>
+    <Name>Compute Nodal Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <PerformerName>Alexa</PerformerName>
+    <Name>Compute Objective Value</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Objective Value</ArgumentName>
+      <SharedDataName>Internal Energy 1</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <Name>AggregateEnergy</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+      <SharedDataName>Internal Energy 1</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+      <SharedDataName>Internal Energy</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Internal Energy</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Internal Energy Gradient</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <Operation>
+    <Name>Compute Nodal Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <PerformerName>Alexa</PerformerName>
+    <Name>Compute Objective Gradient</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Objective Gradient</ArgumentName>
+      <SharedDataName>Internal Energy Gradient 1</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <Name>AggregateEnergy</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field 1</ArgumentName>
+      <SharedDataName>Internal Energy Gradient 1</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Internal Energy Gradient Node Field</SharedDataName>
+    </Output>
+  </Operation>
+  <Operation>
+    <Name>Map Field to Points</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Internal Energy Gradient Node Field</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Mapped MLS Point Values</ArgumentName>
+      <SharedDataName>Internal Energy Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Internal Energy Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<Optimizer>
+  <Package>GCMMA</Package>
+  <NLopt>
+    <Method>MMA</Method>
+  </NLopt>
+  <Output>
+    <OutputStage>Output To File</OutputStage>
+  </Output>
+  <OC>
+    <MoveLimiter>1.0</MoveLimiter>
+    <StabilizationParameter>0.5</StabilizationParameter>
+    <UseNewtonSearch>True</UseNewtonSearch>
+    <ConstraintMaxIterations>20</ConstraintMaxIterations>
+  </OC>
+  <OptimizationVariables>
+    <ValueName>Optimization DOFs</ValueName>
+    <InitializationStage>Initialize Optimization DOFs</InitializationStage>
+    <FilteredName>Topology</FilteredName>
+    <FilterControlStage>FilterControl</FilterControlStage>
+    <LowerBoundValueName>Lower Bound Value</LowerBoundValueName>
+    <LowerBoundVectorName>Lower Bound Vector</LowerBoundVectorName>
+    <UpperBoundValueName>Upper Bound Value</UpperBoundValueName>
+    <UpperBoundVectorName>Upper Bound Vector</UpperBoundVectorName>
+    <SetLowerBoundsStage>Set Lower Bounds</SetLowerBoundsStage>
+    <SetUpperBoundsStage>Set Upper Bounds</SetUpperBoundsStage>
+  </OptimizationVariables>
+  <Objective>
+    <ValueName>Internal Energy</ValueName>
+    <ValueStageName>Internal Energy</ValueStageName>
+    <GradientName>Internal Energy Gradient</GradientName>
+    <GradientStageName>Internal Energy Gradient</GradientStageName>
+  </Objective>
+  <BoundConstraint>
+    <Upper>1.0</Upper>
+    <Lower>1e-9</Lower>
+  </BoundConstraint>
+  <Constraint>
+    <Equality>True</Equality>
+    <Linear>True</Linear>
+    <ValueName>Volume</ValueName>
+    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <GradientName>Volume Gradient</GradientName>
+    <NormalizedTargetValue>0.25</NormalizedTargetValue>
+    <Tolerance>1e-5</Tolerance>
+  </Constraint>
+  <Convergence>
+    <MaxIterations>20</MaxIterations>
+  </Convergence>
+</Optimizer>
+
+
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>bolted_bracket</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <materialID>1</materialID>
+  </block>
+</mesh>
+
+<output>
+  <file>plato</file>
+  <format>exodus</format>
+</output>

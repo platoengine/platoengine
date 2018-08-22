@@ -43,6 +43,13 @@
 // PlatoSubproblemLibraryVersion(8): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Default implementation of point ghosting agent.
+ *
+ * For physically nearby processor neighbors, points are shared between processors.
+ * Points are shared if they are within the support distance of the bounding box of
+ * the point cloud of the two processors.
+ */
+
 #include "PSL_Abstract_PointGhostingAgent.hpp"
 
 #include <vector>

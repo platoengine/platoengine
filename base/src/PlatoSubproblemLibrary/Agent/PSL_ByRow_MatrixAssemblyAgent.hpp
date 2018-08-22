@@ -43,6 +43,9 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Assembles linear system based on functional form.
+ */
+
 #include "PSL_Abstract_MatrixAssemblyAgent.hpp"
 
 #include <vector>

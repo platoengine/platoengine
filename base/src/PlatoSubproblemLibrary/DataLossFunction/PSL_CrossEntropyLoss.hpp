@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Cross entropy loss functional with gradient.
+ */
+
 #include "PSL_DataLossFunction.hpp"
 
 #include <vector>

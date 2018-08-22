@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Abstract factory for creating activation function from enumerations.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 namespace PlatoSubproblemLibrary

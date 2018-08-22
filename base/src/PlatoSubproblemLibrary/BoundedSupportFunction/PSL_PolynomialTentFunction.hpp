@@ -43,6 +43,11 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Classical Polynomial tent function for kernel function.
+ * Typical use involves a power of one (linear function).
+ * Functional form: sum( (radius - distance)^power )
+ */
+
 #include "PSL_Abstract_BoundedSupportFunction.hpp"
 
 namespace PlatoSubproblemLibrary

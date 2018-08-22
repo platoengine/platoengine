@@ -47,6 +47,8 @@
 #include "PSL_FreeHelpers.hpp"
 #include "PSL_Random.hpp"
 
+#include <vector>
+
 namespace PlatoSubproblemLibrary
 {
 namespace TestingPoint
@@ -70,6 +72,34 @@ PSL_TEST(Point,allocation)
     EXPECT_EQ(p.dimension(), 2u);
     EXPECT_EQ(p(0), 0.1);
     EXPECT_EQ(p(1), -0.1);
+}
+
+PSL_TEST(Point,charSet)
+{
+    set_rand_seed();
+
+    // allocate
+    Point p;
+
+    // define point
+    std::vector<float> xyz_floats({0.251437, -42.1375, 0.00234571});
+
+    // make char's
+    char xyz[12];
+    for (int offset=0;offset<3;offset++) {
+        char* c = reinterpret_cast<char*>(&xyz_floats[offset]);
+        for (int offset2=0;offset2<4;offset2++) {
+            xyz[offset2+4*offset] = c[offset2];
+        }
+    }
+
+    // set
+    p.set(0u, xyz);
+
+    // test
+    EXPECT_EQ(p(0),xyz_floats[0]);
+    EXPECT_EQ(p(1),xyz_floats[1]);
+    EXPECT_EQ(p(2),xyz_floats[2]);
 }
 
 }

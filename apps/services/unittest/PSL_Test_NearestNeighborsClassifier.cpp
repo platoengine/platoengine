@@ -55,6 +55,7 @@
 #include "PSL_ClassificationAssessor.hpp"
 #include "PSL_SplitTrainTestEstimator.hpp"
 #include "PSL_Random.hpp"
+#include "PSL_AdvancedSupervisedGenerator.hpp"
 
 #include <vector>
 #include <string>
@@ -118,36 +119,33 @@ PSL_TEST(NearestNeighborsClassifier, passCrossValidationIris)
     stocastic_test(passed_NearestNeighborsClassifier_CrossValidation_iris, 1, 3, .32);
 }
 
-double accuracy_NearestNeighborsClassifier_germanCredit()
+double accuracy_NearestNeighborsClassifier_advancedGenerator()
 {
     // allocate needed interfaces
     AbstractAuthority authority;
 
-    datasets_t::datasets_t dataset = datasets_t::datasets_t::german_credit_dataset;
     ParameterData parameter_data;
     parameter_data.defaults_for_nearestNeighborClassifier();
     parameter_data.set_num_neighbors(5);
     parameter_data.set_should_select_nearest_neighbors_by_validation(false);
-    const double testing_holdout = .1;
 
-    // write dataset
-    FindDataset finder(&authority);
-    const std::string archive_filename = finder.find(dataset);
+    // sampler
+    AdvancedSupervisedGenerator sampler(&authority);
+    // tester
+    SupervisedGeneratorTester tester(&authority);
 
-    // assess
-    SplitTrainTestEstimator estimator(&authority);
-    ClassificationAssessor assessor(&authority);
-    estimator.initialize(archive_filename, false, testing_holdout);
-    estimator.estimate_accuracy(&parameter_data, &assessor);
-    const double accuracy = assessor.get_classification_accuracy();
+    // test
+    const int num_train = 512;
+    const int num_test = 99;
+    const double testing_accuracy = tester.get_accuracy(&sampler, num_train, &parameter_data, num_test);
 
-    return accuracy;
+    return testing_accuracy;
 }
-PSL_TEST(NearestNeighborsClassifier, germanCreditAccuracy)
+PSL_TEST(NearestNeighborsClassifier, advancedGeneratorAccuracy)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_NearestNeighborsClassifier_germanCredit, 4, .72, .08);
+    stocastic_test(accuracy_NearestNeighborsClassifier_advancedGenerator, 4, .75, .07);
 }
 
 bool improve_NearestNeighborsClassifier_lsvt()

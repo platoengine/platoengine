@@ -1,0 +1,20 @@
+decomp -p 2 plato_test1.gen
+decomp -p 4 plato_test1.gen
+decomp -p 4 plato_test1.gen
+decomp -p 4 plato_test1.gen
+mpirun -np 2 -x PLATO_COMM_ID=0 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=plato_operations.xml \
+/projects/plato/dev/PlatoMain/gcc-5.4.0-opt/PlatoMain platomain.xml \
+: -np 4 -x PLATO_COMM_ID=1 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=salinas_operations_1.xml \
+/projects/plato/dev/plato_sd/gcc-5.4.0/plato_sd_main salinas_input_deck_1.i \
+: -np 4 -x PLATO_COMM_ID=2 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=albany_operations_1.xml \
+/projects/plato/dev/albany/opt/albany/Latest/gcc-5.4.0-openmpi-1.10.2/bin/AlbanyMPMD albany_input_deck_1.i \
+: -np 4 -x PLATO_COMM_ID=3 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=salinas_operations_2.xml \
+/projects/plato/dev/plato_sd/gcc-5.4.0/plato_sd_main salinas_input_deck_2.i \

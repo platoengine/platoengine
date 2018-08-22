@@ -43,6 +43,13 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Default implementation of symmetry plane agent.
+ *
+ * This class creates a collection of symmetry points along a narrow cloned
+ * region of the symmetry plane. Input density values within the support distance
+ * are duplicated on the opposite side of symmetry plane.
+ */
+
 #include "PSL_Abstract_SymmetryPlaneAgent.hpp"
 
 #include <vector>

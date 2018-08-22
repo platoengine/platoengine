@@ -43,6 +43,11 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Pure virtual class for functions of bounded support.
+ * Function is zero outside finite support. Support is (globally) bounded.
+ * Having limited support allows for more efficient (limited) construction of evaluating function.
+ */
+
 namespace PlatoSubproblemLibrary
 {
 class Point;

@@ -1,5 +1,5 @@
 set(PLATO_INCLUDES ${PLATO_INCLUDES} 
-  ${CMAKE_SOURCE_DIR}/base/src/iso
+  ${CMAKE_SOURCE_DIR}/base/src/iso/main
   PARENT_SCOPE )
 
 

@@ -43,6 +43,16 @@
 // PlatoSubproblemLibraryVersion(3): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Default implementation of mesh scale agent.
+ *
+ * Determine global mesh scales by considering axis-aligned bounding boxes
+ * of all elements in the mesh. Minimum, mean, and maximum scales are computed.
+ *
+ * Only optimization blocks are included in mesh scale calculations.
+ * The filter only affects density values in optimization blocks.
+ * Non-optimization blocks are often coarsely meshed.
+ */
+
 #include "PSL_Abstract_MeshScaleAgent.hpp"
 
 #include <vector>

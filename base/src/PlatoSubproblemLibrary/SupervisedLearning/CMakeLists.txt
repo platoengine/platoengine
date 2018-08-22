@@ -4,6 +4,7 @@ set(LIB_NAME PSLSupervisedLearning)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 
 set(${LIB_NAME}_SOURCES 
+    PSL_AdvancedSupervisedGenerator.cpp
     PSL_BasicSupervisedGenerator.cpp
     PSL_ClassificationAccuracyEstimator.cpp
     PSL_ClassificationAssessor.cpp
@@ -25,6 +26,7 @@ set(${LIB_NAME}_SOURCES
     )
 
 set(${LIB_NAME}_HEADERS 
+    PSL_AdvancedSupervisedGenerator.hpp
     PSL_BasicSupervisedGenerator.hpp
     PSL_ClassificationAccuracyEstimator.hpp
     PSL_ClassificationAssessor.hpp

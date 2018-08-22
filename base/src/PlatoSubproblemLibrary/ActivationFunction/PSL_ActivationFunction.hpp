@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Abstract activation function class for Feed Forward Neural Network.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 #include <vector>

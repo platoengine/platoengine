@@ -44,6 +44,7 @@
  * IsoVector.hpp
  *
  *  Created on: Oct 24, 2017
+ *      Author: bwclark
  */
 
 #ifndef ISOVECTOR_HPP_

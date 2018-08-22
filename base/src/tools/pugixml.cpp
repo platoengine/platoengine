@@ -173,10 +173,9 @@ PUGI__NS_BEGIN
 		static deallocation_function deallocate;
 	};
 
-	// Global allocation functions are stored in class statics so that in header mode linker deduplicates them
-	// Without a template<> we'll get multiple definitions of the same static
-	template <typename T> allocation_function xml_memory_management_function_storage<T>::allocate = default_allocate;
-	template <typename T> deallocation_function xml_memory_management_function_storage<T>::deallocate = default_deallocate;
+template <typename T> allocation_function xml_memory_management_function_storage<T>::allocate = default_allocate;
+template <typename T> deallocation_function xml_memory_management_function_storage<T>::deallocate = default_deallocate;
+template struct xml_memory_management_function_storage<int>;
 
 	typedef xml_memory_management_function_storage<int> xml_memory;
 PUGI__NS_END

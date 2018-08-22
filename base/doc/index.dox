@@ -1,0 +1,49 @@
+/** 
+\mainpage %Plato Engine
+
+\section PE_outline Outline
+
+<ul>
+<li> \ref PE_Introduction
+<li> \ref PE_Classes
+<li> \ref PE_Tutorials
+<li> \ref PE_Conventions
+</ul>
+
+
+\section PE_Introduction Introduction
+
+%Plato Engine provides blah, blah, blah ... 
+
+\section PE_Classes Classes
+
+<ul>
+  <li> Plato::Application </li>
+  <li> Plato::Interface </li>
+  <li> Plato::Operation </li>
+  <li> Plato::Stage </li>
+</ul>
+
+\section PE_Tutorials Tutorials
+
+<ul>
+<li> \ref PE_Tutorial_01 </li>
+<li> \ref PE_Tutorial_02 </li>
+<li> \ref PE_Tutorial_03 </li>
+</ul>
+
+
+
+
+\section PE_Conventions Plato Programming Conventions
+
+  - One class definition per file and filename = 'Plato_'classname
+  - Class names use camel case:  MyClassName
+  - Function names use camel case with lower case first letter: myFunctionName
+  - Function arguments use camel case with a prepended "a": aMyArgumentName
+  - Clase member data use camel case with a prepended "m": mMyClassVariable
+  - Local variables camel case with a prepended "t": tLocalVariable
+  - Use doxygen comments
+  - %Plato conforms to the c++11 standard
+
+*/

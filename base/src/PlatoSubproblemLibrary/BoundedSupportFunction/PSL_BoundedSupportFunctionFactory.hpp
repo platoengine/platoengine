@@ -43,6 +43,9 @@
 // PlatoSubproblemLibraryVersion(7): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Bounded Support Function class creation factory for enum to class mapping.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 namespace PlatoSubproblemLibrary

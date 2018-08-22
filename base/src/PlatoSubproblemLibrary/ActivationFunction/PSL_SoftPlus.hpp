@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* So-called, "Soft-Plus" activation function.
+ */
+
 #include "PSL_ActivationFunction.hpp"
 
 #include <vector>

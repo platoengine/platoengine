@@ -43,6 +43,10 @@
 // PlatoSubproblemLibraryVersion(3): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Able to perform a variety of normalization strategies on an assembled linear system.
+ * Typical form is classical row normalization. Other strategies exist, but have not been found to be useful.
+ */
+
 #include "PSL_Abstract_MatrixNormalizationAgent.hpp"
 
 #include <vector>

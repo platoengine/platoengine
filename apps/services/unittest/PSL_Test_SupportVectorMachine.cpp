@@ -61,6 +61,8 @@
 #include "PSL_ClassificationAssessor.hpp"
 #include "PSL_InputOutputManager.hpp"
 #include "PSL_Random.hpp"
+#include "PSL_AdvancedSupervisedGenerator.hpp"
+#include "PSL_SupervisedGeneratorTester.hpp"
 
 #include <string>
 #include <iostream>
@@ -193,7 +195,6 @@ PSL_TEST(SupportVectorMachine, errorMinimization)
 
     // define objective
     /*std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::german_credit_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
                                                     datasets_t::datasets_t::lsvt_dataset,
@@ -201,7 +202,6 @@ PSL_TEST(SupportVectorMachine, errorMinimization)
                                                     datasets_t::datasets_t::biodeg_dataset,
                                                     datasets_t::datasets_t::wilt_dataset};*/
     std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::german_credit_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
                                                     datasets_t::datasets_t::lsvt_dataset,
@@ -288,68 +288,65 @@ PSL_TEST(SupportVectorMachine, passCrossValidationIris)
     stocastic_test(passed_SupportVectorMachine_CrossValidation_iris, 2, 8, .74);
 }
 
-double accuracy_SupportVectorMachine_germanCredit(const preprocessor_t::preprocessor_t& preprocessor)
+double accuracy_SupportVectorMachine_advancedGenerator(const preprocessor_t::preprocessor_t& preprocessor)
 {
     // allocate needed interfaces
     AbstractAuthority authority;
 
-    datasets_t::datasets_t dataset = datasets_t::datasets_t::german_credit_dataset;
+    // parameters for SVM
     ParameterData parameter_data;
     parameter_data.defaults_for_supportVectorMachine();
     parameter_data.set_preprocessor(preprocessor);
-    const double testing_holdout = .2;
 
-    // write dataset
-    FindDataset finder(&authority);
-    const std::string archive_filename = finder.find(dataset);
-
-    // assess
-    SplitTrainTestEstimator estimator(&authority);
-    ClassificationAssessor assessor(&authority);
-    estimator.initialize(archive_filename, false, testing_holdout);
-    estimator.estimate_accuracy(&parameter_data, &assessor);
-    const double classacc = assessor.get_classification_accuracy();
-    return classacc;
+    // sampler
+    AdvancedSupervisedGenerator sampler(&authority);
+    // tester
+    SupervisedGeneratorTester tester(&authority);
+    // test
+    const int num_train = 512;
+    const int num_test = 99;
+    const double testing_accuracy = tester.get_accuracy(&sampler, num_train, &parameter_data, num_test);
+    return testing_accuracy;
 }
-double accuracy_SupportVectorMachine_germanCredit_standardization()
+double accuracy_SupportVectorMachine_advancedGenerator_standardization()
 {
-    return accuracy_SupportVectorMachine_germanCredit(preprocessor_t::preprocessor_t::standardization_preprocessor);
+    return accuracy_SupportVectorMachine_advancedGenerator(preprocessor_t::preprocessor_t::standardization_preprocessor);
 }
-double accuracy_SupportVectorMachine_germanCredit_bipolarNormalization()
+double accuracy_SupportVectorMachine_advancedGenerator_bipolarNormalization()
 {
-    return accuracy_SupportVectorMachine_germanCredit(preprocessor_t::preprocessor_t::bipolar_normalization_preprocessor);
+    return accuracy_SupportVectorMachine_advancedGenerator(preprocessor_t::preprocessor_t::bipolar_normalization_preprocessor);
 }
-double accuracy_SupportVectorMachine_germanCredit_skewNormalization()
+double accuracy_SupportVectorMachine_advancedGenerator_skewNormalization()
 {
-    return accuracy_SupportVectorMachine_germanCredit(preprocessor_t::preprocessor_t::skew_normalization_preprocessor);
+    return accuracy_SupportVectorMachine_advancedGenerator(preprocessor_t::preprocessor_t::skew_normalization_preprocessor);
 }
-double accuracy_SupportVectorMachine_germanCredit_PCA()
+double accuracy_SupportVectorMachine_advancedGenerator_PCA()
 {
-    return accuracy_SupportVectorMachine_germanCredit(preprocessor_t::preprocessor_t::PCA_preprocessor);
+    return accuracy_SupportVectorMachine_advancedGenerator(preprocessor_t::preprocessor_t::PCA_preprocessor);
 }
-PSL_TEST(SupportVectorMachine, germanCreditAccuracy_standardization)
+PSL_TEST(SupportVectorMachine, advancedGeneratorAccuracy_standardization)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_SupportVectorMachine_germanCredit_standardization, 8, .737, .05);
+    stocastic_test(accuracy_SupportVectorMachine_advancedGenerator_standardization, 8, 0.82, 0.05);
 }
-PSL_TEST(SupportVectorMachine, germanCreditAccuracy_bipolarNormalization)
+PSL_TEST(SupportVectorMachine, advancedGeneratorAccuracy_bipolarNormalization)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_SupportVectorMachine_germanCredit_bipolarNormalization, 8, .736, .05);
+    stocastic_test(accuracy_SupportVectorMachine_advancedGenerator_bipolarNormalization, 8, 0.82, 0.05);
 }
-PSL_TEST(SupportVectorMachine, germanCreditAccuracy_skewNormalization)
+PSL_TEST(SupportVectorMachine, advancedGeneratorAccuracy_skewNormalization)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_SupportVectorMachine_germanCredit_skewNormalization, 8, .735, .05);
+    stocastic_test(accuracy_SupportVectorMachine_advancedGenerator_skewNormalization, 8, 0.82, 0.05);
 }
-PSL_TEST(SupportVectorMachine, germanCreditAccuracy_PCA)
+PSL_TEST(SupportVectorMachine, advancedGeneratorAccuracy_PCA)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_SupportVectorMachine_germanCredit_PCA, 8, .71, .05);
+    stocastic_test(accuracy_SupportVectorMachine_advancedGenerator_PCA, 8, 0.83, 0.05);
 }
 
 bool passed_SupportVectorMachine_simple()

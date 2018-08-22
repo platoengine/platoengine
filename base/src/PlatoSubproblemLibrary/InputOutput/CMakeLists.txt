@@ -6,7 +6,6 @@ set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES 
     PSL_ClassificationArchive.cpp
     PSL_FindDataset.cpp
-    PSL_FindDataset_GermanCredit.cpp
     PSL_FindDataset_Iris.cpp
     PSL_InputOutputManager.cpp
     )

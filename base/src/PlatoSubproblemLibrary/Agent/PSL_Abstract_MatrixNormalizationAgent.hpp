@@ -43,6 +43,9 @@
 // PlatoSubproblemLibraryVersion(3): a stand-alone library for the kernel filter for plato.
 #pragma once
 
+/* Abstract helper class for Filter library.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 #include <vector>

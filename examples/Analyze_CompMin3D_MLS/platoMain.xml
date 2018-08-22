@@ -1,0 +1,56 @@
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>bolted_bracket</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <materialID>1</materialID>
+  </block>
+</mesh>
+
+<PointArray>
+  <Name>Design Geometry</Name>
+  <Dimensions>3</Dimensions>
+  <N1>10</N1>
+  <N2>7</N2>
+  <N3>6</N3>
+  <Size1>4.5</Size1>
+  <Size2>3.0</Size2>
+  <Size3>2.5</Size3>
+  <Offset1>-0.25</Offset1>
+  <Offset2>-1.5</Offset2>
+  <Offset3>-1.25</Offset3>
+  <Radius>0.35</Radius>
+  <NumNeighbors>27</NumNeighbors>
+  <Field>
+    <Name>Initial Uniform Design</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>0.1</Value>
+    </Uniform>
+  </Field>
+  <Field>
+    <Name>Lower Bound</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>-0.200</Value>
+    </Uniform>
+  </Field>
+  <Field>
+    <Name>Upper Bound</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>0.200</Value>
+    </Uniform>
+  </Field>
+</PointArray>
+
+<output>
+  <file>platomain</file>
+  <format>exodus</format>
+</output>
+

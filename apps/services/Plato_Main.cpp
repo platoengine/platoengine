@@ -49,6 +49,10 @@
 
 #include "communicator.hpp"
 
+#ifdef GEOMETRY
+#include <Kokkos_Core.hpp>
+#endif
+
 #include "PlatoApp.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_OptimizerInterface.hpp"
@@ -57,6 +61,14 @@
 #ifndef NDEBUG
 #include <fenv.h>
 #endif
+
+void safeExit(){
+#ifdef GEOMETRY
+    Kokkos::finalize();
+#endif
+    MPI_Finalize();
+    exit(0);
+}
 
 /******************************************************************************/
 int main(int aArgc, char *aArgv[])
@@ -69,6 +81,10 @@ int main(int aArgc, char *aArgv[])
 
     MPI_Init(&aArgc, (char***) &aArgv);
 
+#ifdef GEOMETRY
+    Kokkos::initialize(aArgc, aArgv);
+#endif
+
     Plato::Interface* tPlatoInterface = nullptr;
     try
     {
@@ -76,8 +92,7 @@ int main(int aArgc, char *aArgv[])
     }
     catch(...)
     {
-        MPI_Finalize();
-        exit(0);
+        safeExit();
     }
 
     MPI_Comm tLocalComm;
@@ -102,8 +117,7 @@ int main(int aArgc, char *aArgv[])
     }
     catch(...)
     {
-        MPI_Finalize();
-        exit(0);
+        safeExit();
     }
 
     try
@@ -121,8 +135,7 @@ int main(int aArgc, char *aArgv[])
     }
     catch(...)
     {
-        MPI_Finalize();
-        exit(0);
+        safeExit();
     }
 
     if(tPlatoApp)
@@ -138,8 +151,7 @@ int main(int aArgc, char *aArgv[])
         delete tOptimizer;
     }
 
-    MPI_Finalize();
-    exit(0);
+    safeExit();
 }
 
 

@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Pure virtual data loss function for Feed Forward Neural Networks.
+ */
+
 #include "PSL_ParameterDataEnums.hpp"
 
 #include <vector>

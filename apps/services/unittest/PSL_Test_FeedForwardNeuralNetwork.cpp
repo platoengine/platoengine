@@ -63,6 +63,8 @@
 #include "PSL_VectorCoding.hpp"
 #include "PSL_Random.hpp"
 #include "PSL_Abstract_DenseMatrix.hpp"
+#include "PSL_AdvancedSupervisedGenerator.hpp"
+#include "PSL_SupervisedGeneratorTester.hpp"
 
 #include <string>
 #include <iostream>
@@ -196,7 +198,6 @@ PSL_TEST(FeedForwardNeuralNetwork, errorMinimization)
 
     // define objective
     /* std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::german_credit_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
                                                     datasets_t::datasets_t::lsvt_dataset,
@@ -204,7 +205,6 @@ PSL_TEST(FeedForwardNeuralNetwork, errorMinimization)
                                                     datasets_t::datasets_t::biodeg_dataset,
                                                     datasets_t::datasets_t::wilt_dataset}; */
     std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::german_credit_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
                                                     datasets_t::datasets_t::lsvt_dataset,
@@ -295,48 +295,47 @@ PSL_TEST(FeedForwardNeuralNetwork, passCrossValidationIris)
     stocastic_test(passed_FeedForwardNeuralNetwork_CrossValidation_iris, 1, 4, .49);
 }
 
-double accuracy_FeedForwardNeuralNetwork_germanCredit()
+double accuracy_FeedForwardNeuralNetwork_advancedGenerator()
 {
     // allocate needed interfaces
     AbstractAuthority authority;
 
-    datasets_t::datasets_t dataset = datasets_t::datasets_t::german_credit_dataset;
+    // sampler
+    AdvancedSupervisedGenerator sampler(&authority);
+    // tester
+    SupervisedGeneratorTester tester(&authority);
+
+    // parameters for training
     ParameterData parameter_data;
     parameter_data.defaults_for_feedForwardNeuralNetwork();
     parameter_data.set_batch_size(2);
     parameter_data.set_validation_holdout(.04);
-    const double testing_holdout = .2;
 
-    // write dataset
-    FindDataset finder(&authority);
-    const std::string archive_filename = finder.find(dataset);
-
-    // assess
-    SplitTrainTestEstimator estimator(&authority);
-    ClassificationAssessor assessor(&authority);
-    estimator.initialize(archive_filename, false, testing_holdout);
-    estimator.estimate_accuracy(&parameter_data, &assessor);
-    return assessor.get_classification_accuracy();
+    // test
+    const int num_train = 512;
+    const int num_test = 99;
+    const double testing_accuracy = tester.get_accuracy(&sampler, num_train, &parameter_data, num_test);
+    return testing_accuracy;
 }
-PSL_TEST(FeedForwardNeuralNetwork, germanCreditAccuracy)
+PSL_TEST(FeedForwardNeuralNetwork, advancedGeneratorAccuracy)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(accuracy_FeedForwardNeuralNetwork_germanCredit, 8, .73, .08);
+    stocastic_test(accuracy_FeedForwardNeuralNetwork_advancedGenerator, 8, .88, .05);
 }
-bool passed_FeedForwardNeuralNetwork_germanCredit()
+bool passed_FeedForwardNeuralNetwork_advancedGenerator()
 {
     // get accuracy
-    const double actual_accuracy = accuracy_FeedForwardNeuralNetwork_germanCredit();
+    const double actual_accuracy = accuracy_FeedForwardNeuralNetwork_advancedGenerator();
 
-    const double expected_accuracy = .719;
+    const double expected_accuracy = .85;
     return (actual_accuracy >= expected_accuracy);
 }
-PSL_TEST(FeedForwardNeuralNetwork, germanCreditPass)
+PSL_TEST(FeedForwardNeuralNetwork, advancedGeneratorPass)
 {
     set_rand_seed();
     PSL_SerialOnlyTest
-    stocastic_test(passed_FeedForwardNeuralNetwork_germanCredit, 4, 25, .64);
+    stocastic_test(passed_FeedForwardNeuralNetwork_advancedGenerator, 4, 25, .5);
 }
 
 bool passed_FeedForwardNeuralNetwork_simple()

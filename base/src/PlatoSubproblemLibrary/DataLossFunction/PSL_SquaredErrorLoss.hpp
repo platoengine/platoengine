@@ -42,6 +42,9 @@
 
 #pragma once
 
+/* Sum of square errors function with gradient.
+ */
+
 #include "PSL_DataLossFunction.hpp"
 
 #include <vector>
