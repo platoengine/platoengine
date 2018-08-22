@@ -1,0 +1,21 @@
+<VTKFile type="PUnstructuredGrid">
+<PUnstructuredGrid GhostLevel="1">
+<PPoints>
+<PDataArray type="Float64" Name="coordinates" NumberOfComponents="3" format="binary"/>
+</PPoints>
+<PPointData>
+<PDataArray type="Int64" Name="global" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int32" Name="local" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int8" Name="class_dim" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int32" Name="class_id" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Float64" Name="Displacement" NumberOfComponents="3" format="binary"/>
+</PPointData>
+<PCellData>
+<PDataArray type="Int64" Name="global" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int32" Name="local" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int8" Name="class_dim" NumberOfComponents="1" format="binary"/>
+<PDataArray type="Int32" Name="class_id" NumberOfComponents="1" format="binary"/>
+</PCellData>
+<Piece Source="pieces/piece_0.vtu"/>
+</PUnstructuredGrid>
+</VTKFile>

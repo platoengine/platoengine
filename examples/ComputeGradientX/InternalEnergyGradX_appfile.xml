@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Operation>
+  <Function>ComputeObjectiveX</Function>
+  <Name>Compute ObjectiveX</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>GradientX X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>GradientX Y</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>GradientX Z</ArgumentName>
+  </Output>
+</Operation>
