@@ -1,5 +1,3 @@
  -- Fatal Error --------------------------------------------------------------
-  Parsing exception on Performer '': 
-    Error message: Plato::Interface: Performer not defined for CommID 1
+  A Performer spec is defined for which no PerformerID is given on the mpi command line.
  -----------------------------------------------------------------------------
-

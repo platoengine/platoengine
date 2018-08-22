@@ -2,22 +2,22 @@
 <Performer>
   <Name>PlatoMain</Name>
   <Code>Plato_Main</Code>
-  <CommID>0</CommID>
+  <PerformerID>0</PerformerID>
 </Performer>
 <Performer>
   <Name>salinas_1</Name>
   <Code>salinas</Code>
-  <CommID>1</CommID>
+  <PerformerID>1</PerformerID>
 </Performer>
 <Performer>
   <Name>albany_1</Name>
   <Code>albany</Code>
-  <CommID>2</CommID>
+  <PerformerID>2</PerformerID>
 </Performer>
 <Performer>
   <Name>salinas_2</Name>
   <Code>salinas</Code>
-  <CommID>3</CommID>
+  <PerformerID>3</PerformerID>
 </Performer>
 <SharedData>
   <Name>Internal Energy 1</Name>

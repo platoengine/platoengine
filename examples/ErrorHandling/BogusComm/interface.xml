@@ -11,19 +11,19 @@
 <Performer> 
   <Name>PlatoMain</Name>
   <Code>Plato_Main</Code>
-  <CommID>0</CommID>
+  <PerformerID>0</PerformerID>
 </Performer> 
 
 <Performer> 
   <Name>LightMP_static_load1</Name>
   <Code>LightMP</Code>
-  <CommID>10</CommID>
+  <PerformerID>10</PerformerID>
 </Performer> 
 
 <Performer> 
   <Name>LightMP_static_load2</Name>
   <Code>LightMP</Code>
-  <CommID>2</CommID>
+  <PerformerID>2</PerformerID>
 </Performer> 
 
 <SharedData>

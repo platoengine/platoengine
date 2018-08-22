@@ -1,27 +1,21 @@
 <?xml version="1.0"?>
 
-<!-- 
-  Define performers.  
-  1.  CommIDs are created at the command line as arguments to mpirun, i.e., '-x PLATO_COMM_ID=0'.
-  2.  Only one performer can be assigned to a CommID.
--->
-
 <Performer> 
   <Name>PlatoMain</Name>
   <Code>Plato_Main</Code>
-  <CommID>0</CommID>
+  <PerformerID>0</PerformerID>
 </Performer> 
 
 <Performer> 
   <Name>LightMP_static_load1</Name>
   <Code>LightMP</Code>
-  <CommID>1</CommID>
+  <PerformerID>1</PerformerID>
 </Performer> 
 
 <Performer> 
   <Name>LightMP_static_load2</Name>
   <Code>LightMP</Code>
-  <CommID>2</CommID>
+  <PerformerID>2</PerformerID>
 </Performer> 
 
 <SharedData>
