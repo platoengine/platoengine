@@ -1,0 +1,17 @@
+option( PLATOMAIN     "Flag to turn on compilation of PlatoMain"            ON )
+option( PLATOSTATICS  "Flag to turn on compilation of Statics performer"    ON )
+option( REGRESSION    "Flag to create regression test suite"                ON )
+option( SALINAS       "Flag to turn on testing of Salinas performer"       OFF )
+option( ALBANY        "Flag to turn on testing of Albany performer"        OFF )
+option( ANALYZE       "Flag to turn on testing of Plato Analyze performer" OFF )
+option( UNIT_TESTING  "Flag to turn on unit testing"                        ON )
+
+set( TRILINOS_INSTALL_DIR   ${PE_TRILINOS}                 CACHE STRING "path to Trilinos library")
+set( CMAKE_CXX_COMPILER     ${PE_CXX}                      CACHE STRING "c++ compiler")
+set( CMAKE_C_COMPILER       ${PE_CC}                       CACHE STRING "c compiler")
+set( GTEST_HOME             ${PE_GTEST}                    CACHE STRING "path to GTest unit testing library")
+set( CMAKE_BUILD_TYPE       ${PE_BUILD_TYPE}               CACHE STRING "Debug or Release")
+set( CMAKE_INSTALL_PREFIX   ${PE_INSTALL}                  CACHE STRING "Location to install")
+set( SEACAS_PATH            ${TRILINOS_INSTALL_DIR}        CACHE STRING "Path to seacas tools")
+
+set( ANALYZE_BINARY         ${ANALYZE_BINARY}              CACHE STRING "filepath to plato analyze")
