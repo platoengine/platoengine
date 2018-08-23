@@ -103,9 +103,22 @@ include_directories( ${Trilinos_INCLUDE_DIRS} ${Trilinos_TPL_INCLUDE_DIRS})
 ###############################################################################
 ###############################################################################
 message("Trilinos_CXX_COMPILER_FLAGS: ${Trilinos_CXX_COMPILER_FLAGS}")
-set(CMAKE_CXX_FLAGS "${Trilinos_CXX_COMPILER_FLAGS} -fPIC -lgfortran")
-set(CMAKE_CXX_FLAGS_DEBUG "${Trilinos_CXX_COMPILER_FLAGS} -fPIC -lgfortran")
-set(CMAKE_CXX_FLAGS_RELEASE "${Trilinos_CXX_COMPILER_FLAGS} -fPIC -lgfortran")
+set(CMAKE_CXX_FLAGS "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS_RELEASE "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Clang specific flags
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+  # gnu specific flags
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lgfortran")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -lgfortran")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -lgfortran")
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+  # intel specific flags
+else()
+  message(WARNING "Unknown compiler type: ${CMAKE_CXX_COMPILER_ID}. Using default flags.")
+endif()
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL Release)
   add_definitions( -DNDEBUG)
