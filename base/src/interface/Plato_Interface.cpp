@@ -72,7 +72,7 @@ namespace Plato
 /******************************************************************************/
 Interface::Interface(MPI_Comm aGlobalComm) :
         mDataLayer(nullptr),
-        mPerformers(),
+        mPerformer(nullptr),
         mStages(),
         mExceptionHandler(nullptr),
         mLocalCommID(-1),
@@ -107,7 +107,7 @@ Interface::Interface(MPI_Comm aGlobalComm) :
 /******************************************************************************/
 Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_Comm aGlobalComm) :
         mDataLayer(nullptr),
-        mPerformers(),
+        mPerformer(nullptr),
         mStages(),
         mExceptionHandler(nullptr),
         mLocalCommID(-1),
@@ -246,10 +246,7 @@ void Interface::perform()
 
     }
 
-    for(auto& tMyPerformer : mPerformers)
-    {
-        tMyPerformer->finalize();
-    }
+      mPerformer->finalize();
 }
 
 /******************************************************************************/
@@ -380,11 +377,9 @@ void Interface::importData(double* aTo, Plato::SharedData* aFrom)
 void Interface::registerApplication(Plato::Application* aApplication)
 /******************************************************************************/
 {
-    Plato::Performer* tPerformer = nullptr;
     try
     {
         aApplication->initialize();
-        tPerformer = this->getPerformer(mLocalCommID);
     }
     catch(...)
     {
@@ -392,9 +387,9 @@ void Interface::registerApplication(Plato::Application* aApplication)
     }
     mExceptionHandler->handleExceptions();
 
-    if(tPerformer)
+    if(mPerformer)
     {
-        tPerformer->setApplication(aApplication);
+        mPerformer->setApplication(aApplication);
     }
 
     try
@@ -427,7 +422,7 @@ void Interface::createStages()
     {
         Plato::StageInputDataMng tStageInputDataMng;
         Plato::Parse::parseStageData(*tStageNode, tStageInputDataMng);
-        Plato::Stage* tNewStage = new Plato::Stage(tStageInputDataMng, mPerformers, mDataLayer->getSharedData());
+        Plato::Stage* tNewStage = new Plato::Stage(tStageInputDataMng, mPerformer, mDataLayer->getSharedData());
         mStages.push_back(tNewStage);
     }
 }
@@ -576,25 +571,9 @@ void Interface::createPerformers()
 
     MPI_Comm_split(mGlobalComm, mLocalCommID, tMyRank, &mLocalComm);
 
-    mPerformers.push_back(new Plato::Performer(mLocalPerformerName, mLocalCommID));
+    mPerformer = std::make_shared<Plato::Performer>(mLocalPerformerName, mLocalCommID);
 
     mExceptionHandler = new Plato::ExceptionHandler(mLocalPerformerName, mLocalComm, mGlobalComm);
-}
-
-/******************************************************************************/
-Plato::Performer* Interface::getPerformer(int aPerformerCommID)
-/******************************************************************************/
-{
-    for(Plato::Performer* tPerformer : mPerformers)
-    {
-        if(tPerformer->myCommID() == aPerformerCommID)
-        {
-            return tPerformer;
-        }
-    }
-    std::stringstream tMessage;
-    tMessage << "Plato::Interface: Performer not defined for CommID " << aPerformerCommID;
-    throw Plato::ParsingException(tMessage.str());
 }
 
 /******************************************************************************/
@@ -748,12 +727,6 @@ Interface::~Interface()
         delete mStages[tStageIndex];
     }
     mStages.clear();
-    const size_t tNumPerformers = mPerformers.size();
-    for(size_t tPerformerIndex = 0u; tPerformerIndex < tNumPerformers; tPerformerIndex++)
-    {
-        delete mPerformers[tPerformerIndex];
-    }
-    mPerformers.clear();
 }
 
 } /* namespace Plato */

@@ -117,7 +117,6 @@ public:
     // accessors
     Plato::Stage* getStage();
     Plato::Stage* getStage(std::string aStageName);
-    Plato::Performer* getPerformer(int aPerformerCommID);
     std::string getLocalPerformerName(){return mLocalPerformerName;}
     int getStageIndex(std::string aStageName) const;
     Plato::InputData getInputData() const;
@@ -150,7 +149,7 @@ private:
 private:
     Plato::DataLayer* mDataLayer = nullptr;
 
-    std::vector<Plato::Performer*> mPerformers;
+    std::shared_ptr<Plato::Performer> mPerformer;
     std::vector<Plato::Stage*> mStages;
 
     Plato::ExceptionHandler* mExceptionHandler;

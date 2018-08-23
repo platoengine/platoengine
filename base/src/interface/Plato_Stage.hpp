@@ -52,6 +52,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace Plato
 {
@@ -68,7 +69,7 @@ class Stage
 {
 public:
     Stage(const Plato::StageInputDataMng & aStageInputData,
-          const std::vector<Plato::Performer*>& aPerformers,
+          const std::shared_ptr<Plato::Performer> aPerformer,
           const std::vector<Plato::SharedData*>& aSharedData);
     ~Stage();
 

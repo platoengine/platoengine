@@ -63,9 +63,9 @@ namespace Plato {
 /******************************************************************************/
 SingleOperation::
 SingleOperation(const Plato::OperationInputDataMng & aOperationDataMng,
-                const std::vector<Plato::Performer*>& aPerformers,
+                const std::shared_ptr<Plato::Performer> aPerformer,
                 const std::vector<Plato::SharedData*>& aSharedData) :
-  Operation(aOperationDataMng, aPerformers, aSharedData)
+  Operation(aOperationDataMng, aPerformer, aSharedData)
 /******************************************************************************/
 {
     const std::string & tPerformerName = aOperationDataMng.getPerformerName();
@@ -86,12 +86,9 @@ SingleOperation(const Plato::OperationInputDataMng & aOperationDataMng,
         this->addArgument(tArgumentName, tSharedDataName, aSharedData, m_outputData);
     }
 
-    for(Plato::Performer* tPerformer : aPerformers)
+    if(aPerformer->myName() == tPerformerName)
     {
-        if(tPerformer->myName() == tPerformerName)
-        {
-            m_performer = tPerformer;
-        }
+        m_performer = aPerformer;
     }
 }
 } // End namespace Plato

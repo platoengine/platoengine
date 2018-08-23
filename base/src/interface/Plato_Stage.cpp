@@ -68,7 +68,7 @@ namespace Plato
 
 /******************************************************************************/
 Stage::Stage(const Plato::StageInputDataMng & aStageInputData,
-             const std::vector<Plato::Performer*>& aPerformers,
+             const std::shared_ptr<Plato::Performer> aPerformer,
              const std::vector<Plato::SharedData*>& aSharedData) :
         m_name(aStageInputData.getStageName()),
         m_operations(),
@@ -125,7 +125,7 @@ Stage::Stage(const Plato::StageInputDataMng & aStageInputData,
     for(int tOperationIndex = 0; tOperationIndex < tNumOperations; tOperationIndex++)
     {
         const Plato::OperationInputDataMng & tOperationDataMng = aStageInputData.getOperationInputData(m_name, tOperationIndex);
-        m_operations.push_back(opFactory.create(tOperationDataMng, aPerformers, aSharedData));
+        m_operations.push_back(opFactory.create(tOperationDataMng, aPerformer, aSharedData));
     }
 
 }

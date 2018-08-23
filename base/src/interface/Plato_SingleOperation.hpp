@@ -70,7 +70,7 @@ class SingleOperation : public Operation
 {
 public:
     SingleOperation(const Plato::OperationInputDataMng & aOperationDataMng,
-                    const std::vector<Plato::Performer*>& aPerformers,
+                    const std::shared_ptr<Plato::Performer> aPerformer,
                     const std::vector<Plato::SharedData*>& aSharedData);
 };
 

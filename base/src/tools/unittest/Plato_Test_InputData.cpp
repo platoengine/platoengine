@@ -250,6 +250,7 @@ namespace PlatoTestInputData
 
     Plato::Parser* parser = new Plato::PugiParser();
     Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
 
     auto sd = inputData.get<Plato::InputData>("SharedData");
     EXPECT_EQ( sd.get<std::string>("Name"),      "Topology"    );
@@ -279,6 +280,7 @@ namespace PlatoTestInputData
 
     Plato::Parser* parser = new Plato::PugiParser();
     Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
 
     auto st = inputData.get<Plato::InputData>("Stage");
     auto op = st.get<Plato::InputData>("Operation");
@@ -313,6 +315,7 @@ namespace PlatoTestInputData
 
     Plato::Parser* parser = new Plato::PugiParser();
     Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
 
     auto st = inputData.get<Plato::InputData>("Stage");
     auto in = st.get<Plato::InputData>("Input");

@@ -63,7 +63,7 @@ namespace Plato {
 /******************************************************************************/
 Operation::
 Operation(const ::Plato::OperationInputDataMng & aOperationDataMng,
-              const std::vector<::Plato::Performer*>& aPerformers,
+              const std::shared_ptr<::Plato::Performer> aPerformer,
               const std::vector<::Plato::SharedData*>& aSharedData) :
         m_performer(nullptr),
         m_operationName(),

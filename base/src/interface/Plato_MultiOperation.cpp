@@ -63,9 +63,9 @@ namespace Plato {
 /******************************************************************************/
 MultiOperation::
 MultiOperation(const Plato::OperationInputDataMng & aOperationDataMng,
-               const std::vector<Plato::Performer*>& aPerformers,
+               const std::shared_ptr<Plato::Performer> aPerformer,
                const std::vector<Plato::SharedData*>& aSharedData) :
-  Operation(aOperationDataMng, aPerformers, aSharedData)
+  Operation(aOperationDataMng, aPerformer, aSharedData)
 /******************************************************************************/
 {
     // collect arrays of all input and output SharedData
@@ -120,12 +120,9 @@ MultiOperation(const Plato::OperationInputDataMng & aOperationDataMng,
     for(int tSubOperationIndex = 0; tSubOperationIndex < tNumSubOperations; tSubOperationIndex++)
     {
         const std::string & tPerformerName = aOperationDataMng.getPerformerName(tSubOperationIndex);
-        for(Plato::Performer* tPerformer : aPerformers)
+        if(aPerformer->myName() == tPerformerName)
         {
-            if(tPerformer->myName() == tPerformerName)
-            {
-                m_performer = tPerformer;
-            }
+            m_performer = aPerformer;
         }
         if(m_performer != nullptr)
         {

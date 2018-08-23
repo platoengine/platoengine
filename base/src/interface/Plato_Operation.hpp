@@ -70,7 +70,7 @@ class Operation
 public:
     virtual ~Operation();
     Operation(const ::Plato::OperationInputDataMng & aOperationDataMng,
-              const std::vector<::Plato::Performer*>& aPerformers,
+              const std::shared_ptr<::Plato::Performer> aPerformer,
               const std::vector<::Plato::SharedData*>& aSharedData);
 
     virtual void sendInput();
@@ -116,7 +116,7 @@ protected:
     };
     std::map<std::string,Plato::SharedData*> m_parameters;
 
-    Performer* m_performer;
+    std::shared_ptr<Performer> m_performer;
     std::string m_operationName;
 
     std::vector<Plato::SharedData*> m_inputData;

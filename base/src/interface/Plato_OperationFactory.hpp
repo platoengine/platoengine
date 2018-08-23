@@ -52,6 +52,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 #include <vector>
 
 namespace Plato
@@ -70,7 +71,7 @@ class OperationFactory
 public:
     Operation*
     create(const Plato::OperationInputDataMng & aOperationDataMng,
-           const std::vector<Plato::Performer*>& aPerformers,
+           const std::shared_ptr<Plato::Performer> aPerformer,
            const std::vector<Plato::SharedData*>& aSharedData);
 };
 

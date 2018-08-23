@@ -70,7 +70,7 @@ namespace Plato {
 Operation*
 OperationFactory::create(
   const Plato::OperationInputDataMng & aOperationDataMng,
-  const std::vector<Plato::Performer*>& aPerformers,
+  const std::shared_ptr<Plato::Performer> aPerformer,
   const std::vector<Plato::SharedData*>& aSharedData)
 /******************************************************************************/
 {
@@ -81,11 +81,11 @@ OperationFactory::create(
       bool tHasSubOperations = aOperationDataMng.hasSubOperations();
       if(tHasSubOperations == true)
       {
-        return new MultiOperation(aOperationDataMng, aPerformers, aSharedData);
+        return new MultiOperation(aOperationDataMng, aPerformer, aSharedData);
       }
       else
       {
-        return new SingleOperation(aOperationDataMng, aPerformers, aSharedData);
+        return new SingleOperation(aOperationDataMng, aPerformer, aSharedData);
       }
     }
     return nullptr;
