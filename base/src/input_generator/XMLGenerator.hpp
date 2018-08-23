@@ -66,6 +66,11 @@ struct Load
   std::string scale; // magnitude
   std::string load_id;
 };
+struct LoadCase
+{
+    std::vector<Load> loads;
+    std::string id;
+};
 struct BC
 {
   std::string app_type; // nodeset or sideset
@@ -91,10 +96,12 @@ struct Objective
   std::string salinas_gdsw_tolerance;
   std::string complex_error_measure;
   std::string convert_to_tet10;
+  std::string multi_load_case;
   std::vector<std::string> frf_match_nodesets;
   std::vector<std::string> output_for_plotting;
-  std::vector<std::string> load_ids;
+  std::vector<std::string> load_case_ids;
   std::vector<std::string> bc_ids;
+  std::vector<std::string> load_case_weights;
 };
 struct Constraint
 {
@@ -178,7 +185,7 @@ struct InputData
   std::vector<std::string> fixed_block_ids;
   std::vector<std::string> fixed_sideset_ids;
   std::vector<std::string> fixed_nodeset_ids;
-  std::vector<Load> loads;
+  std::vector<LoadCase> load_cases;
   std::vector<BC> bcs;
 };
 
