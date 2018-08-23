@@ -4512,7 +4512,7 @@ bool XMLGenerator::generateInterfaceXML()
     pugi::xml_node performer_node = doc.append_child("Performer");
     addChild(performer_node, "Name", "PlatoMain");
     addChild(performer_node, "Code", "PlatoMain");
-    addChild(performer_node, "CommID", "0");
+    addChild(performer_node, "PerformerID", "0");
 
     pugi::xml_node sd_node;
     char tmp_buf[200];
@@ -4524,7 +4524,7 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(performer_node, "Name", m_InputData.objectives[i].performer_name);
         addChild(performer_node, "Code", m_InputData.objectives[i].code_name);
         sprintf(tmp_buf, "%d", (int)(i+1));
-        addChild(performer_node, "CommID", tmp_buf);
+        addChild(performer_node, "PerformerID", tmp_buf);
     }
 
     //////////////////////////////////////////////////
