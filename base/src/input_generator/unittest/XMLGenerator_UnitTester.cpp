@@ -155,7 +155,7 @@ void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
     m_InputData.bcs.clear();
-    m_InputData.loads.clear();
+    m_InputData.load_cases.clear();
     m_InputData.objectives.clear();
     m_InputData.constraints.clear();
     m_InputData.materials.clear();
@@ -242,73 +242,73 @@ std::string XMLGenerator_UnitTester::getBCApplicationDOF(const std::string &aBCI
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadType(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadType(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].type;
+            return m_InputData.load_cases[j].loads[aLoadIndex].type;
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadApplicationType(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadApplicationType(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].app_type;
+            return m_InputData.load_cases[j].loads[aLoadIndex].app_type;
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadApplicationID(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadApplicationID(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].app_id;
+            return m_InputData.load_cases[j].loads[aLoadIndex].app_id;
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadDirectionX(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadDirectionX(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].x;
+            return m_InputData.load_cases[j].loads[aLoadIndex].x;
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadDirectionY(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadDirectionY(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].y;
+            return m_InputData.load_cases[j].loads[aLoadIndex].y;
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadDirectionZ(const std::string &aLoadID)
+std::string XMLGenerator_UnitTester::getLoadDirectionZ(const std::string &aLoadID, const int &aLoadIndex)
 {
-    for(size_t j=0; j<m_InputData.loads.size(); ++j)
+    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
     {
-        if(m_InputData.loads[j].load_id == aLoadID)
+        if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.loads[j].z;
+            return m_InputData.load_cases[j].loads[aLoadIndex].z;
         }
     }
     return "";

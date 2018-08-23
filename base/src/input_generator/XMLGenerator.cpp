@@ -325,14 +325,46 @@ bool XMLGenerator::generateSalinasInputDecks()
             FILE *fp=fopen(buf, "w");
             if(fp)
             {
-                fprintf(fp, "SOLUTION\n");
-                fprintf(fp, "  case '%s'\n", cur_obj.name.c_str());
-                fprintf(fp, "  topology_optimization\n");
-                if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                if(cur_obj.multi_load_case == "true")
                 {
-                    fprintf(fp, "  solver gdsw\n");
+                    fprintf(fp, "SOLUTION\n");
+                    for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
+                    {
+                        bool found = false;
+                        LoadCase cur_load_case;
+                        std::string cur_load_id = cur_obj.load_case_ids[k];
+                        for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                        {
+                            if(cur_load_id == m_InputData.load_cases[qq].id)
+                            {
+                                found = true;
+                                cur_load_case = m_InputData.load_cases[qq];
+                            }
+                        }
+                        if(found)
+                        {
+                            fprintf(fp, "  case '%s'\n", cur_load_case.id.c_str());
+                            fprintf(fp, "    topology_optimization\n");
+                            fprintf(fp, "    load=%s\n", cur_load_case.id.c_str());
+                        }
+                    }
+                    if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                    {
+                        fprintf(fp, "  solver gdsw\n");
+                    }
+                    fprintf(fp, "END\n");
                 }
-                fprintf(fp, "END\n");
+                else
+                {
+                    fprintf(fp, "SOLUTION\n");
+                    fprintf(fp, "  case '%s'\n", cur_obj.name.c_str());
+                    fprintf(fp, "  topology_optimization\n");
+                    if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                    {
+                        fprintf(fp, "  solver gdsw\n");
+                    }
+                    fprintf(fp, "END\n");
+                }
                 if(cur_obj.salinas_wtmass_scale_factor.length() > 0)
                 {
                     fprintf(fp, "PARAMETERS\n");
@@ -551,58 +583,127 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "  surface_area_constraint_value = %s\n", m_InputData.constraints[0].surface_area.c_str());
                     fprintf(fp, "  surface_area_ssid = %s\n", m_InputData.constraints[0].surface_area_ssid.c_str());
                 }
+                if(cur_obj.multi_load_case == "true")
+                {
+                    fprintf(fp, "  load_case_weights = ");
+                    for(size_t gg=0; gg<cur_obj.load_case_weights.size(); ++gg)
+                    {
+                        fprintf(fp, "%s ", cur_obj.load_case_weights[gg].c_str());
+                    }
+                    fprintf(fp, "\n");
+                }
                 fprintf(fp, "END\n");
                 fprintf(fp, "FILE\n");
                 fprintf(fp, "  geometry_file '%s.gen'\n", m_InputData.mesh_name.c_str());
                 fprintf(fp, "END\n");
-                fprintf(fp, "LOADS\n");
-                for(size_t k=0; k<cur_obj.load_ids.size(); ++k)
+
+                // Do the load/loads block(s)
+                if(cur_obj.multi_load_case == "true")
                 {
-                    bool found = false;
-                    Load cur_load;
-                    std::string cur_load_id = cur_obj.load_ids[k];
-                    for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
+                    for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
                     {
-                        if(cur_load_id == m_InputData.loads[qq].load_id)
+                        bool found = false;
+                        LoadCase cur_load_case;
+                        std::string cur_load_id = cur_obj.load_case_ids[k];
+                        for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                         {
-                            found = true;
-                            cur_load = m_InputData.loads[qq];
+                            if(cur_load_id == m_InputData.load_cases[qq].id)
+                            {
+                                found = true;
+                                cur_load_case = m_InputData.load_cases[qq];
+                            }
                         }
-                    }
-                    if(found)
-                    {
-                        if(cur_load.type == "acceleration")
+                        if(found)
                         {
-                            fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
-                                    cur_load.x.c_str(),
-                                    cur_load.y.c_str(),
-                                    cur_load.z.c_str());
-                        }
-                        else if(cur_load.type == "pressure")
-                        {
-                            fprintf(fp, "  %s %s %s %s\n",
-                                    cur_load.app_type.c_str(),
-                                    cur_load.app_id.c_str(),
-                                    cur_load.type.c_str(),
-                                    cur_load.scale.c_str());
-                        }
-                        else
-                        {
-                            fprintf(fp, "  %s %s %s %s %s %s scale 1.0\n",
-                                    cur_load.app_type.c_str(),
-                                    cur_load.app_id.c_str(),
-                                    cur_load.type.c_str(),
-                                    cur_load.x.c_str(),
-                                    cur_load.y.c_str(),
-                                    cur_load.z.c_str());
+                            fprintf(fp, "LOAD=%s\n", cur_load_case.id.c_str());
+                            for(size_t d=0; d<cur_load_case.loads.size(); d++)
+                            {
+                                Load cur_load = cur_load_case.loads[d];
+                                if(cur_load.type == "acceleration")
+                                {
+                                    fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
+                                            cur_load.x.c_str(),
+                                            cur_load.y.c_str(),
+                                            cur_load.z.c_str());
+                                }
+                                else if(cur_load.type == "pressure")
+                                {
+                                    fprintf(fp, "  %s %s %s %s\n",
+                                            cur_load.app_type.c_str(),
+                                            cur_load.app_id.c_str(),
+                                            cur_load.type.c_str(),
+                                            cur_load.scale.c_str());
+                                }
+                                else
+                                {
+                                    fprintf(fp, "  %s %s %s %s %s %s scale 1.0\n",
+                                            cur_load.app_type.c_str(),
+                                            cur_load.app_id.c_str(),
+                                            cur_load.type.c_str(),
+                                            cur_load.x.c_str(),
+                                            cur_load.y.c_str(),
+                                            cur_load.z.c_str());
+                                }
+                            }
+                            fprintf(fp, "END\n");
                         }
                     }
                 }
-                if(frf)
+                else
                 {
-                    fprintf(fp, "  function=1\n");
+                    fprintf(fp, "LOADS\n");
+                    for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
+                    {
+                        bool found = false;
+                        LoadCase cur_load_case;
+                        std::string cur_load_id = cur_obj.load_case_ids[k];
+                        for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                        {
+                            if(cur_load_id == m_InputData.load_cases[qq].id)
+                            {
+                                found = true;
+                                cur_load_case = m_InputData.load_cases[qq];
+                            }
+                        }
+                        if(found)
+                        {
+                            for(size_t d=0; d<cur_load_case.loads.size(); d++)
+                            {
+                                Load cur_load = cur_load_case.loads[d];
+                                if(cur_load.type == "acceleration")
+                                {
+                                    fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
+                                            cur_load.x.c_str(),
+                                            cur_load.y.c_str(),
+                                            cur_load.z.c_str());
+                                }
+                                else if(cur_load.type == "pressure")
+                                {
+                                    fprintf(fp, "  %s %s %s %s\n",
+                                            cur_load.app_type.c_str(),
+                                            cur_load.app_id.c_str(),
+                                            cur_load.type.c_str(),
+                                            cur_load.scale.c_str());
+                                }
+                                else
+                                {
+                                    fprintf(fp, "  %s %s %s %s %s %s scale 1.0\n",
+                                            cur_load.app_type.c_str(),
+                                            cur_load.app_id.c_str(),
+                                            cur_load.type.c_str(),
+                                            cur_load.x.c_str(),
+                                            cur_load.y.c_str(),
+                                            cur_load.z.c_str());
+                                }
+                            }
+                        }
+                    }
+                    if(frf)
+                    {
+                        fprintf(fp, "  function=1\n");
+                    }
+                    fprintf(fp, "END\n");
                 }
-                fprintf(fp, "END\n");
                 fprintf(fp, "BOUNDARY\n");
                 for(size_t k=0; k<cur_obj.bc_ids.size(); ++k)
                 {
@@ -786,40 +887,44 @@ bool XMLGenerator::generateAlbanyInputDecks()
             // Neumann BCs
             n3 = n2.append_child("ParameterList");
             n3.append_attribute("name") = "Neumann BCs";
-            for(size_t j=0; j<cur_obj.load_ids.size(); j++)
+            for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
             {
                 bool found = false;
-                Load cur_load;
-                std::string cur_load_id = cur_obj.load_ids[j];
-                for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
+                LoadCase cur_load_case;
+                std::string cur_load_id = cur_obj.load_case_ids[j];
+                for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                 {
-                    if(cur_load_id == m_InputData.loads[qq].load_id)
+                    if(cur_load_id == m_InputData.load_cases[qq].id)
                     {
                         found = true;
-                        cur_load = m_InputData.loads[qq];
+                        cur_load_case = m_InputData.load_cases[qq];
                     }
                 }
                 if(found)
                 {
-                    if(!cur_obj.type.compare("maximize stiffness"))
+                    for(size_t e=0; e<cur_load_case.loads.size(); e++)
                     {
-                        sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
-                                cur_load.app_id.c_str());
-                        char tmp_buf[200];
-                        double x = std::atof(cur_load.x.c_str());
-                        double y = std::atof(cur_load.y.c_str());
-                        double z = std::atof(cur_load.z.c_str());
-                        double scale = std::atof(cur_load.scale.c_str());
-                        sprintf(tmp_buf, "{%lf,%lf,%lf}", x*scale, y*scale, z*scale);
-                        addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
-                    }
-                    else if(!cur_obj.type.compare("maximize heat conduction"))
-                    {
-                        sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
-                                cur_load.app_id.c_str());
-                        char tmp_buf[200];
-                        sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
-                        addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                        Load cur_load = cur_load_case.loads[e];
+                        if(!cur_obj.type.compare("maximize stiffness"))
+                        {
+                            sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
+                                    cur_load.app_id.c_str());
+                            char tmp_buf[200];
+                            double x = std::atof(cur_load.x.c_str());
+                            double y = std::atof(cur_load.y.c_str());
+                            double z = std::atof(cur_load.z.c_str());
+                            double scale = std::atof(cur_load.scale.c_str());
+                            sprintf(tmp_buf, "{%lf,%lf,%lf}", x*scale, y*scale, z*scale);
+                            addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                        }
+                        else if(!cur_obj.type.compare("maximize heat conduction"))
+                        {
+                            sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
+                                    cur_load.app_id.c_str());
+                            char tmp_buf[200];
+                            sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
+                            addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                        }
                     }
                 }
             }
@@ -1216,48 +1321,52 @@ bool XMLGenerator::generateLightMPInputDecks()
                     }
                 }
             }
-            for(size_t j=0; j<cur_obj.load_ids.size(); ++j)
+            for(size_t j=0; j<cur_obj.load_case_ids.size(); ++j)
             {
                 bool found = false;
-                Load cur_load;
-                std::string cur_load_id = cur_obj.load_ids[j];
-                for(size_t qq=0; qq<m_InputData.loads.size(); ++qq)
+                LoadCase cur_load_case;
+                std::string cur_load_id = cur_obj.load_case_ids[j];
+                for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                 {
-                    if(cur_load_id == m_InputData.loads[qq].load_id)
+                    if(cur_load_id == m_InputData.load_cases[qq].id)
                     {
                         found = true;
-                        cur_load = m_InputData.loads[qq];
+                        cur_load_case = m_InputData.load_cases[qq];
                     }
                 }
                 if(found)
                 {
-                    node4 = node3.append_child("traction");
-                    node5 = node4.append_child("nodeset");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_load.app_id.c_str());
-                    node5 = node4.append_child("direction");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    double x = std::atof(cur_load.x.c_str());
-                    double y = std::atof(cur_load.y.c_str());
-                    double z = std::atof(cur_load.z.c_str());
-                    if(x > y && x > z)
+                    for(size_t e=0; e<cur_load_case.loads.size(); ++e)
                     {
-                        node6.set_value("x");
+                        Load cur_load = cur_load_case.loads[e];
+                        node4 = node3.append_child("traction");
+                        node5 = node4.append_child("nodeset");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_load.app_id.c_str());
+                        node5 = node4.append_child("direction");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        double x = std::atof(cur_load.x.c_str());
+                        double y = std::atof(cur_load.y.c_str());
+                        double z = std::atof(cur_load.z.c_str());
+                        if(x > y && x > z)
+                        {
+                            node6.set_value("x");
+                        }
+                        else if(y > x && y > z)
+                        {
+                            node6.set_value("y");
+                        }
+                        else if(z > x && z > y)
+                        {
+                            node6.set_value("z");
+                        }
+                        node5 = node4.append_child("value");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value(cur_load.scale.c_str());
+                        node5 = node4.append_child("scale");
+                        node6 = node5.append_child(pugi::node_pcdata);
+                        node6.set_value("1.0");
                     }
-                    else if(y > x && y > z)
-                    {
-                        node6.set_value("y");
-                    }
-                    else if(z > x && z > y)
-                    {
-                        node6.set_value("z");
-                    }
-                    node5 = node4.append_child("value");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value(cur_load.scale.c_str());
-                    node5 = node4.append_child("scale");
-                    node6 = node5.append_child(pugi::node_pcdata);
-                    node6.set_value("1.0");
                 }
             }
 
@@ -1404,7 +1513,19 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             for(size_t j=2; j<tokens.size(); ++j)
                             {
-                                new_objective.load_ids.push_back(tokens[j]);
+                                new_objective.load_case_ids.push_back(tokens[j]);
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"load","case","weights"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"load case weights\" keywords.\n";
+                                return false;
+                            }
+                            for(size_t j=3; j<tokens.size(); ++j)
+                            {
+                                new_objective.load_case_weights.push_back(tokens[j]);
                             }
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"code"}, tStringValue))
@@ -1468,6 +1589,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.weight = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"multi","load","case"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"multi load case\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.multi_load_case = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"frf","match","nodesets"}, tStringValue))
                         {
@@ -1804,7 +1934,22 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.  Must be traction, heat flux, or force.\n";
                                 return false;
                             }
-                            m_InputData.loads.push_back(new_load);
+                            bool found_load_case = false;
+                            for(size_t h=0; h<m_InputData.load_cases.size() && !found_load_case; ++h)
+                            {
+                                if(m_InputData.load_cases[h].id == new_load.load_id)
+                                {
+                                    m_InputData.load_cases[h].loads.push_back(new_load);
+                                    found_load_case = true;
+                                }
+                            }
+                            if(!found_load_case)
+                            {
+                                LoadCase new_load_case;
+                                new_load_case.id = new_load.load_id;
+                                new_load_case.loads.push_back(new_load);
+                                m_InputData.load_cases.push_back(new_load_case);
+                            }
                         }
                     }
                 }

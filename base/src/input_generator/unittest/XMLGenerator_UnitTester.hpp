@@ -99,12 +99,12 @@ public:
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
-    std::string getLoadType(const std::string &aLoadID);
-    std::string getLoadApplicationType(const std::string &aLoadID);
-    std::string getLoadApplicationID(const std::string &aLoadID);
-    std::string getLoadDirectionX(const std::string &aLoadID);
-    std::string getLoadDirectionY(const std::string &aLoadID);
-    std::string getLoadDirectionZ(const std::string &aLoadID);
+    std::string getLoadType(const std::string &aLoadID, const int &aLoadIndex);
+    std::string getLoadApplicationType(const std::string &aLoadID, const int &aLoadIndex);
+    std::string getLoadApplicationID(const std::string &aLoadID, const int &aLoadIndex);
+    std::string getLoadDirectionX(const std::string &aLoadID, const int &aLoadIndex);
+    std::string getLoadDirectionY(const std::string &aLoadID, const int &aLoadIndex);
+    std::string getLoadDirectionZ(const std::string &aLoadID, const int &aLoadIndex);
     std::string getMatBoxMinCoords() {return m_InputData.levelset_material_box_min;}
     std::string getMatBoxMaxCoords() {return m_InputData.levelset_material_box_max;}
     std::string getInitDensityValue() {return m_InputData.initial_density_value;}

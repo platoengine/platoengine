@@ -1558,12 +1558,12 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34"), "traction");
-    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34"), "3");
-    EXPECT_EQ(tester.getLoadDirectionX("34"), "990");
-    EXPECT_EQ(tester.getLoadDirectionY("34"), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ("34"), "1000");
+    EXPECT_EQ(tester.getLoadType("34",0), "traction");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "3");
+    EXPECT_EQ(tester.getLoadDirectionX("34",0), "990");
+    EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("34",0), "1000");
 
     // Pressure
     // check number of parameters
@@ -1606,9 +1606,9 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34"), "pressure");
-    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34"), "3");
+    EXPECT_EQ(tester.getLoadType("34",0), "pressure");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "3");
 
     // Heat Flux
     // check number of parameters
@@ -1641,9 +1641,9 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34"), "heat");
-    EXPECT_EQ(tester.getLoadApplicationType("34"), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34"), "4");
+    EXPECT_EQ(tester.getLoadType("34",0), "heat");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "4");
 
     // Force
     // check number of parameters
@@ -1686,12 +1686,12 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34"), "force");
-    EXPECT_EQ(tester.getLoadApplicationType("34"), "nodeset");
-    EXPECT_EQ(tester.getLoadApplicationID("34"), "2");
-    EXPECT_EQ(tester.getLoadDirectionX("34"), "222");
-    EXPECT_EQ(tester.getLoadDirectionY("34"), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ("34"), "0");
+    EXPECT_EQ(tester.getLoadType("34",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
+    EXPECT_EQ(tester.getLoadDirectionX("34",0), "222");
+    EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("34",0), "0");
 
     // Test frequency block
     // check for scale keyword
