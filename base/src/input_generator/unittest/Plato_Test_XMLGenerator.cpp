@@ -1494,7 +1494,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), false);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
     stringInput =
             "begin boundary conditions\n"
             "fixed displacement nodeset 1 truck bc id 33\n"
