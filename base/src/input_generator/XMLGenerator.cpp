@@ -858,15 +858,21 @@ bool XMLGenerator::generateAlbanyInputDecks()
                     {
                         if(cur_bc.dof.empty())
                         {
-                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                    cur_bc.app_id.c_str(), "X");
-                            addNTVParameter(n3, string_var, "double", "0.0");
-                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                    cur_bc.app_id.c_str(), "Y");
-                            addNTVParameter(n3, string_var, "double", "0.0");
-                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                    cur_bc.app_id.c_str(), "Z");
-                            addNTVParameter(n3, string_var, "double", "0.0");
+                            // applying fixed boundary conditions to "sideset"s is currently supported
+                            if(cur_bc.app_type != "nodeset")
+                            {
+                                std::cout << "ERROR:XMLGenerator:generateAlbanyInputDecks: "
+                                          << "Albany boundary conditions can only be applied to \"nodeset\" types.\n";
+                            }
+                            else
+                            {
+                                sprintf(string_var, "DBC on NS nodelist_%s for DOF %s", cur_bc.app_id.c_str(), "X");
+                                addNTVParameter(n3, string_var, "double", "0.0");
+                                sprintf(string_var, "DBC on NS nodelist_%s for DOF %s", cur_bc.app_id.c_str(), "Y");
+                                addNTVParameter(n3, string_var, "double", "0.0");
+                                sprintf(string_var, "DBC on NS nodelist_%s for DOF %s", cur_bc.app_id.c_str(), "Z");
+                                addNTVParameter(n3, string_var, "double", "0.0");
+                            }
                         }
                         else
                         {
@@ -2024,15 +2030,17 @@ bool XMLGenerator::parseBCs(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
                                 return false;
                             }
-                            j++;  // "nodeset"
+
+                            j++;  // "nodeset" or "sideset"
                             std::string cur_token2 = tokens[j];
-                            if(cur_token2 != "nodeset")
+                            if(cur_token2 != "nodeset" && cur_token2 != "sideset")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" types at the moment.\n";
+                                std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
                                 return false;
                             }
                             new_bc.app_type = cur_token2;
-                            j++;  // nodeset id
+
+                            j++;  // nodeset/sideset id
                             std::string cur_token3 = tokens[j];
                             new_bc.app_id = cur_token3;
                             j++;
