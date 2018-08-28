@@ -94,6 +94,18 @@ inline void shape_parameters(const ScalarType & aMinValue,
     aBeta = (tMeanStd * (static_cast<ScalarType>(1) - tMeanStd) / tVarianceStd - static_cast<ScalarType>(1)) - aAlpha;
 }
 
+template<typename ScalarType, typename OrdinalType>
+inline void make_uniform_sample(Plato::Vector<ScalarType>& aInitialGuess)
+{
+    assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
+    const OrdinalType tNumSample = aInitialGuess.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumSample; tIndex++)
+    {
+        ScalarType tValue = (1. / static_cast<ScalarType>(tNumSample + 1u));
+        aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
+    }
+}
+
 } // namespace Plato
 
 #endif /* PLATO_STATISTICSUTILS_HPP_ */

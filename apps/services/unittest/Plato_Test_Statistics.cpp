@@ -49,6 +49,7 @@
 #include "gtest/gtest.h"
 
 #include <numeric>
+#include <cmath>
 
 #include "Plato_DataFactory.hpp"
 #include "Plato_Diagnostics.hpp"
@@ -65,6 +66,8 @@
 #include "Plato_AugmentedLagrangianStageMng.hpp"
 #include "Plato_KelleySachsAugmentedLagrangian.hpp"
 #include "Plato_StandardVectorReductionOperations.hpp"
+#include "Plato_StatisticsUtils.hpp"
+#include "Plato_SolveUncertaintyProblem.hpp"
 
 #include "Plato_UnitTestUtils.hpp"
 
@@ -643,10 +646,10 @@ TEST(PlatoTest, SromOptimizationProblem)
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory =
             std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumDuals = 1;
-    const size_t tNumControls = 4;
+    const size_t tNumSamples = 4;
     const size_t tNumControlVectors = 2;
     tDataFactory->allocateDual(tNumDuals);
-    tDataFactory->allocateControl(tNumControls, tNumControlVectors);
+    tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
     // ********* ALLOCATE BETA DISTRIBUTION *********
     const double tMean = 90;
@@ -674,10 +677,10 @@ TEST(PlatoTest, SromOptimizationProblem)
             std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
 
     // ********* SET INTIAL GUESS FOR VECTOR OF SAMPLES *********
-    Plato::StandardVector<double> tVector(tNumControls);
-    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    Plato::StandardVector<double> tVector(tNumSamples);
+    for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        double tValue = (1. / static_cast<double>(tNumControls + 1u));
+        double tValue = (1. / static_cast<double>(tNumSamples + 1u));
         tVector[tIndex] = static_cast<double>(tIndex + 1u) * tValue;
     }
     size_t tVectorIndex = 0;
@@ -708,7 +711,7 @@ TEST(PlatoTest, SromOptimizationProblem)
     double tGoldValue = -0.00014696838926697708;
     EXPECT_NEAR(tGoldValue, tConstraintValues(0,0), tTolerance);
 
-    Plato::StandardMultiVector<double> tGoldControl(tNumControlVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGoldControl(tNumControlVectors, tNumSamples);
     // GOLD SAMPLES
     tGoldControl(0,0) = 0.16377870487690938;
     tGoldControl(0,1) = 0.409813078171542;
@@ -720,6 +723,49 @@ TEST(PlatoTest, SromOptimizationProblem)
     tGoldControl(1,2) = 0.25018122221660277;
     tGoldControl(1,3) = 0.24988583791340019;
     PlatoTest::checkMultiVectorData(tDataMng->getCurrentControl(), tGoldControl);
+}
+
+TEST(PlatoTest, solveUncertaintyProblem)
+{
+    // pose input distrubtion
+    Plato::UncertaintyInputStruct<double, size_t> input_;
+    input_.distribution = Plato::DistrubtionName::type_t::beta;
+    input_.mean = 1.0;
+    input_.lower_bound = 0.0;
+    input_.upper_bound = 2.0;
+    input_.variance = 0.5;
+    input_.num_samples = 5;
+
+    // solve
+    std::vector<Plato::UncertaintyOutputStruct<double>> output_1;
+    Plato::solve_uncertainty(input_, output_1);
+    // check
+    EXPECT_EQ(output_1.size(), input_.num_samples);
+
+    // pose problem with known solution
+    input_.distribution = Plato::DistrubtionName::type_t::beta;
+    input_.mean = 90;
+    input_.upper_bound = 135;
+    input_.lower_bound = 67.5;
+    input_.variance = 135;
+    input_.num_samples = 4;
+    input_.max_num_distribution_moments = 4;
+
+    // solve
+    std::vector<Plato::UncertaintyOutputStruct<double>> output_2;
+    Plato::solve_uncertainty(input_, output_2);
+    // check
+    ASSERT_EQ(output_2.size(), input_.num_samples);
+    // GOLD SAMPLES
+    EXPECT_FLOAT_EQ(output_2[0].sample_value, 0.16377870487690938);
+    EXPECT_FLOAT_EQ(output_2[1].sample_value, 0.409813078171542);
+    EXPECT_FLOAT_EQ(output_2[2].sample_value, 0.56692565516265081);
+    EXPECT_FLOAT_EQ(output_2[3].sample_value, 0.28805773602398665);
+    // GOLD PROBABILITIES
+    EXPECT_FLOAT_EQ(output_2[0].sample_weight, 0.24979311097918996);
+    EXPECT_FLOAT_EQ(output_2[1].sample_weight, 0.24999286050154013);
+    EXPECT_FLOAT_EQ(output_2[2].sample_weight, 0.25018122221660277);
+    EXPECT_FLOAT_EQ(output_2[3].sample_weight, 0.24988583791340019);
 }
 
 } //namespace PlatoTest

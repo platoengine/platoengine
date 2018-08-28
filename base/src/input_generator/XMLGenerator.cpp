@@ -1966,6 +1966,147 @@ bool XMLGenerator::parseLoads(std::istream &fin)
 }
 
 /******************************************************************************/
+bool XMLGenerator::parseUncertainties(std::istream &fin)
+/******************************************************************************/
+{
+    std::vector<std::string> tInputStringList;
+    char buf[MAX_CHARS_PER_LINE];
+    std::vector<std::string> tokens;
+    std::string tStringValue;
+
+    // read each line of the file
+    while(!fin.eof())
+    {
+        // read an entire line into memory
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+        tokens.clear();
+        parseTokens(buf, tokens);
+
+        // process the tokens
+        if(tokens.size() == 0)
+        {
+            continue;
+        }
+
+        for(size_t j = 0; j < tokens.size(); ++j)
+        {
+            tokens[j] = toLower(tokens[j]);
+        }
+
+        if(parseSingleValue(tokens, tInputStringList ={"begin","uncertainties"}, tStringValue))
+        {
+            while (!fin.eof())
+            {
+                tokens.clear();
+                fin.getline(buf, MAX_CHARS_PER_LINE);
+                parseTokens(buf, tokens);
+                // process the tokens
+                if(tokens.size() == 0)
+                {
+                    continue;
+                }
+
+                for(size_t j=0; j<tokens.size(); ++j)
+                {
+                    tokens[j] = toLower(tokens[j]);
+                }
+
+                if(parseSingleValue(tokens, tInputStringList ={"end","uncertainties"}, tStringValue))
+                {
+                    break;
+                }
+
+                Uncertainty new_uncertainty;
+
+                // load INTEGER angle variation SCALAR distribution STRING mean SCALAR upper SCALAR lower SCALAR standard deviation SCALAR num samples INTEGER
+                // 0    1       2     3         4      5            6      7    8      9     10     11    12     13       14        15     16  17      18
+                if(tokens.size() != 19)
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " Wrong number of parameters specified.\n";
+                    return false;
+                }
+
+                // load INTEGER
+                if(tokens[0] != "load")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"load\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.load_id = tokens[1];
+
+                // angle variation SCALAR
+                if(tokens[2] != "angle" || tokens[3] != "variation")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"angle variation\" keywords not specified.\n";
+                    return false;
+                }
+                new_uncertainty.load_angular_variation_plane = tokens[4];
+
+                // distribution STRING
+                if(tokens[5] != "distribution")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"distribution\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.distribution = tokens[6];
+
+                // mean SCALAR
+                if(tokens[7] != "mean")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"mean\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.mean = tokens[8];
+
+                // upper SCALAR
+                if(tokens[9] != "upper")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"upper\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.upper = tokens[10];
+
+                // lower SCALAR
+                if(tokens[11] != "lower")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"lower\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.lower = tokens[12];
+
+                // standard deviation SCALAR
+                if(tokens[13] != "standard" || tokens[14] != "deviation")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"standard deviation\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.standard_deviation = tokens[15];
+
+                // num samples INTEGER
+                if(tokens[16] != "num" || tokens[17] != "samples")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"num samples\" keyword not specified.\n";
+                    return false;
+                }
+                new_uncertainty.num_samples = tokens[18];
+
+                m_InputData.uncertainties.push_back(new_uncertainty);
+            }
+        }
+    }
+    return true;
+}
+
+/******************************************************************************/
 bool XMLGenerator::parseBCs(std::istream &fin)
 /******************************************************************************/
 {
@@ -3229,7 +3370,9 @@ bool XMLGenerator::parseFile()
     fin.open(m_InputFilename.c_str()); // open a file
     parseCodePaths(fin);
     fin.close();
-
+    fin.open(m_InputFilename.c_str()); // open a file
+    parseUncertainties(fin);
+    fin.close();
 
     return true;
 }

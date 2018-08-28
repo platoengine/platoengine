@@ -116,6 +116,8 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_KokkosVector.hpp
                         Plato_KokkosReductionOperations.hpp
                         Plato_DeviceOptimalityCriteriaUpdate.hpp
+                        Plato_SolveUncertaintyProblem.hpp
+                        Plato_DistributionFactory.hpp
                         )
                         
 IF( ENABLE_ROL )

@@ -56,6 +56,17 @@
 #include <fstream>
 #include "Plato_Parser.hpp"
 
+struct Uncertainty
+{
+    std::string load_id; // which load to vary
+    std::string load_angular_variation_plane; // XY, XZ, YZ (load direction will vary in this plane)
+    std::string distribution; // normal, uniform, beta
+    std::string mean; // scalar value
+    std::string upper; // scalar value
+    std::string lower; // scalar value
+    std::string standard_deviation; // scalar value
+    std::string num_samples; // integer value
+};
 struct Load
 {
   std::string type; // traction, heat flux, force, pressure ...
@@ -187,6 +198,7 @@ struct InputData
   std::vector<std::string> fixed_nodeset_ids;
   std::vector<LoadCase> load_cases;
   std::vector<BC> bcs;
+  std::vector<Uncertainty> uncertainties;
 };
 
 class XMLGenerator {
@@ -224,6 +236,7 @@ protected:
   bool parseObjectives(std::istream &fin);
   bool parseConstraints(std::istream &fin);
   bool parseOptimizationParameters(std::istream &fin);
+  bool parseUncertainties(std::istream &fin);
   bool parseTokens(char *buffer, std::vector<std::string> &tokens);
   bool addNTVParameter(pugi::xml_node parent_node,
                        const std::string &name,
