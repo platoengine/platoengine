@@ -361,6 +361,36 @@ namespace PlatoTestInputData
   }
 
 
+  TEST(PlatoTestInputData, ExpandChildVariable)
+  {
+    std::stringstream buffer;
+    buffer << "<Variable name='Apps' type='int' from='1' to='4'/>" << std::endl;
+
+    buffer << "<SharedData>"                              << std::endl;
+    buffer << "  <Name>Topology</Name>"                   << std::endl;
+    buffer << "  <Type>Scalar</Type>"                     << std::endl;
+    buffer << "  <Layout>Nodal Field</Layout>"            << std::endl;
+    buffer << "  <OwnerName>PlatoMain</OwnerName>"        << std::endl;
+    buffer << "  <UserName>PlatoMain</UserName>"          << std::endl;
+    buffer << "  <For var='N' in='Apps'>"                 << std::endl;
+    buffer << "  <UserName>LightMP_static_[N]</UserName>" << std::endl;
+    buffer << "  </For>"                                  << std::endl;
+    buffer << "</SharedData>"                             << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 5 );
+
+    auto userNames = inputData.get<Plato::InputData>("SharedData").getByName<std::string>("UserName");
+
+    EXPECT_EQ( userNames[0], "PlatoMain" );
+    EXPECT_EQ( userNames[1], "LightMP_static_1" );
+    EXPECT_EQ( userNames[2], "LightMP_static_2" );
+  }
+
+
 
   TEST(PlatoTestInputData, ExpandNestedVariable)
   {
