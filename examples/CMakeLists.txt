@@ -42,6 +42,7 @@ endif()
 
 
 add_subdirectory(2Load_OC)
+add_subdirectory(2Load_OC_Variables)
 add_subdirectory(2Load_absolute_filter_OC)
 add_subdirectory(Proxy_Rosenbrock_KSBC)
 IF( ENABLE_ROL )

@@ -313,7 +313,7 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
         for( auto tVal : tInstances )
         {
             // copy pattern above For node.
-            for( auto toCopy=aNode.first_child(); toCopy; toCopy = aNode.next_sibling())
+            for( auto toCopy=aNode.first_child(); toCopy; toCopy = toCopy.next_sibling())
             {
                 auto copied = aNode.parent().insert_copy_before(toCopy, aNode);
      
@@ -331,7 +331,7 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
 void 
 PugiParser::recursiveFindReplace(pugi::xml_node aNode, std::string aFind, std::string aReplace)
 {
-    for( auto& tNode : aNode.children() )
+    for( auto tNode : aNode.children() )
     {
         tNode.set_name(findReplace(tNode.name(), aFind, aReplace).c_str());
         tNode.set_value(findReplace(tNode.value(), aFind, aReplace).c_str());

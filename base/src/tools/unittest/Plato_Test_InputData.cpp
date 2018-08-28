@@ -360,6 +360,38 @@ namespace PlatoTestInputData
     EXPECT_EQ( performerSpecs[3].get<std::string>("PerformerID"), "4" );
   }
 
+  TEST(PlatoTestInputData, ExpandVariables)
+  {
+    std::stringstream buffer;
+    buffer << "<Variable name='Apps' type='int' from='1' to='2'/>" << std::endl;
+
+    buffer << "<For var='N' in='Apps'>"                     << std::endl;
+    buffer << "<Performer>"                                 << std::endl;
+    buffer << "  <Name>Analyze</Name>"                      << std::endl;
+    buffer << "  <PerformerID>[N]</PerformerID>"            << std::endl;
+    buffer << "</Performer>"                                << std::endl;
+    buffer << "</For>"                                      << std::endl;
+    buffer << "<For var='N' in='Apps'>"                     << std::endl;
+    buffer << "<SharedData>"                                << std::endl;
+    buffer << "  <Name>Internal Energy Gradient [N]</Name>" << std::endl;
+    buffer << "  <Type>Scalar</Type>"                       << std::endl;
+    buffer << "  <Layout>Nodal Field</Layout>"              << std::endl;
+    buffer << "  <OwnerName>LightMP_static_[N]</OwnerName>" << std::endl;
+    buffer << "  <UserName>PlatoMain</UserName>"            << std::endl;
+    buffer << "</SharedData>"                               << std::endl;
+    buffer << "</For>"                                      << std::endl;
+
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+    auto sharedDataSpecs = inputData.getByName<Plato::InputData>("SharedData");
+
+    EXPECT_EQ( sharedDataSpecs[0].get<std::string>("Name"), "Internal Energy Gradient 1" );
+    EXPECT_EQ( sharedDataSpecs[1].get<std::string>("Name"), "Internal Energy Gradient 2" );
+  }
+
 
   TEST(PlatoTestInputData, ExpandChildVariable)
   {
