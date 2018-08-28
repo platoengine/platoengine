@@ -65,24 +65,25 @@ namespace Plato
 template<typename ScalarType>
 struct UncertaintyOutputStruct
 {
-    ScalarType sample_value;
-    ScalarType sample_weight;
+    ScalarType mSampleValue;
+    ScalarType mSampleWeight;
 };
+// struct UncertaintyOutputStruct
 
 template<typename ScalarType, typename OrdinalType>
-void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& input_,
-                       std::vector<UncertaintyOutputStruct<ScalarType> >& output_)
+void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aInput,
+                       std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
 {
     // grab values from input struct
-    const OrdinalType tNumSamples = input_.num_samples;
+    const OrdinalType tNumSamples = aInput.mNumSamples;
     OrdinalType tMaxNumMoments = 0;
-    if(input_.max_num_distribution_moments < 1)
+    if(aInput.mMaxNumDistributionMoments < 1)
     {
         tMaxNumMoments = 4;
     }
     else
     {
-        tMaxNumMoments = input_.max_num_distribution_moments;
+        tMaxNumMoments = aInput.mMaxNumDistributionMoments;
     }
 
     // ********* ALLOCATE DATA FACTORY *********
@@ -94,7 +95,7 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
     // build distrubtion
-    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(input_);
+    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(aInput);
 
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType> > tSromObjective =
@@ -134,12 +135,13 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
 
     // transfer to output data structure
     const Plato::MultiVector<ScalarType, OrdinalType>& tFinalControl = tDataMng->getCurrentControl();
-    output_.resize(tNumSamples);
+    aOutput.resize(tNumSamples);
     for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        output_[tIndex].sample_value = tFinalControl(0,tIndex);
-        output_[tIndex].sample_weight = tFinalControl(1,tIndex);
+        aOutput[tIndex].mSampleValue = tFinalControl(0,tIndex);
+        aOutput[tIndex].mSampleWeight = tFinalControl(1,tIndex);
     }
 }
+// function solve_uncertainty
 
-}
+} // namespace Plato

@@ -17,53 +17,56 @@
 namespace Plato
 {
 
-struct DistrubtionName {
-enum type_t {
-    beta,
-    normal,
-    uniform,
+struct DistrubtionName
+{
+    enum type_t
+    {
+        beta = 0,
+        normal = 1,
+        uniform = 2,
+    };
 };
-};
+// struct DistrubtionName
 
 template<typename ScalarType, typename OrdinalType>
 struct UncertaintyInputStruct
 {
-    DistrubtionName::type_t distribution;
-    ScalarType mean;
-    ScalarType lower_bound;
-    ScalarType upper_bound;
-    ScalarType variance;
-    OrdinalType num_samples;
-    OrdinalType max_num_distribution_moments; // if zero, then use default
+    DistrubtionName::type_t mDistribution;
+    ScalarType mMean;
+    ScalarType mLowerBound;
+    ScalarType mUpperBound;
+    ScalarType mVariance;
+    OrdinalType mNumSamples;
+    OrdinalType mMaxNumDistributionMoments; // if zero, then use default
 
     UncertaintyInputStruct() :   // default Constructor
-            distribution(DistrubtionName::type_t::beta),
-            mean(1.),
-            lower_bound(0.),
-            upper_bound(1.),
-            variance(1.),
-            num_samples(1),
-            max_num_distribution_moments(0)
+            mDistribution(DistrubtionName::type_t::beta),
+            mMean(1.),
+            mLowerBound(0.),
+            mUpperBound(1.),
+            mVariance(1.),
+            mNumSamples(1),
+            mMaxNumDistributionMoments(0)
     {
     }
 };
+// struct UncertaintyInputStruct
 
 // factory constructor
 template<typename ScalarType, typename OrdinalType>
-std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> build_distrubtion(const Plato::UncertaintyInputStruct<ScalarType,
-        OrdinalType>& aInput)
-
+std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>>
+build_distrubtion(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aInput)
 {
     // grab values from input struct
-    const ScalarType tMean = aInput.mean;
-    const ScalarType tMax = aInput.upper_bound;
-    const ScalarType tMin = aInput.lower_bound;
-    const ScalarType tVariance = aInput.variance;
-    const ScalarType tStandardDeviation = sqrt(tVariance);
+    const ScalarType tMean = aInput.mMean;
+    const ScalarType tMax = aInput.mUpperBound;
+    const ScalarType tMin = aInput.mLowerBound;
+    const ScalarType tVariance = aInput.mVariance;
+    const ScalarType tStandardDeviation = std::sqrt(tVariance);
 
     // make
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution;
-    switch(aInput.distribution)
+    switch(aInput.mDistribution)
     {
         case DistrubtionName::type_t::beta:
         {
@@ -89,8 +92,8 @@ std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> build_distrubtion(
 
     return tDistribution;
 }
+// function build_distrubtion
 
-
-}
+} // namespace Plato
 
 #endif /* PLATO_DISTRIBUTIONFACTORY_HPP_ */

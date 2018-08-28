@@ -727,45 +727,47 @@ TEST(PlatoTest, SromOptimizationProblem)
 
 TEST(PlatoTest, solveUncertaintyProblem)
 {
-    // pose input distrubtion
-    Plato::UncertaintyInputStruct<double, size_t> input_;
-    input_.distribution = Plato::DistrubtionName::type_t::beta;
-    input_.mean = 1.0;
-    input_.lower_bound = 0.0;
-    input_.upper_bound = 2.0;
-    input_.variance = 0.5;
-    input_.num_samples = 5;
+    // POSE INPUT DISTRIBUTION
+    Plato::UncertaintyInputStruct<double, size_t> tInput;
+    tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tInput.mMean = 1.0;
+    tInput.mLowerBound = 0.0;
+    tInput.mUpperBound = 2.0;
+    tInput.mVariance = 0.5;
+    tInput.mNumSamples = 5;
 
-    // solve
-    std::vector<Plato::UncertaintyOutputStruct<double>> output_1;
-    Plato::solve_uncertainty(input_, output_1);
-    // check
-    EXPECT_EQ(output_1.size(), input_.num_samples);
+    // SOLVE
+    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput_1;
+    Plato::solve_uncertainty(tInput, tOutput_1);
 
-    // pose problem with known solution
-    input_.distribution = Plato::DistrubtionName::type_t::beta;
-    input_.mean = 90;
-    input_.upper_bound = 135;
-    input_.lower_bound = 67.5;
-    input_.variance = 135;
-    input_.num_samples = 4;
-    input_.max_num_distribution_moments = 4;
+    // CHECK
+    EXPECT_EQ(tOutput_1.size(), tInput.mNumSamples);
 
-    // solve
-    std::vector<Plato::UncertaintyOutputStruct<double>> output_2;
-    Plato::solve_uncertainty(input_, output_2);
-    // check
-    ASSERT_EQ(output_2.size(), input_.num_samples);
+    // POSE PROBLEM WITH KNOWN SOLUTION
+    tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tInput.mMean = 90;
+    tInput.mUpperBound = 135;
+    tInput.mLowerBound = 67.5;
+    tInput.mVariance = 135;
+    tInput.mNumSamples = 4;
+    tInput.mMaxNumDistributionMoments = 4;
+
+    // SOLVE
+    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput_2;
+    Plato::solve_uncertainty(tInput, tOutput_2);
+
+    // CHECK
+    ASSERT_EQ(tOutput_2.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_FLOAT_EQ(output_2[0].sample_value, 0.16377870487690938);
-    EXPECT_FLOAT_EQ(output_2[1].sample_value, 0.409813078171542);
-    EXPECT_FLOAT_EQ(output_2[2].sample_value, 0.56692565516265081);
-    EXPECT_FLOAT_EQ(output_2[3].sample_value, 0.28805773602398665);
+    EXPECT_FLOAT_EQ(tOutput_2[0].mSampleValue, 0.16377870487690938);
+    EXPECT_FLOAT_EQ(tOutput_2[1].mSampleValue, 0.409813078171542);
+    EXPECT_FLOAT_EQ(tOutput_2[2].mSampleValue, 0.56692565516265081);
+    EXPECT_FLOAT_EQ(tOutput_2[3].mSampleValue, 0.28805773602398665);
     // GOLD PROBABILITIES
-    EXPECT_FLOAT_EQ(output_2[0].sample_weight, 0.24979311097918996);
-    EXPECT_FLOAT_EQ(output_2[1].sample_weight, 0.24999286050154013);
-    EXPECT_FLOAT_EQ(output_2[2].sample_weight, 0.25018122221660277);
-    EXPECT_FLOAT_EQ(output_2[3].sample_weight, 0.24988583791340019);
+    EXPECT_FLOAT_EQ(tOutput_2[0].mSampleWeight, 0.24979311097918996);
+    EXPECT_FLOAT_EQ(tOutput_2[1].mSampleWeight, 0.24999286050154013);
+    EXPECT_FLOAT_EQ(tOutput_2[2].mSampleWeight, 0.25018122221660277);
+    EXPECT_FLOAT_EQ(tOutput_2[3].mSampleWeight, 0.24988583791340019);
 }
 
 } //namespace PlatoTest
