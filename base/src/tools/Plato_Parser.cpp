@@ -58,6 +58,7 @@
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include <unordered_map>
 
 #include "Plato_Exceptions.hpp"
 #include "Plato_OperationInputDataMng.hpp"
@@ -66,6 +67,25 @@
 
 namespace Plato
 {
+
+std::string
+MathParser::parse(std::string aExpr)
+{
+    std::stringstream tRetval;
+    
+    int error=0;
+    double tValue = te_interp(aExpr.c_str(), &error);
+
+    if( error!=0 ){
+        std::stringstream ss;
+        ss << "Fatal error:  failed to evaluate expression: '" << aExpr << "'.";
+        throw Plato::ParsingException(ss.str());
+    }
+
+    tRetval << tValue;
+
+    return tRetval.str();
+}
 
 InputData 
 PugiParser::parseFile(const std::string& filename)
@@ -94,7 +114,10 @@ PugiParser::parseString(const std::string& inputString)
 }
 
 InputData 
-PugiParser::read(std::shared_ptr<pugi::xml_document> doc){
+PugiParser::read(std::shared_ptr<pugi::xml_document> doc)
+{
+
+    preProcess(doc);
 
     InputData retInputData("Input Tree");
 
@@ -103,6 +126,263 @@ PugiParser::read(std::shared_ptr<pugi::xml_document> doc){
     retInputData.set<decltype(doc)>("InputTree", doc);
 
     return retInputData;
+}
+
+void
+PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
+{
+    // parse variable definitions
+    //
+    std::map<std::string, std::vector<std::string>> tVariables;
+    for( auto tVariableNode = doc->child("Variable"); tVariableNode; tVariableNode = tVariableNode.next_sibling("Variable"))
+    {
+        std::string tVarName = tVariableNode.attribute("name").value();
+
+        if( tVariables.count(tVarName) == 0 )
+        {
+            // new variable.  add it.
+            //
+            tVariables[tVarName] = std::vector<std::string>(0);
+ 
+            std::string tStrType = tVariableNode.attribute("type").value();
+            if( tStrType == "int" || tStrType == "" )
+            {
+                // parse ints
+
+                std::string tStrValues = tVariableNode.attribute("values").value();
+                if( tStrValues != "" )
+                {
+                    // parse values, e.g, "{2, 3, 4, 6}"
+                }
+                else 
+                {
+                    // parse from=, to=, by=, 
+                    std::string tStrFrom = tVariableNode.attribute("from").value();
+                    int tIntFrom = stoi(tStrFrom);
+
+                    std::string tStrTo = tVariableNode.attribute("to").value();
+                    int tIntTo  = stoi(tStrTo);
+
+                    std::string tStrBy = tVariableNode.attribute("by").value();
+                    int tIntBy = 1;
+                    if( tStrBy != "" ) tIntBy = stoi(tStrBy);
+                    if( tIntBy == 0 )
+                    {
+                        throw Plato::ParsingException("'by' keyword cannot be zero.");
+                    }
+                    
+                    // make sure that the range isn't bogus
+                    int tIntRange = (tIntTo - tIntFrom) / tIntBy;
+                    if( tIntRange < 0 )
+                    {
+                        std::stringstream ss;
+                        ss << "Range (from: " << tIntFrom << ", to: " << tIntTo << ", by: " 
+                           << tIntBy << ") doesn't end." << std::endl;
+                        throw Plato::ParsingException(ss.str());
+                    }
+
+                    // check for nutty ranges
+                    if( tIntRange > 1000 )
+                    {
+                        std::stringstream ss;
+                        ss << "Range (from: " << tIntFrom << ", to: " << tIntTo << ", by: " 
+                           << tIntBy << ") would result in " << tIntRange << " values. " << std::endl;
+                        throw Plato::ParsingException(ss.str());
+                    }
+
+                    auto& tValues = tVariables[tVarName];
+                    for( int i=tIntFrom; i<=tIntTo; i+=tIntBy )
+                    {
+                        tValues.push_back(std::to_string(i));
+                    }
+                }
+                
+            }
+        }
+        else 
+        {
+            std::stringstream ss;
+            ss << "Plato::Parser: Multiple variable definitions for '" << tVarName << "'." << std::endl;
+            throw Plato::ParsingException(ss.str());
+        }
+    }
+
+    if( tVariables.size() != 0 )
+    {
+        int numMods;
+        do
+        {
+            // find 'For' elements and expand them.  The for_each member function in 
+            // the ForWalker class is called for each node in the tree:
+            ForWalker tForWalker(tVariables, numMods);
+            doc->traverse(tForWalker);
+        } while ( numMods != 0 );
+
+        PugiParser::deleteNodesByName(*doc, "Delete");
+
+        do
+        {
+            // find arithmetic expressions and evaluate them.  The for_each member function in 
+            // the MathWalker class is called for each node in the tree:
+            MathWalker tMathWalker;
+            doc->traverse(tMathWalker);
+        } while ( numMods != 0 );
+    }
+
+
+//    std::cout << "Document: \n";
+//    doc->save(std::cout);
+}
+
+void PugiParser::deleteNodesByName(pugi::xml_node aNode, std::string aNodeName)
+{
+    while(aNode.remove_child(aNodeName.c_str()));
+    for( auto& tNode : aNode.children() )
+    {
+        deleteNodesByName(tNode, aNodeName);
+    }
+}
+
+bool PugiParser::MathWalker::for_each(pugi::xml_node& aNode)
+{
+    if (aNode.name() != "" )
+    {
+        std::string tStrName(aNode.name());
+        std::string tStrNameEval = evalExpr(tStrName);
+        aNode.set_name(tStrNameEval.c_str());
+    }
+
+    if (aNode.value() != "" )
+    {
+        std::string tStrValue(aNode.value());
+        std::string tStrValueEval = evalExpr(tStrValue);
+        aNode.set_value(tStrValueEval.c_str());
+    }
+
+    return true;
+}
+
+std::string PugiParser::MathWalker::evalExpr(std::string aString)
+{
+    std::string tString(aString);
+
+    size_t tSearchPos = 0;
+    while((tSearchPos = tString.find('[',tSearchPos)) != std::string::npos)
+    {
+        // parsed expression starts after '['
+        tSearchPos++;
+
+        size_t tEndPos = tString.find(']',tSearchPos);
+        
+        size_t tStrLen = tEndPos-tSearchPos;
+        std::string tExpression = tString.substr(tSearchPos, tStrLen);
+        std::string tParsed = mMathParser.parse(tExpression);
+
+        tString.replace(tSearchPos-1, tStrLen+2, tParsed);
+    }
+    return tString;
+}
+
+bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
+{
+    if( std::string(aNode.name()) == "For" )
+    {
+        // verify 'var' input
+        std::string tStrVar = aNode.attribute("var").value();
+        if( tStrVar.empty() )
+        {
+            throw Plato::ParsingException("'For' element missing 'var' attribute");
+        }
+
+        // verify 'in' input
+        std::string tStrIn  = aNode.attribute("in").value();
+        if( tStrIn.empty() )
+        {
+            throw Plato::ParsingException("'For' element missing 'in' attribute");
+        }
+
+        // verify requested variable exists
+        if( mVarMap.count(tStrIn) == 0 )
+        {
+            std::stringstream ss;
+            ss <<"'For' element requested undefined variable: '" << tStrIn << "'." << std::endl;
+            throw Plato::ParsingException(ss.str());
+        }
+        const auto& tInstances = mVarMap.at(tStrIn);
+
+        for( auto tVal : tInstances )
+        {
+            // copy pattern above For node.
+            for( auto toCopy=aNode.first_child(); toCopy; toCopy = aNode.next_sibling())
+            {
+                auto copied = aNode.parent().insert_copy_before(toCopy, aNode);
+     
+                // find/replace var in new copy.
+                PugiParser::recursiveFindReplace(copied, tStrVar, tVal);
+            }
+        }
+        aNode.set_name("Delete");
+
+        mNumMods++;
+    }
+    return true; // continue traversal
+}
+
+void 
+PugiParser::recursiveFindReplace(pugi::xml_node aNode, std::string aFind, std::string aReplace)
+{
+    for( auto& tNode : aNode.children() )
+    {
+        tNode.set_name(findReplace(tNode.name(), aFind, aReplace).c_str());
+        tNode.set_value(findReplace(tNode.value(), aFind, aReplace).c_str());
+        recursiveFindReplace(tNode, aFind, aReplace);
+    }
+}
+
+std::string
+PugiParser::findReplace(std::string aString, std::string aFind, std::string aReplace)
+{
+
+    // find aFind in aString and replace with aReplace.
+    // only look for aFind between '[' and ']' delimiters
+    // tokenify the string between '[' and ']' based on arithmetic ops (i.e., {+-()/*^}) and find based on tokens
+    // the delimiters '[' and ']' are not removed.
+    
+    std::string tString(aString);
+
+    size_t tSearchPos = 0;
+
+    // for each opening '[':
+    while((tSearchPos = tString.find('[',tSearchPos)) != std::string::npos)
+    {
+
+        // search begins at the character after '[':
+ 
+        // find closing ']':
+        size_t tEndPos = tString.find(']',tSearchPos);
+        if(tEndPos == std::string::npos)
+        {
+            std::stringstream ss;
+            ss << "Opening '[' without closing ']' in '" << aString;
+            throw Plato::ParsingException(ss.str());
+        }
+
+        // search between tSearchPos and tEndPos for aFind
+        std::string tDelimiters(" +-()/*^]");
+        size_t tNextPos;
+        do
+        {
+            tSearchPos++;
+            tNextPos = tString.find_first_of(tDelimiters,tSearchPos);
+            size_t tStrLen = tNextPos - tSearchPos;
+            if (tString.substr(tSearchPos, tStrLen) == aFind ){
+                tString.replace(tSearchPos, tStrLen, aReplace);
+            }
+            tSearchPos = tString.find_first_of(tDelimiters,tSearchPos);
+            tEndPos = tString.find(']',tSearchPos);
+        } while ( tSearchPos != tEndPos );
+    }
+    return tString;
 }
 
 void

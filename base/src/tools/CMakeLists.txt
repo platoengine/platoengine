@@ -7,6 +7,7 @@ set(${LIB_NAME}_SOURCES Plato_Parser.cpp
                         Plato_OptimizerEngineStageData.cpp
                         Plato_OperationInputDataMng.cpp
                         Plato_StageInputDataMng.cpp
+                        math_parser/tinyexpr.c
                         pugixml.cpp)
 set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_InputData.hpp
@@ -47,6 +48,7 @@ if( CMAKE_INSTALL_PREFIX )
   install( FILES ${${PLATO_LIB}_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
  ENDFOREACH()
  install( FILES ${LIBLESS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+ install( FILES math_parser/tinyexpr.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/math_parser)
 endif()
 
 if( UNIT_TESTING )

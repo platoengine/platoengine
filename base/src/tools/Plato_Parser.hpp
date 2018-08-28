@@ -52,6 +52,7 @@
 
 #include <string>
 #include <vector>
+#include "math_parser/tinyexpr.h"
 #include "pugixml.hpp"
 #include "Plato_InputData.hpp"
 
@@ -62,6 +63,10 @@ class StageInputDataMng;
 class OperationInputDataMng;
 class OptimizerEngineStageData;
 
+class MathParser {
+  public:  
+    std::string parse(std::string);
+};
 
 
 class Parser {
@@ -76,9 +81,37 @@ class PugiParser : public Parser {
     ~PugiParser(){}
     Plato::InputData parseFile(const std::string& fileName);
     Plato::InputData parseString(const std::string& inputString);
+
+    static void recursiveFindReplace(pugi::xml_node aNode, std::string aFind, std::string aReplace);
+    static void deleteNodesByName(pugi::xml_node aNode, std::string aNodeName);
+    static std::string findReplace(std::string aString, std::string aFind, std::string aReplace);
+
+
   private:
     Plato::InputData read(std::shared_ptr<pugi::xml_document> doc);
     void addChildren(const pugi::xml_node& node, InputData& inputData);
+    void preProcess(std::shared_ptr<pugi::xml_document> doc);
+
+    class ForWalker : public pugi::xml_tree_walker
+    {
+        const std::map<std::string,std::vector<std::string>>& mVarMap;
+        int& mNumMods;
+
+      public:
+        ForWalker( const std::map<std::string,std::vector<std::string>>& aVarMap, int& aNumMods ) : 
+            mVarMap(aVarMap), mNumMods(aNumMods) { mNumMods = 0; }
+        virtual bool for_each(pugi::xml_node& node);
+    };
+
+    class MathWalker : public pugi::xml_tree_walker
+    {
+        Plato::MathParser mMathParser;
+
+      public:
+        virtual bool for_each(pugi::xml_node& node);
+      private:
+        std::string evalExpr(std::string);
+    };
 };
 
 namespace Get

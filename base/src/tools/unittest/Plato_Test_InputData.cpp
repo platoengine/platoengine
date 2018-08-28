@@ -327,4 +327,134 @@ namespace PlatoTestInputData
                 "Lower Bound Value");
   }
 
+
+  TEST(PlatoTestInputData, ExpandVariable)
+  {
+    std::stringstream buffer;
+    buffer << "<Variable name='Perfs' type='int' from='1' to='4'/>" << std::endl;
+
+    buffer << "<For var='N' in='Perfs'>" << std::endl;
+    buffer << "<Performer>" << std::endl;
+    buffer << "  <Name>Analyze</Name>" << std::endl;
+    buffer << "  <PerformerID>[N]</PerformerID>" << std::endl;
+    buffer << "</Performer>" << std::endl;
+    buffer << "</For>" << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+
+    EXPECT_EQ( inputData.size<Plato::InputData>("Performer"), 4 );
+
+    auto performerSpecs = inputData.getByName<Plato::InputData>("Performer");
+
+    EXPECT_EQ( performerSpecs[0].get<std::string>("Name"), "Analyze" );
+    EXPECT_EQ( performerSpecs[1].get<std::string>("Name"), "Analyze" );
+    EXPECT_EQ( performerSpecs[2].get<std::string>("Name"), "Analyze" );
+    EXPECT_EQ( performerSpecs[3].get<std::string>("Name"), "Analyze" );
+
+    EXPECT_EQ( performerSpecs[0].get<std::string>("PerformerID"), "1" );
+    EXPECT_EQ( performerSpecs[1].get<std::string>("PerformerID"), "2" );
+    EXPECT_EQ( performerSpecs[2].get<std::string>("PerformerID"), "3" );
+    EXPECT_EQ( performerSpecs[3].get<std::string>("PerformerID"), "4" );
+  }
+
+
+
+  TEST(PlatoTestInputData, ExpandNestedVariable)
+  {
+    std::stringstream buffer;
+    buffer << "<Variable name='Perfs' type='int' from='1' to='4'/>" << std::endl;
+    buffer << "<Variable name='Apps'  type='int' from='1' to='3'/>" << std::endl;
+
+    buffer << "<For var='M' in='Apps'>"                               << std::endl;
+    buffer << "<Operation>"                                           << std::endl;
+    buffer << "  <For var='N' in='Perfs'>"                            << std::endl;
+    buffer << "  <Operation>"                                         << std::endl;
+    buffer << "    <PerformerName>Performer_[N]</PerformerName>"      << std::endl;
+    buffer << "    <Name>Compute</Name>"                              << std::endl;
+    buffer << "    <Input>"                                           << std::endl;
+    buffer << "      <ArgumentName>Topology</ArgumentName>"           << std::endl;
+    buffer << "      <SharedDataName>Topology</SharedDataName>"       << std::endl;
+    buffer << "    </Input>"                                          << std::endl;
+    buffer << "    <Output>"                                          << std::endl;
+    buffer << "      <ArgumentName>Gradient</ArgumentName>"           << std::endl;
+    buffer << "      <SharedDataName>Gradient [4*(M-1)+N]</SharedDataName>" << std::endl;
+    buffer << "    </Output>"                                         << std::endl;
+    buffer << "  </Operation>"                                        << std::endl;
+    buffer << "  </For>"                                              << std::endl;
+    buffer << "</Operation>"                                          << std::endl;
+    buffer << "</For>"                                                << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+
+    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 3 );
+
+    auto multiOpSpecs = inputData.getByName<Plato::InputData>("Operation");
+
+    auto singleOpSpecs_0 = multiOpSpecs[0].getByName<Plato::InputData>("Operation");
+    EXPECT_EQ( singleOpSpecs_0[0].get<std::string>("PerformerName"), "Performer_1" );
+    EXPECT_EQ( singleOpSpecs_0[1].get<std::string>("PerformerName"), "Performer_2" );
+    EXPECT_EQ( singleOpSpecs_0[2].get<std::string>("PerformerName"), "Performer_3" );
+    EXPECT_EQ( singleOpSpecs_0[3].get<std::string>("PerformerName"), "Performer_4" );
+
+    auto singleOpSpecs_1 = multiOpSpecs[1].getByName<Plato::InputData>("Operation");
+    EXPECT_EQ( singleOpSpecs_1[0].get<std::string>("PerformerName"), "Performer_1" );
+    EXPECT_EQ( singleOpSpecs_1[1].get<std::string>("PerformerName"), "Performer_2" );
+    EXPECT_EQ( singleOpSpecs_1[2].get<std::string>("PerformerName"), "Performer_3" );
+    EXPECT_EQ( singleOpSpecs_1[3].get<std::string>("PerformerName"), "Performer_4" );
+
+    auto singleOpSpecs_2 = multiOpSpecs[2].getByName<Plato::InputData>("Operation");
+    EXPECT_EQ( singleOpSpecs_2[0].get<std::string>("PerformerName"), "Performer_1" );
+    EXPECT_EQ( singleOpSpecs_2[1].get<std::string>("PerformerName"), "Performer_2" );
+    EXPECT_EQ( singleOpSpecs_2[2].get<std::string>("PerformerName"), "Performer_3" );
+    EXPECT_EQ( singleOpSpecs_2[3].get<std::string>("PerformerName"), "Performer_4" );
+  }
+
+  TEST(PlatoTestInputData, RealValuedExpression)
+  {
+    std::stringstream buffer;
+    buffer << "<Variable name='Perfs' type='int' from='0' to='4'/>" << std::endl;
+
+    buffer << "<Operation>"                                           << std::endl;
+    buffer << "  <For var='N' in='Perfs'>"                            << std::endl;
+    buffer << "  <Operation>"                                         << std::endl;
+    buffer << "    <PerformerName>Performer_[N]</PerformerName>"      << std::endl;
+    buffer << "    <Name>Compute</Name>"                              << std::endl;
+    buffer << "    <Parameter>"                                       << std::endl;
+    buffer << "      <ArgumentName>Traction X</ArgumentName>"         << std::endl;
+    buffer << "      <ArgumentValue>[cos((-10+N*5)*(2.0*3.14159)/360.0)]</ArgumentValue>" << std::endl;
+    buffer << "    </Parameter>"                                      << std::endl;
+    buffer << "    <Parameter>"                                       << std::endl;
+    buffer << "      <ArgumentName>Traction Y</ArgumentName>"         << std::endl;
+    buffer << "      <ArgumentValue>[sin((-10+N*5)*(2.0*3.14159)/360.0)]</ArgumentValue>" << std::endl;
+    buffer << "    </Parameter>"                                      << std::endl;
+    buffer << "    <Input>"                                           << std::endl;
+    buffer << "      <ArgumentName>Topology</ArgumentName>"           << std::endl;
+    buffer << "      <SharedDataName>Topology</SharedDataName>"       << std::endl;
+    buffer << "    </Input>"                                          << std::endl;
+    buffer << "    <Output>"                                          << std::endl;
+    buffer << "      <ArgumentName>Gradient</ArgumentName>"           << std::endl;
+    buffer << "      <SharedDataName>Gradient [N]</SharedDataName>"   << std::endl;
+    buffer << "    </Output>"                                         << std::endl;
+    buffer << "  </Operation>"                                        << std::endl;
+    buffer << "  </For>"                                              << std::endl;
+    buffer << "</Operation>"                                          << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+    auto multiOpSpec = inputData.getByName<Plato::InputData>("Operation");
+
+    auto singleOpSpecs = multiOpSpec[0].getByName<Plato::InputData>("Operation");
+    auto parameters = singleOpSpecs[0].getByName<Plato::InputData>("Parameter");
+    EXPECT_EQ( parameters[0].get<std::string>("ArgumentValue"), "0.984808" );
+    EXPECT_EQ( parameters[1].get<std::string>("ArgumentValue"), "-0.173648" );
+  }
+
 } // end PlatoTestInputData namespace
