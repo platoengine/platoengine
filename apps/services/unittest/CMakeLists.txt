@@ -21,6 +21,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_Statistics.cpp
 							 Plato_Test_ElementWiseCCSA.cpp
 							 Plato_Test_OptimizationTestFunctions.cpp
+							 Plato_Test_Vector3DVariations.cpp
 							 PSL_Test_Triangle.cpp  PSL_Test_OverhangFilter.cpp  PSL_Test_KernelThenHeavisideFilter.cpp  
 							 PSL_Test_VectorKernel.cpp
 							 PSL_Test_VectorCoding.cpp

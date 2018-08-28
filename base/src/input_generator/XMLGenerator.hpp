@@ -59,7 +59,7 @@
 struct Uncertainty
 {
     std::string load_id; // which load to vary
-    std::string load_angular_variation_plane; // XY, XZ, YZ (load direction will vary in this plane)
+    std::string load_angular_variation_axis; // X, Y, Z
     std::string distribution; // normal, uniform, beta
     std::string mean; // scalar value
     std::string upper; // scalar value
@@ -228,6 +228,7 @@ protected:
   bool generateSalinasInputDecks();
   bool generateLightMPInputDecks();
   bool generateAlbanyInputDecks();
+  bool expandUncertaintiesForGenerate();
   bool parseFile();
   bool parseMesh(std::istream &fin);
   bool parseCodePaths(std::istream &fin);

@@ -147,6 +147,7 @@ TEST(PlatoTestXMLGenerator, parseTokens)
     EXPECT_EQ(tokens[1], "bus");
     EXPECT_EQ(tokens[2], "trike");
 }
+
 TEST(PlatoTestXMLGenerator, parseUncertainties)
 {
     XMLGenerator_UnitTester tester;
@@ -154,7 +155,7 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     std::string stringInput;
 
     stringInput = "begin uncertainties\n"
-            "load 10 angle variation XY distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
+            "load 10 angle variation X distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
             "end uncertainties\n";
     iss.str(stringInput);
     iss.clear();
@@ -162,7 +163,7 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
     stringInput = "begin uncertainties\n"
-            "load 10 angle variation XY distribution beta mean 0 upper 5 lower -5 std deviation 1 num samples 5\n"
+            "load 10 angle variation bad distribution uniform upper 5 lower -5 num samples 5\n"
             "end uncertainties\n";
     iss.str(stringInput);
     iss.clear();
@@ -170,8 +171,16 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
     stringInput = "begin uncertainties\n"
-            "load 10 angle variation XY distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "load 12 angle variation XZ distribution normal mean 0 upper 8 lower -2 standard deviation 4 num samples 11\n"
+            "load 10 angle variation Y distribution beta mean 0 upper 5 lower -5 std deviation 1 num samples 5\n"
+            "end uncertainties\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseUncertainties(iss), false);
+    stringInput = "begin uncertainties\n"
+            "load 10 angle variation X distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
+            "load 12 angle variation Y distribution normal mean 0 standard deviation 4 num samples 11\n"
             "end uncertainties\n";
     iss.str(stringInput);
     iss.clear();
@@ -179,8 +188,8 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
     stringInput = "begin uncertainties\n"
-            "load 10 angle variation XY distribution beta upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "load 12 angle variation XZ distribution normal mean 0 upper 8 lower -2 standard deviation 4 num samples 11\n"
+            "load 10 angle variation X distribution beta upper 5 lower -5 standard deviation 1 num samples 5\n"
+            "load 12 angle variation X distribution normal mean 0 standard deviation 4 num samples 11\n"
             "end uncertainties\n";
     iss.str(stringInput);
     iss.clear();
@@ -188,9 +197,9 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
     stringInput = "begin uncertainties\n"
-            "load 10 angle variation XY distribution normal mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "load 12 angle variation XZ distribution beta mean 0 upper 8 lower -2 standard deviation 4 num samples 11\n"
-            "load 15 angle variation YZ distribution uniform mean 1 upper 3 lower -1 standard deviation 2 num samples 8\n"
+            "load 10 angle variation X distribution normal mean 0 standard deviation 1 num samples 5\n"
+            "load 12 angle variation Z distribution beta mean 0 upper 8 lower -2 standard deviation 4 num samples 11\n"
+            "load 15 angle variation Y distribution uniform upper 3 lower -1 num samples 8\n"
             "end uncertainties\n";
     iss.str(stringInput);
     iss.clear();
@@ -198,6 +207,7 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
 }
+
 TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
 {
     XMLGenerator_UnitTester tester;

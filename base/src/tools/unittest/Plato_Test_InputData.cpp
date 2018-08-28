@@ -345,7 +345,7 @@ namespace PlatoTestInputData
     delete parser;
 
 
-    EXPECT_EQ( inputData.size<Plato::InputData>("Performer"), 4 );
+    EXPECT_EQ( inputData.size<Plato::InputData>("Performer"), 4u );
 
     auto performerSpecs = inputData.getByName<Plato::InputData>("Performer");
 
@@ -413,7 +413,7 @@ namespace PlatoTestInputData
     Plato::InputData inputData = parser->parseString(buffer.str());
     delete parser;
 
-    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 5 );
+    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 5u );
 
     auto userNames = inputData.get<Plato::InputData>("SharedData").getByName<std::string>("UserName");
 
@@ -454,7 +454,7 @@ namespace PlatoTestInputData
     delete parser;
 
 
-    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 3 );
+    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 3u );
 
     auto multiOpSpecs = inputData.getByName<Plato::InputData>("Operation");
 
