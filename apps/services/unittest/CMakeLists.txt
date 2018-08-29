@@ -8,6 +8,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_PhysicsProxyApp.cpp
 							 Plato_StructuralTopologyOptimizationProxyGoldResults.cpp
 							 Plato_Test_Proxy.cpp
+							 Plato_Test_SimpleRocket.cpp
 							 Plato_Test_KokkosAlgebra.cpp
 							 Plato_Test_InputData.cpp
 							 Plato_Test_LinearAlgebra.cpp
@@ -22,6 +23,8 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_ElementWiseCCSA.cpp
 							 Plato_Test_OptimizationTestFunctions.cpp
 							 Plato_Test_Vector3DVariations.cpp
+							 Plato_Test_UniqueCounter.cpp
+							 Plato_Test_SimpleRocketGradFreeOpt.cpp
 							 PSL_Test_Triangle.cpp  PSL_Test_OverhangFilter.cpp  PSL_Test_KernelThenHeavisideFilter.cpp  
 							 PSL_Test_VectorKernel.cpp
 							 PSL_Test_VectorCoding.cpp

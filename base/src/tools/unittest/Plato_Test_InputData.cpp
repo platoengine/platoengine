@@ -455,7 +455,7 @@ namespace PlatoTestInputData
     Plato::InputData inputData = parser->parseString(buffer.str());
     delete parser;
 
-    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 6 );
+    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 6u );
 
     auto userNames = inputData.get<Plato::InputData>("SharedData").getByName<std::string>("UserName");
 
@@ -463,7 +463,7 @@ namespace PlatoTestInputData
     EXPECT_EQ( userNames[1], "Alexa_1" );
     EXPECT_EQ( userNames[2], "Alexa_2" );
 
-    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 5 );
+    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 5u );
 
     auto operations = inputData.getByName<Plato::InputData>("Operation");
     float pi = acosf(-1.0);

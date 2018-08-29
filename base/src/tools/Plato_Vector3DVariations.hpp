@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Plato
 {
 
@@ -10,6 +12,7 @@ enum axis3D
     x, y, z
 };
 }
+void axis3D_stringToEnum(const std::string& string_axis, axis3D::axis3D& enum_axis);
 
 struct Vector3D
 {

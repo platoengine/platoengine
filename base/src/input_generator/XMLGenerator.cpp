@@ -53,9 +53,13 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-#include<cassert>
+#include <cassert>
+#include <utility>
+#include <string>
 #include "XMLGenerator.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
+#include "Plato_UniqueCounter.hpp"
+#include "Plato_Vector3DVariations.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -146,18 +150,34 @@ bool XMLGenerator::generate()
 bool XMLGenerator::expandUncertaintiesForGenerate()
 /******************************************************************************/
 {
+    // make unique load counter
+    Plato::UniqueCounter unique_load_counter;
+
     // map load ids to load indices
     std::map<int, std::vector<int> > loadIdToPrivateLoadIndices;
     // for each load
     const int num_load_cases = m_InputData.load_cases.size();
     for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
     {
+        // register load case
+        const int load_cases_id = std::atoi(m_InputData.load_cases[privateLoadIndex].id.c_str());
+        unique_load_counter.mark(load_cases_id);
+
         const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
-        if(this_loads.size() == 1)
+        const int num_this_loads = this_loads.size();
+        if(num_this_loads == 1)
         {
             // build map
             const int load_id = std::atoi(this_loads[0].load_id.c_str());
             loadIdToPrivateLoadIndices[load_id].push_back(privateLoadIndex);
+        }
+
+        // for each load within this case
+        for(int this_load_index = 0; this_load_index < num_this_loads; this_load_index++)
+        {
+            // register load id
+            const int load_id = std::atoi(this_loads[this_load_index].load_id.c_str());
+            unique_load_counter.mark(load_id);
         }
     }
 
@@ -187,19 +207,22 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
         }
     }
 
+    // allocate load expansion mapping
+    std::map<int, std::vector<std::pair<int,double> > > originalUncertainLoadCase_to_expandedLoadCasesAndWeights;
+
     // for each load, if uncertain, expand in all uncertainties
     for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
     {
         // skip multiple loads in this loadcase
-        const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
-        if(this_loads.size() != 1)
+        const std::vector<Load>& this_first_loads = m_InputData.load_cases[privateLoadIndex].loads;
+        if(this_first_loads.size() != 1)
         {
             continue;
         }
-        const int load_id = std::atoi(this_loads[0].load_id.c_str());
+        const int first_load_id = std::atoi(this_first_loads[0].load_id.c_str());
 
         // get uncertainties for this load
-        const std::vector<int>& thisLoadUncertaintyIndices = loadIdToPrivateUncertaintyIndices[load_id];
+        const std::vector<int>& thisLoadUncertaintyIndices = loadIdToPrivateUncertaintyIndices[first_load_id];
         const int this_load_num_uncertainties = thisLoadUncertaintyIndices.size();
 
         // if certain, nothing to do
@@ -208,65 +231,244 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             continue;
         }
 
-        // TODO: generalize to multiple
-        if(1 < this_load_num_uncertainties)
-        {
-            std::cout << "multiple NOT YET SUPPORTED" << std::endl;
-            return false;
-        }
-        int thisUncertaintyIndex = thisLoadUncertaintyIndices[0];
-        const Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
+        // store which loads are being expanded
+        std::vector<int> loadcaseInThisUncertain = {first_load_id};
 
-        // pose uncertainty
-        Plato::UncertaintyInputStruct<double, size_t> tInput;
-        if(thisUncertainty.distribution == "normal")
-        {
-            tInput.mDistribution = Plato::DistrubtionName::type_t::normal;
-        }
-        else if(thisUncertainty.distribution == "uniform")
-        {
-            tInput.mDistribution = Plato::DistrubtionName::type_t::uniform;
-        }
-        else if(thisUncertainty.distribution == "beta")
-        {
-            tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
-        }
-        else
-        {
-            std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
-                      << "Unmatched name." << std::endl;
-            return false;
-        }
-        tInput.mMean = std::atof(thisUncertainty.mean.c_str());
-        tInput.mLowerBound = std::atof(thisUncertainty.lower.c_str());
-        tInput.mUpperBound = std::atof(thisUncertainty.upper.c_str());
-        const double stdDev = std::atof(thisUncertainty.standard_deviation.c_str());
-        tInput.mVariance = stdDev * stdDev;
-        const size_t num_samples = std::atoi(thisUncertainty.num_samples.c_str());
-        tInput.mNumSamples = num_samples;
+        // store weights so far during expansion
+        std::map<int, double> thisUncertaintyWeightsSoFar;
+        thisUncertaintyWeightsSoFar[first_load_id] = 1.0;
 
-        // solve uncertainty sub-problem
-        std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-        Plato::solve_uncertainty(tInput, tOutput);
-        if(tOutput.size() != num_samples)
+        // for each uncertainty
+        for(int this_loadUncertain_index = 0; this_loadUncertain_index < this_load_num_uncertainties; this_loadUncertain_index++)
         {
-            std::cout << "unexpected length" << std::endl;
-            return false;
+            int thisUncertaintyIndex = thisLoadUncertaintyIndices[this_loadUncertain_index];
+            const Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
+
+            // clear any previously established loadcases and weights
+            originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].clear();
+
+            // pose uncertainty
+            Plato::UncertaintyInputStruct<double, size_t> tInput;
+            if(thisUncertainty.distribution == "normal")
+            {
+                tInput.mDistribution = Plato::DistrubtionName::type_t::normal;
+            }
+            else if(thisUncertainty.distribution == "uniform")
+            {
+                tInput.mDistribution = Plato::DistrubtionName::type_t::uniform;
+            }
+            else if(thisUncertainty.distribution == "beta")
+            {
+                tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+            }
+            else
+            {
+                std::cout << "XMLGenerator::expandUncertaintiesForGenerate: " << "Unmatched name." << std::endl;
+                return false;
+            }
+            tInput.mMean = std::atof(thisUncertainty.mean.c_str());
+            tInput.mLowerBound = std::atof(thisUncertainty.lower.c_str());
+            tInput.mUpperBound = std::atof(thisUncertainty.upper.c_str());
+            const double stdDev = std::atof(thisUncertainty.standard_deviation.c_str());
+            tInput.mVariance = stdDev * stdDev;
+            const size_t num_samples = std::atoi(thisUncertainty.num_samples.c_str());
+            tInput.mNumSamples = num_samples;
+
+            // solve uncertainty sub-problem
+            Plato::AlgorithmParamStruct<double, size_t> tParam;
+            std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+            Plato::solve_uncertainty(tInput, tParam, tOutput);
+
+            // check size
+            if(tOutput.size() != num_samples)
+            {
+                std::cout << "unexpected length" << std::endl;
+                return false;
+            }
+
+            // for each uncertain load case from prior
+            const int priorNum_loadcaseInThisUncertain = loadcaseInThisUncertain.size();
+            for(int abstractIndex_loadcaseInThisUncertain = 0;
+                    abstractIndex_loadcaseInThisUncertain < priorNum_loadcaseInThisUncertain;
+                    abstractIndex_loadcaseInThisUncertain++)
+                    {
+                const int this_load_id = loadcaseInThisUncertain[abstractIndex_loadcaseInThisUncertain];
+                const double thisLoadId_UncertaintyWeight = thisUncertaintyWeightsSoFar[this_load_id];
+
+                // convert load id to private index
+                const int num_priv_loads = loadIdToPrivateLoadIndices[this_load_id].size();
+                if(num_priv_loads != 1)
+                {
+                    std::cout << "unexpected length" << std::endl;
+                    return false;
+                }
+                const int this_privateLoadIndex = loadIdToPrivateLoadIndices[this_load_id][0];
+
+                // get loads from private
+                const std::vector<Load>& this_loads = m_InputData.load_cases[this_privateLoadIndex].loads;
+                if(this_loads.size() != 1)
+                {
+                    std::cout << "unexpected length" << std::endl;
+                    return false;
+                }
+
+                // get original load vector
+                const double loadVecX = std::atof(this_loads[0].x.c_str());
+                const double loadVecY = std::atof(this_loads[0].y.c_str());
+                const double loadVecZ = std::atof(this_loads[0].z.c_str());
+                Plato::Vector3D original_load_vec = {loadVecX, loadVecY, loadVecZ};
+
+                // get axis
+                Plato::axis3D::axis3D this_axis = Plato::axis3D::axis3D::x;
+                Plato::axis3D_stringToEnum(thisUncertainty.load_angular_variation_axis, this_axis);
+
+                // make uncertainty variations
+                for(size_t sample_index = 0; sample_index < num_samples; sample_index++)
+                {
+                    // retrieve weight
+                    const double this_sample_weight = tOutput[sample_index].mSampleWeight * thisLoadId_UncertaintyWeight;
+
+                    // decide which load to modify
+                    Load* loadToModify = NULL;
+                    if(sample_index == 0u && abstractIndex_loadcaseInThisUncertain == 0)
+                    {
+                        // modify original load
+                        loadToModify = &m_InputData.load_cases[this_privateLoadIndex].loads[0];
+
+                        // mark original load in mapping
+                        std::pair<int, double> lc_and_weight = std::make_pair(first_load_id, this_sample_weight);
+                        originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].push_back(lc_and_weight);
+
+                        // update weights so far
+                        thisUncertaintyWeightsSoFar[first_load_id] = this_sample_weight;
+                    }
+                    else
+                    {
+                        // get new load id
+                        const size_t newUniqueLoadId = unique_load_counter.assign_next_unique();
+                        const std::string newUniqueLoadId_str = std::to_string(newUniqueLoadId);
+                        loadcaseInThisUncertain.push_back(newUniqueLoadId);
+
+                        // register this new load in mapping
+                        loadIdToPrivateLoadIndices[newUniqueLoadId].push_back(m_InputData.load_cases.size());
+
+                        // make new load
+                        LoadCase new_load_case;
+                        m_InputData.load_cases.push_back(new_load_case);
+                        LoadCase& last_load_case = m_InputData.load_cases.back();
+                        last_load_case.id = newUniqueLoadId_str;
+                        last_load_case.loads.assign(1u, m_InputData.load_cases[this_privateLoadIndex].loads[0]);
+                        last_load_case.loads[0].load_id = newUniqueLoadId_str;
+                        // modify new load
+                        loadToModify = &m_InputData.load_cases.back().loads[0];
+
+                        // append new load in mapping
+                        std::pair<int, double> lc_and_weight = std::make_pair(newUniqueLoadId, this_sample_weight);
+                        originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].push_back(lc_and_weight);
+
+                        // update weights so far
+                        thisUncertaintyWeightsSoFar[newUniqueLoadId] = this_sample_weight;
+                    }
+                    assert(loadToModify != NULL);
+
+                    // rotate vector
+                    const double angle_to_vary = tOutput[sample_index].mSampleValue;
+                    Plato::Vector3D rotated_load_vec = original_load_vec;
+                    Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
+
+                    // update vector in load
+                    loadToModify->x = std::to_string(rotated_load_vec.x);
+                    loadToModify->y = std::to_string(rotated_load_vec.y);
+                    loadToModify->z = std::to_string(rotated_load_vec.z);
+                }
+            }
         }
-
-        // get load vector
-        const double loadVecX = std::atof(this_loads[0].x.c_str());
-        const double loadVecY = std::atof(this_loads[0].y.c_str());
-        const double loadVecZ = std::atof(this_loads[0].z.c_str());
-
-        // TODO
     }
 
     // for each objective
     const int num_objectives = m_InputData.objectives.size();
+    for(int objIndex = 0; objIndex < num_objectives; objIndex++)
+    {
+        Objective& this_obj = m_InputData.objectives[objIndex];
 
-    // TODO: set, multi load case true
-    // TODO: set, load case weights 1 1 1 (based on samples)
+        // get all load cases
+        const std::vector<std::string>& this_obj_load_case_ids = this_obj.load_case_ids;
+
+        // for each load case
+        const int this_num_case_ids = this_obj_load_case_ids.size();
+        for(int subIndex = 0; subIndex < this_num_case_ids; subIndex++)
+        {
+            // get id
+            const int load_case_id = std::atoi(this_obj_load_case_ids[subIndex].c_str());
+
+            // determine expanded load count
+            const std::vector<std::pair<int, double> >& this_expandedLoadCasesAndWeights =
+                    originalUncertainLoadCase_to_expandedLoadCasesAndWeights[load_case_id];
+            const int num_expanded = this_expandedLoadCasesAndWeights.size();
+
+            // if not expanded, nothing to do
+            if(num_expanded == 0)
+            {
+                continue;
+            }
+
+            // expect salinas
+            if(this_obj.code_name != "salinas")
+            {
+                std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
+                          << "Uncertain loads can only applied to salinas code." << std::endl;
+                return false;
+            }
+            // force multi load case
+            this_obj.multi_load_case = "true";
+
+            // NOTE: this is not a strict requirement. Other physics codes could handle uncertain loads.
+            // However, this is a requirement for our initial implementation.
+
+            // assess initial weights/ids
+            const int num_initial_load_case_ids = this_obj.load_case_ids.size();
+            const int num_initial_load_case_weights = this_obj.load_case_weights.size();
+
+            // if not well specified initially
+            if(num_initial_load_case_weights != num_initial_load_case_ids)
+            {
+                // replace with uniform weighting
+                const double uniformWeightFraction = 1.0 / double(num_initial_load_case_ids);
+                const std::string uniformWeightFraction_str = std::to_string(uniformWeightFraction);
+                this_obj.load_case_weights.assign(num_initial_load_case_ids, uniformWeightFraction_str);
+            }
+
+            // get initial scaling
+            const double beforeExpandScale = std::atof(this_obj.load_case_weights[subIndex].c_str());
+
+            // for each expand
+            for(int expand_iter = 0; expand_iter < num_expanded; expand_iter++)
+            {
+                const int expand_loadCaseId = this_expandedLoadCasesAndWeights[expand_iter].first;
+                const double expand_loadCaseWeight = this_expandedLoadCasesAndWeights[expand_iter].second;
+
+                // original load was mutated, other loads are completely new
+                int indexOfWeightToModify = -1;
+                if(expand_loadCaseId == load_case_id)
+                {
+                    // id is correctly, only need to modify weight
+                    indexOfWeightToModify = subIndex;
+                }
+                else
+                {
+                    // set load case id
+                    this_obj.load_case_ids.push_back(std::to_string(expand_loadCaseId));
+                    // reserve spot in vector for weight
+                    indexOfWeightToModify = this_obj.load_case_weights.size();
+                    this_obj.load_case_weights.push_back("");
+                }
+
+                // set weight
+                const double thisExpandWeight = beforeExpandScale * expand_loadCaseWeight;
+                this_obj.load_case_weights[indexOfWeightToModify] = std::to_string(thisExpandWeight);
+            }
+        }
+    }
 
     // exit with success
     return true;
@@ -2469,6 +2671,8 @@ bool XMLGenerator::parseSingleValue(const std::vector<std::string> &aTokens,
 {
     size_t i;
 
+    aReturnStringValue = "";
+
     if(aInputStrings.size() < 1 || aTokens.size() < 1 || aTokens.size() < aInputStrings.size())
         return false;
 
@@ -2494,6 +2698,8 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 /******************************************************************************/
 {
     size_t i;
+
+    aReturnStringValue = "";
 
     assert(aTokens.size() == aUnLoweredTokens.size());
 
@@ -3263,6 +3469,12 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","block"}, tStringValue))
             {
                 Block new_block;
+                if(tStringValue == "")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseBlocks: No block id specified.\n";
+                    return false;
+                }
+                new_block.block_id = tStringValue;
                 // found mesh block
                 while (!fin.eof())
                 {
@@ -3283,15 +3495,6 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
                                 return false;
                             }
                             break;
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"id"}, tStringValue))
-                        {
-                            if(tStringValue == "")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"id\" keyword.\n";
-                                return false;
-                            }
-                            new_block.block_id = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"material"}, tStringValue))
                         {
@@ -3349,6 +3552,12 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","material"}, tStringValue))
             {
                 Material new_material;
+                if(tStringValue == "")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseMaterials: No material id specified.\n";
+                    return false;
+                }
+                new_material.material_id = tStringValue;
                 // found mesh block
                 while (!fin.eof())
                 {
@@ -3369,15 +3578,6 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
                                 return false;
                             }
                             break;
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"id"}, tStringValue))
-                        {
-                            if(tStringValue == "")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"id\" keyword.\n";
-                                return false;
-                            }
-                            new_material.material_id = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"penalty","exponent"}, tStringValue))
                         {

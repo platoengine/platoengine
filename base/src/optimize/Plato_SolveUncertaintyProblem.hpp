@@ -73,11 +73,46 @@ struct UncertaintyOutputStruct
 // struct UncertaintyOutputStruct
 
 template<typename ScalarType, typename OrdinalType>
+struct AlgorithmParamStruct
+{
+    // Stopping criterion
+    Plato::algorithm::stop_t mStop;
+    // Input parameters
+    OrdinalType mMaxNumIterations;
+    ScalarType mStagnationTolerance;
+    ScalarType mMinPenaltyParameter;
+    ScalarType mMaxTrustRegionRadius;
+    ScalarType mActualReductionTolerance;
+    ScalarType mPenaltyParameterScaleFactor;
+    // Output parameters
+    ScalarType mObjectiveValue;
+    ScalarType mConstraintValue;
+
+    /*! @brief Default constructor */
+    AlgorithmParamStruct() :
+            mStop(Plato::algorithm::NOT_CONVERGED),
+            mMaxNumIterations(500),
+            mStagnationTolerance(1e-12),
+            mMinPenaltyParameter(5e-4),
+            mMaxTrustRegionRadius(1e1),
+            mActualReductionTolerance(1e-12),
+            mPenaltyParameterScaleFactor(1.2),
+            mObjectiveValue(std::numeric_limits<ScalarType>::max()),
+            mConstraintValue(std::numeric_limits<ScalarType>::max())
+    {
+    }
+};
+// struct AlgorithmParamStruct
+
+template<typename ScalarType, typename OrdinalType>
 void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aInput,
+                       Plato::AlgorithmParamStruct<ScalarType, OrdinalType>& aAlgorithmParam,
                        std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
 {
     // grab values from input struct
     const OrdinalType tNumSamples = aInput.mNumSamples;
+    const ScalarType tLowerBound = aInput.mLowerBound;
+    const ScalarType tUpperBound = aInput.mUpperBound;
     OrdinalType tMaxNumMoments = 0;
     if(aInput.mMaxNumDistributionMoments < 1)
     {
@@ -91,9 +126,9 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
             std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
-    const OrdinalType tNumDuals = 1;
+    const OrdinalType tNumConstraints = 1;
     const OrdinalType tNumControlVectors = 2; // samples values and sample weights
-    tDataFactory->allocateDual(tNumDuals);
+    tDataFactory->allocateDual(tNumConstraints);
     tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
     // build distribution
@@ -133,6 +168,11 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
     Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
+    tAlgorithm.setMaxNumIterations(aAlgorithmParam.mMaxNumIterations);
+    tAlgorithm.setMinPenaltyParameter(aAlgorithmParam.mMinPenaltyParameter);
+    tAlgorithm.setStagnationTolerance(aAlgorithmParam.mStagnationTolerance);
+    tAlgorithm.setMaxTrustRegionRadius(aAlgorithmParam.mMaxTrustRegionRadius);
+    tAlgorithm.setActualReductionTolerance(aAlgorithmParam.mActualReductionTolerance);
     tAlgorithm.solve();
 
     // transfer to output data structure
@@ -140,9 +180,22 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     aOutput.resize(tNumSamples);
     for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        aOutput[tIndex].mSampleValue = tFinalControl(0,tIndex);
-        aOutput[tIndex].mSampleWeight = tFinalControl(1,tIndex);
+        // undo scaling
+        const ScalarType tUnscaledSampleValue = tFinalControl(0, tIndex);
+        aOutput[tIndex].mSampleValue = tLowerBound + (tUpperBound - tLowerBound) * tUnscaledSampleValue;
+        // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
+        // confirmed accurate for beta dist'n alone
+
+        aOutput[tIndex].mSampleWeight = tFinalControl(1, tIndex);
     }
+
+    // transfer stopping criterion, objective and constraint values to algorithm parameter data structure
+    aAlgorithmParam.mStop = tAlgorithm.getStoppingCriterion();
+    aAlgorithmParam.mObjectiveValue = tDataMng->getCurrentObjectiveFunctionValue();
+    const size_t tNumVectors = 1;
+    Plato::StandardMultiVector<double, size_t> tConstraintValues(tNumVectors, tNumConstraints);
+    tStageMng->getCurrentConstraintValues(tConstraintValues);
+    aAlgorithmParam.mConstraintValue = tConstraintValues(0,0);
 }
 // function solve_uncertainty
 
