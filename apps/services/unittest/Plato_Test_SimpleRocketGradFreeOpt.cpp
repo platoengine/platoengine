@@ -150,17 +150,38 @@ namespace PlatoTest
 
 TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 {
+    // allocate problem inputs - use default parameters
     Plato::SimpleRocketInuts<double> tRocketInputs;
-    std::vector<int> aNumEvaluationsPerDim = {10, 10};
-    std::pair<std::vector<double>, std::vector<double>> aBounds = std::make_pair<std::vector<double>, std::vector<double>>({},{});
-    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, aNumEvaluationsPerDim, aBounds);
 
+    // domain dimension = 10x10=100
+    std::vector<int> tNumEvaluationsPerDim = {10, 10};
+
+    /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
+    std::pair<std::vector<double>, std::vector<double>> aBounds =
+            std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
+    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, tNumEvaluationsPerDim, aBounds);
+
+    /* {chamber_radius, ref_burn_rate} */
     std::vector<double> tControls = {0.075, 0.005};
     double tValue = tObjective.evaluate(tControls);
 
+    // test objective function evaluation
     double tGold = 0;
     double tTolerance = 1e-6;
     EXPECT_NEAR(tValue, tGold, tTolerance);
+
+    // test inputs for gradient-free algorithm
+    std::vector<double> tLowerBounds;
+    std::vector<double> tUpperBounds;
+    std::vector<int> tEvaluationsPerDim;
+    tObjective.get_domain(tLowerBounds, tUpperBounds, tEvaluationsPerDim);
+
+    for(size_t tIndex = 0; tIndex < tNumEvaluationsPerDim.size(); tIndex++)
+    {
+        ASSERT_DOUBLE_EQ(tLowerBounds[tIndex], aBounds.first[tIndex]);
+        ASSERT_DOUBLE_EQ(tUpperBounds[tIndex], aBounds.second[tIndex]);
+        EXPECT_EQ(tEvaluationsPerDim[tIndex], tNumEvaluationsPerDim[tIndex]);
+    }
 }
 
 } // namespace PlatoTest

@@ -353,6 +353,12 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Newton solver.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType newton(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         bool tDone = false;
@@ -373,6 +379,12 @@ private:
         return (tNewTotalPressure);
     }
 
+    /******************************************************************************//**
+     * @brief Jacobian evaluation.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType jacobian(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         ScalarType tPower = mAlpha - static_cast<ScalarType>(1);
@@ -382,6 +394,12 @@ private:
         return tValue;
     }
 
+    /******************************************************************************//**
+     * @brief Residual evaluation.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType residual(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         ScalarType tValue = mPropellantDensity * aChamberArea * mRefBurnRate * mInvPrefAlpha * std::pow(aTotalPressure, mAlpha)
