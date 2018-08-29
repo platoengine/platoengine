@@ -60,6 +60,48 @@ namespace Plato
 {
 
 /******************************************************************************//**
+ * @brief Data structure for rocket problem input parameters.
+**********************************************************************************/
+template<typename ScalarType = double>
+struct SimpleRocketInuts
+{
+    size_t mMaxNumNewtonItr;
+
+    ScalarType mAlpha;
+    ScalarType mDeltaTime;                // seconds
+    ScalarType mRefBurnRate;              // meters/seconds
+    ScalarType mRefPressure;              // Pascal
+    ScalarType mTotalBurnTime;            // seconds
+    ScalarType mChamberRadius;            // meters
+    ScalarType mChamberLength;            // meters
+    ScalarType mThroatDiameter;           // meters
+    ScalarType mNewtonTolerance;          // Pascal
+    ScalarType mAmbientPressure;          // Pascal
+    ScalarType mPropellantDensity;        // kilogram/meter^3
+    ScalarType mCharacteristicVelocity;   // meters/seconds
+
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
+    SimpleRocketInuts() :
+            mMaxNumNewtonItr(1000),
+            mAlpha(0.38),
+            mDeltaTime(0.1),
+            mRefBurnRate(0.005),
+            mRefPressure(3.5e6),
+            mTotalBurnTime(10),
+            mChamberRadius(0.075),
+            mChamberLength(0.65),
+            mThroatDiameter(0.04),
+            mNewtonTolerance(1.e-8),
+            mAmbientPressure(101.325),
+            mPropellantDensity(1744),
+            mCharacteristicVelocity(1554.5)
+    {
+    }
+};
+
+/******************************************************************************//**
  * @brief Design the rocket chamber to achieve desired QoI profile.
  *
  * Nomenclature:
@@ -73,9 +115,12 @@ template<typename ScalarType = double>
 class SimpleRocket
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
     SimpleRocket() :
             mPrint(true),
-            mMaxItr(1000),
+            mMaxNumNewtonItr(1000),
             mChamberLength(0.65), // m
             mChamberRadius(0.075), // m
             mRefBurnRate(0.005), // m/sec
@@ -87,7 +132,7 @@ public:
             mAmbientPressure(101.325), // Pa
             mDeltaTime(0.1), // sec
             mTotalBurnTime(10), // sec
-            mTolerance(1.e-8), // Pa
+            mNewtonTolerance(1.e-8), // Pa
             mInvPrefAlpha(),
             mTimes(),
             mThrustProfile(),
@@ -95,6 +140,35 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param aInputs input parameters for simulation
+    **********************************************************************************/
+    explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs) :
+            mPrint(true),
+            mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
+            mChamberLength(aInputs.mChamberLength), // m
+            mChamberRadius(aInputs.mChamberRadius), // m
+            mRefBurnRate(aInputs.mRefBurnRate), // m/sec
+            mRefPressure(aInputs.mRefPressure), // Pa
+            mAlpha(aInputs.mAlpha),
+            mThroatDiameter(aInputs.mThroatDiameter), // m
+            mCharacteristicVelocity(aInputs.mCharacteristicVelocity), // m/sec
+            mPropellantDensity(aInputs.mPropellantDensity), // kg/m^3
+            mAmbientPressure(aInputs.mAmbientPressure), // Pa
+            mDeltaTime(aInputs.mDeltaTime), // sec
+            mTotalBurnTime(aInputs.mTotalBurnTime), // sec
+            mNewtonTolerance(aInputs.mNewtonTolerance), // Pa
+            mInvPrefAlpha(),
+            mTimes(),
+            mThrustProfile(),
+            mPressureProfile()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~SimpleRocket()
     {
     }
@@ -113,7 +187,7 @@ public:
      **********************************************************************************/
     void setMaxNumIterations(const size_t& aInput)
     {
-        mMaxItr = aInput;
+        mMaxNumNewtonItr = aInput;
     }
 
     /******************************************************************************//**
@@ -274,7 +348,7 @@ public:
             mChamberRadius += tRdot * mDeltaTime;
             tTime += mDeltaTime;
 
-            tBurning = tTime + mTolerance < mTotalBurnTime;
+            tBurning = tTime + mNewtonTolerance < mTotalBurnTime;
         }
     }
 
@@ -293,7 +367,7 @@ private:
             tNewTotalPressure += tDeltaPressure;
 
             tIteration += static_cast<size_t>(1);
-            tDone = std::abs(tDeltaPressure) < mTolerance || tIteration > mMaxItr;
+            tDone = std::abs(tDeltaPressure) < mNewtonTolerance || tIteration > mMaxNumNewtonItr;
         }
 
         return (tNewTotalPressure);
@@ -317,7 +391,7 @@ private:
 
 private:
     bool mPrint;
-    size_t mMaxItr;
+    size_t mMaxNumNewtonItr;
 
     ScalarType mChamberLength; // m
     ScalarType mChamberRadius; // m
@@ -330,7 +404,7 @@ private:
     ScalarType mAmbientPressure; // Pa
     ScalarType mDeltaTime; // sec
     ScalarType mTotalBurnTime; // sec
-    ScalarType mTolerance; // Pa
+    ScalarType mNewtonTolerance; // Pa
 
     ScalarType mInvPrefAlpha;
 

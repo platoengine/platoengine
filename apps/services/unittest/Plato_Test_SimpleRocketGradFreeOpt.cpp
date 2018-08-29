@@ -62,10 +62,11 @@ namespace Plato
 class SimpleRocketObjectiveGradFree : public PlatoSubproblemLibrary::DiscreteObjective
 {
 public:
-    SimpleRocketObjectiveGradFree(const std::vector<int>& aNumEvaluationsPerDim,
+    SimpleRocketObjectiveGradFree(const Plato::SimpleRocketInuts<double>& aRocketInputs,
+                                  const std::vector<int>& aNumEvaluationsPerDim,
                                   const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */) :
             PlatoSubproblemLibrary::DiscreteObjective(),
-            mRocketModel(),
+            mRocketModel(aRocketInputs),
             mTargetThrustProfile(),
             mNumEvaluationsPerDim(aNumEvaluationsPerDim),
             mBounds(aBounds)
@@ -149,9 +150,10 @@ namespace PlatoTest
 
 TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 {
+    Plato::SimpleRocketInuts<double> tRocketInputs;
     std::vector<int> aNumEvaluationsPerDim = {10, 10};
     std::pair<std::vector<double>, std::vector<double>> aBounds = std::make_pair<std::vector<double>, std::vector<double>>({},{});
-    Plato::SimpleRocketObjectiveGradFree tObjective(aNumEvaluationsPerDim, aBounds);
+    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, aNumEvaluationsPerDim, aBounds);
 
     std::vector<double> tControls = {0.075, 0.005};
     double tValue = tObjective.evaluate(tControls);
