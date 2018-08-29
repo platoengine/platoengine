@@ -737,8 +737,9 @@ TEST(PlatoTest, solveUncertaintyProblem_checkSize)
     tInput.mNumSamples = 5;
 
     // SOLVE
+    Plato::AlgorithmParamStruct<double, size_t> tParam;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tOutput);
 
     // CHECK
     EXPECT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -759,25 +760,26 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     tInput.mMaxNumDistributionMoments = 4;
 
     // SOLVE
+    Plato::AlgorithmParamStruct<double, size_t> tParam;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 78.555062579191386, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 95.162382776579079, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 105.76748172347894, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 86.943897181619093, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleValue, 78.555110973752846, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleValue, 95.162418927276619, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleValue, 105.76745339378641, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleValue, 86.943956034155335, tTol);
     // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.24979311097918996, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.24999286050154013, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.25018122221660277, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.24988583791340019, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.2496939761249817, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.24989448275152742, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.25008291182335385, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.24978709886031122, tTol);
     // expect total probability of unity
     const double tTotalProbability = tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight
                                      + tOutput[3].mSampleWeight;
-    EXPECT_NEAR(tTotalProbability, 0.99985303161073302, tTol);
+    EXPECT_NEAR(tTotalProbability, 0.99945846956017426, tTol);
 }
 
 TEST(PlatoTest, solveUncertaintyProblem_uniform)
@@ -795,28 +797,31 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     tInput.mMaxNumDistributionMoments = 4;
 
     // SOLVE
+    Plato::AlgorithmParamStruct<double, size_t> tParam;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 33.339202940758341, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 41.672573832168105, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 50.005945883776036, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 58.3393191142208, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleValue, 66.672693544725036, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleValue, 33.36670189468537, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleValue, 41.700254108657575, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleValue, 50.033818262841237, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleValue, 58.367394569475238, tTol);
+    EXPECT_NEAR(tOutput[4].mSampleValue, 66.700983245423743, tTol);
     // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.19315496, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.19321743, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.19334128, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.19352649, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleWeight, 0.19377321, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.199629021, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.199696349, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.199829875, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.200029615, tTol);
+    EXPECT_NEAR(tOutput[4].mSampleWeight, 0.200295595, tTol);
     // expect total probability of unity
-    const double tTotalProbability = tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight
-                                     + tOutput[3].mSampleWeight
-                                     + tOutput[4].mSampleWeight;
-    EXPECT_NEAR(tTotalProbability, 0.96701335957848578, tTol);
+    double tTotalProbability = 0;
+    for(int tIndex = 0; tIndex < tInput.mNumSamples; tIndex++)
+    {
+        tTotalProbability += tOutput[tIndex].mSampleWeight;
+    }
+    EXPECT_NEAR(tTotalProbability, 0.99948045716825895, tTol);
 }
 
 TEST(PlatoTest, solveUncertaintyProblem_normal)
@@ -834,8 +839,9 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     tInput.mMaxNumDistributionMoments = 5;
 
     // SOLVE
+    Plato::AlgorithmParamStruct<double, size_t> tParam;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -847,18 +853,18 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     EXPECT_NEAR(tOutput[4].mSampleValue, 0.,tTol);//0.71433961, tTol);
     EXPECT_NEAR(tOutput[5].mSampleValue, 0.,tTol);//0.85720098, tTol);
     // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.15638386, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.15639839, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.15642956, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.15647738, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleWeight, 0.15654185, tTol);
-    EXPECT_NEAR(tOutput[5].mSampleWeight, 0.15662298, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.13995699, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.14407919, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.15301207, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.16684967, tTol);
+    EXPECT_NEAR(tOutput[4].mSampleWeight, 0.18573693, tTol);
+    EXPECT_NEAR(tOutput[5].mSampleWeight, 0.20986992, tTol);
     // expect total probability of unity
     const double tTotalProbability = tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight
                                      + tOutput[3].mSampleWeight
                                      + tOutput[4].mSampleWeight
                                      + tOutput[5].mSampleWeight;
-    EXPECT_NEAR(tTotalProbability, 0.93885401851773909, tTol);
+    EXPECT_NEAR(tTotalProbability, 0.99950480285612575, tTol);
 }
 
 } //namespace PlatoTest

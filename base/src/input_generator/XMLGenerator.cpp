@@ -288,8 +288,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
         tInput.mNumSamples = num_samples;
 
         // solve uncertainty sub-problem
+        Plato::AlgorithmParamStruct<double, size_t> tParam;
         std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-        Plato::solve_uncertainty(tInput, tOutput);
+        Plato::solve_uncertainty(tInput, tParam, tOutput);
         if(tOutput.size() != num_samples)
         {
             std::cout << "unexpected length" << std::endl;
