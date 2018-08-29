@@ -1185,14 +1185,13 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     std::string stringInput;
 
     stringInput = "begin block\n"
-            "id\n"
             "end block\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block\n"
+    stringInput = "begin block 1\n"
             "material\n"
             "end block\n";
     iss.str(stringInput);
@@ -1200,7 +1199,7 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block\n"
+    stringInput = "begin block 1\n"
             "bad_keywordl\n"
             "end block\n";
     iss.str(stringInput);
@@ -1208,8 +1207,7 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block\n"
-            "id 1\n"
+    stringInput = "begin block 1\n"
             "end block\n";
     iss.str(stringInput);
     iss.clear();
@@ -1224,12 +1222,10 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block\n"
+    stringInput = "begin block 44\n"
             "material 89\n"
-            "id 44\n"
             "end block\n"
-            "begin block\n"
-            "id 33\n"
+            "begin block 33\n"
             "material 34\n"
             "end block\n";
     iss.str(stringInput);
@@ -1248,7 +1244,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     std::istringstream iss;
     std::string stringInput;
 
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "penalty exponent\n"
             "end material\n";
     iss.str(stringInput);
@@ -1257,14 +1253,13 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
     stringInput = "begin material\n"
-            "id\n"
             "end material\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "youngs modulus\n"
             "end material\n";
     iss.str(stringInput);
@@ -1272,7 +1267,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "poissons ratio\n"
             "end material\n";
     iss.str(stringInput);
@@ -1280,7 +1275,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "density\n"
             "end material\n";
     iss.str(stringInput);
@@ -1288,7 +1283,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "thermal conductivity\n"
             "end material\n";
     iss.str(stringInput);
@@ -1296,7 +1291,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
+    stringInput = "begin material 1\n"
             "bad_keyword\n"
             "end material\n";
     iss.str(stringInput);
@@ -1311,16 +1306,14 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
-            "id 34\n"
+    stringInput = "begin material 34\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
             "thermal conductivity .02\n"
             "density .001\n"
             "end material\n"
-            "begin material\n"
-            "id 388\n"
+            "begin material 388\n"
             "penalty exponent 5\n"
             "youngs modulus 1e7\n"
             "poissons ratio 0.34\n"

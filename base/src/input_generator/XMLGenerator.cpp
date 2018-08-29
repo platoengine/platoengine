@@ -2641,6 +2641,8 @@ bool XMLGenerator::parseSingleValue(const std::vector<std::string> &aTokens,
 {
     size_t i;
 
+    aReturnStringValue = "";
+
     if(aInputStrings.size() < 1 || aTokens.size() < 1 || aTokens.size() < aInputStrings.size())
         return false;
 
@@ -2666,6 +2668,8 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 /******************************************************************************/
 {
     size_t i;
+
+    aReturnStringValue = "";
 
     assert(aTokens.size() == aUnLoweredTokens.size());
 
@@ -3435,6 +3439,12 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","block"}, tStringValue))
             {
                 Block new_block;
+                if(tStringValue == "")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseBlocks: No block id specified.\n";
+                    return false;
+                }
+                new_block.block_id = tStringValue;
                 // found mesh block
                 while (!fin.eof())
                 {
@@ -3455,15 +3465,6 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
                                 return false;
                             }
                             break;
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"id"}, tStringValue))
-                        {
-                            if(tStringValue == "")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"id\" keyword.\n";
-                                return false;
-                            }
-                            new_block.block_id = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"material"}, tStringValue))
                         {
@@ -3521,6 +3522,12 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","material"}, tStringValue))
             {
                 Material new_material;
+                if(tStringValue == "")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseMaterials: No material id specified.\n";
+                    return false;
+                }
+                new_material.material_id = tStringValue;
                 // found mesh block
                 while (!fin.eof())
                 {
@@ -3541,15 +3548,6 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
                                 return false;
                             }
                             break;
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"id"}, tStringValue))
-                        {
-                            if(tStringValue == "")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"id\" keyword.\n";
-                                return false;
-                            }
-                            new_material.material_id = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"penalty","exponent"}, tStringValue))
                         {
