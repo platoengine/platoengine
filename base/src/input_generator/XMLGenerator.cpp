@@ -55,6 +55,7 @@
 #include <cstring>
 #include<cassert>
 #include "XMLGenerator.hpp"
+#include "Plato_SolveUncertaintyProblem.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -94,6 +95,7 @@ bool XMLGenerator::generate()
         return false;
     }
 
+    // NOTE: modifies parsed data for uncertainties
     if(!expandUncertaintiesForGenerate())
     {
         std::cout << "Failed to expand uncertainties in file generation" << std::endl;
@@ -144,7 +146,127 @@ bool XMLGenerator::generate()
 bool XMLGenerator::expandUncertaintiesForGenerate()
 /******************************************************************************/
 {
-    // TODO
+    // map load ids to load indices
+    std::map<int, std::vector<int> > loadIdToPrivateLoadIndices;
+    // for each load
+    const int num_load_cases = m_InputData.load_cases.size();
+    for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
+    {
+        const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
+        if(this_loads.size() == 1)
+        {
+            // build map
+            const int load_id = std::atoi(this_loads[0].load_id.c_str());
+            loadIdToPrivateLoadIndices[load_id].push_back(privateLoadIndex);
+        }
+    }
+
+    // map load ids to uncertainties
+    std::map<int, std::vector<int> > loadIdToPrivateUncertaintyIndices;
+    // for each uncertainty
+    const int num_uncertainties = m_InputData.uncertainties.size();
+    for(int privateUncertainIndex = 0; privateUncertainIndex < num_uncertainties; privateUncertainIndex++)
+    {
+        // build map
+        const int load_id = std::atoi(m_InputData.uncertainties[privateUncertainIndex].load_id.c_str());
+        loadIdToPrivateUncertaintyIndices[load_id].push_back(privateUncertainIndex);
+
+        // get load to be uncertain
+        const int num_privateLoadIndices = loadIdToPrivateLoadIndices[load_id].size();
+        if(num_privateLoadIndices == 0)
+        {
+            std::cout<<"XMLGenerator::expandUncertaintiesForGenerate: "
+                     <<"Unmatched uncertain load id."<<std::endl;
+            return false;
+        }
+        if(1 < num_privateLoadIndices)
+        {
+            std::cout<<"XMLGenerator::expandUncertaintiesForGenerate: "
+                     <<"Uncertain loads must currently be individual loads."<<std::endl;
+            return false;
+        }
+    }
+
+    // for each load, if uncertain, expand in all uncertainties
+    for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
+    {
+        // skip multiple loads in this loadcase
+        const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
+        if(this_loads.size() != 1)
+        {
+            continue;
+        }
+        const int load_id = std::atoi(this_loads[0].load_id.c_str());
+
+        // get uncertainties for this load
+        const std::vector<int>& thisLoadUncertaintyIndices = loadIdToPrivateUncertaintyIndices[load_id];
+        const int this_load_num_uncertainties = thisLoadUncertaintyIndices.size();
+
+        // if certain, nothing to do
+        if(0 == this_load_num_uncertainties)
+        {
+            continue;
+        }
+
+        // TODO: generalize to multiple
+        if(1 < this_load_num_uncertainties)
+        {
+            std::cout << "multiple NOT YET SUPPORTED" << std::endl;
+            return false;
+        }
+        int thisUncertaintyIndex = thisLoadUncertaintyIndices[0];
+        const Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
+
+        // pose uncertainty
+        Plato::UncertaintyInputStruct<double, size_t> tInput;
+        if(thisUncertainty.distribution == "normal")
+        {
+            tInput.mDistribution = Plato::DistrubtionName::type_t::normal;
+        }
+        else if(thisUncertainty.distribution == "uniform")
+        {
+            tInput.mDistribution = Plato::DistrubtionName::type_t::uniform;
+        }
+        else if(thisUncertainty.distribution == "beta")
+        {
+            tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+        }
+        else
+        {
+            std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
+                      << "Unmatched name." << std::endl;
+            return false;
+        }
+        tInput.mMean = std::atof(thisUncertainty.mean.c_str());
+        tInput.mLowerBound = std::atof(thisUncertainty.lower.c_str());
+        tInput.mUpperBound = std::atof(thisUncertainty.upper.c_str());
+        const double stdDev = std::atof(thisUncertainty.standard_deviation.c_str());
+        tInput.mVariance = stdDev * stdDev;
+        const size_t num_samples = std::atoi(thisUncertainty.num_samples.c_str());
+        tInput.mNumSamples = num_samples;
+
+        // solve uncertainty sub-problem
+        std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+        Plato::solve_uncertainty(tInput, tOutput);
+        if(tOutput.size() != num_samples)
+        {
+            std::cout << "unexpected length" << std::endl;
+            return false;
+        }
+
+        // get load vector
+        const double loadVecX = std::atof(this_loads[0].x.c_str());
+        const double loadVecY = std::atof(this_loads[0].y.c_str());
+        const double loadVecZ = std::atof(this_loads[0].z.c_str());
+
+        // TODO
+    }
+
+    // for each objective
+    const int num_objectives = m_InputData.objectives.size();
+
+    // TODO: set, multi load case true
+    // TODO: set, load case weights 1 1 1 (based on samples)
 
     // exit with success
     return true;

@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 # actual target:
 set(PLATOMAIN_LIBS ${PLATO_LIBRARIES} ${Plato_EXTRA_LINK_FLAGS})
 add_executable(XMLGenerator ${XMLGenerator_SRCS})
-target_link_libraries(XMLGenerator ${PLATOMAIN_LIBS})
+target_link_libraries(XMLGenerator ${PLATOMAIN_LIBS} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES})
 #set(INTERFACEXMLCHECKER_BINARY ${CMAKE_BINARY_DIR}/base/src/input_checkers/XMLGenerator PARENT_SCOPE)
 
 if( CMAKE_INSTALL_PREFIX )

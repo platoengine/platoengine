@@ -80,7 +80,7 @@ struct Load
 struct LoadCase
 {
     std::vector<Load> loads;
-    std::string id;
+    std::string id; // note LoadCase id is not necessarily shared with its Loads
 };
 struct BC
 {

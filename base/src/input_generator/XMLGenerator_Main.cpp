@@ -42,6 +42,8 @@
 
 #include "XMLGenerator.hpp"
 #include <cstring>
+#include <mpi.h>
+#include <Kokkos_Core.hpp>
 
 void print_usage()
 {
@@ -52,6 +54,9 @@ void print_usage()
 int main(int argc, char *argv[])
 /******************************************************************************/
 {
+    MPI_Init(&argc, &argv);
+    Kokkos::initialize(argc, argv);
+
     if(argc == 1 ||
       (argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--h"))))
     {
@@ -69,6 +74,10 @@ int main(int argc, char *argv[])
         XMLGenerator generator(argv[filename_index], use_launch);
         generator.generate();
     }
+
+    Kokkos::finalize();
+    MPI_Finalize();
+    return 0;
 }
 
 

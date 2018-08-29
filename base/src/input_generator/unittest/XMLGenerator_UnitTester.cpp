@@ -158,6 +158,13 @@ bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicExpandUncertaintiesForGenerate()
+/******************************************************************************/
+{
+    return expandUncertaintiesForGenerate();
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
