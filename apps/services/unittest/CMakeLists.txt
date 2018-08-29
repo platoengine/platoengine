@@ -8,6 +8,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_PhysicsProxyApp.cpp
 							 Plato_StructuralTopologyOptimizationProxyGoldResults.cpp
 							 Plato_Test_Proxy.cpp
+							 Plato_Test_SimpleRocket.cpp
 							 Plato_Test_KokkosAlgebra.cpp
 							 Plato_Test_InputData.cpp
 							 Plato_Test_LinearAlgebra.cpp
