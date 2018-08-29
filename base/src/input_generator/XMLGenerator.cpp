@@ -55,9 +55,11 @@
 #include <cstring>
 #include <cassert>
 #include <utility>
+#include <string>
 #include "XMLGenerator.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
+#include "Plato_Vector3DVariations.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -196,6 +198,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             loadCaseId_to_PrivateObjectiveAndSubIndexPair[load_case_id].push_back(std::make_pair(objIndex, subIndex));
         }
     }
+    // TODO: is this needed?
 
     // map load ids to uncertainties
     std::map<int, std::vector<int> > loadIdToPrivateUncertaintyIndices;
@@ -222,6 +225,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             return false;
         }
     }
+
+    // allocate load expansion mapping
+    std::map<int, std::vector<std::pair<int,double> > > originalUncertainLoadCase_to_expandedLoadCasesAndWeights;
 
     // for each load, if uncertain, expand in all uncertainties
     for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
@@ -290,18 +296,148 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             return false;
         }
 
-        // get load vector
+        // get original load vector
         const double loadVecX = std::atof(this_loads[0].x.c_str());
         const double loadVecY = std::atof(this_loads[0].y.c_str());
         const double loadVecZ = std::atof(this_loads[0].z.c_str());
+        Plato::Vector3D original_load_vec = {loadVecX, loadVecY, loadVecZ};
 
-        // TODO
+        // get axis
+        Plato::axis3D::axis3D this_axis = Plato::axis3D::axis3D::x;
+        Plato::axis3D_stringToEnum(thisUncertainty.load_angular_variation_axis, this_axis);
+
+        // make uncertainty variations
+        for(size_t sample_index = 0; sample_index < num_samples; sample_index++)
+        {
+            // retrieve weight
+            const double this_sample_weight = tOutput[sample_index].mSampleWeight;
+
+            // decide which load to modify
+            Load* loadToModify = NULL;
+            if(sample_index == 0u)
+            {
+                // modify original load
+                loadToModify = &m_InputData.load_cases[privateLoadIndex].loads[0];
+
+                // mark original load in mapping
+                std::pair<int,double> lc_and_weight = std::make_pair(load_id, this_sample_weight);
+                originalUncertainLoadCase_to_expandedLoadCasesAndWeights[load_id].assign(1u, lc_and_weight);
+            }
+            else
+            {
+                // make new load
+                const size_t newUniqueLoadId = unique_load_counter.assign_next_unique();
+                const std::string newUniqueLoadId_str = std::to_string(newUniqueLoadId);
+                LoadCase new_load_case;
+                m_InputData.load_cases.push_back(new_load_case);
+                LoadCase& last_load_case = m_InputData.load_cases.back();
+                last_load_case.id = newUniqueLoadId_str;
+                last_load_case.loads.assign(1u, m_InputData.load_cases[privateLoadIndex].loads[0]);
+                last_load_case.loads[0].load_id = newUniqueLoadId_str;
+                // modify new load
+                loadToModify = &m_InputData.load_cases.back().loads[0];
+
+                // append new load in mapping
+                std::pair<int,double> lc_and_weight = std::make_pair(newUniqueLoadId, this_sample_weight);
+                originalUncertainLoadCase_to_expandedLoadCasesAndWeights[load_id].push_back(lc_and_weight);
+            }
+            assert(loadToModify != NULL);
+
+            // rotate vector
+            const double angle_to_vary = tOutput[sample_index].mSampleValue;
+            Plato::Vector3D rotated_load_vec = original_load_vec;
+            Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
+
+            // update vector in load
+            loadToModify->x = std::to_string(rotated_load_vec.x);
+            loadToModify->y = std::to_string(rotated_load_vec.y);
+            loadToModify->z = std::to_string(rotated_load_vec.z);
+        }
     }
 
     // for each objective
+    for(int objIndex = 0; objIndex < num_objectives; objIndex++)
+    {
+        Objective& this_obj = m_InputData.objectives[objIndex];
 
-    // TODO: set, multi load case true
-    // TODO: set, load case weights 1 1 1 (based on samples)
+        // get all load cases
+        const std::vector<std::string>& this_obj_load_case_ids = this_obj.load_case_ids;
+
+        // for each load case
+        const int this_num_case_ids = this_obj_load_case_ids.size();
+        for(int subIndex = 0; subIndex < this_num_case_ids; subIndex++)
+        {
+            // get id
+            const int load_case_id = std::atoi(this_obj_load_case_ids[subIndex].c_str());
+
+            // determine expanded load count
+            const std::vector<std::pair<int, double> >& this_expandedLoadCasesAndWeights =
+                    originalUncertainLoadCase_to_expandedLoadCasesAndWeights[load_case_id];
+            const int num_expanded = this_expandedLoadCasesAndWeights.size();
+
+            // if not expanded, nothing to do
+            if(num_expanded == 0)
+            {
+                continue;
+            }
+
+            // expect salinas
+            if(this_obj.code_name != "salinas")
+            {
+                std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
+                          << "Uncertain loads can only applied to salinas code." << std::endl;
+                return false;
+            }
+            // force multi load case
+            this_obj.multi_load_case = "true";
+
+            // NOTE: this is not a strict requirement. Other physics codes could handle uncertain loads.
+            // However, this is a requirement for our initial implementation.
+
+            // assess initial weights/ids
+            const int num_initial_load_case_ids = this_obj.load_case_ids.size();
+            const int num_initial_load_case_weights = this_obj.load_case_weights.size();
+
+            // if not well specified initially
+            if(num_initial_load_case_weights != num_initial_load_case_ids)
+            {
+                // replace with uniform weighting
+                const double uniformWeightFraction = 1.0 / double(num_initial_load_case_ids);
+                const std::string uniformWeightFraction_str = std::to_string(uniformWeightFraction);
+                this_obj.load_case_weights.assign(num_initial_load_case_ids, uniformWeightFraction_str);
+            }
+
+            // get initial scaling
+            const double beforeExpandScale = std::atof(this_obj.load_case_weights[subIndex].c_str());
+
+            // for each expand
+            for(int expand_iter = 0; expand_iter < num_expanded; expand_iter++)
+            {
+                const int expand_loadCaseId = this_expandedLoadCasesAndWeights[expand_iter].first;
+                const double expand_loadCaseWeight = this_expandedLoadCasesAndWeights[expand_iter].second;
+
+                // original load was mutated, other loads are completely new
+                int indexOfWeightToModify = -1;
+                if(expand_loadCaseId == load_case_id)
+                {
+                    // id is correctly, only need to modify weight
+                    indexOfWeightToModify = subIndex;
+                }
+                else
+                {
+                    // set load case id
+                    this_obj.load_case_ids.push_back(std::to_string(expand_loadCaseId));
+                    // reserve spot in vector for weight
+                    indexOfWeightToModify = this_obj.load_case_weights.size();
+                    this_obj.load_case_weights.push_back("");
+                }
+
+                // set weight
+                const double thisExpandWeight = beforeExpandScale * expand_loadCaseWeight;
+                this_obj.load_case_weights[indexOfWeightToModify] = std::to_string(thisExpandWeight);
+            }
+        }
+    }
 
     // exit with success
     return true;

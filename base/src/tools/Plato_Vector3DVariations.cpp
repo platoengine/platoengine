@@ -7,6 +7,26 @@
 namespace Plato
 {
 
+void axis3D_stringToEnum(const std::string& string_axis, axis3D::axis3D& enum_axis)
+{
+    if(string_axis == "x")
+    {
+        enum_axis = axis3D::axis3D::x;
+    }
+    else if(string_axis == "y")
+    {
+        enum_axis = axis3D::axis3D::y;
+    }
+    else if(string_axis == "z")
+    {
+        enum_axis = axis3D::axis3D::z;
+    }
+    else
+    {
+        std::abort();
+    }
+}
+
 Vector3D::Vector3D(double a_x, double a_y, double a_z) :
         x(a_x),
         y(a_y),

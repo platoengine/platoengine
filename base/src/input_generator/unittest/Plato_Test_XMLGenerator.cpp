@@ -1842,7 +1842,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     std::string stringInput;
 
     stringInput =
-            "begin objective"
+            "begin objective\n"
                 "type maximize stiffness\n"
                 "load ids 34\n"
                 "boundary condition ids 256\n"
@@ -1852,6 +1852,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
             "end objective\n"
             "begin loads\n"
                 "force nodeset 2 value 7 0 0 load id 34\n"
+                "force nodeset 72 value 1 1 1 load id 1\n"
             "end loads\n"
             "begin uncertainties\n"
                 "load 34 angle variation Z distribution uniform upper 40 lower -35 num samples 3\n"
@@ -1871,16 +1872,58 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
 
-    // do expand
-    EXPECT_EQ(tester.publicExpandUncertaintiesForGenerate(), true);
+    // BEFORE modification
 
-    // TODO modify
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+    // check load
     EXPECT_EQ(tester.getLoadType("34",0), "force");
     EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
     EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
     EXPECT_EQ(tester.getLoadDirectionX("34",0), "7");
     EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
     EXPECT_EQ(tester.getLoadDirectionZ("34",0), "0");
+
+    // do expand
+    EXPECT_EQ(tester.publicExpandUncertaintiesForGenerate(), true);
+
+    // AFTER modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+    // check loads
+    EXPECT_EQ(tester.getLoadType("34",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("34",0).c_str()), 6.7, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("34",0).c_str()), -1.9, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("34",0).c_str()), 0, 1e-5);
+    EXPECT_EQ(tester.getLoadType("0",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("0",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("0",0), "2");
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("0",0).c_str()), 7.0, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("0",0).c_str()), 0.3, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("0",0).c_str()), 0, 1e-5);
+    EXPECT_EQ(tester.getLoadType("2",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("2",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("2",0), "2");
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("2",0).c_str()), 6.5, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("2",0).c_str()), 2.6, 0.1);
+    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("2",0).c_str()), 0, 1e-5);
+
+    // check load ids
+    std::vector<std::string> modified_load_ids = tester.getObjLoadIds(0);
+    ASSERT_EQ(modified_load_ids.size(), 3u);
+    EXPECT_EQ(modified_load_ids[0], "34");
+    EXPECT_EQ(modified_load_ids[1], "0");
+    EXPECT_EQ(modified_load_ids[2], "2");
+
+    // check weights
+    std::vector<std::string> modified_load_weights = tester.getObjLoadWeights(0);
+    ASSERT_EQ(modified_load_weights.size(), 3u);
+    EXPECT_NEAR(std::atof(modified_load_weights[0].c_str()), 0.33, 0.01);
+    EXPECT_NEAR(std::atof(modified_load_weights[1].c_str()), 0.33, 0.01);
+    EXPECT_NEAR(std::atof(modified_load_weights[2].c_str()), 0.33, 0.01);
 }
 
 TEST(PlatoTestXMLGenerator,uncertainLoad_two)

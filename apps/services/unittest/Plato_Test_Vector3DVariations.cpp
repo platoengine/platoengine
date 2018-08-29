@@ -8,8 +8,23 @@
 
 #include "Plato_Vector3DVariations.hpp"
 
+#include <string>
+
 namespace Plato
 {
+
+TEST(Vector3DVariations,strToEnum)
+{
+    axis3D::axis3D axis = axis3D::axis3D::x;
+
+    // check mappings
+    axis3D_stringToEnum("y", axis);
+    EXPECT_EQ(axis, axis3D::axis3D::y);
+    axis3D_stringToEnum("z", axis);
+    EXPECT_EQ(axis, axis3D::axis3D::z);
+    axis3D_stringToEnum("x", axis);
+    EXPECT_EQ(axis, axis3D::axis3D::x);
+}
 
 TEST(Vector3DVariations,vary)
 {

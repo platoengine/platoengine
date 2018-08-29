@@ -92,12 +92,15 @@ public:
     std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].density;}
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
+    size_t getNumObjectives() {return m_InputData.objectives.size();}
     std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
     std::string getObjCodeName(const int &aIndex) {return m_InputData.objectives[aIndex].code_name;}
     std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].performer_name;}
     std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
     std::string getObjFreqMax(const int &aIndex) {return m_InputData.objectives[aIndex].freq_max;}
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
+    std::vector<std::string> getObjLoadIds(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_ids;}
+    std::vector<std::string> getObjLoadWeights(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_weights;}
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
