@@ -151,6 +151,13 @@ bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &si
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
+/******************************************************************************/
+{
+    return parseUncertainties(sin);
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
@@ -204,6 +211,7 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.KS_outer_stagnation_tolerance="";
     m_InputData.KS_outer_control_stagnation_tolerance="";
     m_InputData.KS_outer_actual_reduction_tolerance="";
+    m_InputData.uncertainties.clear();
 }
 
 std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBCID)

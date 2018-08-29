@@ -94,6 +94,12 @@ bool XMLGenerator::generate()
         return false;
     }
 
+    if(!expandUncertaintiesForGenerate())
+    {
+        std::cout << "Failed to expand uncertainties in file generation" << std::endl;
+        return false;
+    }
+
     if(!generateInterfaceXML())
     {
         std::cout << "Failed to generate interface.xml" << std::endl;
@@ -131,6 +137,16 @@ bool XMLGenerator::generate()
     }
 
     std::cout << "Successfully wrote XML files." << std::endl;
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::expandUncertaintiesForGenerate()
+/******************************************************************************/
+{
+    // TODO
+
+    // exit with success
     return true;
 }
 
@@ -1966,6 +1982,242 @@ bool XMLGenerator::parseLoads(std::istream &fin)
 }
 
 /******************************************************************************/
+bool XMLGenerator::parseUncertainties(std::istream &fin)
+/******************************************************************************/
+{
+    std::vector<std::string> tInputStringList;
+    char buf[MAX_CHARS_PER_LINE];
+    std::vector<std::string> tokens;
+    std::string tStringValue;
+
+    // read each line of the file
+    while(!fin.eof())
+    {
+        // read an entire line into memory
+        fin.getline(buf, MAX_CHARS_PER_LINE);
+        tokens.clear();
+        parseTokens(buf, tokens);
+
+        // process the tokens
+        if(tokens.size() == 0)
+        {
+            continue;
+        }
+
+        for(size_t j = 0; j < tokens.size(); ++j)
+        {
+            tokens[j] = toLower(tokens[j]);
+        }
+
+        if(parseSingleValue(tokens, tInputStringList ={"begin","uncertainties"}, tStringValue))
+        {
+            while (!fin.eof())
+            {
+                tokens.clear();
+                fin.getline(buf, MAX_CHARS_PER_LINE);
+                parseTokens(buf, tokens);
+                // process the tokens
+                if(tokens.size() == 0)
+                {
+                    continue;
+                }
+
+                for(size_t j=0; j<tokens.size(); ++j)
+                {
+                    tokens[j] = toLower(tokens[j]);
+                }
+
+                if(parseSingleValue(tokens, tInputStringList ={"end","uncertainties"}, tStringValue))
+                {
+                    break;
+                }
+
+                Uncertainty new_uncertainty;
+
+                // load INTEGER angle variation STRING distribution beta mean SCALAR upper SCALAR lower SCALAR standard deviation SCALAR num samples INTEGER
+                // 0    1       2     3         4      5            6    7    8      9     10     11    12     13       14        15     16  17      18
+                // load INTEGER angle variation STRING distribution normal mean SCALAR standard deviation SCALAR num samples INTEGER
+                // 0    1       2     3         4      5            6      7    8      9        10        11     12  13      14
+                // load INTEGER angle variation STRING distribution uniform upper SCALAR lower SCALAR num samples INTEGER
+                // 0    1       2     3         4      5            6       7     8      9     10     11  12      13
+
+                // expect minimum size
+                if(tokens.size() < 7)
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " Wrong number of parameters specified in appropriate sequence.\n";
+                    return false;
+                }
+
+                // load INTEGER
+                if(tokens[0] != "load")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"load\" keyword not specified in appropriate sequence.\n";
+                    return false;
+                }
+                new_uncertainty.load_id = tokens[1];
+
+                // angle variation STRING
+                if(tokens[2] != "angle" || tokens[3] != "variation")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"angle variation\" keywords not specified in appropriate sequence.\n";
+                    return false;
+                }
+                std::string this_axis = tokens[4];
+                if(this_axis != "x" && this_axis != "y" && this_axis != "z")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " unmatched angle variation axis.\n";
+                    return false;
+                }
+                new_uncertainty.load_angular_variation_axis = this_axis;
+
+                // distribution STRING
+                if(tokens[5] != "distribution")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"distribution\" keyword not specified in appropriate sequence.\n";
+                    return false;
+                }
+                new_uncertainty.distribution = tokens[6];
+
+                int j=-1;
+
+                // for each type of distribution
+                if(new_uncertainty.distribution == "beta")
+                {
+                    // expect exact size
+                    if(tokens.size() != 19)
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " Wrong number of parameters specified.\n";
+                        return false;
+                    }
+
+                    // mean SCALAR
+                    if(tokens[7] != "mean")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"mean\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.mean = tokens[8];
+
+                    // upper SCALAR
+                    if(tokens[9] != "upper")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"upper\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.upper = tokens[10];
+
+                    // lower SCALAR
+                    if(tokens[11] != "lower")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"lower\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.lower = tokens[12];
+
+                    // standard deviation SCALAR
+                    if(tokens[13] != "standard" || tokens[14] != "deviation")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"standard deviation\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.standard_deviation = tokens[15];
+
+                    j=16;
+                }
+                else if(new_uncertainty.distribution == "normal")
+                {
+                    // expect exact size
+                    if(tokens.size() != 15)
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " Wrong number of parameters specified.\n";
+                        return false;
+                    }
+
+                    // mean SCALAR
+                    if(tokens[7] != "mean")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"mean\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.mean = tokens[8];
+
+                    // standard deviation SCALAR
+                    if(tokens[9] != "standard" || tokens[10] != "deviation")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"standard deviation\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.standard_deviation = tokens[11];
+
+                    j=12;
+                }
+                else if(new_uncertainty.distribution == "uniform")
+                {
+                    // expect exact size
+                    if(tokens.size() != 14)
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " Wrong number of parameters specified in appropriate sequence.\n";
+                        return false;
+                    }
+
+                    // upper SCALAR
+                    if(tokens[7] != "upper")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"upper\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.upper = tokens[8];
+
+                    // lower SCALAR
+                    if(tokens[9] != "lower")
+                    {
+                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                                " \"lower\" keyword not specified in appropriate sequence.\n";
+                        return false;
+                    }
+                    new_uncertainty.lower = tokens[10];
+
+                    j=11;
+                }
+                else
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " Unknown distribution specified.\n";
+                    return false;
+                }
+
+                // num samples INTEGER
+                if(tokens[j] != "num" || tokens[j+1] != "samples")
+                {
+                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
+                            " \"num samples\" keyword not specified in appropriate sequence.\n";
+                    return false;
+                }
+                new_uncertainty.num_samples = tokens[j+2];
+
+                m_InputData.uncertainties.push_back(new_uncertainty);
+            }
+        }
+    }
+    return true;
+}
+
+/******************************************************************************/
 bool XMLGenerator::parseBCs(std::istream &fin)
 /******************************************************************************/
 {
@@ -3229,7 +3481,9 @@ bool XMLGenerator::parseFile()
     fin.open(m_InputFilename.c_str()); // open a file
     parseCodePaths(fin);
     fin.close();
-
+    fin.open(m_InputFilename.c_str()); // open a file
+    parseUncertainties(fin);
+    fin.close();
 
     return true;
 }
