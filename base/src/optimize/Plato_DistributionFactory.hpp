@@ -41,11 +41,11 @@ struct UncertaintyInputStruct
 
     UncertaintyInputStruct() :   // default Constructor
             mDistribution(DistrubtionName::type_t::beta),
-            mMean(1.),
+            mMean(0.),
             mLowerBound(0.),
-            mUpperBound(1.),
-            mVariance(1.),
-            mNumSamples(1),
+            mUpperBound(0.),
+            mVariance(0.),
+            mNumSamples(0),
             mMaxNumDistributionMoments(0)
     {
     }

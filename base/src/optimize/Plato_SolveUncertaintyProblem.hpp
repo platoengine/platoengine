@@ -45,6 +45,8 @@
 
 #pragma once
 
+#include "Plato_MultiVector.hpp"
+#include "Plato_Vector.hpp"
 #include "Plato_DistributionFactory.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_SromObjective.hpp"
@@ -94,7 +96,7 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     tDataFactory->allocateDual(tNumDuals);
     tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
-    // build distrubtion
+    // build distribution
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(aInput);
 
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
