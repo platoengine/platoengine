@@ -328,15 +328,15 @@ namespace PlatoTestInputData
   }
 
 
-  TEST(PlatoTestInputData, ExpandVariable)
+  TEST(PlatoTestInputData, Expand)
   {
     std::stringstream buffer;
-    buffer << "<Variable name='Perfs' type='int' from='1' to='4'/>" << std::endl;
+    buffer << "<Array    name='Perfs' type='int' from='1' to='4'/>" << std::endl;
 
     buffer << "<For var='N' in='Perfs'>" << std::endl;
     buffer << "<Performer>" << std::endl;
     buffer << "  <Name>Analyze</Name>" << std::endl;
-    buffer << "  <PerformerID>[N]</PerformerID>" << std::endl;
+    buffer << "  <PerformerID>{N}</PerformerID>" << std::endl;
     buffer << "</Performer>" << std::endl;
     buffer << "</For>" << std::endl;
 
@@ -360,23 +360,23 @@ namespace PlatoTestInputData
     EXPECT_EQ( performerSpecs[3].get<std::string>("PerformerID"), "4" );
   }
 
-  TEST(PlatoTestInputData, ExpandVariables)
+  TEST(PlatoTestInputData, ExpandMultiple)
   {
     std::stringstream buffer;
-    buffer << "<Variable name='Apps' type='int' from='1' to='2'/>" << std::endl;
+    buffer << "<Array    name='Apps' type='int' from='1' to='2'/>" << std::endl;
 
     buffer << "<For var='N' in='Apps'>"                     << std::endl;
     buffer << "<Performer>"                                 << std::endl;
     buffer << "  <Name>Analyze</Name>"                      << std::endl;
-    buffer << "  <PerformerID>[N]</PerformerID>"            << std::endl;
+    buffer << "  <PerformerID>{N}</PerformerID>"            << std::endl;
     buffer << "</Performer>"                                << std::endl;
     buffer << "</For>"                                      << std::endl;
     buffer << "<For var='N' in='Apps'>"                     << std::endl;
     buffer << "<SharedData>"                                << std::endl;
-    buffer << "  <Name>Internal Energy Gradient [N]</Name>" << std::endl;
+    buffer << "  <Name>Internal Energy Gradient {N}</Name>" << std::endl;
     buffer << "  <Type>Scalar</Type>"                       << std::endl;
     buffer << "  <Layout>Nodal Field</Layout>"              << std::endl;
-    buffer << "  <OwnerName>LightMP_static_[N]</OwnerName>" << std::endl;
+    buffer << "  <OwnerName>LightMP_static_{N}</OwnerName>" << std::endl;
     buffer << "  <UserName>PlatoMain</UserName>"            << std::endl;
     buffer << "</SharedData>"                               << std::endl;
     buffer << "</For>"                                      << std::endl;
@@ -393,10 +393,10 @@ namespace PlatoTestInputData
   }
 
 
-  TEST(PlatoTestInputData, ExpandChildVariable)
+  TEST(PlatoTestInputData, ExpandChild)
   {
     std::stringstream buffer;
-    buffer << "<Variable name='Apps' type='int' from='1' to='4'/>" << std::endl;
+    buffer << "<Array    name='Apps' type='int' from='1' to='4'/>" << std::endl;
 
     buffer << "<SharedData>"                              << std::endl;
     buffer << "  <Name>Topology</Name>"                   << std::endl;
@@ -405,7 +405,7 @@ namespace PlatoTestInputData
     buffer << "  <OwnerName>PlatoMain</OwnerName>"        << std::endl;
     buffer << "  <UserName>PlatoMain</UserName>"          << std::endl;
     buffer << "  <For var='N' in='Apps'>"                 << std::endl;
-    buffer << "  <UserName>LightMP_static_[N]</UserName>" << std::endl;
+    buffer << "  <UserName>LightMP_static_{N}</UserName>" << std::endl;
     buffer << "  </For>"                                  << std::endl;
     buffer << "</SharedData>"                             << std::endl;
 
@@ -422,19 +422,71 @@ namespace PlatoTestInputData
     EXPECT_EQ( userNames[2], "LightMP_static_2" );
   }
 
-
-
-  TEST(PlatoTestInputData, ExpandNestedVariable)
+  TEST(PlatoTestInputData, ExpandChildWithDefine)
   {
     std::stringstream buffer;
-    buffer << "<Variable name='Perfs' type='int' from='1' to='4'/>" << std::endl;
-    buffer << "<Variable name='Apps'  type='int' from='1' to='3'/>" << std::endl;
+    buffer << "<Define  name='Nvals'  value='5'                      />" << std::endl;
+    buffer << "<Define  name='Angle'  value='10.0'                   />" << std::endl;
+    buffer << "<Array   name='Apps'   type='int'  from='1' to='{Nvals}'   />" << std::endl;
+    buffer << "<Array   name='Angles' type='real' from='{-Angle*pi/180.0}' to='{Angle*pi/180.0}' intervals='{Nvals-1}' />" << std::endl;
+
+    buffer << "<SharedData>"                                << std::endl;
+    buffer << "  <Name>Topology</Name>"                     << std::endl;
+    buffer << "  <Type>Scalar</Type>"                       << std::endl;
+    buffer << "  <Layout>Nodal Field</Layout>"              << std::endl;
+    buffer << "  <OwnerName>PlatoMain</OwnerName>"          << std::endl;
+    buffer << "  <UserName>PlatoMain</UserName>"            << std::endl;
+    buffer << "  <For var='N' in='Apps'>"                   << std::endl;
+    buffer << "  <UserName>LightMP_static_{N}</UserName>"   << std::endl;
+    buffer << "  </For>"                                    << std::endl;
+    buffer << "</SharedData>"                               << std::endl;
+    buffer << "<For var='R' in='Angles'>"                   << std::endl;
+    buffer << "<Operation>"                                 << std::endl;
+    buffer << "  <PerformerName>Alexa</PerformerName>"      << std::endl;
+    buffer << "  <Name>Compute Objective Gradient</Name>"   << std::endl;
+    buffer << "  <Parameter>"                               << std::endl;
+    buffer << "    <ArgumentName>Traction X</ArgumentName>" << std::endl;
+    buffer << "    <ArgumentValue>{cos(R)}</ArgumentValue>" << std::endl;
+    buffer << "  </Parameter>"                              << std::endl;
+    buffer << "</Operation>"                                << std::endl;
+    buffer << "</For>"                                      << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+    EXPECT_EQ( inputData.get<Plato::InputData>("SharedData").size<std::string>("UserName"), 6 );
+
+    auto userNames = inputData.get<Plato::InputData>("SharedData").getByName<std::string>("UserName");
+
+    EXPECT_EQ( userNames[0], "PlatoMain" );
+    EXPECT_EQ( userNames[1], "LightMP_static_1" );
+    EXPECT_EQ( userNames[2], "LightMP_static_2" );
+
+    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 5 );
+
+    auto operations = inputData.getByName<Plato::InputData>("Operation");
+    float pi = acosf(-1.0);
+    EXPECT_NEAR(stof(operations[0].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf(-10.0*pi/180.0), 1e-6 );
+    EXPECT_NEAR(stof(operations[1].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf( -5.0*pi/180.0), 1e-6 );
+    EXPECT_NEAR(stof(operations[2].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf(  0.0*pi/180.0), 1e-6 );
+    EXPECT_NEAR(stof(operations[3].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf(  5.0*pi/180.0), 1e-6 );
+    EXPECT_NEAR(stof(operations[4].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf( 10.0*pi/180.0), 1e-6 );
+
+  }
+
+
+  TEST(PlatoTestInputData, ExpandNested)
+  {
+    std::stringstream buffer;
+    buffer << "<Array    name='Perfs' type='int' from='1' to='4'/>" << std::endl;
+    buffer << "<Array    name='Apps'  type='int' from='1' to='3'/>" << std::endl;
 
     buffer << "<For var='M' in='Apps'>"                               << std::endl;
     buffer << "<Operation>"                                           << std::endl;
     buffer << "  <For var='N' in='Perfs'>"                            << std::endl;
     buffer << "  <Operation>"                                         << std::endl;
-    buffer << "    <PerformerName>Performer_[N]</PerformerName>"      << std::endl;
+    buffer << "    <PerformerName>Performer_{N}</PerformerName>"      << std::endl;
     buffer << "    <Name>Compute</Name>"                              << std::endl;
     buffer << "    <Input>"                                           << std::endl;
     buffer << "      <ArgumentName>Topology</ArgumentName>"           << std::endl;
@@ -442,7 +494,7 @@ namespace PlatoTestInputData
     buffer << "    </Input>"                                          << std::endl;
     buffer << "    <Output>"                                          << std::endl;
     buffer << "      <ArgumentName>Gradient</ArgumentName>"           << std::endl;
-    buffer << "      <SharedDataName>Gradient [4*(M-1)+N]</SharedDataName>" << std::endl;
+    buffer << "      <SharedDataName>Gradient {4*(M-1)+N}</SharedDataName>" << std::endl;
     buffer << "    </Output>"                                         << std::endl;
     buffer << "  </Operation>"                                        << std::endl;
     buffer << "  </For>"                                              << std::endl;
@@ -480,20 +532,20 @@ namespace PlatoTestInputData
   TEST(PlatoTestInputData, RealValuedExpression)
   {
     std::stringstream buffer;
-    buffer << "<Variable name='Perfs' type='int' from='0' to='4'/>" << std::endl;
+    buffer << "<Array    name='Perfs' type='int' from='0' to='4'/>" << std::endl;
 
     buffer << "<Operation>"                                           << std::endl;
     buffer << "  <For var='N' in='Perfs'>"                            << std::endl;
     buffer << "  <Operation>"                                         << std::endl;
-    buffer << "    <PerformerName>Performer_[N]</PerformerName>"      << std::endl;
+    buffer << "    <PerformerName>Performer_{N}</PerformerName>"      << std::endl;
     buffer << "    <Name>Compute</Name>"                              << std::endl;
     buffer << "    <Parameter>"                                       << std::endl;
     buffer << "      <ArgumentName>Traction X</ArgumentName>"         << std::endl;
-    buffer << "      <ArgumentValue>[cos((-10+N*5)*(2.0*3.14159)/360.0)]</ArgumentValue>" << std::endl;
+    buffer << "      <ArgumentValue>{cos((-10+N*5)*(2.0*3.14159)/360.0)}</ArgumentValue>" << std::endl;
     buffer << "    </Parameter>"                                      << std::endl;
     buffer << "    <Parameter>"                                       << std::endl;
     buffer << "      <ArgumentName>Traction Y</ArgumentName>"         << std::endl;
-    buffer << "      <ArgumentValue>[sin((-10+N*5)*(2.0*3.14159)/360.0)]</ArgumentValue>" << std::endl;
+    buffer << "      <ArgumentValue>{sin((-10+N*5)*(2.0*3.14159)/360.0)}</ArgumentValue>" << std::endl;
     buffer << "    </Parameter>"                                      << std::endl;
     buffer << "    <Input>"                                           << std::endl;
     buffer << "      <ArgumentName>Topology</ArgumentName>"           << std::endl;
@@ -501,7 +553,7 @@ namespace PlatoTestInputData
     buffer << "    </Input>"                                          << std::endl;
     buffer << "    <Output>"                                          << std::endl;
     buffer << "      <ArgumentName>Gradient</ArgumentName>"           << std::endl;
-    buffer << "      <SharedDataName>Gradient [N]</SharedDataName>"   << std::endl;
+    buffer << "      <SharedDataName>Gradient {N}</SharedDataName>"   << std::endl;
     buffer << "    </Output>"                                         << std::endl;
     buffer << "  </Operation>"                                        << std::endl;
     buffer << "  </For>"                                              << std::endl;

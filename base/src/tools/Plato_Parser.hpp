@@ -64,7 +64,12 @@ class OperationInputDataMng;
 class OptimizerEngineStageData;
 
 class MathParser {
+    std::vector<te_variable> mVariables;
+    std::vector<std::shared_ptr<double>> mValues;
+    std::vector<std::shared_ptr<std::string>> mNames;
   public:  
+    void addVariable(std::string aVarName, std::string aVarValue);
+    std::string compute(std::string);
     std::string parse(std::string);
 };
 
@@ -105,9 +110,10 @@ class PugiParser : public Parser {
 
     class MathWalker : public pugi::xml_tree_walker
     {
-        Plato::MathParser mMathParser;
+        Plato::MathParser& mMathParser;
 
       public:
+        MathWalker(Plato::MathParser& aMathParser) : mMathParser(aMathParser) {}
         virtual bool for_each(pugi::xml_node& node);
       private:
         std::string evalExpr(std::string);

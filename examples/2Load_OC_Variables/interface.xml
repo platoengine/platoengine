@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<Variable name="Apps" type="int" from="1" to="2"></Variable>
+<Array name="Apps" type="int" from="1" to="2"/>
 
 <Performer> 
   <Name>PlatoMain</Name>
@@ -9,17 +9,17 @@
 
 <For var="N" in="Apps">
 <Performer> 
-  <Name>LightMP_static_[N]</Name>
-  <PerformerID>[N]</PerformerID>
+  <Name>LightMP_static_{N}</Name>
+  <PerformerID>{N}</PerformerID>
 </Performer> 
 </For>
 
 <For var="N" in="Apps">
 <SharedData>
-  <Name>Internal Energy Gradient [N]</Name>
+  <Name>Internal Energy Gradient {N}</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>LightMP_static_[N]</OwnerName>
+  <OwnerName>LightMP_static_{N}</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 </For>
@@ -55,7 +55,7 @@
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
   <For var="N" in="Apps">
-  <UserName>LightMP_static_[N]</UserName>
+  <UserName>LightMP_static_{N}</UserName>
   </For>
 </SharedData>
 
@@ -79,11 +79,11 @@
 
 <For var="N" in="Apps">
 <SharedData>
-  <Name>Internal Energy [N]</Name>
+  <Name>Internal Energy {N}</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
   <Size>1</Size>
-  <OwnerName>LightMP_static_[N]</OwnerName>
+  <OwnerName>LightMP_static_{N}</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 </For>
@@ -286,7 +286,7 @@
 
   <For var="N" in="Apps">
   <Operation>
-    <PerformerName>LightMP_static_[N]</PerformerName>
+    <PerformerName>LightMP_static_{N}</PerformerName>
     <Name>Compute Internal Energy</Name>
     <Input>
       <ArgumentName>Topology</ArgumentName>
@@ -294,7 +294,7 @@
     </Input>
     <Output>
       <ArgumentName>Internal Energy</ArgumentName>
-      <SharedDataName>Internal Energy [N]</SharedDataName>
+      <SharedDataName>Internal Energy {N}</SharedDataName>
     </Output>
   </Operation>
   </For>
@@ -304,8 +304,8 @@
     <PerformerName>PlatoMain</PerformerName>
     <For var="N" in="Apps">
     <Input>
-      <ArgumentName>Value [N]</ArgumentName>
-      <SharedDataName>Internal Energy [N]</SharedDataName>
+      <ArgumentName>Value {N}</ArgumentName>
+      <SharedDataName>Internal Energy {N}</SharedDataName>
     </Input>
     </For>
     <Output>
@@ -338,7 +338,7 @@
 
   <For var="N" in="Apps">
   <Operation>
-    <PerformerName>LightMP_static_[N]</PerformerName>
+    <PerformerName>LightMP_static_{N}</PerformerName>
     <Name>Compute Internal Energy</Name>
     <Input>
       <ArgumentName>Topology</ArgumentName>
@@ -346,7 +346,7 @@
     </Input>
     <Output>
       <ArgumentName>Internal Energy Gradient</ArgumentName>
-      <SharedDataName>Internal Energy Gradient [N]</SharedDataName>
+      <SharedDataName>Internal Energy Gradient {N}</SharedDataName>
     </Output>
   </Operation>
   </For>
@@ -356,8 +356,8 @@
     <PerformerName>PlatoMain</PerformerName>
     <For var="N" in="Apps">
     <Input>
-      <ArgumentName>Field [N]</ArgumentName>
-      <SharedDataName>Internal Energy Gradient [N]</SharedDataName>
+      <ArgumentName>Field {N}</ArgumentName>
+      <SharedDataName>Internal Energy Gradient {N}</SharedDataName>
     </Input>
     </For>
     <Output>

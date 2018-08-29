@@ -68,6 +68,59 @@
 namespace Plato
 {
 
+void
+MathParser::addVariable(std::string aVarName, std::string aVarValue)
+{
+    // the te_variable struct stores pointers to name and value -- it doesn't
+    // copy anything -- so the data have to be persistent.  Use shared_ptr's 
+    // so there's no cleanup.  The references in the te_variable instance aren't
+    // counted, but mVariables, mValues, and mNames all go out of scope at the
+    // same time.
+    auto tNewDatum = std::make_shared<double>(stof(aVarValue));
+    mValues.push_back(tNewDatum);
+    
+    // tinyexpr only works with lowercase variable names
+    std::transform(aVarName.begin(), aVarName.end(), aVarName.begin(), ::tolower);
+    auto tNewName  = std::make_shared<std::string>(aVarName);
+    mNames.push_back(tNewName);
+
+    te_variable newVar = {tNewName->c_str(), tNewDatum.get()};
+
+    mVariables.push_back(newVar);
+}
+
+std::string
+MathParser::compute(std::string aExpr)
+{
+    std::stringstream tRetval;
+
+    size_t tBegin = aExpr.find("{");
+    tBegin++;
+    size_t tEnd = aExpr.find("}");
+
+    std::string tSubExpr = aExpr.substr(tBegin,tEnd-tBegin);
+
+    // tinyexpr requires lowercase.
+    std::transform(tSubExpr.begin(), tSubExpr.end(), tSubExpr.begin(), ::tolower);
+ 
+    int error;
+    te_expr *tExpr = te_compile(tSubExpr.c_str(), mVariables.data(), mVariables.size(), &error);
+ 
+    if( tExpr )
+    {
+        double tVal = te_eval(tExpr);
+        tRetval << tVal;
+    }
+    else
+    {
+        std::stringstream ss;
+        ss << "Fatal error:  failed to evaluate expression: '" << aExpr << "'.";
+        throw Plato::ParsingException(ss.str());
+    }
+    te_free(tExpr);
+    return tRetval.str();
+}
+
 std::string
 MathParser::parse(std::string aExpr)
 {
@@ -128,28 +181,48 @@ PugiParser::read(std::shared_ptr<pugi::xml_document> doc)
     return retInputData;
 }
 
+
+
 void
 PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
 {
-    // parse variable definitions
-    //
-    std::map<std::string, std::vector<std::string>> tVariables;
-    for( auto tVariableNode = doc->child("Variable"); tVariableNode; tVariableNode = tVariableNode.next_sibling("Variable"))
-    {
-        std::string tVarName = tVariableNode.attribute("name").value();
 
-        if( tVariables.count(tVarName) == 0 )
+    // process 'includes'.  included files are pulled in verbatim.
+    //
+    // JR TODO.
+
+    Plato::MathParser tMathParser;
+
+    // parse 'Define' definitions
+    //
+    for( auto tDefineNode = doc->child("Define"); tDefineNode; tDefineNode = tDefineNode.next_sibling("Define"))
+    {
+        std::string tDefName  = tDefineNode.attribute("name").value();
+        std::string tDefValue = tDefineNode.attribute("value").value();
+        tMathParser.addVariable(tDefName, tDefValue);
+    }
+    
+
+    // parse 'Variable' definitions
+    //
+    std::map<std::string, std::vector<std::string>> tArrays;
+    for( auto tArrayNode = doc->child("Array"); tArrayNode; tArrayNode = tArrayNode.next_sibling("Array"))
+    {
+        std::string tVarName = tArrayNode.attribute("name").value();
+
+        if( tArrays.count(tVarName) == 0 )
         {
             // new variable.  add it.
             //
-            tVariables[tVarName] = std::vector<std::string>(0);
+            tArrays[tVarName] = std::vector<std::string>(0);
  
-            std::string tStrType = tVariableNode.attribute("type").value();
+            std::string tStrType = tArrayNode.attribute("type").value();
+            std::transform(tStrType.begin(), tStrType.end(), tStrType.begin(), ::tolower);
             if( tStrType == "int" || tStrType == "" )
             {
                 // parse ints
 
-                std::string tStrValues = tVariableNode.attribute("values").value();
+                std::string tStrValues = tArrayNode.attribute("values").value();
                 if( tStrValues != "" )
                 {
                     // parse values, e.g, "{2, 3, 4, 6}"
@@ -157,15 +230,21 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 else 
                 {
                     // parse from=, to=, by=, 
-                    std::string tStrFrom = tVariableNode.attribute("from").value();
+                    std::string tStrFrom = tArrayNode.attribute("from").value();
+                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser.compute(tStrFrom);
                     int tIntFrom = stoi(tStrFrom);
 
-                    std::string tStrTo = tVariableNode.attribute("to").value();
+                    std::string tStrTo = tArrayNode.attribute("to").value();
+                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser.compute(tStrTo);
                     int tIntTo  = stoi(tStrTo);
 
-                    std::string tStrBy = tVariableNode.attribute("by").value();
+                    std::string tStrBy = tArrayNode.attribute("by").value();
                     int tIntBy = 1;
-                    if( tStrBy != "" ) tIntBy = stoi(tStrBy);
+                    if( tStrBy != "" )
+                    {
+                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser.compute(tStrBy);
+                        tIntBy = stoi(tStrBy);
+                    }
                     if( tIntBy == 0 )
                     {
                         throw Plato::ParsingException("'by' keyword cannot be zero.");
@@ -190,13 +269,100 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                         throw Plato::ParsingException(ss.str());
                     }
 
-                    auto& tValues = tVariables[tVarName];
+                    auto& tValues = tArrays[tVarName];
                     for( int i=tIntFrom; i<=tIntTo; i+=tIntBy )
                     {
                         tValues.push_back(std::to_string(i));
                     }
                 }
-                
+            } else
+            if( tStrType == "real" || tStrType == "float" || tStrType == "double" )
+            {
+                // parse reals
+
+                std::string tStrValues = tArrayNode.attribute("values").value();
+                if( tStrValues != "" )
+                {
+                    // parse values, e.g, "{2, 3, 4, 6}"
+                }
+                else 
+                {
+                    // parse from=
+                    std::string tStrFrom = tArrayNode.attribute("from").value();
+                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser.compute(tStrFrom);
+                    double tRealFrom = stof(tStrFrom);
+
+                    // parse to=
+                    std::string tStrTo = tArrayNode.attribute("to").value();
+                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser.compute(tStrTo);
+                    double tRealTo  = stof(tStrTo);
+
+                    // parse by= or intervals=
+                    int tNumReals=0;
+                    double tRealBy=0.0;
+
+                    std::string tStrBy = tArrayNode.attribute("by").value();
+                    std::string tStrIntervals = tArrayNode.attribute("intervals").value();
+
+                    // specify either 'by=' or 'intervals='
+                    if((tStrBy != "" && tStrIntervals != "") ||
+                       (tStrBy == "" && tStrIntervals == "") )
+                    {
+                        throw Plato::ParsingException("Specify either 'by=' or 'intervals=' in Array definition");
+                    }
+
+                    if( tStrBy != "" )
+                    {
+                        // parse 'by='
+                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser.compute(tStrBy);
+                        tRealBy = stof(tStrBy);
+                        if( tRealBy == 0.0 )
+                        {
+                            throw Plato::ParsingException("'by' keyword cannot be zero.");
+                        }
+                        tNumReals = (tRealTo - tRealFrom) / tRealBy;
+                    
+                        // make sure that the range isn't bogus
+                        if( tNumReals < 0 )
+                        {
+                            std::stringstream ss;
+                            ss << "Range (from: " << tRealFrom << ", to: " << tRealTo << ", by: " 
+                               << tRealBy << ") doesn't end." << std::endl;
+                            throw Plato::ParsingException(ss.str());
+                        }
+
+                        // check for nutty ranges
+                        if( tNumReals > 1000 )
+                        {
+                            std::stringstream ss;
+                            ss << "Range (from: " << tRealFrom << ", to: " << tRealTo << ", by: " 
+                               << tRealBy << ") would result in " << tNumReals << " values. " << std::endl;
+                            throw Plato::ParsingException(ss.str());
+                        }
+                    }
+
+                    if( tStrIntervals != "" )
+                    {
+                        // parse 'intervals='
+                        if( tStrIntervals.find("{") != std::string::npos ) 
+                            tStrIntervals = tMathParser.compute(tStrIntervals);
+                        tNumReals = stoi(tStrIntervals);
+
+                        // make sure that the range isn't bogus
+                        if( tNumReals < 0 )
+                        {
+                            throw Plato::ParsingException("'intervals' value must be positive.");
+                        }
+                        tRealBy = (tRealTo-tRealFrom)/tNumReals;
+                    }
+
+                    auto& tValues = tArrays[tVarName];
+                    for( int i=0; i<=tNumReals; i++ )
+                    {
+                        double val = tRealFrom + i * tRealBy;
+                        tValues.push_back(std::to_string(val));
+                    }
+                }
             }
         }
         else 
@@ -207,14 +373,14 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
         }
     }
 
-    if( tVariables.size() != 0 )
+    if( tArrays.size() != 0 )
     {
         int numMods;
         do
         {
             // find 'For' elements and expand them.  The for_each member function in 
             // the ForWalker class is called for each node in the tree:
-            ForWalker tForWalker(tVariables, numMods);
+            ForWalker tForWalker(tArrays, numMods);
             doc->traverse(tForWalker);
         } while ( numMods != 0 );
 
@@ -224,7 +390,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
         {
             // find arithmetic expressions and evaluate them.  The for_each member function in 
             // the MathWalker class is called for each node in the tree:
-            MathWalker tMathWalker;
+            MathWalker tMathWalker(tMathWalker);
             doc->traverse(tMathWalker);
         } while ( numMods != 0 );
     }
@@ -267,12 +433,12 @@ std::string PugiParser::MathWalker::evalExpr(std::string aString)
     std::string tString(aString);
 
     size_t tSearchPos = 0;
-    while((tSearchPos = tString.find('[',tSearchPos)) != std::string::npos)
+    while((tSearchPos = tString.find('{',tSearchPos)) != std::string::npos)
     {
-        // parsed expression starts after '['
+        // parsed expression starts after '{'
         tSearchPos++;
 
-        size_t tEndPos = tString.find(']',tSearchPos);
+        size_t tEndPos = tString.find('}',tSearchPos);
         
         size_t tStrLen = tEndPos-tSearchPos;
         std::string tExpression = tString.substr(tSearchPos, tStrLen);
@@ -344,31 +510,29 @@ PugiParser::findReplace(std::string aString, std::string aFind, std::string aRep
 {
 
     // find aFind in aString and replace with aReplace.
-    // only look for aFind between '[' and ']' delimiters
-    // tokenify the string between '[' and ']' based on arithmetic ops (i.e., {+-()/*^}) and find based on tokens
-    // the delimiters '[' and ']' are not removed.
+    // only look for aFind between '{' and '}' delimiters
+    // tokenify the string between '{' and '}' based on arithmetic ops (i.e., {+-()/*^}) and find based on tokens
+    // the delimiters '{' and '}' are not removed.
     
     std::string tString(aString);
 
     size_t tSearchPos = 0;
 
-    // for each opening '[':
-    while((tSearchPos = tString.find('[',tSearchPos)) != std::string::npos)
+    // for each opening '{':
+    while((tSearchPos = tString.find('{',tSearchPos)) != std::string::npos)
     {
 
-        // search begins at the character after '[':
- 
-        // find closing ']':
-        size_t tEndPos = tString.find(']',tSearchPos);
+        // find closing '}':
+        size_t tEndPos = tString.find('}',tSearchPos);
         if(tEndPos == std::string::npos)
         {
             std::stringstream ss;
-            ss << "Opening '[' without closing ']' in '" << aString;
+            ss << "Opening '{' without closing '}' in '" << aString;
             throw Plato::ParsingException(ss.str());
         }
 
         // search between tSearchPos and tEndPos for aFind
-        std::string tDelimiters(" +-()/*^]");
+        std::string tDelimiters(" +-()/*^}");
         size_t tNextPos;
         do
         {
@@ -379,7 +543,7 @@ PugiParser::findReplace(std::string aString, std::string aFind, std::string aRep
                 tString.replace(tSearchPos, tStrLen, aReplace);
             }
             tSearchPos = tString.find_first_of(tDelimiters,tSearchPos);
-            tEndPos = tString.find(']',tSearchPos);
+            tEndPos = tString.find('}',tSearchPos);
         } while ( tSearchPos != tEndPos );
     }
     return tString;

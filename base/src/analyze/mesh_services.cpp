@@ -66,9 +66,6 @@ double MeshServices::getTotalVolume()
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
 
-      // don't process blocks that don't have volume
-      if( elblock.getDim() != 3 ) continue;
-
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();
       int spaceDim = elblock.getDim();
@@ -96,18 +93,21 @@ double MeshServices::getTotalVolume()
 
       int numElemsThisBlock = elblock.getNumElem();
 
+      // Physical cell coordinates
+      std::vector<Real*> coords(spaceDim);
+      coords[0] = myMesh.getX();
+      if(spaceDim > 1) coords[1] = myMesh.getY();
+      if(spaceDim > 2) coords[2] = myMesh.getZ();
+
       // *** Element loop ***
       for (int iel=0; iel<numElemsThisBlock; iel++) {
 
-        // Physical cell coordinates
         int* elemConnect = elblock.Connect(iel);
-        Real* X = myMesh.getX();
-        Real* Y = myMesh.getY();
-        Real* Z = myMesh.getZ();
+
         for (int inode=0; inode<numNodesPerElem; inode++) {
-          Nodes(0,inode,0) = X[elemConnect[inode]];
-          Nodes(0,inode,1) = Y[elemConnect[inode]];
-          Nodes(0,inode,2) = Z[elemConnect[inode]];
+          for (int idim=0; idim<spaceDim; idim++) {
+            Nodes(0,inode,idim) = coords[idim][elemConnect[inode]];
+          }
         }
 
         // Compute cell Jacobians, their inverses and their determinants
@@ -155,9 +155,6 @@ MeshServices::getCurrentVolume(
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
 
-      // don't process blocks that don't have volume
-      if( elblock.getDim() != 3 ) continue;
-
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();
       int spaceDim = elblock.getDim();
@@ -187,6 +184,11 @@ MeshServices::getCurrentVolume(
 
       int numElemsThisBlock = elblock.getNumElem();
 
+      std::vector<Real*> coords(spaceDim);
+      coords[0] = myMesh.getX();
+      if(spaceDim > 1) coords[1] = myMesh.getY();
+      if(spaceDim > 2) coords[2] = myMesh.getZ();
+
       // *** Element loop ***
       for (int iel=0; iel<numElemsThisBlock; iel++) {
 
@@ -194,13 +196,10 @@ MeshServices::getCurrentVolume(
 
         // Physical cell coordinates
         int* elemConnect = elblock.Connect(iel);
-        Real* X = myMesh.getX();
-        Real* Y = myMesh.getY();
-        Real* Z = myMesh.getZ();
         for (int inode=0; inode<numNodesPerElem; inode++) {
-          Nodes(0,inode,0) = X[elemConnect[inode]];
-          Nodes(0,inode,1) = Y[elemConnect[inode]];
-          Nodes(0,inode,2) = Z[elemConnect[inode]];
+          for (int idim=0; idim<spaceDim; idim++) {
+            Nodes(0,inode,idim) = coords[idim][elemConnect[inode]];
+          }
         }
 
         // Compute cell Jacobians, their inverses and their determinants
@@ -471,6 +470,11 @@ MeshServices::getRoughness(
 
       int numElemsThisBlock = elblock.getNumElem();
 
+      std::vector<Real*> coords(spaceDim);
+      coords[0] = myMesh.getX();
+      if(spaceDim > 1) coords[1] = myMesh.getY();
+      if(spaceDim > 2) coords[2] = myMesh.getZ();
+
       // *** Element loop ***
       for (int iel=0; iel<numElemsThisBlock; iel++) {
 
@@ -478,13 +482,10 @@ MeshServices::getRoughness(
 
         // Physical cell coordinates
         int* elemConnect = elblock.Connect(iel);
-        Real* X = myMesh.getX();
-        Real* Y = myMesh.getY();
-        Real* Z = myMesh.getZ();
         for (int inode=0; inode<numNodesPerElem; inode++) {
-          Nodes(iCell,inode,0) = X[elemConnect[inode]];
-          Nodes(iCell,inode,1) = Y[elemConnect[inode]];
-          Nodes(iCell,inode,2) = Z[elemConnect[inode]];
+          for (int idim=0; idim<spaceDim; idim++) {
+            Nodes(0,inode,idim) = coords[idim][elemConnect[inode]];
+          }
           Topos(iCell,inode)   = topoField[elemConnect[inode]];
         }
 

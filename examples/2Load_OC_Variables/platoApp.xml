@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<Variable name="Apps" type="int" from="1" to="2"></Variable>
+<Array name="Apps" type="int" from="1" to="2"/>
 
 <Operation>
   <Function>PlatoMainOutput</Function>
@@ -91,7 +91,7 @@
     <Layout>Value</Layout>
     <For var="N" in="Apps">
     <Input>
-      <ArgumentName>Value [N]</ArgumentName>
+      <ArgumentName>Value {N}</ArgumentName>
     </Input>
     </For>
     <Output>
@@ -102,7 +102,7 @@
     <Layout>Nodal Field</Layout>
     <For var="N" in="Apps">
     <Input>
-      <ArgumentName>Field [N]</ArgumentName>
+      <ArgumentName>Field {N}</ArgumentName>
     </Input>
     </For>
     <Output>
@@ -112,7 +112,7 @@
   <Weighting>
     <For var="M" in="Apps">
     <Weight>
-      <Value>[1.0/2.0]</Value>
+      <Value>{1.0/2.0}</Value>
     </Weight>
     </For>
   </Weighting>

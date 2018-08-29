@@ -439,7 +439,7 @@ void Interface::createPerformers()
     std::map<int,int> tPerfCommSize;
     for( auto tNode : mInputData.getByName<Plato::InputData>("Performer") )
     {
-        // is the PerformerID already used? If so, error out.
+        // is a PerformerID specified?  If not, error out.
         //
         int tLocalPerformerID = Plato::Get::Int(tNode, "PerformerID", std::numeric_limits<int>::min());
 
@@ -454,6 +454,8 @@ void Interface::createPerformers()
             throw 1;
         } 
        
+        // is the PerformerID already used? If so, error out.
+        //
         if( std::count( tPerfIDs.begin(), tPerfIDs.end(), tLocalPerformerID ) )
         {
             if( tMyRank == 0 )
