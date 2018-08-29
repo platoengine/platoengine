@@ -437,12 +437,12 @@ namespace PlatoTestInputData
     buffer << "  <OwnerName>PlatoMain</OwnerName>"          << std::endl;
     buffer << "  <UserName>PlatoMain</UserName>"            << std::endl;
     buffer << "  <For var='N' in='Apps'>"                   << std::endl;
-    buffer << "  <UserName>LightMP_static_{N}</UserName>"   << std::endl;
+    buffer << "  <UserName>Alexa_{N}</UserName>"            << std::endl;
     buffer << "  </For>"                                    << std::endl;
     buffer << "</SharedData>"                               << std::endl;
-    buffer << "<For var='R' in='Angles'>"                   << std::endl;
+    buffer << "<For var='R,N' in='Angles,Apps'>"            << std::endl;
     buffer << "<Operation>"                                 << std::endl;
-    buffer << "  <PerformerName>Alexa</PerformerName>"      << std::endl;
+    buffer << "  <PerformerName>Alexa_{N}</PerformerName>"  << std::endl;
     buffer << "  <Name>Compute Objective Gradient</Name>"   << std::endl;
     buffer << "  <Parameter>"                               << std::endl;
     buffer << "    <ArgumentName>Traction X</ArgumentName>" << std::endl;
@@ -460,8 +460,8 @@ namespace PlatoTestInputData
     auto userNames = inputData.get<Plato::InputData>("SharedData").getByName<std::string>("UserName");
 
     EXPECT_EQ( userNames[0], "PlatoMain" );
-    EXPECT_EQ( userNames[1], "LightMP_static_1" );
-    EXPECT_EQ( userNames[2], "LightMP_static_2" );
+    EXPECT_EQ( userNames[1], "Alexa_1" );
+    EXPECT_EQ( userNames[2], "Alexa_2" );
 
     EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 5 );
 
@@ -473,6 +473,11 @@ namespace PlatoTestInputData
     EXPECT_NEAR(stof(operations[3].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf(  5.0*pi/180.0), 1e-6 );
     EXPECT_NEAR(stof(operations[4].get<Plato::InputData>("Parameter").get<std::string>("ArgumentValue")), cosf( 10.0*pi/180.0), 1e-6 );
 
+    EXPECT_EQ(operations[0].get<std::string>("PerformerName"), "Alexa_1");
+    EXPECT_EQ(operations[1].get<std::string>("PerformerName"), "Alexa_2");
+    EXPECT_EQ(operations[2].get<std::string>("PerformerName"), "Alexa_3");
+    EXPECT_EQ(operations[3].get<std::string>("PerformerName"), "Alexa_4");
+    EXPECT_EQ(operations[4].get<std::string>("PerformerName"), "Alexa_5");
   }
 
 

@@ -90,6 +90,7 @@ class PugiParser : public Parser {
     static void recursiveFindReplace(pugi::xml_node aNode, std::string aFind, std::string aReplace);
     static void deleteNodesByName(pugi::xml_node aNode, std::string aNodeName);
     static std::string findReplace(std::string aString, std::string aFind, std::string aReplace);
+    static std::vector<std::string> tokenize(std::string aString, const char aDelimiter);
 
 
   private:

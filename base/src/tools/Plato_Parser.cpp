@@ -459,6 +459,9 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
         {
             throw Plato::ParsingException("'For' element missing 'var' attribute");
         }
+  
+        // tokenize to account for compound 'For' loops (i.e., For var='I,J', etc.)
+        auto tStrVars = tokenize(tStrVar,',');
 
         // verify 'in' input
         std::string tStrIn  = aNode.attribute("in").value();
@@ -466,25 +469,48 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
         {
             throw Plato::ParsingException("'For' element missing 'in' attribute");
         }
+        // tokenize
+        auto tStrIns = tokenize(tStrIn,',');
 
-        // verify requested variable exists
-        if( mVarMap.count(tStrIn) == 0 )
+        // compound 'var' and 'in' must be same length
+        if( tStrVars.size() != tStrIns.size() )
         {
-            std::stringstream ss;
-            ss <<"'For' element requested undefined variable: '" << tStrIn << "'." << std::endl;
-            throw Plato::ParsingException(ss.str());
+            throw Plato::ParsingException("Compound 'For' element with unequal length 'var' and 'in'.");
         }
-        const auto& tInstances = mVarMap.at(tStrIn);
 
-        for( auto tVal : tInstances )
+        // verify requested variables exists and check that lengths are equal
+        int tNumVals = -1;
+        for( auto tStr : tStrIns )
+        {
+            if( mVarMap.count(tStr) == 0 )
+            {
+                std::stringstream ss;
+                ss <<"'For' element requested undefined variable: '" << tStr << "'." << std::endl;
+                throw Plato::ParsingException(ss.str());
+            }
+            int tNewLen = mVarMap.at(tStr).size();
+            if( tNumVals != -1 && tNumVals != tNewLen )
+            {
+                throw Plato::ParsingException("Arrays in compound For statements must be equal length.");
+            }
+            tNumVals = tNewLen;
+        }
+
+        for( int iVal=0; iVal<tNumVals; iVal++ )
         {
             // copy pattern above For node.
             for( auto toCopy=aNode.first_child(); toCopy; toCopy = toCopy.next_sibling())
             {
                 auto copied = aNode.parent().insert_copy_before(toCopy, aNode);
-     
-                // find/replace var in new copy.
-                PugiParser::recursiveFindReplace(copied, tStrVar, tVal);
+
+                for( int iVar=0; iVar<tStrVars.size(); iVar++ )
+                {
+                    std::string tVal = mVarMap.at(tStrIns[iVar])[iVal];
+                    std::string tVar = tStrVars[iVar];
+         
+                    // find/replace var in new copy.
+                    PugiParser::recursiveFindReplace(copied, tVar, tVal);
+                }
             }
         }
         aNode.set_name("Delete");
@@ -494,8 +520,24 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
     return true; // continue traversal
 }
 
+std::vector<std::string>
+PugiParser::tokenize( std::string aString, const char aDelimiter )
+{
+  std::vector<std::string> tTokens;
+  {
+    std::istringstream tStream(aString);
+    std::string tToken;
+    while (std::getline(tStream, tToken, aDelimiter))
+    {
+      tTokens.push_back(tToken);
+    }
+  }
+  return tTokens;
+}
+
+
 void 
-PugiParser::recursiveFindReplace(pugi::xml_node aNode, std::string aFind, std::string aReplace)
+PugiParser::recursiveFindReplace( pugi::xml_node aNode, std::string aFind, std::string aReplace)
 {
     for( auto tNode : aNode.children() )
     {
