@@ -1,0 +1,7 @@
+<Define name="NumPoints" value="2"     />
+<Define name="Angle"     value="10.0"  />
+<Define name="LoadMag"   value="1.0e4" />
+
+<Array  name="Apps"      type="int"    from="1" to="{NumPoints}"/>
+<Array  name="Angles"    type="real"   from="{-Angle*pi/180.0}" to="{Angle*pi/180.0}" intervals="{NumPoints-1}"/>
+<Array  name="weights"   type="real"   from="{1.0/NumPoints}" to="{1.0/NumPoints}" intervals="{NumPoints}"/>

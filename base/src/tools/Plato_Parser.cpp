@@ -189,9 +189,27 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
 
     // process 'includes'.  included files are pulled in verbatim.
     //
-    // JR TODO.
+    for( auto tIncludeNode = doc->child("include"); tIncludeNode; tIncludeNode = tIncludeNode.next_sibling("include"))
+    {
+        std::string tFilename  = tIncludeNode.attribute("filename").value();
+        pugi::xml_document tInclude;
+        pugi::xml_parse_result tResult = tInclude.load_file(tFilename.c_str());
+        if(!tResult)
+        {
+            std::stringstream ss;
+            ss << "Error loading file '" << tFilename << "'.";
+            throw Plato::ParsingException(ss.str());
+        }
+        for( auto tNode = tInclude.first_child(); tNode; tNode = tNode.next_sibling() )
+        {
+            auto copied = doc->insert_copy_before(tNode, tIncludeNode);
+        }
+        tIncludeNode.set_name("Delete");
+    }
+    PugiParser::deleteNodesByName(*doc, "Delete");
 
-    Plato::MathParser tMathParser;
+
+    std::shared_ptr<Plato::MathParser> tMathParser(new MathParser);
 
     // parse 'Define' definitions
     //
@@ -199,7 +217,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
     {
         std::string tDefName  = tDefineNode.attribute("name").value();
         std::string tDefValue = tDefineNode.attribute("value").value();
-        tMathParser.addVariable(tDefName, tDefValue);
+        tMathParser->addVariable(tDefName, tDefValue);
     }
     
 
@@ -231,18 +249,18 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 {
                     // parse from=, to=, by=, 
                     std::string tStrFrom = tArrayNode.attribute("from").value();
-                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser.compute(tStrFrom);
+                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser->compute(tStrFrom);
                     int tIntFrom = stoi(tStrFrom);
 
                     std::string tStrTo = tArrayNode.attribute("to").value();
-                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser.compute(tStrTo);
+                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser->compute(tStrTo);
                     int tIntTo  = stoi(tStrTo);
 
                     std::string tStrBy = tArrayNode.attribute("by").value();
                     int tIntBy = 1;
                     if( tStrBy != "" )
                     {
-                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser.compute(tStrBy);
+                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser->compute(tStrBy);
                         tIntBy = stoi(tStrBy);
                     }
                     if( tIntBy == 0 )
@@ -289,12 +307,12 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 {
                     // parse from=
                     std::string tStrFrom = tArrayNode.attribute("from").value();
-                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser.compute(tStrFrom);
+                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser->compute(tStrFrom);
                     double tRealFrom = stof(tStrFrom);
 
                     // parse to=
                     std::string tStrTo = tArrayNode.attribute("to").value();
-                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser.compute(tStrTo);
+                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser->compute(tStrTo);
                     double tRealTo  = stof(tStrTo);
 
                     // parse by= or intervals=
@@ -314,7 +332,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                     if( tStrBy != "" )
                     {
                         // parse 'by='
-                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser.compute(tStrBy);
+                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser->compute(tStrBy);
                         tRealBy = stof(tStrBy);
                         if( tRealBy == 0.0 )
                         {
@@ -345,11 +363,11 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                     {
                         // parse 'intervals='
                         if( tStrIntervals.find("{") != std::string::npos ) 
-                            tStrIntervals = tMathParser.compute(tStrIntervals);
+                            tStrIntervals = tMathParser->compute(tStrIntervals);
                         tNumReals = stoi(tStrIntervals);
 
                         // make sure that the range isn't bogus
-                        if( tNumReals < 0 )
+                        if( tNumReals <= 0 )
                         {
                             throw Plato::ParsingException("'intervals' value must be positive.");
                         }
@@ -390,7 +408,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
         {
             // find arithmetic expressions and evaluate them.  The for_each member function in 
             // the MathWalker class is called for each node in the tree:
-            MathWalker tMathWalker(tMathWalker);
+            MathWalker tMathWalker(tMathParser);
             doc->traverse(tMathWalker);
         } while ( numMods != 0 );
     }
@@ -442,7 +460,7 @@ std::string PugiParser::MathWalker::evalExpr(std::string aString)
         
         size_t tStrLen = tEndPos-tSearchPos;
         std::string tExpression = tString.substr(tSearchPos, tStrLen);
-        std::string tParsed = mMathParser.parse(tExpression);
+        std::string tParsed = mMathParser->compute(tExpression);
 
         tString.replace(tSearchPos-1, tStrLen+2, tParsed);
     }

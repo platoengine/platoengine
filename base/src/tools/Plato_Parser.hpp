@@ -111,10 +111,10 @@ class PugiParser : public Parser {
 
     class MathWalker : public pugi::xml_tree_walker
     {
-        Plato::MathParser& mMathParser;
+        std::shared_ptr<Plato::MathParser> mMathParser;
 
       public:
-        MathWalker(Plato::MathParser& aMathParser) : mMathParser(aMathParser) {}
+        MathWalker(std::shared_ptr<Plato::MathParser> aMathParser) : mMathParser(aMathParser) {}
         virtual bool for_each(pugi::xml_node& node);
       private:
         std::string evalExpr(std::string);
