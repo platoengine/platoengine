@@ -53,9 +53,11 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-#include<cassert>
+#include <cassert>
+#include <utility>
 #include "XMLGenerator.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
+#include "Plato_UniqueCounter.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -146,18 +148,52 @@ bool XMLGenerator::generate()
 bool XMLGenerator::expandUncertaintiesForGenerate()
 /******************************************************************************/
 {
+    // make unique load counter
+    Plato::UniqueCounter unique_load_counter;
+
     // map load ids to load indices
     std::map<int, std::vector<int> > loadIdToPrivateLoadIndices;
     // for each load
     const int num_load_cases = m_InputData.load_cases.size();
     for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
     {
+        // register load case
+        const int load_cases_id = std::atoi(m_InputData.load_cases[privateLoadIndex].id.c_str());
+        unique_load_counter.mark(load_cases_id);
+
         const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
-        if(this_loads.size() == 1)
+        const int num_this_loads = this_loads.size();
+        if(num_this_loads == 1)
         {
             // build map
             const int load_id = std::atoi(this_loads[0].load_id.c_str());
             loadIdToPrivateLoadIndices[load_id].push_back(privateLoadIndex);
+        }
+
+        // for each load within this case
+        for(int this_load_index = 0; this_load_index < num_this_loads; this_load_index++)
+        {
+            // register load id
+            const int load_id = std::atoi(this_loads[this_load_index].load_id.c_str());
+            unique_load_counter.mark(load_id);
+        }
+    }
+
+    // map load ids to objectives
+    std::map<int, std::vector<std::pair<int, int> > > loadCaseId_to_PrivateObjectiveAndSubIndexPair;
+    const int num_objectives = m_InputData.objectives.size();
+    for(int objIndex = 0; objIndex < num_objectives; objIndex++)
+    {
+        // get all load cases
+        const std::vector<std::string>& this_obj_load_case_ids = m_InputData.objectives[objIndex].load_case_ids;
+        // for each load case
+        const int this_num_case_ids = this_obj_load_case_ids.size();
+        for(int subIndex = 0; subIndex < this_num_case_ids; subIndex++)
+        {
+            // get id
+            const int load_case_id = std::atoi(this_obj_load_case_ids[subIndex].c_str());
+            // register
+            loadCaseId_to_PrivateObjectiveAndSubIndexPair[load_case_id].push_back(std::make_pair(objIndex, subIndex));
         }
     }
 
@@ -263,7 +299,6 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
     }
 
     // for each objective
-    const int num_objectives = m_InputData.objectives.size();
 
     // TODO: set, multi load case true
     // TODO: set, load case weights 1 1 1 (based on samples)

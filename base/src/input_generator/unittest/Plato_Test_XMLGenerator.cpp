@@ -1835,7 +1835,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getObjPerfName(4), "lightmp_1");
 }
 
-TEST(PlatoTestXMLGenerator,uncertainLoad)
+TEST(PlatoTestXMLGenerator,uncertainLoad_single)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
@@ -1854,7 +1854,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad)
                 "force nodeset 2 value 7 0 0 load id 34\n"
             "end loads\n"
             "begin uncertainties\n"
-                "load 34 angle variation Z distribution uniform upper 8 lower -2 num samples 3\n"
+                "load 34 angle variation Z distribution uniform upper 40 lower -35 num samples 3\n"
             "end uncertainties\n";
 
     // do parse
@@ -1881,6 +1881,110 @@ TEST(PlatoTestXMLGenerator,uncertainLoad)
     EXPECT_EQ(tester.getLoadDirectionX("34",0), "7");
     EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
     EXPECT_EQ(tester.getLoadDirectionZ("34",0), "0");
+}
+
+TEST(PlatoTestXMLGenerator,uncertainLoad_two)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective"
+                "type maximize stiffness\n"
+                "load ids 8\n"
+                "boundary condition ids 256\n"
+                "code salinas\n"
+                "number processors 3\n"
+                "weight 1 \n"
+            "end objective\n"
+            "begin loads\n"
+                "force nodeset 2 value 5 0 0 load id 8\n"
+                "force nodeset 4 value 1 1 1 load id 1\n"
+                "force nodeset 3 value 0 -1 -2 load id 1\n"
+                "force nodeset 1 value 3 -4 1 load id 2\n"
+            "end loads\n"
+            "begin uncertainties\n"
+                "load 8 angle variation Y distribution uniform upper 25 lower -30 num samples 4\n"
+                "load 8 angle variation Z distribution beta mean 5 upper 30 lower -25 standard deviation 15 num samples 3\n"
+            "end uncertainties\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+
+    // do expand
+    EXPECT_EQ(tester.publicExpandUncertaintiesForGenerate(), false);
+
+    // TODO modify
+    EXPECT_EQ(tester.getLoadType("8",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("8",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("8",0), "2");
+    EXPECT_EQ(tester.getLoadDirectionX("8",0), "5");
+    EXPECT_EQ(tester.getLoadDirectionY("8",0), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("8",0), "0");
+}
+
+TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective"
+                "type maximize stiffness\n"
+                "load ids 1 8\n"
+                "boundary condition ids 256\n"
+                "code salinas\n"
+                "number processors 3\n"
+                "weight 1 \n"
+            "end objective\n"
+            "begin loads\n"
+                "force nodeset 2 value 5 0 0 load id 8\n"
+                "force nodeset 4 value 1 1 1 load id 1\n"
+                "force nodeset 3 value 0 -1 -2 load id 1\n"
+                "force nodeset 1 value 3 -4 1 load id 2\n"
+            "end loads\n"
+            "begin uncertainties\n"
+                "load 8 angle variation Y distribution uniform upper 25 lower -30 num samples 4\n"
+                "load 8 angle variation Z distribution beta mean 5 upper 30 lower -25 standard deviation 15 num samples 3\n"
+            "end uncertainties\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+
+    // do expand
+    EXPECT_EQ(tester.publicExpandUncertaintiesForGenerate(), false);
+
+    // TODO modify
+    EXPECT_EQ(tester.getLoadType("8",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("8",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("8",0), "2");
+    EXPECT_EQ(tester.getLoadDirectionX("8",0), "5");
+    EXPECT_EQ(tester.getLoadDirectionY("8",0), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("8",0), "0");
 }
 
 } // end PlatoTestXMLGenerator namespace

@@ -78,6 +78,8 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
 {
     // grab values from input struct
     const OrdinalType tNumSamples = aInput.mNumSamples;
+    const ScalarType tLowerBound = aInput.mLowerBound;
+    const ScalarType tUpperBound = aInput.mUpperBound;
     OrdinalType tMaxNumMoments = 0;
     if(aInput.mMaxNumDistributionMoments < 1)
     {
@@ -140,8 +142,13 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     aOutput.resize(tNumSamples);
     for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        aOutput[tIndex].mSampleValue = tFinalControl(0,tIndex);
-        aOutput[tIndex].mSampleWeight = tFinalControl(1,tIndex);
+        // undo scaling
+        const ScalarType tUnscaledSampleValue = tFinalControl(0, tIndex);
+        aOutput[tIndex].mSampleValue = tLowerBound + (tUpperBound - tLowerBound) * tUnscaledSampleValue;
+        // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
+        // confirmed accurate for beta dist'n alone
+
+        aOutput[tIndex].mSampleWeight = tFinalControl(1, tIndex);
     }
 }
 // function solve_uncertainty

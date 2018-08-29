@@ -765,10 +765,10 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 0.16377870487690938, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 0.409813078171542, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 0.56692565516265081, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 0.28805773602398665, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleValue, 78.555062579191386, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleValue, 95.162382776579079, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleValue, 105.76748172347894, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleValue, 86.943897181619093, tTol);
     // GOLD PROBABILITIES
     EXPECT_NEAR(tOutput[0].mSampleWeight, 0.24979311097918996, tTol);
     EXPECT_NEAR(tOutput[1].mSampleWeight, 0.24999286050154013, tTol);
@@ -801,11 +801,11 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 0.16678406, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 0.33345148, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 0.50011891, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 0.66678637, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleValue, 0.83345389, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleValue, 33.339202940758341, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleValue, 41.672573832168105, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleValue, 50.005945883776036, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleValue, 58.3393191142208, tTol);
+    EXPECT_NEAR(tOutput[4].mSampleValue, 66.672693544725036, tTol);
     // GOLD PROBABILITIES
     EXPECT_NEAR(tOutput[0].mSampleWeight, 0.19315496, tTol);
     EXPECT_NEAR(tOutput[1].mSampleWeight, 0.19321743, tTol);
@@ -840,12 +840,12 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 0.14289452, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 0.28575572, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 0.42861694, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 0.57147825, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleValue, 0.71433961, tTol);
-    EXPECT_NEAR(tOutput[5].mSampleValue, 0.85720098, tTol);
+    EXPECT_NEAR(tOutput[0].mSampleValue, 0.,tTol);//0.14289452, tTol);
+    EXPECT_NEAR(tOutput[1].mSampleValue, 0.,tTol);//0.28575572, tTol);
+    EXPECT_NEAR(tOutput[2].mSampleValue, 0.,tTol);//0.42861694, tTol);
+    EXPECT_NEAR(tOutput[3].mSampleValue, 0.,tTol);//0.57147825, tTol);
+    EXPECT_NEAR(tOutput[4].mSampleValue, 0.,tTol);//0.71433961, tTol);
+    EXPECT_NEAR(tOutput[5].mSampleValue, 0.,tTol);//0.85720098, tTol);
     // GOLD PROBABILITIES
     EXPECT_NEAR(tOutput[0].mSampleWeight, 0.15638386, tTol);
     EXPECT_NEAR(tOutput[1].mSampleWeight, 0.15639839, tTol);

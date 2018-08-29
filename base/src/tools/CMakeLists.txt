@@ -9,6 +9,7 @@ set(${LIB_NAME}_SOURCES Plato_Parser.cpp
                         Plato_StageInputDataMng.cpp
                         math_parser/tinyexpr.c
                         pugixml.cpp
+                        Plato_UniqueCounter.cpp
                         Plato_Vector3DVariations.cpp)
 set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_InputData.hpp
@@ -17,6 +18,7 @@ set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_StageInputDataMng.hpp
                         pugixml.hpp
                         pugiconfig.hpp
+                        Plato_UniqueCounter.hpp
                         Plato_Vector3DVariations.hpp)
 
 set(LIB_NAME Convergence)
