@@ -52,7 +52,9 @@
 
 #include <cmath>
 #include <math.h>
+#include <cstdio>
 #include <cassert>
+#include <cstddef>
 
 namespace Plato
 {
