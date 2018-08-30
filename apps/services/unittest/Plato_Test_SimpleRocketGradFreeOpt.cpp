@@ -141,6 +141,7 @@ public:
 
     double evaluate(const std::vector<double>& aControls)
     {
+        this->inputData(aControls);
         mRocketModel.solve();
         std::vector<double> tSimulationThrustProfile = mRocketModel.getThrustProfile();
         assert(tSimulationThrustProfile.size() == mTargetThrustProfile.size());
