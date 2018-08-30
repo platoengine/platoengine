@@ -141,8 +141,12 @@ public:
             mTimes(),
             mThrustProfile(),
             mPressureProfile(),
-            mGeometryModel(std::make_shared<Plato::CircularCylinder<ScalarType>>())
+            mChamberGeomModel(std::make_shared<Plato::CircularCylinder<ScalarType>>())
     {
+        std::map<std::string, ScalarType> tGeomParam;
+        tGeomParam.insert(std::pair<std::string, ScalarType>("Radius", mChamberRadius));
+        tGeomParam.insert(std::pair<std::string, ScalarType>("Length", mChamberLength));
+        mChamberGeomModel->set(tGeomParam);
     }
 
     /******************************************************************************//**
@@ -151,7 +155,7 @@ public:
      * @param aGeomModel geometry model used for the rocket chamber
     **********************************************************************************/
     explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs,
-                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aGeomModel) :
+                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeomModel) :
             mPrint(true),
             mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
             mChamberLength(aInputs.mChamberLength), // m
@@ -170,7 +174,7 @@ public:
             mTimes(),
             mThrustProfile(),
             mPressureProfile(),
-            mGeometryModel(aGeomModel)
+            mChamberGeomModel(aChamberGeomModel)
     {
     }
 
@@ -320,12 +324,9 @@ public:
     {
         // set simulation-specific data
         mRefBurnRate = aParam.find("RefBurnRate")->second;
-
         // set geometry model parameters
         std::map<std::string, ScalarType> tGeomParam;
         mChamberRadius = aParam.find("Radius")->second;
-        tGeomParam.insert(std::pair<std::string, ScalarType>("Radius", mChamberRadius));
-        tGeomParam.insert(std::pair<std::string, ScalarType>("Length", mChamberLength));
     }
 
     /******************************************************************************//**
@@ -453,7 +454,7 @@ private:
     std::vector<ScalarType> mThrustProfile;
     std::vector<ScalarType> mPressureProfile;
 
-    std::shared_ptr<Plato::GeometryModel<ScalarType>> mGeometryModel;
+    std::shared_ptr<Plato::GeometryModel<ScalarType>> mChamberGeomModel;
 };
 // class SimpleRocket
 
