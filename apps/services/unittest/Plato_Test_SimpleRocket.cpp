@@ -56,7 +56,6 @@ namespace PlatoTest
 TEST(PlatoTest, SimpleRocket)
 {
     Plato::SimpleRocket<double> tDriver;
-    tDriver.disableOutput();
     tDriver.solve();
 
     std::vector<double> tTimes = tDriver.getTimeProfile();
