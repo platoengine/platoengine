@@ -54,8 +54,11 @@
 #include <cmath>
 #include <math.h>
 #include <cstdio>
+#include <memory>
 #include <cassert>
 #include <cstddef>
+
+#include "Plato_CircularCylinder.hpp"
 
 namespace Plato
 {
@@ -137,15 +140,18 @@ public:
             mInvPrefAlpha(),
             mTimes(),
             mThrustProfile(),
-            mPressureProfile()
+            mPressureProfile(),
+            mGeometryModel(std::make_shared<Plato::CircularCylinder<ScalarType>>())
     {
     }
 
     /******************************************************************************//**
      * @brief Constructor
      * @param aInputs input parameters for simulation
+     * @param aGeomModel geometry model used for the rocket chamber
     **********************************************************************************/
-    explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs) :
+    explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs,
+                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aGeomModel) :
             mPrint(true),
             mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
             mChamberLength(aInputs.mChamberLength), // m
@@ -163,7 +169,8 @@ public:
             mInvPrefAlpha(),
             mTimes(),
             mThrustProfile(),
-            mPressureProfile()
+            mPressureProfile(),
+            mGeometryModel(aGeomModel)
     {
     }
 
@@ -322,7 +329,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief compute thrust and pressure profiles using an algebraic model for the solid fuel rocket.
+     * @brief compute thrust and pressure profiles given a simple algebraic model for a rocket.
      **********************************************************************************/
     void solve()
     {
@@ -445,6 +452,8 @@ private:
     std::vector<ScalarType> mTimes;
     std::vector<ScalarType> mThrustProfile;
     std::vector<ScalarType> mPressureProfile;
+
+    std::shared_ptr<Plato::GeometryModel<ScalarType>> mGeometryModel;
 };
 // class SimpleRocket
 

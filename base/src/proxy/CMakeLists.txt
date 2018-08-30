@@ -8,7 +8,9 @@ set(${LIB_NAME}_SOURCES Plato_StructuralTopologyOptimization.cpp
 
 set(${LIB_NAME}_HEADERS Plato_ProxyVolume.hpp
 						Plato_SimpleRocket.hpp
+						Plato_GeometryModel.hpp
 						Plato_ProxyCompliance.hpp
+						Plato_CircularCylinder.hpp
 						Plato_StructuralTopologyOptimization.hpp
 						Plato_StructuralTopologyOptimizationProxyApp.hpp
 						)

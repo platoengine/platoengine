@@ -50,75 +50,26 @@
 
 #include <map>
 #include <vector>
+#include <memory>
 #include <utility>
 #include <cassert>
 #include <cstddef>
 
 #include "Plato_SimpleRocket.hpp"
+#include "Plato_CircularCylinder.hpp"
+
 #include "PSL_DiscreteObjective.hpp"
 
 namespace Plato
 {
 
-template<typename ScalarType = double>
-class GeometryModel
-{
-public:
-    virtual ~GeometryModel(){}
-
-    virtual ScalarType area() = 0;
-    virtual void set(const std::map<std::string, ScalarType>& aParam) = 0;
-};
-// class GeometryModel
-
-template<typename ScalarType = double>
-class CircularCylinder : public GeometryModel<ScalarType>
-{
-public:
-    CircularCylinder() :
-            mParameters()
-    {
-    }
-
-    virtual ~CircularCylinder()
-    {
-    }
-
-    ScalarType area()
-    {
-        const ScalarType tRadius = mParameters.find("Radius")->second;
-        const ScalarType tLength = mParameters.find("Length")->second;
-        const ScalarType tArea = static_cast<ScalarType>(2) * M_PI * tRadius * tLength;
-        return (tArea);
-    }
-
-    void gradient(std::vector<ScalarType>& aOutput)
-    {
-        assert(aOutput.size() == static_cast<size_t>(2));
-
-        const ScalarType tRadius = mParameters.find("Radius")->second;
-        const ScalarType tLength = mParameters.find("Length")->second;
-        aOutput[0] = static_cast<ScalarType>(2) * M_PI * tLength;
-        aOutput[1] = static_cast<ScalarType>(2) * M_PI * tRadius;
-    }
-
-    void set(const std::map<std::string, ScalarType>& aParam)
-    {
-        mParameters = aParam;
-    }
-
-private:
-    std::map<std::string, ScalarType> mParameters;
-};
-// class CircularCylinder
-
 class SimpleRocketObjectiveGradFree : public PlatoSubproblemLibrary::DiscreteObjective
 {
 public:
     SimpleRocketObjectiveGradFree(const Plato::SimpleRocketInuts<double>& aRocketInputs,
-                                  const Plato::GeometryModel<double>& aGeomModel) :
+                                  const std::shared_ptr<Plato::GeometryModel<double>>& aGeomModel) :
             PlatoSubproblemLibrary::DiscreteObjective(),
-            mRocketModel(aRocketInputs),
+            mRocketModel(aRocketInputs, aGeomModel),
             mTargetThrustProfile(),
             mNumEvaluationsPerDim(),
             mBounds()
@@ -219,7 +170,7 @@ private:
 };
 // class SimpleRocketObjectiveGradFree
 
-} // namespace
+} // namespace Plato
 
 namespace PlatoTest
 {
@@ -227,8 +178,9 @@ namespace PlatoTest
 TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 {
     // allocate problem inputs - use default parameters
-    Plato::CircularCylinder<double> tGeomModel;
     Plato::SimpleRocketInuts<double> tRocketInputs;
+    std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
+            std::make_shared<Plato::CircularCylinder<double>>();
 
     // domain dimension = 10x10=100
     std::vector<int> tNumEvaluationsPerDim = {10, 10};
