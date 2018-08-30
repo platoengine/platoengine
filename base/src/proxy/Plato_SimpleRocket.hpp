@@ -50,6 +50,7 @@
 
 #define _USE_MATH_DEFINES
 
+#include <map>
 #include <cmath>
 #include <math.h>
 #include <cstdio>
@@ -281,7 +282,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return time steps.
+     * @brief returns time steps.
      **********************************************************************************/
     std::vector<ScalarType> getTimeProfile() const
     {
@@ -289,7 +290,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return thrust values for each time snapshot.
+     * @brief returns thrust values for each time snapshot.
      **********************************************************************************/
     std::vector<ScalarType> getThrustProfile() const
     {
@@ -297,11 +298,27 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return pressure values for each time snapshot.
+     * @brief returns pressure values for each time snapshot.
      **********************************************************************************/
     std::vector<ScalarType> getPressuresProfile() const
     {
         return (mPressureProfile);
+    }
+
+    /******************************************************************************//**
+     * @brief Input data received from optimizer.
+     * @param aParam design variables
+     **********************************************************************************/
+    void inputData(const std::map<std::string, ScalarType>& aParam)
+    {
+        // set simulation-specific data
+        mRefBurnRate = aParam.find("RefBurnRate")->second;
+
+        // set geometry model parameters
+        std::map<std::string, ScalarType> tGeomParam;
+        mChamberRadius = aParam.find("Radius")->second;
+        tGeomParam.insert(std::pair<std::string, ScalarType>("Radius", mChamberRadius));
+        tGeomParam.insert(std::pair<std::string, ScalarType>("Length", mChamberLength));
     }
 
     /******************************************************************************//**
@@ -324,20 +341,19 @@ public:
         ScalarType tTime = 0.0;
         ScalarType tThrust = 0.0;
         ScalarType tTotalPressure = mRefPressure; // initial guess
-        ScalarType tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberRadius;
 
         bool tBurning = true;
         while(tBurning == true)
         {
             if(mPrint == true)
             {
-                printf("time = %f,\t Thrust = %f,\t Pressure = %f\n", tTime, tThrust, tTotalPressure);
+                printf("Time = %f,\t Thrust = %f,\t Pressure = %f\n", tTime, tThrust, tTotalPressure);
             }
 
             mTimes.push_back(tTime);
             mThrustProfile.push_back(tThrust);
             mPressureProfile.push_back(tTotalPressure);
-            tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberLength;
+            ScalarType tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberLength;
 
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 

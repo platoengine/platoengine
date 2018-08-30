@@ -48,6 +48,7 @@
 
 #include "gtest/gtest.h"
 
+#include <map>
 #include <vector>
 #include <utility>
 #include <cassert>
@@ -58,6 +59,59 @@
 
 namespace Plato
 {
+
+template<typename ScalarType = double>
+class GeometryModel
+{
+public:
+    GeometryModel(){}
+    virtual ~GeometryModel(){}
+
+    virtual ScalarType area() = 0;
+    virtual void set(const std::map<std::string, ScalarType>& aParam) = 0;
+};
+// class GeometryModel
+
+template<typename ScalarType = double>
+class CircularCylinder
+{
+public:
+    CircularCylinder() :
+            mParameters()
+    {
+    }
+
+    virtual ~CircularCylinder()
+    {
+    }
+
+    ScalarType area()
+    {
+        const ScalarType tRadius = mParameters.find("Radius")->second;
+        const ScalarType tLength = mParameters.find("Length")->second;
+        const ScalarType tArea = static_cast<ScalarType>(2) * M_PI * tRadius * tLength;
+        return (tArea);
+    }
+
+    void gradient(std::vector<ScalarType>& aOutput)
+    {
+        assert(aOutput.size() == static_cast<size_t>(2));
+
+        const ScalarType tRadius = mParameters.find("Radius")->second;
+        const ScalarType tLength = mParameters.find("Length")->second;
+        aOutput[0] = static_cast<ScalarType>(2) * M_PI * tLength;
+        aOutput[1] = static_cast<ScalarType>(2) * M_PI * tRadius;
+    }
+
+    void set(const std::map<std::string, ScalarType>& aParam)
+    {
+        mParameters = aParam;
+    }
+
+private:
+    std::map<std::string, ScalarType> mParameters;
+};
+// class CircularCylinder
 
 class SimpleRocketObjectiveGradFree : public PlatoSubproblemLibrary::DiscreteObjective
 {
@@ -103,6 +157,9 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Set target data and disable console output.
+     **********************************************************************************/
     void initialize()
     {
         mTargetThrustProfile =
@@ -132,6 +189,18 @@ private:
             6655793.704806847, 6747260.227631442, 6839795.624579719, 6933410.196724654,
             7028114.32338894, 7123918.462580209, 7220833.151427887};
         mRocketModel.disableOutput();
+    }
+
+    /******************************************************************************//**
+     * @brief Import design variables into simulation.
+     * @param aControls design variables
+     **********************************************************************************/
+    void inputData(const std::vector<double>& aControls)
+    {
+        std::map<std::string, double> tParam;
+        tParam.insert(std::pair<std::string, double>("Radius",aControls[0]));
+        tParam.insert(std::pair<std::string, double>("RefBurnRate",aControls[1]));
+        mRocketModel.inputData(tParam);
     }
 
 private:
