@@ -141,12 +141,8 @@ public:
             mTimes(),
             mThrustProfile(),
             mPressureProfile(),
-            mChamberGeomModel(std::make_shared<Plato::CircularCylinder<ScalarType>>())
+            mChamberGeomModel(std::make_shared<Plato::CircularCylinder<ScalarType>>(mChamberRadius, mChamberLength))
     {
-        std::map<std::string, ScalarType> tGeomParam;
-        tGeomParam.insert(std::pair<std::string, ScalarType>("Radius", mChamberRadius));
-        tGeomParam.insert(std::pair<std::string, ScalarType>("Length", mChamberLength));
-        mChamberGeomModel->set(tGeomParam);
     }
 
     /******************************************************************************//**
@@ -317,16 +313,22 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Input data received from optimizer.
-     * @param aParam design variables
+     * @brief update parameters associated with the simulation.
+     * @param aParam simulation parameters
      **********************************************************************************/
-    void inputData(const std::map<std::string, ScalarType>& aParam)
+    void updateSimulation(const std::map<std::string, ScalarType>& aParam)
     {
         // set simulation-specific data
         mRefBurnRate = aParam.find("RefBurnRate")->second;
-        // set geometry model parameters
-        std::map<std::string, ScalarType> tGeomParam;
-        mChamberRadius = aParam.find("Radius")->second;
+    }
+
+    /******************************************************************************//**
+     * @brief update chambers geometry.
+     * @param aParam parameters associated with the chamber's geometry
+     **********************************************************************************/
+    void updateInitialChamberGeometry(const std::map<std::string, ScalarType>& aParam)
+    {
+        mChamberGeomModel->update(aParam);
     }
 
     /******************************************************************************//**
@@ -350,6 +352,12 @@ public:
         ScalarType tThrust = 0.0;
         ScalarType tTotalPressure = mRefPressure; // initial guess
 
+        // initialize geometry map
+        std::map<std::string, ScalarType> tChamberGeom;
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("BurnRate", 0.0));
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("DeltaTime", mDeltaTime));
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("Configuration", Plato::Configuration::DYNAMIC));
+
         bool tBurning = true;
         while(tBurning == true)
         {
@@ -361,7 +369,7 @@ public:
             mTimes.push_back(tTime);
             mThrustProfile.push_back(tThrust);
             mPressureProfile.push_back(tTotalPressure);
-            ScalarType tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberLength;
+            ScalarType tChamberArea = mChamberGeomModel->area();
 
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 
@@ -369,7 +377,8 @@ public:
             tThrust = static_cast<ScalarType>(269.0) * static_cast<ScalarType>(9.8) * tChamberArea * (tTotalPressure - mAmbientPressure)
                     / mCharacteristicVelocity;
 
-            mChamberRadius += tRdot * mDeltaTime;
+            tChamberGeom.find("BurnRate")->second = tRdot;
+            mChamberGeomModel->update(tChamberGeom);
             tTime += mDeltaTime;
 
             tBurning = tTime + mNewtonTolerance < mTotalBurnTime;

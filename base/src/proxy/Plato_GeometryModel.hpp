@@ -52,6 +52,19 @@ namespace Plato
 {
 
 /******************************************************************************//**
+ * @brief Defines options for geometry. 1) INITIAL = initial geometry. 2) DYNAMIC = geometry changing in time
+**********************************************************************************/
+struct Configuration
+{
+    enum type_t
+    {
+        INITIAL = 0,
+        DYNAMIC = 1
+    };
+};
+// struct Configuration
+
+/******************************************************************************//**
  * @brief Abstract geometry model class
 **********************************************************************************/
 template<typename ScalarType = double>
@@ -80,7 +93,7 @@ public:
      * @brief set parameters that define a geometry.
      * @param aParam parameters that define a geometry
     **********************************************************************************/
-    virtual void set(const std::map<std::string, ScalarType>& aParam) = 0;
+    virtual void update(const std::map<std::string, ScalarType>& aParam) = 0;
 };
 // class GeometryModel
 

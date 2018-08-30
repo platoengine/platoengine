@@ -97,7 +97,7 @@ public:
 
     double evaluate(const std::vector<double>& aControls)
     {
-        this->inputData(aControls);
+        this->update(aControls);
 
         mRocketModel.solve();
         std::vector<double> tSimulationThrustProfile = mRocketModel.getThrustProfile();
@@ -150,15 +150,18 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Import design variables into simulation.
+     * @brief update parameters (e.g. design variables) for simulation.
      * @param aControls design variables
      **********************************************************************************/
-    void inputData(const std::vector<double>& aControls)
+    void update(const std::vector<double>& aControls)
     {
-        std::map<std::string, double> tParam;
-        tParam.insert(std::pair<std::string, double>("Radius",aControls[0]));
-        tParam.insert(std::pair<std::string, double>("RefBurnRate",aControls[1]));
-        mRocketModel.inputData(tParam);
+        std::map<std::string, double> tSimParam;
+        tSimParam.insert(std::pair<std::string, double>("RefBurnRate",aControls[1]));
+        mRocketModel.updateSimulation(tSimParam);
+        std::map<std::string, double> tChamberGeomParam;
+        tChamberGeomParam.insert(std::pair<std::string, double>("Radius",aControls[0]));
+        tChamberGeomParam.insert(std::pair<std::string, double>("Configuration", Plato::Configuration::INITIAL));
+        mRocketModel.updateInitialChamberGeometry(tChamberGeomParam);
     }
 
 private:
@@ -180,10 +183,10 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     // allocate problem inputs - use default parameters
     Plato::SimpleRocketInuts<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::CircularCylinder<double>>();
+            std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // domain dimension = 10x10=100
-    std::vector<int> tNumEvaluationsPerDim = {10, 10};
+    std::vector<int> tNumEvaluationsPerDim = {100, 100};
 
     /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
     std::pair<std::vector<double>, std::vector<double>> aBounds =

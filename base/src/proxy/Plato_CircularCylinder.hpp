@@ -56,6 +56,7 @@
 #include <vector>
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 
 #include "Plato_GeometryModel.hpp"
 
@@ -72,8 +73,9 @@ public:
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    CircularCylinder() :
-            mParameters()
+    explicit CircularCylinder(const ScalarType aRadius, const ScalarType aLength) :
+            mRadius(aRadius),
+            mLength(aLength)
     {
     }
 
@@ -89,9 +91,7 @@ public:
     **********************************************************************************/
     ScalarType area()
     {
-        const ScalarType tRadius = mParameters.find("Radius")->second;
-        const ScalarType tLength = mParameters.find("Length")->second;
-        const ScalarType tArea = static_cast<ScalarType>(2) * M_PI * tRadius * tLength;
+        const ScalarType tArea = static_cast<ScalarType>(2) * M_PI * mRadius * mLength;
         return (tArea);
     }
 
@@ -102,23 +102,73 @@ public:
     void gradient(std::vector<ScalarType>& aOutput)
     {
         assert(aOutput.size() == static_cast<size_t>(2));
-
-        const ScalarType tRadius = mParameters.find("Radius")->second;
-        const ScalarType tLength = mParameters.find("Length")->second;
-        aOutput[0] = static_cast<ScalarType>(2) * M_PI * tLength;
-        aOutput[1] = static_cast<ScalarType>(2) * M_PI * tRadius;
+        aOutput[0] = static_cast<ScalarType>(2) * M_PI * mLength;
+        aOutput[1] = static_cast<ScalarType>(2) * M_PI * mRadius;
     }
 
     /******************************************************************************//**
-     * @brief set parameters that define a circular cylinder.
+     * @brief update parameters that define a circular cylinder.
+     * @param aParam parameters that define a circular cylinder
     **********************************************************************************/
-    void set(const std::map<std::string, ScalarType>& aParam)
+    void update(const std::map<std::string, ScalarType>& aParam)
     {
-        mParameters = aParam;
+        assert(aParam.find("Configuration") != aParam.end());
+        Plato::Configuration::type_t tConfiguration =
+                static_cast<Plato::Configuration::type_t>(aParam.find("Configuration")->second);
+
+        switch (tConfiguration)
+        {
+            case Plato::Configuration::INITIAL:
+            {
+                this->updateInitialConfiguration(aParam);
+                break;
+            }
+            case Plato::Configuration::DYNAMIC:
+            {
+                this->updateDynamicConfiguration(aParam);
+                break;
+            }
+            default:
+            {
+                std::abort();
+            }
+        }
     }
 
 private:
-    std::map<std::string, ScalarType> mParameters;
+    /******************************************************************************//**
+     * @brief update initial configuration
+     * @param aParam parameters that define a circular cylinder
+     **********************************************************************************/
+    void updateInitialConfiguration(const std::map<std::string, ScalarType>& aParam)
+    {
+        assert(aParam.find("Radius") != aParam.end());
+        mRadius = aParam.find("Radius")->second;
+
+        if(aParam.find("Length") != aParam.end())
+        {
+            mLength = aParam.find("Length")->second;
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief update dynamic configuration
+     * @param aParam parameters that define a circular cylinder
+     **********************************************************************************/
+    void updateDynamicConfiguration(const std::map<std::string, ScalarType>& aParam)
+    {
+        assert(aParam.find("BurnRate") != aParam.end());
+        const ScalarType tBurnRate = aParam.find("BurnRate")->second;
+
+        assert(aParam.find("DeltaTime") != aParam.end());
+        const ScalarType tDeltaTime = aParam.find("DeltaTime")->second;
+
+        mRadius += tBurnRate * tDeltaTime;
+    }
+
+private:
+    ScalarType mRadius;
+    ScalarType mLength;
 };
 // class CircularCylinder
 
