@@ -217,4 +217,40 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     }
 }
 
+TEST(PlatoTest, CircularCylinder)
+{
+    // allocate problem inputs - use default parameters
+    const double tRadius = 1;
+    const double tLength = 2;
+    Plato::CircularCylinder<double> tCylinder(tRadius, tLength);
+
+    // test area calculation
+    double tTolerance = 1e-6;
+    double tArea = tCylinder.area();
+    EXPECT_NEAR(tArea, 12.566370614359172, tTolerance);
+
+    // test gradient
+    const size_t tNumControls = 2;
+    std::vector<double> tGrad(tNumControls);
+    tCylinder.gradient(tGrad);
+    EXPECT_NEAR(tGrad[0], 12.56637061435917, tTolerance);
+    EXPECT_NEAR(tGrad[1], 6.283185307179586, tTolerance);
+
+    // test update initial configuration
+    std::map<std::string, double> tParam;
+    tParam.insert(std::pair<std::string, double>("Radius", 2));
+    tParam.insert(std::pair<std::string, double>("Configuration", Plato::Configuration::INITIAL));
+    tCylinder.update(tParam);
+    tArea = tCylinder.area();
+    EXPECT_NEAR(tArea, 25.132741228718345, tTolerance);
+
+    // test update dynamics configuration
+    tParam.insert(std::pair<std::string, double>("BurnRate", 10));
+    tParam.insert(std::pair<std::string, double>("DeltaTime", 0.1));
+    tParam.find("Configuration")->second = Plato::Configuration::DYNAMIC;
+    tCylinder.update(tParam);
+    tArea = tCylinder.area();
+    EXPECT_NEAR(tArea, 37.699111843077520, tTolerance);
+}
+
 } // namespace PlatoTest
