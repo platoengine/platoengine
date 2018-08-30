@@ -59,16 +59,19 @@
 #include "Plato_CircularCylinder.hpp"
 
 #include "PSL_DiscreteObjective.hpp"
+#include "PSL_AbstractAuthority.hpp"
+#include "PSL_IterativeSelection.hpp"
 
 namespace Plato
 {
 
-class SimpleRocketObjectiveGradFree : public PlatoSubproblemLibrary::DiscreteObjective
+class GradFreeSimpleRocketObjective : public PlatoSubproblemLibrary::DiscreteObjective
 {
 public:
-    SimpleRocketObjectiveGradFree(const Plato::SimpleRocketInuts<double>& aRocketInputs,
+    GradFreeSimpleRocketObjective(const Plato::SimpleRocketInuts<double>& aRocketInputs,
                                   const std::shared_ptr<Plato::GeometryModel<double>>& aGeomModel) :
             PlatoSubproblemLibrary::DiscreteObjective(),
+            mNormTargetValues(0),
             mRocketModel(aRocketInputs, aGeomModel),
             mTargetThrustProfile(),
             mNumEvaluationsPerDim(),
@@ -77,7 +80,7 @@ public:
         this->initialize();
     }
 
-    virtual ~SimpleRocketObjectiveGradFree()
+    virtual ~GradFreeSimpleRocketObjective()
     {
     }
 
@@ -109,7 +112,8 @@ public:
             double tDeltaThrust = tSimulationThrustProfile[tIndex] - mTargetThrustProfile[tIndex];
             tObjectiveValue += tDeltaThrust * tDeltaThrust;
         }
-        tObjectiveValue = static_cast<double>(0.5) * tObjectiveValue;
+        const double tNumElements = mTargetThrustProfile.size();
+        tObjectiveValue = static_cast<double>(1.0 / (2.0 * tNumElements * mNormTargetValues)) * tObjectiveValue;
 
         return tObjectiveValue;
     }
@@ -146,6 +150,10 @@ private:
             6300413.047778608, 6387705.534992979, 6476026.465884338, 6565385.832848894,
             6655793.704806847, 6747260.227631442, 6839795.624579719, 6933410.196724654,
             7028114.32338894, 7123918.462580209, 7220833.151427887};
+
+        const double tBaseValue = 0;
+        mNormTargetValues =
+                std::inner_product(mTargetThrustProfile.begin(), mTargetThrustProfile.end(), mTargetThrustProfile.begin(), tBaseValue);
         mRocketModel.disableOutput();
     }
 
@@ -165,6 +173,7 @@ private:
     }
 
 private:
+    double mNormTargetValues;
     Plato::SimpleRocket<double> mRocketModel;
     std::vector<double> mTargetThrustProfile;
 
@@ -191,7 +200,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
     std::pair<std::vector<double>, std::vector<double>> aBounds =
             std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
-    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, tGeomModel);
+    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, aBounds);
 
     /* {chamber_radius, ref_burn_rate} */
@@ -251,6 +260,43 @@ TEST(PlatoTest, CircularCylinder)
     tCylinder.update(tParam);
     tArea = tCylinder.area();
     EXPECT_NEAR(tArea, 37.699111843077520, tTolerance);
+}
+
+TEST(PlatoTest, GradFreeSimpleRocketOptimization)
+{
+    PlatoSubproblemLibrary::AbstractAuthority tAuthority;
+
+    // define objective
+    Plato::SimpleRocketInuts<double> tRocketInputs;
+    std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
+            std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);;
+
+    // set inputs for optimization problem
+    std::vector<int> tNumEvaluationsPerDim = {100, 100}; // domain dimension = 100x100=10000
+    /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
+    std::pair<std::vector<double>, std::vector<double>> aBounds =
+            std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
+    tObjective.setOptimizationInputs(tNumEvaluationsPerDim, aBounds);
+
+    // define searcher
+    PlatoSubproblemLibrary::IterativeSelection tSearcher(&tAuthority);
+    tSearcher.set_objective(&tObjective);
+
+    // find a minimum
+    std::vector<double> tBestParameters;
+    const double tBestObjectiveValue = tSearcher.find_min(tBestParameters);
+    std::cout << "BestObjectiveValue = " << tBestObjectiveValue << "\n";
+    std::cout << "NumFunctionEvaluations = " << tSearcher.get_number_of_evaluations() << "\n";
+    std::cout << "Best1:" << tBestParameters[0] << " ,Best2:" << tBestParameters[1] << std::endl;
+
+    // equal by determinism of objective
+    EXPECT_FLOAT_EQ(tBestObjectiveValue, tObjective.evaluate(tBestParameters));
+
+    // test solution
+    double tTolerance = 1e-3;
+    EXPECT_NEAR(tBestParameters[0], 0.07515151515151515, tTolerance);
+    EXPECT_NEAR(tBestParameters[1], 0.0050101010101010097, tTolerance);
 }
 
 } // namespace PlatoTest
