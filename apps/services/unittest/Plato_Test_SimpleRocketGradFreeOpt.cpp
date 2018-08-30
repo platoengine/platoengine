@@ -64,7 +64,6 @@ template<typename ScalarType = double>
 class GeometryModel
 {
 public:
-    GeometryModel(){}
     virtual ~GeometryModel(){}
 
     virtual ScalarType area() = 0;
@@ -73,7 +72,7 @@ public:
 // class GeometryModel
 
 template<typename ScalarType = double>
-class CircularCylinder
+class CircularCylinder : public GeometryModel<ScalarType>
 {
 public:
     CircularCylinder() :
@@ -117,19 +116,25 @@ class SimpleRocketObjectiveGradFree : public PlatoSubproblemLibrary::DiscreteObj
 {
 public:
     SimpleRocketObjectiveGradFree(const Plato::SimpleRocketInuts<double>& aRocketInputs,
-                                  const std::vector<int>& aNumEvaluationsPerDim,
-                                  const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */) :
+                                  const Plato::GeometryModel<double>& aGeomModel) :
             PlatoSubproblemLibrary::DiscreteObjective(),
             mRocketModel(aRocketInputs),
             mTargetThrustProfile(),
-            mNumEvaluationsPerDim(aNumEvaluationsPerDim),
-            mBounds(aBounds)
+            mNumEvaluationsPerDim(),
+            mBounds()
     {
         this->initialize();
     }
 
     virtual ~SimpleRocketObjectiveGradFree()
     {
+    }
+
+    void setOptimizationInputs(const std::vector<int>& aNumEvaluationsPerDim,
+                               const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */)
+    {
+        mBounds = aBounds;
+        mNumEvaluationsPerDim = aNumEvaluationsPerDim;
     }
 
     void get_domain(std::vector<double>& aLowerBounds, std::vector<double>& aUpperBounds, std::vector<int>& aNumEvaluationsPerDim)
@@ -142,6 +147,7 @@ public:
     double evaluate(const std::vector<double>& aControls)
     {
         this->inputData(aControls);
+
         mRocketModel.solve();
         std::vector<double> tSimulationThrustProfile = mRocketModel.getThrustProfile();
         assert(tSimulationThrustProfile.size() == mTargetThrustProfile.size());
@@ -221,6 +227,7 @@ namespace PlatoTest
 TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 {
     // allocate problem inputs - use default parameters
+    Plato::CircularCylinder<double> tGeomModel;
     Plato::SimpleRocketInuts<double> tRocketInputs;
 
     // domain dimension = 10x10=100
@@ -229,7 +236,8 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
     std::pair<std::vector<double>, std::vector<double>> aBounds =
             std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
-    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, tNumEvaluationsPerDim, aBounds);
+    Plato::SimpleRocketObjectiveGradFree tObjective(tRocketInputs, tGeomModel);
+    tObjective.setOptimizationInputs(tNumEvaluationsPerDim, aBounds);
 
     /* {chamber_radius, ref_burn_rate} */
     std::vector<double> tControls = {0.075, 0.005};
