@@ -50,14 +50,60 @@
 
 #define _USE_MATH_DEFINES
 
+#include <map>
 #include <cmath>
 #include <math.h>
 #include <cstdio>
+#include <memory>
 #include <cassert>
 #include <cstddef>
 
+#include "Plato_CircularCylinder.hpp"
+
 namespace Plato
 {
+
+/******************************************************************************//**
+ * @brief Data structure for rocket problem input parameters.
+**********************************************************************************/
+template<typename ScalarType = double>
+struct SimpleRocketInuts
+{
+    size_t mMaxNumNewtonItr;
+
+    ScalarType mAlpha;
+    ScalarType mDeltaTime;                // seconds
+    ScalarType mRefBurnRate;              // meters/seconds
+    ScalarType mRefPressure;              // Pascal
+    ScalarType mTotalBurnTime;            // seconds
+    ScalarType mChamberRadius;            // meters
+    ScalarType mChamberLength;            // meters
+    ScalarType mThroatDiameter;           // meters
+    ScalarType mNewtonTolerance;          // Pascal
+    ScalarType mAmbientPressure;          // Pascal
+    ScalarType mPropellantDensity;        // kilogram/meter^3
+    ScalarType mCharacteristicVelocity;   // meters/seconds
+
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
+    SimpleRocketInuts() :
+            mMaxNumNewtonItr(1000),
+            mAlpha(0.38),
+            mDeltaTime(0.1),
+            mRefBurnRate(0.005),
+            mRefPressure(3.5e6),
+            mTotalBurnTime(10),
+            mChamberRadius(0.075),
+            mChamberLength(0.65),
+            mThroatDiameter(0.04),
+            mNewtonTolerance(1.e-8),
+            mAmbientPressure(101.325),
+            mPropellantDensity(1744),
+            mCharacteristicVelocity(1554.5)
+    {
+    }
+};
 
 /******************************************************************************//**
  * @brief Design the rocket chamber to achieve desired QoI profile.
@@ -73,9 +119,12 @@ template<typename ScalarType = double>
 class SimpleRocket
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
     SimpleRocket() :
             mPrint(true),
-            mMaxItr(1000),
+            mMaxNumNewtonItr(1000),
             mChamberLength(0.65), // m
             mChamberRadius(0.075), // m
             mRefBurnRate(0.005), // m/sec
@@ -87,14 +136,47 @@ public:
             mAmbientPressure(101.325), // Pa
             mDeltaTime(0.1), // sec
             mTotalBurnTime(10), // sec
-            mTolerance(1.e-8), // Pa
+            mNewtonTolerance(1.e-8), // Pa
             mInvPrefAlpha(),
             mTimes(),
             mThrustProfile(),
-            mPressureProfile()
+            mPressureProfile(),
+            mChamberGeomModel(std::make_shared<Plato::CircularCylinder<ScalarType>>(mChamberRadius, mChamberLength))
     {
     }
 
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param aInputs input parameters for simulation
+     * @param aGeomModel geometry model used for the rocket chamber
+    **********************************************************************************/
+    explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs,
+                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeomModel) :
+            mPrint(true),
+            mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
+            mChamberLength(aInputs.mChamberLength), // m
+            mChamberRadius(aInputs.mChamberRadius), // m
+            mRefBurnRate(aInputs.mRefBurnRate), // m/sec
+            mRefPressure(aInputs.mRefPressure), // Pa
+            mAlpha(aInputs.mAlpha),
+            mThroatDiameter(aInputs.mThroatDiameter), // m
+            mCharacteristicVelocity(aInputs.mCharacteristicVelocity), // m/sec
+            mPropellantDensity(aInputs.mPropellantDensity), // kg/m^3
+            mAmbientPressure(aInputs.mAmbientPressure), // Pa
+            mDeltaTime(aInputs.mDeltaTime), // sec
+            mTotalBurnTime(aInputs.mTotalBurnTime), // sec
+            mNewtonTolerance(aInputs.mNewtonTolerance), // Pa
+            mInvPrefAlpha(),
+            mTimes(),
+            mThrustProfile(),
+            mPressureProfile(),
+            mChamberGeomModel(aChamberGeomModel)
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~SimpleRocket()
     {
     }
@@ -113,7 +195,7 @@ public:
      **********************************************************************************/
     void setMaxNumIterations(const size_t& aInput)
     {
-        mMaxItr = aInput;
+        mMaxNumNewtonItr = aInput;
     }
 
     /******************************************************************************//**
@@ -207,7 +289,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return time steps.
+     * @brief returns time steps.
      **********************************************************************************/
     std::vector<ScalarType> getTimeProfile() const
     {
@@ -215,7 +297,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return thrust values for each time snapshot.
+     * @brief returns thrust values for each time snapshot.
      **********************************************************************************/
     std::vector<ScalarType> getThrustProfile() const
     {
@@ -223,7 +305,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief return pressure values for each time snapshot.
+     * @brief returns pressure values for each time snapshot.
      **********************************************************************************/
     std::vector<ScalarType> getPressuresProfile() const
     {
@@ -231,7 +313,26 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief compute thrust and pressure profiles using an algebraic model for the solid fuel rocket.
+     * @brief update parameters associated with the simulation.
+     * @param aParam simulation parameters
+     **********************************************************************************/
+    void updateSimulation(const std::map<std::string, ScalarType>& aParam)
+    {
+        // set simulation-specific data
+        mRefBurnRate = aParam.find("RefBurnRate")->second;
+    }
+
+    /******************************************************************************//**
+     * @brief update chambers geometry.
+     * @param aParam parameters associated with the chamber's geometry
+     **********************************************************************************/
+    void updateInitialChamberGeometry(const std::map<std::string, ScalarType>& aParam)
+    {
+        mChamberGeomModel->update(aParam);
+    }
+
+    /******************************************************************************//**
+     * @brief compute thrust and pressure profiles given a simple algebraic model for a rocket.
      **********************************************************************************/
     void solve()
     {
@@ -250,20 +351,25 @@ public:
         ScalarType tTime = 0.0;
         ScalarType tThrust = 0.0;
         ScalarType tTotalPressure = mRefPressure; // initial guess
-        ScalarType tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberRadius;
+
+        // initialize geometry map
+        std::map<std::string, ScalarType> tChamberGeom;
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("BurnRate", 0.0));
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("DeltaTime", mDeltaTime));
+        tChamberGeom.insert(std::pair<std::string, ScalarType>("Configuration", Plato::Configuration::DYNAMIC));
 
         bool tBurning = true;
         while(tBurning == true)
         {
             if(mPrint == true)
             {
-                printf("time = %f,\t Thrust = %f,\t Pressure = %f\n", tTime, tThrust, tTotalPressure);
+                printf("Time = %f,\t Thrust = %f,\t Pressure = %f\n", tTime, tThrust, tTotalPressure);
             }
 
             mTimes.push_back(tTime);
             mThrustProfile.push_back(tThrust);
             mPressureProfile.push_back(tTotalPressure);
-            tChamberArea = static_cast<ScalarType>(2.0) * M_PI * mChamberRadius * mChamberLength;
+            ScalarType tChamberArea = mChamberGeomModel->area();
 
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 
@@ -271,14 +377,21 @@ public:
             tThrust = static_cast<ScalarType>(269.0) * static_cast<ScalarType>(9.8) * tChamberArea * (tTotalPressure - mAmbientPressure)
                     / mCharacteristicVelocity;
 
-            mChamberRadius += tRdot * mDeltaTime;
+            tChamberGeom.find("BurnRate")->second = tRdot;
+            mChamberGeomModel->update(tChamberGeom);
             tTime += mDeltaTime;
 
-            tBurning = tTime + mTolerance < mTotalBurnTime;
+            tBurning = tTime + mNewtonTolerance < mTotalBurnTime;
         }
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Newton solver.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType newton(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         bool tDone = false;
@@ -293,12 +406,18 @@ private:
             tNewTotalPressure += tDeltaPressure;
 
             tIteration += static_cast<size_t>(1);
-            tDone = std::abs(tDeltaPressure) < mTolerance || tIteration > mMaxItr;
+            tDone = std::abs(tDeltaPressure) < mNewtonTolerance || tIteration > mMaxNumNewtonItr;
         }
 
         return (tNewTotalPressure);
     }
 
+    /******************************************************************************//**
+     * @brief Jacobian evaluation.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType jacobian(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         ScalarType tPower = mAlpha - static_cast<ScalarType>(1);
@@ -308,6 +427,12 @@ private:
         return tValue;
     }
 
+    /******************************************************************************//**
+     * @brief Residual evaluation.
+     * @param aChamberArea current chamber area
+     * @param aTotalPressure total pressure at current time step
+     * @param aThroatArea current throat area
+     **********************************************************************************/
     ScalarType residual(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         ScalarType tValue = mPropellantDensity * aChamberArea * mRefBurnRate * mInvPrefAlpha * std::pow(aTotalPressure, mAlpha)
@@ -317,7 +442,7 @@ private:
 
 private:
     bool mPrint;
-    size_t mMaxItr;
+    size_t mMaxNumNewtonItr;
 
     ScalarType mChamberLength; // m
     ScalarType mChamberRadius; // m
@@ -330,13 +455,15 @@ private:
     ScalarType mAmbientPressure; // Pa
     ScalarType mDeltaTime; // sec
     ScalarType mTotalBurnTime; // sec
-    ScalarType mTolerance; // Pa
+    ScalarType mNewtonTolerance; // Pa
 
     ScalarType mInvPrefAlpha;
 
     std::vector<ScalarType> mTimes;
     std::vector<ScalarType> mThrustProfile;
     std::vector<ScalarType> mPressureProfile;
+
+    std::shared_ptr<Plato::GeometryModel<ScalarType>> mChamberGeomModel;
 };
 // class SimpleRocket
 

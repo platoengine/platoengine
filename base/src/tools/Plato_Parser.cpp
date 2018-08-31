@@ -59,6 +59,9 @@
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_map>
+#include <stdio.h>
+#include <string.h>
+#include <cstddef>
 
 #include "Plato_Exceptions.hpp"
 #include "Plato_OperationInputDataMng.hpp"
@@ -261,7 +264,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
         }
         for( auto tNode = tInclude.first_child(); tNode; tNode = tNode.next_sibling() )
         {
-            auto copied = doc->insert_copy_before(tNode, tIncludeNode);
+            doc->insert_copy_before(tNode, tIncludeNode);
         }
         tIncludeNode.set_name("Delete");
     }
@@ -491,14 +494,14 @@ void PugiParser::deleteNodesByName(pugi::xml_node aNode, std::string aNodeName)
 
 bool PugiParser::MathWalker::for_each(pugi::xml_node& aNode)
 {
-    if (aNode.name() != "" )
+    if(0 != strcmp(aNode.name(), ""))
     {
         std::string tStrName(aNode.name());
         std::string tStrNameEval = evalExpr(tStrName);
         aNode.set_name(tStrNameEval.c_str());
     }
 
-    if (aNode.value() != "" )
+    if(0 != strcmp(aNode.value(), ""))
     {
         std::string tStrValue(aNode.value());
         std::string tStrValueEval = evalExpr(tStrValue);
@@ -600,7 +603,7 @@ bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
             {
                 auto copied = aNode.parent().insert_copy_before(toCopy, aNode);
 
-                for( int iVar=0; iVar<tStrVars.size(); iVar++ )
+                for( size_t iVar=0; iVar<tStrVars.size(); iVar++ )
                 {
                     std::string tVal = mVarMap.at(tStrIns[iVar])[iVal];
                     std::string tVar = tStrVars[iVar];

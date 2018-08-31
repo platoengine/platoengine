@@ -817,7 +817,7 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     EXPECT_NEAR(tOutput[4].mSampleWeight, 0.200295595, tTol);
     // expect total probability of unity
     double tTotalProbability = 0;
-    for(int tIndex = 0; tIndex < tInput.mNumSamples; tIndex++)
+    for(size_t tIndex = 0; tIndex < tInput.mNumSamples; tIndex++)
     {
         tTotalProbability += tOutput[tIndex].mSampleWeight;
     }

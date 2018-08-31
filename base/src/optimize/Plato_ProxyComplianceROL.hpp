@@ -102,7 +102,6 @@ public:
         // Get Epetra Serial Dense Vector
         const Plato::SerialEpetraVectorROL<ScalarType> & tControl =
                 dynamic_cast<const Plato::SerialEpetraVectorROL<ScalarType>&>(aControl);
-        const Epetra_SerialDenseVector & tEpetraControl = tControl.vector();
         // Solve partial differential equation
         mSolver->solve(tControl.vector());
         // Compute potential energy (i.e. compliance objective)

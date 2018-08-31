@@ -49,6 +49,7 @@
 #include <gtest/gtest.h>
 #include "XMLGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
+#include <cmath>
 
 const int MAX_CHARS_PER_LINE = 512;
 
@@ -2112,6 +2113,99 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
         const double tW = std::atof(modified_load_weights[1u+i].c_str());
         EXPECT_NEAR(tW, 0.033, 0.003);
         //        std::cout << i << "," << tW << std::endl; // announce
+    }
+}
+
+TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective\n"
+                "type maximize stiffness\n"
+                "load ids 34\n"
+                "boundary condition ids 256\n"
+                "code salinas\n"
+                "number processors 9\n"
+                "weight 1 \n"
+            "end objective\n"
+            "begin loads\n"
+                "force nodeset 2 value 7 0 0 load id 34\n"
+            "end loads\n"
+            "begin uncertainties\n"
+                "load 34 angle variation Z distribution beta mean 45.0 upper 90 lower 0 standard deviation 1 num samples 6\n"
+            "end uncertainties\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+
+    // BEFORE modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+    // check load
+    EXPECT_EQ(tester.getLoadType("34",0), "force");
+    EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
+    EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
+    EXPECT_EQ(tester.getLoadDirectionX("34",0), "7");
+    EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
+    EXPECT_EQ(tester.getLoadDirectionZ("34",0), "0");
+
+    // do expand
+    EXPECT_EQ(tester.publicExpandUncertaintiesForGenerate(), true);
+
+    // AFTER modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+    const size_t num_expected_samples = 6u;
+
+    // check loads that will be generated
+    std::vector<std::string> loads_to_check = {"34", "0", "1", "2", "3", "4"};
+    ASSERT_EQ(loads_to_check.size(), num_expected_samples);
+    for(size_t i = 0u; i < num_expected_samples; i++)
+    {
+        EXPECT_EQ(tester.getLoadType(loads_to_check[i],0), "force");
+        EXPECT_EQ(tester.getLoadApplicationType(loads_to_check[i],0), "nodeset");
+        EXPECT_EQ(tester.getLoadApplicationID(loads_to_check[i],0), "2");
+        const double tX = std::atof(tester.getLoadDirectionX(loads_to_check[i], 0).c_str());
+        const double tY = std::atof(tester.getLoadDirectionY(loads_to_check[i], 0).c_str());
+        const double tZ = std::atof(tester.getLoadDirectionZ(loads_to_check[i], 0).c_str());
+        EXPECT_EQ(isnan(tX), true);
+        EXPECT_EQ(isnan(tY), true);
+        EXPECT_NEAR(tZ, 0., 0.1);
+//        std::cout << i << "," << tX << "," << tY << "," << tZ << std::endl;    // announce
+    }
+
+    // check load ids
+    std::vector<std::string> modified_load_ids = tester.getObjLoadIds(0);
+    ASSERT_EQ(modified_load_ids.size(), num_expected_samples);
+    for(size_t i = 0u; i < num_expected_samples; i++)
+    {
+        EXPECT_EQ(modified_load_ids[i], loads_to_check[i]);
+    }
+
+    // check weights
+    std::vector<std::string> modified_load_weights = tester.getObjLoadWeights(0);
+    ASSERT_EQ(modified_load_weights.size(), num_expected_samples);
+    for(size_t i = 0u; i < num_expected_samples; i++)
+    {
+        const double tW = std::atof(modified_load_weights[i].c_str());
+        EXPECT_EQ(isnan(tW), true);
+//        std::cout << i << "," << tW << std::endl; // announce
     }
 }
 

@@ -539,10 +539,13 @@ bool XMLGenerator::generateLaunchScript()
                 tNumBufferLayersString = m_InputData.number_buffer_layers;
 
             std::string tCommand;
+            std::string tPruneAndRefineExe = "prune_and_refine";
+            if(m_InputData.prune_and_refine_path.length() > 0)
+                tPruneAndRefineExe = m_InputData.prune_and_refine_path;
             if(m_UseLaunch)
-                tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
+                tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
             else
-                tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + m_InputData.prune_and_refine_path;
+                tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
             if(m_InputData.initial_guess_filename != "")
                 tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
             tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name + ".gen");
@@ -611,7 +614,7 @@ bool XMLGenerator::generateLaunchScript()
         if(m_InputData.plato_main_path.length() != 0)
             fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
         else
-            fprintf(fp, "/home/bwclark/dev/plato_engine/DEBUG/apps/services/PlatoMain platomain.xml \\\n");
+            fprintf(fp, "plato_main platomain.xml \\\n");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
             const Objective& cur_obj = m_InputData.objectives[i];
@@ -627,7 +630,7 @@ bool XMLGenerator::generateLaunchScript()
                 if(m_InputData.salinas_path.length() != 0)
                     fprintf(fp, "%s salinas_input_deck_%s.i \\\n", m_InputData.salinas_path.c_str(), cur_obj.name.c_str());
                 else
-                    fprintf(fp, "/projects/plato/dev/plato_sd/plato_sd_main salinas_input_deck_%s.i \\\n", cur_obj.name.c_str());
+                    fprintf(fp, "plato_sd_main salinas_input_deck_%s.i \\\n", cur_obj.name.c_str());
             }
             else if(!cur_obj.code_name.compare("lightmp"))
             {
@@ -638,6 +641,8 @@ bool XMLGenerator::generateLaunchScript()
             {
                 if(m_InputData.albany_path.length() != 0)
                     fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
+                else
+                    fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
             }
         }
         fclose(fp);
