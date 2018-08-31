@@ -41,7 +41,7 @@
  */
 
 /*
- * Plato_Test_SimpleRocketGradFreeOpt.cpp
+ * Plato_Test_SimpleRocketOptimization.cpp
  *
  *  Created on: Aug 29, 2018
  */
