@@ -23,9 +23,9 @@ solz  = analyze.exportData("Solution Z", "SCALAR_FIELD")
 adjx  = analyze.exportData("Adjoint X", "SCALAR_FIELD")
 adjy  = analyze.exportData("Adjoint Y", "SCALAR_FIELD")
 adjz  = analyze.exportData("Adjoint Z", "SCALAR_FIELD")
-gradx = analyze.exportData("GradientX X", "SCALAR_FIELD")
-grady = analyze.exportData("GradientX Y", "SCALAR_FIELD")
-gradz = analyze.exportData("GradientX Z", "SCALAR_FIELD")
+gradx = analyze.exportData("Objective GradientX X", "SCALAR_FIELD")
+grady = analyze.exportData("Objective GradientX Y", "SCALAR_FIELD")
+gradz = analyze.exportData("Objective GradientX Z", "SCALAR_FIELD")
 
 # open exodus file for output and configure
 numTimes = 1

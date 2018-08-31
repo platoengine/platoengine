@@ -28,10 +28,9 @@ TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:        
 # No GLOBAL VARIABLES
 
 NODAL VARIABLES relative 1.e-4 floor 1e-8
-	MLS_Field  # min:               0 @ t1,n1585	max:              10 @ t1,n4403
-	solution_x # min:               0 @ t1,n1585	max:              10 @ t1,n4403
-	solution_y # min:               0 @ t1,n1585	max:              10 @ t1,n4403
-	solution_z # min:               0 @ t1,n1585	max:              10 @ t1,n4403
+	gradientx_x # min:               0 @ t1,n1585	max:              10 @ t1,n4403
+	gradientx_y # min:               0 @ t1,n1585	max:              10 @ t1,n4403
+	gradientx_z # min:               0 @ t1,n1585	max:              10 @ t1,n4403
 
 # No ELEMENT VARIABLES
 
