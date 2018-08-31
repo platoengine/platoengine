@@ -67,8 +67,11 @@ class MathParser {
     std::vector<te_variable> mVariables;
     std::vector<std::shared_ptr<double>> mValues;
     std::vector<std::shared_ptr<std::string>> mNames;
+
+    std::map<std::string,std::vector<std::string>> mArrays;
   public:  
     void addVariable(std::string aVarName, std::string aVarValue);
+    void addArrays(const decltype(mArrays)&);
     std::string compute(std::string);
     std::string parse(std::string);
 };
@@ -118,6 +121,7 @@ class PugiParser : public Parser {
         virtual bool for_each(pugi::xml_node& node);
       private:
         std::string evalExpr(std::string);
+        void evalSubExpr(std::string&, size_t);
     };
 };
 

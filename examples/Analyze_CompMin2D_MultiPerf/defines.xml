@@ -1,0 +1,12 @@
+<Define name="NumPoints" type="int"   value="4"                          />
+<Define name="NumComms"  type="int"   value="2"                          />
+<Define name="NumEvals"  type="int"   value="{NumPoints/NumComms}"       />
+<Define name="Angle"     value="10.0"                                    />
+<Define name="LoadMag"   value="1.0e4"                                   />
+
+<Array  name="Points"    type="int"   from="0" to="{NumPoints-1}"        />
+<Array  name="Evals"     type="int"   from="0" to="{NumEvals-1}"         />
+<Array  name="Comms"     type="int"   from="0" to="{NumComms-1}"         />
+<Array  name="angles"    type="real"  from="{-Angle*pi/180.0}" to="{Angle*pi/180.0}" intervals="{NumPoints-1}" />
+<Array  name="weights"   type="real"  from="{1.0/NumPoints}"   to="{1.0/NumPoints}"  intervals="{NumPoints-1}" />
+

@@ -480,7 +480,6 @@ namespace PlatoTestInputData
     EXPECT_EQ(operations[4].get<std::string>("PerformerName"), "Alexa_5");
   }
 
-
   TEST(PlatoTestInputData, ExpandNested)
   {
     std::stringstream buffer;
@@ -532,6 +531,56 @@ namespace PlatoTestInputData
     EXPECT_EQ( singleOpSpecs_2[1].get<std::string>("PerformerName"), "Performer_2" );
     EXPECT_EQ( singleOpSpecs_2[2].get<std::string>("PerformerName"), "Performer_3" );
     EXPECT_EQ( singleOpSpecs_2[3].get<std::string>("PerformerName"), "Performer_4" );
+  }
+
+  TEST(PlatoTestInputData, ExpandNestedWithArray)
+  {
+    std::stringstream buffer;
+
+    buffer << "<Define name='NumSamples' type='int'   value='12'/>" << std::endl;
+    buffer << "<Define name='NumPerfs'   type='int'   value='3'/>" << std::endl;
+    buffer << "<Define name='NumEvals'   type='int'   value='{NumSamples/NumPerfs}'/>" << std::endl;
+
+    buffer << "<Array name='Perfs'  type='int'  from='0'     to='{NumPerfs-1}'/>" << std::endl;
+    buffer << "<Array name='Evals'  type='int'  from='0'     to='{NumEvals-1}'/>" << std::endl;
+    buffer << "<Array name='Angles' type='real' from='-10.0' to='10.0' intervals='{NumSamples}'/>" << std::endl;
+
+    buffer << "<For var='J' in='Evals'>"                                              << std::endl;
+    buffer << "<Operation>"                                                           << std::endl;
+    buffer << "  <For var='I' in='Perfs'>"                                            << std::endl;
+    buffer << "  <Operation>"                                                         << std::endl;
+    buffer << "    <PerformerName>Alexa_{I}</PerformerName>"                          << std::endl;
+    buffer << "    <Name>Compute Objective Value</Name>"                              << std::endl;
+    buffer << "    <Parameter>"                                                       << std::endl;
+    buffer << "      <ArgumentName>Traction X</ArgumentName>"                         << std::endl;
+    buffer << "      <ArgumentValue>{cos(Angles[{I*NumEvals+J}])}</ArgumentValue>"    << std::endl;
+    buffer << "    </Parameter>"                                                      << std::endl;
+    buffer << "    <Input>"                                                           << std::endl;
+    buffer << "      <ArgumentName>Topology</ArgumentName>"                           << std::endl;
+    buffer << "      <SharedDataName>Topology</SharedDataName>"                       << std::endl;
+    buffer << "    </Input>"                                                          << std::endl;
+    buffer << "    <Output>"                                                          << std::endl;
+    buffer << "      <ArgumentName>Objective Value</ArgumentName>"                    << std::endl;
+    buffer << "      <SharedDataName>Internal Energy {I*NumEvals+J}</SharedDataName>" << std::endl;
+    buffer << "    </Output>"                                                         << std::endl;
+    buffer << "  </Operation>"                                                        << std::endl;
+    buffer << "  </For>"                                                              << std::endl;
+    buffer << "</Operation>"                                                          << std::endl;
+    buffer << "</For>"                                                                << std::endl;
+
+    Plato::Parser* parser = new Plato::PugiParser();
+    Plato::InputData inputData = parser->parseString(buffer.str());
+    delete parser;
+
+    EXPECT_EQ( inputData.size<Plato::InputData>("Operation"), 4u );
+    EXPECT_NEAR(stof(inputData.getByName<Plato::InputData>("Operation")[0]
+                              .getByName<Plato::InputData>("Operation")[0]
+                              .get<Plato::InputData>("Parameter")
+                              .get<std::string>("ArgumentValue")), cosf(-10.0), 1e-6);
+    EXPECT_NEAR(stof(inputData.getByName<Plato::InputData>("Operation")[1]
+                              .getByName<Plato::InputData>("Operation")[0]
+                              .get<Plato::InputData>("Parameter")
+                              .get<std::string>("ArgumentValue")), cosf(-10.0+20.0/12.0), 1e-6);
   }
 
   TEST(PlatoTestInputData, RealValuedExpression)

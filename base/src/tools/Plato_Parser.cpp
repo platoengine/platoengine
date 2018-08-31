@@ -68,6 +68,12 @@
 namespace Plato
 {
 
+void 
+MathParser::addArrays(const decltype(mArrays)& aArrays)
+{
+    mArrays = aArrays;
+}
+
 void
 MathParser::addVariable(std::string aVarName, std::string aVarValue)
 {
@@ -76,6 +82,9 @@ MathParser::addVariable(std::string aVarName, std::string aVarValue)
     // so there's no cleanup.  The references in the te_variable instance aren't
     // counted, but mVariables, mValues, and mNames all go out of scope at the
     // same time.
+    
+    if( aVarValue.find("{") != std::string::npos ) aVarValue = this->compute(aVarValue);
+
     auto tNewDatum = std::make_shared<double>(stof(aVarValue));
     mValues.push_back(tNewDatum);
     
@@ -94,15 +103,65 @@ MathParser::compute(std::string aExpr)
 {
     std::stringstream tRetval;
 
+    // get substring between '{' and '}'
     size_t tBegin = aExpr.find("{");
     tBegin++;
     size_t tEnd = aExpr.find("}");
-
     std::string tSubExpr = aExpr.substr(tBegin,tEnd-tBegin);
+
+    // tinyexpr doesn't handle arrays.  find/replace array values before compiling.
+    size_t tSearchPos;
+    if( (tSearchPos = tSubExpr.find("[")) != std::string::npos )
+    {
+        if( mArrays.size() == 0 )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' has Array operator (i.e., [*]) but no Arrays are defined.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        size_t tIndexEnd = tSubExpr.find("]", tSearchPos);
+        if( tIndexEnd == std::string::npos )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' has opening '[' but no closing ']'";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        auto tIndexStart = tSearchPos+1;
+        auto tIndexLen = tIndexEnd - tIndexStart;
+        int tArrayIndex = stoi(tSubExpr.substr(tIndexStart, tIndexLen));
+        
+        std::string tDelimiters(" +-()/*^");
+        auto tNameStart = tSubExpr.find_last_of(tDelimiters,tSearchPos);
+        tNameStart++; // Array name starts immediately after the delimiter
+        auto tNameLen = tSearchPos - tNameStart;
+        std::string tArrayName = tSubExpr.substr(tNameStart, tNameLen);
+        
+        if( mArrays.count(tArrayName) == 0 )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' uses Array '" << tArrayName << "' that is not defined.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        const auto& tStrVals = mArrays[tArrayName];
+        if( (tStrVals.size() < (tArrayIndex+1)) || (tArrayIndex < 0) )
+        {
+            std::stringstream ss;
+            ss << "Expression '," << tSubExpr << "' Array '" << tArrayName 
+               << "', value (" << tArrayIndex << " out of bounds.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        auto tStrVal = tStrVals[tArrayIndex];
+        auto tTotalLen = tIndexEnd - tNameStart;
+        tSubExpr.replace(tNameStart, tTotalLen+1, tStrVal);
+    }
 
     // tinyexpr requires lowercase.
     std::transform(tSubExpr.begin(), tSubExpr.end(), tSubExpr.begin(), ::tolower);
- 
+
     int error;
     te_expr *tExpr = te_compile(tSubExpr.c_str(), mVariables.data(), mVariables.size(), &error);
  
@@ -221,7 +280,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
     }
     
 
-    // parse 'Variable' definitions
+    // parse 'Array' definitions
     //
     std::map<std::string, std::vector<std::string>> tArrays;
     for( auto tArrayNode = doc->child("Array"); tArrayNode; tArrayNode = tArrayNode.next_sibling("Array"))
@@ -393,6 +452,9 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
 
     if( tArrays.size() != 0 )
     {
+
+        tMathParser->addArrays(tArrays);
+
         int numMods;
         do
         {
@@ -448,23 +510,40 @@ bool PugiParser::MathWalker::for_each(pugi::xml_node& aNode)
 
 std::string PugiParser::MathWalker::evalExpr(std::string aString)
 {
+
     std::string tString(aString);
 
     size_t tSearchPos = 0;
     while((tSearchPos = tString.find('{',tSearchPos)) != std::string::npos)
     {
-        // parsed expression starts after '{'
-        tSearchPos++;
-
-        size_t tEndPos = tString.find('}',tSearchPos);
-        
-        size_t tStrLen = tEndPos-tSearchPos;
-        std::string tExpression = tString.substr(tSearchPos, tStrLen);
-        std::string tParsed = mMathParser->compute(tExpression);
-
-        tString.replace(tSearchPos-1, tStrLen+2, tParsed);
+        evalSubExpr(tString, tSearchPos+1);
     }
     return tString;
+}
+
+void PugiParser::MathWalker::evalSubExpr(std::string& aString, size_t aSearchPos)
+{
+    size_t tOpenerPos = aString.find('{',aSearchPos);
+    size_t tCloserPos = aString.find('}',aSearchPos);
+
+    if (tOpenerPos == std::string::npos && tCloserPos == std::string::npos )
+    {
+        std::stringstream ss;
+        ss << "Failed to evaluate '" << aString << "'. Malformed expression?";
+        throw Plato::ParsingException(ss.str());
+    }
+
+    if (tOpenerPos < tCloserPos)
+    {
+        evalSubExpr(aString, tOpenerPos+1);
+    } 
+    else
+    {
+        size_t tStrLen = tCloserPos-aSearchPos;
+        std::string tExpression = aString.substr(aSearchPos, tStrLen);
+        std::string tParsed = mMathParser->compute(tExpression);
+        aString.replace(aSearchPos-1, tStrLen+2, tParsed);
+    }
 }
 
 bool PugiParser::ForWalker::for_each(pugi::xml_node& aNode)
@@ -571,7 +650,7 @@ PugiParser::findReplace(std::string aString, std::string aFind, std::string aRep
 
     // find aFind in aString and replace with aReplace.
     // only look for aFind between '{' and '}' delimiters
-    // tokenify the string between '{' and '}' based on arithmetic ops (i.e., {+-()/*^}) and find based on tokens
+    // tokenify the string between '{' and '}' based on arithmetic ops and delimiters (i.e., +-()/*^{}[]) and find based on tokens
     // the delimiters '{' and '}' are not removed.
     
     std::string tString(aString);
@@ -592,7 +671,7 @@ PugiParser::findReplace(std::string aString, std::string aFind, std::string aRep
         }
 
         // search between tSearchPos and tEndPos for aFind
-        std::string tDelimiters(" +-()/*^}");
+        std::string tDelimiters(" +-()/*^{}[]");
         size_t tNextPos;
         do
         {

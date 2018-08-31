@@ -471,6 +471,7 @@ void Interface::createPerformers()
             tPerfIDs.push_back(tLocalPerformerID);
         }
 
+
         // Are any PerformerIDs specified in the interface definition that weren't 
         // defined on the mpi command line?
         //
@@ -507,9 +508,9 @@ void Interface::createPerformers()
         throw 1;
     }
 
-    // If the Performer spec defines a CommSize, then the allocated ranks on that PerformerID are
-    // broken into one (trivial case) or more local comms.  To avoid any semantics of how ranks
-    // are assigned, manually color the local comms before splitting.
+    // If the Performer spec has N names defined then the allocated ranks on that PerformerID are
+    // broken into N local comms.  To avoid any semantics of how ranks are assigned, manually color 
+    // the local comms before splitting.
     //
     std::vector<int> tPerformerIDs(tNumGlobalRanks);
     MPI_Allgather(&mPerformerID, 1, MPI_INT, tPerformerIDs.data(), 1, MPI_INT, mGlobalComm);
@@ -519,18 +520,21 @@ void Interface::createPerformers()
     {
         int tLocalPerformerID = Plato::Get::Int(tNode, "PerformerID");
         int tNumRanksThisID = tPerfCommSize[tLocalPerformerID];
-        int tLocalPerformerCommSize = Plato::Get::Int(tNode, "CommSize", /*default_if_not_given=*/ tNumRanksThisID);
+        auto tPerformerNames = tNode.getByName<std::string>("Name");
+        int tNumCommsThisID = tPerformerNames.size();
+        int tLocalPerformerCommSize = tNumRanksThisID / tNumCommsThisID;
 
-        // Does the CommSize partition the ranks for this PerformerID without a remainder?
+        // Does the number of Comms partition the ranks for this PerformerID without a remainder?
         //
-        int tErrorUneven = ( tNumRanksThisID % tLocalPerformerCommSize == 0 ) ? 0 : 1;
-        int tErrorUnevenGlobal = 0;
-        MPI_Allreduce(&tErrorUneven, &tErrorUnevenGlobal, 1, MPI_INT, MPI_MAX, mGlobalComm);
-        if( tErrorUnevenGlobal ){
+        int tErrorUneven = ( tNumCommsThisID * tLocalPerformerCommSize == tNumRanksThisID ) ? 0 : 1;
+        if( tErrorUneven ){
             if( tMyRank == 0 )
             {
                     std::cout << " -- Fatal Error --------------------------------------------------------------" << std::endl;
-                    std::cout << "  Each PerformerID must be allocated N*CommSize processes where N is a positive integer." << std::endl;
+                    std::cout << "  Error creating performer with ID=" << tLocalPerformerID << "." << std::endl;
+                    std::cout << "  Attempted to spread N=" << tNumRanksThisID 
+                              << " processes over M=" << tNumCommsThisID << " comms, but N % M != 0." << std::endl;
+                    std::cout << "  Change N to a whole number multiple of M and try again." << std::endl;
                     std::cout << " -----------------------------------------------------------------------------" << std::endl;
             }
             throw 1;
@@ -544,7 +548,8 @@ void Interface::createPerformers()
             {
                 if( i == tMyRank )
                 {
-                     mLocalPerformerName = Plato::Get::String(tNode, "Name");
+                     int tNameIndex = tRankCount/tLocalPerformerCommSize;
+                     mLocalPerformerName = tPerformerNames[tNameIndex];
                      mLocalCommID = tCommIndex;
                 }
                 tRankCount++;

@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+
+<Filter>
+  <Name>Kernel</Name>
+  <Scale>4.48</Scale>
+  <Absolute>-1.0</Absolute>
+</Filter>
+
+<Operation>
+  <Function>PlatoMainOutput</Function>
+  <OutputFrequency>1000</OutputFrequency>
+  <Name>PlatoMainOutput</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+    <Alias>Topology</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Internal Energy Gradient</ArgumentName>
+    <Alias>Internal Energy Gradient</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Volume Gradient</ArgumentName>
+    <Alias>Volume Gradient</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Displacement X</ArgumentName>
+    <Alias>Displacement X</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Displacement Y</ArgumentName>
+    <Alias>Displacement Y</Alias>
+  </Input>
+</Operation>
+
+<Operation>
+  <Function>Filter</Function>
+  <Name>FilterControl</Name>
+  <Input>
+    <ArgumentName>Field</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Filtered Field</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>Filter</Function>
+  <Name>FilterGradient</Name>
+  <Input>
+    <ArgumentName>Field</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Filtered Field</ArgumentName>
+  </Output>
+  <Transpose>True</Transpose>
+</Operation>
+
+<Operation>
+  <Function>InitializeField</Function>
+  <Name>Initialize Field</Name>
+  <Method>Uniform</Method>
+  <Output>
+    <ArgumentName>Initialized Field</ArgumentName>
+  </Output>
+  <Uniform>
+    <Value>0.25</Value>
+  </Uniform>
+</Operation>
+
+<Operation>
+  <Function>DesignVolume</Function>
+  <Name>Design Volume</Name>
+  <Output>
+    <ArgumentName>Design Volume</ArgumentName>
+  </Output>
+  <Blocks>1</Blocks>
+</Operation>
+
+<Operation>
+  <Function>ComputeVolume</Function>
+  <Name>Compute Current Volume</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Volume</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Volume Gradient</ArgumentName>
+  </Output>
+
+  <PenaltyModel>SIMP</PenaltyModel>
+  <SIMP>
+    <PenaltyExponent>1.0</PenaltyExponent>
+    <MinimumValue>0.0</MinimumValue>
+  </SIMP>
+</Operation>
+
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateEnergy</Name>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <For var="N" in="Points">
+    <Input>
+      <ArgumentName>Value {N}</ArgumentName>
+    </Input>
+    </For>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Aggregate>
+    <Layout>Nodal Field</Layout>
+    <For var="N" in="Points">
+    <Input>
+      <ArgumentName>Field {N}</ArgumentName>
+    </Input>
+    </For>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Weighting>
+    <For var="N" in="Points">
+    <Weight>
+      <Value>{weights[N]}</Value>
+    </Weight>
+    </For>
+  </Weighting>
+</Operation>
+<Operation>
+  <Function>SetLowerBounds</Function>
+  <Name>Calculate Lower Bounds</Name>
+  <Input>
+    <ArgumentName>Lower Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Lower Bound Vector</ArgumentName>
+  </Output>
+  <FixedBlocks>
+  </FixedBlocks>
+</Operation>
+<Operation>
+  <Function>SetUpperBounds</Function>
+  <Name>Calculate Upper Bounds</Name>
+  <Input>
+    <ArgumentName>Upper Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Upper Bound Vector</ArgumentName>
+  </Output>
+</Operation>
+
