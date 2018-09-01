@@ -87,6 +87,8 @@ struct AlgorithmParamStruct
     // Output parameters
     ScalarType mObjectiveValue;
     ScalarType mConstraintValue;
+    ScalarType mCumulativeDistributionMisfit;
+    std::vector<ScalarType> mMomentMisfitTerms;
 
     /*! @brief Default constructor */
     AlgorithmParamStruct() :
@@ -98,7 +100,9 @@ struct AlgorithmParamStruct
             mActualReductionTolerance(1e-12),
             mPenaltyParameterScaleFactor(1.2),
             mObjectiveValue(std::numeric_limits<ScalarType>::max()),
-            mConstraintValue(std::numeric_limits<ScalarType>::max())
+            mConstraintValue(std::numeric_limits<ScalarType>::max()),
+            mCumulativeDistributionMisfit(std::numeric_limits<ScalarType>::max()),
+            mMomentMisfitTerms()
     {
     }
 };
