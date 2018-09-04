@@ -400,8 +400,8 @@ TEST(PlatoTest, SromObjectiveTestOne)
 
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.276806509167094;
     tControl(tVectorIndex, 1) = 0.431107226622461;
@@ -412,7 +412,7 @@ TEST(PlatoTest, SromObjectiveTestOne)
 
     // ********* TEST OBJECTIVE FUNCTION *********
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments);
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
@@ -421,9 +421,9 @@ TEST(PlatoTest, SromObjectiveTestOne)
     EXPECT_NEAR(tGold, tValue, tTolerance);
 
     // ********* TEST OBJECTIVE GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tObjective.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = -2.010045017107233;
     tGradientGold(tVectorIndex, 1) = -3.878346258927178;
@@ -449,8 +449,8 @@ TEST(PlatoTest, SromObjectiveTestTwo)
 
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 3;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.276806509167094;
     tControl(tVectorIndex, 1) = 0.004622102620248;
@@ -467,7 +467,7 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     // ********* TEST OBJECTIVE FUNCTION *********
     const size_t tRandomVecDim = 2;
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tRandomVecDim);
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
@@ -476,9 +476,9 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     EXPECT_NEAR(tGold, tValue, tTolerance);
 
     // ********* TEST OBJECTIVE GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tObjective.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = -2.42724408126656;
     tGradientGold(tVectorIndex, 1) = -0.337450847795798;
@@ -501,8 +501,8 @@ TEST(PlatoTest, SromConstraint)
 {
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.183183326166505;
     tControl(tVectorIndex, 1) = 0.341948604575779;
@@ -525,9 +525,9 @@ TEST(PlatoTest, SromConstraint)
     EXPECT_NEAR(tGoldValue, tValue, tTolerance);
 
     // ********* TEST CONSTRAINT GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tConstraint.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = 0;
     tGradientGold(tVectorIndex, 1) = 0;
@@ -599,12 +599,13 @@ TEST(PlatoTest, CheckSromObjectiveGradient)
 
     // ********* CHECK OBJECTIVE GRADIENT *********
     std::ostringstream tOutputMsg;
-    Plato::Diagnostics<double> tDiagnostics;
+    const size_t tNumSamples = 4;
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments);
+    Plato::Diagnostics<double> tDiagnostics;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples);
+
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
@@ -624,8 +625,8 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     Plato::SromConstraint<double> tConstraint(tReductions);
 
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
 
     std::ostringstream tOutputMsg;
     Plato::Diagnostics<double> tDiagnostics;
@@ -662,7 +663,7 @@ TEST(PlatoTest, SromOptimizationProblem)
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     const size_t tMaxNumMoments = 4;
     std::shared_ptr<Plato::SromObjective<double>> tSromObjective =
-            std::make_shared<Plato::SromObjective<double>>(tDistribution, tMaxNumMoments);
+            std::make_shared<Plato::SromObjective<double>>(tDistribution, tMaxNumMoments, tNumSamples);
     std::shared_ptr<Plato::ReductionOperations<double>> tReductions = tDataFactory->getControlReductionOperations().create();
     std::shared_ptr<Plato::SromConstraint<double>> tSromConstraint = std::make_shared<Plato::SromConstraint<double>>(tReductions);
     std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
