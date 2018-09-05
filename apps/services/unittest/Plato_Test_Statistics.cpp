@@ -780,6 +780,36 @@ TEST(PlatoTest, solveUncertaintyProblem_checkSize)
 
     // CHECK
     EXPECT_EQ(tOutput.size(), tInput.mNumSamples);
+
+    // CHECK DIAGNOSTICS OUTPUT
+    EXPECT_EQ(tInput.mNumSamples, tDiagnostics.mSromCDF.size());
+    EXPECT_EQ(tInput.mNumSamples, tDiagnostics.mTrueCDF.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mSromMoments.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mTrueMoments.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mMomentErrors.size());
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.031222598068113901, tDiagnostics.mCumulativeDistributionFunctionError, tTolerance);
+    EXPECT_NEAR(0.0080309885157028253, tDiagnostics.mMomentErrors[0], tTolerance);
+    EXPECT_NEAR(0.00059230417679088476, tDiagnostics.mMomentErrors[1], tTolerance);
+    EXPECT_NEAR(0.0003054453504334667, tDiagnostics.mMomentErrors[2], tTolerance);
+    EXPECT_NEAR(0.0016131419470630369, tDiagnostics.mMomentErrors[3], tTolerance);
+    EXPECT_NEAR(0.54480789136888397, tDiagnostics.mSromMoments[0], tTolerance);
+    EXPECT_NEAR(0.38412648754238005, tDiagnostics.mSromMoments[1], tTolerance);
+    EXPECT_NEAR(0.30703843909644246, tDiagnostics.mSromMoments[2], tTolerance);
+    EXPECT_NEAR(0.26245517309625521, tDiagnostics.mSromMoments[3], tTolerance);
+    EXPECT_NEAR(0.5, tDiagnostics.mTrueMoments[0], tTolerance);
+    EXPECT_NEAR(0.375, tDiagnostics.mTrueMoments[1], tTolerance);
+    EXPECT_NEAR(0.3125, tDiagnostics.mTrueMoments[2], tTolerance);
+    EXPECT_NEAR(0.2734375, tDiagnostics.mTrueMoments[3], tTolerance);
+    EXPECT_NEAR(0.099861401416886472, tDiagnostics.mSromCDF[0], tTolerance);
+    EXPECT_NEAR(0.29957760047036575, tDiagnostics.mSromCDF[1], tTolerance);
+    EXPECT_NEAR(0.49931471064563576, tDiagnostics.mSromCDF[2], tTolerance);
+    EXPECT_NEAR(0.69915967725924877, tDiagnostics.mSromCDF[3], tTolerance);
+    EXPECT_NEAR(0.24487127477497825, tDiagnostics.mTrueCDF[0], tTolerance);
+    EXPECT_NEAR(0.3909744339238192, tDiagnostics.mTrueCDF[1], tTolerance);
+    EXPECT_NEAR(0.51924481068784534, tDiagnostics.mTrueCDF[2], tTolerance);
+    EXPECT_NEAR(0.66196029192642658, tDiagnostics.mTrueCDF[3], tTolerance);
 }
 
 TEST(PlatoTest, solveUncertaintyProblem_beta)

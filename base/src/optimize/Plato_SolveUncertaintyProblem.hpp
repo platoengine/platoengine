@@ -241,15 +241,7 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
     const ScalarType tLowerBound = aStatsInputs.mLowerBound;
     const ScalarType tUpperBound = aStatsInputs.mUpperBound;
-    OrdinalType tMaxNumMoments = 0;
-    if(aStatsInputs.mMaxNumDistributionMoments < 1)
-    {
-        tMaxNumMoments = 4;
-    }
-    else
-    {
-        tMaxNumMoments = aStatsInputs.mMaxNumDistributionMoments;
-    }
+    const OrdinalType tMaxNumMoments = aStatsInputs.mMaxNumDistributionMoments;
 
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
