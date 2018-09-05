@@ -664,6 +664,9 @@ TEST(PlatoTest, SromOptimizationProblem)
     const size_t tMaxNumMoments = 4;
     std::shared_ptr<Plato::SromObjective<double>> tSromObjective =
             std::make_shared<Plato::SromObjective<double>>(tDistribution, tMaxNumMoments, tNumSamples);
+    EXPECT_EQ(tNumSamples, tSromObjective->getNumSamples());
+    EXPECT_EQ(tMaxNumMoments, tSromObjective->getMaxNumMoments());
+
     std::shared_ptr<Plato::ReductionOperations<double>> tReductions = tDataFactory->getControlReductionOperations().create();
     std::shared_ptr<Plato::SromConstraint<double>> tSromConstraint = std::make_shared<Plato::SromConstraint<double>>(tReductions);
     std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
@@ -771,8 +774,9 @@ TEST(PlatoTest, solveUncertaintyProblem_checkSize)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     EXPECT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -794,8 +798,9 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -831,8 +836,9 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -873,8 +879,9 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);

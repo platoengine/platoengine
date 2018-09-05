@@ -71,6 +71,7 @@ public:
                            const OrdinalType & aMaxNumMoments,
                            const OrdinalType & aNumSamples,
                            OrdinalType aNumRandomVecDim = 1) :
+            mNumSamples(aNumSamples),
             mMaxNumMoments(aMaxNumMoments),
             mNumRandomVecDim(aNumRandomVecDim),
             mSromSigma(1e-3),
@@ -81,8 +82,8 @@ public:
             mCumulativeDistributionFunctionError(0),
             mSromMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
             mTrueMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
-            mSromCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, aNumSamples)),
-            mTrueCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, aNumSamples)),
+            mSromCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
+            mTrueCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
             mMomentsError(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
             mMomentsMisfit(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
             mDistribution(aDistribution)
@@ -129,6 +130,24 @@ public:
     ScalarType getCumulativeDistributionFunctionError() const
     {
         return (mCumulativeDistributionFunctionError);
+    }
+
+    /******************************************************************************//**
+     * @brief Return number of samples
+     * @return number of samples
+    **********************************************************************************/
+    OrdinalType getNumSamples() const
+    {
+        return (mNumSamples);
+    }
+
+    /******************************************************************************//**
+     * @brief Return the maximum number of moments matched through optimization.
+     * @return maximum number of moments
+    **********************************************************************************/
+    OrdinalType getMaxNumMoments() const
+    {
+        return (mMaxNumMoments);
     }
 
     /******************************************************************************//**
@@ -520,6 +539,7 @@ private:
     }
 
 private:
+    OrdinalType mNumSamples;
     OrdinalType mMaxNumMoments;
     OrdinalType mNumRandomVecDim;
 
