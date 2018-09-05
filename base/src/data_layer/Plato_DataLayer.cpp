@@ -95,8 +95,8 @@ DataLayer::DataLayer(const Plato::SharedDataInfo & aSharedDataInfo, const Plato:
         {
             const int tSize = aSharedDataInfo.getSharedDataSize(tMyName);
             assert(tSize > static_cast<int>(0));
-            std::string tMyProviderName = aSharedDataInfo.getProviderName(tIndex);
-            tNewData = new Plato::SharedValue(tMyName, tMyProviderName, aCommData, tSize);
+            std::vector<std::string> tMyProviderNames = aSharedDataInfo.getProviderNames(tIndex);
+            tNewData = new Plato::SharedValue(tMyName, tMyProviderNames, aCommData, tSize);
         }
         else
         {

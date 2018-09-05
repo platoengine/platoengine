@@ -76,9 +76,11 @@ public:
     int getSharedDataSize(const std::string & aName) const;
     void setSharedDataSize(const std::string & aName, const int & aSize);
 
-    const std::string & getProviderName(const int & aIndex) const;
+    const std::vector<std::string> & getProviderNames(const int & aIndex) const;
     const std::vector<std::string> & getReceiverNames(const int & aIndex) const;
-    void setSharedDataMap(const std::string & aProviderName, const std::vector<std::string> & aReceiverNames);
+    void setSharedDataMap(
+           const std::vector<std::string> & aProviderNames, 
+           const std::vector<std::string> & aReceiverNames);
 
     bool isNameDefined(const std::string & aName) const;
     bool isLayoutDefined(const std::string & aLayout) const;
@@ -93,7 +95,7 @@ private:
     std::map<std::string, int> mSharedDataSize;
     std::vector<Plato::communication::broadcast_t> mBroadcast;
     std::vector<std::pair<std::string, std::string>> mSharedDataIdentifiers;
-    std::vector<std::pair<std::string, std::vector<std::string>>> mSharedDataMap;
+    std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> mSharedDataMap;
 
 private:
     SharedDataInfo(const SharedDataInfo& aRhs);
@@ -101,10 +103,10 @@ private:
 };
 
 inline Plato::communication::broadcast_t getBroadcastType(const std::string & aLocalCommName,
-                                                          const std::string & aProviderName,
+                                                          const std::vector<std::string> & aProviderNames,
                                                           const std::vector<std::string> & aReceiverNames)
 {
-    const bool tProvider = (aLocalCommName == aProviderName);
+    const bool tProvider = (std::count(aProviderNames.begin(), aProviderNames.end(), aLocalCommName) > 0);
     const bool tReceiver = (std::count(aReceiverNames.begin(), aReceiverNames.end(), aLocalCommName) > 0);
     Plato::communication::broadcast_t tMyBroadcast = Plato::communication::broadcast_t::UNDEFINED;
 

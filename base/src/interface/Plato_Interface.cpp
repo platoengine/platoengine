@@ -595,13 +595,13 @@ void Interface::createSharedData(Plato::Application* aApplication)
     Plato::SharedDataInfo tSharedDataInfo;
     for( auto tNode : mInputData.getByName<Plato::InputData>("SharedData") )
     {
-        std::string tMyProviderName = Plato::Get::String(tNode, "OwnerName");
+        std::vector<std::string> tMyProviderNames = tNode.getByName<std::string>("OwnerName");
 
         std::vector<std::string> tMyReceiverNames = tNode.getByName<std::string>("UserName");
-        tSharedDataInfo.setSharedDataMap(tMyProviderName, tMyReceiverNames);
+        tSharedDataInfo.setSharedDataMap(tMyProviderNames, tMyReceiverNames);
 
         Plato::communication::broadcast_t tMyBroadcast =
-                Plato::getBroadcastType(tCommunicationData.mLocalCommName, tMyProviderName, tMyReceiverNames);
+                Plato::getBroadcastType(tCommunicationData.mLocalCommName, tMyProviderNames, tMyReceiverNames);
         tSharedDataInfo.setMyBroadcast(tMyBroadcast);
 
         int tMySize = 1;

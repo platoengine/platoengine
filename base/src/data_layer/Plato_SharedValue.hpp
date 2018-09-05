@@ -64,7 +64,9 @@ struct CommunicationData;
 class SharedValue : public SharedData
 {
 public:
-    SharedValue(const std::string & aMyName, const std::string & aProviderName, const Plato::CommunicationData & aCommData, int aSize = 1);
+    SharedValue(const std::string & aMyName, 
+                const std::vector<std::string> & aProviderName, 
+                const Plato::CommunicationData & aCommData, int aSize = 1);
     virtual ~SharedValue();
 
     int size() const;
@@ -77,7 +79,7 @@ public:
 
 private:
     std::string mMyName;
-    std::string mProviderName;
+    std::vector<std::string> mProviderNames;
     std::string mLocalCommName;
 
     MPI_Comm mMyComm;
