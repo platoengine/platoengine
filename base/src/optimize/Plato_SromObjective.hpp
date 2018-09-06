@@ -69,7 +69,9 @@ class SromObjective : public Plato::Criterion<ScalarType, OrdinalType>
 public:
     explicit SromObjective(const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
                            const OrdinalType & aMaxNumMoments,
+                           const OrdinalType & aNumSamples,
                            OrdinalType aNumRandomVecDim = 1) :
+            mNumSamples(aNumSamples),
             mMaxNumMoments(aMaxNumMoments),
             mNumRandomVecDim(aNumRandomVecDim),
             mSromSigma(1e-3),
@@ -77,8 +79,13 @@ public:
             mWeightCdfMisfit(1/1e2),
             mWeightMomentMisfit(1/1e2),
             mSromSigmaTimesSigma(0),
-            mTrueMoments(),
-            mMomentsMisfit(),
+            mCumulativeDistributionFunctionError(0),
+            mSromMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
+            mTrueMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
+            mSromCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
+            mTrueCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
+            mMomentsError(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
+            mMomentsMisfit(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
             mDistribution(aDistribution)
     {
         this->setConstants();
@@ -88,36 +95,176 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Set parameter used to control the degree of smoothness of the SROM CDF
+     * @param [in] aInput parameter used to control the degree of smoothness
+    **********************************************************************************/
     void setSromSigma(const ScalarType & aInput)
     {
         mSromSigma = aInput;
-        this->setConstants(); // Reset constants due to new user-defined input
+        this->setConstants(); // Reset constants due to new input
     }
+
+    /******************************************************************************//**
+     * @brief Set weights used to ensure CDF error component has similar order of magnitude
+     * @param [in] aInput weight
+    **********************************************************************************/
     void setCdfMisfitTermWeight(const ScalarType & aInput)
     {
         mWeightCdfMisfit = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set weights used to ensure moment's error component has similar order of magnitude
+     * @param [in] aInput weight
+    **********************************************************************************/
     void setMomentMisfitTermWeight(const ScalarType & aInput)
     {
         mWeightMomentMisfit = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Return cumulative distribution function (CDF) error
+     * @return error between true and SROM CDF
+    **********************************************************************************/
+    ScalarType getCumulativeDistributionFunctionError() const
+    {
+        return (mCumulativeDistributionFunctionError);
+    }
+
+    /******************************************************************************//**
+     * @brief Return number of samples
+     * @return number of samples
+    **********************************************************************************/
+    OrdinalType getNumSamples() const
+    {
+        return (mNumSamples);
+    }
+
+    /******************************************************************************//**
+     * @brief Return the maximum number of moments matched through optimization.
+     * @return maximum number of moments
+    **********************************************************************************/
+    OrdinalType getMaxNumMoments() const
+    {
+        return (mMaxNumMoments);
+    }
+
+    /******************************************************************************//**
+     * @brief Return moment errors for all random dimension
+     * @return multi-vector with moment errors for all random dimension
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType>& getMomentError() const
+    {
+        return (*mMomentsError);
+    }
+
+
+    /******************************************************************************//**
+     * @brief Return moment errors for input random dimension
+     * @param [in] aInput random vector dimension
+     * @return vector with moment errors for input random dimension
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType>& getMomentError(const OrdinalType& aInput) const
+    {
+        assert(aInput < mMomentsError->getNumVectors());
+        return (mMomentsError->operator[](aInput));
+    }
+
+    /******************************************************************************//**
+     * @brief Return true moments
+     * @return vector with true moments in increasing order, i.e. first element
+     *          corresponds to the first moment (i.e. mean) and the last element
+     *          corresponds to the last moment
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType>& getTrueMoments() const
+    {
+        return (*mTrueMoments);
+    }
+
+    /******************************************************************************//**
+     * @brief Return SROM moments
+     * @return vector with SROM moments in increasing order, i.e. first element
+     *          corresponds to the first SROM moment approximation (i.e. mean) and
+     *          the last element corresponds to the last SROM moment approximation
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType>& getSromMoments() const
+    {
+        return (*mSromMoments);
+    }
+
+    /******************************************************************************//**
+     * @brief Return true cumulative distribution function evaluations
+     * @return vector with true cumulative distribution function evaluations at the
+     *         sample inputs to the objective function (for all random dimensions).
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType>& getTrueCDF() const
+    {
+        return (*mTrueCDF);
+    }
+
+    /******************************************************************************//**
+     * @brief Return SROM cumulative distribution function evaluations
+     * @return vector with SROM cumulative distribution function evaluations at the
+     *         sample inputs to the objective function (for all random dimensions).
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType>& getSromCDF() const
+    {
+        return (*mSromCDF);
+    }
+
+    /******************************************************************************//**
+     * @brief Return true cumulative distribution function evaluations
+     * @param [in] aInput random vector dimension
+     * @return vector with true cumulative distribution function evaluations at the
+     *         sample inputs to the objective function (for all random dimensions).
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType>& getTrueCDF(const OrdinalType& aInput) const
+    {
+        assert(aInput < mTrueCDF->getNumVectors());
+        return (mTrueCDF->operator[](aInput));
+    }
+
+    /******************************************************************************//**
+     * @brief Return SROM cumulative distribution function evaluations
+     * @param [in] aInput random vector dimension
+     * @return vector with SROM cumulative distribution function evaluations at the
+     *         sample inputs to the objective function (for all random dimensions).
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType>& getSromCDF(const OrdinalType& aInput) const
+    {
+        assert(aInput < mSromCDF->getNumVectors());
+        return (mSromCDF->operator[](aInput));
+    }
+
+    /******************************************************************************//**
+     * @brief Null operation - operation is not needed for SROM optimization problem
+    **********************************************************************************/
     void cacheData()
     {
         return;
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate SROM objective
+     * @param [in] aControl optimization variables
+     * @return criterion evaluation
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
-        // NOTE: CORRELATION TERM IS NOT IMPLEMENTED YET. THIS TERM WILL BE ADDED IN THE NEAR FUTURE
+        // NOTE: CORRELATION TERM IS NOT IMPLEMENTED YET. THIS TERM WILL BE ADDED IN THE FUTURE
         const ScalarType tMomentsMisfit = this->computeMomentsMisfit(aControl);
-        const ScalarType tCummulativeDistributionFunctionMisfit =
-                this->computeCumulativeDistributionFunctionMisfit(aControl);
+        mCumulativeDistributionFunctionError = this->computeCumulativeDistributionFunctionMisfit(aControl);
         const ScalarType tOutput = static_cast<ScalarType>(0.5)
-                * (mWeightCdfMisfit * tCummulativeDistributionFunctionMisfit + mWeightMomentMisfit * tMomentsMisfit);
+                * (mWeightCdfMisfit * mCumulativeDistributionFunctionError + mWeightMomentMisfit * tMomentsMisfit);
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate SROM gradient
+     * @param [in] aControl optimization variables
+     * @param [in,out] aOutput SROM gradient
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
@@ -157,6 +304,12 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Apply vector to Hessian operator
+     * @param [in] aControl optimization variables
+     * @param [in] aVector descent direction
+     * @param [in,out] aOutput application of vector to Hessian operator
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -165,22 +318,34 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Set SROM constants
+    **********************************************************************************/
     void setConstants()
     {
         mSromSigmaTimesSigma = mSromSigma * mSromSigma;
         mSqrtConstant = static_cast<ScalarType>(2) * static_cast<ScalarType>(M_PI) * mSromSigmaTimesSigma;
         mSqrtConstant = std::sqrt(mSqrtConstant);
     }
+
+    /******************************************************************************//**
+     * @brief Precompute true moments for target statistics.
+    **********************************************************************************/
     void setTrueMoments()
     {
-        mTrueMoments = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments);
         for(OrdinalType tIndex = 0; tIndex < mMaxNumMoments; tIndex++)
         {
             OrdinalType tMyOrder = tIndex + static_cast<OrdinalType>(1);
             mTrueMoments->operator[](tIndex) = mDistribution->moment(tMyOrder);
         }
-        mMomentsMisfit = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments);
     }
+
+    /******************************************************************************//**
+     * @brief Compute partial derivative of moment term with respect to samples.
+     * @param [in] aSampleIJ sample IJ
+     * @param [in] aProbabilityIJ probability IJ
+     * @param [in] aMomentsMisfit moment misfit term
+    **********************************************************************************/
     ScalarType partialMomentsWrtSamples(const ScalarType & aSampleIJ,
                                         const ScalarType & aProbabilityIJ,
                                         const Plato::Vector<ScalarType, OrdinalType> & aMomentsMisfit)
@@ -198,6 +363,12 @@ private:
         }
         return (tSum);
     }
+
+    /******************************************************************************//**
+     * @brief Compute partial derivative of moment term with respect to probabilities.
+     * @param [in] aSampleIJ sample IJ
+     * @param [in] aMomentsMisfit moment misfit term
+    **********************************************************************************/
     ScalarType partialMomentsWrtProbabilities(const ScalarType & aSampleIJ,
                                               const Plato::Vector<ScalarType, OrdinalType> & aMomentsMisfit)
     {
@@ -213,6 +384,14 @@ private:
         }
         return (tSum);
     }
+
+    /******************************************************************************//**
+     * @brief Compute partial derivative of CDF term with respect to samples.
+     * @param [in] aSampleIJ sample IJ
+     * @param [in] aProbabilityIJ probability IJ
+     * @param [in] aSamples trial samples
+     * @param [in] aSamples trial probabilities
+    **********************************************************************************/
     ScalarType partialCumulativeDistributionFunctionWrtSamples(const ScalarType & aSampleIJ,
                                                                const ScalarType & aProbabilityIJ,
                                                                const Plato::Vector<ScalarType, OrdinalType> & aSamples,
@@ -251,6 +430,13 @@ private:
         const ScalarType tOutput = tTermOne - tTermTwo;
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Compute partial derivative of CDF term with respect to probabilities.
+     * @param [in] aSampleIJ sample IJ
+     * @param [in] aSamples trial samples
+     * @param [in] aSamples trial probabilities
+    **********************************************************************************/
     ScalarType partialCumulativeDistributionFunctionWrtProbabilities(const ScalarType & aSampleIJ,
                                                                      const Plato::Vector<ScalarType, OrdinalType> & aSamples,
                                                                      const Plato::Vector<ScalarType, OrdinalType> & aProbabilities)
@@ -274,11 +460,16 @@ private:
         tSum = static_cast<ScalarType>(0.5) * tSum;
         return (tSum);
     }
-    /*!
-     * Compute misfit in moments up to order q for ith dimension (i.e. i-th random vector dimension).
-     * Currently, the random vector dimension is always set to one. Hence, random vector has size one
-     * and samples are not correlated.
-     **/
+
+    /******************************************************************************//**
+     * @brief Compute misfit in moments, i.e. difference between target and SROM moments.
+     * @param [in] aControl sample/probability pairs
+     *
+     * NOTE:
+     * Compute misfit in moments up to order q for ith dimension (i.e. i-th random vector
+     * dimension). Currently, the random vector dimension is always set to one. Hence,
+     * random vector has size one and samples are not correlated.
+    **********************************************************************************/
     ScalarType computeMomentsMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mMaxNumMoments == mTrueMoments->size());
@@ -292,25 +483,32 @@ private:
         {
             ScalarType tMomentSum = 0;
             const Plato::Vector<ScalarType, OrdinalType> & tMySamples = aControl[tDimIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tMyMomentError = mMomentsError->operator[](tDimIndex);
             Plato::Vector<ScalarType, OrdinalType> & tMyMomentMisfit = mMomentsMisfit->operator[](tDimIndex);
             for(OrdinalType tMomentIndex = 0; tMomentIndex < mMaxNumMoments; tMomentIndex++)
             {
                 OrdinalType tMomentOrder = tMomentIndex + static_cast<OrdinalType>(1);
-                ScalarType tSromMoment =
+                mSromMoments->operator[](tMomentIndex) =
                         Plato::compute_srom_moment<ScalarType, OrdinalType>(tMomentOrder, tMySamples, tProbabilities);
-                tMyMomentMisfit[tMomentIndex] = tSromMoment - mTrueMoments->operator[](tMomentIndex);
+                tMyMomentMisfit[tMomentIndex] = mSromMoments->operator[](tMomentIndex) - mTrueMoments->operator[](tMomentIndex);
                 ScalarType tValue = tMyMomentMisfit[tMomentIndex] / mTrueMoments->operator[](tMomentIndex);
-                tMomentSum = tMomentSum + (tValue * tValue);
+                tMyMomentError[tMomentIndex] = tValue * tValue;
+                tMomentSum = tMomentSum + tMyMomentError[tMomentIndex];
             }
             tTotalSum = tTotalSum + tMomentSum;
         }
         return (tTotalSum);
     }
-    /*!
-     * Compute misfit in Cumulative Distribution Function (CDF) for i-th dimension (i.e. i-th random vector
-     * dimension). Currently, the random vector dimension is always set to one. Hence, random vector has size
-     * one and samples are not correlated.
-     **/
+
+    /******************************************************************************//**
+     * @brief Compute misfit in CDF, i.e. difference between target and SROM CDF.
+     * @param [in] aControl sample/probability pairs
+     *
+     * NOTE:
+     * Compute misfit in Cumulative Distribution Function (CDF) for i-th dimension (i.e.
+     * i-th random vector dimension). Currently, the random vector dimension is always
+     * set to one. Hence, random vector has size one and samples are not correlated.
+    **********************************************************************************/
     ScalarType computeCumulativeDistributionFunctionMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() >= static_cast<OrdinalType>(2));
@@ -322,15 +520,17 @@ private:
         const OrdinalType tNumProbabilities = tProbabilities.size();
         for(OrdinalType tDimIndex = 0; tDimIndex < tNumRandomVecDim; tDimIndex++)
         {
-            ScalarType tMySampleSum = 0;
+            Plato::Vector<ScalarType, OrdinalType> & tMySromCDF = mSromCDF->operator[](tDimIndex);
+            Plato::Vector<ScalarType, OrdinalType> & tMyTrueCDF = mTrueCDF->operator[](tDimIndex);
             const Plato::Vector<ScalarType, OrdinalType> & tMySamples = aControl[tDimIndex];
+
+            ScalarType tMySampleSum = 0;
             for(OrdinalType tProbIndex = 0; tProbIndex < tNumProbabilities; tProbIndex++)
             {
                 ScalarType tSample_ij = tMySamples[tProbIndex];
-                ScalarType tTrueCDF = mDistribution->cdf(tSample_ij);
-                ScalarType tSromCDF =
-                        Plato::compute_srom_cdf<ScalarType, OrdinalType>(tSample_ij, mSromSigma, tMySamples, tProbabilities);
-                ScalarType tMisfit = tSromCDF - tTrueCDF;
+                tMyTrueCDF[tProbIndex] = mDistribution->cdf(tSample_ij);
+                tMySromCDF[tProbIndex] = Plato::compute_srom_cdf<ScalarType, OrdinalType>(tSample_ij, mSromSigma, tMySamples, tProbabilities);
+                ScalarType tMisfit = tMySromCDF[tProbIndex] - tMyTrueCDF[tProbIndex];
                 tMySampleSum = tMySampleSum + (tMisfit * tMisfit);
             }
             tTotalSum = tTotalSum + tMySampleSum;
@@ -339,6 +539,7 @@ private:
     }
 
 private:
+    OrdinalType mNumSamples;
     OrdinalType mMaxNumMoments;
     OrdinalType mNumRandomVecDim;
 
@@ -347,8 +548,13 @@ private:
     ScalarType mWeightCdfMisfit;
     ScalarType mWeightMomentMisfit;
     ScalarType mSromSigmaTimesSigma;
+    ScalarType mCumulativeDistributionFunctionError;
 
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mSromMoments;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTrueMoments;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mSromCDF;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mTrueCDF;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mMomentsError;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mMomentsMisfit;
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> mDistribution;
 

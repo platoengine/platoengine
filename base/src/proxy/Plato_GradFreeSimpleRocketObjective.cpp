@@ -15,10 +15,10 @@ namespace Plato
 {
 
 GradFreeSimpleRocketObjective::GradFreeSimpleRocketObjective(const Plato::SimpleRocketInuts<double>& aRocketInputs,
-                                                             const std::shared_ptr<Plato::GeometryModel<double>>& aGeomModel) :
+                                                             const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom) :
         PlatoSubproblemLibrary::DiscreteObjective(),
         mNormTargetValues(0),
-        mRocketModel(aRocketInputs, aGeomModel),
+        mRocketModel(aRocketInputs, aChamberGeom),
         mTargetThrustProfile(),
         mNumEvaluationsPerDim(),
         mBounds()

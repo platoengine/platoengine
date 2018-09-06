@@ -24,8 +24,10 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_OptimizationTestFunctions.cpp
 							 Plato_Test_Vector3DVariations.cpp
 							 Plato_Test_UniqueCounter.cpp
-							 Plato_Test_SimpleRocketGradFreeOpt.cpp
-							 PSL_Test_Triangle.cpp  PSL_Test_OverhangFilter.cpp  PSL_Test_KernelThenHeavisideFilter.cpp  
+							 Plato_Test_SimpleRocketOptimization.cpp
+							 PSL_Test_Triangle.cpp  
+							 PSL_Test_OverhangFilter.cpp  
+							 PSL_Test_KernelThenHeavisideFilter.cpp  
 							 PSL_Test_VectorKernel.cpp
 							 PSL_Test_VectorCoding.cpp
 							 PSL_Test_SupportVectorMachine.cpp

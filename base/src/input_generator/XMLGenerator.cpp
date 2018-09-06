@@ -275,12 +275,13 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             tInput.mNumSamples = num_samples;
 
             // solve uncertainty sub-problem
-            Plato::AlgorithmParamStruct<double, size_t> tParam;
-            std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-            Plato::solve_uncertainty(tInput, tParam, tOutput);
+            Plato::AlgorithmParamStruct<double, size_t> tAlgorithmParam;
+            Plato::SromProblemDiagnosticsStruct<double> tSromDiagnostics;
+            std::vector<Plato::UncertaintyOutputStruct<double>> tSromOutput;
+            Plato::solve_uncertainty(tInput, tAlgorithmParam, tSromDiagnostics, tSromOutput);
 
             // check size
-            if(tOutput.size() != num_samples)
+            if(tSromOutput.size() != num_samples)
             {
                 std::cout << "unexpected length" << std::endl;
                 return false;
@@ -326,7 +327,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                 for(size_t sample_index = 0; sample_index < num_samples; sample_index++)
                 {
                     // retrieve weight
-                    const double this_sample_weight = tOutput[sample_index].mSampleWeight * thisLoadId_UncertaintyWeight;
+                    const double this_sample_weight = tSromOutput[sample_index].mSampleWeight * thisLoadId_UncertaintyWeight;
 
                     // decide which load to modify
                     Load* loadToModify = NULL;
@@ -372,7 +373,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                     assert(loadToModify != NULL);
 
                     // rotate vector
-                    const double angle_to_vary = tOutput[sample_index].mSampleValue;
+                    const double angle_to_vary = tSromOutput[sample_index].mSampleValue;
                     Plato::Vector3D rotated_load_vec = original_load_vec;
                     Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
 

@@ -46,7 +46,7 @@ struct UncertaintyInputStruct
             mUpperBound(0.),
             mVariance(0.),
             mNumSamples(0),
-            mMaxNumDistributionMoments(0)
+            mMaxNumDistributionMoments(4)
     {
     }
 };

@@ -67,10 +67,24 @@ namespace Plato
 template<typename ScalarType>
 struct UncertaintyOutputStruct
 {
+    // Primary outputs
     ScalarType mSampleValue;
     ScalarType mSampleWeight;
 };
 // struct UncertaintyOutputStruct
+
+template<typename ScalarType>
+struct SromProblemDiagnosticsStruct
+{
+    // Diagnostics - secondary outputs
+    std::vector<ScalarType> mSromCDF;
+    std::vector<ScalarType> mTrueCDF;
+    std::vector<ScalarType> mSromMoments;
+    std::vector<ScalarType> mTrueMoments;
+    std::vector<ScalarType> mMomentErrors;
+    ScalarType mCumulativeDistributionFunctionError;
+};
+// struct SromProblemOutputStruct
 
 template<typename ScalarType, typename OrdinalType>
 struct AlgorithmParamStruct
@@ -87,7 +101,6 @@ struct AlgorithmParamStruct
     // Output parameters
     ScalarType mObjectiveValue;
     ScalarType mConstraintValue;
-
     /*! @brief Default constructor */
     AlgorithmParamStruct() :
             mStop(Plato::algorithm::NOT_CONVERGED),
@@ -104,24 +117,131 @@ struct AlgorithmParamStruct
 };
 // struct AlgorithmParamStruct
 
+/******************************************************************************//**
+ *
+ * @brief Save solution from the stochastic reduced order model (SROM) optimization problem
+ * @param [in] aStatsInputs data structure with inputs for probability distribution function
+ * @param [in] aOptimalControls optimal controls from SROM problem
+ * @param [in,out] aOutput data structure used to save solution from SROM problem
+ *
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aInput,
+void save_srom_solution(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs,
+                        const Plato::MultiVector<ScalarType, OrdinalType>& aOptimalControls,
+                        std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
+{
+    for(OrdinalType tIndex = 0; tIndex < aStatsInputs.mNumSamples; tIndex++)
+    {
+        // undo scaling
+        const ScalarType tUnscaledSampleValue = aOptimalControls(0, tIndex);
+        aOutput[tIndex].mSampleValue = aStatsInputs.mLowerBound
+                + (aStatsInputs.mUpperBound - aStatsInputs.mLowerBound) * tUnscaledSampleValue;
+        // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
+        // confirmed accurate for beta dist'n alone
+        aOutput[tIndex].mSampleWeight = aOptimalControls(1, tIndex);
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Save diagnostics associated with the stochastic reduced order model (SROM) moment metrics
+ * @param [in] aSromObjective objective function interface for SROM problem
+ * @param [in,out] aOutput diagnostics associated with the SROM optimization problem
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void save_srom_moments_diagnostics(const Plato::SromObjective<ScalarType, OrdinalType>& aSromObjective,
+                                   Plato::SromProblemDiagnosticsStruct<ScalarType>& aOutput)
+{
+    // Resize if necessary
+    const OrdinalType tNumMoments = aSromObjective.getMaxNumMoments();
+    if(aOutput.mSromMoments.empty() == true || static_cast<OrdinalType>(aOutput.mSromMoments.size()) != tNumMoments)
+    {
+        aOutput.mSromMoments.clear();
+        aOutput.mSromMoments.resize(tNumMoments);
+    }
+    if(aOutput.mTrueMoments.empty() == true || static_cast<OrdinalType>(aOutput.mTrueMoments.size()) != tNumMoments)
+    {
+        aOutput.mTrueMoments.clear();
+        aOutput.mTrueMoments.resize(tNumMoments);
+    }
+    if(aOutput.mMomentErrors.empty() == true || static_cast<OrdinalType>(aOutput.mMomentErrors.size()) != tNumMoments)
+    {
+        aOutput.mMomentErrors.clear();
+        aOutput.mMomentErrors.resize(tNumMoments);
+    }
+
+    // SET OUTPUT ASSOCIATED WITH MOMENT-BASED METRICS
+    const OrdinalType tNUM_RANDOM_DIM = 1; // ONLY SINGLE DIMENSION SUPPORT
+    for(OrdinalType tRandomDimIndex = 0; tRandomDimIndex < tNUM_RANDOM_DIM; tRandomDimIndex++)
+    {
+        for(OrdinalType tMomentIndex = 0; tMomentIndex < tNumMoments; tMomentIndex++)
+        {
+            aOutput.mSromMoments[tMomentIndex] = aSromObjective.getSromMoments()[tMomentIndex];
+            aOutput.mTrueMoments[tMomentIndex] = aSromObjective.getTrueMoments()[tMomentIndex];
+            aOutput.mMomentErrors[tMomentIndex] = aSromObjective.getMomentError(tRandomDimIndex)[tMomentIndex];
+        }
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Save diagnostics associated with the SROM CDF
+ * @param [in] aSromObjective objective function interface for SROM problem
+ * @param [in,out] aOutput diagnostics associated with the SROM optimization problem
+ *
+ * NOTE: CDF = cumulative distribution function; 2) SROM = stochastic reduced order model
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void save_srom_cdf_diagnostics(const Plato::SromObjective<ScalarType, OrdinalType>& aSromObjective,
+                               Plato::SromProblemDiagnosticsStruct<ScalarType>& aOutput)
+{
+    // Resize if necessary
+    const OrdinalType tNumSamples = aSromObjective.getNumSamples();
+    if(aOutput.mSromCDF.empty() == true || static_cast<OrdinalType>(aOutput.mSromCDF.size()) != tNumSamples)
+    {
+        aOutput.mSromCDF.clear();
+        aOutput.mSromCDF.resize(tNumSamples);
+    }
+    if(aOutput.mTrueCDF.empty() == true || static_cast<OrdinalType>(aOutput.mTrueCDF.size()) != tNumSamples)
+    {
+        aOutput.mTrueCDF.clear();
+        aOutput.mTrueCDF.resize(tNumSamples);
+    }
+
+    // SET OUTPUT ASSOCIATED WITH CDF METRICS
+    const OrdinalType tNUM_RANDOM_DIM = 1; // ONLY SINGLE DIMENSION SUPPORT
+    aOutput.mCumulativeDistributionFunctionError = aSromObjective.getCumulativeDistributionFunctionError();
+    for(OrdinalType tRandomDimIndex = 0; tRandomDimIndex < tNUM_RANDOM_DIM; tRandomDimIndex++)
+    {
+        for(OrdinalType tSampleIndex = 0; tSampleIndex < tNumSamples; tSampleIndex++)
+        {
+            aOutput.mSromCDF[tSampleIndex] = aSromObjective.getSromCDF(tRandomDimIndex)[tSampleIndex];
+            aOutput.mTrueCDF[tSampleIndex] = aSromObjective.getTrueCDF(tRandomDimIndex)[tSampleIndex];
+        }
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Solve optimization problem to construct an optimal stochastic reduced order model (SROM)
+ * @param [in] aStatisticInputs data structure with inputs for probability distribution function
+ * @param [in,out] aAlgorithmParam data structure with inputs/outputs for/from optimization algorithm
+ * @param [in,out] aOutput data structure with outputs from SROM optimization problem
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs,
                        Plato::AlgorithmParamStruct<ScalarType, OrdinalType>& aAlgorithmParam,
+                       Plato::SromProblemDiagnosticsStruct<double>& aSromDiagnostics,
                        std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
 {
     // grab values from input struct
-    const OrdinalType tNumSamples = aInput.mNumSamples;
-    const ScalarType tLowerBound = aInput.mLowerBound;
-    const ScalarType tUpperBound = aInput.mUpperBound;
-    OrdinalType tMaxNumMoments = 0;
-    if(aInput.mMaxNumDistributionMoments < 1)
-    {
-        tMaxNumMoments = 4;
-    }
-    else
-    {
-        tMaxNumMoments = aInput.mMaxNumDistributionMoments;
-    }
+    const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
+    const ScalarType tLowerBound = aStatsInputs.mLowerBound;
+    const ScalarType tUpperBound = aStatsInputs.mUpperBound;
+    const OrdinalType tMaxNumMoments = aStatsInputs.mMaxNumDistributionMoments;
 
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
@@ -132,11 +252,11 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
     // build distribution
-    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(aInput);
+    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(aStatsInputs);
 
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType> > tSromObjective =
-            std::make_shared<Plato::SromObjective<ScalarType, OrdinalType> >(tDistribution, tMaxNumMoments);
+            std::make_shared<Plato::SromObjective<ScalarType, OrdinalType> >(tDistribution, tMaxNumMoments, tNumSamples);
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType> > tReductions = tDataFactory->getControlReductionOperations().create();
     std::shared_ptr<Plato::SromConstraint<ScalarType, OrdinalType> > tSromConstraint = std::make_shared<Plato::SromConstraint<ScalarType, OrdinalType> >(tReductions);
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType> > tConstraintList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType> >();
@@ -178,16 +298,9 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     // transfer to output data structure
     const Plato::MultiVector<ScalarType, OrdinalType>& tFinalControl = tDataMng->getCurrentControl();
     aOutput.resize(tNumSamples);
-    for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
-    {
-        // undo scaling
-        const ScalarType tUnscaledSampleValue = tFinalControl(0, tIndex);
-        aOutput[tIndex].mSampleValue = tLowerBound + (tUpperBound - tLowerBound) * tUnscaledSampleValue;
-        // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
-        // confirmed accurate for beta dist'n alone
-
-        aOutput[tIndex].mSampleWeight = tFinalControl(1, tIndex);
-    }
+    Plato::save_srom_solution<ScalarType,OrdinalType>(aStatsInputs, tFinalControl, aOutput);
+    Plato::save_srom_cdf_diagnostics<ScalarType,OrdinalType>(*tSromObjective, aSromDiagnostics);
+    Plato::save_srom_moments_diagnostics<ScalarType,OrdinalType>(*tSromObjective, aSromDiagnostics);
 
     // transfer stopping criterion, objective and constraint values to algorithm parameter data structure
     aAlgorithmParam.mStop = tAlgorithm.getStoppingCriterion();

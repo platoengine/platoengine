@@ -400,8 +400,8 @@ TEST(PlatoTest, SromObjectiveTestOne)
 
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.276806509167094;
     tControl(tVectorIndex, 1) = 0.431107226622461;
@@ -412,7 +412,7 @@ TEST(PlatoTest, SromObjectiveTestOne)
 
     // ********* TEST OBJECTIVE FUNCTION *********
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments);
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
@@ -421,9 +421,9 @@ TEST(PlatoTest, SromObjectiveTestOne)
     EXPECT_NEAR(tGold, tValue, tTolerance);
 
     // ********* TEST OBJECTIVE GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tObjective.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = -2.010045017107233;
     tGradientGold(tVectorIndex, 1) = -3.878346258927178;
@@ -449,8 +449,8 @@ TEST(PlatoTest, SromObjectiveTestTwo)
 
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 3;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.276806509167094;
     tControl(tVectorIndex, 1) = 0.004622102620248;
@@ -467,7 +467,7 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     // ********* TEST OBJECTIVE FUNCTION *********
     const size_t tRandomVecDim = 2;
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tRandomVecDim);
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
@@ -476,9 +476,9 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     EXPECT_NEAR(tGold, tValue, tTolerance);
 
     // ********* TEST OBJECTIVE GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tObjective.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = -2.42724408126656;
     tGradientGold(tVectorIndex, 1) = -0.337450847795798;
@@ -501,8 +501,8 @@ TEST(PlatoTest, SromConstraint)
 {
     // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     size_t tVectorIndex = 0;
     tControl(tVectorIndex, 0) = 0.183183326166505;
     tControl(tVectorIndex, 1) = 0.341948604575779;
@@ -525,9 +525,9 @@ TEST(PlatoTest, SromConstraint)
     EXPECT_NEAR(tGoldValue, tValue, tTolerance);
 
     // ********* TEST CONSTRAINT GRADIENT *********
-    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
     tConstraint.gradient(tControl, tGradient);
-    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
     tVectorIndex = 0;
     tGradientGold(tVectorIndex, 0) = 0;
     tGradientGold(tVectorIndex, 1) = 0;
@@ -599,12 +599,13 @@ TEST(PlatoTest, CheckSromObjectiveGradient)
 
     // ********* CHECK OBJECTIVE GRADIENT *********
     std::ostringstream tOutputMsg;
-    Plato::Diagnostics<double> tDiagnostics;
+    const size_t tNumSamples = 4;
     const size_t tMaxNumMoments = 4;
-    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments);
+    Plato::Diagnostics<double> tDiagnostics;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples);
+
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
     tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
@@ -624,8 +625,8 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     Plato::SromConstraint<double> tConstraint(tReductions);
 
     const size_t tNumVectors = 2;
-    const size_t tNumControls = 4;
-    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
 
     std::ostringstream tOutputMsg;
     Plato::Diagnostics<double> tDiagnostics;
@@ -662,7 +663,10 @@ TEST(PlatoTest, SromOptimizationProblem)
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     const size_t tMaxNumMoments = 4;
     std::shared_ptr<Plato::SromObjective<double>> tSromObjective =
-            std::make_shared<Plato::SromObjective<double>>(tDistribution, tMaxNumMoments);
+            std::make_shared<Plato::SromObjective<double>>(tDistribution, tMaxNumMoments, tNumSamples);
+    EXPECT_EQ(tNumSamples, tSromObjective->getNumSamples());
+    EXPECT_EQ(tMaxNumMoments, tSromObjective->getMaxNumMoments());
+
     std::shared_ptr<Plato::ReductionOperations<double>> tReductions = tDataFactory->getControlReductionOperations().create();
     std::shared_ptr<Plato::SromConstraint<double>> tSromConstraint = std::make_shared<Plato::SromConstraint<double>>(tReductions);
     std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
@@ -723,6 +727,38 @@ TEST(PlatoTest, SromOptimizationProblem)
     tGoldControl(1,2) = 0.25018122221660277;
     tGoldControl(1,3) = 0.24988583791340019;
     PlatoTest::checkMultiVectorData(tDataMng->getCurrentControl(), tGoldControl);
+
+    // TEST ACCESSOR FUNCTIONS
+    EXPECT_NEAR(0.011192979601439203, tSromObjective->getCumulativeDistributionFunctionError(), tTolerance);
+    EXPECT_EQ(1, tSromObjective->getMomentError().getNumVectors());
+    const size_t tRANDOM_VEC_DIM = 0;
+    EXPECT_EQ(tMaxNumMoments, tSromObjective->getMomentError(tRANDOM_VEC_DIM).size());
+    EXPECT_NEAR(0.0051166144050895333, tSromObjective->getMomentError(tRANDOM_VEC_DIM)[0], tTolerance);
+    EXPECT_NEAR(0.0041708441435645144, tSromObjective->getMomentError(tRANDOM_VEC_DIM)[1], tTolerance);
+    EXPECT_NEAR(0.0001597576589617835, tSromObjective->getMomentError(tRANDOM_VEC_DIM)[2], tTolerance);
+    EXPECT_NEAR(0.0052769725525790403, tSromObjective->getMomentError(tRANDOM_VEC_DIM)[3], tTolerance);
+    EXPECT_EQ(tMaxNumMoments, tSromObjective->getTrueMoments().size());
+    EXPECT_NEAR(0.33333333333333337, tSromObjective->getTrueMoments()[0], tTolerance);
+    EXPECT_NEAR(0.1407407407407405, tSromObjective->getTrueMoments()[1], tTolerance);
+    EXPECT_NEAR(0.06899055918663749, tSromObjective->getTrueMoments()[2], tTolerance);
+    EXPECT_NEAR(0.037521181312030978, tSromObjective->getTrueMoments()[3], tTolerance);
+    EXPECT_EQ(tMaxNumMoments, tSromObjective->getSromMoments().size());
+    EXPECT_NEAR(0.35717683793472566, tSromObjective->getSromMoments()[0], tTolerance);
+    EXPECT_NEAR(0.14983006952307662, tSromObjective->getSromMoments()[1], tTolerance);
+    EXPECT_NEAR(0.069862567266374576, tSromObjective->getSromMoments()[2], tTolerance);
+    EXPECT_NEAR(0.034795538633737751, tSromObjective->getSromMoments()[3], tTolerance);
+    EXPECT_EQ(1, tSromObjective->getTrueCDF().getNumVectors());
+    EXPECT_EQ(tNumSamples, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM).size());
+    EXPECT_NEAR(0.17821214529480175, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[0], tTolerance);
+    EXPECT_NEAR(0.68420782522934132, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[1], tTolerance);
+    EXPECT_NEAR(0.89353339757926531, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[2], tTolerance);
+    EXPECT_NEAR(0.44147406832303915, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[3], tTolerance);
+    EXPECT_EQ(1, tSromObjective->getSromCDF().getNumVectors());
+    EXPECT_EQ(tNumSamples, tSromObjective->getSromCDF(tRANDOM_VEC_DIM).size());
+    EXPECT_NEAR(0.12489655548959624, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[0], tTolerance);
+    EXPECT_NEAR(0.62467537914336646, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[1], tTolerance);
+    EXPECT_NEAR(0.87476242050244046, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[2], tTolerance);
+    EXPECT_NEAR(0.37473602993589383, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[3], tTolerance);
 }
 
 TEST(PlatoTest, solveUncertaintyProblem_checkSize)
@@ -738,11 +774,42 @@ TEST(PlatoTest, solveUncertaintyProblem_checkSize)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     EXPECT_EQ(tOutput.size(), tInput.mNumSamples);
+
+    // CHECK DIAGNOSTICS OUTPUT
+    EXPECT_EQ(tInput.mNumSamples, tDiagnostics.mSromCDF.size());
+    EXPECT_EQ(tInput.mNumSamples, tDiagnostics.mTrueCDF.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mSromMoments.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mTrueMoments.size());
+    EXPECT_EQ(tInput.mMaxNumDistributionMoments, tDiagnostics.mMomentErrors.size());
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.031222598068113901, tDiagnostics.mCumulativeDistributionFunctionError, tTolerance);
+    EXPECT_NEAR(0.0080309885157028253, tDiagnostics.mMomentErrors[0], tTolerance);
+    EXPECT_NEAR(0.00059230417679088476, tDiagnostics.mMomentErrors[1], tTolerance);
+    EXPECT_NEAR(0.0003054453504334667, tDiagnostics.mMomentErrors[2], tTolerance);
+    EXPECT_NEAR(0.0016131419470630369, tDiagnostics.mMomentErrors[3], tTolerance);
+    EXPECT_NEAR(0.54480789136888397, tDiagnostics.mSromMoments[0], tTolerance);
+    EXPECT_NEAR(0.38412648754238005, tDiagnostics.mSromMoments[1], tTolerance);
+    EXPECT_NEAR(0.30703843909644246, tDiagnostics.mSromMoments[2], tTolerance);
+    EXPECT_NEAR(0.26245517309625521, tDiagnostics.mSromMoments[3], tTolerance);
+    EXPECT_NEAR(0.5, tDiagnostics.mTrueMoments[0], tTolerance);
+    EXPECT_NEAR(0.375, tDiagnostics.mTrueMoments[1], tTolerance);
+    EXPECT_NEAR(0.3125, tDiagnostics.mTrueMoments[2], tTolerance);
+    EXPECT_NEAR(0.2734375, tDiagnostics.mTrueMoments[3], tTolerance);
+    EXPECT_NEAR(0.099861401416886472, tDiagnostics.mSromCDF[0], tTolerance);
+    EXPECT_NEAR(0.29957760047036575, tDiagnostics.mSromCDF[1], tTolerance);
+    EXPECT_NEAR(0.49931471064563576, tDiagnostics.mSromCDF[2], tTolerance);
+    EXPECT_NEAR(0.69915967725924877, tDiagnostics.mSromCDF[3], tTolerance);
+    EXPECT_NEAR(0.24487127477497825, tDiagnostics.mTrueCDF[0], tTolerance);
+    EXPECT_NEAR(0.3909744339238192, tDiagnostics.mTrueCDF[1], tTolerance);
+    EXPECT_NEAR(0.51924481068784534, tDiagnostics.mTrueCDF[2], tTolerance);
+    EXPECT_NEAR(0.66196029192642658, tDiagnostics.mTrueCDF[3], tTolerance);
 }
 
 TEST(PlatoTest, solveUncertaintyProblem_beta)
@@ -761,8 +828,9 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -798,8 +866,9 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
@@ -840,8 +909,9 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
 
     // SOLVE
     Plato::AlgorithmParamStruct<double, size_t> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tInput, tParam, tOutput);
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tInput.mNumSamples);
