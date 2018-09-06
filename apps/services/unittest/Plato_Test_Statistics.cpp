@@ -937,4 +937,34 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     EXPECT_NEAR(tTotalProbability, 0.99950480285612575, tTol);
 }
 
+TEST(PlatoTest, OutputSromDiagnostics)
+{
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
+    tDiagnostics.mCumulativeDistributionFunctionError = 0.01;
+    tDiagnostics.mMomentErrors.resize(4);
+    tDiagnostics.mMomentErrors[0] = 0.020;
+    tDiagnostics.mMomentErrors[1] = 0.021;
+    tDiagnostics.mMomentErrors[2] = 0.022;
+    tDiagnostics.mMomentErrors[3] = 0.023;
+    Plato::output_srom_diagnostics<double, size_t>(tDiagnostics);
+
+    std::ifstream tInputFile;
+    tInputFile.open("plato_srom_diagnostics.txt");
+    std::string tData;
+    std::stringstream tDataFromFile;
+    while(tInputFile >> tData)
+    {
+        tDataFromFile << tData.c_str();
+    }
+    tInputFile.close();
+    std::system("rm -f plato_srom_diagnostics.txt");
+
+    std::stringstream tGold;
+    tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";
+    tGold << "CumulativeDistributionFunction(CDF)Mismatch=1.000000e-02--------------------------------|";
+    tGold << "StatisticalMomentsMismatch|--------------------------------|NameOrderError|--------------------------------|";
+    tGold << "Mean12.000e-02||Variance22.100e-02||Skewness32.200e-02||Kurtosis42.300e-02|--------------------------------";
+    ASSERT_STREQ(tDataFromFile.str().c_str(), tGold.str().c_str());
+}
+
 } //namespace PlatoTest

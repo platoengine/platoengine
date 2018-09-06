@@ -60,6 +60,9 @@
 #include "Plato_KelleySachsAugmentedLagrangian.hpp"
 
 #include <vector>
+#include <string>
+#include <fstream>
+#include <iostream>
 
 namespace Plato
 {
@@ -225,9 +228,43 @@ void save_srom_cdf_diagnostics(const Plato::SromObjective<ScalarType, OrdinalTyp
 
 /******************************************************************************//**
  *
+ * @brief Output diagnostics for stochastic reduced order model (SROM) optimization problem
+ * @param [in] aSromDiagnostics diagnostics associated with the SROM optimization problem
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics)
+{
+    std::ofstream tOutputFile;
+    tOutputFile.open("plato_srom_diagnostics.txt");
+    tOutputFile << "Plato Engine v.1.0: Copyright 2018, National Technology & Engineering Solutions of Sandia, LLC (NTESS).\n\n";
+    tOutputFile << "Cumulative Distribution Function (CDF) Mismatch = "
+            << std::setprecision(6) << std::scientific << aSromDiagnostics.mCumulativeDistributionFunctionError << "\n\n";
+
+    tOutputFile << "--------------------------------\n";
+    tOutputFile << "| Statistical Moments Mismatch |\n";
+    tOutputFile << "--------------------------------\n";
+    tOutputFile << "| Name" << std::setw(12) << "Order" << std::setw(10) << "Error" << std::setw(5) << "|\n";
+    tOutputFile << "--------------------------------\n";
+    std::vector<std::string> tMomentNames = {"Mean    ", "Variance", "Skewness", "Kurtosis"};
+    const OrdinalType tMaxNumMoments = aSromDiagnostics.mMomentErrors.size();
+    for(OrdinalType tMomentIndex = 0; tMomentIndex < tMaxNumMoments; tMomentIndex++)
+    {
+        const OrdinalType tMomentOrder = tMomentIndex + static_cast<OrdinalType>(1);
+        std::string tMyName = tMomentIndex < tMaxNumMoments ? tMomentNames[tMomentIndex] : std::to_string(tMomentOrder) + "";
+        tOutputFile << std::setprecision(3) << std::scientific << "| "<< std::setw(8) << tMyName.c_str() << std::setw(6) << tMomentOrder
+                << std::setw(14) << aSromDiagnostics.mMomentErrors[tMomentIndex] << " |\n";
+    }
+    tOutputFile << "--------------------------------";
+    tOutputFile.close();
+}
+
+/******************************************************************************//**
+ *
  * @brief Solve optimization problem to construct an optimal stochastic reduced order model (SROM)
  * @param [in] aStatisticInputs data structure with inputs for probability distribution function
  * @param [in,out] aAlgorithmParam data structure with inputs/outputs for/from optimization algorithm
+ * @param [in,out] aSromDiagnostics diagnostics associated with the SROM optimization problem
  * @param [in,out] aOutput data structure with outputs from SROM optimization problem
  *
 **********************************************************************************/
