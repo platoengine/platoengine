@@ -95,8 +95,8 @@ void SharedValue::transmitData()
         MPI_Comm_split(mInterComm, tProviderColor, tGlobalProcID, &tReductionComm);
 
         // reduce data to rank zero of tReductionComm
-        std::vector<double> mRecv(mData.size(), 0.0);
-        MPI_Reduce(mData.data(), mRecv.data(), mData.size(), MPI_DOUBLE, MPI_SUM, /*rank_of_root=*/0, tReductionComm);
+        std::vector<double> tRecv(mData.size(), 0.0);
+        MPI_Reduce(mData.data(), tRecv.data(), mData.size(), MPI_DOUBLE, MPI_SUM, /*rank_of_root=*/0, tReductionComm);
 
 
         // broadcast the result to all ranks in mIntercomm
@@ -114,7 +114,8 @@ void SharedValue::transmitData()
         MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
 
         // broadcast the reduced data to all ranks 
-        MPI_Bcast(mRecv.data(), mRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        mData = tRecv;
     }
 }
   
