@@ -747,13 +747,13 @@ TEST(PlatoTest, SromOptimizationProblem)
     EXPECT_NEAR(0.14983006952307662, tSromObjective->getSromMoments()[1], tTolerance);
     EXPECT_NEAR(0.069862567266374576, tSromObjective->getSromMoments()[2], tTolerance);
     EXPECT_NEAR(0.034795538633737751, tSromObjective->getSromMoments()[3], tTolerance);
-    EXPECT_EQ(1, tSromObjective->getTrueCDF().getNumVectors());
+    EXPECT_EQ(static_cast<size_t>(1), tSromObjective->getTrueCDF().getNumVectors());
     EXPECT_EQ(tNumSamples, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM).size());
     EXPECT_NEAR(0.17821214529480175, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[0], tTolerance);
     EXPECT_NEAR(0.68420782522934132, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[1], tTolerance);
     EXPECT_NEAR(0.89353339757926531, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[2], tTolerance);
     EXPECT_NEAR(0.44147406832303915, tSromObjective->getTrueCDF(tRANDOM_VEC_DIM)[3], tTolerance);
-    EXPECT_EQ(1, tSromObjective->getSromCDF().getNumVectors());
+    EXPECT_EQ(static_cast<size_t>(1), tSromObjective->getSromCDF().getNumVectors());
     EXPECT_EQ(tNumSamples, tSromObjective->getSromCDF(tRANDOM_VEC_DIM).size());
     EXPECT_NEAR(0.12489655548959624, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[0], tTolerance);
     EXPECT_NEAR(0.62467537914336646, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[1], tTolerance);
