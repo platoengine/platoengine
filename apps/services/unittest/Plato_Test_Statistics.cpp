@@ -730,7 +730,7 @@ TEST(PlatoTest, SromOptimizationProblem)
 
     // TEST ACCESSOR FUNCTIONS
     EXPECT_NEAR(0.011192979601439203, tSromObjective->getCumulativeDistributionFunctionError(), tTolerance);
-    EXPECT_EQ(1, tSromObjective->getMomentError().getNumVectors());
+    EXPECT_EQ(static_cast<size_t>(1), tSromObjective->getMomentError().getNumVectors());
     const size_t tRANDOM_VEC_DIM = 0;
     EXPECT_EQ(tMaxNumMoments, tSromObjective->getMomentError(tRANDOM_VEC_DIM).size());
     EXPECT_NEAR(0.0051166144050895333, tSromObjective->getMomentError(tRANDOM_VEC_DIM)[0], tTolerance);

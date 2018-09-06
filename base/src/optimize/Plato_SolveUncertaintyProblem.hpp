@@ -276,8 +276,6 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
 {
     // grab values from input struct
     const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
-    const ScalarType tLowerBound = aStatsInputs.mLowerBound;
-    const ScalarType tUpperBound = aStatsInputs.mUpperBound;
     const OrdinalType tMaxNumMoments = aStatsInputs.mMaxNumDistributionMoments;
 
     // ********* ALLOCATE DATA FACTORY *********
