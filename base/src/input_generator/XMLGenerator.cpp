@@ -322,7 +322,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
 
                 // get axis
                 Plato::axis3D::axis3D this_axis = Plato::axis3D::axis3D::x;
-                Plato::axis3D_stringToEnum(thisUncertainty.load_angular_variation_axis, this_axis);
+                Plato::axis3D_stringToEnum(thisUncertainty.axis, this_axis);
 
                 // make uncertainty variations
                 for(size_t sample_index = 0; sample_index < num_samples; sample_index++)
@@ -2320,9 +2320,10 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
     char buf[MAX_CHARS_PER_LINE];
     std::vector<std::string> tokens;
     std::string tStringValue;
+    const std::string error_prestring = "ERROR:XMLGenerator:parseUncertainties: ";
 
     // read each line of the file
-    while(!fin.eof())
+    while (!fin.eof())
     {
         // read an entire line into memory
         fin.getline(buf, MAX_CHARS_PER_LINE);
@@ -2330,221 +2331,248 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
         parseTokens(buf, tokens);
 
         // process the tokens
-        if(tokens.size() == 0)
+        if(tokens.size() > 0)
         {
-            continue;
-        }
+            for(size_t j=0; j<tokens.size(); ++j)
+                tokens[j] = toLower(tokens[j]);
 
-        for(size_t j = 0; j < tokens.size(); ++j)
-        {
-            tokens[j] = toLower(tokens[j]);
-        }
-
-        if(parseSingleValue(tokens, tInputStringList ={"begin","uncertainties"}, tStringValue))
-        {
-            while (!fin.eof())
+            if(parseSingleValue(tokens, tInputStringList = {"begin","uncertainty"}, tStringValue))
             {
-                tokens.clear();
-                fin.getline(buf, MAX_CHARS_PER_LINE);
-                parseTokens(buf, tokens);
-                // process the tokens
-                if(tokens.size() == 0)
-                {
-                    continue;
-                }
-
-                for(size_t j=0; j<tokens.size(); ++j)
-                {
-                    tokens[j] = toLower(tokens[j]);
-                }
-
-                if(parseSingleValue(tokens, tInputStringList ={"end","uncertainties"}, tStringValue))
-                {
-                    break;
-                }
-
                 Uncertainty new_uncertainty;
-
-                // load INTEGER angle variation STRING distribution beta mean SCALAR upper SCALAR lower SCALAR standard deviation SCALAR num samples INTEGER
-                // 0    1       2     3         4      5            6    7    8      9     10     11    12     13       14        15     16  17      18
-                // load INTEGER angle variation STRING distribution normal mean SCALAR standard deviation SCALAR num samples INTEGER
-                // 0    1       2     3         4      5            6      7    8      9        10        11     12  13      14
-                // load INTEGER angle variation STRING distribution uniform upper SCALAR lower SCALAR num samples INTEGER
-                // 0    1       2     3         4      5            6       7     8      9     10     11  12      13
-
-                // expect minimum size
-                if(tokens.size() < 7)
+                // found an uncertainty. parse it.
+                while (!fin.eof())
                 {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " Wrong number of parameters specified in appropriate sequence.\n";
-                    return false;
+                    tokens.clear();
+                    fin.getline(buf, MAX_CHARS_PER_LINE);
+                    parseTokens(buf, tokens);
+                    // process the tokens
+                    if(tokens.size() > 0)
+                    {
+                        std::vector<std::string> unlowered_tokens = tokens;
+
+                        for(size_t j=0; j<tokens.size(); ++j)
+                            tokens[j] = toLower(tokens[j]);
+
+                        // begin uncertainty
+                        //      type angle variation
+                        //      axis STRING
+                        //      load INTEGER
+                        //      distribution STRING
+                        //      mean VALUE
+                        //      lower VALUE
+                        //      upper VALUE
+                        //      standard deviation VALUE
+                        //      num samples INTEGER
+                        // end uncertainty
+
+                        if(parseSingleValue(tokens, tInputStringList = {"end","uncertainty"}, tStringValue))
+                        {
+                            break;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"type"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No type specified after \"type\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.type = tokens[1];
+                            for(size_t j=2; j<tokens.size(); ++j)
+                            {
+                                new_uncertainty.type += " ";
+                                new_uncertainty.type += tokens[j];
+                            }
+                            if(new_uncertainty.type != "angle variation")
+                            {
+                                std::cout << error_prestring << "Unmatched uncertainty type.\n";
+                                return false;
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"axis"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No axis specified after \"axis\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.axis = tokens[1];
+                            if(new_uncertainty.axis != "x" &&
+                                    new_uncertainty.axis != "y" &&
+                                    new_uncertainty.axis != "z")
+                            {
+                                std::cout << error_prestring << "Unmatched uncertainty axis.\n";
+                                return false;
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"load"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No load specified after \"load\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.load_id = tokens[1];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"distribution"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No distribution specified after \"distribution\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.distribution = tokens[1];
+                            if(new_uncertainty.distribution != "beta" &&
+                                    new_uncertainty.distribution != "uniform" &&
+                                    new_uncertainty.distribution != "normal")
+                            {
+                                std::cout << error_prestring << "Unmatched uncertainty distribution.\n";
+                                return false;
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mean"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No mean specified after \"mean\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.mean = tokens[1];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"lower"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No lower bound specified after \"lower\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.lower = tokens[1];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"upper"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No load specified after \"upper\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.upper = tokens[1];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"standard", "deviation"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << error_prestring << "No standard deviation specified after \"standard deviation\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.standard_deviation = tokens[2];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"num", "samples"}, tStringValue))
+                        {
+                            if(tokens.size() < 2)
+                            {
+                                std::cout << error_prestring << "No samples specified after \"num samples\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.num_samples = tokens[2];
+                        }
+                        else
+                        {
+                            std::cout << "ERROR: Unhandled keyword(s) \"";
+                            for(size_t ii=0; ii<tokens.size(); ++ii)
+                            {
+                                std::cout << tokens[ii];
+                                if(ii != (tokens.size()-1))
+                                    std::cout << " ";
+                            }
+                            std::cout << "\"\n";
+                            return false;
+                        }
+                    }
                 }
 
-                // load INTEGER
-                if(tokens[0] != "load")
+                // check that uncertainty well specified
+                if(new_uncertainty.type == "angle variation")
                 {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " \"load\" keyword not specified in appropriate sequence.\n";
-                    return false;
-                }
-                new_uncertainty.load_id = tokens[1];
-
-                // angle variation STRING
-                if(tokens[2] != "angle" || tokens[3] != "variation")
-                {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " \"angle variation\" keywords not specified in appropriate sequence.\n";
-                    return false;
-                }
-                std::string this_axis = tokens[4];
-                if(this_axis != "x" && this_axis != "y" && this_axis != "z")
-                {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " unmatched angle variation axis.\n";
-                    return false;
-                }
-                new_uncertainty.load_angular_variation_axis = this_axis;
-
-                // distribution STRING
-                if(tokens[5] != "distribution")
-                {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " \"distribution\" keyword not specified in appropriate sequence.\n";
-                    return false;
-                }
-                new_uncertainty.distribution = tokens[6];
-
-                int j=-1;
-
-                // for each type of distribution
-                if(new_uncertainty.distribution == "beta")
-                {
-                    // expect exact size
-                    if(tokens.size() != 19)
+                    if(new_uncertainty.axis != "x" &&
+                            new_uncertainty.axis != "y" &&
+                            new_uncertainty.axis != "z")
                     {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " Wrong number of parameters specified.\n";
+                        std::cout << error_prestring << "Angular variation requires valid \"axis\" keyword.\n";
                         return false;
                     }
-
-                    // mean SCALAR
-                    if(tokens[7] != "mean")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"mean\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.mean = tokens[8];
-
-                    // upper SCALAR
-                    if(tokens[9] != "upper")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"upper\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.upper = tokens[10];
-
-                    // lower SCALAR
-                    if(tokens[11] != "lower")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"lower\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.lower = tokens[12];
-
-                    // standard deviation SCALAR
-                    if(tokens[13] != "standard" || tokens[14] != "deviation")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"standard deviation\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.standard_deviation = tokens[15];
-
-                    j=16;
-                }
-                else if(new_uncertainty.distribution == "normal")
-                {
-                    // expect exact size
-                    if(tokens.size() != 15)
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " Wrong number of parameters specified.\n";
-                        return false;
-                    }
-
-                    // mean SCALAR
-                    if(tokens[7] != "mean")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"mean\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.mean = tokens[8];
-
-                    // standard deviation SCALAR
-                    if(tokens[9] != "standard" || tokens[10] != "deviation")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"standard deviation\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.standard_deviation = tokens[11];
-
-                    j=12;
-                }
-                else if(new_uncertainty.distribution == "uniform")
-                {
-                    // expect exact size
-                    if(tokens.size() != 14)
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " Wrong number of parameters specified in appropriate sequence.\n";
-                        return false;
-                    }
-
-                    // upper SCALAR
-                    if(tokens[7] != "upper")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"upper\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.upper = tokens[8];
-
-                    // lower SCALAR
-                    if(tokens[9] != "lower")
-                    {
-                        std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                                " \"lower\" keyword not specified in appropriate sequence.\n";
-                        return false;
-                    }
-                    new_uncertainty.lower = tokens[10];
-
-                    j=11;
                 }
                 else
                 {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " Unknown distribution specified.\n";
+                    std::cout << error_prestring << "Unmatched or absent uncertainty \"type\" keyword.\n";
                     return false;
                 }
 
-                // num samples INTEGER
-                if(tokens[j] != "num" || tokens[j+1] != "samples")
+                // check that distribution well specified
+                if(new_uncertainty.distribution == "beta")
                 {
-                    std::cout << "ERROR:XMLGenerator:parseUncertainties:" <<
-                            " \"num samples\" keyword not specified in appropriate sequence.\n";
+                    if(new_uncertainty.lower == "")
+                    {
+                        std::cout << error_prestring << "Beta distribution requires \"lower\" keyword.\n";
+                        return false;
+                    }
+                    if(new_uncertainty.upper == "")
+                    {
+                        std::cout << error_prestring << "Beta distribution requires \"upper\" keyword.\n";
+                        return false;
+                    }
+                    if(new_uncertainty.standard_deviation == "")
+                    {
+                        std::cout << error_prestring << "Beta distribution requires \"standard deviation\" keyword.\n";
+                        return false;
+                    }
+                    if(new_uncertainty.mean == "")
+                    {
+                        std::cout << error_prestring << "Beta distribution requires \"mean\" keyword.\n";
+                        return false;
+                    }
+                }
+                else if(new_uncertainty.distribution == "uniform")
+                {
+                    if(new_uncertainty.lower == "")
+                    {
+                        std::cout << error_prestring << "Uniform distribution requires \"lower\" keyword.\n";
+                        return false;
+                    }
+                    if(new_uncertainty.upper == "")
+                    {
+                        std::cout << error_prestring << "Uniform distribution requires \"upper\" keyword.\n";
+                        return false;
+                    }
+                }
+                else if(new_uncertainty.distribution == "normal")
+                {
+                    if(new_uncertainty.standard_deviation == "")
+                    {
+                        std::cout << error_prestring << "Normal distribution requires \"standard deviation\" keyword.\n";
+                        return false;
+                    }
+                    if(new_uncertainty.mean == "")
+                    {
+                        std::cout << error_prestring << "Normal distribution requires \"mean\" keyword.\n";
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
-                new_uncertainty.num_samples = tokens[j+2];
+
+                // check samples
+                if(new_uncertainty.num_samples == "")
+                {
+                    std::cout << error_prestring << "Uncertainty requires \"num samples\" keyword.\n";
+                    return false;
+                }
 
                 m_InputData.uncertainties.push_back(new_uncertainty);
             }
         }
     }
+
     return true;
 }
 

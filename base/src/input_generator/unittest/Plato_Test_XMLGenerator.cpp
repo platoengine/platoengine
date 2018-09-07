@@ -156,53 +156,134 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     std::istringstream iss;
     std::string stringInput;
 
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation X distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis X\n"
+            "distribution beta\n"
+            "mean 0\n"
+            "upper 5\n"
+            "lower -5\n"
+            "standard deviation 1\n"
+            "num samples 5\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation bad distribution uniform upper 5 lower -5 num samples 5\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis bad\n"
+            "distribution uniform\n"
+            "upper 5\n"
+            "lower -5\n"
+            "num samples 5\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation Y distribution beta mean 0 upper 5 lower -5 std deviation 1 num samples 5\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis Y\n"
+            "distribution beta\n"
+            "mean 0\n"
+            "upper 5\n"
+            "lower -5\n"
+            "std deviation 1\n"
+            "num samples 5\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation X distribution beta mean 0 upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "load 12 angle variation Y distribution normal mean 0 standard deviation 4 num samples 11\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis X\n"
+            "distribution beta\n"
+            "mean 0\n"
+            "upper 5\n"
+            "lower -5\n"
+            "standard deviation 1\n"
+            "num samples 5\n"
+            "end uncertainty\n"
+            "\n"
+            "begin uncertainty\n"
+            "type angle variation\n"
+            "load 12\n"
+            "axis Y\n"
+            "distribution normal\n"
+            "mean 0\n"
+            "standard deviation 4\n"
+            "num samples 11\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation X distribution beta upper 5 lower -5 standard deviation 1 num samples 5\n"
-            "load 12 angle variation X distribution normal mean 0 standard deviation 4 num samples 11\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis X\n"
+            "distribution beta\n"
+            "upper 5\n"
+            "lower -5\n"
+            "standard deviation 1\n"
+            "num samples 5\n"
+            "end uncertainty\n"
+            "\n"
+            "begin uncertainty\n"
+            "type angle variation\n"
+            "load 12\n"
+            "axis Y\n"
+            "distribution normal\n"
+            "mean 0\n"
+            "standard deviation 4\n"
+            "num samples 11\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainties\n"
-            "load 10 angle variation X distribution normal mean 0 standard deviation 1 num samples 5\n"
-            "load 12 angle variation Z distribution beta mean 0 upper 8 lower -2 standard deviation 4 num samples 11\n"
-            "load 15 angle variation Y distribution uniform upper 3 lower -1 num samples 8\n"
-            "end uncertainties\n";
+    stringInput = "begin uncertainty\n"
+            "type angle variation\n"
+            "load 10\n"
+            "axis X\n"
+            "distribution normal\n"
+            "mean 0\n"
+            "standard deviation 1\n"
+            "num samples 5\n"
+            "end uncertainty\n"
+            "\n"
+            "begin uncertainty\n"
+            "type angle variation\n"
+            "load 12\n"
+            "axis Z\n"
+            "distribution beta\n"
+            "mean 0\n"
+            "upper 8\n"
+            "lower -2\n"
+            "standard deviation 4\n"
+            "num samples 11\n"
+            "end uncertainty\n"
+            "\n"
+            "begin uncertainty\n"
+            "type angle variation\n"
+            "load 15\n"
+            "axis Y\n"
+            "distribution uniform\n"
+            "upper 3\n"
+            "lower -1\n"
+            "num samples 8\n"
+            "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
@@ -1837,20 +1918,26 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
 
     stringInput =
             "begin objective\n"
-                "type maximize stiffness\n"
-                "load ids 34\n"
-                "boundary condition ids 256\n"
-                "code salinas\n"
-                "number processors 9\n"
-                "weight 1 \n"
+            "    type maximize stiffness\n"
+            "    load ids 34\n"
+            "    boundary condition ids 256\n"
+            "    code salinas\n"
+            "    number processors 9\n"
+            "    weight 1 \n"
             "end objective\n"
             "begin loads\n"
-                "force nodeset 2 value 7 0 0 load id 34\n"
-                "force nodeset 72 value 1 1 1 load id 1\n"
+            "    force nodeset 2 value 7 0 0 load id 34\n"
+            "    force nodeset 72 value 1 1 1 load id 1\n"
             "end loads\n"
-            "begin uncertainties\n"
-                "load 34 angle variation Z distribution uniform upper 40 lower -35 num samples 3\n"
-            "end uncertainties\n";
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 34\n"
+            "    axis Z\n"
+            "    distribution uniform\n"
+            "    upper 40\n"
+            "    lower -35\n"
+            "    num samples 3\n"
+            "end uncertainty\n";
 
     // do parse
     iss.str(stringInput);
@@ -1928,23 +2015,39 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
 
     stringInput =
             "begin objective\n"
-                "type maximize stiffness\n"
-                "load ids 8\n"
-                "boundary condition ids 256\n"
-                "code salinas\n"
-                "number processors 3\n"
-                "weight 1 \n"
+            "    type maximize stiffness\n"
+            "    load ids 8\n"
+            "    boundary condition ids 256\n"
+            "    code salinas\n"
+            "    number processors 3\n"
+            "    weight 1 \n"
             "end objective\n"
             "begin loads\n"
-                "force nodeset 2 value 5 0 0 load id 8\n"
-                "force nodeset 4 value 1 1 1 load id 1\n"
-                "force nodeset 3 value 0 -1 -2 load id 1\n"
-                "force nodeset 1 value 3 -4 1 load id 2\n"
+            "    force nodeset 2 value 5 0 0 load id 8\n"
+            "    force nodeset 4 value 1 1 1 load id 1\n"
+            "    force nodeset 3 value 0 -1 -2 load id 1\n"
+            "    force nodeset 1 value 3 -4 1 load id 2\n"
             "end loads\n"
-            "begin uncertainties\n"
-                "load 8 angle variation Y distribution uniform upper 25 lower -30 num samples 4\n"
-                "load 8 angle variation Z distribution beta mean 5 upper 30 lower -25 standard deviation 15 num samples 3\n"
-            "end uncertainties\n";
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 8\n"
+            "    axis Y\n"
+            "    distribution uniform\n"
+            "    upper 25\n"
+            "    lower -30\n"
+            "    num samples 4\n"
+            "end uncertainty\n"
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 8\n"
+            "    axis Z\n"
+            "    distribution beta\n"
+            "    mean 5\n"
+            "    upper 30\n"
+            "    lower -25\n"
+            "    standard deviation 15\n"
+            "    num samples 3\n"
+            "end uncertainty\n";
 
     // do parse
     iss.str(stringInput);
@@ -2026,23 +2129,39 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
 
     stringInput =
             "begin objective\n"
-                "type maximize stiffness\n"
-                "load ids 1 8\n"
-                "boundary condition ids 256\n"
-                "code salinas\n"
-                "number processors 3\n"
-                "weight 1 \n"
+            "    type maximize stiffness\n"
+            "    load ids 1 8\n"
+            "    boundary condition ids 256\n"
+            "    code salinas\n"
+            "    number processors 3\n"
+            "    weight 1 \n"
             "end objective\n"
             "begin loads\n"
-                "force nodeset 2 value 0 -6 0 load id 8\n"
-                "force nodeset 4 value 1 1 1 load id 1\n"
-                "force nodeset 3 value 0 -1 -2 load id 1\n"
-                "force nodeset 1 value 3 -4 1 load id 2\n"
+            "    force nodeset 2 value 0 -6 0 load id 8\n"
+            "    force nodeset 4 value 1 1 1 load id 1\n"
+            "    force nodeset 3 value 0 -1 -2 load id 1\n"
+            "    force nodeset 1 value 3 -4 1 load id 2\n"
             "end loads\n"
-            "begin uncertainties\n"
-                "load 8 angle variation X distribution uniform upper 25 lower -30 num samples 5\n"
-                "load 8 angle variation Z distribution beta mean 5 upper 30 lower -25 standard deviation 15 num samples 3\n"
-            "end uncertainties\n";
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 8\n"
+            "    axis X\n"
+            "    distribution uniform\n"
+            "    upper 25\n"
+            "    lower -30\n"
+            "    num samples 5\n"
+            "end uncertainty\n"
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 8\n"
+            "    axis Z\n"
+            "    distribution beta\n"
+            "    mean 5\n"
+            "    upper 30\n"
+            "    lower -25\n"
+            "    standard deviation 15\n"
+            "    num samples 3\n"
+            "end uncertainty\n";
 
     // do parse
     iss.str(stringInput);
@@ -2124,19 +2243,27 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
 
     stringInput =
             "begin objective\n"
-                "type maximize stiffness\n"
-                "load ids 34\n"
-                "boundary condition ids 256\n"
-                "code salinas\n"
-                "number processors 9\n"
-                "weight 1 \n"
+            "    type maximize stiffness\n"
+            "    load ids 34\n"
+            "    boundary condition ids 256\n"
+            "    code salinas\n"
+            "    number processors 9\n"
+            "    weight 1 \n"
             "end objective\n"
             "begin loads\n"
-                "force nodeset 2 value 7 0 0 load id 34\n"
+            "    force nodeset 2 value 7 0 0 load id 34\n"
             "end loads\n"
-            "begin uncertainties\n"
-                "load 34 angle variation Z distribution beta mean 45.0 upper 90 lower 0 standard deviation 1 num samples 6\n"
-            "end uncertainties\n";
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 34\n"
+            "    axis Z\n"
+            "    distribution beta\n"
+            "    mean 45.0\n"
+            "    upper 90\n"
+            "    lower 0\n"
+            "    standard deviation 1\n"
+            "    num samples 6\n"
+            "end uncertainty\n";
 
     // do parse
     iss.str(stringInput);
