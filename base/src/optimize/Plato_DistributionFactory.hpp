@@ -36,6 +36,10 @@ struct UncertaintyInputStruct
     ScalarType mLowerBound;
     ScalarType mUpperBound;
     ScalarType mVariance;
+
+    ScalarType mMomentErrorCriterionWeight;
+    ScalarType mCumulativeDistributionFuncErrorWeight;
+
     OrdinalType mNumSamples;
     OrdinalType mMaxNumDistributionMoments; // if zero, then use default
 
@@ -45,6 +49,8 @@ struct UncertaintyInputStruct
             mLowerBound(0.),
             mUpperBound(0.),
             mVariance(0.),
+            mMomentErrorCriterionWeight(1/1e2),
+            mCumulativeDistributionFuncErrorWeight(1/1e2),
             mNumSamples(0),
             mMaxNumDistributionMoments(4)
     {

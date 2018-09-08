@@ -292,6 +292,9 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType> > tSromObjective =
             std::make_shared<Plato::SromObjective<ScalarType, OrdinalType> >(tDistribution, tMaxNumMoments, tNumSamples);
+    tSromObjective->setMomentMisfitTermWeight(aStatsInputs.mMomentErrorCriterionWeight);
+    tSromObjective->setCdfMisfitTermWeight(aStatsInputs.mCumulativeDistributionFuncErrorWeight);
+
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType> > tReductions = tDataFactory->getControlReductionOperations().create();
     std::shared_ptr<Plato::SromConstraint<ScalarType, OrdinalType> > tSromConstraint = std::make_shared<Plato::SromConstraint<ScalarType, OrdinalType> >(tReductions);
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType> > tConstraintList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType> >();
