@@ -9,7 +9,7 @@ The Plato Engine computer program serves as a collaborative testbed rich in ligh
 
 ## Installation
 To checkout a copy of Plato Engine from the command line use from the directory of your choice (i.e. $HOME/codes):
-```
+```javascript
 git clone https://username:password@github.com/platoengine/platoengine.git
 ```
 where username and password corresponds to your github.com account. At this stage, make sure all required environment variables are set and all tpls are installed. 
@@ -33,4 +33,4 @@ Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/
 Pugixml library: https://pugixml.org 
 
 # Hardware Requirements
-Tested compilers are g++ 4.7.2 and intel 17.0.1 compilers. Tested OS include Linux and Mac. RAM requirements are problem size dependent.
+Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, `g++ 7.2.0` and `intel 17.0.1` compilers. Tested `OS` include `Linux` and `Mac`. `RAM` requirements are problem size dependent.
