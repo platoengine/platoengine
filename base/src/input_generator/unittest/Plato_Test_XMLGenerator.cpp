@@ -156,133 +156,156 @@ TEST(PlatoTestXMLGenerator, parseUncertainties)
     std::istringstream iss;
     std::string stringInput;
 
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis X\n"
-            "distribution beta\n"
-            "mean 0\n"
-            "upper 5\n"
-            "lower -5\n"
-            "standard deviation 1\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis X\n"
+            "    distribution beta\n"
+            "    mean 0\n"
+            "    upper bound 5\n"
+            "    lower bound -5\n"
+            "    standard deviation 1\n"
+            "    num samples 5\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis bad\n"
-            "distribution uniform\n"
-            "upper 5\n"
-            "lower -5\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis X\n"
+            "    distribution beta\n"
+            "    mean 0\n"
+            "    upper bound 5\n"
+            "    lower -5\n"
+            "    standard deviation 1\n"
+            "    num samples 5\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis Y\n"
-            "distribution beta\n"
-            "mean 0\n"
-            "upper 5\n"
-            "lower -5\n"
-            "std deviation 1\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis bad\n"
+            "    distribution uniform\n"
+            "    upper bound 5\n"
+            "    lower bound -5\n"
+            "    num samples 5\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis X\n"
-            "distribution beta\n"
-            "mean 0\n"
-            "upper 5\n"
-            "lower -5\n"
-            "standard deviation 1\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis Y\n"
+            "    distribution beta\n"
+            "    mean 0\n"
+            "    upper bound 5\n"
+            "    lower bound -5\n"
+            "    std deviation 1\n"
+            "    num samples 5\n"
+            "end uncertainty\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseUncertainties(iss), false);
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis X\n"
+            "    distribution beta\n"
+            "    mean 0\n"
+            "    upper bound 5\n"
+            "    lower bound -5\n"
+            "    standard deviation 1\n"
+            "    num samples 5\n"
             "end uncertainty\n"
             "\n"
             "begin uncertainty\n"
-            "type angle variation\n"
-            "load 12\n"
-            "axis Y\n"
-            "distribution normal\n"
-            "mean 0\n"
-            "standard deviation 4\n"
-            "num samples 11\n"
+            "    type angle variation\n"
+            "    load 12\n"
+            "    axis Y\n"
+            "    distribution normal\n"
+            "    mean 0\n"
+            "    standard deviation 4\n"
+            "    num samples 11\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), true);
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis X\n"
-            "distribution beta\n"
-            "upper 5\n"
-            "lower -5\n"
-            "standard deviation 1\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis X\n"
+            "    distribution beta\n"
+            "    upper bound 5\n"
+            "    lower bound -5\n"
+            "    standard deviation 1\n"
+            "    num samples 5\n"
             "end uncertainty\n"
             "\n"
             "begin uncertainty\n"
-            "type angle variation\n"
-            "load 12\n"
-            "axis Y\n"
-            "distribution normal\n"
-            "mean 0\n"
-            "standard deviation 4\n"
-            "num samples 11\n"
+            "    type angle variation\n"
+            "    load 12\n"
+            "    axis Y\n"
+            "    distribution normal\n"
+            "    mean 0\n"
+            "    standard deviation 4\n"
+            "    num samples 11\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseUncertainties(iss), false);
-    stringInput = "begin uncertainty\n"
-            "type angle variation\n"
-            "load 10\n"
-            "axis X\n"
-            "distribution normal\n"
-            "mean 0\n"
-            "standard deviation 1\n"
-            "num samples 5\n"
+    stringInput =
+            "begin uncertainty\n"
+            "    type angle variation\n"
+            "    load 10\n"
+            "    axis X\n"
+            "    distribution normal\n"
+            "    mean 0\n"
+            "    standard deviation 1\n"
+            "    num samples 5\n"
             "end uncertainty\n"
             "\n"
             "begin uncertainty\n"
-            "type angle variation\n"
-            "load 12\n"
-            "axis Z\n"
-            "distribution beta\n"
-            "mean 0\n"
-            "upper 8\n"
-            "lower -2\n"
-            "standard deviation 4\n"
-            "num samples 11\n"
+            "    type angle variation\n"
+            "    load 12\n"
+            "    axis Z\n"
+            "    distribution beta\n"
+            "    mean 0\n"
+            "    upper bound 8\n"
+            "    lower bound -2\n"
+            "    standard deviation 4\n"
+            "    num samples 11\n"
             "end uncertainty\n"
             "\n"
             "begin uncertainty\n"
-            "type angle variation\n"
-            "load 15\n"
-            "axis Y\n"
-            "distribution uniform\n"
-            "upper 3\n"
-            "lower -1\n"
-            "num samples 8\n"
+            "    type angle variation\n"
+            "    load 15\n"
+            "    axis Y\n"
+            "    distribution uniform\n"
+            "    upper bound 3\n"
+            "    lower bound -1\n"
+            "    num samples 8\n"
             "end uncertainty\n";
     iss.str(stringInput);
     iss.clear();
@@ -1934,8 +1957,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
             "    load 34\n"
             "    axis Z\n"
             "    distribution uniform\n"
-            "    upper 40\n"
-            "    lower -35\n"
+            "    upper bound 40\n"
+            "    lower bound -35\n"
             "    num samples 3\n"
             "end uncertainty\n";
 
@@ -2033,8 +2056,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
             "    load 8\n"
             "    axis Y\n"
             "    distribution uniform\n"
-            "    upper 25\n"
-            "    lower -30\n"
+            "    upper bound 25\n"
+            "    lower bound -30\n"
             "    num samples 4\n"
             "end uncertainty\n"
             "begin uncertainty\n"
@@ -2043,8 +2066,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
             "    axis Z\n"
             "    distribution beta\n"
             "    mean 5\n"
-            "    upper 30\n"
-            "    lower -25\n"
+            "    upper bound 30\n"
+            "    lower bound -25\n"
             "    standard deviation 15\n"
             "    num samples 3\n"
             "end uncertainty\n";
@@ -2147,8 +2170,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
             "    load 8\n"
             "    axis X\n"
             "    distribution uniform\n"
-            "    upper 25\n"
-            "    lower -30\n"
+            "    upper bound 25\n"
+            "    lower bound -30\n"
             "    num samples 5\n"
             "end uncertainty\n"
             "begin uncertainty\n"
@@ -2157,8 +2180,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
             "    axis Z\n"
             "    distribution beta\n"
             "    mean 5\n"
-            "    upper 30\n"
-            "    lower -25\n"
+            "    upper bound 30\n"
+            "    lower bound -25\n"
             "    standard deviation 15\n"
             "    num samples 3\n"
             "end uncertainty\n";
@@ -2259,8 +2282,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
             "    axis Z\n"
             "    distribution beta\n"
             "    mean 45.0\n"
-            "    upper 90\n"
-            "    lower 0\n"
+            "    upper bound 90\n"
+            "    lower bound 0\n"
             "    standard deviation 1\n"
             "    num samples 6\n"
             "end uncertainty\n";

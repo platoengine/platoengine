@@ -2359,8 +2359,8 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                         //      load INTEGER
                         //      distribution STRING
                         //      mean VALUE
-                        //      lower VALUE
-                        //      upper VALUE
+                        //      lower bound VALUE
+                        //      upper bound VALUE
                         //      standard deviation VALUE
                         //      num samples INTEGER
                         // end uncertainty
@@ -2438,23 +2438,23 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                             }
                             new_uncertainty.mean = tokens[1];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"lower"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"lower", "bound"}, tStringValue))
                         {
-                            if(tokens.size() < 2)
+                            if(tokens.size() < 3)
                             {
-                                std::cout << error_prestring << "No lower bound specified after \"lower\" keyword.\n";
+                                std::cout << error_prestring << "No lower bound specified after \"lower bound\" keyword.\n";
                                 return false;
                             }
-                            new_uncertainty.lower = tokens[1];
+                            new_uncertainty.lower = tokens[2];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"upper"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"upper", "bound"}, tStringValue))
                         {
-                            if(tokens.size() < 2)
+                            if(tokens.size() < 3)
                             {
-                                std::cout << error_prestring << "No load specified after \"upper\" keyword.\n";
+                                std::cout << error_prestring << "No load specified after \"upper bound\" keyword.\n";
                                 return false;
                             }
-                            new_uncertainty.upper = tokens[1];
+                            new_uncertainty.upper = tokens[2];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"standard", "deviation"}, tStringValue))
                         {
