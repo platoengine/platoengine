@@ -1,0 +1,34 @@
+<PointArray>
+  <Name>Design Geometry</Name>
+  <Dimensions>2</Dimensions>
+  <N1>{N1}</N1>
+  <N2>{N2}</N2>
+  <Size1>{Size1}</Size1>
+  <Size2>{Size2}</Size2>
+  <Offset1>{Offset1}</Offset1>
+  <Offset2>{Offset2}</Offset2>
+  <Radius>{Radius}</Radius>
+  <NumNeighbors>9</NumNeighbors>
+  <Field>
+    <Name>Initial Uniform Design</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>0.05</Value>
+    </Uniform>
+  </Field>
+  <Field>
+    <Name>Lower Bound</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>-0.200</Value>
+    </Uniform>
+  </Field>
+  <Field>
+    <Name>Upper Bound</Name>
+    <Initializer>Uniform</Initializer>
+    <Uniform>
+      <Value>0.200</Value>
+    </Uniform>
+  </Field>
+</PointArray>
+

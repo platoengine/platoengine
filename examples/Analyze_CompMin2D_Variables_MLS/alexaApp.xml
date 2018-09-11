@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+<include filename="pointarray.xml"/>
+
+<Operation>
+  <Name>Compute MLS Design</Name>
+  <Function>ComputeMLSField</Function>
+  <Input>
+    <ArgumentName>MLS Values</ArgumentName>
+  </Input>
+  <MLSName>Design Geometry</MLSName>
+</Operation>
+
+<Operation>
+  <Name>Compute Perturbed Design</Name>
+  <Function>ComputePerturbedMLSField</Function>
+  <Parameter>
+    <ArgumentName>Perturbed Index</ArgumentName>
+    <InitialValue>0</InitialValue>
+  </Parameter>
+  <Delta>{FD_Delta}</Delta>
+  <MLSName>Design Geometry</MLSName>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective</Name>
+  <Function>ComputeObjectiveValue</Function>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint</Name>
+  <Function>ComputeConstraintValue</Function>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Finite Difference</Name>
+  <Function>ComputeFiniteDifference</Function>
+  <Delta>{FD_Delta}</Delta>
+  <Parameter>
+    <ArgumentName>Perturbed Index</ArgumentName>
+    <InitialValue>0</InitialValue>
+  </Parameter>
+  <Parameter>
+    <ArgumentName>Vector Length</ArgumentName>
+    <InitialValue>{N1*N2}</InitialValue>
+  </Parameter>
+  <Input>
+    <ArgumentName>Initial Value</ArgumentName>
+  </Input>
+  <Input>
+    <ArgumentName>Perturbed Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Solution X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Y</ArgumentName>
+  </Output>
+</Operation>

@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+
+<Operation>
+  <Function>ComputeMLSField</Function>
+  <Name>Compute Nodal Field</Name>
+  <Input>
+    <ArgumentName>MLS Point Values</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>MLS Field Values</ArgumentName>
+  </Output>
+  <MLSName>Design Geometry</MLSName>
+</Operation>
+
+<Operation>
+  <Function>InitializeValues</Function>
+  <Name>Initialize Gradient Values</Name>
+  <Output>
+    <ArgumentName>Values</ArgumentName>
+  </Output>
+  <InitialValue>0.0</InitialValue>
+</Operation>
+
+<Operation>
+  <Function>InitializeValues</Function>
+  <Name>Initialize DOF Values</Name>
+  <Output>
+    <ArgumentName>Values</ArgumentName>
+  </Output>
+  <InitialValue>0.1</InitialValue>
+</Operation>
+
+<Operation>
+  <Function>DesignVolume</Function>
+  <Name>Design Volume</Name>
+  <Output>
+    <ArgumentName>Design Volume</ArgumentName>
+  </Output>
+  <Blocks>1</Blocks>
+</Operation>
+
+<Operation>
+  <Function>PlatoMainOutput</Function>
+  <OutputFrequency>1000</OutputFrequency>
+  <Name>PlatoMainOutput</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+    <Alias>Topology</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Displacement X</ArgumentName>
+    <Alias>Displacement X</Alias>
+  </Input>
+  <Input>
+    <ArgumentName>Displacement Y</ArgumentName>
+    <Alias>Displacement Y</Alias>
+  </Input>
+</Operation>
+
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateEnergy</Name>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Aggregate>
+    <Layout>Nodal Field</Layout>
+    <Input>
+      <ArgumentName>Field 1</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Weighting>
+    <Weight>
+      <Value>1.00</Value>
+    </Weight>
+  </Weighting>
+</Operation>
+
+<Operation>
+  <Function>SetLowerBounds</Function>
+  <Name>Set Lower Bounds</Name>
+  <Input>
+    <ArgumentName>Lower Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Lower Bound Vector</ArgumentName>
+    <Layout>Global</Layout>
+    <Size>{N1*N2}</Size>
+  </Output>
+  <FixedBlocks>
+  </FixedBlocks>
+</Operation>
+<Operation>
+  <Function>SetUpperBounds</Function>
+  <Name>Set Upper Bounds</Name>
+  <Input>
+    <ArgumentName>Upper Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Upper Bound Vector</ArgumentName>
+    <Layout>Global</Layout>
+    <Size>{N1*N2}</Size>
+  </Output>
+</Operation>
+
+
