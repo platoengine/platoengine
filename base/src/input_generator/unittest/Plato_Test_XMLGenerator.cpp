@@ -2253,7 +2253,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
     for(size_t i = 0u; i < num_expected_samples; i++)
     {
         const double tW = std::atof(modified_load_weights[1u+i].c_str());
-        EXPECT_NEAR(tW, 0.033, 0.003);
+        EXPECT_NEAR(tW, 1.0/15.0, 0.001);
         //        std::cout << i << "," << tW << std::endl; // announce
     }
 }

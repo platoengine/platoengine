@@ -434,10 +434,13 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             // if not well specified initially
             if(num_initial_load_case_weights != num_initial_load_case_ids)
             {
-                // replace with uniform weighting
-                const double uniformWeightFraction = 1.0 / double(num_initial_load_case_ids);
-                const std::string uniformWeightFraction_str = std::to_string(uniformWeightFraction);
+                // replace with constant weighting
+                const double constantWeightFraction = 1.0;
+                const std::string uniformWeightFraction_str = std::to_string(constantWeightFraction);
                 this_obj.load_case_weights.assign(num_initial_load_case_ids, uniformWeightFraction_str);
+                // must be constant at 1.0 rather than (1.0/num_cases) to allow
+                // multi-load to be equivalent to multi-objective. We don't know within
+                // this objective how many other loads should be considered "equally".
             }
 
             // get initial scaling
