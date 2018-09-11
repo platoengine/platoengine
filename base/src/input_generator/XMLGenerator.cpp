@@ -4089,6 +4089,7 @@ bool XMLGenerator::generateSalinasOperationsXML()
     {
         if(!m_InputData.objectives[i].code_name.compare("salinas"))
         {
+            Objective cur_obj = m_InputData.objectives[i];
             num_salinas_objs++;
 
             pugi::xml_document doc;
@@ -4104,6 +4105,27 @@ bool XMLGenerator::generateSalinasOperationsXML()
             tmp_node = doc.append_child("Operation");
             addChild(tmp_node, "Function", "Cache State");
             addChild(tmp_node, "Name", "Cache State");
+            if(cur_obj.multi_load_case == "true")
+            {
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+                {
+                    char buffer[100];
+                    sprintf(buffer, "%lu", k);
+                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                    {
+                        tmp_node1 = tmp_node.append_child("Output");
+                        addChild(tmp_node1, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                    }
+                }
+            }
+            else
+            {
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    tmp_node1 = tmp_node.append_child("Output");
+                    addChild(tmp_node1, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                }
+            }
 
             // Displacement
             tmp_node = doc.append_child("Operation");
@@ -4254,13 +4276,33 @@ bool XMLGenerator::generatePlatoOperationsXML()
     }
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.multi_load_case == "true")
         {
-            tmp_node1 = tmp_node.append_child("Input");
-            addChild(tmp_node1, "ArgumentName", m_InputData.objectives[i].performer_name + "_" + m_InputData.objectives[i].output_for_plotting[j]);
-            if(m_InputData.objectives[i].output_for_plotting[j] == "vonmises")
+            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
             {
-                addChild(tmp_node1, "Layout", "Element Field");
+                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    tmp_node1 = tmp_node.append_child("Input");
+                    addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                    if(cur_obj.output_for_plotting[j] == "vonmises")
+                    {
+                        addChild(tmp_node1, "Layout", "Element Field");
+                    }
+                }
+            }
+        }
+        else
+        {
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+            {
+                tmp_node1 = tmp_node.append_child("Input");
+                addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+                if(cur_obj.output_for_plotting[j] == "vonmises")
+                {
+                    addChild(tmp_node1, "Layout", "Element Field");
+                }
             }
         }
     }
@@ -5325,19 +5367,44 @@ bool XMLGenerator::generateInterfaceXML()
     // Output shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); ++j)
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.multi_load_case == "true")
         {
-            // create shared data for objectives
-            sd_node = doc.append_child("SharedData");
-            sprintf(tmp_buf, "%s_%s", m_InputData.objectives[i].performer_name.c_str(), m_InputData.objectives[i].output_for_plotting[j].c_str());
-            addChild(sd_node, "Name", tmp_buf);
-            addChild(sd_node, "Type", "Scalar");
-            if(m_InputData.objectives[i].output_for_plotting[j] == "vonmises")
-                addChild(sd_node, "Layout", "Element Field");
-            else
-                addChild(sd_node, "Layout", "Nodal Field");
-            addChild(sd_node, "OwnerName", m_InputData.objectives[i].performer_name);
-            addChild(sd_node, "UserName", "PlatoMain");
+            for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
+            {
+                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+                {
+                    // create shared data for objectives
+                    sd_node = doc.append_child("SharedData");
+                    sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    addChild(sd_node, "Name", tmp_buf);
+                    addChild(sd_node, "Type", "Scalar");
+                    if(cur_obj.output_for_plotting[j] == "vonmises")
+                        addChild(sd_node, "Layout", "Element Field");
+                    else
+                        addChild(sd_node, "Layout", "Nodal Field");
+                    addChild(sd_node, "OwnerName", cur_obj.performer_name);
+                    addChild(sd_node, "UserName", "PlatoMain");
+                }
+            }
+        }
+        else
+        {
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+            {
+                // create shared data for objectives
+                sd_node = doc.append_child("SharedData");
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                addChild(sd_node, "Name", tmp_buf);
+                addChild(sd_node, "Type", "Scalar");
+                if(cur_obj.output_for_plotting[j] == "vonmises")
+                    addChild(sd_node, "Layout", "Element Field");
+                else
+                    addChild(sd_node, "Layout", "Nodal Field");
+                addChild(sd_node, "OwnerName", cur_obj.performer_name);
+                addChild(sd_node, "UserName", "PlatoMain");
+            }
         }
     }
 
@@ -5541,12 +5608,30 @@ bool XMLGenerator::generateInterfaceXML()
     }
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.multi_load_case == "true")
         {
-            input_node = op_node.append_child("Input");
-            sprintf(tmp_buf, "%s_%s", m_InputData.objectives[i].performer_name.c_str(), m_InputData.objectives[i].output_for_plotting[j].c_str());
-            addChild(input_node, "ArgumentName", tmp_buf);
-            addChild(input_node, "SharedDataName", tmp_buf);
+            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+            {
+                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    input_node = op_node.append_child("Input");
+                    sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    addChild(input_node, "ArgumentName", tmp_buf);
+                    addChild(input_node, "SharedDataName", tmp_buf);
+                }
+            }
+        }
+        else
+        {
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+            {
+                input_node = op_node.append_child("Input");
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                addChild(input_node, "ArgumentName", tmp_buf);
+                addChild(input_node, "SharedDataName", tmp_buf);
+            }
         }
     }
 
@@ -5578,14 +5663,33 @@ bool XMLGenerator::generateInterfaceXML()
     
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
+        Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Cache State");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name);
-        for(size_t j=0; j<m_InputData.objectives[i].output_for_plotting.size(); j++)
+        addChild(op_node, "PerformerName", cur_obj.performer_name);
+        if(cur_obj.multi_load_case == "true")
         {
-            output_node = op_node.append_child("Output");
-            addChild(output_node, "ArgumentName", m_InputData.objectives[i].output_for_plotting[j]);
-            addChild(output_node, "SharedDataName", m_InputData.objectives[i].performer_name + "_" + m_InputData.objectives[i].output_for_plotting[j]);
+            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+            {
+                char buffer[100];
+                sprintf(buffer, "%lu", k);
+                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    output_node = op_node.append_child("Output");
+                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                }
+            }
+        }
+        else
+        {
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+            {
+                output_node = op_node.append_child("Output");
+                addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+            }
         }
     }
 
