@@ -1041,12 +1041,28 @@ void parseOperationData(const Plato::InputData & aOperationNode, Plato::Operatio
     aOperationData.set<Plato::InputData>("Input Data", aOperationNode);
  
     std::string tOperationName = aOperationNode.get<std::string>("Name");
+
   
     if( aOperationNode.size<std::string>("PerformerName") != static_cast<int>(1) )
     {
         throw Plato::ParsingException("one and only one performer must be specified");
     }
     std::string tPerformerName = aOperationNode.get<std::string>("PerformerName");
+
+    auto tParametersData = aOperationData.get_add<Plato::InputData>("Parameters");
+
+    // parse parameters
+    auto tParamNodes = aOperationNode.getByName<Plato::InputData>("Parameter");
+    if ( tParamNodes.size() )
+    {
+        Plato::InputData tParameterDataByPerformer;
+        for( auto tParameterData : tParamNodes )
+        {
+            tParameterDataByPerformer.add("Parameter",tParameterData);
+        }
+        tParametersData.set<Plato::InputData>(tPerformerName, tParameterDataByPerformer);
+    }
+
 
     std::vector<std::string> tArgumentNameInputs;
     Plato::Parse::parseArgumentNameInputs(aOperationNode, tArgumentNameInputs);

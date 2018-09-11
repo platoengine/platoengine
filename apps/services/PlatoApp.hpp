@@ -158,7 +158,18 @@ public:
         else if(aExportData.myLayout() == Plato::data::layout_t::SCALAR)
         {
             std::vector<double>* tLocalData = getValue(aArgumentName);
-            aExportData.setData(*tLocalData);
+            if( tLocalData->size() == aExportData.size() )
+            {
+                aExportData.setData(*tLocalData);
+            } else
+            if( tLocalData->size() == 1 )
+            {
+                std::vector<double> retVec(aExportData.size(), (*tLocalData)[0]);
+                aExportData.setData(retVec);
+            } else
+            {
+                throw Plato::ParsingException("SharedValued length mismatch.");
+            }
         }
     }
 
@@ -537,6 +548,18 @@ private:
     };
     friend class Roughness;
 
+    class InitializeValues : public LocalOp
+    {
+    public:
+        InitializeValues(PlatoApp* aPlatoApp, Plato::InputData & aNode);
+        void operator()();
+        void getArguments(std::vector<LocalArg> & aLocalArgs);
+    private:
+        std::string m_valuesName;
+        double m_value;
+    };
+    friend class InitializeValues;
+
     class InitializeField : public LocalOp
     {
     public:
@@ -594,6 +617,7 @@ private:
     private:
         std::string mOutputName;
         Plato::data::layout_t mOutputLayout;
+        int mOutputSize;
         std::string mInputName;
         std::string mDiscretization;
         std::vector<int> mFixedBlocks;
@@ -613,6 +637,7 @@ private:
         std::string mOutputName;
         std::string mDiscretization;
         Plato::data::layout_t mOutputLayout;
+        int mOutputSize;
         std::string mInputName;
         std::vector<int> mFixedBlocks;
         std::vector<int> mFixedSidesets;

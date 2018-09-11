@@ -68,21 +68,8 @@ Operation(const ::Plato::OperationInputDataMng & aOperationDataMng,
         m_performer(nullptr),
         m_operationName(),
         m_inputData(),
-        m_outputData()
+        m_outputData() { }
 /******************************************************************************/
-{
-
-    // parse/create m_parameters
-    auto tInputData = aOperationDataMng.get<Plato::InputData>("Input Data");
-    
-    m_operationName = Plato::Get::String(tInputData, "Name");
-    for( auto tParameterData : tInputData.getByName<Plato::InputData>("Parameter") )
-    {
-        auto tArgName  = Plato::Get::String(tParameterData,"ArgumentName");
-        auto tArgValue = Plato::Get::Double(tParameterData,"ArgumentValue");
-        m_parameters.insert(std::pair<std::string, Parameter*>(tArgName, new Parameter(tArgName, m_operationName, tArgValue)));
-    }
-}
 
 /******************************************************************************/
 void 

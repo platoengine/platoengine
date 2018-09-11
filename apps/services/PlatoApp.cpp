@@ -90,7 +90,7 @@ void PlatoApp::SetLowerBounds::getArguments(std::vector<LocalArg> & aLocalArgs)
 /******************************************************************************/
 {
     aLocalArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName));
+    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName, mOutputSize));
 }
 
 /******************************************************************************/
@@ -105,6 +105,7 @@ PlatoApp::SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
     mOutputName = "Lower Bound Vector";
     auto tOutputNode = Plato::Get::InputData(aNode,"Output");
     mOutputLayout = getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+    mOutputSize = Plato::Get::Int(tOutputNode,"Size");
 
     auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
     mFixedBlocks = Plato::Get::Ints(tFixedBlocksNode, "Index");
@@ -131,6 +132,13 @@ void PlatoApp::SetLowerBounds::operator()()
       tDataLen = tOutputField.MyLength();
     } else 
     if( mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD ){
+      throw Plato::ParsingException("ELEMENT_FIELD not implemented for SetLowerBounds operation");
+    } else
+    if( mOutputLayout == Plato::data::layout_t::SCALAR ){
+      auto tOutputScalar = mPlatoApp->getValue(mOutputName);
+      tDataLen = mOutputSize;
+      tOutputScalar->resize(tDataLen);
+      toData = tOutputScalar->data();
     }
 
     // Get incoming global lower bound specified by user
@@ -143,9 +151,8 @@ void PlatoApp::SetLowerBounds::operator()()
         toData[i] = tLowerBoundIn;
     }
 
-    // JR TODO: this is SCALAR_FIELD specific. Implement for ELEMENT_FIELD
     // Now update values based on fixed entities
-    if(mDiscretization == "density")
+    if(mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD )
     {
         double tValue = 0.5001;
         mPlatoApp->mMeshServices->updateLowerBoundsForFixedBlocks(toData, mFixedBlocks, tValue);
@@ -205,7 +212,7 @@ void PlatoApp::SetUpperBounds::getArguments(std::vector<LocalArg> & aLocalArgs)
 /******************************************************************************/
 {
     aLocalArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName));
+    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName, mOutputSize));
 }
 
 /******************************************************************************/
@@ -220,6 +227,7 @@ PlatoApp::SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& 
     mOutputName = "Upper Bound Vector";
     auto tOutputNode = Plato::Get::InputData(aNode,"Output");
     mOutputLayout = getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+    mOutputSize = Plato::Get::Int(tOutputNode,"Size");
 
     auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
     mFixedBlocks = Plato::Get::Ints(tFixedBlocksNode, "Index");
@@ -247,6 +255,13 @@ void PlatoApp::SetUpperBounds::operator()()
       tDataLen = tOutputField.MyLength();
     } else 
     if( mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD ){
+      throw Plato::ParsingException("ELEMENT_FIELD not implemented for SetUpperBounds operation");
+    } else
+    if( mOutputLayout == Plato::data::layout_t::SCALAR ){
+      auto tOutputScalar = mPlatoApp->getValue(mOutputName);
+      tDataLen = mOutputSize;
+      tOutputScalar->resize(tDataLen);
+      toData = tOutputScalar->data();
     }
 
     // Get incoming global Upper bound specified by user
@@ -259,7 +274,7 @@ void PlatoApp::SetUpperBounds::operator()()
         toData[i] = tUpperBoundIn;
     }
     // Now update values based on fixed entities
-    if(mDiscretization == "levelset")
+    if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD )
     {
         double tValue = -0.001;
         mPlatoApp->mMeshServices->updateUpperBoundsForFixedBlocks(toData, mFixedBlocks, tValue);
@@ -955,7 +970,7 @@ Plato::data::layout_t getLayout(const std::string & aLayoutStr)
     {
         tLayout = Plato::data::layout_t::ELEMENT_FIELD;
     }
-    else if(aLayoutStr == "Value")
+    else if(aLayoutStr == "Value" || aLayoutStr == "Global" || aLayoutStr == "Scalar" )
     {
         tLayout = Plato::data::layout_t::SCALAR;
     }
@@ -1074,6 +1089,32 @@ void PlatoApp::Roughness::getArguments(std::vector<LocalArg>& aLocalArgs)
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_roughnessName,/*length=*/1});
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
+}
+
+/******************************************************************************/
+PlatoApp::InitializeValues::InitializeValues(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
+        LocalOp(aPlatoAppp),
+        m_valuesName("Values")
+{
+    m_value = Plato::Get::Double(aNode, "InitialValue");
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void PlatoApp::InitializeValues::operator()()
+/******************************************************************************/
+{
+  // Output: Values
+
+  std::vector<double>* tData = mPlatoApp->getValue(m_valuesName);
+  (*tData)[0] = m_value;
+}
+
+/******************************************************************************/
+void PlatoApp::InitializeValues::getArguments(std::vector<LocalArg>& aLocalArgs)
+/******************************************************************************/
+{
+    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_valuesName,/*length=*/1});
 }
 
 /******************************************************************************/
@@ -1437,6 +1478,14 @@ void PlatoApp::initialize()
             if(tStrFunction == tFunctions.back())
             {
                 mOperationMap[tStrName] = new Roughness(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("InitializeValues");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new InitializeValues(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }

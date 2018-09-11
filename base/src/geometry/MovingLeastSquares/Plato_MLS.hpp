@@ -413,7 +413,7 @@ class MovingLeastSquares {
           numerator   += a_pointValues(iPoint)*t_kernelVal;
           denominator += t_kernelVal;
         }
-        a_nodeValues(nodeIndex) = numerator / denominator; 
+        a_nodeValues(nodeIndex) = denominator != 0.0 ? numerator / denominator : 0.0;
       });
     }
 

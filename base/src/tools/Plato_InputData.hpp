@@ -149,6 +149,24 @@ class InputData {
     }
   }
 
+  /*! Get or create and get the unique value that maps to the given name.
+   *  If an entry by this name doesn't exist an entry is created then returned.
+   *  If an entry by this name does exist the entry is returned.
+   */ 
+ 
+  template <typename T>
+  T get_add(std::string name, unsigned int index = 0) 
+  {
+    auto num = m_parameters->count(name);
+    if( index == num ){
+      add(name, T());
+    } else 
+    if( index > num ){
+      throw 1;
+    }
+    return get<T>(name, index);
+  }
+
   /*! Add a {name, value} pair in the InputData.  The name is not required to be unique, however, 
    *  if entries by this name already exist the value to be added must match their type.
    *   

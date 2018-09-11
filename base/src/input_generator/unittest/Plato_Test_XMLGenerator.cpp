@@ -2184,8 +2184,8 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
         const double tX = std::atof(tester.getLoadDirectionX(loads_to_check[i], 0).c_str());
         const double tY = std::atof(tester.getLoadDirectionY(loads_to_check[i], 0).c_str());
         const double tZ = std::atof(tester.getLoadDirectionZ(loads_to_check[i], 0).c_str());
-        EXPECT_EQ(isnan(tX), true);
-        EXPECT_EQ(isnan(tY), true);
+        EXPECT_EQ(std::isnan(tX), true);
+        EXPECT_EQ(std::isnan(tY), true);
         EXPECT_NEAR(tZ, 0., 0.1);
 //        std::cout << i << "," << tX << "," << tY << "," << tZ << std::endl;    // announce
     }
@@ -2204,7 +2204,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
     for(size_t i = 0u; i < num_expected_samples; i++)
     {
         const double tW = std::atof(modified_load_weights[i].c_str());
-        EXPECT_EQ(isnan(tW), true);
+        EXPECT_EQ(std::isnan(tW), true);
 //        std::cout << i << "," << tW << std::endl; // announce
     }
 }

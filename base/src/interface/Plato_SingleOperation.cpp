@@ -71,6 +71,19 @@ SingleOperation(const Plato::OperationInputDataMng & aOperationDataMng,
     const std::string & tPerformerName = aOperationDataMng.getPerformerName();
     m_operationName = aOperationDataMng.getOperationName(tPerformerName);
 
+    auto tAllParamsData = aOperationDataMng.get<Plato::InputData>("Parameters");
+    if( tAllParamsData.size<Plato::InputData>(tPerformerName) )
+    {
+        auto tParamsData = tAllParamsData.get<Plato::InputData>(tPerformerName);
+        for( auto tParamData : tParamsData.getByName<Plato::InputData>("Parameter") )
+        {
+            auto tArgName  = Plato::Get::String(tParamData,"ArgumentName");
+            auto tArgValue = Plato::Get::Double(tParamData,"ArgumentValue");
+            m_parameters.insert(
+              std::pair<std::string, Parameter*>(tArgName, new Parameter(tArgName, m_operationName, tArgValue)));
+        }
+    }
+
     const int tNumInputs = aOperationDataMng.getNumInputs(tPerformerName);
     for(int tInputIndex = 0; tInputIndex < tNumInputs; tInputIndex++)
     {
