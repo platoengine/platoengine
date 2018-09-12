@@ -29,7 +29,7 @@ Plato Engine is intended to serve as a collaborative testbed that enables the de
 Plato Engine has been designed for the MPMD parallel programming model. It also aims to perform using a Single Program, Multiple Data (SPMD) parallel programming model. Plato Engine is designed for MPI distributed memory calculations and aims to perform its function efficiently on current and next generation computing architectures.
 
 # Required Libraries
-Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/trilinos \
+Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/trilinos
 
 # Hardware Requirements
 Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, `g++ 7.2.0` and `intel 17.0.1` compilers. Tested `OS` include `Linux` and `Mac`. `RAM` requirements are problem size dependent.
