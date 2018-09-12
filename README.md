@@ -30,7 +30,6 @@ Plato Engine has been designed for the MPMD parallel programming model. It also 
 
 # Required Libraries
 Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/trilinos \
-Pugixml library: https://pugixml.org 
 
 # Hardware Requirements
 Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, `g++ 7.2.0` and `intel 17.0.1` compilers. Tested `OS` include `Linux` and `Mac`. `RAM` requirements are problem size dependent.
