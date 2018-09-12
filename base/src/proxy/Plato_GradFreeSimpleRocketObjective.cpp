@@ -37,6 +37,11 @@ void GradFreeSimpleRocketObjective::setOptimizationInputs(const std::vector<int>
     mNumEvaluationsPerDim = aNumEvaluationsPerDim;
 }
 
+std::vector<double> GradFreeSimpleRocketObjective::getThrustProfile() const
+{
+    return (mRocketModel.getThrustProfile());
+}
+
 void GradFreeSimpleRocketObjective::get_domain(std::vector<double>& aLowerBounds,
                                                std::vector<double>& aUpperBounds,
                                                std::vector<int>& aNumEvaluationsPerDim)

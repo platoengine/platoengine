@@ -115,6 +115,15 @@ public:
         mEpsilon = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Return thrust profile
+     * @return thrust profile
+     **********************************************************************************/
+    std::vector<ScalarType> getThrustProfile() const
+    {
+        return (mRocketModel.getThrustProfile());
+    }
+
     OrdinalType getNumFunctionEvaluations() const
     {
         return (mNumFuncEvaluations);

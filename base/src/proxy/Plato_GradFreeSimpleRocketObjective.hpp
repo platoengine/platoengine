@@ -89,6 +89,12 @@ public:
                                const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */);
 
     /******************************************************************************//**
+     * @brief Return thrust profile
+     * @return thrust profile
+     **********************************************************************************/
+    std::vector<double> getThrustProfile() const;
+
+    /******************************************************************************//**
      * @brief Get algorithm inputs needed to pose optimization problem from objective interface
      * @param [out] aLowerBounds design variables lower bounds
      * @param [out] aUpperBounds design variables upper bounds
