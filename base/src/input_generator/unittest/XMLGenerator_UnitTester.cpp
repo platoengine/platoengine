@@ -189,7 +189,7 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.mesh_name="";
     m_InputData.plato_main_path="";
     m_InputData.lightmp_path="";
-    m_InputData.salinas_path="";
+    m_InputData.sierra_sd_path="";
     m_InputData.albany_path="";
     m_InputData.optimization_algorithm="";
     m_InputData.check_gradient="";

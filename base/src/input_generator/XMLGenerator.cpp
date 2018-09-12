@@ -414,11 +414,11 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                 continue;
             }
 
-            // expect salinas
-            if(this_obj.code_name != "salinas")
+            // expect sierra_sd
+            if(this_obj.code_name != "sierra_sd")
             {
                 std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
-                          << "Uncertain loads can only applied to salinas code." << std::endl;
+                          << "Uncertain loads can only applied to sierra_sd code." << std::endl;
                 return false;
             }
             // force multi load case
@@ -630,12 +630,12 @@ bool XMLGenerator::generateLaunchScript()
             fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
             fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
                     cur_obj.name.c_str());
-            if(!cur_obj.code_name.compare("salinas"))
+            if(!cur_obj.code_name.compare("sierra_sd"))
             {
-                if(m_InputData.salinas_path.length() != 0)
-                    fprintf(fp, "%s salinas_input_deck_%s.i \\\n", m_InputData.salinas_path.c_str(), cur_obj.name.c_str());
+                if(m_InputData.sierra_sd_path.length() != 0)
+                    fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
                 else
-                    fprintf(fp, "plato_sd_main salinas_input_deck_%s.i \\\n", cur_obj.name.c_str());
+                    fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
             }
             else if(!cur_obj.code_name.compare("lightmp"))
             {
@@ -665,13 +665,13 @@ bool XMLGenerator::generateSalinasInputDecks()
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         const Objective& cur_obj = m_InputData.objectives[i];
-        if(!cur_obj.code_name.compare("salinas"))
+        if(!cur_obj.code_name.compare("sierra_sd"))
         {
             bool frf = false;
             if(cur_obj.type.compare("match frf data") == 0)
                 frf = true;
             char buf[200];
-            sprintf(buf, "salinas_input_deck_%s.i", cur_obj.name.c_str());
+            sprintf(buf, "sierra_sd_input_deck_%s.i", cur_obj.name.c_str());
             FILE *fp=fopen(buf, "w");
             if(fp)
             {
@@ -698,7 +698,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                             fprintf(fp, "    load=%s\n", cur_load_case.id.c_str());
                         }
                     }
-                    if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                    if(cur_obj.analysis_solver_tolerance.length() > 0)
                     {
                         fprintf(fp, "  solver gdsw\n");
                     }
@@ -709,16 +709,16 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "SOLUTION\n");
                     fprintf(fp, "  case '%s'\n", cur_obj.name.c_str());
                     fprintf(fp, "  topology_optimization\n");
-                    if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                    if(cur_obj.analysis_solver_tolerance.length() > 0)
                     {
                         fprintf(fp, "  solver gdsw\n");
                     }
                     fprintf(fp, "END\n");
                 }
-                if(cur_obj.salinas_wtmass_scale_factor.length() > 0)
+                if(cur_obj.wtmass_scale_factor.length() > 0)
                 {
                     fprintf(fp, "PARAMETERS\n");
-                    fprintf(fp, "  WTMASS = %s\n", cur_obj.salinas_wtmass_scale_factor.c_str());
+                    fprintf(fp, "  WTMASS = %s\n", cur_obj.wtmass_scale_factor.c_str());
                     fprintf(fp, "END\n");
                 }
                 if(frf)
@@ -747,7 +747,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                         sscanf(cur_obj.freq_min.c_str(), "%lf", &tFreqMin);
                         sscanf(cur_obj.freq_max.c_str(), "%lf", &tFreqMax);
                         sscanf(cur_obj.freq_step.c_str(), "%lf", &tFreqStep);
-                        // This is the formula salinas uses to get the number of frequencies
+                        // This is the formula sierra_sd uses to get the number of frequencies
                         int tNumFreqs = (int)(((tFreqMax-tFreqMin)/tFreqStep)+0.5) + 1;
                         int tNumMatchNodes = cur_obj.frf_match_nodesets.size();
                         FILE *tTmpFP = fopen(tTruthTableFile.c_str(), "w");
@@ -837,11 +837,11 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "  data 1e6 1\n");
                     fprintf(fp, "END\n");
                 }
-                if(cur_obj.salinas_gdsw_tolerance.length() > 0)
+                if(cur_obj.analysis_solver_tolerance.length() > 0)
                 {
                     fprintf(fp, "GDSW\n");
                  //   fprintf(fp, "  diag_scaling diagonal\n");
-                    fprintf(fp, "  solver_tol = %s\n", cur_obj.salinas_gdsw_tolerance.c_str());
+                    fprintf(fp, "  solver_tol = %s\n", cur_obj.analysis_solver_tolerance.c_str());
                  //   fprintf(fp, "  krylov_method = GMRESClassic\n");
                  //   fprintf(fp, "  orthog=0\n");
                     fprintf(fp, "END\n");
@@ -886,7 +886,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                     }
                     if(m_InputData.blocks[n].element_type.empty() == false)
                     {
-                        // For now we will just let salinas determine the element type based
+                        // For now we will just let sierra_sd determine the element type based
                         // on what is in the exodus file (unless it is rbar).
                         if(m_InputData.blocks[n].element_type == "rbar")
                             fprintf(fp, "  rbar\n");
@@ -1965,23 +1965,23 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             for(size_t j=3; j<tokens.size(); ++j)
                                 new_objective.frf_match_nodesets.push_back(tokens[j]);
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"salinas","weight","mass","scale","factor"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"weight","mass","scale","factor"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"salinas weight mass scale factor\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"weight mass scale factor\" keywords.\n";
                                 return false;
                             }
-                            new_objective.salinas_wtmass_scale_factor = tStringValue;
+                            new_objective.wtmass_scale_factor = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"salinas","gdsw","tolerance"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"analysis","solver","tolerance"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"salinas gdsw tolerance\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"analysis solver tolerance\" keywords.\n";
                                 return false;
                             }
-                            new_objective.salinas_gdsw_tolerance = tStringValue;
+                            new_objective.analysis_solver_tolerance = tStringValue;
                         }
                         else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"reference","frf","file"}, tStringValue))
                         {
@@ -3425,14 +3425,14 @@ bool XMLGenerator::parseCodePaths(std::istream &fin)
                         {
                             break;
                         }
-                        else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","salinas"}, tStringValue))
+                        else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","sierra_sd"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code salinas\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code sierra_sd\" keywords.\n";
                                 return false;
                             }
-                            m_InputData.salinas_path = tStringValue;
+                            m_InputData.sierra_sd_path = tStringValue;
                         }
                         else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","platomain"}, tStringValue))
                         {
@@ -4087,13 +4087,13 @@ bool XMLGenerator::generateAlbanyOperationsXML()
 bool XMLGenerator::generateSalinasOperationsXML()
 /******************************************************************************/
 {
-    int num_salinas_objs = 0;
+    int num_sierra_sd_objs = 0;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        if(!m_InputData.objectives[i].code_name.compare("salinas"))
+        if(!m_InputData.objectives[i].code_name.compare("sierra_sd"))
         {
             Objective cur_obj = m_InputData.objectives[i];
-            num_salinas_objs++;
+            num_sierra_sd_objs++;
 
             pugi::xml_document doc;
             pugi::xml_node tmp_node1;
@@ -4221,7 +4221,7 @@ bool XMLGenerator::generateSalinasOperationsXML()
             }
 
             char buf[200];
-            sprintf(buf, "salinas_operations_%s.xml", m_InputData.objectives[i].name.c_str());
+            sprintf(buf, "sierra_sd_operations_%s.xml", m_InputData.objectives[i].name.c_str());
             // Write the file to disk
             doc.save_file(buf, "  ");
         }

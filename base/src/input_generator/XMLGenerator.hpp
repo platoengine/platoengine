@@ -104,8 +104,8 @@ struct Objective
   std::string ref_frf_file;
   std::string raleigh_damping_alpha;
   std::string raleigh_damping_beta;
-  std::string salinas_wtmass_scale_factor;
-  std::string salinas_gdsw_tolerance;
+  std::string wtmass_scale_factor;
+  std::string analysis_solver_tolerance;
   std::string complex_error_measure;
   std::string convert_to_tet10;
   std::string multi_load_case;
@@ -157,7 +157,7 @@ struct InputData
   std::string mesh_name;
   std::string plato_main_path;
   std::string lightmp_path;
-  std::string salinas_path;
+  std::string sierra_sd_path;
   std::string albany_path;
   std::string prune_and_refine_path;
   std::string number_prune_and_refine_processors;

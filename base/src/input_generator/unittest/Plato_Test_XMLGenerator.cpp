@@ -1228,7 +1228,7 @@ TEST(PlatoTestXMLGenerator, parseCodePaths)
     std::string stringInput;
 
     stringInput = "begin paths\n"
-            "code salinas\n"
+            "code sierra_sd\n"
             "end paths\n";
     iss.str(stringInput);
     iss.clear();
@@ -1268,7 +1268,7 @@ TEST(PlatoTestXMLGenerator, parseCodePaths)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
     stringInput = "begin paths\n"
-            "code salinas /Users/bwclark/salinas\n"
+            "code sierra_sd /Users/bwclark/salinas\n"
             "code albany /Users/bwclark/albany\n"
             "code lightmp /Users/bwclark/lightmp\n"
             "code platomain /Users/bwclark/platomain\n"
@@ -1452,7 +1452,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     // Test some examples of valid objectives.
     stringInput = "begin objective\n"
             "type match frf data\n"
-            "code salinas\n"
+            "code sierra_sd\n"
             "end objective\n"
             "begin objective\n"
             "type match frf data\n"
@@ -1549,18 +1549,18 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
 
-    // Test the "salinas weight mass scale factor" keywords
+    // Test the "sierra_sd weight mass scale factor" keywords
     stringInput = "begin objective\n"
-            "salinas weight mass scale factor\n"
+            "weight mass scale factor\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
 
-    // Test the "salinas gdsw tolerance" keywords
+    // Test the "sierra_sd analysis solver tolerance" keywords
     stringInput = "begin objective\n"
-            "salinas gdsw tolerance\n"
+            "analysis solver tolerance\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
@@ -1896,17 +1896,17 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
 
     // Some checks for objective names
     stringInput = "begin objective\n"
-            "code salinas\n"
+            "code sierra_sd\n"
             "name obj1\n"
             "end objective\n"
             "begin objective\n"
-            "code salinas\n"
+            "code sierra_sd\n"
             "end objective\n"
             "begin objective\n"
             "code albany\n"
             "end objective\n"
             "begin objective\n"
-            "code salinas\n"
+            "code sierra_sd\n"
             "end objective\n"
             "begin objective\n"
             "code lightmp\n"
@@ -1921,15 +1921,15 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getObjectiveName(2), "1");
     EXPECT_EQ(tester.getObjectiveName(3), "3");
     EXPECT_EQ(tester.getObjectiveName(4), "1");
-    EXPECT_EQ(tester.getObjCodeName(0), "salinas");
-    EXPECT_EQ(tester.getObjCodeName(1), "salinas");
+    EXPECT_EQ(tester.getObjCodeName(0), "sierra_sd");
+    EXPECT_EQ(tester.getObjCodeName(1), "sierra_sd");
     EXPECT_EQ(tester.getObjCodeName(2), "albany");
-    EXPECT_EQ(tester.getObjCodeName(3), "salinas");
+    EXPECT_EQ(tester.getObjCodeName(3), "sierra_sd");
     EXPECT_EQ(tester.getObjCodeName(4), "lightmp");
-    EXPECT_EQ(tester.getObjPerfName(0), "salinas_obj1");
-    EXPECT_EQ(tester.getObjPerfName(1), "salinas_2");
+    EXPECT_EQ(tester.getObjPerfName(0), "sierra_sd_obj1");
+    EXPECT_EQ(tester.getObjPerfName(1), "sierra_sd_2");
     EXPECT_EQ(tester.getObjPerfName(2), "albany_1");
-    EXPECT_EQ(tester.getObjPerfName(3), "salinas_3");
+    EXPECT_EQ(tester.getObjPerfName(3), "sierra_sd_3");
     EXPECT_EQ(tester.getObjPerfName(4), "lightmp_1");
 }
 
@@ -1944,7 +1944,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
             "    type maximize stiffness\n"
             "    load ids 34\n"
             "    boundary condition ids 256\n"
-            "    code salinas\n"
+            "    code sierra_sd\n"
             "    number processors 9\n"
             "    weight 1 \n"
             "end objective\n"
@@ -2041,7 +2041,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
             "    type maximize stiffness\n"
             "    load ids 8\n"
             "    boundary condition ids 256\n"
-            "    code salinas\n"
+            "    code sierra_sd\n"
             "    number processors 3\n"
             "    weight 1 \n"
             "end objective\n"
@@ -2155,7 +2155,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
             "    type maximize stiffness\n"
             "    load ids 1 8\n"
             "    boundary condition ids 256\n"
-            "    code salinas\n"
+            "    code sierra_sd\n"
             "    number processors 3\n"
             "    weight 1 \n"
             "end objective\n"
@@ -2269,7 +2269,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
             "    type maximize stiffness\n"
             "    load ids 34\n"
             "    boundary condition ids 256\n"
-            "    code salinas\n"
+            "    code sierra_sd\n"
             "    number processors 9\n"
             "    weight 1 \n"
             "end objective\n"

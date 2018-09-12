@@ -151,7 +151,7 @@ public:
     std::string getCheckGradient() {return m_InputData.check_gradient;}
     std::string getCheckHessian() {return m_InputData.check_hessian;}
     std::string getMeshName() {return m_InputData.mesh_name;}
-    std::string getSalinasPath() {return m_InputData.salinas_path;}
+    std::string getSalinasPath() {return m_InputData.sierra_sd_path;}
     std::string getAlbanyPath() {return m_InputData.albany_path;}
     std::string getLightMPPath() {return m_InputData.lightmp_path;}
     std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
