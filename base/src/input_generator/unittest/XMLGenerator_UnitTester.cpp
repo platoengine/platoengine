@@ -165,6 +165,13 @@ bool XMLGenerator_UnitTester::publicExpandUncertaintiesForGenerate()
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicDistributeObjectivesForGenerate()
+/******************************************************************************/
+{
+    return distributeObjectivesForGenerate();
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {

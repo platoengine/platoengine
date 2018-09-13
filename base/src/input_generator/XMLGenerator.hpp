@@ -114,6 +114,8 @@ struct Objective
   std::vector<std::string> load_case_ids;
   std::vector<std::string> bc_ids;
   std::vector<std::string> load_case_weights;
+  std::string distribute_objective_type;
+  std::string atmost_total_num_processors;
 };
 struct Constraint
 {
@@ -234,12 +236,14 @@ protected:
   bool generateLightMPInputDecks();
   bool generateAlbanyInputDecks();
   bool expandUncertaintiesForGenerate();
+  bool distributeObjectivesForGenerate();
   bool parseFile();
   bool parseMesh(std::istream &fin);
   bool parseCodePaths(std::istream &fin);
   bool parseMaterials(std::istream &fin);
   bool parseBlocks(std::istream &fin);
   bool parseObjectives(std::istream &fin);
+  bool fillObjectiveAndPerfomerNames();
   bool parseConstraints(std::istream &fin);
   bool parseOptimizationParameters(std::istream &fin);
   bool parseUncertainties(std::istream &fin);

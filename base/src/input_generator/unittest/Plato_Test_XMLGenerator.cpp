@@ -1495,6 +1495,44 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
 
+    // Test the "distribute objective" keyword
+    stringInput = "begin objective\n"
+            "distribute\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    stringInput = "begin objective\n"
+            "distribute objective\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    stringInput = "begin objective\n"
+            "distribute objective kangaroo\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    stringInput = "begin objective\n"
+            "distribute objective none\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    stringInput = "begin objective\n"
+            "multi load case true\n"
+            "distribute objective at most 256 processors\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+
     // Test the "name" keyword
     stringInput = "begin objective\n"
             "name \n"
@@ -1944,6 +1982,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
             "    type maximize stiffness\n"
             "    load ids 34\n"
             "    boundary condition ids 256\n"
+            "    multi load case true\n"
             "    code sierra_sd\n"
             "    number processors 9\n"
             "    weight 1 \n"
@@ -2041,6 +2080,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
             "    type maximize stiffness\n"
             "    load ids 8\n"
             "    boundary condition ids 256\n"
+            "    multi load case true\n"
             "    code sierra_sd\n"
             "    number processors 3\n"
             "    weight 1 \n"
@@ -2156,6 +2196,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
             "    load ids 1 8\n"
             "    boundary condition ids 256\n"
             "    code sierra_sd\n"
+            "    multi load case true\n"
             "    number processors 3\n"
             "    weight 1 \n"
             "end objective\n"
@@ -2271,6 +2312,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
             "    boundary condition ids 256\n"
             "    code sierra_sd\n"
             "    number processors 9\n"
+            "    multi load case true\n"
             "    weight 1 \n"
             "end objective\n"
             "begin loads\n"
@@ -2357,6 +2399,210 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
         EXPECT_EQ(isnan(tW), true);
 //        std::cout << i << "," << tW << std::endl; // announce
     }
+}
+
+TEST(PlatoTestXMLGenerator,distributeObjective_notEnoughProcessors)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 2 5 7 11\n"
+            "    boundary condition ids 256\n"
+            "    code sierra_sd\n"
+            "    number processors 2\n"
+            "    multi load case true\n"
+            "    weight 1 \n"
+            "    distribute objective at most 7 processors\n"
+            "end objective\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+
+    // BEFORE modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+
+    // do expand
+    EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+    // AFTER modification
+
+    // three objectives
+    const size_t expected_num_objectives = 3u;
+    ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
+
+    // get loadIds for distributed objective
+    std::vector<std::string> distributed_loadIds;
+    for(size_t objI = 0u; objI < expected_num_objectives; objI++)
+    {
+        const std::vector<std::string> thisObj_loadIds = tester.getObjLoadIds(objI);
+
+        // expected number of loads is either 1 or 2
+        const size_t num_load_ids = thisObj_loadIds.size();
+        EXPECT_EQ((num_load_ids==1u) || (num_load_ids==2u), true);
+
+        // concatenate
+        distributed_loadIds.insert(distributed_loadIds.end(), thisObj_loadIds.begin(), thisObj_loadIds.end());
+    }
+
+    // expect maintenance of num of loads in distributed loads
+    const size_t original_num_loads = 4u;
+    ASSERT_EQ(distributed_loadIds.size(), original_num_loads);
+    std::vector<bool> wasMaintained(12u, false);
+    for(size_t di = 0u; di < original_num_loads; di++)
+    {
+        wasMaintained[std::atoi(distributed_loadIds[di].c_str())] = true;
+    }
+
+    // expect each load id was maintained
+    EXPECT_EQ(wasMaintained[2], true);
+    EXPECT_EQ(wasMaintained[5], true);
+    EXPECT_EQ(wasMaintained[7], true);
+    EXPECT_EQ(wasMaintained[11], true);
+}
+
+TEST(PlatoTestXMLGenerator,distributeObjective_exactlyEnoughProcessors)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 2 6 4 8\n"
+            "    boundary condition ids 256\n"
+            "    code sierra_sd\n"
+            "    number processors 2\n"
+            "    multi load case true\n"
+            "    weight 1 \n"
+            "    distribute objective at most 8 processors\n"
+            "end objective\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+
+    // BEFORE modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+
+    // do expand
+    EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+    // AFTER modification
+
+    // four objectives
+    const size_t expected_num_objectives = 4u;
+    ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
+
+    // get loadIds for distributed objective
+    std::vector<std::string> distributed_loadIds;
+    for(size_t objI = 0u; objI < expected_num_objectives; objI++)
+    {
+        const std::vector<std::string> thisObj_loadIds = tester.getObjLoadIds(objI);
+
+        // expected number of loads is 1
+        const size_t num_load_ids = thisObj_loadIds.size();
+        EXPECT_EQ(num_load_ids,1u);
+
+        // concatenate
+        distributed_loadIds.insert(distributed_loadIds.end(), thisObj_loadIds.begin(), thisObj_loadIds.end());
+    }
+
+    // expect maintenance of num of loads in distributed loads
+    const size_t original_num_loads = 4u;
+    ASSERT_EQ(distributed_loadIds.size(), original_num_loads);
+    std::vector<bool> wasMaintained(12u, false);
+    for(size_t di = 0u; di < original_num_loads; di++)
+    {
+        wasMaintained[std::atoi(distributed_loadIds[di].c_str())] = true;
+    }
+
+    // expect each load id was maintained
+    EXPECT_EQ(wasMaintained[2], true);
+    EXPECT_EQ(wasMaintained[6], true);
+    EXPECT_EQ(wasMaintained[4], true);
+    EXPECT_EQ(wasMaintained[8], true);
+}
+
+TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 1 7 3 4\n"
+            "    boundary condition ids 256\n"
+            "    code sierra_sd\n"
+            "    number processors 2\n"
+            "    multi load case true\n"
+            "    weight 1 \n"
+            "    distribute objective at most 9 processors\n"
+            "end objective\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+
+    // BEFORE modification
+
+    // one objective
+    ASSERT_EQ(tester.getNumObjectives(), 1u);
+
+    // do expand
+    EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+    // AFTER modification
+
+    // four objectives
+    const size_t expected_num_objectives = 4u;
+    ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
+
+    // get loadIds for distributed objective
+    std::vector<std::string> distributed_loadIds;
+    for(size_t objI = 0u; objI < expected_num_objectives; objI++)
+    {
+        const std::vector<std::string> thisObj_loadIds = tester.getObjLoadIds(objI);
+
+        // expected number of loads is 1
+        const size_t num_load_ids = thisObj_loadIds.size();
+        EXPECT_EQ(num_load_ids,1u);
+
+        // concatenate
+        distributed_loadIds.insert(distributed_loadIds.end(), thisObj_loadIds.begin(), thisObj_loadIds.end());
+    }
+
+    // expect maintenance of num of loads in distributed loads
+    const size_t original_num_loads = 4u;
+    ASSERT_EQ(distributed_loadIds.size(), original_num_loads);
+    std::vector<bool> wasMaintained(12u, false);
+    for(size_t di = 0u; di < original_num_loads; di++)
+    {
+        wasMaintained[std::atoi(distributed_loadIds[di].c_str())] = true;
+    }
+
+    // expect each load id was maintained
+    EXPECT_EQ(wasMaintained[1], true);
+    EXPECT_EQ(wasMaintained[7], true);
+    EXPECT_EQ(wasMaintained[3], true);
+    EXPECT_EQ(wasMaintained[4], true);
 }
 
 } // end PlatoTestXMLGenerator namespace

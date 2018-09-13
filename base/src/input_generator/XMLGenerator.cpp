@@ -60,6 +60,7 @@
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
+#include "Plato_FreeFunctions.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -106,10 +107,17 @@ bool XMLGenerator::generate()
         return false;
     }
 
-    // NOTE: modifies parsed data for uncertainties
+    // NOTE: modifies objectives and loads for uncertainties
     if(!expandUncertaintiesForGenerate())
     {
         std::cout << "Failed to expand uncertainties in file generation" << std::endl;
+        return false;
+    }
+
+    // NOTE: modifies objectives to resolve repeats
+    if(!distributeObjectivesForGenerate())
+    {
+        std::cout << "Failed to repeat objectives in file generation" << std::endl;
         return false;
     }
 
@@ -150,6 +158,99 @@ bool XMLGenerator::generate()
     }
 
     std::cout << "Successfully wrote XML files." << std::endl;
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::distributeObjectivesForGenerate()
+/******************************************************************************/
+{
+    // for each objective, consider if should distribute
+    size_t objective_index = 0u;
+    while(objective_index < m_InputData.objectives.size())
+    {
+        const std::string thisObjective_distributeType = m_InputData.objectives[objective_index].distribute_objective_type;
+        if(thisObjective_distributeType == "")
+        {
+            // no distribute; nothing to do for this objective.
+        }
+        else if(thisObjective_distributeType == "atmost")
+        {
+            // distribute by "atmost" rule
+
+            // get inputs to distributed
+            const size_t total_number_of_tasks = m_InputData.objectives[objective_index].load_case_ids.size();
+            const int num_processors_in_group = std::atoi(m_InputData.objectives[objective_index].num_procs.c_str());
+            const int atmost_processor_count =
+                    std::atoi(m_InputData.objectives[objective_index].atmost_total_num_processors.c_str());
+            if(num_processors_in_group <= 0 || atmost_processor_count <= 0)
+            {
+                std::cout << "ERROR:XMLGenerator:distributeObjectives: read a non-positive processor count.\n";
+                return false;
+            }
+
+            // divide up distributed objective
+            const size_t num_distributed_objectives = Plato::divide_up_atmost_processors(total_number_of_tasks,
+                                                                                         num_processors_in_group,
+                                                                                         atmost_processor_count);
+
+            // store original load ids and weights
+            const std::vector<std::string> orig_load_case_ids = m_InputData.objectives[objective_index].load_case_ids;
+            const std::vector<std::string> orig_load_case_weights = m_InputData.objectives[objective_index].load_case_weights;
+
+            const size_t num_loads_this_original_objective = orig_load_case_ids.size();
+            if(num_loads_this_original_objective != orig_load_case_weights.size())
+            {
+                std::cout << "ERROR:XMLGenerator:distributeObjectives: "
+                          << "Found length mismatch between load case ids and weights.\n";
+                return false;
+            }
+
+            // clear load ids/weights in preparation for re-allocation
+            m_InputData.objectives[objective_index].load_case_ids.clear();
+            m_InputData.objectives[objective_index].load_case_weights.clear();
+
+            // clear distribute type in preparation for completion
+            m_InputData.objectives[objective_index].distribute_objective_type = "";
+            m_InputData.objectives[objective_index].atmost_total_num_processors = "";
+
+            // pushback indices for this distributed objective
+            std::vector<size_t> fromOriginal_newDistributed_objectiveIndices(1u, objective_index);
+            for(size_t distributed_index = 1u; distributed_index < num_distributed_objectives; distributed_index++)
+            {
+                fromOriginal_newDistributed_objectiveIndices.push_back(m_InputData.objectives.size());
+                m_InputData.objectives.push_back(m_InputData.objectives[objective_index]);
+            }
+
+            // stride load case ids and weights across distributed objectives
+            size_t strided_distributed_index = 0u;
+            for(size_t abstract_load_id = 0u; abstract_load_id < num_loads_this_original_objective; abstract_load_id++)
+            {
+                // resolve strided index to objective index
+                const size_t this_distributed_objectiveIndex =
+                        fromOriginal_newDistributed_objectiveIndices[strided_distributed_index];
+
+                // transfer ids/weights
+                m_InputData.objectives[this_distributed_objectiveIndex].load_case_ids.push_back(orig_load_case_ids[abstract_load_id]);
+                m_InputData.objectives[this_distributed_objectiveIndex].load_case_weights.push_back(orig_load_case_weights[abstract_load_id]);
+
+                // advance distributed index
+                strided_distributed_index = (strided_distributed_index + 1) % num_distributed_objectives;
+            }
+        }
+
+        // advance considered objective
+        objective_index++;
+    }
+
+    // assign names
+    const bool filling_did_pass = fillObjectiveAndPerfomerNames();
+    if(!filling_did_pass)
+    {
+        std::cout << "ERROR:XMLGenerator:distributeObjectives: Failed to fill objective and performer names.\n";
+        return false;
+    }
+
     return true;
 }
 
@@ -441,13 +542,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             // if not well specified initially
             if(num_initial_load_case_weights != num_initial_load_case_ids)
             {
-                // replace with constant weighting
-                const double constantWeightFraction = 1.0;
-                const std::string uniformWeightFraction_str = std::to_string(constantWeightFraction);
-                this_obj.load_case_weights.assign(num_initial_load_case_ids, uniformWeightFraction_str);
-                // must be constant at 1.0 rather than (1.0/num_cases) to allow
-                // multi-load to be equivalent to multi-objective. We don't know within
-                // this objective how many other loads should be considered "equally".
+                std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
+                        << "Uncertain loads found length mismatch between load case ids and weights." << std::endl;
+                return false;
             }
 
             // get initial scaling
@@ -2017,6 +2114,42 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.raleigh_damping_beta = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"distribute","objective"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No case specified after \"repeat objective\" keywords.\n";
+                                return false;
+                            }
+                            if(tokens[2]=="none")
+                            {
+                                // distribute objective none
+                                // 0          1         2
+                                new_objective.distribute_objective_type="";
+                            }
+                            else if(tokens[2]=="at")
+                            {
+                                // distribute objective at most {number} processors
+                                // 0          1         2  3    4        5
+                                if(tokens.size() < 6)
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseObjectives: Unmatched case specified after \"repeat objective\" keywords.\n";
+                                    return false;
+                                }
+                                if(tokens[3]!="most" || tokens[5]!="processors")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseObjectives: Unmatched case specified after \"repeat objective\" keywords.\n";
+                                    return false;
+                                }
+                                new_objective.distribute_objective_type = "atmost";
+                                new_objective.atmost_total_num_processors = tokens[4];
+                            }
+                            else
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: Unmatched case specified after \"repeat objective\" keywords.\n";
+                                return false;
+                            }
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"begin","frequency"}, tStringValue))
                         {
                             while (!fin.eof())
@@ -2073,10 +2206,66 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                         }
                     }
                 }
+
+                // do checking of this objective
+
+                // check (number of load ids) versus (number of load weights)
+                const size_t num_load_ids = new_objective.load_case_ids.size();
+                const size_t num_load_case_weights = new_objective.load_case_weights.size();
+                if(num_load_case_weights == 0u)
+                {
+                    // replace with constant weighting
+                    const double constantWeightFraction = 1.0;
+                    const std::string uniformWeightFraction_str = std::to_string(constantWeightFraction);
+                    new_objective.load_case_weights.assign(num_load_ids, uniformWeightFraction_str);
+                    // must be constant at 1.0 rather than (1.0/num_cases) to allow
+                    // multi-load to be equivalent to multi-objective. We don't know within
+                    // this objective how many other loads should be considered "equally".
+                }
+                else if(num_load_ids != num_load_case_weights)
+                {
+                    std::cout << "ERROR:XMLGenerator:parseObjectives: Length mismatch in load case ids and weights.\n";
+                    return false;
+                }
+
+                // check that (distribute objective) must have (multi load case true)
+                const bool have_distributed_objective =
+                        (new_objective.distribute_objective_type != "");
+                const bool have_multiLoadCaseTrue =
+                        (new_objective.multi_load_case == "true");
+                if(have_distributed_objective && !have_multiLoadCaseTrue)
+                {
+                    std::cout << "ERROR:XMLGenerator:parseObjectives: "
+                            << "Parsed input is ambiguous.\n"
+                            << "Distributed objectives must have \"multi load case true\".\n"
+                            << "Or set \"distribute objective none\".\n";
+                    return false;
+                }
+
+                // place objective in array
                 m_InputData.objectives.push_back(new_objective);
             }
         }
     }
+
+    // assign names
+    const bool filling_did_pass = fillObjectiveAndPerfomerNames();
+    if(!filling_did_pass)
+    {
+        std::cout << "ERROR:XMLGenerator:parseObjectives: Failed to fill objective and performer names.\n";
+        return false;
+    }
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::fillObjectiveAndPerfomerNames()
+/******************************************************************************/
+{
+    // assigns objective names to yet un-named objectives
+    // assigns performer name to each objective
+
     char buf2[200];
     size_t num_objs = m_InputData.objectives.size();
     // If there were objectives without names add a default name
@@ -2105,6 +2294,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                 m_InputData.objectives[i].code_name +
                 "_" + m_InputData.objectives[i].name;
     }
+
     return true;
 }
 

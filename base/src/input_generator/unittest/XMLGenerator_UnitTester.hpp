@@ -79,6 +79,7 @@ public:
     bool publicParseMaterials(std::istream &sin);
     bool publicParseUncertainties(std::istream &sin);
     bool publicExpandUncertaintiesForGenerate();
+    bool publicDistributeObjectivesForGenerate();
     std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name;}
     std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].type;}
     std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}
