@@ -73,7 +73,11 @@ void SharedValue::transmitData()
         }
         int tSenderProcID = -1;
         MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
-        MPI_Bcast(mData.data(), mData.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        auto tRecv(mData);
+        MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        if( !tIsProvider ){
+            mData = tRecv;
+        }
     }
     else 
     { // multiple provider
@@ -115,7 +119,9 @@ void SharedValue::transmitData()
 
         // broadcast the reduced data to all ranks 
         MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
-        mData = tRecv;
+        if( !tIsaProvider ){
+            mData = tRecv;
+        }
     }
 }
   
