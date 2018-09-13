@@ -1,7 +1,7 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>square_tet_bc</mesh>
+  <mesh>square_tet_bc.gen</mesh>
   <block>
     <index>1</index>
     <integration>

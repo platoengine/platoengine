@@ -550,7 +550,7 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>bolted_bracket</mesh>
+  <mesh>bolted_bracket.gen</mesh>
   <block>
     <index>1</index>
     <integration>

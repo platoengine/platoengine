@@ -535,7 +535,7 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>mitchell_tri</mesh>
+  <mesh>mitchell_tri.gen</mesh>
   <block>
     <index>1</index>
     <integration>
