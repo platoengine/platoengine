@@ -1549,9 +1549,9 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
 
-    // Test the "sierra_sd weight mass scale factor" keywords
+    // Test the "sierra_sd weightmass scale factor" keywords
     stringInput = "begin objective\n"
-            "weight mass scale factor\n"
+            "weightmass scale factor\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();

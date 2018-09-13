@@ -1965,11 +1965,11 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             for(size_t j=3; j<tokens.size(); ++j)
                                 new_objective.frf_match_nodesets.push_back(tokens[j]);
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"weight","mass","scale","factor"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"weightmass","scale","factor"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"weight mass scale factor\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"weightmass scale factor\" keywords.\n";
                                 return false;
                             }
                             new_objective.wtmass_scale_factor = tStringValue;
