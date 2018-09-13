@@ -187,6 +187,7 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.discretization="";
     m_InputData.volume_fraction="";
     m_InputData.mesh_name="";
+    m_InputData.mesh_name_without_extension="";
     m_InputData.plato_main_path="";
     m_InputData.lightmp_path="";
     m_InputData.sierra_sd_path="";

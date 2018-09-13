@@ -528,7 +528,7 @@ bool XMLGenerator::generateLaunchScript()
             // First decompose the files that will be involved below
             if(tNumberPruneAndRefineProcs > 1)
             {
-                fprintf(fp, "decomp -p %d %s.gen\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
+                fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
                 if(m_InputData.initial_guess_filename != "")
                     fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
             }
@@ -553,8 +553,8 @@ bool XMLGenerator::generateLaunchScript()
                 tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
             if(m_InputData.initial_guess_filename != "")
                 tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
-            tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name + ".gen");
-            tCommand += (" --result_mesh=" + m_InputData.mesh_name + ".gen");
+            tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
+            tCommand += (" --result_mesh=" + m_InputData.mesh_name);
             if(m_InputData.initial_guess_field_name != "")
                 tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
             tCommand += (" --number_of_refines=" + tNumRefinesString);
@@ -570,13 +570,13 @@ bool XMLGenerator::generateLaunchScript()
                 std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
                 for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
                     tExtensionString += "0";
-                fprintf(fp, "epu -auto %s.gen%s\n", m_InputData.mesh_name.c_str(), tExtensionString.c_str());
+                fprintf(fp, "epu -auto %s%s\n", m_InputData.mesh_name.c_str(), tExtensionString.c_str());
             }
         }
 
         // Now do the decomps for the TO run.
         if(num_opt_procs.compare("1") != 0)
-            fprintf(fp, "decomp -p %s %s.gen\n", num_opt_procs.c_str(), m_InputData.mesh_name.c_str());
+            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.mesh_name.c_str());
         if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
             fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
@@ -586,7 +586,7 @@ bool XMLGenerator::generateLaunchScript()
                 num_procs = m_InputData.objectives[i].num_procs;
             if(num_procs.compare("1") != 0)
             {
-                fprintf(fp, "decomp -p %s %s.gen\n", num_procs.c_str(), m_InputData.mesh_name.c_str());
+                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.mesh_name.c_str());
                 if(m_InputData.objectives[i].ref_frf_file.length() > 0)
                     fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
             }
@@ -944,7 +944,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 fprintf(fp, "END\n");
                 fprintf(fp, "FILE\n");
-                fprintf(fp, "  geometry_file '%s.gen'\n", m_InputData.mesh_name.c_str());
+                fprintf(fp, "  geometry_file '%s'\n", m_InputData.mesh_name.c_str());
                 fprintf(fp, "END\n");
 
                 // Do the load/loads block(s)
@@ -1349,9 +1349,9 @@ bool XMLGenerator::generateAlbanyInputDecks()
             n2 = n1.append_child("ParameterList");
             n2.append_attribute("name") = "Discretization";
             addNTVParameter(n2, "Method", "string", "Ioss");
-            sprintf(string_var, "%s.gen", m_InputData.mesh_name.c_str());
+            sprintf(string_var, "%s", m_InputData.mesh_name.c_str());
             addNTVParameter(n2, "Exodus Input File Name", "string", string_var);
-            sprintf(string_var, "%s_alb_%s.exo", m_InputData.mesh_name.c_str(), cur_obj.name.c_str());
+            sprintf(string_var, "%s_alb_%s.exo", m_InputData.mesh_name_without_extension.c_str(), cur_obj.name.c_str());
             addNTVParameter(n2, "Exodus Output File Name", "string", string_var);
             addNTVParameter(n2, "Separate Evaluators by Element Block", "bool", "true");
 
@@ -3364,12 +3364,27 @@ bool XMLGenerator::parseMesh(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseMesh: No value specified after \"name\" keyword.\n";
                                 return false;
                             }
-                            size_t index = tStringValue.find(".gen");
-                            if(index != std::string::npos)
-                            {
-                                tStringValue = tStringValue.substr(0, index);
-                            }
                             m_InputData.mesh_name = tStringValue;
+
+                            // find last dot in filename, get mesh filename base from this
+                            size_t loc = tStringValue.find_last_of('.');
+                            if(loc == std::string::npos)
+                            {
+                                // mesh name: mesh_file
+                                // without extension: mesh_file
+                                m_InputData.mesh_name_without_extension = m_InputData.mesh_name;
+                            }
+                            else if(tStringValue[loc] == '.')
+                            {
+                                // mesh name: some_file.gen
+                                // without extension: some_file
+                                m_InputData.mesh_name_without_extension = tStringValue.substr(0,loc);
+                            }
+                            else
+                            {
+                                // I don't know when this case will ever occur
+                                m_InputData.mesh_name_without_extension = m_InputData.mesh_name;
+                            }
                         }
                         else
                         {
@@ -4358,7 +4373,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
         // run or by just specifying an initial guess filename.
         addChild(tmp_node, "Method", "FromFieldOnInputMesh");
         tmp_node1 = tmp_node.append_child("FromFieldOnInputMesh");
-        addChild(tmp_node1, "Name", m_InputData.mesh_name + ".gen");
+        addChild(tmp_node1, "Name", m_InputData.mesh_name);
         addChild(tmp_node1, "VariableName", m_InputData.initial_guess_field_name);
         if(m_InputData.restart_iteration != "")
             addChild(tmp_node1, "Iteration", m_InputData.restart_iteration);
@@ -4377,7 +4392,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
             {
                 addChild(tmp_node, "Method", "PrimitivesLevelSet");
                 tmp_node1 = tmp_node.append_child("PrimitivesLevelSet");
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name + ".gen");
+                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name);
                 if(m_InputData.levelset_material_box_min != "" &&
                    m_InputData.levelset_material_box_max != "")
                 {
@@ -4401,68 +4416,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
                 {
                     addChild(tmp_node1, "NodeSet", m_InputData.levelset_nodesets[r]);
                 }
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name + ".gen");
+                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name);
             }
         }
     }
-
-    /* Original InitializeField code
-    tmp_node = doc.append_child("Operation");
-    addChild(tmp_node, "Function", "InitializeField");
-    addChild(tmp_node, "Name", "Initialize Field");
-    tmp_node1 = tmp_node.append_child("Output");
-    addChild(tmp_node1, "ArgumentName", "Initialized Field");
-    if(m_InputData.restart_iteration.size() > 0)
-    {
-        addChild(tmp_node, "Method", "FromFile");
-        tmp_node1 = tmp_node.append_child("FromFile");
-        addChild(tmp_node1, "Name", m_InputData.restart_mesh_filename);
-        addChild(tmp_node1, "VariableName", m_InputData.restart_field_name);
-        addChild(tmp_node1, "Iteration", m_InputData.restart_iteration);
-    }
-    else
-    {
-        if(m_InputData.discretization == "density")
-        {
-            addChild(tmp_node, "Method", "Uniform");
-            tmp_node1 = tmp_node.append_child("Uniform");
-            addChild(tmp_node1, "Value", m_InputData.initial_density_value.c_str());
-        }
-        else if(m_InputData.discretization == "levelset")
-        {
-            if(m_InputData.levelset_initialization_method == "primitives")
-            {
-                addChild(tmp_node, "Method", "PrimitivesLevelSet");
-                tmp_node1 = tmp_node.append_child("PrimitivesLevelSet");
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name + ".gen");
-                if(m_InputData.levelset_material_box_min != "" &&
-                   m_InputData.levelset_material_box_max != "")
-                {
-                    tmp_node2 = tmp_node1.append_child("MaterialBox");
-                    addChild(tmp_node2, "MinCoords", m_InputData.levelset_material_box_min);
-                    addChild(tmp_node2, "MaxCoords", m_InputData.levelset_material_box_max);
-                }
-            }
-            else
-            {
-                addChild(tmp_node, "Method", "SwissCheeseLevelSet");
-                tmp_node1 = tmp_node.append_child("SwissCheeseLevelSet");
-                if(m_InputData.create_levelset_spheres == "")
-                    m_InputData.create_levelset_spheres = "false";
-                addChild(tmp_node1, "CreateSpheres", m_InputData.create_levelset_spheres);
-                if(m_InputData.create_levelset_spheres == "true" && m_InputData.levelset_sphere_radius != "")
-                    addChild(tmp_node1, "SphereRadius", m_InputData.levelset_sphere_radius);
-                if(m_InputData.create_levelset_spheres == "true" && m_InputData.levelset_sphere_packing_factor != "")
-                    addChild(tmp_node1, "SpherePackingFactor", m_InputData.levelset_sphere_packing_factor);
-                for(size_t r=0; r<m_InputData.levelset_nodesets.size(); ++r)
-                {
-                    addChild(tmp_node1, "NodeSet", m_InputData.levelset_nodesets[r]);
-                }
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name + ".gen");
-            }
-        }
-    }
-    */
 
     if(m_InputData.discretization == "density")
     {

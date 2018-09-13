@@ -155,6 +155,7 @@ struct InputData
   std::string discretization;
   std::string volume_fraction;
   std::string mesh_name;
+  std::string mesh_name_without_extension;
   std::string plato_main_path;
   std::string lightmp_path;
   std::string sierra_sd_path;

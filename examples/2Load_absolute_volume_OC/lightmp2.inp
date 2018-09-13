@@ -49,7 +49,7 @@ mesh {
 #  intervals = {20, 10, 10}
   type = "unstructured"
   format = "exodus"
-  mesh = "unsmesh"
+  mesh = "unsmesh.gen"
   block 1 {
     integration {
       type = "gauss"

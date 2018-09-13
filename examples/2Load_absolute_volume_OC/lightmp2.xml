@@ -19,7 +19,7 @@ material 1 {
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>unsmesh</mesh>
+  <mesh>unsmesh.gen</mesh>
   <block>
     <index>1</index>
     <integration>
@@ -33,7 +33,7 @@ material 1 {
 mesh {
   type = "unstructured"
   format = "exodus"
-  mesh = "unsmesh"
+  mesh = "unsmesh.gen"
   block 1 {
     integration {
       type = "gauss"

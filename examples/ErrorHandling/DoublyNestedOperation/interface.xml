@@ -398,7 +398,7 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>unsmesh</mesh>
+  <mesh>unsmesh.gen</mesh>
   <block>
     <index>1</index>
     <integration>

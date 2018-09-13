@@ -774,7 +774,6 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
     ostringstream buffer;
     if( WorldComm.GetSize() == 1 ) {
       buffer << filename;
-      buffer << ".gen";
       filename = buffer.str();
     } else {
       int my_pid = WorldComm.GetPID();
@@ -798,7 +797,6 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
         zeros << '0';
       buffer << "./";
       buffer << filename;
-      buffer << ".gen";
       buffer << "." << my_sze << "." << zeros.str() << my_pid;
       filename = buffer.str();
     }

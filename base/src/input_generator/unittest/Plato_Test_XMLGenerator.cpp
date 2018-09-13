@@ -1219,7 +1219,7 @@ TEST(PlatoTestXMLGenerator, parseMesh)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMesh(iss), true);
-    EXPECT_EQ(tester.getMeshName(), "file");
+    EXPECT_EQ(tester.getMeshName(), "file.gen");
 }
 TEST(PlatoTestXMLGenerator, parseCodePaths)
 {
