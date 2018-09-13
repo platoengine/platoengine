@@ -65,6 +65,13 @@ const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
 const char* const DELIMITER = " \t";
 
+void PrintUnrecognizedTokens(const std::vector<std::string> & unrecognizedTokens)
+{
+       std::cout << "Did not recognize: ";
+       for (size_t ind = 0 ; ind < unrecognizedTokens.size(); ++ind)
+               std::cout << unrecognizedTokens[ind].c_str() << " " ;
+        std::cout << "\n";
+}
 
 /******************************************************************************/
 XMLGenerator::XMLGenerator()
@@ -554,7 +561,7 @@ bool XMLGenerator::generateLaunchScript()
             if(m_InputData.initial_guess_filename != "")
                 tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
             tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
-            tCommand += (" --result_mesh=" + m_InputData.mesh_name);
+            tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
             if(m_InputData.initial_guess_field_name != "")
                 tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
             tCommand += (" --number_of_refines=" + tNumRefinesString);
@@ -570,13 +577,13 @@ bool XMLGenerator::generateLaunchScript()
                 std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
                 for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
                     tExtensionString += "0";
-                fprintf(fp, "epu -auto %s%s\n", m_InputData.mesh_name.c_str(), tExtensionString.c_str());
+                fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
             }
         }
 
         // Now do the decomps for the TO run.
         if(num_opt_procs.compare("1") != 0)
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.mesh_name.c_str());
+            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
         if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
             fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
@@ -586,7 +593,7 @@ bool XMLGenerator::generateLaunchScript()
                 num_procs = m_InputData.objectives[i].num_procs;
             if(num_procs.compare("1") != 0)
             {
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.mesh_name.c_str());
+                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
                 if(m_InputData.objectives[i].ref_frf_file.length() > 0)
                     fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
             }
@@ -944,7 +951,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 fprintf(fp, "END\n");
                 fprintf(fp, "FILE\n");
-                fprintf(fp, "  geometry_file '%s'\n", m_InputData.mesh_name.c_str());
+                fprintf(fp, "  geometry_file '%s'\n", m_InputData.run_mesh_name.c_str());
                 fprintf(fp, "END\n");
 
                 // Do the load/loads block(s)
@@ -1349,9 +1356,9 @@ bool XMLGenerator::generateAlbanyInputDecks()
             n2 = n1.append_child("ParameterList");
             n2.append_attribute("name") = "Discretization";
             addNTVParameter(n2, "Method", "string", "Ioss");
-            sprintf(string_var, "%s", m_InputData.mesh_name.c_str());
+            sprintf(string_var, "%s", m_InputData.run_mesh_name.c_str());
             addNTVParameter(n2, "Exodus Input File Name", "string", string_var);
-            sprintf(string_var, "%s_alb_%s.exo", m_InputData.mesh_name_without_extension.c_str(), cur_obj.name.c_str());
+            sprintf(string_var, "%s_alb_%s.exo", m_InputData.run_mesh_name_without_extension.c_str(), cur_obj.name.c_str());
             addNTVParameter(n2, "Exodus Output File Name", "string", string_var);
             addNTVParameter(n2, "Separate Evaluators by Element Block", "bool", "true");
 
@@ -1550,7 +1557,7 @@ bool XMLGenerator::generateLightMPInputDecks()
             node3.set_value("exodus");
             node2 = node1.append_child("mesh");
             node3 = node2.append_child(pugi::node_pcdata);
-            node3.set_value(m_InputData.mesh_name.c_str());
+            node3.set_value(m_InputData.run_mesh_name.c_str());
             // lightmp just needs one block specified with an integration rule--don't need all of the blocks listed here
             node2 = node1.append_child("block");
             node3 = node2.append_child("index");
@@ -2050,6 +2057,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                         }
                                         else
                                         {
+                                            PrintUnrecognizedTokens(tokens);
                                             std::cout << "ERROR:XMLGenerator:parseObjectives: Unrecognized keyword in \"frequency block\".\n";
                                             return false;
                                         }
@@ -2059,14 +2067,8 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                         }
                         else
                         {
-                            std::cout << "ERROR: Unhandled keyword(s) \"";
-                            for(size_t ii=0; ii<tokens.size(); ++ii)
-                            {
-                                std::cout << tokens[ii];
-                                if(ii != (tokens.size()-1))
-                                    std::cout << " ";
-                            }
-                            std::cout << "\"\n";
+                            PrintUnrecognizedTokens(tokens);
+                            std::cout << "ERROR:XMLGenerator:parseObjectives: Unrecognized keywords.\n";
                             return false;
                         }
                     }
@@ -2287,6 +2289,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                             }
                             else
                             {
+                                PrintUnrecognizedTokens(tokens);
                                 std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.  Must be traction, heat flux, or force.\n";
                                 return false;
                             }
@@ -2479,14 +2482,8 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                         }
                         else
                         {
-                            std::cout << "ERROR: Unhandled keyword(s) \"";
-                            for(size_t ii=0; ii<tokens.size(); ++ii)
-                            {
-                                std::cout << tokens[ii];
-                                if(ii != (tokens.size()-1))
-                                    std::cout << " ";
-                            }
-                            std::cout << "\"\n";
+                            PrintUnrecognizedTokens(tokens);
+                            std::cout << "ERROR:XMLGenerator:parseUncertainties: Unrecognized keywords.\n";
                             return false;
                         }
                     }
@@ -3273,6 +3270,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                         }
                         else
                         {
+                            PrintUnrecognizedTokens(tokens);
                             std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: Unrecognized keyword.\n";
                             return false;
                         }
@@ -3379,6 +3377,7 @@ bool XMLGenerator::parseMesh(std::istream &fin)
                                 // mesh name: some_file.gen
                                 // without extension: some_file
                                 m_InputData.mesh_name_without_extension = tStringValue.substr(0,loc);
+                                m_InputData.mesh_extension = tStringValue.substr(loc);
                             }
                             else
                             {
@@ -3388,6 +3387,7 @@ bool XMLGenerator::parseMesh(std::istream &fin)
                         }
                         else
                         {
+                            PrintUnrecognizedTokens(tokens);
                             std::cout << "ERROR:XMLGenerator:parseMesh: Unrecognized keyword.\n";
                             return false;
                         }
@@ -3487,6 +3487,7 @@ bool XMLGenerator::parseCodePaths(std::istream &fin)
                         }
                         else
                         {
+                            PrintUnrecognizedTokens(tokens);
                             std::cout << "ERROR:XMLGenerator:parseCodePaths: Unrecognized keyword.\n";
                             return false;
                         }
@@ -3569,6 +3570,7 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
                         }
                         else
                         {
+                            PrintUnrecognizedTokens(tokens);
                             std::cout << "ERROR:XMLGenerator:parseBlocks: Unrecognized keyword.\n";
                             return false;
                         }
@@ -3679,6 +3681,7 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
                         }
                         else
                         {
+                            PrintUnrecognizedTokens(tokens);
                             std::cout << "ERROR:XMLGenerator:parseMaterials: Unrecognized keyword.\n";
                             return false;
                         }
@@ -3860,6 +3863,26 @@ bool XMLGenerator::parseFile()
     parseUncertainties(fin);
     fin.close();
 
+    // If we will need to run the prune_and_refine executable for any
+    // reason we need to have our "run" mesh name not be the same
+    // as the input mesh name.
+    int tNumRefines = 0;
+    if(m_InputData.number_refines != "")
+        tNumRefines = std::atoi(m_InputData.number_refines.c_str());
+    if(tNumRefines > 0 ||
+      (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
+    {
+        m_InputData.run_mesh_name_without_extension = m_InputData.mesh_name_without_extension + "_mod";
+        m_InputData.run_mesh_name = m_InputData.run_mesh_name_without_extension;
+        if(m_InputData.mesh_extension != "")
+            m_InputData.run_mesh_name += m_InputData.mesh_extension;
+    }
+    else
+    {
+        m_InputData.run_mesh_name = m_InputData.mesh_name;
+        m_InputData.run_mesh_name_without_extension = m_InputData.mesh_name_without_extension;
+    }
+
     return true;
 }
 
@@ -3922,7 +3945,7 @@ bool XMLGenerator::generatePlatoMainInputDeckXML()
     pugi::xml_node mesh_node = doc.append_child("mesh");
     addChild(mesh_node, "type", "unstructured");
     addChild(mesh_node, "format", "exodus");
-    addChild(mesh_node, "mesh", m_InputData.mesh_name.c_str());
+    addChild(mesh_node, "mesh", m_InputData.run_mesh_name.c_str());
     // just need one block specified here
     if(m_InputData.blocks.size() > 0)
     {
@@ -4373,7 +4396,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
         // run or by just specifying an initial guess filename.
         addChild(tmp_node, "Method", "FromFieldOnInputMesh");
         tmp_node1 = tmp_node.append_child("FromFieldOnInputMesh");
-        addChild(tmp_node1, "Name", m_InputData.mesh_name);
+        addChild(tmp_node1, "Name", m_InputData.run_mesh_name);
         addChild(tmp_node1, "VariableName", m_InputData.initial_guess_field_name);
         if(m_InputData.restart_iteration != "")
             addChild(tmp_node1, "Iteration", m_InputData.restart_iteration);
@@ -4392,7 +4415,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
             {
                 addChild(tmp_node, "Method", "PrimitivesLevelSet");
                 tmp_node1 = tmp_node.append_child("PrimitivesLevelSet");
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name);
+                addChild(tmp_node1, "BackgroundMeshName", m_InputData.run_mesh_name);
                 if(m_InputData.levelset_material_box_min != "" &&
                    m_InputData.levelset_material_box_max != "")
                 {
@@ -4416,7 +4439,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
                 {
                     addChild(tmp_node1, "NodeSet", m_InputData.levelset_nodesets[r]);
                 }
-                addChild(tmp_node1, "BackgroundMeshName", m_InputData.mesh_name);
+                addChild(tmp_node1, "BackgroundMeshName", m_InputData.run_mesh_name);
             }
         }
     }
@@ -5895,7 +5918,7 @@ bool XMLGenerator::generateInterfaceXML()
     pugi::xml_node mesh_node = doc.append_child("mesh");
     addChild(mesh_node, "type", "unstructured");
     addChild(mesh_node, "format", "exodus");
-    addChild(mesh_node, "mesh", m_InputData.mesh_name);
+    addChild(mesh_node, "mesh", m_InputData.run_mesh_name);
     for(size_t n=0; n<m_InputData.blocks.size(); ++n)
     {
         tmp_node = mesh_node.append_child("block");
