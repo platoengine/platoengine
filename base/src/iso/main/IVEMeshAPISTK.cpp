@@ -844,6 +844,7 @@ bool IVEMeshAPISTK::read_exodus_mesh( std::string &meshfile, std::string &fieldn
   mIoBroker->set_option_to_not_collapse_sequenced_fields();
   if(!input_file_is_spread)
     mIoBroker->property_add(Ioss::Property("DECOMPOSITION_METHOD", "RIB"));
+  mIoBroker->property_add(Ioss::Property("MAXIMUM_NAME_LENGTH", 256));
   mIoBroker->add_mesh_database(meshfile, "exodus", stk::io::READ_MESH);
   mIoBroker->create_input_mesh();
 
@@ -1142,6 +1143,7 @@ void IVEMeshAPISTK::write_exodus_mesh( std::string &meshfile, int output_method,
 
   if(output_method == 1)  // use Ioss to do concatenation
     mIoBroker->property_add(Ioss::Property("COMPOSE_RESULTS", true));
+  mIoBroker->property_add(Ioss::Property("MAXIMUM_NAME_LENGTH", 256));
   size_t fh = mIoBroker->create_output_mesh(meshfile, stk::io::WRITE_RESULTS);
   stk::mesh::Selector sel(*mFixedTriPart);
   sel |= *mOptimizedTriPart;
