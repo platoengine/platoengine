@@ -60,13 +60,13 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mUserInitialGuess(false),
         mOutputControlToFile(false),
         mOutputDiagnosticsToFile(false),
-        mGCMMAInitialMovingAsymptoteScaleFactor(0.5),
+        mInitialMovingAsymptoteScaleFactor(0.5),
         mGCMMAInnerKKTTolerance(5e-4),
-        mGCMMAOuterKKTTolerance(1e-5),
-        mGCMMAOuterControlStagnationTolerance(1e-8),
+        mCCSAOuterKKTTolerance(1e-10),
+        mCCSAOuterControlStagnationTolerance(1e-8),
         mGCMMAInnerControlStagnationTolerance(1e-8),
-        mGCMMAOuterObjectiveStagnationTolerance(1e-6),
-        mGCMMAOuterStationarityTolerance(1e-4),
+        mCCSAOuterObjectiveStagnationTolerance(1e-6),
+        mCCSAOuterStationarityTolerance(1e-4),
         mKSTrustRegionExpansionFactor(2.0),
         mKSTrustRegionContractionFactor(0.75),
         mKSOuterGradientTolerance(1e-4),
@@ -286,20 +286,6 @@ void OptimizerEngineStageData::setInitialGuess(const std::vector<std::string> & 
 }
 
 /******************************************************************************/
-double OptimizerEngineStageData::getGCMMAInitialMovingAsymptoteScaleFactor() const
-/******************************************************************************/
-{
-    return (mGCMMAInitialMovingAsymptoteScaleFactor);
-}
-
-/******************************************************************************/
-void OptimizerEngineStageData::setGCMMAInitialMovingAsymptoteScaleFactor(const double & aInput)
-/******************************************************************************/
-{
-    mGCMMAInitialMovingAsymptoteScaleFactor = aInput;
-}
-
-/******************************************************************************/
 double OptimizerEngineStageData::getKSTrustRegionExpansionFactor() const
 /******************************************************************************/
 {
@@ -328,6 +314,20 @@ void OptimizerEngineStageData::setKSTrustRegionContractionFactor(const double & 
 }
 
 /******************************************************************************/
+int OptimizerEngineStageData::getGCMMAMaxInnerIterations() const
+/******************************************************************************/
+{
+    return (mGCMMAMaxInnerIterations);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setGCMMAMaxInnerIterations(const int & aInput)
+/******************************************************************************/
+{
+    mGCMMAMaxInnerIterations = aInput;
+}
+
+/******************************************************************************/
 double OptimizerEngineStageData::getGCMMAInnerKKTTolerance() const
 /******************************************************************************/
 {
@@ -339,20 +339,6 @@ void OptimizerEngineStageData::setGCMMAInnerKKTTolerance(const double & aInput)
 /******************************************************************************/
 {
     mGCMMAInnerKKTTolerance = aInput;
-}
-
-/******************************************************************************/
-double OptimizerEngineStageData::getGCMMAOuterKKTTolerance() const
-/******************************************************************************/
-{
-    return (mGCMMAOuterKKTTolerance);
-}
-
-/******************************************************************************/
-void OptimizerEngineStageData::setGCMMAOuterKKTTolerance(const double & aInput)
-/******************************************************************************/
-{
-    mGCMMAOuterKKTTolerance = aInput;
 }
 
 /******************************************************************************/
@@ -370,59 +356,73 @@ void OptimizerEngineStageData::setGCMMAInnerControlStagnationTolerance(const dou
 }
 
 /******************************************************************************/
-double OptimizerEngineStageData::getGCMMAOuterControlStagnationTolerance() const
+double OptimizerEngineStageData::getInitialMovingAsymptoteScaleFactor() const
 /******************************************************************************/
 {
-    return (mGCMMAOuterControlStagnationTolerance);
+    return (mInitialMovingAsymptoteScaleFactor);
 }
 
 /******************************************************************************/
-void OptimizerEngineStageData::setGCMMAOuterControlStagnationTolerance(const double & aInput)
+void OptimizerEngineStageData::setInitialMovingAsymptoteScaleFactor(const double & aInput)
 /******************************************************************************/
 {
-    mGCMMAOuterControlStagnationTolerance = aInput;
+    mInitialMovingAsymptoteScaleFactor = aInput;
 }
 
 /******************************************************************************/
-double OptimizerEngineStageData::getGCMMAOuterObjectiveStagnationTolerance() const
+double OptimizerEngineStageData::getCCSAOuterKKTTolerance() const
 /******************************************************************************/
 {
-    return (mGCMMAOuterObjectiveStagnationTolerance);
+    return (mCCSAOuterKKTTolerance);
 }
 
 /******************************************************************************/
-void OptimizerEngineStageData::setGCMMAOuterObjectiveStagnationTolerance(const double & aInput)
+void OptimizerEngineStageData::setCCSAOuterKKTTolerance(const double & aInput)
 /******************************************************************************/
 {
-    mGCMMAOuterObjectiveStagnationTolerance = aInput;
+    mCCSAOuterKKTTolerance = aInput;
 }
 
 /******************************************************************************/
-double OptimizerEngineStageData::getGCMMAOuterStationarityTolerance() const
+double OptimizerEngineStageData::getCCSAOuterControlStagnationTolerance() const
 /******************************************************************************/
 {
-    return (mGCMMAOuterStationarityTolerance);
+    return (mCCSAOuterControlStagnationTolerance);
 }
 
 /******************************************************************************/
-void OptimizerEngineStageData::setGCMMAOuterStationarityTolerance(const double & aInput)
+void OptimizerEngineStageData::setCCSAOuterControlStagnationTolerance(const double & aInput)
 /******************************************************************************/
 {
-    mGCMMAOuterStationarityTolerance = aInput;
+    mCCSAOuterControlStagnationTolerance = aInput;
 }
 
 /******************************************************************************/
-int OptimizerEngineStageData::getGCMMAMaxInnerIterations() const
+double OptimizerEngineStageData::getCCSAOuterObjectiveStagnationTolerance() const
 /******************************************************************************/
 {
-    return (mGCMMAMaxInnerIterations);
+    return (mCCSAOuterObjectiveStagnationTolerance);
 }
 
 /******************************************************************************/
-void OptimizerEngineStageData::setGCMMAMaxInnerIterations(const int & aInput)
+void OptimizerEngineStageData::setCCSAOuterObjectiveStagnationTolerance(const double & aInput)
 /******************************************************************************/
 {
-    mGCMMAMaxInnerIterations = aInput;
+    mCCSAOuterObjectiveStagnationTolerance = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getCCSAOuterStationarityTolerance() const
+/******************************************************************************/
+{
+    return (mCCSAOuterStationarityTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setCCSAOuterStationarityTolerance(const double & aInput)
+/******************************************************************************/
+{
+    mCCSAOuterStationarityTolerance = aInput;
 }
 
 /******************************************************************************/

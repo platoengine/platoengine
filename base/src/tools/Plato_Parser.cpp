@@ -1405,8 +1405,8 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
 
         if( tOptionsNode.size<std::string>("GCMMAInitialMovingAsymptoteScaleFactor") )
         {
-            double tGCMMAInitialMovingAsymptoteScaleFactor = Plato::Get::Double(tOptionsNode, "GCMMAInitialMovingAsymptoteScaleFactor");
-            aOptimizerEngineStageData.setGCMMAInitialMovingAsymptoteScaleFactor(tGCMMAInitialMovingAsymptoteScaleFactor);
+            double tInitialMovingAsymptoteScaleFactor = Plato::Get::Double(tOptionsNode, "GCMMAInitialMovingAsymptoteScaleFactor");
+            aOptimizerEngineStageData.setInitialMovingAsymptoteScaleFactor(tInitialMovingAsymptoteScaleFactor);
         }
         if( tOptionsNode.size<std::string>("GCMMAInnerKKTTolerance") )
         {
@@ -1415,8 +1415,8 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         }
         if( tOptionsNode.size<std::string>("GCMMAOuterKKTTolerance") )
         {
-            double tGCMMAOuterKKTTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterKKTTolerance");
-            aOptimizerEngineStageData.setGCMMAOuterKKTTolerance(tGCMMAOuterKKTTolerance);
+            double tCCSAOuterKKTTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterKKTTolerance");
+            aOptimizerEngineStageData.setCCSAOuterKKTTolerance(tCCSAOuterKKTTolerance);
         }
         if( tOptionsNode.size<std::string>("GCMMAInnerControlStagnationTolerance") )
         {
@@ -1425,13 +1425,13 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         }
         if( tOptionsNode.size<std::string>("GCMMAOuterControlStagnationTolerance") )
         {
-            double tGCMMAOuterControlStagnationTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterControlStagnationTolerance");
-            aOptimizerEngineStageData.setGCMMAOuterControlStagnationTolerance(tGCMMAOuterControlStagnationTolerance);
+            double tCCSAOuterControlStagnationTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterControlStagnationTolerance");
+            aOptimizerEngineStageData.setCCSAOuterControlStagnationTolerance(tCCSAOuterControlStagnationTolerance);
         }
         if( tOptionsNode.size<std::string>("GCMMAOuterObjectiveStagnationTolerance") )
         {
-            double tGCMMAOuterObjectiveStagnationTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterObjectiveStagnationTolerance");
-            aOptimizerEngineStageData.setGCMMAOuterObjectiveStagnationTolerance(tGCMMAOuterObjectiveStagnationTolerance);
+            double tCCSAOuterObjectiveStagnationTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterObjectiveStagnationTolerance");
+            aOptimizerEngineStageData.setCCSAOuterObjectiveStagnationTolerance(tCCSAOuterObjectiveStagnationTolerance);
         }
         if( tOptionsNode.size<std::string>("GCMMAMaxInnerIterations") )
         {
@@ -1440,8 +1440,8 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         }
         if( tOptionsNode.size<std::string>("GCMMAOuterStationarityTolerance") )
         {
-            double tGCMMAOuterStationarityTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterStationarityTolerance");
-            aOptimizerEngineStageData.setGCMMAOuterStationarityTolerance(tGCMMAOuterStationarityTolerance);
+            double tCCSAOuterStationarityTolerance = Plato::Get::Double(tOptionsNode, "GCMMAOuterStationarityTolerance");
+            aOptimizerEngineStageData.setCCSAOuterStationarityTolerance(tCCSAOuterStationarityTolerance);
         }
         if( tOptionsNode.size<std::string>("KSTrustRegionExpansionFactor") )
         {

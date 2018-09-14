@@ -70,6 +70,21 @@
 namespace Plato
 {
 
+template<typename ScalarType>
+struct DefaultParametersMMA
+{
+    DefaultParametersMMA() :
+            mMovingAsymptoteExpansionFactor(2),
+            mMovingAsymptoteUpperBoundScaleFactor(50),
+            mMovingAsymptoteLowerBoundScaleFactor(0.001875)
+    {
+    }
+
+    ScalarType mMovingAsymptoteExpansionFactor;
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor;
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor;
+};
+
 template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
 {
@@ -264,11 +279,21 @@ private:
 
         // ********* ALLOCATE CONSERVATIVE CONVEX SEPARABLE APPROXIMATION (CCSA) ALGORITHM *********
         Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, aDataMng, tSubProblem);
-        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
-        tAlgorithm.setMaxNumIterations(tMaxNumIterations);
-        ScalarType tGCMMAInitialMovingAsymptoteScaleFactor = mInputData.getGCMMAInitialMovingAsymptoteScaleFactor();
-        tAlgorithm.setInitialMovingAsymptoteScaleFactor(tGCMMAInitialMovingAsymptoteScaleFactor);
+        this->setParameters(tAlgorithm);
         tAlgorithm.solve();
+    }
+
+    void setParameters(Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType>& aAlgorithm)
+    {
+        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
+        aAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
+        aAlgorithm.setInitialMovingAsymptoteScaleFactor(tInitialMovingAsymptoteScaleFactor);
+
+        Plato::DefaultParametersMMA<ScalarType> tDefaultParametersMMA;
+        aAlgorithm.setMovingAsymptoteExpansionFactor(tDefaultParametersMMA.mMovingAsymptoteExpansionFactor);
+        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteLowerBoundScaleFactor);
+        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteUpperBoundScaleFactor);
     }
 
 private:

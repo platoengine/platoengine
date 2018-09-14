@@ -93,14 +93,11 @@ public:
     void setInitialGuess(const std::vector<double> & aInput);
     void setInitialGuess(const std::vector<std::string> & aInput);
 
-    double getGCMMAInitialMovingAsymptoteScaleFactor() const;
-    void setGCMMAInitialMovingAsymptoteScaleFactor(const double & aInput);
+    double getInitialMovingAsymptoteScaleFactor() const;
+    void setInitialMovingAsymptoteScaleFactor(const double & aInput);
 
     double getGCMMAInnerKKTTolerance() const;
     void setGCMMAInnerKKTTolerance(const double & aInput);
-
-    double getGCMMAOuterKKTTolerance() const;
-    void setGCMMAOuterKKTTolerance(const double & aInput);
 
     int getGCMMAMaxInnerIterations() const;
     void setGCMMAMaxInnerIterations(const int & aInput);
@@ -108,14 +105,17 @@ public:
     double getGCMMAInnerControlStagnationTolerance() const;
     void setGCMMAInnerControlStagnationTolerance(const double & aInput);
 
-    double getGCMMAOuterControlStagnationTolerance() const;
-    void setGCMMAOuterControlStagnationTolerance(const double & aInput);
+    double getCCSAOuterKKTTolerance() const;
+    void setCCSAOuterKKTTolerance(const double & aInput);
 
-    double getGCMMAOuterObjectiveStagnationTolerance() const;
-    void setGCMMAOuterObjectiveStagnationTolerance(const double & aInput);
+    double getCCSAOuterControlStagnationTolerance() const;
+    void setCCSAOuterControlStagnationTolerance(const double & aInput);
 
-    double getGCMMAOuterStationarityTolerance() const;
-    void setGCMMAOuterStationarityTolerance(const double & aInput);
+    double getCCSAOuterObjectiveStagnationTolerance() const;
+    void setCCSAOuterObjectiveStagnationTolerance(const double & aInput);
+
+    double getCCSAOuterStationarityTolerance() const;
+    void setCCSAOuterStationarityTolerance(const double & aInput);
 
     double getKSTrustRegionExpansionFactor() const;
     void setKSTrustRegionExpansionFactor(const double & aInput);
@@ -242,13 +242,13 @@ private:
     bool mOutputControlToFile;
     bool mOutputDiagnosticsToFile;
 
-    double mGCMMAInitialMovingAsymptoteScaleFactor;
+    double mInitialMovingAsymptoteScaleFactor;
     double mGCMMAInnerKKTTolerance;
-    double mGCMMAOuterKKTTolerance;
-    double mGCMMAOuterControlStagnationTolerance;
+    double mCCSAOuterKKTTolerance;
+    double mCCSAOuterControlStagnationTolerance;
     double mGCMMAInnerControlStagnationTolerance;
-    double mGCMMAOuterObjectiveStagnationTolerance;
-    double mGCMMAOuterStationarityTolerance;
+    double mCCSAOuterObjectiveStagnationTolerance;
+    double mCCSAOuterStationarityTolerance;
     double mKSTrustRegionExpansionFactor;
     double mKSTrustRegionContractionFactor;
     double mKSOuterGradientTolerance;

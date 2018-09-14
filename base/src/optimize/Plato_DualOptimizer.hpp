@@ -104,7 +104,7 @@ public:
             mDualLowerBound(aFactory.dual().create()),
             mDualUpperBound(aFactory.dual().create()),
             mBounds(std::make_shared<Plato::HostBounds<ScalarType, OrdinalType>>()),
-            mStageMng(std::make_shared<Plato::DualProblemStageMng<ScalarType, OrdinalType>>(aFactory))
+            mDualProbStageMng(std::make_shared<Plato::DualProblemStageMng<ScalarType, OrdinalType>>(aFactory))
 
     {
         Plato::fill(static_cast<ScalarType>(0), *mDualLowerBound);
@@ -223,19 +223,19 @@ public:
 
     void update(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        mStageMng->update(aDataMng);
+        mDualProbStageMng->update(aDataMng);
     }
     void updateObjectiveCoefficients(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        mStageMng->updateObjectiveCoefficients(aDataMng);
+        mDualProbStageMng->updateObjectiveCoefficients(aDataMng);
     }
     void updateConstraintCoefficients(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        mStageMng->updateConstraintCoefficients(aDataMng);
+        mDualProbStageMng->updateConstraintCoefficients(aDataMng);
     }
     void initializeAuxiliaryVariables(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        mStageMng->initializeAuxiliaryVariables(aDataMng);
+        mDualProbStageMng->initializeAuxiliaryVariables(aDataMng);
     }
 
     void solve(Plato::MultiVector<ScalarType,OrdinalType> & aDual,
@@ -244,8 +244,8 @@ public:
         mNumIterationsDone = 0;
         Plato::update(static_cast<ScalarType>(1), aDual, static_cast<ScalarType>(0), *mNewDual);
 
-        mNewObjectiveFunctionValue = mStageMng->evaluateObjective(*mNewDual);
-        mStageMng->computeGradient(*mNewDual, *mNewGradient);
+        mNewObjectiveFunctionValue = mDualProbStageMng->evaluateObjective(*mNewDual);
+        mDualProbStageMng->computeGradient(*mNewDual, *mNewGradient);
         Plato::update(static_cast<ScalarType>(-1), *mNewGradient, static_cast<ScalarType>(0), *mNewSteepestDescent);
 
         Plato::update(static_cast<ScalarType>(1), *mNewDual, static_cast<ScalarType>(0), *mTrialDual);
@@ -259,13 +259,13 @@ public:
         if(this->stoppingCriteriaSatisfied() == true)
         {
             Plato::update(static_cast<ScalarType>(1), *mNewDual, static_cast<ScalarType>(0), aDual);
-            mStageMng->getTrialControl(aTrialControl);
+            mDualProbStageMng->getTrialControl(aTrialControl);
             return;
         }
 
         while(1)
         {
-            mStageMng->computeGradient(*mNewDual, *mNewGradient);
+            mDualProbStageMng->computeGradient(*mNewDual, *mNewGradient);
             Plato::update(static_cast<ScalarType>(-1), *mNewGradient, static_cast<ScalarType>(0), *mNewSteepestDescent);
 
             Plato::update(static_cast<ScalarType>(1), *mNewDual, static_cast<ScalarType>(0), *mTrialDual);
@@ -292,7 +292,7 @@ public:
         }
 
         Plato::update(static_cast<ScalarType>(1), *mNewDual, static_cast<ScalarType>(0), aDual);
-        mStageMng->getTrialControl(aTrialControl);
+        mDualProbStageMng->getTrialControl(aTrialControl);
     }
 
     void reset()
@@ -332,7 +332,7 @@ private:
         mBounds->project(*mDualLowerBound, *mDualUpperBound, *mTrialDual);
         this->computeProjectedStep(*mTrialDual, *mNewDual, *mProjectedStep);
 
-        tObjectiveValues[2] = mStageMng->evaluateObjective(*mTrialDual);
+        tObjectiveValues[2] = mDualProbStageMng->evaluateObjective(*mTrialDual);
 
         ScalarType tInitialProjectedStepDotGradient = Plato::dot(*mProjectedStep, *mNewGradient);
         ScalarType tTargetObjectiveValue = tObjectiveValues[0] - tAlpha * tStepValues[1] * tInitialProjectedStepDotGradient;
@@ -352,7 +352,7 @@ private:
             this->computeProjectedStep(*mTrialDual, *mNewDual, *mProjectedStep);
 
             tObjectiveValues[1] = tObjectiveValues[2];
-            tObjectiveValues[2] = mStageMng->evaluateObjective(*mTrialDual);
+            tObjectiveValues[2] = mDualProbStageMng->evaluateObjective(*mTrialDual);
             if(this->getLineSearchIterationCount() >= tMaxNumIterations)
             {
                 return;
@@ -581,7 +581,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualUpperBound;
 
     std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds;
-    std::shared_ptr<Plato::DualProblemStageMng<ScalarType, OrdinalType>> mStageMng;
+    std::shared_ptr<Plato::DualProblemStageMng<ScalarType, OrdinalType>> mDualProbStageMng;
 
 private:
     DualOptimizer<ScalarType, OrdinalType>(const Plato::DualOptimizer<ScalarType, OrdinalType> & aRhs);

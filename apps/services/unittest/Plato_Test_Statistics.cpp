@@ -74,6 +74,32 @@
 namespace PlatoTest
 {
 
+template<typename ScalarType, typename OrdinalType>
+void compute_srom_cdf(const Plato::Vector<ScalarType>& aSamplesMC,
+                      const Plato::Vector<ScalarType>& aSamplesSROM,
+                      const Plato::Vector<ScalarType>& aProbsSROM,
+                      Plato::Vector<ScalarType>& aSromCDF,
+                      ScalarType aSigma = 1e-7)
+{
+    assert(aSromCDF.size() == aSamplesMC.size());
+    assert(aSamplesSROM.size() == aProbsSROM.size());
+
+    const ScalarType tConstant = std::sqrt(2);
+    const OrdinalType tNumSamplesMC = aSamplesMC.size();
+    const OrdinalType tNumSamplesSROM = aSamplesSROM.size();
+
+    for(OrdinalType tIndexMC = 0; tIndexMC < tNumSamplesMC; tIndexMC++)
+    {
+        ScalarType tSum = 0;
+        for(OrdinalType tIndexSROM = 0; tIndexSROM < tNumSamplesSROM; tIndexSROM++)
+        {
+            ScalarType tArg = (aSamplesMC[tIndexMC] - aSamplesSROM[tIndexSROM]) / (aSigma * tConstant);
+            tSum = tSum + aProbsSROM[tIndexSROM] * (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + erf(tArg)));
+        }
+        aSromCDF[tIndexMC] = tSum;
+    }
+}
+
 std::vector<double> get_gold_beta_cdf_values()
 {
     std::vector<double> tOutput = {0, 4.18251442858886e-06, 1.87360421565357e-05, 4.50004817470168e-05, 8.37385628098157e-05,

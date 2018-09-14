@@ -70,6 +70,21 @@
 namespace Plato
 {
 
+template<typename ScalarType>
+struct DefaultParametersGCMMA
+{
+    DefaultParametersGCMMA() :
+            mMovingAsymptoteExpansionFactor(2),
+            mMovingAsymptoteUpperBoundScaleFactor(5),
+            mMovingAsymptoteLowerBoundScaleFactor(0.02)
+    {
+    }
+
+    ScalarType mMovingAsymptoteExpansionFactor;
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor;
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor;
+};
+
 template<typename ScalarType, typename OrdinalType = size_t>
 class GloballyConvergentMethodMovingAsymptotesInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
 {
@@ -264,28 +279,25 @@ private:
 
         // ********* ALLOCATE CONSERVATIVE CONVEX SEPARABLE APPROXIMATION (CCSA) ALGORITHM *********
         Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, aDataMng, tSubProblem);
-        this->setOptions(tAlgorithm, *tSubProblem);
+        this->setParameters(tAlgorithm, *tSubProblem);
         tAlgorithm.solve();
-
-        this->printStoppingReason(tAlgorithm.getStoppingCriterion());
-
     }
 
     /******************************************************************************/
-    void setOptions(Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm,
-                    Plato::GloballyConvergentMethodMovingAsymptotes<ScalarType, OrdinalType> & aSubProblem)
+    void setParameters(Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm,
+                       Plato::GloballyConvergentMethodMovingAsymptotes<ScalarType, OrdinalType> & aSubProblem)
     /******************************************************************************/
     {
         // ********* Get User input ***************
         ScalarType tInnerKKTTolerance = mInputData.getGCMMAInnerKKTTolerance();
-        ScalarType tOuterKKTTolerance = mInputData.getGCMMAOuterKKTTolerance();
+        ScalarType tOuterKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
         ScalarType tInnerControlStagnationTolerancer = mInputData.getGCMMAInnerControlStagnationTolerance();
-        ScalarType tOuterControlStagnationTolerancer = mInputData.getGCMMAOuterControlStagnationTolerance();
-        ScalarType tOuterObjectiveStagnationTolerancer = mInputData.getGCMMAOuterObjectiveStagnationTolerance();
+        ScalarType tOuterControlStagnationTolerancer = mInputData.getCCSAOuterControlStagnationTolerance();
+        ScalarType tOuterObjectiveStagnationTolerancer = mInputData.getCCSAOuterObjectiveStagnationTolerance();
         OrdinalType tMaxNumInnerIterations = mInputData.getGCMMAMaxInnerIterations();
         OrdinalType tMaxNumOuterIterations = mInputData.getMaxNumIterations();
-        ScalarType tOuterStationarityTolerance = mInputData.getGCMMAOuterStationarityTolerance();
-        ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getGCMMAInitialMovingAsymptoteScaleFactor();
+        ScalarType tOuterStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
+        ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
 
         aSubProblem.setKarushKuhnTuckerConditionsTolerance(tInnerKKTTolerance);
         aSubProblem.setStagnationTolerance(tInnerControlStagnationTolerancer);
@@ -298,34 +310,12 @@ private:
         // Using single tolerance for both control and objective right now.
         aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerancer);
         aAlgorithm.setStagnationTolerance(tOuterControlStagnationTolerancer);
-    }
 
-    /******************************************************************************/
-    void printStoppingReason(Plato::ccsa::stop_t aStopCriteria)
-    /******************************************************************************/
-    {
-
-        if(aStopCriteria == Plato::ccsa::MAX_NUMBER_ITERATIONS)
-        {
-            fprintf(stdout,"\n\n GCMMA stopping due to exceeding maximum number of iterations\n");
-        }
-        else if (aStopCriteria == Plato::ccsa::KKT_CONDITIONS_TOLERANCE)
-        {
-            fprintf(stdout,"\n\n GCMMA stopping due to meeting KKT conditions within tolerance\n");
-        }
-        else if (aStopCriteria == Plato::ccsa::OBJECTIVE_STAGNATION  )
-        {
-            fprintf(stdout,"\n\n GCMMA stopping due to objective stagnation\n");
-        }
-        else if (aStopCriteria == Plato::ccsa::CONTROL_STAGNATION)
-        {
-            fprintf(stdout,"\n\n GCMMA stopping due to design variable stagnation\n");
-        }
-        else
-        {
-            fprintf(stdout,"\n\nGCMMA stopped for an unknown reason (%i)\n",static_cast<int>(aStopCriteria));
-        }
-
+        // Set default parameters
+        Plato::DefaultParametersGCMMA<ScalarType> tDefaultParametersGCMMA;
+        aAlgorithm.setMovingAsymptoteExpansionFactor(tDefaultParametersGCMMA.mMovingAsymptoteExpansionFactor);
+        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersGCMMA.mMovingAsymptoteLowerBoundScaleFactor);
+        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersGCMMA.mMovingAsymptoteUpperBoundScaleFactor);
     }
 
 private:
