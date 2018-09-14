@@ -149,7 +149,7 @@ MathParser::compute(std::string aExpr)
         }
 
         const auto& tStrVals = mArrays[tArrayName];
-        if( (tStrVals.size() < (tArrayIndex+1)) || (tArrayIndex < 0) )
+        if( (tStrVals.size() < (static_cast<size_t>(tArrayIndex + 1))) || (tArrayIndex < 0) )
         {
             std::stringstream ss;
             ss << "Expression '," << tSubExpr << "' Array '" << tArrayName 

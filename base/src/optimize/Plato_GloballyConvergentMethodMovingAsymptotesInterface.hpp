@@ -315,7 +315,7 @@ private:
         Plato::DefaultParametersGCMMA<ScalarType> tDefaultParametersGCMMA;
         aAlgorithm.setMovingAsymptoteExpansionFactor(tDefaultParametersGCMMA.mMovingAsymptoteExpansionFactor);
         aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersGCMMA.mMovingAsymptoteLowerBoundScaleFactor);
-        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersGCMMA.mMovingAsymptoteUpperBoundScaleFactor);
+        aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(tDefaultParametersGCMMA.mMovingAsymptoteUpperBoundScaleFactor);
     }
 
 private:

@@ -293,7 +293,7 @@ private:
         Plato::DefaultParametersMMA<ScalarType> tDefaultParametersMMA;
         aAlgorithm.setMovingAsymptoteExpansionFactor(tDefaultParametersMMA.mMovingAsymptoteExpansionFactor);
         aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteLowerBoundScaleFactor);
-        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteUpperBoundScaleFactor);
+        aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteUpperBoundScaleFactor);
     }
 
 private:
