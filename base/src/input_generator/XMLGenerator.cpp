@@ -2955,6 +2955,8 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
 {
     // Initialize variables
     m_InputData.output_frequency="5";
+    m_InputData.discretization="density";
+    m_InputData.initial_density_value="0.5";
     m_InputData.output_method="epu";
     m_InputData.check_gradient = "false";
     m_InputData.check_hessian = "false";
