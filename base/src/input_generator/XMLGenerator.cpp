@@ -114,10 +114,10 @@ bool XMLGenerator::generate()
         return false;
     }
 
-    // NOTE: modifies objectives to resolve repeats
+    // NOTE: modifies objectives to resolves distribution
     if(!distributeObjectivesForGenerate())
     {
-        std::cout << "Failed to repeat objectives in file generation" << std::endl;
+        std::cout << "Failed to distribute objectives in file generation" << std::endl;
         return false;
     }
 
@@ -233,6 +233,10 @@ bool XMLGenerator::distributeObjectivesForGenerate()
                 // transfer ids/weights
                 m_InputData.objectives[this_distributed_objectiveIndex].load_case_ids.push_back(orig_load_case_ids[abstract_load_id]);
                 m_InputData.objectives[this_distributed_objectiveIndex].load_case_weights.push_back(orig_load_case_weights[abstract_load_id]);
+
+                // remove name in distributed
+                m_InputData.objectives[this_distributed_objectiveIndex].name="";
+                m_InputData.objectives[this_distributed_objectiveIndex].performer_name="";
 
                 // advance distributed index
                 strided_distributed_index = (strided_distributed_index + 1) % num_distributed_objectives;

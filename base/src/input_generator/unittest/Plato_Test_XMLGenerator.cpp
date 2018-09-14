@@ -2439,6 +2439,14 @@ TEST(PlatoTestXMLGenerator,distributeObjective_notEnoughProcessors)
     const size_t expected_num_objectives = 3u;
     ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
 
+    // check names
+    EXPECT_EQ(tester.getObjectiveName(0u),"1");
+    EXPECT_EQ(tester.getObjectiveName(1u),"2");
+    EXPECT_EQ(tester.getObjectiveName(2u),"3");
+    EXPECT_EQ(tester.getObjPerfName(0u),"sierra_sd_1");
+    EXPECT_EQ(tester.getObjPerfName(1u),"sierra_sd_2");
+    EXPECT_EQ(tester.getObjPerfName(2u),"sierra_sd_3");
+
     // get loadIds for distributed objective
     std::vector<std::string> distributed_loadIds;
     for(size_t objI = 0u; objI < expected_num_objectives; objI++)
@@ -2507,6 +2515,16 @@ TEST(PlatoTestXMLGenerator,distributeObjective_exactlyEnoughProcessors)
     const size_t expected_num_objectives = 4u;
     ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
 
+    // check names
+    EXPECT_EQ(tester.getObjectiveName(0u), "1");
+    EXPECT_EQ(tester.getObjectiveName(1u), "2");
+    EXPECT_EQ(tester.getObjectiveName(2u), "3");
+    EXPECT_EQ(tester.getObjectiveName(3u), "4");
+    EXPECT_EQ(tester.getObjPerfName(0u), "sierra_sd_1");
+    EXPECT_EQ(tester.getObjPerfName(1u), "sierra_sd_2");
+    EXPECT_EQ(tester.getObjPerfName(2u), "sierra_sd_3");
+    EXPECT_EQ(tester.getObjPerfName(3u), "sierra_sd_4");
+
     // get loadIds for distributed objective
     std::vector<std::string> distributed_loadIds;
     for(size_t objI = 0u; objI < expected_num_objectives; objI++)
@@ -2574,6 +2592,16 @@ TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
     // four objectives
     const size_t expected_num_objectives = 4u;
     ASSERT_EQ(tester.getNumObjectives(), expected_num_objectives);
+
+    // check names
+    EXPECT_EQ(tester.getObjectiveName(0u), "1");
+    EXPECT_EQ(tester.getObjectiveName(1u), "2");
+    EXPECT_EQ(tester.getObjectiveName(2u), "3");
+    EXPECT_EQ(tester.getObjectiveName(3u), "4");
+    EXPECT_EQ(tester.getObjPerfName(0u), "sierra_sd_1");
+    EXPECT_EQ(tester.getObjPerfName(1u), "sierra_sd_2");
+    EXPECT_EQ(tester.getObjPerfName(2u), "sierra_sd_3");
+    EXPECT_EQ(tester.getObjPerfName(3u), "sierra_sd_4");
 
     // get loadIds for distributed objective
     std::vector<std::string> distributed_loadIds;
