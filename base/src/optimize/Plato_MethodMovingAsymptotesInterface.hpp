@@ -285,8 +285,17 @@ private:
 
     void setParameters(Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType>& aAlgorithm)
     {
+        // ********* Get User input ***************
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        ScalarType tKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
+        aAlgorithm.setKarushKuhnTuckerConditionsTolerance(tKKTTolerance);
+        ScalarType tStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
+        aAlgorithm.setStationarityTolerance(tStationarityTolerance);
+        ScalarType tControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
+        aAlgorithm.setStagnationTolerance(tControlStagnationTolerance);
+        ScalarType tObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
+        aAlgorithm.setObjectiveStagnationTolerance(tObjectiveStagnationTolerance);
         ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
         aAlgorithm.setInitialMovingAsymptoteScaleFactor(tInitialMovingAsymptoteScaleFactor);
 

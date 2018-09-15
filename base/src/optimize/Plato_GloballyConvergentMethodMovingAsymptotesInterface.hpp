@@ -291,16 +291,16 @@ private:
         // ********* Get User input ***************
         ScalarType tInnerKKTTolerance = mInputData.getGCMMAInnerKKTTolerance();
         ScalarType tOuterKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
-        ScalarType tInnerControlStagnationTolerancer = mInputData.getGCMMAInnerControlStagnationTolerance();
-        ScalarType tOuterControlStagnationTolerancer = mInputData.getCCSAOuterControlStagnationTolerance();
-        ScalarType tOuterObjectiveStagnationTolerancer = mInputData.getCCSAOuterObjectiveStagnationTolerance();
+        ScalarType tInnerControlStagnationTolerance = mInputData.getGCMMAInnerControlStagnationTolerance();
+        ScalarType tOuterControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
+        ScalarType tOuterObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
         OrdinalType tMaxNumInnerIterations = mInputData.getGCMMAMaxInnerIterations();
         OrdinalType tMaxNumOuterIterations = mInputData.getMaxNumIterations();
         ScalarType tOuterStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
         ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
 
         aSubProblem.setKarushKuhnTuckerConditionsTolerance(tInnerKKTTolerance);
-        aSubProblem.setStagnationTolerance(tInnerControlStagnationTolerancer);
+        aSubProblem.setStagnationTolerance(tInnerControlStagnationTolerance);
         aSubProblem.setMaxNumIterations(tMaxNumInnerIterations);
 
         aAlgorithm.setMaxNumIterations(tMaxNumOuterIterations);
@@ -308,8 +308,8 @@ private:
         aAlgorithm.setKarushKuhnTuckerConditionsTolerance(tOuterKKTTolerance);
         aAlgorithm.setStationarityTolerance(tOuterStationarityTolerance);
         // Using single tolerance for both control and objective right now.
-        aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerancer);
-        aAlgorithm.setStagnationTolerance(tOuterControlStagnationTolerancer);
+        aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerance);
+        aAlgorithm.setStagnationTolerance(tOuterControlStagnationTolerance);
 
         // Set default parameters
         Plato::DefaultParametersGCMMA<ScalarType> tDefaultParametersGCMMA;
