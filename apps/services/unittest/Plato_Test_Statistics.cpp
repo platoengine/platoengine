@@ -48,8 +48,9 @@
 
 #include "gtest/gtest.h"
 
-#include <numeric>
 #include <cmath>
+#include <numeric>
+#include <vector>
 
 #include "Plato_DataFactory.hpp"
 #include "Plato_Diagnostics.hpp"
@@ -75,11 +76,11 @@ namespace PlatoTest
 {
 
 template<typename ScalarType, typename OrdinalType>
-void compute_srom_cdf(const Plato::Vector<ScalarType>& aSamplesMC,
-                      const Plato::Vector<ScalarType>& aSamplesSROM,
-                      const Plato::Vector<ScalarType>& aProbsSROM,
-                      Plato::Vector<ScalarType>& aSromCDF,
-                      ScalarType aSigma = 1e-7)
+void compute_srom_cdf_plot(const Plato::Vector<ScalarType>& aSamplesMC,
+                           const Plato::Vector<ScalarType>& aSamplesSROM,
+                           const Plato::Vector<ScalarType>& aProbsSROM,
+                           Plato::Vector<ScalarType>& aSromCDF,
+                           ScalarType aSigma = 1e-7)
 {
     assert(aSromCDF.size() == aSamplesMC.size());
     assert(aSamplesSROM.size() == aProbsSROM.size());
@@ -94,7 +95,9 @@ void compute_srom_cdf(const Plato::Vector<ScalarType>& aSamplesMC,
         for(OrdinalType tIndexSROM = 0; tIndexSROM < tNumSamplesSROM; tIndexSROM++)
         {
             ScalarType tArg = (aSamplesMC[tIndexMC] - aSamplesSROM[tIndexSROM]) / (aSigma * tConstant);
-            tSum = tSum + aProbsSROM[tIndexSROM] * (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + erf(tArg)));
+            tSum = tSum
+                    + aProbsSROM[tIndexSROM]
+                            * (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + erf(tArg)));
         }
         aSromCDF[tIndexMC] = tSum;
     }
