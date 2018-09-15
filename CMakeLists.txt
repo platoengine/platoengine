@@ -10,7 +10,7 @@ option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface" OFF)
 option( GEOMETRY      "Enable Geometry subcomponent"   OFF)
 option( EXPY          "Build exodus python API"        OFF)
 option( SEACAS        "Seacas tools"                    ON)
-option( ENABLE_STK    "Flag to turn on use of STK"      ON)
+option( ENABLE_STK    "Flag to turn on use of STK"     OFF)
 
 
 ##################################################################
