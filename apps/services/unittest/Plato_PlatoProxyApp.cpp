@@ -46,6 +46,8 @@
  *  Created on: Oct 17, 2017
  */
 
+#ifdef ENABLE_STK
+
 #include <algorithm>
 
 #include <stk_mesh/base/Comm.hpp>
@@ -162,3 +164,5 @@ void PlatoProxyApp::getSubDomainOwnedAndSharedGlobalIDs(std::vector<int> & aInpu
 }
 
 } // namespace Plato
+
+#endif
