@@ -49,6 +49,8 @@
 #ifndef PLATO_PHYSICSPROXYAPP_HPP_
 #define PLATO_PHYSICSPROXYAPP_HPP_
 
+#ifdef ENABLE_STK
+
 #include <mpi.h>
 
 #include "Plato_Application.hpp"
@@ -101,5 +103,7 @@ private:
 };
 
 } // namespace Plato
+
+#endif // ENABLE_STK
 
 #endif /* PLATO_PHYSICSPROXYAPP_HPP_ */
