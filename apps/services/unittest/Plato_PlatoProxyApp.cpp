@@ -165,4 +165,4 @@ void PlatoProxyApp::getSubDomainOwnedAndSharedGlobalIDs(std::vector<int> & aInpu
 
 } // namespace Plato
 
-#endif
+#endif // ENABLE_STK
