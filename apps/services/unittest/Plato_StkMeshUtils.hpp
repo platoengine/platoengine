@@ -75,6 +75,6 @@ void buildCommunicationOwnedNodeMap(const stk::mesh::BulkData & aBulkData,
 
 } // namespace Plato
 
-#endif ENABLE_STK
+#endif // ENABLE_STK
 
 #endif /* PLATO_STKMESHUTILS_HPP_ */
