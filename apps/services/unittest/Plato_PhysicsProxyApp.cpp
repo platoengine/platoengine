@@ -46,6 +46,8 @@
  *  Created on: Oct 17, 2017
  */
 
+#ifdef ENABLE_STK
+
 #include <stk_mesh/base/Comm.hpp>
 #include <stk_io/StkMeshIoBroker.hpp>
 #include <stk_mesh/base/GetEntities.hpp>
@@ -211,3 +213,5 @@ void PhysicsProxyApp::getSubDomainOwnedAndSharedGlobalIDs(std::vector<int> & aIn
 }
 
 } // namespace Plato
+
+#endif // ENABLE_STK
