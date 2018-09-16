@@ -49,6 +49,8 @@
 #ifndef PLATO_STKMESHUTILS_HPP_
 #define PLATO_STKMESHUTILS_HPP_
 
+#ifdef ENABLE_STK
+
 #include <vector>
 
 #include <stk_mesh/base/BulkData.hpp>
@@ -72,5 +74,7 @@ void buildCommunicationOwnedNodeMap(const stk::mesh::BulkData & aBulkData,
                                      std::vector<int> & aLocallyOwnedGlobalNodeIds);
 
 } // namespace Plato
+
+#endif ENABLE_STK
 
 #endif /* PLATO_STKMESHUTILS_HPP_ */
