@@ -76,10 +76,10 @@ namespace PlatoTest
 {
 
 template<typename ScalarType, typename OrdinalType>
-void compute_srom_cdf_plot(const Plato::Vector<ScalarType>& aSamplesMC,
-                           const Plato::Vector<ScalarType>& aSamplesSROM,
-                           const Plato::Vector<ScalarType>& aProbsSROM,
-                           Plato::Vector<ScalarType>& aSromCDF,
+void compute_srom_cdf_plot(const Plato::Vector<ScalarType, OrdinalType>& aSamplesMC,
+                           const Plato::Vector<ScalarType, OrdinalType>& aSamplesSROM,
+                           const Plato::Vector<ScalarType, OrdinalType>& aProbsSROM,
+                           Plato::Vector<ScalarType, OrdinalType>& aSromCDF,
                            ScalarType aSigma = 1e-7)
 {
     assert(aSromCDF.size() == aSamplesMC.size());
@@ -627,6 +627,63 @@ TEST(PlatoTest, BetaCDF2)
     {
         EXPECT_NEAR(tCDF[tIndex], tGold[tIndex], tTolerance);
     }
+}
+
+TEST(PlatoTest, PlotBetaCDF)
+{
+    // BUILD BETA DISTRIBUTION
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    Plato::BetaDistribution<double> tBetaDistribution(tMin, tMax, tMean, tVariance);
+
+    // CONSTRUCT MONTE CARLO SAMPLE VECTOR
+    const size_t tNumSamples = 1000;
+    const size_t tLength = tNumSamples + static_cast<size_t>(1);
+    const double tDelta = 1.0 / tNumSamples;
+    Plato::StandardVector<double> tSamplesMC(tNumSamples);
+    for(size_t tIndex = 1; tIndex < tLength; tIndex++)
+    {
+        size_t tPreviousIndex = tIndex - static_cast<size_t>(1);
+        tSamplesMC[tIndex] = tSamplesMC[tPreviousIndex] + tDelta;
+    }
+
+    // COMPUTE MONTE CARLO CDF
+    Plato::StandardVector<double> tMonteCarloCDF(tLength);
+    EXPECT_EQ(tMonteCarloCDF.size(), tSamplesMC.size());
+    for(size_t tIndex = 0; tIndex < tSamplesMC.size(); tIndex++)
+    {
+        tMonteCarloCDF[tIndex] = tBetaDistribution.cdf(tSamplesMC[tIndex]);
+    }
+
+    // POSE SROM PROBLEM WITH KNOWN SOLUTION
+    Plato::UncertaintyInputStruct<double> tInput;
+    tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tInput.mMean = 90.;
+    tInput.mUpperBound = 135.;
+    tInput.mLowerBound = 67.5;
+    tInput.mVariance = 135.;
+    tInput.mNumSamples = 20;
+    tInput.mMaxNumDistributionMoments = 4;
+
+    // SOLVE
+    Plato::AlgorithmParamStruct<double> tParam;
+    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
+    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+    Plato::solve_uncertainty(tInput, tParam, tDiagnostics, tOutput);
+
+    Plato::StandardVector<double> tSromCDF(tLength);
+    Plato::StandardVector<double> tProbsSROM(tInput.mNumSamples);
+    Plato::StandardVector<double> tSamplesSROM(tInput.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tInput.mNumSamples; tIndex++)
+    {
+        tProbsSROM[tIndex] = tOutput[tIndex].mSampleWeight;
+        tSamplesSROM[tIndex] = tOutput[tIndex].mSampleValue;
+    }
+
+    // CALL CDF PLOT FUNCTION
+    PlatoTest::compute_srom_cdf_plot(tSamplesMC, tSamplesSROM, tProbsSROM, tSromCDF);
 }
 
 TEST(PlatoTest, BetaDistribution)

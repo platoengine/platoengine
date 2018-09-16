@@ -28,7 +28,7 @@ struct DistrubtionName
 };
 // struct DistrubtionName
 
-template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType = size_t>
 struct UncertaintyInputStruct
 {
     DistrubtionName::type_t mDistribution;

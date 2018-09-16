@@ -89,7 +89,7 @@ struct SromProblemDiagnosticsStruct
 };
 // struct SromProblemOutputStruct
 
-template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType = size_t>
 struct AlgorithmParamStruct
 {
     // Stopping criterion
@@ -271,8 +271,8 @@ void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarTyp
 template<typename ScalarType, typename OrdinalType>
 void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs,
                        Plato::AlgorithmParamStruct<ScalarType, OrdinalType>& aAlgorithmParam,
-                       Plato::SromProblemDiagnosticsStruct<double>& aSromDiagnostics,
-                       std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
+                       Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics,
+                       std::vector<UncertaintyOutputStruct<ScalarType>>& aOutput)
 {
     // grab values from input struct
     const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
@@ -343,8 +343,8 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     // transfer stopping criterion, objective and constraint values to algorithm parameter data structure
     aAlgorithmParam.mStop = tAlgorithm.getStoppingCriterion();
     aAlgorithmParam.mObjectiveValue = tDataMng->getCurrentObjectiveFunctionValue();
-    const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double, size_t> tConstraintValues(tNumVectors, tNumConstraints);
+    const OrdinalType tNumVectors = 1;
+    Plato::StandardMultiVector<ScalarType, OrdinalType> tConstraintValues(tNumVectors, tNumConstraints);
     tStageMng->getCurrentConstraintValues(tConstraintValues);
     aAlgorithmParam.mConstraintValue = tConstraintValues(0,0);
 }
