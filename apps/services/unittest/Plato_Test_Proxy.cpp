@@ -46,6 +46,8 @@
  *  Created on: Sep 27, 2017
  */
 
+#ifdef ENABLE_STK
+
 #include <gtest/gtest.h>
 
 #include <memory>
@@ -431,3 +433,5 @@ TEST(PlatoTest, ProxyPerformer)
 }
 
 }
+
+#endif // ENABLE_STK
