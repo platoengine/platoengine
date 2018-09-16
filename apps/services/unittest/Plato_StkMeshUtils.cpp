@@ -110,4 +110,4 @@ void buildCommunicationOwnedNodeMap(const stk::mesh::BulkData & aBulkData,
 
 }
 
-#endif ENABLE_STK
+#endif // ENABLE_STK
