@@ -46,7 +46,7 @@
 #include "STKExtract.hpp"
 #endif
 
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
 #include "stk_mesh/base/MetaData.hpp"
 #include <stk_mesh/base/Field.hpp>
 #include <stk_io/StkMeshIoBroker.hpp>
@@ -572,7 +572,7 @@ double PlatoApp::InitializeField::evaluateSwissCheeseLevelSet(const double &aX, 
 void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
     stk::mesh::MetaData *meta_data = new stk::mesh::MetaData;
     stk::mesh::BulkData *bulk_data = new stk::mesh::BulkData(*meta_data, mPlatoApp->mLocalComm);
@@ -744,14 +744,14 @@ void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(Distribut
     delete broker;
 #else
     throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
-#endif // ENABLE_STK
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/
 void PlatoApp::InitializeField::getInitialValuesForPrimitivesLevelSet(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
     stk::mesh::MetaData *meta_data = new stk::mesh::MetaData;
     stk::mesh::BulkData *bulk_data = new stk::mesh::BulkData(*meta_data, mPlatoApp->mLocalComm);
@@ -832,14 +832,14 @@ void PlatoApp::InitializeField::getInitialValuesForPrimitivesLevelSet(Distribute
     delete broker;
 #else
     throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
-#endif // ENABLE_STK
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/
 void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &field, std::vector<double> &values)
 /******************************************************************************/
 {
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
     bool input_file_is_spread = true;
 
     stk::io::StkMeshIoBroker *broker = new stk::io::StkMeshIoBroker(mPlatoApp->mLocalComm);
@@ -886,7 +886,7 @@ void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &fi
 
 #else
     throw Plato::LogicException("Functionality not available.  Recompile with STK enabled.");
-#endif // ENABLE_STK
+#endif // STK_ENABLED
 }
 
 /******************************************************************************/

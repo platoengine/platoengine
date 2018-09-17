@@ -46,7 +46,7 @@
  *  Created on: Oct 17, 2017
  */
 
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
 
 #include <stk_io/StkMeshIoBroker.hpp>
 #include <stk_mesh/base/GetEntities.hpp>
@@ -110,4 +110,4 @@ void buildCommunicationOwnedNodeMap(const stk::mesh::BulkData & aBulkData,
 
 }
 
-#endif // ENABLE_STK
+#endif // STK_ENABLED

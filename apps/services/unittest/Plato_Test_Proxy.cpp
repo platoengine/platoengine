@@ -46,7 +46,7 @@
  *  Created on: Sep 27, 2017
  */
 
-#ifdef ENABLE_STK
+#ifdef STK_ENABLED
 
 #include <gtest/gtest.h>
 
@@ -434,4 +434,4 @@ TEST(PlatoTest, ProxyPerformer)
 
 }
 
-#endif // ENABLE_STK
+#endif // STK_ENABLED
