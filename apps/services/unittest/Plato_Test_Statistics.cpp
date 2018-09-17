@@ -629,6 +629,7 @@ TEST(PlatoTest, BetaCDF2)
     }
 }
 
+/*
 TEST(PlatoTest, PlotBetaCDF)
 {
     // BUILD BETA DISTRIBUTION
@@ -685,6 +686,7 @@ TEST(PlatoTest, PlotBetaCDF)
     // CALL CDF PLOT FUNCTION
     PlatoTest::compute_srom_cdf_plot(tSamplesMC, tSamplesSROM, tProbsSROM, tSromCDF);
 }
+*/
 
 TEST(PlatoTest, BetaDistribution)
 {
