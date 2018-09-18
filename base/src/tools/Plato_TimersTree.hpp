@@ -59,6 +59,7 @@ enum timer_partition_t
     mesh_services,
     file_input_output,
     physics_compute,
+    aggregator,
     TOTAL_NUM_KEYS
 };
 }

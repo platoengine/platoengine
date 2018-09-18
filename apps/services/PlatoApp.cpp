@@ -1698,6 +1698,11 @@ void PlatoApp::ReciprocateObjectiveGradient::operator()()
 void PlatoApp::Aggregator::operator()() 
 /******************************************************************************/
 {
+    // begin timer if timing
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::aggregator);
+    }
 
   std::vector<double> weights(m_weights);
   if(m_weightMethod == "FIXED"){
@@ -1778,6 +1783,12 @@ void PlatoApp::Aggregator::operator()()
       throw pe;
     }
   }
+
+  // end: "aggregator"
+  if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->end_partition();
+    }
 
   return;
 }
@@ -1904,6 +1915,12 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
 void PlatoApp::PlatoMainOutput::operator()()
 /******************************************************************************/
 {
+    // time operation
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::file_input_output);
+    }
+
     LightMP* lmp = mPlatoApp->getLightMP();
     double time = lmp->getCurrentTime();
     time += 1.0;
@@ -1954,6 +1971,12 @@ void PlatoApp::PlatoMainOutput::operator()()
                 }
             }
         }
+    }
+
+    // end I/O timer
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->end_partition();
     }
 }
 

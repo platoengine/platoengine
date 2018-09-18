@@ -275,6 +275,7 @@ const char* TimersTree::get_string_from_partition_enum(const int partition) cons
         PLATO_TIMERSTREE_PARTITION_CASE(mesh_services)
         PLATO_TIMERSTREE_PARTITION_CASE(file_input_output)
         PLATO_TIMERSTREE_PARTITION_CASE(physics_compute)
+        PLATO_TIMERSTREE_PARTITION_CASE(aggregator)
         case timer_partition_t::timer_partition_t::TOTAL_NUM_KEYS:
         {
             return "uncategorized";
