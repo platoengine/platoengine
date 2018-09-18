@@ -1244,7 +1244,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
                 addNTVParameter(n4, "Topology Name", "string", "Rho");
                 addNTVParameter(n4, "Entity Type", "string", "State Variable");
                 addNTVParameter(n4, "Bounds", "Array(double)", "{0.0,1.0}");
-                addNTVParameter(n4, "Initial Value", "double", m_InputData.constraints[0].volume_fraction);
+                addNTVParameter(n4, "Initial Value", "double", m_InputData.initial_density_value);
                 n5 = n4.append_child("ParameterList");
                 n5.append_attribute("name") = "Functions";
                 size_t num_functions = 1;
@@ -1371,23 +1371,28 @@ bool XMLGenerator::generateAlbanyInputDecks()
                         Load cur_load = cur_load_case.loads[e];
                         if(!cur_obj.type.compare("maximize stiffness"))
                         {
-                            sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
-                                    cur_load.app_id.c_str());
-                            char tmp_buf[200];
-                            double x = std::atof(cur_load.x.c_str());
-                            double y = std::atof(cur_load.y.c_str());
-                            double z = std::atof(cur_load.z.c_str());
-                            double scale = std::atof(cur_load.scale.c_str());
-                            sprintf(tmp_buf, "{%lf,%lf,%lf}", x*scale, y*scale, z*scale);
-                            addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                            if(cur_load.type == "traction")
+                            {
+                                sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
+                                        cur_load.app_id.c_str());
+                                char tmp_buf[200];
+                                double x = std::atof(cur_load.x.c_str());
+                                double y = std::atof(cur_load.y.c_str());
+                                double z = std::atof(cur_load.z.c_str());
+                                sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
+                                addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                            }
                         }
                         else if(!cur_obj.type.compare("maximize heat conduction"))
                         {
-                            sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
-                                    cur_load.app_id.c_str());
-                            char tmp_buf[200];
-                            sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
-                            addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                            if(cur_load.type == "heat") // for "heat flux"
+                            {
+                                sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
+                                        cur_load.app_id.c_str());
+                                char tmp_buf[200];
+                                sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
+                                addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
+                            }
                         }
                     }
                 }
@@ -3805,6 +3810,7 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","material"}, tStringValue))
             {
                 Material new_material;
+                new_material.penalty_exponent = "3.0";
                 if(tStringValue == "")
                 {
                     std::cout << "ERROR:XMLGenerator:parseMaterials: No material id specified.\n";
@@ -4268,9 +4274,11 @@ bool XMLGenerator::generateAlbanyOperationsXML()
             tmp_att.set_value("1.0");
 
             // Cache State
+            /* For now Albany isn't handling this correctly.
             tmp_node = doc.append_child("Operation");
             addChild(tmp_node, "Function", "Cache State");
             addChild(tmp_node, "Name", "Cache State");
+            */
 
             // InternalEnergy
             tmp_node = doc.append_child("Operation");
@@ -5834,42 +5842,45 @@ bool XMLGenerator::generateInterfaceXML()
     // Cache State
     stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Cache State");
-    
+
     pugi::xml_node cur_parent = stage_node;
     if(m_InputData.objectives.size() > 1)
     {
         op_node = stage_node.append_child("Operation");
         cur_parent = op_node;
     }
-    
+
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         Objective cur_obj = m_InputData.objectives[i];
-        op_node = cur_parent.append_child("Operation");
-        addChild(op_node, "Name", "Cache State");
-        addChild(op_node, "PerformerName", cur_obj.performer_name);
-        if(cur_obj.multi_load_case == "true")
+        if(cur_obj.code_name.compare("albany")) // Albany doesn't handle Cache State correctly yet
         {
-            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+            op_node = cur_parent.append_child("Operation");
+            addChild(op_node, "Name", "Cache State");
+            addChild(op_node, "PerformerName", cur_obj.performer_name);
+            if(cur_obj.multi_load_case == "true")
             {
-                char buffer[100];
-                sprintf(buffer, "%lu", k);
-                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+                {
+                    char buffer[100];
+                    sprintf(buffer, "%lu", k);
+                    std::string cur_load_string = cur_obj.load_case_ids[k];
+                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                    {
+                        output_node = op_node.append_child("Output");
+                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                    }
+                }
+            }
+            else
+            {
                 for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                 {
                     output_node = op_node.append_child("Output");
-                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
-                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
                 }
-            }
-        }
-        else
-        {
-            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-            {
-                output_node = op_node.append_child("Output");
-                addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
-                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
             }
         }
     }
