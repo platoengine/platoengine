@@ -61,6 +61,7 @@
 #include "PlatoEngine_FilterFactory.hpp"
 #include "PlatoEngine_AbstractFilter.hpp"
 #include "Ioss_Region.h"                // for Region, NodeSetContainer, etc
+#include "Plato_TimersTree.hpp"
 
 /******************************************************************************/
 /*! \brief Get the layout.
@@ -1271,6 +1272,20 @@ void PlatoApp::exportDataMap(const Plato::data::layout_t & aDataLayout, std::vec
 void PlatoApp::initialize()
 /******************************************************************************/
 {
+    // conditionally begin timers
+    if(mAppfileData.size<Plato::InputData>("Timers"))
+    {
+        auto tTimersNode = mAppfileData.get<Plato::InputData>("Timers");
+        if(tTimersNode.size<std::string>("time") > 0)
+        {
+            const bool do_time = Plato::Get::Bool(tTimersNode, "time");
+            if(do_time)
+            {
+                mTimersTree = new Plato::TimersTree(mLocalComm);
+            }
+        }
+    }
+
     // Define system graph and mesh services (e.g. output) for problems with shared data fields (mesh-based fields)
     const int tDofsPerNode = 1;
     if(mLightMp != nullptr)
@@ -1552,8 +1567,10 @@ void PlatoApp::compute(const std::string & aOperationName)
 }
 
 /******************************************************************************/
-void PlatoApp::finalize(){}
+void PlatoApp::finalize()
 /******************************************************************************/
+{
+}
 
 /******************************************************************************/
 PlatoApp::~PlatoApp()
@@ -1593,6 +1610,12 @@ PlatoApp::~PlatoApp()
     {
         delete mFilter;
         mFilter = nullptr;
+    }
+    if(mTimersTree)
+    {
+        mTimersTree->print_results();
+        delete mTimersTree;
+        mTimersTree = nullptr;
     }
 }
 
@@ -1938,6 +1961,11 @@ void PlatoApp::PlatoMainOutput::operator()()
 void PlatoApp::Filter::operator()()
 /******************************************************************************/
 {
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
+    }
+
     auto infield = mPlatoApp->getNodeField(m_inputName);
     Real* input_field; infield->ExtractView(&input_field);
 
@@ -1949,9 +1977,18 @@ void PlatoApp::Filter::operator()()
     std::copy(input_field, input_field + length, output_field);
 
     if(m_transpose)
-      mFilter->apply_on_gradient(length, output_field);
+    {
+        mFilter->apply_on_gradient(length, output_field);
+    }
     else
-      mFilter->apply_on_field(length, output_field);
+    {
+        mFilter->apply_on_field(length, output_field);
+    }
+
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->end_partition();
+    }
 }
 
 /******************************************************************************/
@@ -2073,7 +2110,15 @@ Plato::AbstractFilter* PlatoApp::getFilter()
 {
     if(!mFilter)
     {
+        if(mTimersTree)
+        {
+            mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
+        }
         mFilter = Plato::build_filter(mAppfileData, mLocalComm, mLightMp->getMesh());
+        if(mTimersTree)
+        {
+            mTimersTree->end_partition();
+        }
     }
     return mFilter;
 }
@@ -2086,7 +2131,8 @@ PlatoApp::PlatoApp(MPI_Comm& aLocalComm) :
         mMeshServices(nullptr),
         mFilter(nullptr),
         mAppfileData("Appfile Data"),
-        mInputfileData("Inputfile Data")
+        mInputfileData("Inputfile Data"),
+        mTimersTree(nullptr)
 /******************************************************************************/
 {
 }
@@ -2099,7 +2145,8 @@ PlatoApp::PlatoApp(int aArgc, char **aArgv, MPI_Comm& aLocalComm) :
         mMeshServices(nullptr),
         mFilter(nullptr),
         mAppfileData("Appfile Data"),
-        mInputfileData("Inputfile Data")
+        mInputfileData("Inputfile Data"),
+        mTimersTree(nullptr)
 /******************************************************************************/
 {
     const char* input_char = getenv("PLATO_APP_FILE");
@@ -2143,7 +2190,7 @@ PlatoApp::PlatoApp(int aArgc, char **aArgv, MPI_Comm& aLocalComm) :
             else
             if( tPointArrayDims == 2 )
                 mMLS[tPointArrayName] = std::make_shared<MLSstruct>(MLSstruct({Plato::any(Plato::Geometry::MovingLeastSquares<2,double>(*tPointArrayInput)),2}));
-            else 
+            else
             if( tPointArrayDims == 3 )
                 mMLS[tPointArrayName] = std::make_shared<MLSstruct>(MLSstruct({Plato::any(Plato::Geometry::MovingLeastSquares<3,double>(*tPointArrayInput)),3}));
         }
@@ -2159,7 +2206,8 @@ PlatoApp::PlatoApp(const std::string &aPhysics_XML_File, const std::string &aApp
         mSysGraph(nullptr),
         mMeshServices(nullptr),
         mFilter(nullptr),
-        mAppfileData("Input Data")
+        mAppfileData("Input Data"),
+        mTimersTree(nullptr)
 /******************************************************************************/
 {
 

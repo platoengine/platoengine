@@ -43,6 +43,7 @@
 #include "lightmp.hpp"
 #include "Plato_Application.hpp"
 #include "Plato_Exceptions.hpp"
+#include "Plato_TimersTree.hpp"
 
 #ifdef GEOMETRY
   #include "Plato_MLS.hpp"
@@ -649,9 +650,12 @@ private:
     void createLocalData(LocalOp* op);
     void createLocalData(LocalArg arg);
 
-    std::map<std::string,VarIndex> mElementFieldMap;
-    std::map<std::string,DistributedVector*> mNodeFieldMap;
-    std::map<std::string,std::vector<double>*> mValueMap;
-    std::map<std::string,LocalOp*> mOperationMap;
+    std::map<std::string, VarIndex> mElementFieldMap;
+    std::map<std::string, DistributedVector*> mNodeFieldMap;
+    std::map<std::string, std::vector<double>*> mValueMap;
+    std::map<std::string, LocalOp*> mOperationMap;
+
+    Plato::TimersTree* mTimersTree;
+
 };
 
