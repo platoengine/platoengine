@@ -41,6 +41,7 @@
 */
 
 #include <sstream>
+#include <fstream>
 
 #ifdef ENABLE_ISO
 #include "STKExtract.hpp"
@@ -1172,6 +1173,22 @@ PlatoApp::NormalizeObjectiveGradient::NormalizeObjectiveGradient(PlatoApp* aPlat
 }
 
 /******************************************************************************/
+PlatoApp::WriteGlobalValue::WriteGlobalValue(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
+        LocalOp(aPlatoApp)
+/******************************************************************************/
+{
+    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
+    if( aNode.size<Plato::InputData>("Input") > 1 )
+    {
+        throw ParsingException("PlatoApp::WriteGlobalValue: more than one Input specified.");
+    }
+    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
+
+    m_size = Plato::Get::Int(aNode,"Size");
+    m_filename = Plato::Get::String(aNode, "Filename");
+}
+
+/******************************************************************************/
 PlatoApp::ReciprocateObjectiveValue::ReciprocateObjectiveValue(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
         LocalOp(aPlatoApp)
 /******************************************************************************/
@@ -1342,6 +1359,14 @@ void PlatoApp::initialize()
             if(tStrFunction == tFunctions.back())
             {
                 mOperationMap[tStrName] = new NormalizeObjectiveGradient(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("WriteGlobalValue");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new WriteGlobalValue(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1682,6 +1707,26 @@ void PlatoApp::NormalizeObjectiveGradient::operator()()
     }
 }
 
+/******************************************************************************/
+void PlatoApp::WriteGlobalValue::operator()() 
+/******************************************************************************/
+{
+    int my_rank = 0;
+    MPI_Comm_rank(mPlatoApp->mLocalComm, &my_rank);
+    if(my_rank == 0)
+    {
+        fstream outfile;
+        outfile.open(m_filename, std::ios::app);
+        std::vector<double>& fromData = *(mPlatoApp->getValue(m_inputName));
+
+        for(unsigned int i=0; i<fromData.size(); i++)
+        {
+          outfile << std::setprecision(8) << fromData[i] << " ";
+        }
+        outfile << std::endl;
+        outfile.close();
+    }
+}
 
 /******************************************************************************/
 void PlatoApp::ReciprocateObjectiveValue::operator()() 
@@ -1824,6 +1869,13 @@ void PlatoApp::NormalizeObjectiveGradient::getArguments(std::vector<LocalArg> & 
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_refValName,/*length=*/1});
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_outputName});
     aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_inputName});
+}
+
+/******************************************************************************/
+void PlatoApp::WriteGlobalValue::getArguments(std::vector<LocalArg> & aLocalArgs)
+/******************************************************************************/
+{
+    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_inputName, m_size});
 }
 
 /******************************************************************************/

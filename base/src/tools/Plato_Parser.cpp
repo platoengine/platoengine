@@ -453,30 +453,27 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
         }
     }
 
-    if( tArrays.size() != 0 )
+
+    tMathParser->addArrays(tArrays);
+
+    int numMods;
+    do
     {
+        // find 'For' elements and expand them.  The for_each member function in 
+        // the ForWalker class is called for each node in the tree:
+        ForWalker tForWalker(tArrays, numMods);
+        doc->traverse(tForWalker);
+    } while ( numMods != 0 );
 
-        tMathParser->addArrays(tArrays);
+    PugiParser::deleteNodesByName(*doc, "Delete");
 
-        int numMods;
-        do
-        {
-            // find 'For' elements and expand them.  The for_each member function in 
-            // the ForWalker class is called for each node in the tree:
-            ForWalker tForWalker(tArrays, numMods);
-            doc->traverse(tForWalker);
-        } while ( numMods != 0 );
-
-        PugiParser::deleteNodesByName(*doc, "Delete");
-
-        do
-        {
-            // find arithmetic expressions and evaluate them.  The for_each member function in 
-            // the MathWalker class is called for each node in the tree:
-            MathWalker tMathWalker(tMathParser);
-            doc->traverse(tMathWalker);
-        } while ( numMods != 0 );
-    }
+    do
+    {
+        // find arithmetic expressions and evaluate them.  The for_each member function in 
+        // the MathWalker class is called for each node in the tree:
+        MathWalker tMathWalker(tMathParser);
+        doc->traverse(tMathWalker);
+    } while ( numMods != 0 );
 
 
 //    std::cout << "Document: \n";

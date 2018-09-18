@@ -228,6 +228,19 @@ private:
         PlatoApp* mPlatoApp;
     };
 
+    class WriteGlobalValue : public LocalOp
+    {
+    public:
+        WriteGlobalValue(PlatoApp* aPlatoApp, Plato::InputData& aNode);
+        void operator()();
+        void getArguments(std::vector<LocalArg>& aLocalArgs);
+      private:
+        std::string m_inputName;
+        std::string m_filename;
+        int m_size;
+    };
+    friend class WriteGlobalValue;
+
     class ReciprocateObjectiveValue : public LocalOp
     {
     public:
