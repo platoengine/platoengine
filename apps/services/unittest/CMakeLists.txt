@@ -83,6 +83,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_ActivationFunction.cpp
 							 PSL_Test_AbstractAuthority.cpp
 							 PSL_Test_Point.cpp
+							 Plato_Test_TimersTree.cpp
 							 )
 
 IF( ENABLE_ROL )

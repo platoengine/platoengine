@@ -40,33 +40,56 @@
 //@HEADER
 */
 
-/*
- * Plato_FreeFunctions.hpp
- *
- */
-
 #pragma once
 
 #include <cstddef>
+#include <mpi.h>
 #include <vector>
+#include <utility>
 
 namespace Plato
 {
 
-size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
-                                   const size_t& num_processors_in_group,
-                                   const size_t& atmost_processor_count);
-
-template<typename T>
-T free_sum(const std::vector<T>& in_)
+namespace timer_partition_t
 {
-    T result = T(0.);
-    const size_t length = in_.size();
-    for(size_t i = 0u; i < length; i++)
-    {
-        result += in_[i];
-    }
-    return result;
+enum timer_partition_t
+{
+    optimizer,
+    filter,
+    mesh_services,
+    file_input_output,
+    physics_compute,
+    TOTAL_NUM_KEYS
+};
 }
 
-} // end namespace Plato
+class TimersTree
+{
+public:
+    TimersTree(const MPI_Comm& aLocalComm,
+               const int num_keys = timer_partition_t::timer_partition_t::TOTAL_NUM_KEYS);
+    ~TimersTree();
+
+    bool begin_partition(const int partition);
+    bool end_partition();
+
+    bool print_results();
+
+    void unit_testing_incrament();
+    std::vector<double> unit_testing_get_timers() const;
+    std::vector<size_t> unit_testing_get_entrances() const;
+
+private:
+    const char* get_string_from_partition_enum(const int partition) const;
+
+    MPI_Comm mLocalComm;
+    int m_num_keys;
+    std::vector<double> m_accumulated_times_by_key;
+    std::vector<size_t> m_num_entrances_by_key;
+    std::vector<std::pair<int,double> > m_stack_of_keys_and_times;
+    std::vector<bool> m_consider_partition;
+
+    bool m_just_incrementing;
+};
+
+}
