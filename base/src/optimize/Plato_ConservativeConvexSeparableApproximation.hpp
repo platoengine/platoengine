@@ -57,6 +57,9 @@ class ConservativeConvexSeparableAppxDataMng;
 template<typename ScalarType, typename OrdinalType>
 class ConservativeConvexSeparableAppxStageMng;
 
+/******************************************************************************//**
+ * @brief CCSA algorithm stopping criteria flags
+**********************************************************************************/
 struct ccsa
 {
     enum stop_t
@@ -71,6 +74,62 @@ struct ccsa
     };
 };
 
+/******************************************************************************//**
+ * @brief Output a brief sentence explaining why the CCSA optimizer stopped.
+ * @param [in] aStopCriterion stopping criterion flag
+ * @param [in,out] aOutput string with brief description
+**********************************************************************************/
+inline void get_ccsa_stop_criterion(const Plato::ccsa::stop_t & aStopCriterion, std::string & aOutput)
+{
+    aOutput.clear();
+    switch(aStopCriterion)
+    {
+        case Plato::ccsa::stop_t::STATIONARITY_TOLERANCE:
+        {
+            aOutput = "\n\n****** Optimization stopping due to stationary measure being met. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::KKT_CONDITIONS_TOLERANCE:
+        {
+            aOutput = "\n\n****** Optimization stopping due to KKT tolerance being met. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::OBJECTIVE_STAGNATION:
+        {
+            aOutput = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::CONTROL_STAGNATION:
+        {
+            aOutput = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::MAX_NUMBER_ITERATIONS:
+        {
+            aOutput = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::OPTIMALITY_AND_FEASIBILITY_MET:
+        {
+            aOutput = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+            break;
+        }
+        case Plato::ccsa::stop_t::NOT_CONVERGED:
+        {
+            aOutput = "\n\n****** Optimization algorithm did not converge. ******\n\n";
+            break;
+        }
+        default:
+        {
+            aOutput = "\n\n****** ERROR: Optimization algorithm stopping due to undefined behavior. ******\n\n";
+            break;
+        }
+    }
+}
+
+/******************************************************************************//**
+ * @brief Abstract interface for Conservative Convex Separable Approximation (CCSA) algorithm
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ConservativeConvexSeparableApproximation
 {

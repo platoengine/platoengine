@@ -13,7 +13,7 @@
 //
 // 1. Redistributions of source code must retain the above copyright
 // notice, this list of conditions and the following disclaimer.
-//
+//S
 // 2. Redistributions in binary form must reproduce the above copyright
 // notice, this list of conditions and the following disclaimer in the
 // documentation and/or other materials provided with the distribution.
@@ -48,6 +48,7 @@
 
 #include "gtest/gtest.h"
 
+#include "Plato_Types.hpp"
 #include "Plato_OptimizersIO.hpp"
 
 namespace PlatoTest
@@ -420,6 +421,111 @@ TEST(PlatoTest, PrintDiagnosticsKSBC)
     tGold << "011.000000e+004.565600e-032.340000e-0201.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+308";
     tGold << "132.987360e-013.456560e-012.340000e-01224.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-01";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, TestStoppingCriterionOutputAlgorithm)
+{
+    std::string tDescription;
+    Plato::algorithm::stop_t tFlag = Plato::algorithm::NOT_CONVERGED;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    std::string tGold("\n\n****** Optimization algorithm did not converge. ******\n\n");
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_ACTUAL_REDUCTION;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to NaN actual reduction. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_STATIONARITY_MEASURE;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to NaN stationary measure. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_OBJECTIVE_STAGNATION;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to NaN objective stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_CONTROL_STAGNATION;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to NaN control stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_OBJECTIVE_GRADIENT;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to NaN norm of objective gradient vector. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::SMALL_PENALTY_PARAMETER;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to small penalty parameter in augmented Lagrangian being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::OPTIMALITY_AND_FEASIBILITY;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NORM_STEP;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to norm of trial step tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_NORM_GRADIENT;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to NaN norm of gradient vector. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NaN_NORM_TRIAL_STEP;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to NaN norm of trial step vector. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::MAX_NUMBER_ITERATIONS;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::CONTROL_STAGNATION;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::SMALL_TRUST_REGION_RADIUS;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to small trust region radius. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::OBJECTIVE_STAGNATION;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::NORM_GRADIENT;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to norm of gradient tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::STATIONARITY_MEASURE;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to stationary measure being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::ACTUAL_REDUCTION_TOLERANCE;
+    Plato::get_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to actual reduction tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
 } // namespace PlatoTest

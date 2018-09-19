@@ -309,7 +309,7 @@ private:
         aAlgorithm.setStationarityTolerance(tOuterStationarityTolerance);
         // Using single tolerance for both control and objective right now.
         aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerance);
-        aAlgorithm.setStagnationTolerance(tOuterControlStagnationTolerance);
+        aAlgorithm.setControlStagnationTolerance(tOuterControlStagnationTolerance);
 
         // Set default parameters
         Plato::DefaultParametersGCMMA<ScalarType> tDefaultParametersGCMMA;

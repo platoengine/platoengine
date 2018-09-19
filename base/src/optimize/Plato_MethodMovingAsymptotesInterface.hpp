@@ -293,7 +293,7 @@ private:
         ScalarType tStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
         aAlgorithm.setStationarityTolerance(tStationarityTolerance);
         ScalarType tControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
-        aAlgorithm.setStagnationTolerance(tControlStagnationTolerance);
+        aAlgorithm.setControlStagnationTolerance(tControlStagnationTolerance);
         ScalarType tObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
         aAlgorithm.setObjectiveStagnationTolerance(tObjectiveStagnationTolerance);
         ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();

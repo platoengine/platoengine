@@ -264,6 +264,7 @@ private:
         Plato::OptimalityCriteria<ScalarType, OrdinalType> tAlgorithm(aDataMng, tStageMng, tSubProblem);
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         tAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
     }
 

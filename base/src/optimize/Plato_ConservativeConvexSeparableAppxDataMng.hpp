@@ -75,9 +75,15 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class ConservativeConvexSeparableAppxDataMng
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param aDataFactory vector and multi-vector factory
+    **********************************************************************************/
     explicit ConservativeConvexSeparableAppxDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory) :
             mIsInitialGuessSet(false),
-            mStagnationMeasure(std::numeric_limits<ScalarType>::max()),
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
+            mControlStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mFeasibilityMeasure(std::numeric_limits<ScalarType>::max()),
             mStationarityMeasure(std::numeric_limits<ScalarType>::max()),
             mNormInactiveGradient(std::numeric_limits<ScalarType>::max()),
@@ -105,6 +111,7 @@ public:
             mCurrentConstraintValues(aDataFactory->dual().create()),
             mCurrentObjectiveGradient(aDataFactory->control().create()),
             mConstraintGlobalizationFactors(aDataFactory->dual().create()),
+            mCommWrapper(aDataFactory->getCommWrapper().create()),
             mBounds(nullptr),
             mDualReductions(aDataFactory->getDualReductionOperations().create()),
             mControlReductions(aDataFactory->getControlReductionOperations().create()),
@@ -115,18 +122,75 @@ public:
         this->initializeBounds();
         this->initializeElementWiseFunctions();
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~ConservativeConvexSeparableAppxDataMng()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Check if initial guess is set
+     * @return flag (true/false) specifying if initial control guess has been set
+    **********************************************************************************/
     bool isInitialGuessSet() const
     {
         return (mIsInitialGuessSet);
     }
 
+    /******************************************************************************//**
+     * @brief Return memory space (e.g. HOST or DEVICE)
+     * @return memory space type
+    **********************************************************************************/
     Plato::MemorySpace::type_t getMemorySpace() const
     {
         return (mMemorySpace);
+    }
+
+    /******************************************************************************//**
+     * @brief Return a const reference to the distributed memory communication wrapper
+     * @return const reference to the distributed memory communication wrapper
+    **********************************************************************************/
+    const Plato::CommWrapper& getCommWrapper() const
+    {
+        return (mCommWrapper.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Get number of objective function evaluations
+     * @return number of objective function evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveFunctionEvaluations() const
+    {
+        return (mNumObjFuncEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective function evaluations
+     * @param [in] aInput number of objective function evaluations
+    **********************************************************************************/
+    void setNumObjectiveFunctionEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjFuncEval = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Get number of objective gradient evaluations
+     * @return number of objective gradient evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveGradientEvaluations() const
+    {
+        return (mNumObjGradEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective gradient evaluations
+     * @param [in] aInput number of objective gradient evaluations
+    **********************************************************************************/
+    void setNumObjectiveGradientEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjGradEval = aInput;
     }
 
     // NOTE: NUMBER OF CONTROL VECTORS
@@ -576,12 +640,21 @@ public:
         Plato::update(1., aInput, 0., *mControlUpperBounds);
     }
 
-    // NOTE: CURRENT CONSTRAINT VALUES
+    /******************************************************************************//**
+     * @brief Return multi-vector of constraint values
+     * @return multi-vector of constraint values
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentConstraintValues() const
     {
         assert(mCurrentConstraintValues.get() != nullptr);
         return (mCurrentConstraintValues.operator *());
     }
+
+    /******************************************************************************//**
+     * @brief Return vector of constraint values
+     * @param [in] aVectorIndex dual vector index (default = 1)
+     * @return vector of constraint values
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValues(const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentConstraintValues.get() != nullptr);
@@ -589,11 +662,36 @@ public:
         assert(aVectorIndex < mCurrentConstraintValues->getNumVectors());
         return (mCurrentConstraintValues->operator [](aVectorIndex));
     }
+
+    /******************************************************************************//**
+     * @brief Return constraint value
+     * @param [in] aVectorIndex dual vector index
+     * @param [in] aConstraintIndex constraint index
+     * @return constraint value
+    **********************************************************************************/
+    ScalarType getCurrentConstraintValue(const OrdinalType & aVectorIndex, const OrdinalType & aConstraintIndex) const
+    {
+        assert(mCurrentConstraintValues.get() != nullptr);
+        assert(aVectorIndex >= static_cast<OrdinalType>(0));
+        assert(aVectorIndex < mCurrentConstraintValues->getNumVectors());
+        return ((*mCurrentConstraintValues)[aVectorIndex][aConstraintIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Set current constraint values
+     * @param [in] aInput constraint values
+    **********************************************************************************/
     void setCurrentConstraintValues(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() == mCurrentConstraintValues->getNumVectors());
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentConstraintValues);
     }
+
+    /******************************************************************************//**
+     * @brief Set current constraint values
+     * @param [in] aVectorIndex dual vector index
+     * @param [in] aInput constraint values
+    **********************************************************************************/
     void setCurrentConstraintValues(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentConstraintValues.get() != nullptr);
@@ -602,7 +700,10 @@ public:
         mCurrentConstraintValues->operator [](aVectorIndex).update(1., aInput, 0.);
     }
 
-    // NOTE: CURRENT CONSTRAINT GRADIENTS
+    /******************************************************************************//**
+     * @brief Return list with constraint gradients
+     * @return constraint gradients
+    **********************************************************************************/
     const Plato::MultiVectorList<ScalarType, OrdinalType> & getCurrentConstraintGradients() const
     {
         assert(mCurrentConstraintGradients.get() != nullptr);
@@ -672,8 +773,8 @@ public:
         mCurrentConstraintGradients->operator()(aConstraintIndex, aVectorIndex).update(tAlpha, aInput, tBeta);
     }
 
-    // NOTE: STAGNATION MEASURE CRITERION
-    void computeStagnationMeasure()
+    // NOTE: Control STAGNATION MEASURE CRITERION
+    void computeControlStagnationMeasure()
     {
         OrdinalType tNumVectors = mCurrentControl->getNumVectors();
         std::vector<ScalarType> storage(tNumVectors, std::numeric_limits<ScalarType>::min());
@@ -686,11 +787,11 @@ public:
             mControlWorkVectorOne->modulus();
             storage[tIndex] = mControlReductions->max(*mControlWorkVectorOne);
         }
-        mStagnationMeasure = *std::max_element(storage.begin(), storage.end());
+        mControlStagnationMeasure = *std::max_element(storage.begin(), storage.end());
     }
-    ScalarType getStagnationMeasure() const
+    ScalarType getControlStagnationMeasure() const
     {
-        return (mStagnationMeasure);
+        return (mControlStagnationMeasure);
     }
 
     // NOTE: NORM OF CURRENT PROJECTED GRADIENT
@@ -1019,8 +1120,11 @@ private:
 private:
     bool mIsInitialGuessSet;
 
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
+
     ScalarType mGlobalNumControls;
-    ScalarType mStagnationMeasure;
+    ScalarType mControlStagnationMeasure;
     ScalarType mFeasibilityMeasure;
     ScalarType mStationarityMeasure;
     ScalarType mNormInactiveGradient;
@@ -1053,6 +1157,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentObjectiveGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mConstraintGlobalizationFactors;
 
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
     std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductions;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductions;

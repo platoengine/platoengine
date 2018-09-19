@@ -65,22 +65,41 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class OptimalityCriteriaStageMng : public Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory data factory used to allocate Plato vectors and multi-vectors
+    **********************************************************************************/
     explicit OptimalityCriteriaStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory) :
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
             mWorkMyGradient(aDataFactory->control().create()),
             mWorkTotalGradient(aDataFactory->control().create()),
             mObjective(),
             mConstraintList()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory data factory used to allocate Plato vectors and multi-vectors
+     * @param [in] aObjective interface to objective function
+     * @param [in] aInequality interface to inequality constraints
+    **********************************************************************************/
     explicit OptimalityCriteriaStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                                         const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
                                         const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aInequality) :
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
             mWorkMyGradient(aDataFactory->control().create()),
             mWorkTotalGradient(aDataFactory->control().create()),
             mObjective(aObjective),
             mConstraintList(aInequality)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~OptimalityCriteriaStageMng()
     {
     }
@@ -98,6 +117,7 @@ public:
             (*mConstraintList)[tConstraintIndex].cacheData();
         }
     }
+
     //! Directive to update optimization specific data once the trial control is accepted.
     void update(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -105,7 +125,10 @@ public:
         assert(mObjective.get() != nullptr);
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();
         ScalarType tObjectiveValue = mObjective->value(tControl);
+        mNumObjFuncEval++;
+
         aDataMng.setCurrentObjectiveValue(tObjectiveValue);
+        aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
 
         // Evaluate inequality constraints
         assert(mConstraintList.get() != nullptr);
@@ -135,6 +158,9 @@ public:
     }
 
 private:
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
+
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mWorkMyGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mWorkTotalGradient;
 

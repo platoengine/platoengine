@@ -73,12 +73,18 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class PrimalProblemStageMng : public Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory vector and multi-vector factory
+     * @param [in] aObjective objective function interface
+     * @param [in] aConstraints inequality constraint interface
+    **********************************************************************************/
     PrimalProblemStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                           const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
                           const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints) :
-            mNumObjectiveFunctionEvaluations(0),
-            mNumObjectiveGradientEvaluations(0),
-            mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
+            mNumObjFunEval(0),
+            mNumObjGradEval(0),
+            mNumConstraintEval(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mObjective(aObjective),
             mConstraints(aConstraints),
@@ -89,25 +95,50 @@ public:
         mObjectiveGradient = std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(mObjective);
         mConstraintGradients = std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(mConstraints);
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~PrimalProblemStageMng()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return number of objective function evaluations
+     * @return number of objective function evaluations
+    **********************************************************************************/
     OrdinalType getNumObjectiveFunctionEvaluations() const
     {
-        return (mNumObjectiveFunctionEvaluations);
+        return (mNumObjFunEval);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of objective gradient evaluations
+     * @return number of objective gradient evaluations
+    **********************************************************************************/
     OrdinalType getNumObjectiveGradientEvaluations() const
     {
-        return (mNumObjectiveGradientEvaluations);
+        return (mNumObjGradEval);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of constraint evaluations
+     * @param [in] aIndex constraint index
+     * @return number of constraint evaluations
+    **********************************************************************************/
     OrdinalType getNumConstraintEvaluations(const OrdinalType & aIndex) const
     {
-        assert(mNumConstraintEvaluations.empty() == false);
+        assert(mNumConstraintEval.empty() == false);
         assert(aIndex >= static_cast<OrdinalType>(0));
-        assert(aIndex < mNumConstraintEvaluations.size());
-        return (mNumConstraintEvaluations[aIndex]);
+        assert(aIndex < mNumConstraintEval.size());
+        return (mNumConstraintEval[aIndex]);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of constraint gradient evaluations
+     * @param [in] aIndex constraint index
+     * @return number of constraint gradient evaluations
+    **********************************************************************************/
     OrdinalType getNumConstraintGradientEvaluations(const OrdinalType & aIndex) const
     {
         assert(mNumConstraintGradientEvaluations.empty() == false);
@@ -116,16 +147,27 @@ public:
         return (mNumConstraintGradientEvaluations[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Set method used to compute objective function gradient (e.g. analytical, finite difference).
+     * @param [in] aInput method used to compute the objective gradient
+    **********************************************************************************/
     void setObjectiveGradient(const Plato::GradientOperator<ScalarType, OrdinalType> & aInput)
     {
         mObjectiveGradient = aInput.create();
     }
+
+    /******************************************************************************//**
+     * @brief Set method used to compute constraint gradients (e.g. analytical, finite difference).
+     * @param [in] aInput method used to compute the constraint gradients
+    **********************************************************************************/
     void setConstraintGradients(const Plato::GradientOperatorList<ScalarType, OrdinalType> & aInput)
     {
         mConstraintGradients = aInput.create();
     }
 
-    //! Directive to cache any criterion specific data once the trial control is accepted.
+    /******************************************************************************//**
+     * @brief Cache any criteria specific data once the trial control is accepted.
+    **********************************************************************************/
     void cacheData()
     {
         // Communicate user that criteria specific data can be cached since trial control was accepted
@@ -137,8 +179,16 @@ public:
             (*mConstraints)[tConstraintIndex].cacheData();
         }
     }
-    void update(const Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
+
+    /******************************************************************************//**
+     * @brief Update primal data, e.g. objective and constraint values plus gradients.
+     * @param aDataMng CCSA algorithm data manager
+    **********************************************************************************/
+    void update(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFunEval);
+        aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
+
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
         mStateData->setCurrentObjectiveGradient(aDataMng.getCurrentObjectiveGradient());
@@ -146,7 +196,7 @@ public:
 
         mObjectiveGradient->update(mStateData.operator*());
 
-        const OrdinalType tNumConstraints = mConstraintGradients->size();
+        const OrdinalType tNumConstraints = aDataMng.getNumConstraints();
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
         {
             const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradient =
@@ -155,23 +205,41 @@ public:
             mConstraintGradients->operator[](tConstraintIndex).update(mStateData.operator*());
         }
     }
+
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+     * @param [in] aControl current controls (i.e. optimization variables)
+     * @return objective function value
+    **********************************************************************************/
     ScalarType evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mObjective.get() != nullptr);
 
         ScalarType tObjectiveFunctionValue = mObjective->value(aControl);
-        mNumObjectiveFunctionEvaluations++;
+        mNumObjFunEval++;
 
         return (tObjectiveFunctionValue);
     }
+
+    /******************************************************************************//**
+     * @brief Compute objective function gradient
+     * @param [in] aControl current controls (i.e. optimization variables)
+     * @param [in,out] aOutput gradient
+    **********************************************************************************/
     void computeGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                          Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
         assert(mObjectiveGradient.get() != nullptr);
         Plato::fill(static_cast<ScalarType>(0), aOutput);
         mObjectiveGradient->compute(aControl, aOutput);
-        mNumObjectiveGradientEvaluations++;
+        mNumObjGradEval++;
     }
+
+    /******************************************************************************//**
+     * @brief Evaluate each constraint defined for the optimization problem
+     * @param [in] aControl current controls (i.e. optimization variables)
+     * @param [in,out] aOutput constraint values
+    **********************************************************************************/
     void evaluateConstraints(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                              Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
@@ -190,11 +258,17 @@ public:
                 assert(mConstraints->ptr(tConstraintIndex).get() != nullptr);
 
                 tMyOutput[tConstraintIndex] = mConstraints->operator[](tConstraintIndex).value(aControl);
-                mNumConstraintEvaluations[tConstraintIndex] =
-                        mNumConstraintEvaluations[tConstraintIndex] + static_cast<OrdinalType>(1);
+                mNumConstraintEval[tConstraintIndex] =
+                        mNumConstraintEval[tConstraintIndex] + static_cast<OrdinalType>(1);
             }
         }
     }
+
+    /******************************************************************************//**
+     * @brief Evaluate gradient for each constraint defined for the optimization problem
+     * @param [in] aControl current controls (i.e. optimization variables)
+     * @param [in,out] aOutput constraint gradients
+    **********************************************************************************/
     void computeConstraintGradients(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                     Plato::MultiVectorList<ScalarType, OrdinalType> & aOutput)
     {
@@ -215,18 +289,17 @@ public:
     }
 
 private:
-    OrdinalType mNumObjectiveFunctionEvaluations;
-    OrdinalType mNumObjectiveGradientEvaluations;
+    OrdinalType mNumObjFunEval; /*!< number of objective function evaluations */
+    OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
 
-    std::vector<OrdinalType> mNumConstraintEvaluations;
-    std::vector<OrdinalType> mNumConstraintGradientEvaluations;
+    std::vector<OrdinalType> mNumConstraintEval; /*!< number of constraint evaluations */
+    std::vector<OrdinalType> mNumConstraintGradientEvaluations; /*!< number of constraint gradient evaluations */
 
-    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective;
-    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
-    std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> mObjectiveGradient;
-    std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> mConstraintGradients;
-
-    std::shared_ptr<Plato::StateData<ScalarType, OrdinalType>> mStateData;
+    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective; /*!< interface to objective function */
+    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints; /*!< interface to constraints */
+    std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> mObjectiveGradient; /*!< interface to objective gradient computation approach */
+    std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> mConstraintGradients; /*!< interface to constraint gradient computation approach */
+    std::shared_ptr<Plato::StateData<ScalarType, OrdinalType>> mStateData; /*!< primal data structure, contains current optimization state data */
 
 private:
     PrimalProblemStageMng(const Plato::PrimalProblemStageMng<ScalarType, OrdinalType> & aRhs);

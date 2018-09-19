@@ -69,20 +69,7 @@ namespace error
  * @param [in] aOutputFile output file
  *
 **********************************************************************************/
-void is_file_open(const std::ofstream& aOutputFile)
-{
-    try
-    {
-        if(aOutputFile.is_open() == false)
-        {
-            throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
-        }
-    }
-    catch(const std::invalid_argument & tError)
-    {
-        throw tError;
-    }
-}
+void is_file_open(const std::ofstream& aOutputFile);
 
 /******************************************************************************//**
  *
@@ -174,6 +161,17 @@ struct OutputDataKelleySachs
     std::vector<ScalarType> mConstraints;  /*!< residual value for each constraint */
 };
 // struct OutputDataKelleySachs
+
+// *********************************************** END OUTPUT DATA STRUCT ***********************************************
+
+/******************************************************************************//**
+ *
+ * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
+ * @param [in,out] aOutputFile output file
+ * @param [in] aPrint flag use to enable/disable output (default = disable)
+ *
+**********************************************************************************/
+void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint = false);
 
 /******************************************************************************//**
  *
@@ -392,43 +390,6 @@ void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aD
     }
 
     aOutputFile << aData.mControlStagnationMeasure << std::setw(15) << aData.mObjectiveStagnationMeasure << "\n"
-            << std::flush;
-}
-
-/******************************************************************************//**
- *
- * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
- * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
- *
-**********************************************************************************/
-void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint = false)
-{
-    try
-    {
-        Plato::error::is_file_open(aOutputFile);
-    }
-    catch(const std::invalid_argument& tErrorMsg)
-    {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
-    }
-
-    // PRIMARY DIAGNOSTICS  (OUTER-LOOP)
-    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
-            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(12);
-
-    // TRUST REGION PROBLEM DATA (INNER-LOOP)
-    aOutputFile << "TR-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed" << std::setw(17) << "TR-Ratio"
-            << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15) << "abs(dF)" << "\n"
             << std::flush;
 }
 

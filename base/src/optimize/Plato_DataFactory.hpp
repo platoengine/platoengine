@@ -51,6 +51,7 @@
 
 #include <cassert>
 
+#include "Plato_CommWrapper.hpp"
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_StandardVectorReductionOperations.hpp"
 
@@ -61,7 +62,10 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class DataFactory
 {
 public:
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aMemorySpace memory space (HOST OR DEVICE). Default = HOST
+    **********************************************************************************/
     DataFactory(Plato::MemorySpace::type_t aMemorySpace = Plato::MemorySpace::HOST) :
             mNumDuals(1),
             mNumStates(1),
@@ -69,6 +73,7 @@ public:
             mNumLowerBounds(0),
             mNumUpperBounds(0),
             mMemorySpace(aMemorySpace),
+            mCommWrapper(std::make_shared<Plato::CommWrapper>()),
             mDual(),
             mState(),
             mControl(),
@@ -77,52 +82,83 @@ public:
             mDualReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
             mStateReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
             mControlReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
-    /********************************************************************************/
     {
+        mCommWrapper->useDefaultComm();
         this->allocateDual(mNumDuals);
         this->allocateState(mNumStates);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~DataFactory()
-    /********************************************************************************/
     {
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Return number of controls
+     * @return number of controls
+    **********************************************************************************/
     OrdinalType getNumControls() const
-    /********************************************************************************/
     {
         assert(mNumControls > static_cast<ScalarType>(0));
         return (mNumControls);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Return number of control lower bound entries
+     * @return number of control lower bound entries
+    **********************************************************************************/
     OrdinalType getNumLowerBounds() const
-    /********************************************************************************/
     {
         assert(mNumLowerBounds > static_cast<ScalarType>(0));
         return (mNumLowerBounds);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Return number of control upper bound entries
+     * @return number of control upper bound entries
+    **********************************************************************************/
     OrdinalType getNumUpperBounds() const
-    /********************************************************************************/
     {
         assert(mNumUpperBounds > static_cast<ScalarType>(0));
         return (mNumUpperBounds);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Return memory space flag
+     * @return memory space flag
+    **********************************************************************************/
     Plato::MemorySpace::type_t getMemorySpace() const
-    /********************************************************************************/
     {
         return (mMemorySpace);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Set distributed memory communication wrapper
+     * @param [in] aInput Plato communication wrapper
+    **********************************************************************************/
+    void setCommWrapper(const Plato::CommWrapper & aInput)
+    {
+        mCommWrapper.reset();
+        mCommWrapper = aInput.create();
+    }
+
+    /******************************************************************************//**
+     * @brief Return a const reference to the distributed memory communication wrapper
+     * @return const reference to the distributed memory communication wrapper
+    **********************************************************************************/
+    const Plato::CommWrapper& getCommWrapper() const
+    {
+        return (mCommWrapper.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Allocate a Plato multi-vector of dual variables
+     * @param [in] aNumElements number of elements in a given vector
+     * @param [in] aNumVectors number of vectors (default = 1)
+    **********************************************************************************/
     void allocateDual(const OrdinalType & aNumElements, OrdinalType aNumVectors = 1)
-    /********************************************************************************/
     {
         assert(aNumElements > static_cast<OrdinalType>(0));
         mNumDuals = aNumElements;
@@ -130,9 +166,11 @@ public:
         mDual = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, tVector);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Allocate dual multi-vector
+     * @param [in] aInput Plato multi-vector
+    **********************************************************************************/
     void allocateDual(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
-    /********************************************************************************/
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
         const OrdinalType tVectorIndex = 0;
@@ -141,9 +179,11 @@ public:
         mDual = aInput.create();
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Allocate dual multi-vector
+     * @param [in] aInput Plato standard multi-vector
+    **********************************************************************************/
     void allocateDual(const Plato::Vector<ScalarType, OrdinalType> & aInput, OrdinalType aNumVectors = 1)
-    /********************************************************************************/
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
         mNumDuals = aInput.size();
@@ -339,6 +379,7 @@ private:
 
     Plato::MemorySpace::type_t mMemorySpace;
 
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDual;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mState;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControl;

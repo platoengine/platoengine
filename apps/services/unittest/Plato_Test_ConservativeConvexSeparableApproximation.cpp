@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_ConservativeConvexSeparableApproximationTest.cpp
+ * Plato_Test_ConservativeConvexSeparableApproximation.cpp
  *
  *  Created on: Jun 14, 2017
  */
@@ -355,9 +355,9 @@ TEST(PlatoTest, ConservativeConvexSeparableAppxDataMng)
     tScalarValue = 4;
     Plato::fill(tScalarValue, tControlMultiVector);
     tDataMng.setPreviousControl(tControlMultiVector);
-    tDataMng.computeStagnationMeasure();
+    tDataMng.computeControlStagnationMeasure();
     tScalarValue = 3;
-    EXPECT_NEAR(tScalarValue, tDataMng.getStagnationMeasure(), tTolerance);
+    EXPECT_NEAR(tScalarValue, tDataMng.getControlStagnationMeasure(), tTolerance);
 
     // ********* TEST COMPUTE INACTIVE VECTOR NORM *********
     tScalarValue = 1;
@@ -599,6 +599,51 @@ TEST(PlatoTest, ComputeKarushKuhnTuckerConditionsInexactness)
     const double tTolerance = 1e-6;
     tScalarValue = tDataMng.getKarushKuhnTuckerConditionsInexactness();
     EXPECT_NEAR(tScalarValue, tGold, tTolerance);
+}
+
+TEST(PlatoTest, TestStoppingCriterionOutputCCSA)
+{
+    std::string tDescription;
+    Plato::ccsa::stop_t tFlag = Plato::ccsa::NOT_CONVERGED;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    std::string tGold("\n\n****** Optimization algorithm did not converge. ******\n\n");
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::OPTIMALITY_AND_FEASIBILITY_MET;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::MAX_NUMBER_ITERATIONS;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::CONTROL_STAGNATION;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::OBJECTIVE_STAGNATION;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::KKT_CONDITIONS_TOLERANCE;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to KKT tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::ccsa::STATIONARITY_TOLERANCE;
+    Plato::get_ccsa_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to stationary measure being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
 } // PlatoTest

@@ -307,9 +307,9 @@ private:
             std::ofstream tOutputFile;
             tOutputFile.open("solution.txt");
 
-            std::ostringstream tStopCriterion;
-            Plato::getStopCriterion(aAlgorithm.getStoppingCriterion(), tStopCriterion);
-            tOutputFile << tStopCriterion.str().c_str();
+            std::string tStopCriterion;
+            Plato::get_stop_criterion(aAlgorithm.getStoppingCriterion(), tStopCriterion);
+            tOutputFile << tStopCriterion.c_str();
 
             tOutputFile << "Number of Outer Iterations = " << aAlgorithm.getNumIterationsDone() << "\n";
             tOutputFile << "Objective Function Value = " << aDataMng.getCurrentObjectiveFunctionValue() << "\n\n";

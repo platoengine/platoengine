@@ -329,9 +329,9 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimization)
     std::cout << "NumFunctionEvaluations = " << tMyObjective->getNumFunctionEvaluations() << std::endl;
     std::cout << "BestObjectiveValue = " << tDataMng->getCurrentObjectiveFunctionValue() << std::endl;
     std::cout << "Best1: " << tBest1 << ", Best2: " << tBest2 << std::endl;
-    std::ostringstream tMessage;
-    Plato::getStopCriterion(tAlgorithm.getStoppingCriterion(), tMessage);
-    std::cout << "StoppingCriterion = " << tMessage.str().c_str() << std::endl;
+    std::string tMessage;
+    Plato::get_stop_criterion(tAlgorithm.getStoppingCriterion(), tMessage);
+    std::cout << "StoppingCriterion = " << tMessage.c_str() << std::endl;
 
     std::vector<double> tGoldThrustProfile = getGoldThrust();
     std::vector<double> tThrustProfile = tMyObjective->getThrustProfile();

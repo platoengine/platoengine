@@ -1,10 +1,4 @@
 /*
- * Plato_ConservativeConvexSeparableAppxStageMng.hpp
- *
- *  Created on: Nov 4, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,39 +40,67 @@
 //@HEADER
 */
 
-#ifndef PLATO_CONSERVATIVECONVEXSEPARABLEAPPXSTAGEMNG_HPP_
-#define PLATO_CONSERVATIVECONVEXSEPARABLEAPPXSTAGEMNG_HPP_
+/*
+ * Plato_OptimizersIO.cpp
+ *
+ *  Created on: Sep 17, 2018
+ */
+
+#include "Plato_OptimizersIO.hpp"
 
 namespace Plato
 {
 
-template<typename ScalarType, typename OrdinalType>
-class MultiVector;
-template<typename ScalarType, typename OrdinalType>
-class MultiVectorList;
-template<typename ScalarType, typename OrdinalType>
-class ConservativeConvexSeparableAppxDataMng;
-
-template<typename ScalarType, typename OrdinalType = size_t>
-class ConservativeConvexSeparableAppxStageMng
+namespace error
 {
-public:
-    virtual ~ConservativeConvexSeparableAppxStageMng()
+
+void is_file_open(const std::ofstream& aOutputFile)
+{
+    try
     {
+        if(aOutputFile.is_open() == false)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument & tError)
+    {
+        throw tError;
+    }
+}
+
+} // namespace error
+
+// *********************************************** END NAMESPACE ERROR ***********************************************
+
+void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint)
+{
+    try
+    {
+        Plato::error::is_file_open(aOutputFile);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+
+        std::ostringstream tMessage;
+        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
+        << ", LINE: " << __LINE__ << " ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
     }
 
-    virtual void cacheData() = 0;
-    virtual void update(Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
-    virtual ScalarType evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) = 0;
-    virtual void computeGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                                 Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
+    // PRIMARY DIAGNOSTICS  (OUTER-LOOP)
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
+            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(12);
 
-    virtual void evaluateConstraints(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                                     Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
-    virtual void computeConstraintGradients(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                                            Plato::MultiVectorList<ScalarType, OrdinalType> & aOutput) = 0;
-};
+    // TRUST REGION PROBLEM DATA (INNER-LOOP)
+    aOutputFile << "TR-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed" << std::setw(17) << "TR-Ratio"
+            << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15) << "abs(dF)" << "\n"
+            << std::flush;
+}
 
 } // namespace Plato
-
-#endif /* PLATO_CONSERVATIVECONVEXSEPARABLEAPPXSTAGEMNG_HPP_ */

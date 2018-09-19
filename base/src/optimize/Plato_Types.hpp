@@ -48,7 +48,7 @@
 #ifndef Plato_TYPES_HPP_
 #define Plato_TYPES_HPP_
 
-#include <sstream>
+#include <string>
 
 namespace Plato
 {
@@ -78,98 +78,104 @@ struct algorithm
     };
 };
 
-inline void getStopCriterion(const Plato::algorithm::stop_t & aStopCriterion, std::ostringstream & aOutput)
+/******************************************************************************//**
+ * @brief Output a brief sentence explaining why the optimizer stopped.
+ * @param [in] aStopCriterion stopping criterion flag
+ * @param [in,out] aOutput string with brief description
+**********************************************************************************/
+inline void get_stop_criterion(const Plato::algorithm::stop_t & aStopCriterion, std::string & aOutput)
 {
+    aOutput.clear();
     switch(aStopCriterion)
     {
         case Plato::algorithm::stop_t::STATIONARITY_MEASURE:
         {
-            aOutput << "****** Optimization stopping due to stationary measure being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to stationary measure being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE:
         {
-            aOutput << "****** Optimization stopping due to actual reduction tolerance being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to actual reduction tolerance being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::OBJECTIVE_STAGNATION:
         {
-            aOutput << "****** Optimization stopping due to objective stagnation. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS:
         {
-            aOutput << "****** Optimization stopping due to small trust region radius. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to small trust region radius. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::CONTROL_STAGNATION:
         {
-            aOutput << "****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS:
         {
-            aOutput << "****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_NORM_TRIAL_STEP:
         {
-            aOutput << "****** Optimization stopping due to NaN norm of trial step vector. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN norm of trial step vector. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_NORM_GRADIENT:
         {
-            aOutput << "****** Optimization stopping due to NaN norm of gradient vector. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN norm of gradient vector. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NORM_GRADIENT:
         {
-            aOutput << "****** Optimization stopping due to norm of gradient tolerance being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to norm of gradient tolerance being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NORM_STEP:
         {
-            aOutput << "****** Optimization stopping due to norm of trial step tolerance being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to norm of trial step tolerance being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::OPTIMALITY_AND_FEASIBILITY:
         {
-            aOutput << "****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::SMALL_PENALTY_PARAMETER:
         {
-            aOutput << "****** Optimization stopping due to small penalty parameter in augmented Lagrangian being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to small penalty parameter in augmented Lagrangian being met. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_OBJECTIVE_GRADIENT:
         {
-            aOutput << "****** Optimization stopping due to NaN norm of objective gradient vector. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN norm of objective gradient vector. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_OBJECTIVE_STAGNATION:
         {
-            aOutput << "****** Optimization stopping due to NaN objective stagnation. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN objective stagnation. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_CONTROL_STAGNATION:
         {
-            aOutput << "****** Optimization stopping due to NaN control stagnation. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN control stagnation. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_STATIONARITY_MEASURE:
         {
-            aOutput << "****** Optimization stopping due to NaN stationary measure. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN stationary measure. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NaN_ACTUAL_REDUCTION:
         {
-            aOutput << "****** Optimization stopping due to NaN actual reduction. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to NaN actual reduction. ******\n\n";
             break;
         }
         case Plato::algorithm::stop_t::NOT_CONVERGED:
         {
-            aOutput << "****** Optimization algorithm did not converge. ******\n\n";
+            aOutput = "\n\n****** Optimization algorithm did not converge. ******\n\n";
             break;
         }
     }

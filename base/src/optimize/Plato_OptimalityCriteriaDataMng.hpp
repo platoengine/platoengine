@@ -53,6 +53,7 @@
 #include <limits>
 #include <cassert>
 
+#include "Plato_Types.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_DataFactory.hpp"
@@ -65,14 +66,21 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class OptimalityCriteriaDataMng
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aFactory data factory used to allocate Plato vectors and multi-vectors
+    **********************************************************************************/
     explicit OptimalityCriteriaDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
             mInitialGuessSet(false),
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
             mMaxInequalityValue(std::numeric_limits<ScalarType>::max()),
             mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
             mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mControlStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
+            mStopCriterion(Plato::algorithm::NOT_CONVERGED),
             mMemorySpace(aFactory->getMemorySpace()),
             mCurrentDual(),
             mDualWorkVector(),
@@ -85,48 +93,133 @@ public:
             mInequalityGradient(aFactory->control().create()),
             mControlLowerBounds(aFactory->control().create()),
             mControlUpperBounds(aFactory->control().create()),
+            mCommWrapper(aFactory->getCommWrapper().create()),
             mDualReductionOperations(),
             mControlReductionOperations()
     {
         this->initialize(aFactory);
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~OptimalityCriteriaDataMng()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return a const reference to the distributed memory communication wrapper
+     * @return const reference to the distributed memory communication wrapper
+    **********************************************************************************/
+    const Plato::CommWrapper& getCommWrapper() const
+    {
+        return (mCommWrapper.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Get number of constraints
+     * @return number of constraints
+    **********************************************************************************/
     OrdinalType getNumConstraints() const
     {
         OrdinalType tNumVectors = mCurrentDual->size();
         return (tNumVectors);
     }
+
+    /******************************************************************************//**
+     * @brief Get number of control vectors (e.g. number of materials)
+     * @return number of control vectors
+    **********************************************************************************/
     OrdinalType getNumControlVectors() const
     {
         OrdinalType tNumVectors = mCurrentControl->getNumVectors();
         return (tNumVectors);
     }
 
+    /******************************************************************************//**
+     * @brief Get maximum inequality constraint residual
+     * @return maximum inequality constraint residual
+    **********************************************************************************/
     ScalarType getMaxInequalityValue() const
     {
         return (mMaxInequalityValue);
     }
+
+    /******************************************************************************//**
+     * @brief Get norm of the objective function gradient.
+     * @return norm of the objective function gradient
+    **********************************************************************************/
     ScalarType getNormObjectiveGradient() const
     {
         return (mNormObjectiveGradient);
     }
+
+    /******************************************************************************//**
+     * @brief Get control stagnation measure
+     * @return control stagnation measure
+    **********************************************************************************/
     ScalarType getControlStagnationMeasure() const
     {
         return (mControlStagnationMeasure);
     }
+
+    /******************************************************************************//**
+     * @brief Get objective function stagnation measure
+     * @return objective function stagnation measure
+    **********************************************************************************/
     ScalarType getObjectiveStagnationMeasure() const
     {
         return (mObjectiveStagnationMeasure);
     }
 
+    /******************************************************************************//**
+     * @brief Get stopping criterion
+     * @return stopping criterion
+    **********************************************************************************/
+    Plato::algorithm::stop_t getStopCriterion() const
+    {
+        return (mStopCriterion);
+    }
+
+    /******************************************************************************//**
+     * @brief Set stopping criterion
+     * @param [in] stopping criterion
+    **********************************************************************************/
+    void setStopCriterion(const Plato::algorithm::stop_t& aInput)
+    {
+        mStopCriterion = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Get memory space
+     * @return memory space, e.g. HOST = CPU and DEVICE = GPU
+    **********************************************************************************/
     Plato::MemorySpace::type_t getMemorySpace() const
     {
         return (mMemorySpace);
     }
 
+    /******************************************************************************//**
+     * @brief Get number of objective function evaluations
+     * @return number of objective function evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveFunctionEvaluations() const
+    {
+        return (mNumObjFuncEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective function evaluations
+     * @param [in] aInput number of objective function evaluations
+    **********************************************************************************/
+    void setNumObjectiveFunctionEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjFuncEval = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Compute maximum inequality constraint residual
+    **********************************************************************************/
     void computeMaxInequalityValue()
     {
         mDualWorkVector->update(1., *mCurrentConstraintValues, 0.);
@@ -562,6 +655,9 @@ private:
 private:
     bool mInitialGuessSet;
 
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
+
     ScalarType mMaxInequalityValue;
     ScalarType mNormObjectiveGradient;
     ScalarType mCurrentObjectiveValue;
@@ -569,6 +665,7 @@ private:
     ScalarType mControlStagnationMeasure;
     ScalarType mObjectiveStagnationMeasure;
 
+    Plato::algorithm::stop_t mStopCriterion;
     Plato::MemorySpace::type_t mMemorySpace;
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentDual;
@@ -584,6 +681,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlLowerBounds;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlUpperBounds;
 
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations;
 

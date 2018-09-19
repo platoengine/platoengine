@@ -51,6 +51,7 @@
 
 #include <memory>
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
@@ -58,6 +59,7 @@
 #include "Plato_Vector.hpp"
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_MultiVector.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_MultiVectorList.hpp"
 #include "Plato_PrimalProblemStageMng.hpp"
@@ -72,11 +74,19 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class ConservativeConvexSeparableAppxAlgorithm
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aStageMng stage manager for Conservative Convex Separable Approximation (CCSA) algorithms
+     * @param [in] aDataMng data manager for CCSA algorithms
+     * @param [in] aSubProblem CCSA subproblem (e.g. MMA, GCMMA)
+    **********************************************************************************/
     ConservativeConvexSeparableAppxAlgorithm(const std::shared_ptr<Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>> & aStageMng,
-                                             const std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> & aDataMng,
+                                             const std::shared_ptr< Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> & aDataMng,
                                              const std::shared_ptr<Plato::ConservativeConvexSeparableApproximation<ScalarType, OrdinalType>> & aSubProblem) :
-            mMaxNumIterations(500),
-            mNumIterationsDone(0),
+            mPrintDiagnostics(false),
+            mOutputStream(),
+            mMaxNumOuterIter(500),
+            mNumOuterIterDone(0),
             mStagnationTolerance(1e-8),
             mStationarityTolerance(1e-4),
             mObjectiveStagnationTolerance(1e-6),
@@ -86,167 +96,402 @@ public:
             mKarushKuhnTuckerConditionsTolerance(1e-5),
             mMovingAsymptoteUpperBoundScaleFactor(10),
             mMovingAsymptoteLowerBoundScaleFactor(0.01),
-            mStoppingCriterion(Plato::ccsa::stop_t::NOT_CONVERGED),
+            mStopCriterion(Plato::ccsa::stop_t::NOT_CONVERGED),
             mDualWork(),
             mControlWork(),
             mPreviousSigma(),
             mAntepenultimateControl(),
             mWorkMultiVectorList(),
+            mOutputData(),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
             mSubProblem(aSubProblem)
     {
-        this->initialize(aDataMng.operator*());
+        this->initialize(*aDataMng);
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~ConservativeConvexSeparableAppxAlgorithm()
     {
     }
 
-    OrdinalType getMaxNumIterations() const
+    /******************************************************************************//**
+     * @brief Enable output of diagnostics (i.e. optimization problem status)
+    **********************************************************************************/
+    void enableDiagnostics()
     {
-        return (mMaxNumIterations);
-    }
-    void setMaxNumIterations(const OrdinalType & aInput)
-    {
-        mMaxNumIterations = aInput;
-    }
-    OrdinalType getNumIterationsDone() const
-    {
-        return (mNumIterationsDone);
+        mPrintDiagnostics = true;
     }
 
-    ScalarType getStagnationTolerance() const
+    /******************************************************************************//**
+     * @brief Return maximum number of outer optimization iterations
+     * @return maximum number of outer optimization iterations
+    **********************************************************************************/
+    OrdinalType getMaxNumIterations() const
+    {
+        return (mMaxNumOuterIter);
+    }
+
+    /******************************************************************************//**
+     * @brief Set maximum number of outer optimization iterations
+     * @param [in] aInput maximum number of outer optimization iterations
+    **********************************************************************************/
+    void setMaxNumIterations(const OrdinalType & aInput)
+    {
+        mMaxNumOuterIter = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Return number of outer optimization iterations done
+     * @return number of outer optimization iterations done
+    **********************************************************************************/
+    OrdinalType getNumIterationsDone() const
+    {
+        return (mNumOuterIterDone);
+    }
+
+    /******************************************************************************//**
+     * @brief Return control stagnation tolerance
+     * @return control stagnation tolerance
+    **********************************************************************************/
+    ScalarType getControlStagnationTolerance() const
     {
         return (mStagnationTolerance);
     }
-    void setStagnationTolerance(const ScalarType & aInput)
+
+    /******************************************************************************//**
+     * @brief Set control stagnation tolerance
+     * @param [in] aInput control stagnation tolerance
+    **********************************************************************************/
+    void setControlStagnationTolerance(const ScalarType & aInput)
     {
         mStagnationTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return stationarity tolerance (i.e. norm of the trial step)
+     * @return stationarity tolerance
+    **********************************************************************************/
     ScalarType getStationarityTolerance() const
     {
         return (mStationarityTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Set stationarity tolerance (i.e. norm of the trial step)
+     * @param [in] aInput stationarity tolerance
+    **********************************************************************************/
     void setStationarityTolerance(const ScalarType & aInput)
     {
         mStationarityTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return objective function stagnation tolerance
+     * @return objective function stagnation tolerance
+    **********************************************************************************/
     ScalarType getObjectiveStagnationTolerance() const
     {
         return (mObjectiveStagnationTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Set objective function stagnation tolerance
+     * @param [in] aInput objective function stagnation tolerance
+    **********************************************************************************/
     void setObjectiveStagnationTolerance(const ScalarType & aInput)
     {
         mObjectiveStagnationTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return moving asymptotes' expansion factor
+     * @return moving asymptotes expansion factor
+    **********************************************************************************/
     ScalarType getMovingAsymptoteExpansionFactor() const
     {
         return (mMovingAsymptoteExpansionFactor);
     }
+
+    /******************************************************************************//**
+     * @brief Set moving asymptotes' expansion factor
+     * @param [in] aInput moving asymptotes expansion factor
+    **********************************************************************************/
     void setMovingAsymptoteExpansionFactor(const ScalarType & aInput)
     {
         mMovingAsymptoteExpansionFactor = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return moving asymptotes' contraction factor
+     * @return moving asymptotes contraction factor
+    **********************************************************************************/
     ScalarType getMovingAsymptoteContractionFactor() const
     {
         return (mMovingAsymptoteContractionFactor);
     }
+
+    /******************************************************************************//**
+     * @brief Set moving asymptotes' contraction factor
+     * @param [in] aInput moving asymptotes contraction factor
+    **********************************************************************************/
     void setMovingAsymptoteContractionFactor(const ScalarType & aInput)
     {
         mMovingAsymptoteContractionFactor = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return moving asymptotes' scale factor
+     * @return moving asymptotes scale factor
+    **********************************************************************************/
     ScalarType getInitialMovingAsymptoteScaleFactor() const
     {
         return (mInitialMovingAsymptoteScaleFactor);
     }
+
+    /******************************************************************************//**
+     * @brief Set moving asymptotes' scale factor
+     * @param [in] aInput moving asymptotes scale factor
+    **********************************************************************************/
     void setInitialMovingAsymptoteScaleFactor(const ScalarType & aInput)
     {
         mInitialMovingAsymptoteScaleFactor = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return Karush-Kuhn-Tucker (KKT) inexactness tolerance
+     * @return Karush-Kuhn-Tucker inexactness tolerance
+    **********************************************************************************/
     ScalarType getKarushKuhnTuckerConditionsTolerance() const
     {
         return (mKarushKuhnTuckerConditionsTolerance);
     }
+    /******************************************************************************//**
+     * @brief Set Karush-Kuhn-Tucker (KKT) inexactness tolerance
+     * @param [in] aInput Karush-Kuhn-Tucker inexactness tolerance
+    **********************************************************************************/
     void setKarushKuhnTuckerConditionsTolerance(const ScalarType & aInput)
     {
         mKarushKuhnTuckerConditionsTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return scale factor for upper bound on moving asymptotes
+     * @return scale factor
+    **********************************************************************************/
     ScalarType getMovingAsymptoteUpperBoundScaleFactor() const
     {
         return (mMovingAsymptoteUpperBoundScaleFactor);
     }
+
+    /******************************************************************************//**
+     * @brief Set scale factor for upper bound on moving asymptotes
+     * @param [in] aInput scale factor
+    **********************************************************************************/
     void setMovingAsymptoteUpperBoundScaleFactor(const ScalarType & aInput)
     {
         mMovingAsymptoteUpperBoundScaleFactor = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return scale factor for lower bound on moving asymptotes
+     * @return scale factor
+    **********************************************************************************/
     ScalarType getMovingAsymptoteLowerBoundScaleFactor() const
     {
         return (mMovingAsymptoteLowerBoundScaleFactor);
     }
+
+    /******************************************************************************//**
+     * @brief Set scale factor for lower bound on moving asymptotes
+     * @param [in] aInput scale factor
+    **********************************************************************************/
     void setMovingAsymptoteLowerBoundScaleFactor(const ScalarType & aInput)
     {
         mMovingAsymptoteLowerBoundScaleFactor = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Get stopping criterion
+     * @return stopping criterion
+    **********************************************************************************/
     Plato::ccsa::stop_t getStoppingCriterion() const
     {
-        return (mStoppingCriterion);
+        return (mStopCriterion);
     }
+
+    /******************************************************************************//**
+     * @brief Set stopping criterion
+     * @param [in] stopping criterion
+    **********************************************************************************/
     void setStoppingCriterion(const Plato::ccsa::stop_t & aInput)
     {
-        mStoppingCriterion = aInput;
+        mStopCriterion = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Solve optimization problem using Optimality criteria algorithm
+    **********************************************************************************/
     void solve()
     {
+        this->openOutputFile();
         this->checkInitialGuess();
-
-        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
-        const ScalarType tSMCurrentObjectiveFunctionValue = mStageMng->evaluateObjective(tControl);
-        mDataMng->setCurrentObjectiveFunctionValue(tSMCurrentObjectiveFunctionValue);
-        mStageMng->evaluateConstraints(tControl, mDualWork.operator*());
-        mDataMng->setCurrentConstraintValues(mDualWork.operator*());
-        mDataMng->setDual(mDualWork.operator*());
-        mSubProblem->initializeAuxiliaryVariables(mDataMng.operator*());
+        this->setInitialProblemData();
 
         while(1)
         {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
-            mStageMng->cacheData();
-            mStageMng->computeGradient(tCurrentControl, mControlWork.operator*());
-            mDataMng->setCurrentObjectiveGradient(mControlWork.operator*());
-            mStageMng->computeConstraintGradients(tCurrentControl, mWorkMultiVectorList.operator*());
-            mDataMng->setCurrentConstraintGradients(mWorkMultiVectorList.operator*());
+            this->computeCurrentGradients();
+            mStageMng->update(*mDataMng);
 
+            this->outputDiagnostics();
             if(this->checkStoppingCriteria() == true)
             {
+                this->outputMyStoppingCriterion();
+                this->closeOutputFile();
                 break;
             }
 
             this->updateSigmaParameters();
+            this->saveProblemData();
 
-            const Plato::MultiVector<ScalarType, OrdinalType> & tPreviousControl = mDataMng->getPreviousControl();
-            Plato::update(static_cast<ScalarType>(1),
-                          tPreviousControl,
-                          static_cast<ScalarType>(0),
-                          mAntepenultimateControl.operator*());
-            Plato::update(static_cast<ScalarType>(1),
-                          tCurrentControl,
-                          static_cast<ScalarType>(0),
-                          mControlWork.operator*());
-            mDataMng->setPreviousControl(mControlWork.operator*());
-
-            const ScalarType tDMCurrentObjectiveFunctionValue = mDataMng->getCurrentObjectiveFunctionValue();
-            mDataMng->setPreviousObjectiveFunctionValue(tDMCurrentObjectiveFunctionValue);
-
-            mSubProblem->solve(mStageMng.operator*(), mDataMng.operator*());
-            mStageMng->update(mDataMng.operator*());
-
-            mNumIterationsDone++;
+            mSubProblem->solve(*mStageMng, *mDataMng);
+            mNumOuterIterDone++;
         }
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Open output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+                mOutputData.mConstraints.clear();
+                mOutputData.mConstraints.resize(tNumConstraints);
+                mOutputStream.open("ccsa_algorithm_diagnostics.txt");
+                Plato::print_ccsa_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print diagnostics for Optimality Criteria algorithm
+    **********************************************************************************/
+    void outputDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = this->getNumIterationsDone();
+            mOutputData.mKKTMeasure = mDataMng->getKarushKuhnTuckerConditionsInexactness();
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormInactiveGradient();
+            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            const OrdinalType tDUAL_VECTOR_INDEX = 0;
+            const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+            for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+            {
+                mOutputData.mConstraints[tIndex] = mDataMng->getCurrentConstraintValue(tDUAL_VECTOR_INDEX, tIndex);
+            }
+
+            Plato::print_ccsa_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion into diagnostics file.
+    **********************************************************************************/
+    void outputMyStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::get_ccsa_stop_criterion(mStopCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Compute current objective and constraint gradients.
+    **********************************************************************************/
+    void computeCurrentGradients()
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+        mStageMng->cacheData();
+        mStageMng->computeGradient(tCurrentControl, *mControlWork);
+        mDataMng->setCurrentObjectiveGradient(*mControlWork);
+        mStageMng->computeConstraintGradients(tCurrentControl, *mWorkMultiVectorList);
+        mDataMng->setCurrentConstraintGradients(*mWorkMultiVectorList);
+    }
+
+    /******************************************************************************//**
+     * @brief Compute initial objective and constraint values and initialize auxiliary variables.
+    **********************************************************************************/
+    void setInitialProblemData()
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
+        const ScalarType tInitialObjFuncValue = mStageMng->evaluateObjective(tControl);
+        mDataMng->setCurrentObjectiveFunctionValue(tInitialObjFuncValue);
+        mStageMng->evaluateConstraints(tControl, *mDualWork);
+        mDataMng->setCurrentConstraintValues(*mDualWork);
+        mDataMng->setDual(*mDualWork);
+        mSubProblem->initializeAuxiliaryVariables(*mDataMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Save previous and antepenultimate criteria values and controls.
+    **********************************************************************************/
+    void saveProblemData()
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tPreviousControl = mDataMng->getPreviousControl();
+        Plato::update(static_cast<ScalarType>(1), tPreviousControl, static_cast<ScalarType>(0), *mAntepenultimateControl);
+        Plato::update(static_cast<ScalarType>(1), tCurrentControl, static_cast<ScalarType>(0), *mControlWork);
+        mDataMng->setPreviousControl(*mControlWork);
+
+        const ScalarType tCurrentObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+        mDataMng->setPreviousObjectiveFunctionValue(tCurrentObjFuncValue);
+    }
+
+    /******************************************************************************//**
+     * @brief Initialize bounds and check if the bounds are properly defined.
+     * @param [in] aDataMng data manager for CCSA algorithms
+    **********************************************************************************/
     void initialize(const Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         // Allocate Core Data Structures
@@ -269,6 +514,10 @@ private:
             std::abort();
         }
     }
+
+    /******************************************************************************//**
+     * @brief Check if initial guess is within upper and lower bounds
+    **********************************************************************************/
     void checkInitialGuess()
     {
         try
@@ -303,26 +552,31 @@ private:
         mDataMng->bounds().project(tLowerBounds, tUpperBounds, *tWorkMultiVector);
         mDataMng->setCurrentControl(*tWorkMultiVector);
     }
+
+    /******************************************************************************//**
+     * @brief Check if a stopping criterion is met.
+     * @return flag instructing algorithm to stop, true or false
+    **********************************************************************************/
     bool checkStoppingCriteria()
     {
         bool tStop = false;
 
-        mDataMng->computeStagnationMeasure();
         mDataMng->computeFeasibilityMeasure();
         mDataMng->computeStationarityMeasure();
         mDataMng->computeNormInactiveGradient();
+        mDataMng->computeControlStagnationMeasure();
         mDataMng->computeObjectiveStagnationMeasure();
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tDual = mDataMng->getDual();
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
         mDataMng->computeKarushKuhnTuckerConditionsInexactness(tControl, tDual);
 
-        const ScalarType tStagnationMeasure = mDataMng->getStagnationMeasure();
         const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
+        const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
         const ScalarType tObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
         const ScalarType t_KKT_ConditionsInexactness = mDataMng->getKarushKuhnTuckerConditionsInexactness();
 
-        if(tStagnationMeasure < this->getStagnationTolerance())
+        if(tControlStagnationMeasure < this->getControlStagnationTolerance())
         {
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::stop_t::CONTROL_STAGNATION);
@@ -337,7 +591,7 @@ private:
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::stop_t::KKT_CONDITIONS_TOLERANCE);
         }
-        else if(mNumIterationsDone >= this->getMaxNumIterations())
+        else if(mNumOuterIterDone >= this->getMaxNumIterations())
         {
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::stop_t::MAX_NUMBER_ITERATIONS);
@@ -350,6 +604,7 @@ private:
 
         return (tStop);
     }
+
     void updateSigmaParameters()
     {
         assert(mControlWork.get() != nullptr);
@@ -409,8 +664,11 @@ private:
     }
 
 private:
-    OrdinalType mMaxNumIterations;
-    OrdinalType mNumIterationsDone;
+    bool mPrintDiagnostics;
+    std::ofstream mOutputStream;
+
+    OrdinalType mMaxNumOuterIter;
+    OrdinalType mNumOuterIterDone;
 
     ScalarType mStagnationTolerance;
     ScalarType mStationarityTolerance;
@@ -422,7 +680,7 @@ private:
     ScalarType mMovingAsymptoteUpperBoundScaleFactor;
     ScalarType mMovingAsymptoteLowerBoundScaleFactor;
 
-    Plato::ccsa::stop_t mStoppingCriterion;
+    Plato::ccsa::stop_t mStopCriterion;
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWork;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWork;
@@ -430,6 +688,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControl;
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mWorkMultiVectorList;
 
+    Plato::OutputDataCCSA<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> mDataMng;
     std::shared_ptr<Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>> mStageMng;
     std::shared_ptr<Plato::ConservativeConvexSeparableApproximation<ScalarType, OrdinalType>> mSubProblem;

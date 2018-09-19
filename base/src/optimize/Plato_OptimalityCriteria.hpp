@@ -57,6 +57,7 @@
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_DeviceBounds.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_OptimalityCriteriaDataMng.hpp"
 #include "Plato_OptimalityCriteriaSubProblem.hpp"
@@ -69,6 +70,12 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class OptimalityCriteria
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataMng data manager for the Optimality Criteria algorithm
+     * @param [in] aStageMng stage manager for the Optimality Criteria algorithm
+     * @param [in] aSubProblem optimality criteria subproblem
+    **********************************************************************************/
     OptimalityCriteria(const std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> & aDataMng,
                        const std::shared_ptr<Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType>> & aStageMng,
                        const std::shared_ptr<Plato::OptimalityCriteriaSubProblem<ScalarType, OrdinalType>> & aSubProblem) :
@@ -80,6 +87,7 @@ public:
             mControlStagnationTolerance(1e-2),
             mObjectiveGradientTolerance(1e-8),
             mObjectiveStagnationTolerance(1e-5),
+            mOutputData(),
             mBounds(nullptr),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
@@ -87,40 +95,71 @@ public:
     {
         this->initialize();
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~OptimalityCriteria()
     {
     }
 
-    bool printDiagnostics() const
-    {
-        return (mPrintDiagnostics);
-    }
-
+    /******************************************************************************//**
+     * @brief Enable output of diagnostics (i.e. optimization problem status)
+    **********************************************************************************/
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
     }
 
+    /******************************************************************************//**
+     * @brief Get number of optimization iterations done.
+     * @return number of optimization iterations done
+    **********************************************************************************/
     OrdinalType getNumIterationsDone() const
     {
         return (mNumIterationsDone);
     }
+
+    /******************************************************************************//**
+     * @brief Get max number of optimization iterations.
+     * @return max number of optimization iterations
+    **********************************************************************************/
     OrdinalType getMaxNumIterations() const
     {
         return (mMaxNumIterations);
     }
+
+    /******************************************************************************//**
+     * @brief Get control stagnation tolerance
+     * @return control stagnation tolerance
+    **********************************************************************************/
     ScalarType getControlStagnationTolerance() const
     {
         return (mControlStagnationTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Get feasibility tolerance
+     * @return feasibility tolerance
+    **********************************************************************************/
     ScalarType getFeasibilityTolerance() const
     {
         return (mFeasibilityTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Get objective gradient tolerance
+     * @return objective gradient tolerance
+    **********************************************************************************/
     ScalarType getObjectiveGradientTolerance() const
     {
         return (mObjectiveGradientTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Get objective stagnation tolerance
+     * @return objective stagnation tolerance
+    **********************************************************************************/
     ScalarType getObjectiveStagnationTolerance() const
     {
         return (mObjectiveStagnationTolerance);
@@ -147,13 +186,17 @@ public:
         mObjectiveStagnationTolerance = aInput;
     }
 
-    void gatherOuputStream(std::ostringstream & aOutput)
+    void gatherOuputStream(std::ofstream & aOutput)
     {
-        aOutput << mOutputStream.str().c_str();
+        aOutput = mOutputStream;
     }
 
+    /******************************************************************************//**
+     * @brief Solve optimization problem using Optimality criteria algorithm
+    **********************************************************************************/
     void solve()
     {
+        this->openOutputFile();
         this->checkInitialGuess();
 
         mNumIterationsDone = 0;
@@ -161,14 +204,13 @@ public:
         {
             mStageMng->update(*mDataMng);
 
-            mDataMng->computeMaxInequalityValue();
-            mDataMng->computeNormObjectiveGradient();
-            mDataMng->computeControlStagnationMeasure();
-            mDataMng->computeObjectiveStagnationMeasure();
+            this->computeStoppingMetrics();
+            this->outputDiagnostics();
 
-            this->printCurrentProgress();
-            if(this->stoppingCriteriaSatisfied() == true)
+            if(this->isStoppingCriteriaSatisfied() == true)
             {
+                this->outputMyStoppingCriterion();
+                this->closeOutputFile();
                 break;
             }
 
@@ -179,80 +221,73 @@ public:
         }
     }
 
-    bool stoppingCriteriaSatisfied()
-    {
-        bool tStoppingCriterionSatisfied = false;
-        ScalarType tMaxInequalityValue = mDataMng->getMaxInequalityValue();
-        ScalarType tNormObjectiveGradient = mDataMng->getNormObjectiveGradient();
-        ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-        ScalarType tObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
-
-        if(this->getNumIterationsDone() >= this->getMaxNumIterations())
-        {
-            tStoppingCriterionSatisfied = true;
-        }
-        else if(tControlStagnationMeasure < this->getControlStagnationTolerance())
-        {
-            tStoppingCriterionSatisfied = true;
-        }
-        else if(tObjectiveStagnationMeasure < this->getObjectiveStagnationTolerance())
-        {
-            tStoppingCriterionSatisfied = true;
-        }
-        else if(tNormObjectiveGradient < this->getObjectiveGradientTolerance()
-                && tMaxInequalityValue < this->getFeasibilityTolerance())
-        {
-            tStoppingCriterionSatisfied = true;
-        }
-
-        return (tStoppingCriterionSatisfied);
-    }
-
-    void printCurrentProgress()
-    {
-        if(this->printDiagnostics() == false)
-        {
-            return;
-        }
-
-        OrdinalType tCurrentNumIterationsDone = this->getNumIterationsDone();
-
-        if(tCurrentNumIterationsDone < static_cast<OrdinalType>(2))
-        {
-            mOutputStream << " Itr" << std::setw(14) << "   F(x)  " << std::setw(16) << " ||F'(x)||" << std::setw(16)
-                    << "   Max(H) " << "\n" << std::flush;
-            mOutputStream << "-----" << std::setw(14) << "----------" << std::setw(16) << "-----------" << std::setw(16)
-                    << "----------" << "\n" << std::flush;
-        }
-
-        ScalarType tObjectiveValue = mDataMng->getCurrentObjectiveValue();
-        ScalarType tMaxInequalityValue = mDataMng->getMaxInequalityValue();
-        ScalarType tNormObjectiveGradient = mDataMng->getNormObjectiveGradient();
-        mOutputStream << std::setw(3) << tCurrentNumIterationsDone << std::setprecision(4) << std::fixed
-                << std::scientific << std::setw(16) << tObjectiveValue << std::setw(16) << tNormObjectiveGradient
-                << std::setw(16) << tMaxInequalityValue << "\n";
-    }
-    void storeCurrentStageData()
-    {
-        const ScalarType tObjectiveValue = mDataMng->getCurrentObjectiveValue();
-        mDataMng->setPreviousObjectiveValue(tObjectiveValue);
-
-        const OrdinalType tNumVectors = mDataMng->getNumControlVectors();
-        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
-        {
-            const Plato::Vector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl(tVectorIndex);
-            mDataMng->setPreviousControl(tVectorIndex, tControl);
-        }
-
-        const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
-        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
-        {
-            ScalarType tMyCurrentConstraintValue = mDataMng->getCurrentConstraintValues(tConstraintIndex);
-            mDataMng->setPreviousConstraintValue(tConstraintIndex, tMyCurrentConstraintValue);
-        }
-    }
-
 private:
+    /******************************************************************************//**
+     * @brief Compute metrics used to decide if algorithm converged.
+    **********************************************************************************/
+    void computeStoppingMetrics()
+    {
+        mDataMng->computeMaxInequalityValue();
+        mDataMng->computeNormObjectiveGradient();
+        mDataMng->computeControlStagnationMeasure();
+        mDataMng->computeObjectiveStagnationMeasure();
+    }
+
+    /******************************************************************************//**
+     * @brief Open output file
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+                mOutputData.mConstraints.clear();
+                mOutputData.mConstraints.resize(tNumConstraints);
+                mOutputStream.open("optimality_criteria_diagnostics.txt");
+                Plato::print_oc_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close output file
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion into diagnostics file.
+    **********************************************************************************/
+    void outputMyStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::algorithm::stop_t tCriterion = mDataMng->getStopCriterion();
+                Plato::get_stop_criterion(tCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Initialize bounds based on memory space
+    **********************************************************************************/
     void initialize()
     {
         // Check Bounds
@@ -284,6 +319,70 @@ private:
             }
         }
     }
+
+    /******************************************************************************//**
+     * @brief Check if a stopping criterion is met.
+     * @return flag instructing algorithm to stop, true or false
+    **********************************************************************************/
+    bool isStoppingCriteriaSatisfied()
+    {
+        bool tStop = false;
+        ScalarType tMaxInequalityValue = mDataMng->getMaxInequalityValue();
+        ScalarType tNormObjectiveGradient = mDataMng->getNormObjectiveGradient();
+        ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+        ScalarType tObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+        if(this->getNumIterationsDone() >= this->getMaxNumIterations())
+        {
+            tStop = true;
+            mDataMng->setStopCriterion(Plato::algorithm::MAX_NUMBER_ITERATIONS);
+        }
+        else if(tControlStagnationMeasure < this->getControlStagnationTolerance())
+        {
+            tStop = true;
+            mDataMng->setStopCriterion(Plato::algorithm::CONTROL_STAGNATION);
+        }
+        else if(tObjectiveStagnationMeasure < this->getObjectiveStagnationTolerance())
+        {
+            tStop = true;
+            mDataMng->setStopCriterion(Plato::algorithm::OBJECTIVE_STAGNATION);
+        }
+        else if(tNormObjectiveGradient < this->getObjectiveGradientTolerance()
+                && tMaxInequalityValue < this->getFeasibilityTolerance())
+        {
+            tStop = true;
+            mDataMng->setStopCriterion(Plato::algorithm::OPTIMALITY_AND_FEASIBILITY);
+        }
+
+        return (tStop);
+    }
+
+    /******************************************************************************//**
+     * @brief Store primal information associated with current optimization iteration
+    **********************************************************************************/
+    void storeCurrentStageData()
+    {
+        const ScalarType tObjectiveValue = mDataMng->getCurrentObjectiveValue();
+        mDataMng->setPreviousObjectiveValue(tObjectiveValue);
+
+        const OrdinalType tNumVectors = mDataMng->getNumControlVectors();
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl(tVectorIndex);
+            mDataMng->setPreviousControl(tVectorIndex, tControl);
+        }
+
+        const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        {
+            ScalarType tMyCurrentConstraintValue = mDataMng->getCurrentConstraintValues(tConstraintIndex);
+            mDataMng->setPreviousConstraintValue(tConstraintIndex, tMyCurrentConstraintValue);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Check if initial guess is within upper and lower bounds
+    **********************************************************************************/
     void checkInitialGuess()
     {
         try
@@ -319,9 +418,39 @@ private:
         mDataMng->setCurrentControl(*tWorkMultiVector);
     }
 
+    /******************************************************************************//**
+     * @brief Print diagnostics for Optimality Criteria algorithm
+    **********************************************************************************/
+    void outputDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = this->getNumIterationsDone();
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveValue();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormObjectiveGradient();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+            for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+            {
+                mOutputData.mConstraints[tIndex] = mDataMng->getCurrentConstraintValues(tIndex);
+            }
+
+            Plato::print_oc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
 private:
     bool mPrintDiagnostics;
-    std::ostringstream mOutputStream;
+    std::ofstream mOutputStream;
 
     OrdinalType mMaxNumIterations;
     OrdinalType mNumIterationsDone;
@@ -331,6 +460,7 @@ private:
     ScalarType mObjectiveGradientTolerance;
     ScalarType mObjectiveStagnationTolerance;
 
+    Plato::OutputDataOC<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds;
     std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> mDataMng;
     std::shared_ptr<Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType>> mStageMng;

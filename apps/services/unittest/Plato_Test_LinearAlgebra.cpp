@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_LinearAlgebraTest.cpp
+ * Plato_Test_LinearAlgebra.cpp
  *
  *  Created on: Oct 21, 2017
  */
@@ -52,6 +52,7 @@
 
 #include "Plato_UnitTestUtils.hpp"
 
+#include "Plato_CommWrapper.hpp"
 #include "Plato_StandardVector.hpp"
 #include "Plato_DistributedVector.hpp"
 #include "Plato_StandardMultiVector.hpp"
@@ -60,6 +61,26 @@
 
 namespace PlatoTest
 {
+
+TEST(PlatoTest, CommWrapperIsInit)
+{
+    Plato::CommWrapper tDefaultCommWrap;
+    EXPECT_TRUE(tDefaultCommWrap.isCommInitialized());
+    ASSERT_THROW(tDefaultCommWrap.size(), std::invalid_argument);
+    ASSERT_THROW(tDefaultCommWrap.myProcID(), std::invalid_argument);
+    tDefaultCommWrap.useDefaultComm();
+    EXPECT_EQ(tDefaultCommWrap.size(), 1);
+    EXPECT_EQ(tDefaultCommWrap.myProcID(), 0);
+
+    Plato::CommWrapper tCommWrapOne;
+    tCommWrapOne.setComm(MPI_COMM_WORLD);
+    EXPECT_EQ(tCommWrapOne.size(), 1);
+    EXPECT_EQ(tCommWrapOne.myProcID(), 0);
+
+    Plato::CommWrapper tCommWrapTwo(MPI_COMM_WORLD);
+    EXPECT_EQ(tCommWrapTwo.size(), 1);
+    EXPECT_EQ(tCommWrapTwo.myProcID(), 0);
+}
 
 TEST(PlatoTest, size)
 {
