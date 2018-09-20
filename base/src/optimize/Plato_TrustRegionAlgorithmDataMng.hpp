@@ -1,10 +1,4 @@
 /*
- * Plato_TrustRegionAlgorithmDataMng.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 //@HEADER
 */
 
+/*
+ * Plato_TrustRegionAlgorithmDataMng.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
 #ifndef PLATO_TRUSTREGIONALGORITHMDATAMNG_HPP_
 #define PLATO_TRUSTREGIONALGORITHMDATAMNG_HPP_
 
@@ -67,7 +67,13 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class TrustRegionAlgorithmDataMng
 {
 public:
-    explicit TrustRegionAlgorithmDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aFactory enables allocation of core vectors and multi-vectors
+    **********************************************************************************/
+    TrustRegionAlgorithmDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
             mNumDualVectors(aFactory->dual().getNumVectors()),
             mNumControlVectors(aFactory->control().getNumVectors()),
             mStationarityMeasure(0),
@@ -93,47 +99,125 @@ public:
             mControlUpperBounds(aFactory->control().create()),
             mControlWorkVector(),
             mControlWorkMultiVector(aFactory->control().create()),
+            mCommWrapper(aFactory->getCommWrapper().create()),
             mBounds(std::make_shared<Plato::HostBounds<ScalarType, OrdinalType>>()),
             mDualReductionOperations(aFactory->getDualReductionOperations().create()),
             mControlReductionOperations(aFactory->getControlReductionOperations().create())
     {
         this->initialize(aFactory.operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~TrustRegionAlgorithmDataMng()
     {
     }
 
-    // NOTE: NUMBER OF CONTROL VECTORS
+    /******************************************************************************//**
+     * @brief Return a const reference to the distributed memory communication wrapper
+     * @return const reference to the distributed memory communication wrapper
+    **********************************************************************************/
+    const Plato::CommWrapper& getCommWrapper() const
+    {
+        return (mCommWrapper.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Return number of control vectors
+     * @return number of control vectors
+    **********************************************************************************/
     OrdinalType getNumControlVectors() const
     {
         return (mNumControlVectors);
     }
-    // NOTE: NUMBER OF DUAL VECTORS
+
+    /******************************************************************************//**
+     * @brief Return number of dual vectors
+     * @return number of dual vectors
+    **********************************************************************************/
     OrdinalType getNumDualVectors() const
     {
         return (mNumDualVectors);
     }
 
-    // NOTE: OBJECTIVE FUNCTION VALUE
+    /******************************************************************************//**
+     * @brief Get number of objective function evaluations
+     * @return number of objective function evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveFunctionEvaluations() const
+    {
+        return (mNumObjFuncEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective function evaluations
+     * @param [in] aInput number of objective function evaluations
+    **********************************************************************************/
+    void setNumObjectiveFunctionEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjFuncEval = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Get number of objective gradient evaluations
+     * @return number of objective gradient evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveGradientEvaluations() const
+    {
+        return (mNumObjGradEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective gradient evaluations
+     * @param [in] aInput number of objective gradient evaluations
+    **********************************************************************************/
+    void setNumObjectiveGradientEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjGradEval = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Return current objective function value
+     * @return objective function value
+    **********************************************************************************/
     ScalarType getCurrentObjectiveFunctionValue() const
     {
         return (mCurrentObjectiveFunctionValue);
     }
+
+    /******************************************************************************//**
+     * @brief Set current objective function value
+     * @param [in] objective function value
+    **********************************************************************************/
     void setCurrentObjectiveFunctionValue(const ScalarType & aInput)
     {
         mCurrentObjectiveFunctionValue = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return previous objective function value
+     * @return objective function value
+    **********************************************************************************/
     ScalarType getPreviousObjectiveFunctionValue() const
     {
         return (mPreviousObjectiveFunctionValue);
     }
+
+    /******************************************************************************//**
+     * @brief Set previous objective function value
+     * @param [in] objective function value
+    **********************************************************************************/
     void setPreviousObjectiveFunctionValue(const ScalarType & aInput)
     {
         mPreviousObjectiveFunctionValue = aInput;
     }
 
-    // NOTE: SET INITIAL GUESS
-    void setInitialGuess(const ScalarType & aValue)
+    /******************************************************************************//**
+     * @brief Set initial guess: each element is set to a constant scalar value
+     * @param [in] aInput scalar value
+    **********************************************************************************/
+    void setInitialGuess(const ScalarType & aInput)
     {
         assert(mCurrentControl.get() != nullptr);
         assert(mCurrentControl->getNumVectors() > static_cast<OrdinalType>(0));
@@ -141,10 +225,16 @@ public:
         OrdinalType tNumVectors = mCurrentControl->getNumVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
-            mCurrentControl->operator [](tVectorIndex).fill(aValue);
+            mCurrentControl->operator [](tVectorIndex).fill(aInput);
         }
         mIsInitialGuessSet = true;
     }
+
+    /******************************************************************************//**
+     * @brief Set initial guess: each element in specified vector is set to a constant scalar value
+     * @param [in] aVectorIndex control vector index
+     * @param [in] aValue scalar value
+    **********************************************************************************/
     void setInitialGuess(const OrdinalType & aVectorIndex, const ScalarType & aValue)
     {
         assert(mCurrentControl.get() != nullptr);
@@ -154,6 +244,12 @@ public:
         mCurrentControl->operator [](aVectorIndex).fill(aValue);
         mIsInitialGuessSet = true;
     }
+
+    /******************************************************************************//**
+     * @brief Set initial guess
+     * @param [in] aVectorIndex control vector index
+     * @param [in] aInput control vector
+    **********************************************************************************/
     void setInitialGuess(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentControl.get() != nullptr);
@@ -163,6 +259,11 @@ public:
         mCurrentControl->operator [](aVectorIndex).update(1., aInput, 0.);
         mIsInitialGuessSet = true;
     }
+
+    /******************************************************************************//**
+     * @brief Set initial guess
+     * @param [in] aInput control multi-vector
+    **********************************************************************************/
     void setInitialGuess(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() == mCurrentControl->getNumVectors());
@@ -674,6 +775,8 @@ private:
     }
 
 private:
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
     OrdinalType mNumDualVectors;
     OrdinalType mNumControlVectors;
 
@@ -704,6 +807,7 @@ private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWorkMultiVector;
 
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
     std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations;

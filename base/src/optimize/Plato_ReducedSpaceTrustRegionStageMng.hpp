@@ -72,8 +72,8 @@ class ReducedSpaceTrustRegionStageMng : public Plato::TrustRegionStageMng<Scalar
 public:
     ReducedSpaceTrustRegionStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                     const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aObjectives) :
-            mNumObjectiveFunctionEvaluations(0),
-            mNumObjectiveGradientEvaluations(0),
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
             mNumObjectiveHessianEvaluations(0),
             mNumPreconditionerEvaluations(0),
             mNumInversePreconditionerEvaluations(0),
@@ -91,11 +91,11 @@ public:
 
     OrdinalType getNumObjectiveFunctionEvaluations() const
     {
-        return (mNumObjectiveFunctionEvaluations);
+        return (mNumObjFuncEval);
     }
     OrdinalType getNumObjectiveGradientEvaluations() const
     {
-        return (mNumObjectiveGradientEvaluations);
+        return (mNumObjGradEval);
     }
     OrdinalType getNumObjectiveHessianEvaluations() const
     {
@@ -140,9 +140,10 @@ public:
             (*mObjectives)[tObjectiveIndex].cacheData();
         }
     }
+
     /*! Directive that updates current optimization state data and notifies any active gradient and Hessian
      *  approximation methods that they need to update any method specific data since a trial control was accepted. */
-    void updateOptimizationData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         assert(mStateData.get() != nullptr);
         assert(mObjectives.get() != nullptr);
@@ -160,7 +161,11 @@ public:
             mObjectivesGradient->operator[](tObjectiveIndex).update(mStateData.operator*());
             mObjectiveHessians->operator[](tObjectiveIndex).update(mStateData.operator*());
         }
+
+        aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
+        aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
     }
+
     /*! Evaluate objective function f_i(\mathbf{z})\ \forall\ i=1,\dots,n, where i\in\mathcal{N}
      *  and $n$ denotes the number of objective functions. */
     ScalarType evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
@@ -176,7 +181,7 @@ public:
             ScalarType tMyValue = tMyWeight * mObjectives->operator[](tIndex).value(aControl);
             tOutput += tMyValue;
         }
-        mNumObjectiveFunctionEvaluations++;
+        mNumObjFuncEval++;
         return (tOutput);
     }
     /*! Compute reduced gradient, \nabla_{\mathbf{z}}{F}=\sum_{i=1}^{n}\nabla_{\mathbf{z}}f_i(\mathbf{z})\
@@ -196,7 +201,7 @@ public:
             ScalarType tMyWeight = mObjectives->weight(tIndex);
             Plato::update(tMyWeight, *mWorkVec, static_cast<ScalarType>(1), aOutput);
         }
-        mNumObjectiveGradientEvaluations++;
+        mNumObjGradEval++;
     }
     /*! Compute the application of a vector to the reduced Hessian. The reduced Hessian is defined as
      *  \nabla_{\mathbf{z}}^{2}{F}=\sum_{i=1}^{n}\nabla_{\mathbf{z}}^{2}f_i(\mathbf{z})\ \forall\ i=1,
@@ -239,8 +244,8 @@ public:
     }
 
 private:
-    OrdinalType mNumObjectiveFunctionEvaluations;
-    OrdinalType mNumObjectiveGradientEvaluations;
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
     OrdinalType mNumObjectiveHessianEvaluations;
     OrdinalType mNumPreconditionerEvaluations;
     OrdinalType mNumInversePreconditionerEvaluations;

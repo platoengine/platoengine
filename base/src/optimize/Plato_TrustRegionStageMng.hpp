@@ -67,7 +67,7 @@ public:
     }
 
     virtual void cacheData() = 0;
-    virtual void updateOptimizationData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
+    virtual void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
     virtual ScalarType evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                           ScalarType aTolerance = std::numeric_limits<ScalarType>::max()) = 0;
     virtual void computeGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,

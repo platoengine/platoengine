@@ -51,6 +51,7 @@
 
 #include <cmath>
 #include <memory>
+#include <sstream>
 #include <cassert>
 #include <iostream>
 #include <algorithm>
@@ -59,6 +60,7 @@
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_MultiVector.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_KelleySachsStepMng.hpp"
 #include "Plato_KelleySachsAlgorithm.hpp"
@@ -73,9 +75,17 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class KelleySachsBoundConstrained : public Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory enables construction of core vector and multi-vector data structures
+     * @param [in] aDataMng data manager for Kelley-Sachs algorithms
+     * @param [in] aStageMng interface to objective and constraint evaluations
+    **********************************************************************************/
     KelleySachsBoundConstrained(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                                 const std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng,
                                 const std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
+            mPrintDiagnostics(false),
+            mOutputData(),
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
             mOptimalityTolerance(1e-5),
             mGradient(aDataFactory->control().create()),
@@ -86,53 +96,212 @@ public:
     {
         this->initialize();
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~KelleySachsBoundConstrained()
     {
     }
 
-    /*! Set optimality tolerance, i.e. \Vert\nabla_{\mathbf{z}}F\Vert < \epsilon, where \nabla_{\mathbf{z}}
-     *  F = \sum_{i=1}^{n}\nabla_{\mathbf{z}}f_{i}(\mathbf{z})\ \forall\ i=1,\dots,n. Here, \mathbf{z}
-     *  denotes the set of controls, f_i(\mathbf{z}) is an objective function, $n\in\mathcal{N}$ is the
-     *  number of objective functions and \epsilon > 0 denotes a user-defined tolerance. */
+    /******************************************************************************//**
+     * @brief Enable output of diagnostics (i.e. optimization problem status)
+    **********************************************************************************/
+    void enableDiagnostics()
+    {
+        mPrintDiagnostics = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Set optimality tolerance, i.e. \f$\Vert\nabla{F}(x)\Vert\leq\epsilon\f$
+     * @return [in] aInput optimality tolerance
+    **********************************************************************************/
     void setOptimalityTolerance(const ScalarType & aInput)
     {
         mOptimalityTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set maximum number of trust region subproblem iterations
+     * @return [in] aInput maximum number of trust region subproblem iterations
+    **********************************************************************************/
     void setMaxNumTrustRegionSubProblemIterations(const OrdinalType & aInput)
     {
         mStepMng->setMaxNumTrustRegionSubProblemIterations(aInput);
     }
+
+    /******************************************************************************//**
+     * @brief Set minimum trust region radius
+     * @return [in] aInput minimum trust region radius
+    **********************************************************************************/
     void setMinTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMinTrustRegionRadius(aInput);
     }
+
+    /******************************************************************************//**
+     * @brief Set maximum trust region radius
+     * @return [in] aInput maximum trust region radius
+    **********************************************************************************/
     void setMaxTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMaxTrustRegionRadius(aInput);
     }
+
+    /******************************************************************************//**
+     * @brief Set trust region radius expansion factor
+     * @return [in] aInput trust region radius expansion factor
+    **********************************************************************************/
     void setTrustRegionExpansion(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionExpansion(aInput);
     }
+
+    /******************************************************************************//**
+     * @brief Set trust region radius contraction factor
+     * @return [in] aInput trust region radius contraction factor
+    **********************************************************************************/
     void setTrustRegionContraction(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionContraction(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Solve optimization problem
+    **********************************************************************************/
     void solve()
     {
+        this->openOutputFile();
         this->checkInitialGuess();
+        this->setInitialProblemData();
+        mStageMng->updateOptimizationData(*mDataMng);
+        this->outputDiagnostics();
 
-        const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
-        ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
-        ScalarType tCurrentObjectiveFunctionValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
-        mDataMng->setCurrentObjectiveFunctionValue(tCurrentObjectiveFunctionValue);
+        OrdinalType tIteration = 0;
+        while(1)
+        {
+            tIteration++;
+            this->setNumIterationsDone(tIteration);
+            mDataMng->cacheCurrentStageData();
+            // Compute adaptive constants to ensure superlinear convergence
+            this->computeAdaptiveConstant();
+            // Solve trust region subproblem
+            mStepMng->solveSubProblem(*mDataMng, *mStageMng, *mSolver);
+            // Update mid objective, control, and gradient information if necessary
+            this->update();
+            // Update stage manager data
+            mStageMng->updateOptimizationData(*mDataMng);
+            // output diagnostics
+            this->outputDiagnostics();
+            if(this->checkStoppingCriteria() == true)
+            {
+                this->outputMyStoppingCriterion();
+                this->closeOutputFile();
+                break;
+            }
+        }
+    }
 
-        mStageMng->cacheData();
-        mStageMng->computeGradient(tCurrentControl, *mGradient);
-        mDataMng->setCurrentGradient(*mGradient);
-        mDataMng->computeNormProjectedGradient();
+private:
+    /******************************************************************************//**
+     * @brief Open output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.open("ksbc_algorithm_diagnostics.txt");
+                Plato::print_ksbc_diagnostics_header(mOutputStream, mPrintDiagnostics);
+            }
+        }
+    }
 
+    /******************************************************************************//**
+     * @brief Close output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print diagnostics for Kelley-Sachs bound constrained algorithm
+    **********************************************************************************/
+    void outputDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = this->getNumIterationsDone();
+            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
+
+            mOutputData.mActualRed = mStepMng->getActualReduction();
+            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
+            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
+            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            Plato::print_ksbc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion into diagnostics file.
+    **********************************************************************************/
+    void outputMyStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::algorithm::stop_t tStopCriterion = this->getStoppingCriterion();
+                Plato::get_stop_criterion(tStopCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Compute adaptive constants to ensure superlinear convergence
+    **********************************************************************************/
+    void computeAdaptiveConstant()
+    {
+        ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
+        ScalarType tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.75));
+        ScalarType tEpsilon = std::min(static_cast<ScalarType>(1e-3), tValue);
+        mStepMng->setEpsilonConstant(tEpsilon);
+        tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.95));
+        ScalarType tEta = static_cast<ScalarType>(0.1) * std::min(static_cast<ScalarType>(1e-1), tValue);
+        mStepMng->setEtaConstant(tEta);
+    }
+
+    /******************************************************************************//**
+     * @brief Set initial trust region radius to initial norm of the gradient
+    **********************************************************************************/
+    void setInitialTrustRegionRadius()
+    {
         if(mStepMng->isInitialTrustRegionRadiusSetToNormProjectedGradient() == true)
         {
             ScalarType tTrustRegionRadius = mDataMng->getNormProjectedGradient();
@@ -143,36 +312,28 @@ public:
             }
             mStepMng->setTrustRegionRadius(tTrustRegionRadius);
         }
-        mDataMng->computeStationarityMeasure();
-
-        OrdinalType tIteration = 0;
-        while(1)
-        {
-            tIteration++;
-            this->setNumIterationsDone(tIteration);
-            mDataMng->cacheCurrentStageData();
-            // Compute adaptive constants to ensure superlinear convergence
-            ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
-            ScalarType tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.75));
-            ScalarType tEpsilon = std::min(static_cast<ScalarType>(1e-3), tValue);
-            mStepMng->setEpsilonConstant(tEpsilon);
-            tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.95));
-            ScalarType tEta = static_cast<ScalarType>(0.1) * std::min(static_cast<ScalarType>(1e-1), tValue);
-            mStepMng->setEtaConstant(tEta);
-            // Solve trust region subproblem
-            mStepMng->solveSubProblem(*mDataMng, *mStageMng, *mSolver);
-            // Update mid objective, control, and gradient information if necessary
-            this->update();
-            // Update stage manager data
-            mStageMng->updateOptimizationData(mDataMng.operator*());
-            if(this->checkStoppingCriteria() == true)
-            {
-                break;
-            }
-        }
     }
 
-private:
+    /******************************************************************************//**
+     * @brief Compute initial objective value and gradient.
+    **********************************************************************************/
+    void setInitialProblemData()
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+        ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
+        ScalarType tCurrentObjFuncValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
+        mDataMng->setCurrentObjectiveFunctionValue(tCurrentObjFuncValue);
+        mStageMng->cacheData();
+        mStageMng->computeGradient(tCurrentControl, *mGradient);
+        mDataMng->setCurrentGradient(*mGradient);
+        mDataMng->computeNormProjectedGradient();
+        this->setInitialTrustRegionRadius();
+        mDataMng->computeStationarityMeasure();
+    }
+
+    /******************************************************************************//**
+     * @brief Check and initialize control lower and upper bounds
+    **********************************************************************************/
     void initialize()
     {
         // Check Bounds
@@ -182,12 +343,16 @@ private:
             const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
             Plato::error::checkBounds(tLowerBounds, tUpperBounds);
         }
-        catch(const std::invalid_argument & tErrorMsg)
+        catch(const std::invalid_argument & tError)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            std::cout << tError.what() << std::flush;
+            throw tError;
         }
     }
+
+    /******************************************************************************//**
+     * @brief Check that control initial guess is within bounds
+    **********************************************************************************/
     void checkInitialGuess()
     {
         try
@@ -195,10 +360,10 @@ private:
             bool tIsInitialGuessSet = mDataMng->isInitialGuessSet();
             Plato::error::checkInitialGuessIsSet(tIsInitialGuessSet);
         }
-        catch(const std::invalid_argument & tErrorMsg)
+        catch(const std::invalid_argument & tError)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            std::cout << tError.what() << std::flush;
+            throw tError;
         }
 
         try
@@ -208,10 +373,10 @@ private:
             const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
             Plato::error::checkInitialGuess(tControl, tLowerBounds, tUpperBounds);
         }
-        catch(const std::invalid_argument & tErrorMsg)
+        catch(const std::invalid_argument & tError)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            std::cout << tError.what() << std::flush;
+            throw tError;
         }
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
@@ -222,6 +387,10 @@ private:
         mDataMng->bounds().project(tLowerBounds, tUpperBounds, *tWorkMultiVector);
         mDataMng->setCurrentControl(*tWorkMultiVector);
     }
+
+    /******************************************************************************//**
+     * @brief Update trial control if current mid-point actual reduction tolerance is violated.
+    **********************************************************************************/
     void update()
     {
         // Cache state data since trial control was accepted
@@ -250,6 +419,8 @@ private:
 
         // Compute stationarity measure
         mDataMng->computeStationarityMeasure();
+        // Compute norm of projected gradient
+        mDataMng->computeNormProjectedGradient();
         // Compute control stagnation measure
         mDataMng->computeControlStagnationMeasure();
         // Compute objective stagnation measure
@@ -258,9 +429,11 @@ private:
         ScalarType tNormProjectedGradient = mDataMng->getNormProjectedGradient();
         mStepMng->updateGradientInexactnessTolerance(tNormProjectedGradient);
     }
-    /*! Check stopping criteria. Return true if a stopping criteria is met; otherwise, return false and
-     *  solve the trust region sub-problem to compute a new trial control. Repeat until one stopping
-     *  criteria is satisfied. */
+
+    /******************************************************************************//**
+     * @brief Check stopping criteria
+     * @return stopping criteria flag (true = stop algorithm, false = continue to next iteration)
+    **********************************************************************************/
     bool checkStoppingCriteria()
     {
         bool tStop = false;
@@ -320,7 +493,11 @@ private:
 
         return (tStop);
     }
-    //! Check for any NaN stopping criteria measures.
+
+    /******************************************************************************//**
+     * @brief Check for NaN values
+     * @return NaN flag (true = NaN identified, false = NaN not identified)
+    **********************************************************************************/
     bool checkNaN()
     {
         const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
@@ -348,8 +525,12 @@ private:
     }
 
 private:
+    bool mPrintDiagnostics;
+    std::ofstream mOutputStream;
+
     ScalarType mOptimalityTolerance;
 
+    Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;
     std::shared_ptr<Plato::KelleySachsStepMng<ScalarType, OrdinalType>> mStepMng;
     std::shared_ptr<Plato::ProjectedSteihaugTointPcg<ScalarType,OrdinalType>> mSolver;

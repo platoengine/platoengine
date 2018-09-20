@@ -390,7 +390,7 @@ public:
     }
 
     /****************************************************************************************************************/
-    void updateOptimizationData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     /****************************************************************************************************************/
     {
         // compute objective and constraint stagnation measures
