@@ -1927,14 +1927,36 @@ void PlatoApp::PlatoMainOutput::operator()()
     lmp->setCurrentTime(time);
     int int_time = (int)time;
     lmp->WriteOutput();
+    int tMyRank = 0;
+    MPI_Comm_rank(mPlatoApp->mLocalComm, &tMyRank);
     if(m_outputFrequency > 0 && int_time % m_outputFrequency == 0)
     {
         if(mDiscretization == "density")
+        {
             extract_iso_surface(int_time);
+
+            // Write restart file
+            if(tMyRank == 0)
+            {
+                std::ostringstream theCommand;
+                std::string tInputFilename = "platomain.exo.1.0";
+                int tNumProcs = 0;
+                MPI_Comm_size(mPlatoApp->mLocalComm, &tNumProcs);
+                if(tNumProcs > 1)
+                {
+                    theCommand << "epu -auto platomain.exo." << tNumProcs << ".0 > epu.txt;";
+                    tInputFilename = "platomain.exo";
+                }
+                theCommand << "echo times " << int_time << " > commands.txt;";
+                theCommand << "echo save optimizationdofs >> commands.txt;";
+                theCommand << "echo end >> commands.txt;";
+                theCommand << "algebra " << tInputFilename << " restart_" << int_time << ".exo < commands.txt > algebra.txt";
+                std::cout << "\nExecuting system call: " << theCommand.str() << "\n";
+                system(theCommand.str().c_str());
+            }
+        }
         else if(mDiscretization == "levelset")
         {
-            int tMyRank = 0;
-            MPI_Comm_rank(mPlatoApp->mLocalComm, &tMyRank);
             if(tMyRank == 0)
             {
                 std::string tListCommand = "ls -t IterationHistory* > junk.txt";
