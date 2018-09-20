@@ -116,23 +116,23 @@ public:
         this->initialize();
 
         // ********* ALLOCATE LINEAR ALGEBRA FACTORY ********* //
-        Plato::AlgebraFactory<ScalarType, OrdinalType> tAlgebraFactory;
+        Plato::AlgebraFactory<ScalarType, OrdinalType> tLinearAlgebraFactory;
 
         // ********* ALLOCATE BASELINE DATA STRUCTURES FOR OPTIMIZER ********* //
         std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
                 std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
-        this->allocateBaselineDataStructures(tAlgebraFactory, *tDataFactory);
+        this->allocateBaselineDataStructures(tLinearAlgebraFactory, *tDataFactory);
 
         // ********* ALLOCATE DATA MANAGER ********* //
         std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> tDataMng =
                 std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(tDataFactory);
 
         // ********* SET UPPER AND LOWER BOUNDS ********* //
-        this->setLowerBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
-        this->setUpperBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
+        this->setLowerBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
+        this->setUpperBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
 
         // ********* SET INITIAL GUESS ********* //
-        this->setInitialGuess(tAlgebraFactory, *tDataMng);
+        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
 
         // ********* ALLOCATE OBJECTIVE FUNCTION ********* //
         std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tObjective =
@@ -154,10 +154,9 @@ public:
 
         // ********* ALLOCATE KELLEY-SACHS BOUND CONSTRAINED OPTIMIZATION ALGORITHM ********* //
         Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-        this->setOptions(tAlgorithm);
+        this->setParameters(tAlgorithm);
+        tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
-
-        this->printOutputFile(tAlgorithm, *tDataMng);
 
         this->finalize();
     }
@@ -171,7 +170,7 @@ public:
 
 private:
     /******************************************************************************/
-    void setOptions(Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
+    void setParameters(Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
     /******************************************************************************/
     {
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
@@ -294,44 +293,9 @@ private:
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
                 aAlgebraFactory.createReduction(mComm, mInterface);
         aDataFactory.allocateControlReductionOperations(*tReductionOperations);
-    }
 
-    /*****************************************************************************/
-    void printOutputFile(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm,
-                         const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
-    /*****************************************************************************/
-    {
-        bool tOutputDiagnostics = mInputData.getOutputDiagnosticsToFile();
-        if(tOutputDiagnostics == true)
-        {
-            std::ofstream tOutputFile;
-            tOutputFile.open("solution.txt");
-
-            std::string tStopCriterion;
-            Plato::get_stop_criterion(aAlgorithm.getStoppingCriterion(), tStopCriterion);
-            tOutputFile << tStopCriterion.c_str();
-
-            tOutputFile << "Number of Outer Iterations = " << aAlgorithm.getNumIterationsDone() << "\n";
-            tOutputFile << "Objective Function Value = " << aDataMng.getCurrentObjectiveFunctionValue() << "\n\n";
-
-            bool tOutputControl = mInputData.getOutputControlToFile();
-            if(tOutputControl == true)
-            {
-                const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();
-                for(OrdinalType tIndex = 0; tIndex < tControl.getNumVectors(); tIndex++)
-                {
-                    tOutputFile << "Solution Vector " << tIndex + static_cast<OrdinalType>(1) << "\n";
-                    const Plato::Vector<ScalarType, OrdinalType> & tMyControl = tControl[tIndex];
-                    for(OrdinalType tControlIndex = 0; tControlIndex < tMyControl.size(); tControlIndex++)
-                    {
-                        tOutputFile << "[" << tControlIndex << "] = " << tMyControl[tControlIndex] << "\n";
-                    }
-                    tOutputFile << "\n";
-                }
-            }
-
-            tOutputFile.close();
-        }
+        Plato::CommWrapper tCommWrapper(mComm);
+        aDataFactory.setCommWrapper(tCommWrapper);
     }
 
 private:

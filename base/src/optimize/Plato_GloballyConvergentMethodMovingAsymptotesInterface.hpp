@@ -247,6 +247,9 @@ private:
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
                 aAlgebraFactory.createReduction(mComm, mInterface);
         aDataFactory.allocateControlReductionOperations(*tReductionOperations);
+
+        Plato::CommWrapper tCommWrapper(mComm);
+        aDataFactory.setCommWrapper(tCommWrapper);
     }
 
     /******************************************************************************/
@@ -280,6 +283,7 @@ private:
         // ********* ALLOCATE CONSERVATIVE CONVEX SEPARABLE APPROXIMATION (CCSA) ALGORITHM *********
         Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, aDataMng, tSubProblem);
         this->setParameters(tAlgorithm, *tSubProblem);
+        tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
     }
 

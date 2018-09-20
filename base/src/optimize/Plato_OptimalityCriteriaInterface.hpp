@@ -112,23 +112,23 @@ public:
         this->initialize();
 
         // ********* ALLOCATE LINEAR ALGEBRA FACTORY ********* //
-        Plato::AlgebraFactory<ScalarType, OrdinalType> tAlgebraFactory;
+        Plato::AlgebraFactory<ScalarType, OrdinalType> tLinearAlgebraFactory;
 
         // ********* ALLOCATE OPTIMIZER'S BASELINE DATA STRUCTURES *********
         std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
                 std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
-        this->allocateBaselineDataStructures(tAlgebraFactory, *tDataFactory);
+        this->allocateBaselineDataStructures(tLinearAlgebraFactory, *tDataFactory);
 
         // ********* ALLOCATE OPTIMIZER'S DATA MANAGER *********
         std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> tDataMng =
                 std::make_shared<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>>(tDataFactory);
 
         // ********* SET LOWER AND UPPER BOUNDS FOR CONTROLS *********
-        this->setLowerBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
-        this->setUpperBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
+        this->setLowerBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
+        this->setUpperBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
 
         // ********* SET INITIAL GUESS *********
-        this->setInitialGuess(tAlgebraFactory, *tDataMng);
+        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
 
         // ********* SOLVE OPTIMIZATION PROBLEM *********
         this->solveOptimizationProblem(tDataMng, tDataFactory);
@@ -232,6 +232,9 @@ private:
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
                 aAlgebraFactory.createReduction(mComm, mInterface);
         aDataFactory.allocateControlReductionOperations(*tReductionOperations);
+
+        Plato::CommWrapper tCommWrapper(mComm);
+        aDataFactory.setCommWrapper(tCommWrapper);
     }
 
     /******************************************************************************/
