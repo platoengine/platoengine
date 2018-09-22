@@ -8,7 +8,7 @@ The PLATO Engine computer program serves as a collaborative testbed rich in ligh
 # Getting Started
 
 ## Installation
-To checkout a copy of PLATO Engine and PLATO Analyze from the command line use from the directory of your choice (i.e. $HOME/codes):
+To checkout a copy of PLATO Engine and PLATO Analyze from the command line use from the directory of your choice (i.e. `$HOME/codes`):
 ```javascript
 git clone https://username:password@github.com/platoengine/platoengine.git (PLATO Engine)
 git clone https://username:password@github.com/SNLComputation/lgrtk.git (PLATO Analyze)
