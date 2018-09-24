@@ -965,6 +965,10 @@ ExodusIO::readNodePlot(double* data, string name)
 
   int num_nodes = myMesh->getNumNodes();
   ex_get_nodal_var(myFileID, num_time_steps, varindex, num_nodes, data);
+
+  delete [] names;
+
+
   return true;
 }
 

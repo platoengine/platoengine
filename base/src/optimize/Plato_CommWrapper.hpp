@@ -124,7 +124,7 @@ public:
         int tWorldSize = 0;
         try
         {
-            if(mComm == nullptr)
+            if( mComm == MPI_COMM_NULL )
             {
                 throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
             }
@@ -151,7 +151,7 @@ public:
         int tMyProcID = 0;
         try
         {
-            if(mComm == nullptr)
+            if( mComm == MPI_COMM_NULL )
             {
                 throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
             }
