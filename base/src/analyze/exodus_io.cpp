@@ -961,13 +961,14 @@ ExodusIO::readNodePlot(double* data, string name)
       break;
     }
  
+  for(int i=0; i<num_node_vars; i++)
+     delete [] names[i];
+  delete [] names;
+
   if (varindex < 0) return false;
 
   int num_nodes = myMesh->getNumNodes();
   ex_get_nodal_var(myFileID, num_time_steps, varindex, num_nodes, data);
-
-  delete [] names;
-
 
   return true;
 }
