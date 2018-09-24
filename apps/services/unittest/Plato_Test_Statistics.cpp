@@ -852,7 +852,7 @@ TEST(PlatoTest, PlotBetaCDF)
     Plato::BetaDistribution<double> tBetaDistribution(tMin, tMax, tMean, tVariance);
 
     // CONSTRUCT MONTE CARLO SAMPLE VECTOR
-    const size_t tNumSamples = 1000;
+    const size_t tNumSamples = 100;
     const size_t tLength = tNumSamples + static_cast<size_t>(1);
     const double tDelta = 1.0 / tNumSamples;
     Plato::StandardVector<double> tSamplesMC(tLength);
