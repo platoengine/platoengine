@@ -62,6 +62,10 @@
 #include "PlatoEngine_AbstractFilter.hpp"
 #include "Ioss_Region.h"                // for Region, NodeSetContainer, etc
 #include "Plato_TimersTree.hpp"
+#include "data_container.hpp"
+#include "lightmp.hpp"
+#include "types.hpp"
+#include "matrix_container.hpp"
 
 /******************************************************************************/
 /*! \brief Get the layout.
@@ -148,10 +152,28 @@ void PlatoApp::SetLowerBounds::operator()()
     // Now update values based on fixed entities
     if(mDiscretization == "density")
     {
-        double tValue = 0.5001;
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedBlocks(toData, mFixedBlocks, tValue);
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedSidesets(toData, mFixedSidesets, tValue);
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedNodesets(toData, mFixedNodesets, tValue);
+        LightMP* tLightMP = mPlatoApp->getLightMP();
+        const int dofsPerNode_1D = 1;
+        SystemContainer* sysGraph_1D = new SystemContainer(tLightMP->getMesh(), dofsPerNode_1D, tLightMP->getInput());
+        std::vector<VarIndex> single_value(1u);
+        DataContainer* dataContainer = tLightMP->getDataContainer();
+        bool plottable = true;
+        single_value[0] = dataContainer->registerVariable(RealType, "lowerBoundWorking", NODE, !plottable);
+        DistributedVector* dist_vector = new DistributedVector(sysGraph_1D, single_value);
+
+        double tBoundaryValue = .5001;
+        double tUpperValue = 1.;
+        mPlatoApp->mMeshServices->updateLowerBoundsForFixedBlocks(toData,
+                                                                  mFixedBlocks,
+                                                                  tLowerBoundIn,
+                                                                  tBoundaryValue,
+                                                                  tUpperValue,
+                                                                  *dist_vector);
+        mPlatoApp->mMeshServices->updateLowerBoundsForFixedSidesets(toData, mFixedSidesets, tBoundaryValue);
+        mPlatoApp->mMeshServices->updateLowerBoundsForFixedNodesets(toData, mFixedNodesets, tBoundaryValue);
+
+        delete dist_vector;
+        delete sysGraph_1D;
     }
 }
 

@@ -65,8 +65,13 @@ class MeshServices
 
     void getRoughness(const DistributedVector& topo,
                       double& roughness, DistributedVector& roughnessGradient,
-                      Plato::PenaltyModel* pModel=nullptr);
-    void updateLowerBoundsForFixedBlocks(double *toData, const std::vector<int> &aFixedBlocks, const double &aFixedBlockValue);
+                      Plato::PenaltyModel* pModel = nullptr);
+    void updateLowerBoundsForFixedBlocks(double *toData,
+                                         const std::vector<int> &aFixedBlocks,
+                                         const double& aOptimizationBlockInternalValue,
+                                         const double& aFixedBlockBoundaryValue,
+                                         const double& aFixedBlockInternalValue,
+                                         DistributedVector& aDistributed);
     void updateLowerBoundsForFixedSidesets(double *toData, const std::vector<int> &aFixedSidesets, const double &aFixedSidesetsValue);
     void updateLowerBoundsForFixedNodesets(double *toData, const std::vector<int> &aFixedNodesets, const double &aFixedNodesetsValue);
     void updateUpperBoundsForFixedBlocks(double *toData, const std::vector<int> &mFixedBlocks, const double &aFixedBlockValue);

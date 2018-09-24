@@ -165,6 +165,7 @@ public:
 
     LightMP* getLightMP();
     Plato::AbstractFilter* getFilter();
+    SystemContainer* getSysGraph() {return mSysGraph;}
 
     std::vector<double>* getValue(const std::string & aName);
 
