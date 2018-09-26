@@ -172,19 +172,19 @@ public:
         return (mStandardDeviation);
     }
 
-    ScalarType pdf(const ScalarType & aInput)
+    ScalarType pdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::normal_pdf<ScalarType>(aInput, mMean, mStandardDeviation);
         return (tOutput);
     }
 
-    ScalarType cdf(const ScalarType & aInput)
+    ScalarType cdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::normal_cdf<ScalarType>(aInput, mMean, mStandardDeviation);
         return (tOutput);
     }
 
-    ScalarType moment(const OrdinalType & aInput)
+    ScalarType moment(const OrdinalType & aInput) const
     {
         ScalarType tOutput = Plato::normal_moment<ScalarType, OrdinalType>(aInput, mMean, mStandardDeviation);
         return (tOutput);

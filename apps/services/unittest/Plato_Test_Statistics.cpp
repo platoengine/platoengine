@@ -76,40 +76,164 @@ namespace Plato
 {
 
 template<typename ScalarType, typename OrdinalType>
-void compute_monte_carlo_data(const Plato::Distribution<ScalarType, OrdinalType> & aDistribution,
-                              const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ,
-                              Plato::Vector<ScalarType, OrdinalType> & aSamples,
-                              Plato::Vector<ScalarType, OrdinalType> & aCDF)
+void check_dimension_mismatch(Plato::Vector<ScalarType, OrdinalType> & aVecOne, Plato::Vector<ScalarType, OrdinalType> & aVecTwo)
 {
-    const ScalarType tDelta = static_cast<ScalarType>(1.0) / aInputParamUQ.mNumSamples;
-    const OrdinalType tLength = aInputParamUQ.mNumSamples + static_cast<OrdinalType>(1);
-    for(OrdinalType tIndex = 1; tIndex < tLength; tIndex++)
+    try
     {
-        OrdinalType tPreviousIndex = tIndex - static_cast<OrdinalType>(1);
-        aSamples[tIndex] = aSamples[tPreviousIndex] + tDelta;
-        aCDF[tIndex] = aDistribution.cdf(aSamples[tIndex]);
+        if(aVecOne.size() != aVecTwo.size())
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! VEC_1 DIM = " << aVecOne.size() << " AND VEC_2 DIM = "
+            << aVecTwo.size() << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
     }
 }
 
 template<typename ScalarType, typename OrdinalType>
-void output_cdf_data(const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
-                     const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
-                     const Plato::Vector<ScalarType, OrdinalType> & aSamples,
-                     const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ)
+void check_cdf_container_size(const OrdinalType & aNumSamples, Plato::Vector<ScalarType, OrdinalType> & aCDF)
 {
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tUnnormalizedSamples = aSamples.create();
-    for(OrdinalType tIndex = 0; tIndex < tUnnormalizedSamples->size(); tIndex++)
+    try
     {
-        (*tUnnormalizedSamples)[tIndex] =
-                Plato::undo_normalization(aInputParamUQ.mLowerBound, aInputParamUQ.mUpperBound, aSamples[tIndex]);
+        if(aCDF.size() != aNumSamples)
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! EXPECTED CUMULATIVE DISTRIBUTION FUNCTION CONTAINER OF SIZE = "
+            << aNumSamples << ". INPUT CUMULATIVE DISTRIBUTION FUNCTION CONTAINER HAS SIZE = " << aCDF.size()
+            << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
+void check_samples_container_size(const OrdinalType & aNumSamples, Plato::Vector<ScalarType, OrdinalType> & aSamples)
+{
+    try
+    {
+        if(aSamples.size() != aNumSamples)
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! EXPECTED SAMPLES CONTAINER OF SIZE = " << aNumSamples
+            << ". INPUT SAMPLES CONTAINER HAS SIZE = " << aSamples.size() << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
+void compute_monte_carlo_data(const Plato::Distribution<ScalarType, OrdinalType> & aDistribution,
+                              const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ,
+                              Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                              Plato::Vector<ScalarType, OrdinalType> & aCDF,
+                              bool aPrint = false)
+{
+    const OrdinalType tNumMonteCarloSamples = aInputParamUQ.mNumSamples + static_cast<OrdinalType>(1);
+    try
+    {
+        Plato::check_cdf_container_size(tNumMonteCarloSamples, aCDF);
+        Plato::check_samples_container_size(tNumMonteCarloSamples, aSamples);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
+        << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
     }
 
-    std::ofstream tOutputFile;
-    tOutputFile.open("plato_cdf_output.txt");
-    tOutputFile.close();
+    const ScalarType tDelta = static_cast<ScalarType>(1.0) / aInputParamUQ.mNumSamples;
+    for(OrdinalType tIndex = 1; tIndex < tNumMonteCarloSamples; tIndex++)
+    {
+        OrdinalType tPreviousIndex = tIndex - static_cast<OrdinalType>(1);
+        aSamples[tIndex] = aSamples[tPreviousIndex] + tDelta;
+        const ScalarType tValue = aDistribution.cdf(aSamples[tIndex]);
+        aCDF[tIndex] = tValue;
+    }
 }
 
+template<typename ScalarType, typename OrdinalType>
+void compute_unnormalized_samples(const ScalarType & aLowerBound,
+                                  const ScalarType & aUpperBound,
+                                  const Plato::Vector<ScalarType, OrdinalType> & aNormalizedSamples,
+                                  Plato::Vector<ScalarType, OrdinalType> & aUnnormalizedSamples)
+{
+    assert(aNormalizedSamples.size() == aUnnormalizedSamples.size());
+    for(OrdinalType tIndex = 0; tIndex < aUnnormalizedSamples.size(); tIndex++)
+    {
+        aUnnormalizedSamples[tIndex] = Plato::undo_normalization(aLowerBound, aUpperBound, aNormalizedSamples[tIndex]);
+    }
 }
+
+template<typename ScalarType, typename OrdinalType>
+void print_cumulative_distribution_function_to_file(const Plato::CommWrapper & aCommWrapper,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aSamples)
+{
+    if(aCommWrapper.myProcID() == static_cast<OrdinalType>(0))
+    {
+        std::ofstream tOutputFile;
+        tOutputFile.open("plato_cdf_output.txt");
+        tOutputFile << std::right << "Samples" << std::setw(14) << "MC-CDF" << std::setw(14) << "SROM-CDF" << "\n" << std::flush;
+        const OrdinalType tNumSamples = aSamples.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
+        {
+            tOutputFile << std::setprecision(12) << std::right << aSamples[tIndex] << std::setw(14) << aMonteCarloCDF[tIndex]
+            << std::setw(14) << aSromCDF[tIndex] << "\n" << std::flush;
+        }
+        tOutputFile.close();
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
+void output_cumulative_distribution_function(const Plato::CommWrapper & aCommWrapper,
+                                             const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
+                                             const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
+                                             const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                                             bool aPrint = false)
+{
+    try
+    {
+        if(aCommWrapper.isCommInitialized() == false)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
+                 << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    Plato::print_cumulative_distribution_function_to_file(aCommWrapper, aSromCDF, aMonteCarloCDF, aSamples);
+}
+
+} // namespace Plato
 
 namespace PlatoTest
 {
@@ -525,6 +649,53 @@ std::vector<double> get_gold_beta_cdf_values()
                                  0.999999994611299, 0.999999996975875, 0.999999998447931, 0.999999999294973, 0.999999999731666,
                                  0.999999999922788, 0.999999999986664, 0.999999999999338, 1};
     return (tOutput);
+}
+
+// ********************************************** BEGIN UNIT TESTS **********************************************
+
+TEST(PlatoTest, ComputeMonteCarloDataErrors)
+{
+    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    tStatsInputs.mMean = 90.;
+    tStatsInputs.mUpperBound = 135.;
+    tStatsInputs.mLowerBound = 67.5;
+    tStatsInputs.mVariance = 135.;
+    tStatsInputs.mNumSamples = 10;
+    Plato::BetaDistribution<double> tDistribution(tStatsInputs.mLowerBound, tStatsInputs.mUpperBound, tStatsInputs.mMean, tStatsInputs.mVariance);
+
+    Plato::StandardVector<double> tCDF_1(tStatsInputs.mNumSamples);
+    Plato::StandardVector<double> tSamples_1(tStatsInputs.mNumSamples);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_1, tCDF_1), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_1, tCDF_1, true /* print error */), std::invalid_argument);
+
+    Plato::StandardVector<double> tCDF_2(tStatsInputs.mNumSamples + 1);
+    Plato::StandardVector<double> tSamples_2(tStatsInputs.mNumSamples);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_2, tCDF_2), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_2, tCDF_2, true /* print error */), std::invalid_argument);
+}
+
+TEST(PlatoTest, ComputeMonteCarloData)
+{
+    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    tStatsInputs.mMean = 90.;
+    tStatsInputs.mUpperBound = 135.;
+    tStatsInputs.mLowerBound = 67.5;
+    tStatsInputs.mVariance = 135.;
+    tStatsInputs.mNumSamples = 10;
+    Plato::BetaDistribution<double> tDistribution(tStatsInputs.mLowerBound, tStatsInputs.mUpperBound, tStatsInputs.mMean, tStatsInputs.mVariance);
+
+    Plato::StandardVector<double> tCDF(tStatsInputs.mNumSamples + 1);
+    Plato::StandardVector<double> tSamples(tStatsInputs.mNumSamples + 1);
+    Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples, tCDF);
+
+    const double tTolerance = 1e-4;
+    std::vector<double> tGoldSamples = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+    std::vector<double> tGoldCDF = {0, 0.0714785, 0.251019, 0.467237, 0.666808, 0.820732, 0.920897, 0.974047, 0.994957, 0.999721, 0.999987};
+    for(size_t tIndex = 0; tIndex < tCDF.size(); tIndex++)
+    {
+        EXPECT_NEAR(tCDF[tIndex], tGoldCDF[tIndex], tTolerance);
+        EXPECT_NEAR(tSamples[tIndex], tGoldSamples[tIndex], tTolerance);
+    }
 }
 
 TEST(PlatoTest, Uniform)

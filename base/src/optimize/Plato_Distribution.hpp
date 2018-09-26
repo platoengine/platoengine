@@ -60,9 +60,9 @@ public:
     {
     }
 
-    virtual ScalarType pdf(const ScalarType & tInput) = 0;
-    virtual ScalarType cdf(const ScalarType & tInput) = 0;
-    virtual ScalarType moment(const OrdinalType & tInput) = 0;
+    virtual ScalarType pdf(const ScalarType & tInput) const = 0;
+    virtual ScalarType cdf(const ScalarType & tInput) const = 0;
+    virtual ScalarType moment(const OrdinalType & tInput) const = 0;
 };
 
 } // namespace Plato

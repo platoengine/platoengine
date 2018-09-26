@@ -216,17 +216,17 @@ public:
         return (mAlpha);
     }
 
-    ScalarType pdf(const ScalarType & aInput)
+    ScalarType pdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::beta_pdf<ScalarType>(aInput, mAlpha, mBeta);
         return (tOutput);
     }
-    ScalarType cdf(const ScalarType & aInput)
+    ScalarType cdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::beta_cdf<ScalarType, OrdinalType>(aInput, mAlpha, mBeta);
         return (tOutput);
     }
-    ScalarType moment(const OrdinalType & aInput)
+    ScalarType moment(const OrdinalType & aInput) const
     {
         ScalarType tOutput = Plato::beta_moment<ScalarType, OrdinalType>(aInput, mAlpha, mBeta);
         return (tOutput);

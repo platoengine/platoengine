@@ -156,19 +156,19 @@ public:
         return (tOuput);
     }
 
-    ScalarType pdf(const ScalarType & aInput)
+    ScalarType pdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::uniform_pdf<ScalarType>(aInput, mLowerBound, mUpperBound);
         return (tOutput);
     }
 
-    ScalarType cdf(const ScalarType & aInput)
+    ScalarType cdf(const ScalarType & aInput) const
     {
         ScalarType tOutput = Plato::uniform_cdf<ScalarType>(aInput, mLowerBound, mUpperBound);
         return (tOutput);
     }
 
-    ScalarType moment(const OrdinalType & aInput)
+    ScalarType moment(const OrdinalType & aInput) const
     {
         ScalarType tOutput = Plato::uniform_moment<ScalarType>(aInput, mLowerBound, mUpperBound);
         return (tOutput);

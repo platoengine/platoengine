@@ -66,7 +66,8 @@ public:
      * @brief Default constructor
      **********************************************************************************/
     CommWrapper() :
-            mComm()
+            mComm(),
+            mIsCommSet(false)
     {
     }
 
@@ -75,7 +76,8 @@ public:
      * @param [in] aInput MPI communicator
      **********************************************************************************/
     explicit CommWrapper(const MPI_Comm & aInput) :
-            mComm(aInput)
+            mComm(aInput),
+            mIsCommSet(true)
     {
     }
 
@@ -92,10 +94,7 @@ public:
      **********************************************************************************/
     bool isCommInitialized() const
     {
-        int tIsInitialized = 0;
-        MPI_Initialized(&tIsInitialized);
-        bool tOutput = tIsInitialized == static_cast<int>(1) ? true : false;
-        return (tOutput);
+        return (mIsCommSet);
     }
 
     /******************************************************************************//**
@@ -104,6 +103,7 @@ public:
     void useDefaultComm()
     {
         mComm = MPI_COMM_WORLD;
+        mIsCommSet = true;
     }
 
     /******************************************************************************//**
@@ -113,6 +113,7 @@ public:
     void setComm(const MPI_Comm & aInput)
     {
         mComm = aInput;
+        mIsCommSet = true;
     }
 
     /******************************************************************************//**
@@ -124,7 +125,7 @@ public:
         int tWorldSize = 0;
         try
         {
-            if( mComm == MPI_COMM_NULL )
+            if( mIsCommSet == false )
             {
                 throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
             }
@@ -151,7 +152,7 @@ public:
         int tMyProcID = 0;
         try
         {
-            if( mComm == MPI_COMM_NULL )
+            if( mIsCommSet == false )
             {
                 throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
             }
@@ -180,6 +181,7 @@ public:
 
 private:
     MPI_Comm mComm; /*!< MPI communicator */
+    bool mIsCommSet; /*!< specifies if MPI communicator is set */
 };
 // class CommWrapper
 
