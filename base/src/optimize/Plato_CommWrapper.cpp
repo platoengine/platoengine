@@ -75,7 +75,7 @@ bool CommWrapper::isCommInitialized() const
     return (tOutput);
 }
 
-void CommWrapper::setDefaultComm()
+void CommWrapper::useDefaultComm()
 {
     mComm = MPI_COMM_WORLD;
 }
@@ -90,7 +90,7 @@ int CommWrapper::size() const
     int tWorldSize = 0;
     try
     {
-        if(mComm == nullptr)
+        if(mComm == MPI_COMM_NULL)
         {
             throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
         }
@@ -113,7 +113,7 @@ int CommWrapper::myProcID() const
     int tMyProcID = 0;
     try
     {
-        if(mComm == nullptr)
+        if(mComm == MPI_COMM_NULL)
         {
             throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
         }
