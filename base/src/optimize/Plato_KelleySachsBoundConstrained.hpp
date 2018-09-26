@@ -84,10 +84,10 @@ public:
     KelleySachsBoundConstrained(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                                 const std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng,
                                 const std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
-            mPrintDiagnostics(false),
-            mOutputData(),
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
+            mPrintDiagnostics(false),
             mOptimalityTolerance(1e-5),
+            mOutputData(),
             mGradient(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
             mSolver(std::make_shared<Plato::ProjectedSteihaugTointPcg<ScalarType, OrdinalType>>(*aDataFactory)),
@@ -213,7 +213,7 @@ private:
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.open("ksbc_algorithm_diagnostics.txt");
+                mOutputStream.open("plato_ksbc_algorithm_diagnostics.txt");
                 Plato::print_ksbc_diagnostics_header(mOutputStream, mPrintDiagnostics);
             }
         }

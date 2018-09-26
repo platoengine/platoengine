@@ -98,6 +98,7 @@ struct AlgorithmParamStruct
     OrdinalType mMaxNumIterations;
     ScalarType mStagnationTolerance;
     ScalarType mMinPenaltyParameter;
+    ScalarType mFeasibilityTolerance;
     ScalarType mMaxTrustRegionRadius;
     ScalarType mActualReductionTolerance;
     ScalarType mPenaltyParameterScaleFactor;
@@ -107,9 +108,10 @@ struct AlgorithmParamStruct
     /*! @brief Default constructor */
     AlgorithmParamStruct() :
             mStop(Plato::algorithm::NOT_CONVERGED),
-            mMaxNumIterations(500),
+            mMaxNumIterations(1000),
             mStagnationTolerance(1e-12),
-            mMinPenaltyParameter(5e-4),
+            mMinPenaltyParameter(1e-5),
+            mFeasibilityTolerance(1e-4),
             mMaxTrustRegionRadius(1e1),
             mActualReductionTolerance(1e-12),
             mPenaltyParameterScaleFactor(1.2),
@@ -261,6 +263,25 @@ void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarTyp
 
 /******************************************************************************//**
  *
+ * @brief Set optimizer parameters for stochastic reduced order model (SROM) problem
+ * @param [in] aAlgorithmParam data structure with inputs/outputs for/from optimizer
+ * @param [in,out] aAlgorithm optimizer interface
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void set_srom_optimizer_parameters(const Plato::AlgorithmParamStruct<ScalarType, OrdinalType>& aAlgorithmParam,
+                                   Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType>& aAlgorithm)
+{
+    aAlgorithm.setMaxNumIterations(aAlgorithmParam.mMaxNumIterations);
+    aAlgorithm.setMinPenaltyParameter(aAlgorithmParam.mMinPenaltyParameter);
+    aAlgorithm.setStagnationTolerance(aAlgorithmParam.mStagnationTolerance);
+    aAlgorithm.setFeasibilityTolerance(aAlgorithmParam.mFeasibilityTolerance);
+    aAlgorithm.setMaxTrustRegionRadius(aAlgorithmParam.mMaxTrustRegionRadius);
+    aAlgorithm.setActualReductionTolerance(aAlgorithmParam.mActualReductionTolerance);
+}
+
+/******************************************************************************//**
+ *
  * @brief Solve optimization problem to construct an optimal stochastic reduced order model (SROM)
  * @param [in] aStatisticInputs data structure with inputs for probability distribution function
  * @param [in,out] aAlgorithmParam data structure with inputs/outputs for/from optimization algorithm
@@ -287,7 +308,8 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
     tDataFactory->allocateControl(tNumSamples, tNumControlVectors);
 
     // build distribution
-    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution = build_distrubtion<ScalarType, OrdinalType>(aStatsInputs);
+    std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution =
+            Plato::build_distrubtion<ScalarType, OrdinalType>(aStatsInputs);
 
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType> > tSromObjective =
@@ -326,11 +348,7 @@ void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalTy
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
     Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setMaxNumIterations(aAlgorithmParam.mMaxNumIterations);
-    tAlgorithm.setMinPenaltyParameter(aAlgorithmParam.mMinPenaltyParameter);
-    tAlgorithm.setStagnationTolerance(aAlgorithmParam.mStagnationTolerance);
-    tAlgorithm.setMaxTrustRegionRadius(aAlgorithmParam.mMaxTrustRegionRadius);
-    tAlgorithm.setActualReductionTolerance(aAlgorithmParam.mActualReductionTolerance);
+    Plato::set_srom_optimizer_parameters<ScalarType, OrdinalType>(aAlgorithmParam, tAlgorithm);
     tAlgorithm.solve();
 
     // transfer to output data structure

@@ -375,7 +375,7 @@ private:
                 const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
                 mOutputData.mConstraints.clear();
                 mOutputData.mConstraints.resize(tNumConstraints);
-                mOutputStream.open("ccsa_algorithm_diagnostics.txt");
+                mOutputStream.open("plato_ccsa_algorithm_diagnostics.txt");
                 Plato::print_ccsa_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }

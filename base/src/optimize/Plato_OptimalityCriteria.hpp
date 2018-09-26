@@ -246,7 +246,7 @@ private:
                 const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
                 mOutputData.mConstraints.clear();
                 mOutputData.mConstraints.resize(tNumConstraints);
-                mOutputStream.open("optimality_criteria_diagnostics.txt");
+                mOutputStream.open("plato_optimality_criteria_diagnostics.txt");
                 Plato::print_oc_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }
