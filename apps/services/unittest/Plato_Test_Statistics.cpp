@@ -75,45 +75,6 @@
 namespace PlatoTest
 {
 
-template<typename ScalarType>
-ScalarType normalize(const ScalarType& aLowerBound, const ScalarType& aUpperBound, const ScalarType& aSampleValue)
-{
-    return ( (aSampleValue - aLowerBound) / (aUpperBound - aLowerBound) );
-}
-
-template<typename ScalarType>
-ScalarType undo_normalization(const ScalarType& aLowerBound, const ScalarType& aUpperBound, const ScalarType& aSampleValue)
-{
-    return (aLowerBound + (aUpperBound - aLowerBound) * aSampleValue);
-}
-
-template<typename ScalarType, typename OrdinalType>
-void compute_srom_cdf_plot(const Plato::Vector<ScalarType, OrdinalType>& aSamplesMC,
-                           const Plato::Vector<ScalarType, OrdinalType>& aSamplesSROM,
-                           const Plato::Vector<ScalarType, OrdinalType>& aProbsSROM,
-                           Plato::Vector<ScalarType, OrdinalType>& aSromCDF,
-                           ScalarType aSigma = 1e-7)
-{
-    assert(aSromCDF.size() == aSamplesMC.size());
-    assert(aSamplesSROM.size() == aProbsSROM.size());
-
-    const ScalarType tConstant = std::sqrt(2);
-    const OrdinalType tNumSamplesMC = aSamplesMC.size();
-    const OrdinalType tNumSamplesSROM = aSamplesSROM.size();
-
-    for(OrdinalType tIndexMC = 0; tIndexMC < tNumSamplesMC; tIndexMC++)
-    {
-        ScalarType tSum = 0;
-        for(OrdinalType tIndexSROM = 0; tIndexSROM < tNumSamplesSROM; tIndexSROM++)
-        {
-            ScalarType tArg = (aSamplesMC[tIndexMC] - aSamplesSROM[tIndexSROM]) / (aSigma * tConstant);
-            tSum = tSum + aProbsSROM[tIndexSROM] * (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + erf(tArg)));
-            tSum = tSum >= static_cast<ScalarType>(1.0) ? static_cast<ScalarType>(1.0) : tSum;
-        }
-        aSromCDF[tIndexMC] = tSum;
-    }
-}
-
 /******************************************************************************//**
  *
  * @brief Return gold values for srom cumulative distribution function unit test.
@@ -900,7 +861,7 @@ TEST(PlatoTest, PlotBetaCDF)
     Plato::StandardVector<double> tNormalizedSamplesSROM(tInput.mNumSamples);
     for(size_t tIndex = 0; tIndex < tSamplesSROM.size(); tIndex++)
     {
-        tNormalizedSamplesSROM[tIndex] = PlatoTest::normalize(tInput.mLowerBound, tInput.mUpperBound, tSamplesSROM[tIndex]);
+        tNormalizedSamplesSROM[tIndex] = Plato::normalize(tInput.mLowerBound, tInput.mUpperBound, tSamplesSROM[tIndex]);
     }
 
     // TEST SROM PROBLEM OUTPUT
@@ -918,7 +879,7 @@ TEST(PlatoTest, PlotBetaCDF)
     }
 
     // CALL SROM CDF PLOT FUNCTION
-    PlatoTest::compute_srom_cdf_plot(tSamplesMC, tNormalizedSamplesSROM, tProbsSROM, tSromCDF);
+    Plato::compute_srom_cdf_plot(tSamplesMC, tNormalizedSamplesSROM, tProbsSROM, tSromCDF);
 
     // TEST CDF OUTPUT
     std::vector<double> tGoldSromCDF = PlatoTest::get_gold_srom_cdf_values();

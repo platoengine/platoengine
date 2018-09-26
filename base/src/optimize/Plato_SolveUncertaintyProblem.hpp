@@ -1,8 +1,4 @@
 /*
- * Plato_SolveUncertaintyProblem.hpp
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -42,6 +38,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_SolveUncertaintyProblem.hpp
+ *
+ * Created on: August 31, 2018
+ */
 
 #pragma once
 
@@ -121,6 +123,45 @@ struct AlgorithmParamStruct
     }
 };
 // struct AlgorithmParamStruct
+
+/******************************* INLINED FUNCTIONS *******************************/
+
+/******************************************************************************//**
+ *
+ * @brief Compute cumulative distribution function from Stochastic Reduced Order Model (SROM) approximation.
+ * @param [in] aSamplesMC Monte Carlo samples
+ * @param [in] aSamplesSROM SROM samples from optimization problem
+ * @param [in] aProbsSROM SROM sample probabilities from optimization problem
+ * @param [in,out] aProbsSROM aSromCDF SROM cumulative distribution function
+ * @param [in] aSigma smoothing parameter (Default = 1e-7)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void compute_srom_cdf_plot(const Plato::Vector<ScalarType, OrdinalType>& aSamplesMC,
+                           const Plato::Vector<ScalarType, OrdinalType>& aSamplesSROM,
+                           const Plato::Vector<ScalarType, OrdinalType>& aProbsSROM,
+                           Plato::Vector<ScalarType, OrdinalType>& aSromCDF,
+                           ScalarType aSigma = 1e-7)
+{
+    assert(aSromCDF.size() == aSamplesMC.size());
+    assert(aSamplesSROM.size() == aProbsSROM.size());
+
+    const ScalarType tConstant = std::sqrt(2);
+    const OrdinalType tNumSamplesMC = aSamplesMC.size();
+    const OrdinalType tNumSamplesSROM = aSamplesSROM.size();
+
+    for(OrdinalType tIndexMC = 0; tIndexMC < tNumSamplesMC; tIndexMC++)
+    {
+        ScalarType tSum = 0;
+        for(OrdinalType tIndexSROM = 0; tIndexSROM < tNumSamplesSROM; tIndexSROM++)
+        {
+            ScalarType tArg = (aSamplesMC[tIndexMC] - aSamplesSROM[tIndexSROM]) / (aSigma * tConstant);
+            tSum = tSum + aProbsSROM[tIndexSROM] * (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + erf(tArg)));
+            tSum = tSum >= static_cast<ScalarType>(1.0) ? static_cast<ScalarType>(1.0) : tSum;
+        }
+        aSromCDF[tIndexMC] = tSum;
+    }
+}
 
 /******************************************************************************//**
  *
