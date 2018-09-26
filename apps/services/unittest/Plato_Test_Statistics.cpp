@@ -75,8 +75,28 @@
 namespace Plato
 {
 
+void print_plato_license(std::ofstream & aOutputFile)
+{
+    aOutputFile << "Plato Engine v.1.0: Copyright 2018, National Technology & Engineering Solutions of Sandia, LLC (NTESS).\n\n";
+}
+
+void check_null_comm(const Plato::CommWrapper & aCommWrapper)
+{
+    try
+    {
+        if(aCommWrapper.isCommInitialized() == false)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
 template<typename ScalarType, typename OrdinalType>
-void check_dimension_mismatch(Plato::Vector<ScalarType, OrdinalType> & aVecOne, Plato::Vector<ScalarType, OrdinalType> & aVecTwo)
+void check_dimension_mismatch(const Plato::Vector<ScalarType, OrdinalType> & aVecOne, const Plato::Vector<ScalarType, OrdinalType> & aVecTwo)
 {
     try
     {
@@ -173,9 +193,26 @@ template<typename ScalarType, typename OrdinalType>
 void compute_unnormalized_samples(const ScalarType & aLowerBound,
                                   const ScalarType & aUpperBound,
                                   const Plato::Vector<ScalarType, OrdinalType> & aNormalizedSamples,
-                                  Plato::Vector<ScalarType, OrdinalType> & aUnnormalizedSamples)
+                                  Plato::Vector<ScalarType, OrdinalType> & aUnnormalizedSamples,
+                                  bool aPrint = false)
 {
-    assert(aNormalizedSamples.size() == aUnnormalizedSamples.size());
+    try
+    {
+        Plato::check_dimension_mismatch(aNormalizedSamples, aUnnormalizedSamples);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
+        << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
     for(OrdinalType tIndex = 0; tIndex < aUnnormalizedSamples.size(); tIndex++)
     {
         aUnnormalizedSamples[tIndex] = Plato::undo_normalization(aLowerBound, aUpperBound, aNormalizedSamples[tIndex]);
@@ -192,12 +229,13 @@ void print_cumulative_distribution_function_to_file(const Plato::CommWrapper & a
     {
         std::ofstream tOutputFile;
         tOutputFile.open("plato_cdf_output.txt");
-        tOutputFile << std::right << "Samples" << std::setw(14) << "MC-CDF" << std::setw(14) << "SROM-CDF" << "\n" << std::flush;
+        Plato::print_plato_license(tOutputFile);
+        tOutputFile << std::right << "    Samples" << std::setw(18) << "MC-CDF" << std::setw(18) << "SROM-CDF" << "\n" << std::flush;
         const OrdinalType tNumSamples = aSamples.size();
         for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
         {
-            tOutputFile << std::setprecision(12) << std::right << aSamples[tIndex] << std::setw(14) << aMonteCarloCDF[tIndex]
-            << std::setw(14) << aSromCDF[tIndex] << "\n" << std::flush;
+            tOutputFile << std::scientific << std::setprecision(8) << std::right << aSamples[tIndex] << std::setw(18) << aMonteCarloCDF[tIndex]
+            << std::setw(18) << aSromCDF[tIndex] << "\n" << std::flush;
         }
         tOutputFile.close();
     }
@@ -212,15 +250,14 @@ void output_cumulative_distribution_function(const Plato::CommWrapper & aCommWra
 {
     try
     {
-        if(aCommWrapper.isCommInitialized() == false)
-        {
-            throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
-        }
+        Plato::check_null_comm(aCommWrapper);
+        Plato::check_dimension_mismatch(aSromCDF, aMonteCarloCDF);
+        Plato::check_dimension_mismatch(aSamples, aMonteCarloCDF);
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
         std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__ << "\nLINE: " << __LINE__
                  << "\n ******** \n\n";
         tMessage << tErrorMsg.what();
         if(aPrint == true)
@@ -686,7 +723,7 @@ TEST(PlatoTest, ComputeMonteCarloData)
 
     Plato::StandardVector<double> tCDF(tStatsInputs.mNumSamples + 1);
     Plato::StandardVector<double> tSamples(tStatsInputs.mNumSamples + 1);
-    Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples, tCDF);
+    ASSERT_NO_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples, tCDF));
 
     const double tTolerance = 1e-4;
     std::vector<double> tGoldSamples = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
@@ -696,6 +733,124 @@ TEST(PlatoTest, ComputeMonteCarloData)
         EXPECT_NEAR(tCDF[tIndex], tGoldCDF[tIndex], tTolerance);
         EXPECT_NEAR(tSamples[tIndex], tGoldSamples[tIndex], tTolerance);
     }
+}
+
+TEST(PlatoTest, ComputeUnnormalizedSamples)
+{
+    size_t tNumSamples = 11;
+    double tUpperBound = 135.;
+    double tLowerBound = 67.5;
+    std::vector<double> tValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+
+    Plato::StandardVector<double> VecOne(tValues);
+    Plato::StandardVector<double> VecTwo(9 /* size */);
+    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo, true /* print error */), std::invalid_argument);
+
+    Plato::StandardVector<double> tNormalized(tValues);
+    Plato::StandardVector<double> tUnnormalized(tValues.size());
+    ASSERT_NO_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, tNormalized, tUnnormalized));
+
+    const double tTolerance = 1e-4;
+    std::vector<double> tGoldValues = {67.5, 74.25, 81, 87.75, 94.5, 101.25, 108, 114.75, 121.5, 128.25, 135};
+    for(size_t tIndex = 0; tIndex < tNormalized.size(); tIndex++)
+    {
+        EXPECT_NEAR(tUnnormalized[tIndex], tGoldValues[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, PrintCumulativeDistributionFunctionToFile)
+{
+    Plato::CommWrapper tCommWrapper;
+    tCommWrapper.useDefaultComm();
+    std::vector<double> tValues = {67.5, 74.25, 81, 87.75, 94.5, 101.25, 108, 114.75, 121.5, 128.25, 135};
+    Plato::StandardVector<double> tSamples(tValues);
+    tValues = {0, 0.07147, 0.2510, 0.4672, 0.6668, 0.8207, 0.9209, 0.9741, 0.9951, 0.9997, 1};
+    Plato::StandardVector<double> tSromCDF(tValues);
+    tValues = {0, 0.0714785, 0.251019, 0.467237, 0.666808, 0.820732, 0.920897, 0.974047, 0.994957, 0.999721, 0.999987};
+    Plato::StandardVector<double> tMonteCarloCDF(tValues);
+    Plato::print_cumulative_distribution_function_to_file(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples);
+
+    std::ifstream tReadFile;
+    tReadFile.open("plato_cdf_output.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f plato_cdf_output.txt");
+
+    std::stringstream tGold("");
+    tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";
+    tGold << "SamplesMC-CDFSROM-CDF6.75000000e+010.00000000e+000.00000000e+007.42500000e+017.14785000e-027.14700000e-02";
+    tGold << "8.10000000e+012.51019000e-012.51000000e-018.77500000e+014.67237000e-014.67200000e-019.45000000e+01";
+    tGold << "6.66808000e-016.66800000e-011.01250000e+028.20732000e-018.20700000e-011.08000000e+029.20897000e-019.20900000e-01";
+    tGold << "1.14750000e+029.74047000e-019.74100000e-011.21500000e+029.94957000e-019.95100000e-011.28250000e+029.99721000e-01";
+    tGold << "9.99700000e-011.35000000e+029.99987000e-011.00000000e+00";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, OutputCumulativeDistributionFunctionErrors)
+{
+    size_t tSize = 5;
+    Plato::CommWrapper tCommWrapper;
+    Plato::StandardVector<double> tSamples(tSize);
+    Plato::StandardVector<double> tSromCDF(tSize);
+    Plato::StandardVector<double> tMonteCarloCDF(tSize);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    tCommWrapper.useDefaultComm();
+    ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
+
+    Plato::StandardVector<double> tSromCDF_1(tSize + 1u);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
+
+    Plato::StandardVector<double> tSamples_1(tSize + 1u);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1, true /* print error */), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
+
+    Plato::StandardVector<double> tMonteCarloCDF_1(tSize + 1u);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
+}
+
+TEST(PlatoTest, OutputCumulativeDistributionFunction)
+{
+    Plato::CommWrapper tCommWrapper;
+    tCommWrapper.useDefaultComm();
+    std::vector<double> tValues = {67.5, 74.25, 81, 87.75, 94.5, 101.25, 108, 114.75, 121.5, 128.25, 135};
+    Plato::StandardVector<double> tSamples(tValues);
+    tValues = {0, 0.07147, 0.2510, 0.4672, 0.6668, 0.8207, 0.9209, 0.9741, 0.9951, 0.9997, 1};
+    Plato::StandardVector<double> tSromCDF(tValues);
+    tValues = {0, 0.0714785, 0.251019, 0.467237, 0.666808, 0.820732, 0.920897, 0.974047, 0.994957, 0.999721, 0.999987};
+    Plato::StandardVector<double> tMonteCarloCDF(tValues);
+    Plato::print_cumulative_distribution_function_to_file(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples);
+
+    std::ifstream tReadFile;
+    tReadFile.open("plato_cdf_output.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f plato_cdf_output.txt");
+
+    std::stringstream tGold("");
+    tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";
+    tGold << "SamplesMC-CDFSROM-CDF6.75000000e+010.00000000e+000.00000000e+007.42500000e+017.14785000e-027.14700000e-02";
+    tGold << "8.10000000e+012.51019000e-012.51000000e-018.77500000e+014.67237000e-014.67200000e-019.45000000e+01";
+    tGold << "6.66808000e-016.66800000e-011.01250000e+028.20732000e-018.20700000e-011.08000000e+029.20897000e-019.20900000e-01";
+    tGold << "1.14750000e+029.74047000e-019.74100000e-011.21500000e+029.94957000e-019.95100000e-011.28250000e+029.99721000e-01";
+    tGold << "9.99700000e-011.35000000e+029.99987000e-011.00000000e+00";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, Uniform)
