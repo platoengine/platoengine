@@ -72,6 +72,45 @@
 
 #include "Plato_UnitTestUtils.hpp"
 
+namespace Plato
+{
+
+template<typename ScalarType, typename OrdinalType>
+void compute_monte_carlo_data(const Plato::Distribution<ScalarType, OrdinalType> & aDistribution,
+                              const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ,
+                              Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                              Plato::Vector<ScalarType, OrdinalType> & aCDF)
+{
+    const ScalarType tDelta = static_cast<ScalarType>(1.0) / aInputParamUQ.mNumSamples;
+    const OrdinalType tLength = aInputParamUQ.mNumSamples + static_cast<OrdinalType>(1);
+    for(OrdinalType tIndex = 1; tIndex < tLength; tIndex++)
+    {
+        OrdinalType tPreviousIndex = tIndex - static_cast<OrdinalType>(1);
+        aSamples[tIndex] = aSamples[tPreviousIndex] + tDelta;
+        aCDF[tIndex] = aDistribution.cdf(aSamples[tIndex]);
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
+void output_cdf_data(const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
+                     const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
+                     const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                     const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ)
+{
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tUnnormalizedSamples = aSamples.create();
+    for(OrdinalType tIndex = 0; tIndex < tUnnormalizedSamples->size(); tIndex++)
+    {
+        (*tUnnormalizedSamples)[tIndex] =
+                Plato::undo_normalization(aInputParamUQ.mLowerBound, aInputParamUQ.mUpperBound, aSamples[tIndex]);
+    }
+
+    std::ofstream tOutputFile;
+    tOutputFile.open("plato_cdf_output.txt");
+    tOutputFile.close();
+}
+
+}
+
 namespace PlatoTest
 {
 
