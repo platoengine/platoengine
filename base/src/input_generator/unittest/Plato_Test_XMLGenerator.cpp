@@ -1995,9 +1995,11 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
             "    type angle variation\n"
             "    load 34\n"
             "    axis Z\n"
-            "    distribution uniform\n"
+            "    distribution beta\n"
+            "    mean 2\n"
             "    upper bound 40\n"
             "    lower bound -35\n"
+            "    standard deviation 20\n"
             "    num samples 3\n"
             "end uncertainty\n";
 
@@ -2038,21 +2040,33 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     EXPECT_EQ(tester.getLoadType("34",0), "force");
     EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
     EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("34",0).c_str()), 6.7, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("34",0).c_str()), -1.9, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("34",0).c_str()), 0, 1e-5);
+    const double load34x = std::atof(tester.getLoadDirectionX("34", 0).c_str());
+    const double load34y = std::atof(tester.getLoadDirectionY("34", 0).c_str());
+    const double load34z = std::atof(tester.getLoadDirectionZ("34", 0).c_str());
+    std::cout << "34:" << load34x << "," << load34y << "," << load34z << std::endl;
+    EXPECT_NEAR(load34x, 6.6, 0.5);
+    EXPECT_NEAR(load34y, -2.3, 0.5);
+    EXPECT_NEAR(load34z, 0, 1e-5);
     EXPECT_EQ(tester.getLoadType("0",0), "force");
     EXPECT_EQ(tester.getLoadApplicationType("0",0), "nodeset");
     EXPECT_EQ(tester.getLoadApplicationID("0",0), "2");
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("0",0).c_str()), 7.0, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("0",0).c_str()), 0.3, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("0",0).c_str()), 0, 1e-5);
+    const double load0x = std::atof(tester.getLoadDirectionX("0", 0).c_str());
+    const double load0y = std::atof(tester.getLoadDirectionY("0", 0).c_str());
+    const double load0z = std::atof(tester.getLoadDirectionZ("0", 0).c_str());
+    std::cout << "0:" << load0x << "," << load0y << "," << load0z << std::endl;
+    EXPECT_NEAR(load0x, 7.0, 0.5);
+    EXPECT_NEAR(load0y, 0.7, 0.5);
+    EXPECT_NEAR(load0z, 0, 1e-5);
     EXPECT_EQ(tester.getLoadType("2",0), "force");
     EXPECT_EQ(tester.getLoadApplicationType("2",0), "nodeset");
     EXPECT_EQ(tester.getLoadApplicationID("2",0), "2");
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionX("2",0).c_str()), 6.5, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionY("2",0).c_str()), 2.6, 0.1);
-    EXPECT_NEAR(std::atof(tester.getLoadDirectionZ("2",0).c_str()), 0, 1e-5);
+    const double load2x = std::atof(tester.getLoadDirectionX("2", 0).c_str());
+    const double load2y = std::atof(tester.getLoadDirectionY("2", 0).c_str());
+    const double load2z = std::atof(tester.getLoadDirectionZ("2", 0).c_str());
+    std::cout << "2:" << load2x << "," << load2y << "," << load2z << std::endl;
+    EXPECT_NEAR(load2x, 6.1, 0.5);
+    EXPECT_NEAR(load2y, 3.4, 0.5);
+    EXPECT_NEAR(load2z, 0, 1e-5);
 
     // check load ids
     std::vector<std::string> modified_load_ids = tester.getObjLoadIds(0);
@@ -2064,9 +2078,14 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     // check weights
     std::vector<std::string> modified_load_weights = tester.getObjLoadWeights(0);
     ASSERT_EQ(modified_load_weights.size(), 3u);
-    EXPECT_NEAR(std::atof(modified_load_weights[0].c_str()), 0.33, 0.01);
-    EXPECT_NEAR(std::atof(modified_load_weights[1].c_str()), 0.33, 0.01);
-    EXPECT_NEAR(std::atof(modified_load_weights[2].c_str()), 0.33, 0.01);
+    const double lcw0 = std::atof(modified_load_weights[0].c_str());
+    const double lcw1 = std::atof(modified_load_weights[1].c_str());
+    const double lcw2 = std::atof(modified_load_weights[2].c_str());
+    EXPECT_NEAR(lcw0, 0.33, 0.2);
+    EXPECT_NEAR(lcw1, 0.33, 0.2);
+    EXPECT_NEAR(lcw2, 0.33, 0.2);
+    EXPECT_NEAR(lcw0+lcw1+lcw2, 1.0, 0.05);
+    std::cout << "lcw:" << lcw0 << "," << lcw1 << "," << lcw2 << std::endl;
 }
 
 TEST(PlatoTestXMLGenerator,uncertainLoad_two)
@@ -2095,9 +2114,11 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
             "    type angle variation\n"
             "    load 8\n"
             "    axis Y\n"
-            "    distribution uniform\n"
-            "    upper bound 25\n"
-            "    lower bound -30\n"
+            "    distribution beta\n"
+            "    mean 2\n"
+            "    upper bound 30\n"
+            "    lower bound -25\n"
+            "    standard deviation 15\n"
             "    num samples 4\n"
             "end uncertainty\n"
             "begin uncertainty\n"
@@ -2176,12 +2197,15 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
     // check weights
     std::vector<std::string> modified_load_weights = tester.getObjLoadWeights(0);
     ASSERT_EQ(modified_load_weights.size(), num_expected_samples);
+    double totalW = 0;
     for(size_t i = 0u; i < num_expected_samples; i++)
     {
         const double tW = std::atof(modified_load_weights[i].c_str());
-        EXPECT_NEAR(tW, 0.083, 0.005);
+        EXPECT_NEAR(tW, 0.083, 0.082);
+        totalW += tW;
 //        std::cout << i << "," << tW << std::endl; // announce
     }
+    EXPECT_NEAR(totalW, 1.0, 0.05);
 }
 
 TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
@@ -2210,9 +2234,11 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
             "    type angle variation\n"
             "    load 8\n"
             "    axis X\n"
-            "    distribution uniform\n"
+            "    distribution beta\n"
+            "    mean 2\n"
             "    upper bound 25\n"
             "    lower bound -30\n"
+            "    standard deviation 15\n"
             "    num samples 5\n"
             "end uncertainty\n"
             "begin uncertainty\n"
@@ -2291,12 +2317,15 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
     // check weights
     std::vector<std::string> modified_load_weights = tester.getObjLoadWeights(0);
     ASSERT_EQ(modified_load_weights.size(), 1u+num_expected_samples);
+    double totalW = 0;
     for(size_t i = 0u; i < num_expected_samples; i++)
     {
-        const double tW = std::atof(modified_load_weights[1u+i].c_str());
-        EXPECT_NEAR(tW, 1.0/15.0, 0.001);
+        const double tW = std::atof(modified_load_weights[1u + i].c_str());
+        EXPECT_NEAR(tW, 1.0/15.0, 0.05);
+        totalW += tW;
         //        std::cout << i << "," << tW << std::endl; // announce
     }
+    EXPECT_NEAR(totalW, 1.0, 0.05);
 }
 
 TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
