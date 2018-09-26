@@ -391,7 +391,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             Plato::SromProblemDiagnosticsStruct<double> tSromDiagnostics;
             std::vector<Plato::UncertaintyOutputStruct<double>> tSromOutput;
             Plato::solve_uncertainty<double, size_t>(tInput, tAlgorithmParam, tSromDiagnostics, tSromOutput);
-            Plato::output_srom_diagnostics<double, size_t>(tSromDiagnostics);
+            Plato::output_srom_diagnostics<double, size_t>(tSromDiagnostics, tAlgorithmParam);
 
             // check size
             if(tSromOutput.size() != num_samples)

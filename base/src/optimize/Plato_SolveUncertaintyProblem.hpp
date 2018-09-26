@@ -272,11 +272,13 @@ void save_srom_cdf_diagnostics(const Plato::SromObjective<ScalarType, OrdinalTyp
 /******************************************************************************//**
  *
  * @brief Output diagnostics for stochastic reduced order model (SROM) optimization problem
- * @param [in] aSromDiagnostics diagnostics associated with the SROM optimization problem
+ * @param [in] aSromDiagnostics SROM problem diagnostics
+ * @param [in] aAlgorithmDiagnostics optimizer diagnostics
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics)
+void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics,
+                             const Plato::AlgorithmParamStruct<ScalarType, OrdinalType>& aAlgorithmDiagnostics)
 {
     std::ofstream tOutputFile;
     tOutputFile.open("plato_srom_diagnostics.txt");
@@ -298,7 +300,12 @@ void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarTyp
         tOutputFile << std::setprecision(3) << std::scientific << "| "<< std::setw(8) << tMyName.c_str() << std::setw(6) << tMomentOrder
                 << std::setw(14) << aSromDiagnostics.mMomentErrors[tMomentIndex] << " |\n";
     }
-    tOutputFile << "--------------------------------";
+    tOutputFile << "--------------------------------\n\n";
+    tOutputFile << "Stochastic Reduced Order Model (SROM) optimizer diagnostics.\n";
+    tOutputFile << "Objective Function Value = " << std::setprecision(6) << std::scientific
+            << aAlgorithmDiagnostics.mObjectiveValue << "\n";
+    tOutputFile << "Constraint Value = " << std::setprecision(6) << std::scientific
+            << aAlgorithmDiagnostics.mConstraintValue << "\n";
     tOutputFile.close();
 }
 

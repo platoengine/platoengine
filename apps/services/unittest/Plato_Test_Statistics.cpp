@@ -1459,6 +1459,9 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
 
 TEST(PlatoTest, OutputSromDiagnostics)
 {
+    Plato::AlgorithmParamStruct<double> tAlgorithmOutput;
+    tAlgorithmOutput.mObjectiveValue = 1e-3;
+    tAlgorithmOutput.mConstraintValue = 5e-4;
     Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
     tDiagnostics.mCumulativeDistributionFunctionError = 0.01;
     tDiagnostics.mMomentErrors.resize(4);
@@ -1466,7 +1469,7 @@ TEST(PlatoTest, OutputSromDiagnostics)
     tDiagnostics.mMomentErrors[1] = 0.021;
     tDiagnostics.mMomentErrors[2] = 0.022;
     tDiagnostics.mMomentErrors[3] = 0.023;
-    Plato::output_srom_diagnostics<double, size_t>(tDiagnostics);
+    Plato::output_srom_diagnostics(tDiagnostics, tAlgorithmOutput);
 
     std::ifstream tInputFile;
     tInputFile.open("plato_srom_diagnostics.txt");
@@ -1484,6 +1487,7 @@ TEST(PlatoTest, OutputSromDiagnostics)
     tGold << "CumulativeDistributionFunction(CDF)Mismatch=1.000000e-02--------------------------------|";
     tGold << "StatisticalMomentsMismatch|--------------------------------|NameOrderError|--------------------------------|";
     tGold << "Mean12.000e-02||Variance22.100e-02||Skewness32.200e-02||Kurtosis42.300e-02|--------------------------------";
+    tGold << "StochasticReducedOrderModel(SROM)optimizerdiagnostics.ObjectiveFunctionValue=1.000000e-03ConstraintValue=5.000000e-04";
     ASSERT_STREQ(tDataFromFile.str().c_str(), tGold.str().c_str());
 }
 
