@@ -49,18 +49,87 @@
 #ifndef PLATO_ERRORCHECKS_HPP_
 #define PLATO_ERRORCHECKS_HPP_
 
+#include <sstream>
+#include <fstream>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
 
+#include "Plato_CommWrapper.hpp"
 #include "Plato_MultiVector.hpp"
 
 namespace Plato
 {
 
+/******************************************************************************//**
+ *
+ * @brief Print Plato license statement
+ * @param [in,out] aOutputFile output file
+ *
+**********************************************************************************/
+inline void print_plato_license(std::ofstream & aOutputFile)
+{
+    aOutputFile << "Plato Engine v.1.0: Copyright 2018, National Technology & Engineering Solutions of Sandia, LLC (NTESS).\n\n";
+}
+
 namespace error
 {
 
+/******************************************************************************//**
+ *
+ * @brief Check if distributed memory communicator is null.
+ * @param [in] aCommWrapper distributed memory communicator wrapper
+ *
+**********************************************************************************/
+inline void check_null_comm(const Plato::CommWrapper & aCommWrapper)
+{
+    try
+    {
+        if(aCommWrapper.isCommInitialized() == false)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Check for dimension mismatch
+ * @param [in] aVecOne Plato vector
+ * @param [in] aVecTwo Plato vector
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void check_dimension_mismatch(const Plato::Vector<ScalarType, OrdinalType> & aVecOne,
+                                     const Plato::Vector<ScalarType, OrdinalType> & aVecTwo)
+{
+    try
+    {
+        if(aVecOne.size() != aVecTwo.size())
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! VEC_1 DIM = " << aVecOne.size() << " AND VEC_2 DIM = "
+            << aVecTwo.size() << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Check for errors associated with the lower and upper bound containers.
+ * @param [in] aLowerBounds Plato multivector
+ * @param [in] aUpperBounds Plato multivector
+ *
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void checkBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aLowerBounds,
                         const Plato::MultiVector<ScalarType, OrdinalType> & aUpperBounds,

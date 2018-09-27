@@ -47,18 +47,19 @@
 
 #pragma once
 
-#include "Plato_MultiVector.hpp"
 #include "Plato_Vector.hpp"
-#include "Plato_DistributionFactory.hpp"
+#include "Plato_ErrorChecks.hpp"
+#include "Plato_MultiVector.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_SromObjective.hpp"
-#include "Plato_ReductionOperations.hpp"
-#include "Plato_SromConstraint.hpp"
 #include "Plato_CriterionList.hpp"
-#include "Plato_AugmentedLagrangianStageMng.hpp"
-#include "Plato_TrustRegionAlgorithmDataMng.hpp"
+#include "Plato_SromConstraint.hpp"
 #include "Plato_StandardVector.hpp"
 #include "Plato_StatisticsUtils.hpp"
+#include "Plato_DistributionFactory.hpp"
+#include "Plato_ReductionOperations.hpp"
+#include "Plato_AugmentedLagrangianStageMng.hpp"
+#include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_KelleySachsAugmentedLagrangian.hpp"
 
 #include <vector>
@@ -125,6 +126,215 @@ struct AlgorithmParamStruct
 // struct AlgorithmParamStruct
 
 /******************************* INLINED FUNCTIONS *******************************/
+
+/******************************************************************************//**
+ *
+ * @brief Check cumulative distribution function container dimension.
+ * @param [in] aNumSamples number of samples
+ * @param [in] aCDF cumulative distribution function
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void check_cdf_container_size(const OrdinalType & aNumSamples, const Plato::Vector<ScalarType, OrdinalType> & aCDF)
+{
+    try
+    {
+        if(aCDF.size() != aNumSamples)
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! EXPECTED CUMULATIVE DISTRIBUTION FUNCTION CONTAINER OF SIZE = "
+            << aNumSamples << ". INPUT CUMULATIVE DISTRIBUTION FUNCTION CONTAINER HAS SIZE = " << aCDF.size()
+            << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Check sample's container dimension.
+ * @param [in] aNumSamples number of samples
+ * @param [in] aSamples samples
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void check_samples_container_size(const OrdinalType & aNumSamples, const Plato::Vector<ScalarType, OrdinalType> & aSamples)
+{
+    try
+    {
+        if(aSamples.size() != aNumSamples)
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! EXPECTED SAMPLES CONTAINER OF SIZE = " << aNumSamples
+            << ". INPUT SAMPLES CONTAINER HAS SIZE = " << aSamples.size() << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Check sample's container dimension.
+ * @param [in] aDistribution probability distribution function interface
+ * @param [in] aInputParamUQ statistics core input parameters
+ * @param [in,out] aSamples monte carlo samples
+ * @param [in,out] aCDF monte carlo cumulative distribution function values
+ * @param [in] aPrint flag use to enable terminal output (default = false)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void compute_monte_carlo_data(const Plato::Distribution<ScalarType, OrdinalType> & aDistribution,
+                                     const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aInputParamUQ,
+                                     Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                                     Plato::Vector<ScalarType, OrdinalType> & aCDF,
+                                     bool aPrint = false)
+{
+    const OrdinalType tNumMonteCarloSamples = aInputParamUQ.mNumSamples + static_cast<OrdinalType>(1);
+    try
+    {
+        Plato::check_cdf_container_size(tNumMonteCarloSamples, aCDF);
+        Plato::check_samples_container_size(tNumMonteCarloSamples, aSamples);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
+        << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    const ScalarType tDelta = static_cast<ScalarType>(1.0) / aInputParamUQ.mNumSamples;
+    for(OrdinalType tIndex = 1; tIndex < tNumMonteCarloSamples; tIndex++)
+    {
+        OrdinalType tPreviousIndex = tIndex - static_cast<OrdinalType>(1);
+        aSamples[tIndex] = aSamples[tPreviousIndex] + tDelta;
+        const ScalarType tValue = aDistribution.cdf(aSamples[tIndex]);
+        aCDF[tIndex] = tValue;
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Check sample's container dimension.
+ * @param [in] aLowerBound range's lower bound
+ * @param [in] aUpperBound range's upper bound
+ * @param [in] aNormalizedSamples normalized sample values
+ * @param [in,out] aUnnormalizedSamples unnnormalized sample values
+ * @param [in] aPrint flag use to enable terminal output (default = false)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void compute_unnormalized_samples(const ScalarType & aLowerBound,
+                                         const ScalarType & aUpperBound,
+                                         const Plato::Vector<ScalarType, OrdinalType> & aNormalizedSamples,
+                                         Plato::Vector<ScalarType, OrdinalType> & aUnnormalizedSamples,
+                                         bool aPrint = false)
+{
+    try
+    {
+        Plato::error::check_dimension_mismatch(aNormalizedSamples, aUnnormalizedSamples);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
+        << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    for(OrdinalType tIndex = 0; tIndex < aUnnormalizedSamples.size(); tIndex++)
+    {
+        aUnnormalizedSamples[tIndex] = Plato::undo_normalization(aLowerBound, aUpperBound, aNormalizedSamples[tIndex]);
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief Print cumulative distribution function output data to file
+ * @param [in] aCommWrapper distributed memory communicator wrapper
+ * @param [in] aSromCDF stochastic reduced order model cumulative distribution function values
+ * @param [in] aMonteCarloCDF monte carlo cumulative distribution function values
+ * @param [in] aSamples monte carlo samples
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_cumulative_distribution_function_to_file(const Plato::CommWrapper & aCommWrapper,
+                                                           const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
+                                                           const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
+                                                           const Plato::Vector<ScalarType, OrdinalType> & aSamples)
+{
+    if(aCommWrapper.myProcID() == static_cast<OrdinalType>(0))
+    {
+        std::ofstream tOutputFile;
+        tOutputFile.open("plato_cdf_output.txt");
+        Plato::print_plato_license(tOutputFile);
+        tOutputFile << std::right << "    Samples" << std::setw(18) << "MC-CDF" << std::setw(18) << "SROM-CDF" << "\n" << std::flush;
+        const OrdinalType tNumSamples = aSamples.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumSamples; tIndex++)
+        {
+            tOutputFile << std::scientific << std::setprecision(8) << std::right << aSamples[tIndex] << std::setw(18) << aMonteCarloCDF[tIndex]
+            << std::setw(18) << aSromCDF[tIndex] << "\n" << std::flush;
+        }
+        tOutputFile.close();
+    }
+}
+
+/******************************************************************************//**
+ *
+ * @brief output cumulative distribution function data to file (main interface)
+ * @param [in] aCommWrapper distributed memory communicator wrapper
+ * @param [in] aSromCDF stochastic reduced order model cumulative distribution function values
+ * @param [in] aMonteCarloCDF monte carlo cumulative distribution function values
+ * @param [in] aSamples monte carlo samples
+ * @param [in] aPrint flag use to enable terminal output (default = false)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void output_cumulative_distribution_function(const Plato::CommWrapper & aCommWrapper,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aSromCDF,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aMonteCarloCDF,
+                                                    const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                                                    bool aPrint = false)
+{
+    try
+    {
+        Plato::error::check_null_comm(aCommWrapper);
+        Plato::error::check_dimension_mismatch(aSromCDF, aMonteCarloCDF);
+        Plato::error::check_dimension_mismatch(aSamples, aMonteCarloCDF);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__ << "\nLINE: " << __LINE__
+                 << "\n ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    Plato::print_cumulative_distribution_function_to_file(aCommWrapper, aSromCDF, aMonteCarloCDF, aSamples);
+}
 
 /******************************************************************************//**
  *
@@ -282,7 +492,7 @@ void output_srom_diagnostics(const Plato::SromProblemDiagnosticsStruct<ScalarTyp
 {
     std::ofstream tOutputFile;
     tOutputFile.open("plato_srom_diagnostics.txt");
-    tOutputFile << "Plato Engine v.1.0: Copyright 2018, National Technology & Engineering Solutions of Sandia, LLC (NTESS).\n\n";
+    Plato::print_plato_license(tOutputFile);
     tOutputFile << "Cumulative Distribution Function (CDF) Mismatch = "
             << std::setprecision(6) << std::scientific << aSromDiagnostics.mCumulativeDistributionFunctionError << "\n\n";
 
