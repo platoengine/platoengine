@@ -95,7 +95,7 @@ inline void shape_parameters(const ScalarType & aMinValue,
 }
 
 template<typename ScalarType, typename OrdinalType>
-inline void make_uniform_sample(Plato::Vector<ScalarType>& aInitialGuess)
+inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
 {
     assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
     const OrdinalType tNumSample = aInitialGuess.size();
@@ -104,36 +104,6 @@ inline void make_uniform_sample(Plato::Vector<ScalarType>& aInitialGuess)
         ScalarType tValue = (1. / static_cast<ScalarType>(tNumSample + 1u));
         aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
     }
-}
-
-/******************************************************************************//**
- *
- * @brief Normalize sample value, i.e. map sample from [LB,UP] interval to [0,1] interval.
- * @param [in] aLowerBound lower bound (LB)
- * @param [in] aUpperBound upper bound (UB)
- * @param [in] aSampleValue unnormalized sample value
- * @return normalized sample value
- *
-**********************************************************************************/
-template<typename ScalarType>
-ScalarType normalize(const ScalarType& aLowerBound, const ScalarType& aUpperBound, const ScalarType& aSampleValue)
-{
-    return ( (aSampleValue - aLowerBound) / (aUpperBound - aLowerBound) );
-}
-
-/******************************************************************************//**
- *
- * @brief Undo normalization, i.e. map sample from [0,1] interval to [LB,UP] interval.
- * @param [in] aLowerBound lower bound (LB)
- * @param [in] aUpperBound upper bound (UB)
- * @param [in] aSampleValue normalized sample value
- * @return unnormalized sample value
- *
-**********************************************************************************/
-template<typename ScalarType>
-ScalarType undo_normalization(const ScalarType& aLowerBound, const ScalarType& aUpperBound, const ScalarType& aSampleValue)
-{
-    return (aLowerBound + (aUpperBound - aLowerBound) * aSampleValue);
 }
 
 } // namespace Plato

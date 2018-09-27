@@ -509,13 +509,13 @@ TEST(PlatoTest, ComputeMonteCarloDataErrors)
 
     Plato::StandardVector<double> tCDF_1(tStatsInputs.mNumSamples);
     Plato::StandardVector<double> tSamples_1(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_1, tCDF_1), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_1, tCDF_1, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1, true /* print error */), std::invalid_argument);
 
     Plato::StandardVector<double> tCDF_2(tStatsInputs.mNumSamples + 1);
     Plato::StandardVector<double> tSamples_2(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_2, tCDF_2), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples_2, tCDF_2, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2, true /* print error */), std::invalid_argument);
 }
 
 TEST(PlatoTest, ComputeMonteCarloData)
@@ -530,7 +530,7 @@ TEST(PlatoTest, ComputeMonteCarloData)
 
     Plato::StandardVector<double> tCDF(tStatsInputs.mNumSamples + 1);
     Plato::StandardVector<double> tSamples(tStatsInputs.mNumSamples + 1);
-    ASSERT_NO_THROW(Plato::compute_monte_carlo_data(tDistribution, tStatsInputs, tSamples, tCDF));
+    ASSERT_NO_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples, tCDF));
 
     const double tTolerance = 1e-4;
     std::vector<double> tGoldSamples = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
@@ -1641,7 +1641,10 @@ TEST(PlatoTest, OutputSromDiagnostics)
     tDiagnostics.mMomentErrors[1] = 0.021;
     tDiagnostics.mMomentErrors[2] = 0.022;
     tDiagnostics.mMomentErrors[3] = 0.023;
-    Plato::output_srom_diagnostics(tDiagnostics, tAlgorithmOutput);
+
+    Plato::CommWrapper tCommWrapper;
+    tCommWrapper.useDefaultComm();
+    Plato::output_srom_diagnostics(tCommWrapper, tDiagnostics, tAlgorithmOutput);
 
     std::ifstream tInputFile;
     tInputFile.open("plato_srom_diagnostics.txt");

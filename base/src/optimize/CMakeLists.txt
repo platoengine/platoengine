@@ -109,9 +109,11 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_Distribution.hpp
                         Plato_NormalDistribution.hpp
                         Plato_UniformDistribution.hpp
+                        Plato_SromUtilis.hpp
                         Plato_SromConstraint.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
+                        Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
                         Plato_LinearCriterionHessian.hpp
                         Plato_CentralDifferenceHessian.hpp

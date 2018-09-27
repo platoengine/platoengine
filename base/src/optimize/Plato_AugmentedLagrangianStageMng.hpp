@@ -128,6 +128,18 @@ public:
     {
     }
 
+
+    /******************************************************************************//**
+     * @brief Return number of constraints
+     * @return number of constraints
+     **********************************************************************************/
+    OrdinalType getNumConstraints() const
+    {
+        const OrdinalType tVECTOR_INDEX = 0;
+        const OrdinalType tNumConstraints = mCurrentConstraintValues->operator[](tVECTOR_INDEX).size();
+        return (tNumConstraints);
+    }
+
     /****************************************************************************************************************/
     OrdinalType getNumObjectiveFunctionEvaluations() const
     /****************************************************************************************************************/

@@ -8,55 +8,15 @@
 #define PLATO_DISTRIBUTIONFACTORY_HPP_
 
 #include "Plato_BetaDistribution.hpp"
-#include "Plato_UniformDistribution.hpp"
+#include "Plato_SromProbDataStruct.hpp"
 #include "Plato_NormalDistribution.hpp"
+#include "Plato_UniformDistribution.hpp"
 
 #include <cmath>
 #include <stdlib.h>
 
 namespace Plato
 {
-
-struct DistrubtionName
-{
-    enum type_t
-    {
-        beta = 0,
-        normal = 1,
-        uniform = 2,
-    };
-};
-// struct DistrubtionName
-
-template<typename ScalarType, typename OrdinalType = size_t>
-struct UncertaintyInputStruct
-{
-    DistrubtionName::type_t mDistribution;
-    ScalarType mMean;
-    ScalarType mLowerBound;
-    ScalarType mUpperBound;
-    ScalarType mVariance;
-
-    ScalarType mMomentErrorCriterionWeight;
-    ScalarType mCumulativeDistributionFuncErrorWeight;
-
-    OrdinalType mNumSamples;
-    OrdinalType mMaxNumDistributionMoments; // if zero, then use default
-
-    UncertaintyInputStruct() :   // default Constructor
-            mDistribution(DistrubtionName::type_t::beta),
-            mMean(0.),
-            mLowerBound(0.),
-            mUpperBound(0.),
-            mVariance(0.),
-            mMomentErrorCriterionWeight(1/1e2),
-            mCumulativeDistributionFuncErrorWeight(1/1e2),
-            mNumSamples(0),
-            mMaxNumDistributionMoments(4)
-    {
-    }
-};
-// struct UncertaintyInputStruct
 
 // factory constructor
 template<typename ScalarType, typename OrdinalType>
