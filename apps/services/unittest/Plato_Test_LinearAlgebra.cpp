@@ -53,6 +53,7 @@
 #include "Plato_UnitTestUtils.hpp"
 
 #include "Plato_CommWrapper.hpp"
+#include "Plato_LinearAlgebra.hpp"
 #include "Plato_StandardVector.hpp"
 #include "Plato_DistributedVector.hpp"
 #include "Plato_StandardMultiVector.hpp"
@@ -255,6 +256,21 @@ TEST(PlatoTest, MultiVector)
         double tSumValue = tInterface.sum(tMultiVector2[tVectorIndex]);
         EXPECT_NEAR(tSumValue, tGoldSum, tTolerance);
     }
+}
+
+TEST(PlatoTest, StandardMultiVector_copy)
+{
+    const size_t tLength = 2;
+    std::vector<double> tVector(tLength, 2 /* fill value */);
+    Plato::StandardMultiVector<double> tMultiVector(1 /* number of vectors */, tVector);
+    double tNorm = Plato::norm(tMultiVector);
+
+    double tTolerance = 1e-6;
+    EXPECT_NEAR(tNorm, 0.0, tTolerance);
+
+    tMultiVector.copy(0 /* vector index */, tVector);
+    tNorm = Plato::norm(tMultiVector);
+    EXPECT_NEAR(tNorm, 2.828427124746190, tTolerance);
 }
 
 TEST(PlatoTest, StandardVectorReductionOperations)
