@@ -79,6 +79,7 @@ struct UncertaintyInputStruct
     ScalarType mCumulativeDistributionFuncErrorWeight;
 
     OrdinalType mNumSamples;
+    OrdinalType mNumMonteCarloSamples;
     OrdinalType mMaxNumDistributionMoments; // if zero, then use default
 
     UncertaintyInputStruct() :   // default Constructor
@@ -90,6 +91,7 @@ struct UncertaintyInputStruct
             mMomentErrorCriterionWeight(1/1e2),
             mCumulativeDistributionFuncErrorWeight(1/1e2),
             mNumSamples(0),
+            mNumMonteCarloSamples(1000),
             mMaxNumDistributionMoments(4)
     {
     }

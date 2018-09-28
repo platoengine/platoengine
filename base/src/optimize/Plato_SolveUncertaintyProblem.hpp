@@ -109,17 +109,16 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
     try
     {
         const bool tPrintErrorMsg = true;
-        const OrdinalType t_NUM_MONTE_CARLO_SAMPLES = 1000;
-        Plato::StandardVector<ScalarType, OrdinalType> tMonteCarloCDF(t_NUM_MONTE_CARLO_SAMPLES + 1);
-        Plato::StandardVector<ScalarType, OrdinalType> tNormalizedMonteCarloSamples(t_NUM_MONTE_CARLO_SAMPLES + 1);
-        Plato::compute_monte_carlo_data(t_NUM_MONTE_CARLO_SAMPLES, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF, tPrintErrorMsg);
+        Plato::StandardVector<ScalarType, OrdinalType> tMonteCarloCDF(aStatsInputs.mNumMonteCarloSamples + 1);
+        Plato::StandardVector<ScalarType, OrdinalType> tNormalizedMonteCarloSamples(aStatsInputs.mNumMonteCarloSamples + 1);
+        Plato::compute_monte_carlo_data(aStatsInputs.mNumMonteCarloSamples, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF, tPrintErrorMsg);
 
         const OrdinalType t_SAMPLES_VEC_INDEX = 0;
         const OrdinalType t_PROBABILITIES_VEC_INDEX = 1;
-        Plato::StandardVector<ScalarType, OrdinalType> tSromCDF(t_NUM_MONTE_CARLO_SAMPLES + 1);
+        Plato::StandardVector<ScalarType, OrdinalType> tSromCDF(aStatsInputs.mNumMonteCarloSamples + 1);
         Plato::compute_srom_cdf_plot(tNormalizedMonteCarloSamples, aFinalControl[t_SAMPLES_VEC_INDEX], aFinalControl[t_PROBABILITIES_VEC_INDEX], tSromCDF);
 
-        Plato::StandardVector<ScalarType, OrdinalType> tUnnormalizedMonteCarloSamples(t_NUM_MONTE_CARLO_SAMPLES + 1);
+        Plato::StandardVector<ScalarType, OrdinalType> tUnnormalizedMonteCarloSamples(aStatsInputs.mNumMonteCarloSamples + 1);
         Plato::compute_unnormalized_samples(aStatsInputs.mLowerBound, aStatsInputs.mUpperBound, tNormalizedMonteCarloSamples, tUnnormalizedMonteCarloSamples);
 
         Plato::output_cumulative_distribution_function(aCommWrapper, tSromCDF, tMonteCarloCDF, tUnnormalizedMonteCarloSamples, tPrintErrorMsg);
