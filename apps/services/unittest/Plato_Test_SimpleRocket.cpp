@@ -451,4 +451,14 @@ TEST(PlatoTest, IsOperationDefinedCheck)
     ASSERT_THROW(Plato::is_operation_defined("InequalityGradient", tNames), std::invalid_argument);
 }
 
+TEST(PlatoTest, IsSharedDataLayoutDefinedCheck)
+{
+    ASSERT_NO_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR));
+    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::VECTOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::TENSOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::ELEMENT_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+}
+
 } // namespace PlatoTest
