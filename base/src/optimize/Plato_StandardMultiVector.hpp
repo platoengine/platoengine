@@ -94,13 +94,28 @@ public:
      * @param [in] aIndex vector index
      * @param [in] aVec input vector
      **********************************************************************************/
-    void copy(const OrdinalType & aIndex, const std::vector<ScalarType> & aVec)
+    void setData(const OrdinalType & aIndex, const std::vector<ScalarType> & aVec)
     {
         assert(mData[aIndex]->size() == aVec.size());
         const OrdinalType tLength = mData[aIndex]->size();
         for(OrdinalType tIndex = 0; tIndex < tLength; tIndex++)
         {
             mData[aIndex]->operator[](tIndex) = aVec[tIndex];
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Copy data from Plato vector to std::vector
+     * @param [in] aIndex vector index
+     * @param [in,out] aVec input vector
+     **********************************************************************************/
+    void getData(const OrdinalType & aIndex, std::vector<ScalarType> & aVec)
+    {
+        assert(mData[aIndex]->size() == aVec.size());
+        const OrdinalType tLength = mData[aIndex]->size();
+        for(OrdinalType tIndex = 0; tIndex < tLength; tIndex++)
+        {
+            aVec[tIndex] = mData[aIndex]->operator[](tIndex);
         }
     }
 

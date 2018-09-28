@@ -295,8 +295,10 @@ TEST(PlatoTest, StructuralTopologyOptimizationProxyApp)
 
     std::string tOperation("Solve");
     tApplication.compute(tOperation);
-    Plato::SharedField tSharedState(tArgumentName, Plato::communication::broadcast_t::SENDER_AND_RECEIVER, 
-                                    tApplicationComm, Plato::data::layout_t::VECTOR_FIELD);
+    Plato::SharedField tSharedState(tArgumentName,
+                                    Plato::communication::broadcast_t::SENDER_AND_RECEIVER,
+                                    tApplicationComm,
+                                    Plato::data::layout_t::VECTOR_FIELD);
     tArgumentName = "StateSolution";
     tApplication.exportData(tArgumentName, tSharedState);
     tSharedState.transmitData();

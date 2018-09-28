@@ -48,13 +48,16 @@
 
 #include "gtest/gtest.h"
 
+#include <mpi.h>
 #include <vector>
 #include <string>
 #include <sstream>
 
-#include "Plato_SharedData.hpp"
+#include "Plato_ErrorChecks.hpp"
+#include "Plato_SharedValue.hpp"
 #include "Plato_Application.hpp"
 #include "Plato_SimpleRocket.hpp"
+#include "Plato_Communication.hpp"
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_SimpleRocketObjective.hpp"
 
@@ -183,9 +186,10 @@ public:
         catch(const std::invalid_argument & tErrorMsg)
         {
             std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                    << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
             tFullErrorMsg << tErrorMsg.what();
+            std::cout << tFullErrorMsg.str().c_str();
             throw tFullErrorMsg;
         }
     }
@@ -205,9 +209,10 @@ public:
         catch(const std::invalid_argument & tErrorMsg)
         {
             std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                    << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
             tFullErrorMsg << tErrorMsg.what();
+            std::cout << tFullErrorMsg.str().c_str();
             throw tFullErrorMsg;
         }
     }
@@ -227,9 +232,10 @@ public:
         catch(const std::invalid_argument & tErrorMsg)
         {
             std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                    << "\nLINE: " << __LINE__ << "\n ******** \n\n";
+            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
             tFullErrorMsg << tErrorMsg.what();
+            std::cout << tFullErrorMsg.str().c_str();
             throw tFullErrorMsg;
         }
     }
@@ -252,17 +258,15 @@ private:
         try
         {
             Plato::is_shared_data_argument_defined(aArgumentName, mSharedDataMap);
+            auto tIterator = mSharedDataMap.find(aArgumentName);
+            std::vector<double> & tOutputData = tIterator->second;
+            Plato::error::check_dimension<size_t>(tOutputData.size(), aExportData.size());
+            aExportData.setData(tOutputData);
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
             throw tErrorMsg;
         }
-
-        auto tIterator = mSharedDataMap.find(aArgumentName);
-        std::vector<double> & tOutputData = tIterator->second;
-        size_t tMyLength = tOutputData.size();
-        assert(tMyLength == aExportData.size());
-        aExportData.setData(tOutputData);
     }
 
     void inputData(const std::string & aArgumentName, const Plato::SharedData & aImportData)
@@ -270,21 +274,22 @@ private:
         try
         {
             Plato::is_shared_data_argument_defined(aArgumentName, mSharedDataMap);
+            auto tIterator = mSharedDataMap.find(aArgumentName);
+            std::vector<double> & tImportData = tIterator->second;
+            Plato::error::check_dimension<size_t>(tImportData.size(), aImportData.size());
+            aImportData.getData(tImportData);
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
             throw tErrorMsg;
         }
-
-        auto tIterator = mSharedDataMap.find(aArgumentName);
-        std::vector<double> & tImportData = tIterator->second;
-        aImportData.getData(tImportData);
     }
 
     void defineOperations()
     {
-        mDefinedOperations.push_back("Objective");
+        mDefinedOperations.push_back("ObjectiveValue");
         mDefinedOperations.push_back("ObjectiveGradient");
+        mDefinedOperations.push_back("SetNormalizationConstants");
     }
 
     void defineSharedDataMap()
@@ -298,6 +303,9 @@ private:
 
         tName = "ThrustMisfitObjectiveGradient";
         mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
+
+        tName = "UpperBounds";
+        mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
     }
 
     void evaluateObjective()
@@ -307,7 +315,7 @@ private:
         assert(tIterator != mSharedDataMap.end());
         Plato::StandardMultiVector<double> tControl(1 /* NUM CONTROL VECTORS */, mNumDesigVariables);
         std::vector<double> & tControlVector = tIterator->second;
-        tControl.copy(0 /* VECTOR INDEX */, tControlVector);
+        tControl.setData(0 /* VECTOR INDEX */, tControlVector);
         double tObjectiveValue = mObjective->value(tControl);
 
         tArgumentName = "ThrustMisfitObjective";
@@ -324,6 +332,7 @@ private:
         assert(tIterator != mSharedDataMap.end());
         std::vector<double> & tControlVector = tIterator->second;
         Plato::StandardMultiVector<double> tControl(1 /* NUM CONTROL VECTORS */, tControlVector);
+        tControl.setData(0 /* VECTOR INDEX */, tControlVector);
 
         tArgumentName = "ThrustMisfitObjectiveGradient";
         tIterator = mSharedDataMap.find(tArgumentName);
@@ -332,18 +341,31 @@ private:
         mObjective->gradient(tControl, tGradient);
         std::vector<double> & tGradientVector = tIterator->second;
         assert(tGradientVector.size() == mNumDesigVariables);
-        tGradient.copy(0 /* VECTOR INDEX */, tGradientVector);
+        tGradient.getData(0 /* VECTOR INDEX */, tGradientVector);
+    }
+
+    void setNormalizationConstants()
+    {
+        std::string tArgumentName("UpperBounds");
+        auto tIterator = mSharedDataMap.find(tArgumentName);
+        assert(tIterator != mSharedDataMap.end());
+        std::vector<double> & tValues = tIterator->second;
+        mObjective->setNormalizationConstants(tValues);
     }
 
     void performOperation(const std::string & aOperationName)
     {
-        if(aOperationName.compare("Objective") == static_cast<int>(0))
+        if(aOperationName.compare("ObjectiveValue") == static_cast<int>(0))
         {
             this->evaluateObjective();
         }
-        else
+        else if (aOperationName.compare("ObjectiveGradient") == static_cast<int>(0))
         {
             this->computeObjectiveGradient();
+        }
+        else
+        {
+            this->setNormalizationConstants();
         }
     }
 
@@ -444,8 +466,8 @@ TEST(PlatoTest, SimpleRocket)
 
 TEST(PlatoTest, IsOperationDefinedCheck)
 {
-    std::vector<std::string> tNames = {"Solve", "ObjectiveValue", "ObjectiveGradient"};
-    ASSERT_NO_THROW(Plato::is_operation_defined("Solve", tNames));
+    std::vector<std::string> tNames = {"SetNormalizationConstants", "ObjectiveValue", "ObjectiveGradient"};
+    ASSERT_NO_THROW(Plato::is_operation_defined("SetNormalizationConstants", tNames));
     ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveValue", tNames));
     ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveGradient", tNames));
     ASSERT_THROW(Plato::is_operation_defined("InequalityGradient", tNames), std::invalid_argument);
@@ -473,11 +495,99 @@ TEST(PlatoTest, IsSharedDataArgumentDefinedCheck)
     tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
     tName = "ThrustMisfitObjectiveGradient";
     tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
+    tName = "UpperBounds";
+    tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
 
+    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("UpperBounds", tSharedDataMap));
     ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("DesignVariables", tSharedDataMap));
     ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjective", tSharedDataMap));
     ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjectiveGradient", tSharedDataMap));
     ASSERT_THROW(Plato::is_shared_data_argument_defined("InequalityGradient", tSharedDataMap), std::invalid_argument);
+}
+
+TEST(PlatoTest, RocketDesignAppObjectiveVal)
+{
+    Plato::RocketDesignApp tRocketApp;
+    tRocketApp.initialize();
+
+    Plato::CommunicationData tApplicationComm;
+    tApplicationComm.mLocalComm = MPI_COMM_WORLD;
+    tApplicationComm.mInterComm = MPI_COMM_WORLD;
+    tApplicationComm.mLocalCommName = "Application";
+
+    // SET NORMALIZATION CONSTANTS
+    const size_t tNumVars = 2;
+    std::string tProviderName("Optimizer");
+    std::string tArgumentName("UpperBounds");
+    std::vector<double> tNormConst = {0.09, 0.007};
+    Plato::SharedValue tUpperBounds(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    tUpperBounds.setData(tNormConst);
+    tRocketApp.importData(tArgumentName, tUpperBounds);
+    std::string tOperationName("SetNormalizationConstants");
+    tRocketApp.compute(tOperationName);
+
+    // EVALUATE OBJECTIVE FUNCTION, EXPORT VALUE, AND TEST
+    tProviderName = "Optimizer";
+    tArgumentName = "DesignVariables";
+    std::vector<double> tDesignVars = {0.075 / tNormConst[0], 0.005 / tNormConst[1]};
+    Plato::SharedValue tDesignVariables(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    tDesignVariables.setData(tDesignVars);
+    tRocketApp.importData(tArgumentName, tDesignVariables);
+
+    tOperationName = "ObjectiveValue";
+    tRocketApp.compute(tOperationName);
+
+    tProviderName = "Application";
+    tArgumentName = "ThrustMisfitObjective";
+    Plato::SharedValue tSharedObjective(tArgumentName, tProviderName, tApplicationComm);
+    tRocketApp.exportData(tArgumentName, tSharedObjective);
+    std::vector<double> tObjValue(1 /* size */);
+    tSharedObjective.getData(tObjValue);
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(tObjValue[0], 0.0, tTolerance);
+}
+
+TEST(PlatoTest, RocketDesignAppObjectiveGrad)
+{
+    Plato::RocketDesignApp tRocketApp;
+    tRocketApp.initialize();
+
+    Plato::CommunicationData tApplicationComm;
+    tApplicationComm.mLocalComm = MPI_COMM_WORLD;
+    tApplicationComm.mInterComm = MPI_COMM_WORLD;
+    tApplicationComm.mLocalCommName = "Application";
+
+    // SET NORMALIZATION CONSTANTS
+    const size_t tNumVars = 2;
+    std::string tProviderName("Optimizer");
+    std::string tArgumentName("UpperBounds");
+    std::vector<double> tNormConst = {0.09, 0.007};
+    Plato::SharedValue tUpperBounds(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    tUpperBounds.setData(tNormConst);
+    tRocketApp.importData(tArgumentName, tUpperBounds);
+    std::string tOperationName("SetNormalizationConstants");
+    tRocketApp.compute(tOperationName);
+
+    // COMPUTE OBJECTIVE GRADIENT, EXPORT VALUES, AND TEST
+    tProviderName = "Optimizer";
+    tArgumentName = "DesignVariables";
+    std::vector<double> tDesignVars = {0.085 / tNormConst[0], 0.004 / tNormConst[1]};
+    Plato::SharedValue tDesignVariables(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    tDesignVariables.setData(tDesignVars);
+    tRocketApp.importData(tArgumentName, tDesignVariables);
+
+    tOperationName = "ObjectiveGradient";
+    tRocketApp.compute(tOperationName);
+
+    tProviderName = "Application";
+    tArgumentName = "ThrustMisfitObjectiveGradient";
+    Plato::SharedValue tSharedObjGrad(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    tRocketApp.exportData(tArgumentName, tSharedObjGrad);
+    std::vector<double> tObjGrad(tNumVars);
+    tSharedObjGrad.getData(tObjGrad);
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(tObjGrad[0], -0.0048183366343682423, tTolerance);
+    EXPECT_NEAR(tObjGrad[1], -0.0057808715527571993, tTolerance);
 }
 
 } // namespace PlatoTest

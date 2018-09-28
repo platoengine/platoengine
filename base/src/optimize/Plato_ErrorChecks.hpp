@@ -77,6 +77,32 @@ namespace error
 
 /******************************************************************************//**
  *
+ * @brief Check for dimension mismatch.
+ * @param [in] aDimOne dimension
+ * @param [in] aDimTwo dimension
+ *
+**********************************************************************************/
+template<typename OrdinalType>
+void check_dimension(const OrdinalType & aDimOne, const OrdinalType & aDimTwo)
+{
+    try
+    {
+        if(aDimOne != aDimTwo)
+        {
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! APP DIM = " << aDimOne << " AND SHARED DATA DIM = "
+                    << aDimTwo << ". ABORT! ******** \n\n";
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+    }
+    catch(const std::invalid_argument & tErrorMsg)
+    {
+        throw tErrorMsg;
+    }
+}
+
+/******************************************************************************//**
+ *
  * @brief Check if distributed memory communicator is null.
  * @param [in] aCommWrapper distributed memory communicator wrapper
  *

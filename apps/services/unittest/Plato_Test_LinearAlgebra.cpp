@@ -258,7 +258,7 @@ TEST(PlatoTest, MultiVector)
     }
 }
 
-TEST(PlatoTest, StandardMultiVector_copy)
+TEST(PlatoTest, StandardMultiVector_setData)
 {
     const size_t tLength = 2;
     std::vector<double> tVector(tLength, 2 /* fill value */);
@@ -268,7 +268,7 @@ TEST(PlatoTest, StandardMultiVector_copy)
     double tTolerance = 1e-6;
     EXPECT_NEAR(tNorm, 0.0, tTolerance);
 
-    tMultiVector.copy(0 /* vector index */, tVector);
+    tMultiVector.setData(0 /* vector index */, tVector);
     tNorm = Plato::norm(tMultiVector);
     EXPECT_NEAR(tNorm, 2.828427124746190, tTolerance);
 }
