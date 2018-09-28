@@ -442,4 +442,13 @@ TEST(PlatoTest, SimpleRocket)
     }
 }
 
+TEST(PlatoTest, IsOperationDefinedCheck)
+{
+    std::vector<std::string> tNames = {"Solve", "ObjectiveValue", "ObjectiveGradient"};
+    ASSERT_NO_THROW(Plato::is_operation_defined("Solve", tNames));
+    ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveValue", tNames));
+    ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveGradient", tNames));
+    ASSERT_THROW(Plato::is_operation_defined("InequalityGradient", tNames), std::invalid_argument);
+}
+
 } // namespace PlatoTest
