@@ -461,4 +461,23 @@ TEST(PlatoTest, IsSharedDataLayoutDefinedCheck)
     ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR_PARAMETER), std::invalid_argument);
 }
 
+TEST(PlatoTest, IsSharedDataArgumentDefinedCheck)
+{
+    std::map<std::string, std::vector<double>> tSharedDataMap;
+
+    const size_t tLength = 1;
+    std::string tName = "ThrustMisfitObjective";
+    tSharedDataMap[tName] = std::vector<double>(tLength);
+    tName = "DesignVariables";
+    const size_t tNumDesigVariables = 2;
+    tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
+    tName = "ThrustMisfitObjectiveGradient";
+    tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
+
+    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("DesignVariables", tSharedDataMap));
+    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjective", tSharedDataMap));
+    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjectiveGradient", tSharedDataMap));
+    ASSERT_THROW(Plato::is_shared_data_argument_defined("InequalityGradient", tSharedDataMap), std::invalid_argument);
+}
+
 } // namespace PlatoTest
