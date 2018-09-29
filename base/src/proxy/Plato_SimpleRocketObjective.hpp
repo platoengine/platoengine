@@ -56,6 +56,7 @@
 #include <utility>
 #include <cassert>
 #include <cstddef>
+#include <numeric>
 #include <stdexcept>
 
 #include "Plato_SimpleRocket.hpp"

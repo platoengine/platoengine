@@ -12,7 +12,9 @@ set(${LIB_NAME}_SOURCES Plato_Parser.cpp
                         Plato_UniqueCounter.cpp
                         Plato_FreeFunctions.cpp
                         Plato_TimersTree.cpp
-                        Plato_Vector3DVariations.cpp)
+                        Plato_Vector3DVariations.cpp
+                        Plato_AppErrorChecks.cpp
+                        )
 set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_InputData.hpp
                         Plato_OptimizerEngineStageData.hpp
@@ -23,7 +25,9 @@ set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_UniqueCounter.hpp
                         Plato_FreeFunctions.hpp
                         Plato_TimersTree.hpp
-                        Plato_Vector3DVariations.hpp)
+                        Plato_AppErrorChecks.hpp
+                        Plato_Vector3DVariations.hpp
+                        )
 
 set(LIB_NAME Convergence)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})

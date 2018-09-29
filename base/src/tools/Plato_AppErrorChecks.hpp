@@ -41,84 +41,59 @@
  */
 
 /*
- * RocketDesignMain.cpp
+ * Plato_AppErrorChecks.hpp
  *
- *  Created on: Sep 27, 2018
+ *  Created on: Sep 28, 2018
  */
 
-#include "Plato_Interface.hpp"
-#include "Plato_RocketDesignApp.hpp"
+#pragma once
 
-#ifndef NDEBUG
-#include <fenv.h>
-#endif
+#include <map>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <stdexcept>
 
-/******************************************************************************/
-int main(int aArgc, char **aArgv)
-/******************************************************************************/
+namespace Plato
 {
-#ifndef NDEBUG
-    feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-#endif
 
-    MPI_Init(&aArgc, &aArgv);
-
-    /************************* CREATE PLATO INTERFACE *************************/
-    Plato::Interface* tPlatoInterface = nullptr;
+/******************************************************************************//**
+ * @brief Check if argument name is defined
+ * @param [in] aName name of input operation
+ * @param [in] aMap valid name map
+**********************************************************************************/
+template<typename DataType>
+void check_shared_data_argument_definition(const std::string & aArgumentName,
+                                           const std::map<std::string, DataType> & aMap)
+{
     try
     {
-        tPlatoInterface = new Plato::Interface();
+        if(aMap.find(aArgumentName) == aMap.end())
+        {
+            std::ostringstream tErrorMsg;
+            tErrorMsg << "\n\n ******** MESSAGE: ARGUMENT NAME = '" << aArgumentName.c_str()
+                    << "' IS NOT DEFINE IN MAP. ABORT! ********* \n\n";
+            throw std::invalid_argument(tErrorMsg.str().c_str());
+        }
     }
-    catch(...)
+    catch(const std::invalid_argument & tErrorMsg)
     {
-        MPI_Finalize();
-        exit(0);
+        throw tErrorMsg;
     }
-    /************************* CREATE PLATO INTERFACE *************************/
-
-    /*************************** SET PLATO INTERFACE **************************/
-    MPI_Comm tLocalComm;
-    tPlatoInterface->getLocalComm(tLocalComm);
-    /*************************** SET PLATO INTERFACE **************************/
-
-    /************************ CREATE LOCAL APPLICATION ************************/
-    Plato::RocketDesignApp* tMyApp = nullptr;
-    try
-    {
-        tMyApp = new Plato::RocketDesignApp(aArgc, aArgv);
-    }
-    catch(...)
-    {
-        MPI_Finalize();
-        exit(0);
-    }
-    /************************ CREATE LOCAL APPLICATION ************************/
-
-    /************************** REGISTER APPLICATION **************************/
-    try
-    {
-        tPlatoInterface->registerPerformer(tMyApp);
-    }
-    catch(...)
-    {
-        MPI_Finalize();
-        exit(0);
-    }
-    /************************** REGISTER APPLICATION **************************/
-
-    /******************************** PERFORM *********************************/
-    try
-    {
-        tPlatoInterface->perform();
-    }
-    catch(...)
-    {
-    }
-    /******************************** PERFORM *********************************/
-
-    delete tMyApp;
-
-    MPI_Finalize();
 }
-// main
 
+/******************************************************************************//**
+ * @brief Check if operation name is defined
+ * @param [in] aName name of input operation
+ * @param [in] aNames valid name list
+**********************************************************************************/
+void check_operation_definition(const std::string & aOperationName, const std::vector<std::string> & aNames);
+
+/******************************************************************************//**
+ * @brief Check if shared data and application layout are not similar
+ * @param [in] aAppLayout application data layout
+ * @param [in] aSharedDataLayout shared data data layout
+**********************************************************************************/
+void check_data_layout(const Plato::data::layout_t & aAppLayout, const Plato::data::layout_t & aSharedDataLayout);
+
+} // namespace Plato

@@ -49,340 +49,13 @@
 #include "gtest/gtest.h"
 
 #include <mpi.h>
-#include <vector>
-#include <string>
-#include <sstream>
 
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_SharedValue.hpp"
-#include "Plato_Application.hpp"
-#include "Plato_SimpleRocket.hpp"
 #include "Plato_Communication.hpp"
+#include "Plato_AppErrorChecks.hpp"
+#include "Plato_RocketDesignApp.hpp"
 #include "Plato_StandardMultiVector.hpp"
-#include "Plato_SimpleRocketObjective.hpp"
-
-namespace Plato
-{
-
-void is_operation_defined(const std::string & aOperationName, const std::vector<std::string> & aNames)
-{
-    try
-    {
-        if(std::find(aNames.begin(), aNames.end(), aOperationName) == aNames.end())
-        {
-            std::ostringstream tErrorMsg;
-            tErrorMsg << "\n\n ******** MESSAGE: OPERATION = " << aOperationName.c_str()
-                    << " IS NOT DEFINED. ABORT! ******** \n\n";
-            throw std::invalid_argument(tErrorMsg.str().c_str());
-        }
-    }
-    catch(const std::invalid_argument & tErrorMsg)
-    {
-        throw tErrorMsg;
-    }
-}
-
-void is_shared_data_layout_defined(const Plato::data::layout_t & aLayout)
-{
-    try
-    {
-        if(aLayout != Plato::data::layout_t::SCALAR)
-        {
-
-            throw std::invalid_argument("\n\n ******** MESSAGE: SHARED DATA LAYOUT IS NOT DEFINED. ABORT! ******** \n\n");
-        }
-    }
-    catch(const std::invalid_argument & tErrorMsg)
-    {
-        throw tErrorMsg;
-    }
-}
-
-void is_shared_data_argument_defined(const std::string & aArgumentName, const std::map<std::string, std::vector<double>> & aDataMap)
-{
-    auto tIterator = aDataMap.find(aArgumentName);
-    try
-    {
-        if(tIterator == aDataMap.end())
-        {
-            std::ostringstream tErrorMsg;
-            tErrorMsg << "\n\n ******** MESSAGE: EXPORT ARGUMENT NAME = '" << aArgumentName.c_str()
-                    << "' IS NOT DEFINE IN APP SHARED DATA MAP. ABORT! ********* \n\n";
-            throw std::invalid_argument(tErrorMsg.str().c_str());
-        }
-    }
-    catch(const std::invalid_argument & tErrorMsg)
-    {
-        throw tErrorMsg;
-    }
-}
-
-class RocketDesignApp : public Plato::Application
-{
-public:
-    /******************************************************************************//**
-     * @brief Default constructor
-     **********************************************************************************/
-    RocketDesignApp() :
-            mNumDesigVariables(2),
-            mObjective(),
-            mDefinedOperations(),
-            mSharedDataMap()
-    {
-    }
-
-    /******************************************************************************//**
-     * @brief Constructor
-     **********************************************************************************/
-    RocketDesignApp(int aArgc, char **aArgv) :
-            mNumDesigVariables(2),
-            mObjective(),
-            mDefinedOperations(),
-            mSharedDataMap()
-    {
-    }
-
-    /******************************************************************************//**
-     * @brief Destructor
-     **********************************************************************************/
-    virtual ~RocketDesignApp()
-    {
-    }
-
-    /******************************************************************************//**
-     * @brief Deallocate memory
-     **********************************************************************************/
-    void finalize()
-    {
-        // MEMORY MANAGEMENT AUTOMATED, NO NEED TO EXPLICITLY DEALLOCATE MEMORY
-        return;
-    }
-
-    /******************************************************************************//**
-     * @brief Allocate memory
-     **********************************************************************************/
-    void initialize()
-    {
-        this->defineOperations();
-        this->defineSharedDataMap();
-
-        Plato::SimpleRocketInuts<double> tRocketSimInputs;
-        std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-                std::make_shared<Plato::CircularCylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
-        mObjective = std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketSimInputs, tGeomModel);
-    }
-
-    /******************************************************************************//**
-     * @brief Perform an operation, e.g. evaluate objective function
-     * @param [in] aOperationName name of operation
-     **********************************************************************************/
-    void compute(const std::string & aOperationName)
-    {
-        try
-        {
-            Plato::is_operation_defined(aOperationName, mDefinedOperations);
-            this->performOperation(aOperationName);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
-            tFullErrorMsg << tErrorMsg.what();
-            std::cout << tFullErrorMsg.str().c_str();
-            throw tFullErrorMsg;
-        }
-    }
-
-    /******************************************************************************//**
-     * @brief Export data from user's application
-     * @param [in] aArgumentName name of export data (e.g. objective gradient)
-     * @param [out] aExportData container used to store output data
-     **********************************************************************************/
-    void exportData(const std::string & aArgumentName, Plato::SharedData & aExportData)
-    {
-        try
-        {
-            Plato::is_shared_data_layout_defined(aExportData.myLayout());
-            this->outputData(aArgumentName, aExportData);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
-            tFullErrorMsg << tErrorMsg.what();
-            std::cout << tFullErrorMsg.str().c_str();
-            throw tFullErrorMsg;
-        }
-    }
-
-    /******************************************************************************//**
-     * @brief Import data from Plato to user's application
-     * @param [in] aArgumentName name of import data (e.g. design variables)
-     * @param [in] aImportData container with import data
-     **********************************************************************************/
-    void importData(const std::string & aArgumentName, const Plato::SharedData & aImportData)
-    {
-        try
-        {
-            Plato::is_shared_data_layout_defined(aImportData.myLayout());
-            this->inputData(aArgumentName, aImportData);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            std::ostringstream tFullErrorMsg;
-            tFullErrorMsg << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-                    << "\n LINE: " << __LINE__ << "\n ******** \n\n";
-            tFullErrorMsg << tErrorMsg.what();
-            std::cout << tFullErrorMsg.str().c_str();
-            throw tFullErrorMsg;
-        }
-    }
-
-    /******************************************************************************//**
-     * @brief Export distributed memory graph
-     * @param [in] aDataLayout data layout (options: SCALAR, SCALAR_FIELD, VECTOR_FIELD,
-     *                         TENSOR_FIELD, ELEMENT_FIELD, SCALAR_PARAMETER)
-     * @param [out] aMyOwnedGlobalIDs my processor's global IDs
-     **********************************************************************************/
-    void exportDataMap(const Plato::data::layout_t & aDataLayout, std::vector<int> & aMyOwnedGlobalIDs)
-    {
-        // THIS IS NOT A DISTRIBUTED MEMORY EXAMPLE; HENCE, THE DISTRIBUTED MEMORY GRAPH IS NOT NEEDEDS
-        return;
-    }
-
-private:
-    void outputData(const std::string & aArgumentName, Plato::SharedData & aExportData)
-    {
-        try
-        {
-            Plato::is_shared_data_argument_defined(aArgumentName, mSharedDataMap);
-            auto tIterator = mSharedDataMap.find(aArgumentName);
-            std::vector<double> & tOutputData = tIterator->second;
-            Plato::error::check_dimension<size_t>(tOutputData.size(), aExportData.size());
-            aExportData.setData(tOutputData);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            throw tErrorMsg;
-        }
-    }
-
-    void inputData(const std::string & aArgumentName, const Plato::SharedData & aImportData)
-    {
-        try
-        {
-            Plato::is_shared_data_argument_defined(aArgumentName, mSharedDataMap);
-            auto tIterator = mSharedDataMap.find(aArgumentName);
-            std::vector<double> & tImportData = tIterator->second;
-            Plato::error::check_dimension<size_t>(tImportData.size(), aImportData.size());
-            aImportData.getData(tImportData);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            throw tErrorMsg;
-        }
-    }
-
-    void defineOperations()
-    {
-        mDefinedOperations.push_back("ObjectiveValue");
-        mDefinedOperations.push_back("ObjectiveGradient");
-        mDefinedOperations.push_back("SetNormalizationConstants");
-    }
-
-    void defineSharedDataMap()
-    {
-        const int tLength = 1;
-        std::string tName = "ThrustMisfitObjective";
-        mSharedDataMap[tName] = std::vector<double>(tLength);
-
-        tName = "DesignVariables";
-        mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
-
-        tName = "ThrustMisfitObjectiveGradient";
-        mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
-
-        tName = "UpperBounds";
-        mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
-    }
-
-    void evaluateObjective()
-    {
-        std::string tArgumentName("DesignVariables");
-        auto tIterator = mSharedDataMap.find(tArgumentName);
-        assert(tIterator != mSharedDataMap.end());
-        Plato::StandardMultiVector<double> tControl(1 /* NUM CONTROL VECTORS */, mNumDesigVariables);
-        std::vector<double> & tControlVector = tIterator->second;
-        tControl.setData(0 /* VECTOR INDEX */, tControlVector);
-        double tObjectiveValue = mObjective->value(tControl);
-
-        tArgumentName = "ThrustMisfitObjective";
-        tIterator = mSharedDataMap.find(tArgumentName);
-        assert(tIterator != mSharedDataMap.end());
-        const int tIndex = 0;
-        tIterator->second.operator[](tIndex) = tObjectiveValue;
-    }
-
-    void computeObjectiveGradient()
-    {
-        std::string tArgumentName("DesignVariables");
-        auto tIterator = mSharedDataMap.find(tArgumentName);
-        assert(tIterator != mSharedDataMap.end());
-        std::vector<double> & tControlVector = tIterator->second;
-        Plato::StandardMultiVector<double> tControl(1 /* NUM CONTROL VECTORS */, tControlVector);
-        tControl.setData(0 /* VECTOR INDEX */, tControlVector);
-
-        tArgumentName = "ThrustMisfitObjectiveGradient";
-        tIterator = mSharedDataMap.find(tArgumentName);
-        assert(tIterator != mSharedDataMap.end());
-        Plato::StandardMultiVector<double> tGradient(1 /* NUM CONTROL VECTORS */, mNumDesigVariables);
-        mObjective->gradient(tControl, tGradient);
-        std::vector<double> & tGradientVector = tIterator->second;
-        assert(tGradientVector.size() == mNumDesigVariables);
-        tGradient.getData(0 /* VECTOR INDEX */, tGradientVector);
-    }
-
-    void setNormalizationConstants()
-    {
-        std::string tArgumentName("UpperBounds");
-        auto tIterator = mSharedDataMap.find(tArgumentName);
-        assert(tIterator != mSharedDataMap.end());
-        std::vector<double> & tValues = tIterator->second;
-        mObjective->setNormalizationConstants(tValues);
-    }
-
-    void performOperation(const std::string & aOperationName)
-    {
-        if(aOperationName.compare("ObjectiveValue") == static_cast<int>(0))
-        {
-            this->evaluateObjective();
-        }
-        else if (aOperationName.compare("ObjectiveGradient") == static_cast<int>(0))
-        {
-            this->computeObjectiveGradient();
-        }
-        else
-        {
-            this->setNormalizationConstants();
-        }
-    }
-
-private:
-    size_t mNumDesigVariables; /*!< import/export parameter map */
-    std::shared_ptr<Plato::SimpleRocketObjective<double>> mObjective; /*!< rocket design problem objective */
-
-    std::vector<std::string> mDefinedOperations; /*!< operations recognized by the app */
-    std::map<std::string, std::vector<double>> mSharedDataMap; /*!< import/export shared data map */
-
-private:
-    RocketDesignApp(const Plato::RocketDesignApp & aRhs);
-    Plato::RocketDesignApp & operator=(const Plato::RocketDesignApp & aRhs);
-};
-// class RocketDesignApp
-
-} //namespace Plato
 
 namespace PlatoTest
 {
@@ -467,20 +140,43 @@ TEST(PlatoTest, SimpleRocket)
 TEST(PlatoTest, IsOperationDefinedCheck)
 {
     std::vector<std::string> tNames = {"SetNormalizationConstants", "ObjectiveValue", "ObjectiveGradient"};
-    ASSERT_NO_THROW(Plato::is_operation_defined("SetNormalizationConstants", tNames));
-    ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveValue", tNames));
-    ASSERT_NO_THROW(Plato::is_operation_defined("ObjectiveGradient", tNames));
-    ASSERT_THROW(Plato::is_operation_defined("InequalityGradient", tNames), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::check_operation_definition("SetNormalizationConstants", tNames));
+    ASSERT_NO_THROW(Plato::check_operation_definition("ObjectiveValue", tNames));
+    ASSERT_NO_THROW(Plato::check_operation_definition("ObjectiveGradient", tNames));
+    ASSERT_THROW(Plato::check_operation_definition("InequalityGradient", tNames), std::invalid_argument);
 }
 
 TEST(PlatoTest, IsSharedDataLayoutDefinedCheck)
 {
-    ASSERT_NO_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR));
-    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR_FIELD), std::invalid_argument);
-    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::VECTOR_FIELD), std::invalid_argument);
-    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::TENSOR_FIELD), std::invalid_argument);
-    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::ELEMENT_FIELD), std::invalid_argument);
-    ASSERT_THROW(Plato::is_shared_data_layout_defined(Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::check_data_layout(Plato::data::SCALAR_FIELD, Plato::data::SCALAR_FIELD));
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_FIELD, Plato::data::VECTOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_FIELD, Plato::data::TENSOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_FIELD, Plato::data::ELEMENT_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_FIELD, Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+
+    ASSERT_NO_THROW(Plato::check_data_layout(Plato::data::VECTOR_FIELD, Plato::data::VECTOR_FIELD));
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::VECTOR_FIELD, Plato::data::SCALAR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::VECTOR_FIELD, Plato::data::TENSOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::VECTOR_FIELD, Plato::data::ELEMENT_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::VECTOR_FIELD, Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+
+    ASSERT_NO_THROW(Plato::check_data_layout(Plato::data::TENSOR_FIELD, Plato::data::TENSOR_FIELD));
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::TENSOR_FIELD, Plato::data::SCALAR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::TENSOR_FIELD, Plato::data::VECTOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::TENSOR_FIELD, Plato::data::ELEMENT_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::TENSOR_FIELD, Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+
+    ASSERT_NO_THROW(Plato::check_data_layout(Plato::data::ELEMENT_FIELD, Plato::data::ELEMENT_FIELD));
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::ELEMENT_FIELD, Plato::data::SCALAR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::ELEMENT_FIELD, Plato::data::VECTOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::ELEMENT_FIELD, Plato::data::TENSOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::ELEMENT_FIELD, Plato::data::SCALAR_PARAMETER), std::invalid_argument);
+
+    ASSERT_NO_THROW(Plato::check_data_layout(Plato::data::SCALAR_PARAMETER, Plato::data::SCALAR_PARAMETER));
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_PARAMETER, Plato::data::SCALAR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_PARAMETER, Plato::data::VECTOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_PARAMETER, Plato::data::TENSOR_FIELD), std::invalid_argument);
+    ASSERT_THROW(Plato::check_data_layout(Plato::data::SCALAR_PARAMETER, Plato::data::ELEMENT_FIELD), std::invalid_argument);
 }
 
 TEST(PlatoTest, IsSharedDataArgumentDefinedCheck)
@@ -498,11 +194,11 @@ TEST(PlatoTest, IsSharedDataArgumentDefinedCheck)
     tName = "UpperBounds";
     tSharedDataMap[tName] = std::vector<double>(tNumDesigVariables);
 
-    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("UpperBounds", tSharedDataMap));
-    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("DesignVariables", tSharedDataMap));
-    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjective", tSharedDataMap));
-    ASSERT_NO_THROW(Plato::is_shared_data_argument_defined("ThrustMisfitObjectiveGradient", tSharedDataMap));
-    ASSERT_THROW(Plato::is_shared_data_argument_defined("InequalityGradient", tSharedDataMap), std::invalid_argument);
+    ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("UpperBounds", tSharedDataMap));
+    ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("DesignVariables", tSharedDataMap));
+    ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("ThrustMisfitObjective", tSharedDataMap));
+    ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("ThrustMisfitObjectiveGradient", tSharedDataMap));
+    ASSERT_THROW(Plato::check_shared_data_argument_definition("InequalityGradient", tSharedDataMap), std::invalid_argument);
 }
 
 TEST(PlatoTest, RocketDesignAppObjectiveVal)

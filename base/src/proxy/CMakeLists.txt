@@ -2,8 +2,9 @@ set(LIB_NAMES)
 
 set(LIB_NAME Proxy)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
-set(${LIB_NAME}_SOURCES Plato_StructuralTopologyOptimization.cpp
+set(${LIB_NAME}_SOURCES Plato_RocketDesignApp.cpp
                         Plato_GradFreeSimpleRocketObjective.cpp
+                        Plato_StructuralTopologyOptimization.cpp
                         Plato_StructuralTopologyOptimizationProxyApp.cpp
                         )
 
@@ -11,6 +12,7 @@ set(${LIB_NAME}_HEADERS Plato_ProxyVolume.hpp
 						Plato_SimpleRocket.hpp
 						Plato_GeometryModel.hpp
 						Plato_ProxyCompliance.hpp
+						Plato_RocketDesignApp.hpp
 						Plato_CircularCylinder.hpp
 						Plato_SimpleRocketObjective.hpp
 						Plato_GradFreeSimpleRocketObjective.hpp
