@@ -45,6 +45,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_MLKelleySachsAugmentedLagrangian.hpp
                         Plato_KelleySachsBoundConstrained.hpp
                         Plato_ReducedSpaceTrustRegionStageMng.hpp
+                        Plato_KelleySachsBoundLightInterface.hpp
                         Plato_KelleySachsBoundConstrainedInterface.hpp
                         Plato_KelleySachsAugmentedLagrangianInterface.hpp
                         Plato_KelleySachsStepMng.hpp
