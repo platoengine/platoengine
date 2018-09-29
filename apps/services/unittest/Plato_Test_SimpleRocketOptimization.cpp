@@ -70,6 +70,163 @@
 #include <iostream>
 #include <fstream>
 
+namespace Plato
+{
+
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmOutputsKSBC
+{
+    OrdinalType mNumOuterIter;
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
+
+    ScalarType mObjFuncValue;
+    ScalarType mNormObjFuncGrad;
+    ScalarType mActualReduction;
+    ScalarType mStationarityMeasure;
+    ScalarType mCurrentTrustRegionRadius;
+    ScalarType mControlStagnationMeasure;
+    ScalarType mObjectiveStagnationMeasure;
+
+    std::string mStopCriterion;
+
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution;
+};
+
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmInputsKSBC
+{
+    AlgorithmInputsKSBC() :
+            mMaxNumOuterIter(500),
+            mMaxTrustRegionSubProblemIter(25),
+            mMaxNumOuterLineSearchUpdates(10),
+            mMaxTrustRegionRadius(1e1),
+            mMinTrustRegionRadius(1e-8),
+            mTrustRegionExpansionFactor(4),
+            mTrustRegionContractionFactor(0.75),
+            mOuterGradientTolerance(1e-8),
+            mOuterStationarityTolerance(1e-8),
+            mOuterActualReductionTolerance(1e-12),
+            mOuterControlStagnationTolerance(1e-16),
+            mOuterObjectiveStagnationTolerance(1e-12),
+            mCommWrapper(),
+            mMemorySpace(Plato::MemorySpace::HOST),
+            mLowerBounds(nullptr),
+            mUpperBounds(nullptr),
+            mInitialGuess(nullptr),
+            mReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
+    {
+        mCommWrapper.useDefaultComm();
+    }
+
+    virtual ~AlgorithmInputsKSBC()
+    {
+    }
+
+    OrdinalType mMaxNumOuterIter;
+    OrdinalType mMaxTrustRegionSubProblemIter;
+    OrdinalType mMaxNumOuterLineSearchUpdates;
+
+    ScalarType mMaxTrustRegionRadius;
+    ScalarType mMinTrustRegionRadius;
+    ScalarType mTrustRegionExpansionFactor;
+    ScalarType mTrustRegionContractionFactor;
+
+    ScalarType mOuterGradientTolerance;
+    ScalarType mOuterStationarityTolerance;
+    ScalarType mOuterActualReductionTolerance;
+    ScalarType mOuterControlStagnationTolerance;
+    ScalarType mOuterObjectiveStagnationTolerance;
+
+    Plato::CommWrapper mCommWrapper;
+    Plato::MemorySpace::type_t mMemorySpace;
+
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds;
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds;
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
+};
+
+template<typename ScalarType, typename OrdinalType = size_t>
+void set_bound_constrained_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aAlgoInputs,
+                                            Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
+{
+    aAlgorithm.setMaxNumIterations(aAlgoInputs.mMaxNumOuterIter);
+    aAlgorithm.setMaxNumUpdates(aAlgoInputs.mMaxNumOuterLineSearchUpdates);
+    aAlgorithm.setMaxNumTrustRegionSubProblemIterations(aAlgoInputs.mMaxTrustRegionSubProblemIter);
+
+    aAlgorithm.setMaxTrustRegionRadius(aAlgoInputs.mMaxTrustRegionRadius);
+    aAlgorithm.setMinTrustRegionRadius(aAlgoInputs.mMinTrustRegionRadius);
+    aAlgorithm.setTrustRegionExpansion(aAlgoInputs.mTrustRegionExpansionFactor);
+    aAlgorithm.setTrustRegionContraction(aAlgoInputs.mTrustRegionContractionFactor);
+
+    aAlgorithm.setGradientTolerance(aAlgoInputs.mOuterGradientTolerance);
+    aAlgorithm.setStationarityTolerance(aAlgoInputs.mOuterStationarityTolerance);
+    aAlgorithm.setStagnationTolerance(aAlgoInputs.mOuterObjectiveStagnationTolerance);
+    aAlgorithm.setActualReductionTolerance(aAlgoInputs.mOuterActualReductionTolerance);
+    aAlgorithm.setControlStagnationTolerance(aAlgoInputs.mOuterControlStagnationTolerance);
+}
+
+template<typename ScalarType, typename OrdinalType = size_t>
+void set_bound_constrained_algorithm_outputs(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm,
+                                             Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
+{
+    aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
+    aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
+    aOutputs.mNumObjGradEval = aAlgorithm.getDataMng().getNumObjectiveGradientEvaluations();
+
+    aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveFunctionValue();
+    aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormProjectedGradient();
+    aOutputs.mActualReduction = aAlgorithm.getStepMng().getActualReduction();
+    aOutputs.mStationarityMeasure = aAlgorithm.getDataMng().getStationarityMeasure();
+    aOutputs.mCurrentTrustRegionRadius = aAlgorithm.getStepMng().getTrustRegionRadius();
+    aOutputs.mControlStagnationMeasure = aAlgorithm.getDataMng().getControlStagnationMeasure();
+    aOutputs.mObjectiveStagnationMeasure = aAlgorithm.getDataMng().getObjectiveStagnationMeasure();
+
+    Plato::get_stop_criterion(aAlgorithm.getStoppingCriterion(), aOutputs.mStopCriterion);
+
+    const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = aAlgorithm.getDataMng().getCurrentControl();
+    aOutputs.mSolution = tSolution.create();
+    Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
+}
+
+template<typename ScalarType, typename OrdinalType = size_t>
+void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+                const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
+                Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
+{
+    // ********* ALLOCATE DATA FACTORY *********
+    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
+    tDataFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>(aInputs.mMemorySpace);
+    tDataFactory->setCommWrapper(aInputs.mCommWrapper);
+    tDataFactory->allocateControl(*aInputs.mInitialGuess);
+    tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
+
+    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
+    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> tDataMng;
+    tDataMng = std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(tDataFactory);
+    tDataMng->setInitialGuess(*aInputs.mInitialGuess);
+    tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
+    tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
+
+    // ********* ALLOCATE OBJECTIVE FUNCTION LIST *********
+    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tObjectiveList;
+    tObjectiveList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>();
+    tObjectiveList->add(aObjective);
+
+    // ********* ALLOCATE REDUCED SPACE STAGE MANAGER *********
+    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> tStageMng;
+    tStageMng = std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, tObjectiveList);
+
+    // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
+    Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
+    Plato::set_bound_constrained_algorithm_inputs(aInputs, tAlgorithm);
+    tAlgorithm.solve();
+    Plato::set_bound_constrained_algorithm_outputs(tAlgorithm, aOutputs);
+}
+
+} // namespace Plato
+
 namespace PlatoTest
 {
 
@@ -258,33 +415,12 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     EXPECT_FLOAT_EQ(tBestObjectiveValue, tObjective.evaluate(tBestParameters));
 }
 
-TEST(PlatoTest, GradBasedSimpleRocketOptimization)
+TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithInterface)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    // ********* SET NORMALIZATION CONSTANTS *********
     const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-
-    // ********* SET CONTROL PARAMETERS *********
-    const size_t tVECTOR_INDEX = 0;
     std::vector<double> tNormalizationConstants(tNumControls);
     tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
-
-    Plato::StandardVector<double> tLowerBounds(tNumControls);
-    tLowerBounds[0] = 0.06 / tNormalizationConstants[0]; tLowerBounds[1] = 0.003 / tNormalizationConstants[1];
-    tDataMng->setControlLowerBounds(tVECTOR_INDEX, tLowerBounds);
-
-    Plato::StandardVector<double> tUpperBounds(tNumControls);
-    tUpperBounds[0] = 1.0; tUpperBounds[1] = 1.0;
-    tDataMng->setControlUpperBounds(tVECTOR_INDEX, tUpperBounds);
-
-    Plato::StandardVector<double> tInitialGuess(tNumControls);
-    tInitialGuess[0] = 0.074 / tNormalizationConstants[0]; tInitialGuess[1] = 0.0055 / tNormalizationConstants[1];
-    tDataMng->setInitialGuess(tVECTOR_INDEX, tInitialGuess);
 
     // ********* ALLOCATE OBJECTIVE *********
     Plato::SimpleRocketInuts<double> tRocketInputs;
@@ -292,53 +428,34 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimization)
             std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     std::shared_ptr<Plato::SimpleRocketObjective<double>> tMyObjective =
             std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketInputs, tGeomModel);
-
-    // ********* SET NORMALIZATION PARAMETERS *********
     tMyObjective->setNormalizationConstants(tNormalizationConstants);
 
-    // ********* SET OBJECTIVE FUNCTION LIST *********
-    std::shared_ptr<Plato::CriterionList<double>> tObjectiveList = std::make_shared<Plato::CriterionList<double>>();
-    tObjectiveList->add(tMyObjective);
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
+    (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
 
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjectiveList);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
+    (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setMaxNumIterations(500);
-    tAlgorithm.setMaxTrustRegionRadius(1e1);
-    tAlgorithm.setStationarityTolerance(1e-12);
-    tAlgorithm.setStagnationTolerance(1e-12);
-    tAlgorithm.setGradientTolerance(1e-12);
-    tAlgorithm.setActualReductionTolerance(1e-12);
-    tAlgorithm.solve();
-
-    // ********* EQUAL BY DETERMINISM OF OBJECTIVE *********
-    EXPECT_FLOAT_EQ(tDataMng->getCurrentObjectiveFunctionValue(), tMyObjective->value(tDataMng->getCurrentControl()));
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    const double tBest1 = tDataMng->getCurrentControl(tVECTOR_INDEX)[0] * tNormalizationConstants[0];
-    const double tBest2 = tDataMng->getCurrentControl(tVECTOR_INDEX)[1] * tNormalizationConstants[1];
-    EXPECT_NEAR(tBest1, 0.0749672, tTolerance);
-    EXPECT_NEAR(tBest2, 0.00500131, tTolerance);
+    const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
+    const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
+    EXPECT_NEAR(tBest1, 0.074967184692443331, tTolerance);
+    EXPECT_NEAR(tBest2, 0.0050013136704244072, tTolerance);
 
-    // ********* OUTPUT TO CONSOLE *********
-    std::cout << "NumIterationsDone = " << tAlgorithm.getNumIterationsDone() << std::endl;
+    // ********* OUTPUT TO TERMINAL *********
+    std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
     std::cout << "NumFunctionEvaluations = " << tMyObjective->getNumFunctionEvaluations() << std::endl;
-    std::cout << "BestObjectiveValue = " << tDataMng->getCurrentObjectiveFunctionValue() << std::endl;
-    std::cout << "Best1: " << tBest1 << ", Best2: " << tBest2 << std::endl;
-    std::string tMessage;
-    Plato::get_stop_criterion(tAlgorithm.getStoppingCriterion(), tMessage);
-    std::cout << "StoppingCriterion = " << tMessage.c_str() << std::endl;
-
-    std::vector<double> tGoldThrustProfile = getGoldThrust();
-    std::vector<double> tThrustProfile = tMyObjective->getThrustProfile();
-    for(size_t tIndex = 0; tIndex < tThrustProfile.size(); tIndex++)
-    {
-        EXPECT_NEAR(tThrustProfile[tIndex], tGoldThrustProfile[tIndex], tTolerance);
-    }
+    std::cout << "BestObjectiveValue = " << tOutputs.mObjFuncValue << std::endl;
+    std::cout << "StoppingCriterion = " << tOutputs.mStopCriterion.c_str() << std::endl;
 }
 
 } // namespace PlatoTest

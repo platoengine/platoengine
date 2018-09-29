@@ -114,7 +114,7 @@ public:
 
     /******************************************************************************//**
      * @brief Set optimality tolerance, i.e. \f$\Vert\nabla{F}(x)\Vert\leq\epsilon\f$
-     * @return [in] aInput optimality tolerance
+     * @param [in] aInput optimality tolerance
     **********************************************************************************/
     void setOptimalityTolerance(const ScalarType & aInput)
     {
@@ -132,7 +132,7 @@ public:
 
     /******************************************************************************//**
      * @brief Set minimum trust region radius
-     * @return [in] aInput minimum trust region radius
+     * @param [in] aInput minimum trust region radius
     **********************************************************************************/
     void setMinTrustRegionRadius(const ScalarType & aInput)
     {
@@ -141,7 +141,7 @@ public:
 
     /******************************************************************************//**
      * @brief Set maximum trust region radius
-     * @return [in] aInput maximum trust region radius
+     * @param [in] aInput maximum trust region radius
     **********************************************************************************/
     void setMaxTrustRegionRadius(const ScalarType & aInput)
     {
@@ -150,7 +150,7 @@ public:
 
     /******************************************************************************//**
      * @brief Set trust region radius expansion factor
-     * @return [in] aInput trust region radius expansion factor
+     * @param [in] aInput trust region radius expansion factor
     **********************************************************************************/
     void setTrustRegionExpansion(const ScalarType & aInput)
     {
@@ -159,11 +159,29 @@ public:
 
     /******************************************************************************//**
      * @brief Set trust region radius contraction factor
-     * @return [in] aInput trust region radius contraction factor
+     * @param [in] aInput trust region radius contraction factor
     **********************************************************************************/
     void setTrustRegionContraction(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionContraction(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Return reference to data manager
+     * @return trust region algorithm's data manager
+    **********************************************************************************/
+    const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & getDataMng() const
+    {
+        return (*mDataMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Return reference to trust region step algorithm manager
+     * @return trust region step algorithm manager
+    **********************************************************************************/
+    const Plato::KelleySachsStepMng<ScalarType, OrdinalType> & getStepMng() const
+    {
+        return (*mStepMng);
     }
 
     /******************************************************************************//**
