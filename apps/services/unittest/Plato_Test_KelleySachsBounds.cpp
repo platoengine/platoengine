@@ -406,7 +406,6 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
     const size_t tNumVectors = 1;
     const size_t tNumControls = 2;
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mMaxTrustRegionRadius = 1e2;
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 10 /* base value */);
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -10 /* base value */);
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2 /* base value */);
