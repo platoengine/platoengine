@@ -145,7 +145,10 @@ public:
         // Compute objective gradient
         Plato::fill(static_cast<ScalarType>(0), mWorkMyGradient.operator*());
         mObjective->gradient(tControl, mWorkMyGradient.operator*());
+        mNumObjGradEval++;
+
         aDataMng.setObjectiveGradient(mWorkMyGradient.operator*());
+        aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
 
         // Compute constraint gradients
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)

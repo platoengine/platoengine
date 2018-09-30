@@ -218,6 +218,24 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Get number of objective gradient evaluations
+     * @return number of objective gradient evaluations
+    **********************************************************************************/
+    OrdinalType getNumObjectiveGradientEvaluations() const
+    {
+        return (mNumObjGradEval);
+    }
+
+    /******************************************************************************//**
+     * @brief Set number of objective gradient evaluations
+     * @param [in] aInput number of objective gradient evaluations
+    **********************************************************************************/
+    void setNumObjectiveGradientEvaluations(const OrdinalType& aInput)
+    {
+        mNumObjGradEval = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Compute maximum inequality constraint residual
     **********************************************************************************/
     void computeMaxInequalityValue()

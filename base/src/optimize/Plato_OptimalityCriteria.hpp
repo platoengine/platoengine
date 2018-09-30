@@ -165,30 +165,58 @@ public:
         return (mObjectiveStagnationTolerance);
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of optimization iterations
+     * @param [in] aInput maximum number of optimization iterations
+    **********************************************************************************/
     void setMaxNumIterations(const OrdinalType & aInput)
     {
         mMaxNumIterations = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set control stagnation tolerance
+     * @param [in] aInput control stagnation tolerance
+    **********************************************************************************/
     void setControlStagnationTolerance(const ScalarType & aInput)
     {
         mControlStagnationTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set feasibility tolerance
+     * @param [in] aInput feasibility tolerance
+    **********************************************************************************/
     void setFeasibilityTolerance(const ScalarType & aInput)
     {
         mFeasibilityTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set objective gradient tolerance
+     * @param [in] aInput objective gradient tolerance
+    **********************************************************************************/
     void setObjectiveGradientTolerance(const ScalarType & aInput)
     {
         mObjectiveGradientTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set objective stagnation tolerance
+     * @param [in] aInput objective stagnation tolerance
+    **********************************************************************************/
     void setObjectiveStagnationTolerance(const ScalarType & aInput)
     {
         mObjectiveStagnationTolerance = aInput;
     }
 
-    void gatherOuputStream(std::ofstream & aOutput)
+    /******************************************************************************//**
+     * @brief Return reference to data manager
+     * @return optimality criteria algorithm data manager
+    **********************************************************************************/
+    const Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & getDataMng() const
     {
-        aOutput = mOutputStream;
+        return (*mDataMng);
     }
 
     /******************************************************************************//**
