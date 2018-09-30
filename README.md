@@ -17,7 +17,7 @@ where username and password corresponds to your github.com account. At this stag
 
 ### Branches
 There are two main branches of this repository; stable and master. 
-* **stable** - Most recent stable version of PLATO Engine. This may not have all of the current features but will be more tested. Checkout the stable branch if you want to use PLATO Engine to run some examples. A `stable version` is denoted by a tag. For instance, the latest release version is `v0.2.0`.
+* **stable** - Most recent stable version of PLATO Engine. This may not have all of the current features but will be more tested. Checkout the stable branch if you want to use PLATO Engine to run some examples. A `stable version` is denoted by a tag. For instance, the latest release version is `v0.3.0`.
 * **master** - Constantly changing and may contain bugs. Checkout the master branch if you are actively developing.
 
 # Application
