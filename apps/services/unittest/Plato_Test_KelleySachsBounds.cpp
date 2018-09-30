@@ -50,19 +50,18 @@
 
 #include "Plato_UnitTestUtils.hpp"
 
-#include "Plato_KelleySachsBoundConstrained.hpp"
-#include "Plato_ReducedSpaceTrustRegionStageMng.hpp"
+#include "Plato_KelleySachsBoundLightInterface.hpp"
 
+#include "Plato_Circle.hpp"
+#include "Plato_Rosenbrock.hpp"
+#include "Plato_Himmelblau.hpp"
 #include "Plato_ProxyVolume.hpp"
+#include "Plato_GoldsteinPrice.hpp"
 #include "Plato_ProxyCompliance.hpp"
 #include "Plato_EpetraSerialDenseVector.hpp"
 #include "Plato_EpetraSerialDenseMultiVector.hpp"
 #include "Plato_StructuralTopologyOptimization.hpp"
 #include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
-#include "Plato_Rosenbrock.hpp"
-#include "Plato_Himmelblau.hpp"
-#include "Plato_GoldsteinPrice.hpp"
-#include "Plato_Circle.hpp"
 
 namespace PlatoTest
 {
@@ -396,6 +395,39 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrock)
     tGoldVector(0, 1) = 1.;
     const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
     PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+}
+
+TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
+{
+    // ********* ALLOCATE OBJECTIVE *********
+    std::shared_ptr<Plato::Rosenbrock<double>> tMyObjective = std::make_shared<Plato::Rosenbrock<double>>();
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mMaxTrustRegionRadius = 1e2;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 10 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -10 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2 /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    const double tTolerance = 1e-6;
+    EXPECT_EQ(29u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(281u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(56u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mActualReduction, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mStationarityMeasure, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mControlStagnationMeasure, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mObjectiveStagnationMeasure, tTolerance);
+    EXPECT_NEAR(1e2, tOutputs.mCurrentTrustRegionRadius, tTolerance);
+    EXPECT_NEAR(1.0, (*tOutputs.mSolution)(0,0), tTolerance);
+    EXPECT_NEAR(1.0, (*tOutputs.mSolution)(0,1), tTolerance);
 }
 
 TEST(PlatoTest, KelleySachsBoundConstrainedCircle)

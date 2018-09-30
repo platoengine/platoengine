@@ -95,7 +95,7 @@ struct AlgorithmInputsKSBC
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
             mMaxNumOuterLineSearchUpdates(10),
-            mMaxTrustRegionRadius(1e1),
+            mMaxTrustRegionRadius(1e2),
             mMinTrustRegionRadius(1e-8),
             mTrustRegionExpansionFactor(4),
             mTrustRegionContractionFactor(0.75),

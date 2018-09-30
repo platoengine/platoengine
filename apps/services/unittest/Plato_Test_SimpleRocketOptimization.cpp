@@ -249,7 +249,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     EXPECT_FLOAT_EQ(tBestObjectiveValue, tObjective.evaluate(tBestParameters));
 }
 
-TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithInterface)
+TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
 {
     // ********* SET NORMALIZATION CONSTANTS *********
     const size_t tNumControls = 2;
