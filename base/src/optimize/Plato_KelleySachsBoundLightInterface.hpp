@@ -92,6 +92,7 @@ struct AlgorithmInputsKSBC
      * @brief Default constructor
     **********************************************************************************/
     AlgorithmInputsKSBC() :
+            mPrintDiagnostics(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
             mMaxNumOuterLineSearchUpdates(10),
@@ -120,6 +121,8 @@ struct AlgorithmInputsKSBC
     virtual ~AlgorithmInputsKSBC()
     {
     }
+
+    bool mPrintDiagnostics /*!< flag to enable problem statistics output (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
@@ -236,6 +239,10 @@ inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
     Plato::set_bound_constrained_algorithm_inputs(aInputs, tAlgorithm);
+    if(aInputs.mPrintDiagnostics == true)
+    {
+        tAlgorithm.enableDiagnostics();
+    }
     tAlgorithm.solve();
     Plato::set_bound_constrained_algorithm_outputs(tAlgorithm, aOutputs);
 }
