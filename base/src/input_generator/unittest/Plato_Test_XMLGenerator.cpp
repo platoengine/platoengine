@@ -1975,9 +1975,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 34\n"
@@ -2092,9 +2090,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_two)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 8\n"
@@ -2212,9 +2208,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_certainWithUncertain)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1 8\n"
@@ -2332,9 +2326,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_singleBug)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 34\n"
@@ -2434,9 +2426,7 @@ TEST(PlatoTestXMLGenerator,distributeObjective_notEnoughProcessors)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 2 5 7 11\n"
@@ -2510,9 +2500,7 @@ TEST(PlatoTestXMLGenerator,distributeObjective_exactlyEnoughProcessors)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 2 6 4 8\n"
@@ -2588,9 +2576,7 @@ TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
-    std::string stringInput;
-
-    stringInput =
+    std::string stringInput =
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1 7 3 4\n"

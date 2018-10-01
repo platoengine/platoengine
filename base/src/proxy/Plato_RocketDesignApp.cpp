@@ -131,7 +131,7 @@ void RocketDesignApp::compute(const std::string & aOperationName)
                 << "\n LINE: " << __LINE__ << "\n ******** \n\n";
         tFullErrorMsg << tErrorMsg.what();
         std::cout << tFullErrorMsg.str().c_str();
-        throw tFullErrorMsg;
+        throw std::invalid_argument(tFullErrorMsg.str().c_str());
     }
 }
 
@@ -156,7 +156,7 @@ void RocketDesignApp::exportData(const std::string & aArgumentName, Plato::Share
                 << "\n LINE: " << __LINE__ << "\n ******** \n\n";
         tFullErrorMsg << tErrorMsg.what();
         std::cout << tFullErrorMsg.str().c_str();
-        throw tFullErrorMsg;
+        throw std::invalid_argument(tFullErrorMsg.str().c_str());
     }
 }
 
@@ -181,7 +181,7 @@ void RocketDesignApp::importData(const std::string & aArgumentName, const Plato:
                 << "\n LINE: " << __LINE__ << "\n ******** \n\n";
         tFullErrorMsg << tErrorMsg.what();
         std::cout << tFullErrorMsg.str().c_str();
-        throw tFullErrorMsg;
+        throw std::invalid_argument(tFullErrorMsg.str().c_str());
     }
 }
 
