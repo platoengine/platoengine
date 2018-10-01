@@ -55,6 +55,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_LinearOperatorList.hpp
                         Plato_MethodMovingAsymptotes.hpp
                         Plato_MethodMovingAsymptotesInterface.hpp
+                        Plato_MethodMovingAsymptotesLightInterface.hpp
                         Plato_MultiVectorList.hpp
                         Plato_Preconditioner.hpp
                         Plato_PrimalProblemStageMng.hpp

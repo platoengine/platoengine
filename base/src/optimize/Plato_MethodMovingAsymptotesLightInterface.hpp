@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_OptimalityCriteriaLightInterface.hpp
+ * Plato_MethodMovingAsymptotesLightInterface.hpp
  *
  *  Created on: Sep 30, 2018
  */
@@ -49,26 +49,28 @@
 #pragma once
 
 #include "Plato_DataFactory.hpp"
-#include "Plato_OptimalityCriteria.hpp"
-#include "Plato_OptimalityCriteriaDataMng.hpp"
-#include "Plato_OptimalityCriteriaStageMng.hpp"
-#include "Plato_NonlinearProgrammingSubProblemOC.hpp"
+#include "Plato_PrimalProblemStageMng.hpp"
+#include "Plato_MethodMovingAsymptotes.hpp"
+#include "Plato_ConservativeConvexSeparableAppxDataMng.hpp"
+#include "Plato_ConservativeConvexSeparableAppxAlgorithm.hpp"
 
 namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Output data structure for the Optimality Criteria (OC) algorithm
+ * @brief Output data structure for the Method of Moving Asymptotes (MMA) algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmOutputsOC
+struct AlgorithmOutputsMMA
 {
     OrdinalType mNumOuterIter; /*!< number of outer iterations */
     OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
     OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
 
+    ScalarType mKKTMeasure; /*!< Karush-Kuhn-Tucker (KKT) conditions inexactness */
     ScalarType mObjFuncValue; /*!< objective function value */
     ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
+    ScalarType mStationarityMeasure; /*!< norm of the descent direction */
     ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
     ScalarType mObjectiveStagnationMeasure; /*!< measures stagnation in two subsequent objective function evaluations */
 
@@ -77,30 +79,29 @@ struct AlgorithmOutputsOC
     std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
 };
-// struct AlgorithmOutputsOC
+// struct AlgorithmOutputsMMA
 
 /******************************************************************************//**
- * @brief Input data structure for the Optimality Criteria (OC) algorithm
+ * @brief Input data structure for the Method of Moving Asymptotes (MMA) algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmInputsOC
+struct AlgorithmInputsMMA
 {
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    AlgorithmInputsOC() :
+    AlgorithmInputsMMA() :
             mPrintDiagnostics(false),
-            mMaxNumIter(500),
-            mMoveLimit(0.2),
-            mScaleFactor(0.01),
-            mDampingPower(0.5),
-            mDualLowerBound(0),
-            mDualUpperBound(1e7),
-            mBisectionTolerance(1e-4),
-            mFeasibilityTolerance(1e-5),
-            mObjectiveGradientTolerance(1e-8),
-            mControlStagnationTolerance(1e-2),
-            mObjectiveStagnationTolerance(1e-5),
+            mMaxNumOuterIter(500),
+            mMovingAsymptoteExpansionFactor(1.2),
+            mMovingAsymptoteContractionFactor(0.4),
+            mInitialMovingAsymptoteScaleFactor(0.5),
+            mMovingAsymptoteUpperBoundScaleFactor(10),
+            mMovingAsymptoteLowerBoundScaleFactor(0.01),
+            mStationarityTolerance(1e-4),
+            mControlStagnationTolerance(1e-8),
+            mObjectiveStagnationTolerance(1e-6),
+            mKarushKuhnTuckerConditionsTolerance(1e-5),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
             mDual(nullptr),
@@ -115,25 +116,24 @@ struct AlgorithmInputsOC
     /******************************************************************************//**
      * @brief Default destructor
     **********************************************************************************/
-    virtual ~AlgorithmInputsOC()
+    virtual ~AlgorithmInputsMMA()
     {
     }
 
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
-    OrdinalType mMaxNumIter; /*!< maximum number of outer iterations */
+    OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
 
-    ScalarType mMoveLimit; /*!< control move limit */
-    ScalarType mScaleFactor; /*!< control update scale factor */
-    ScalarType mDampingPower; /*!< damping exponent */
-    ScalarType mDualLowerBound; /*!< Lagrange multiplier lower bounds */
-    ScalarType mDualUpperBound; /*!< Lagrange multiplier upper bounds */
+    ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
+    ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
+    ScalarType mInitialMovingAsymptoteScaleFactor; /*!< initial moving asymptotes' scale factor */
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor; /*!< scale factor for upper bound on moving asymptotes */
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor; /*!< scale factor for lower bound on moving asymptotes */
 
-    ScalarType mBisectionTolerance; /*!< bisection tolerance */
-    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
-    ScalarType mObjectiveGradientTolerance; /*!< gradient norm tolerance */
+    ScalarType mStationarityTolerance; /*!< stationarity tolerance */
     ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
     ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mKarushKuhnTuckerConditionsTolerance; /*!< Karush-Kuhn-Tucker (KKT) inexactness tolerance */
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
@@ -145,81 +145,81 @@ struct AlgorithmInputsOC
     /*!< operations which require communication across processors, e.g. max, min, global sum */
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
 };
-// struct AlgorithmInputsOC
+// struct AlgorithmInputsMMA
 
 /******************************************************************************//**
- * @brief Set Optimality Criteria (OC) algorithm inputs
- * @param [in] aInputs Optimality Criteria algorithm inputs
- * @param [in,out] aStepMng Optimality Criteria subproblem interface
- * @param [in,out] aAlgorithm Optimality Criteria algorithm interface
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm inputs
+ * @param [in] aInputs Method of Moving Asymptotes algorithm inputs
+ * @param [in,out] aAlgorithm Method of Moving Asymptotes algorithm interface
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_optimality_criteria_algorithm_inputs(const Plato::AlgorithmInputsOC<ScalarType, OrdinalType> & aInputs,
-                                                     Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType> & aStepMng,
-                                                     Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm)
+inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                                     Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm)
 {
     if(aInputs.mPrintDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
     }
 
-    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumIter);
-    aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
-    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
-    aAlgorithm.setObjectiveGradientTolerance(aInputs.mObjectiveGradientTolerance);
-    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setMovingAsymptoteExpansionFactor(aInputs.mMovingAsymptoteExpansionFactor);
+    aAlgorithm.setMovingAsymptoteContractionFactor(aInputs.mMovingAsymptoteContractionFactor);
+    aAlgorithm.setInitialMovingAsymptoteScaleFactor(aInputs.mInitialMovingAsymptoteScaleFactor);
+    aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(aInputs.mMovingAsymptoteUpperBoundScaleFactor);
+    aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(aInputs.mMovingAsymptoteLowerBoundScaleFactor);
 
-    aStepMng.setMoveLimit(aInputs.mMoveLimit);
-    aStepMng.setScaleFactor(aInputs.mScaleFactor);
-    aStepMng.setDampingPower(aInputs.mDampingPower);
-    aStepMng.setDualLowerBound(aInputs.mDualLowerBound);
-    aStepMng.setDualUpperBound(aInputs.mDualUpperBound);
-    aStepMng.setBisectionTolerance(aInputs.mBisectionTolerance);
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
+    aAlgorithm.setStationarityTolerance(aInputs.mStationarityTolerance);
+    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setKarushKuhnTuckerConditionsTolerance(aInputs.mKarushKuhnTuckerConditionsTolerance);
 }
-// function set_optimality_criteria_algorithm_inputs
+// function set_mma_algorithm_inputs
 
 /******************************************************************************//**
- * @brief Set Optimality Criteria (OC) algorithm outputs
- * @param [in] aAlgorithm Optimality Criteria algorithm interface
- * @param [in,out] aOutputs Optimality Criteria algorithm outputs
-**********************************************************************************/
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm outputs
+ * @param [in] aAlgorithm Method of Moving Asymptotes algorithm interface
+ * @param [in,out] aOutputs Method of Moving Asymptotes algorithm outputs
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_optimality_criteria_algorithm_outputs(const Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm,
-                                                      Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
+inline void set_mma_algorithm_outputs(const Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm,
+                                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
 {
     aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
     aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
     aOutputs.mNumObjGradEval = aAlgorithm.getDataMng().getNumObjectiveGradientEvaluations();
 
-    aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveValue();
-    aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormObjectiveGradient();
+    aOutputs.mKKTMeasure = aAlgorithm.getDataMng().getKarushKuhnTuckerConditionsInexactness();
+    aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveFunctionValue();
+    aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormInactiveGradient();
+    aOutputs.mStationarityMeasure = aAlgorithm.getDataMng().getStationarityMeasure();
     aOutputs.mControlStagnationMeasure = aAlgorithm.getDataMng().getControlStagnationMeasure();
     aOutputs.mObjectiveStagnationMeasure = aAlgorithm.getDataMng().getObjectiveStagnationMeasure();
 
-    Plato::get_stop_criterion(aAlgorithm.getDataMng().getStopCriterion(), aOutputs.mStopCriterion);
+    Plato::get_ccsa_stop_criterion(aAlgorithm.getStoppingCriterion(), aOutputs.mStopCriterion);
 
     const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = aAlgorithm.getDataMng().getCurrentControl();
     aOutputs.mSolution = tSolution.create();
     Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
 
-    const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = aAlgorithm.getDataMng().getCurrentConstraintValues();
-    aOutputs.mConstraints = tConstraintValues.create();
-    aOutputs.mConstraints->update(static_cast<ScalarType>(1), tConstraintValues, static_cast<ScalarType>(0));
+    const OrdinalType tDUAL_VECTOR_INDEX = 0;
+    const Plato::MultiVector<ScalarType, OrdinalType> & tConstraintValues = aAlgorithm.getDataMng().getCurrentConstraintValues();
+    aOutputs.mConstraints = tConstraintValues[tDUAL_VECTOR_INDEX].create();
+    aOutputs.mConstraints->update(static_cast<ScalarType>(1), tConstraintValues[tDUAL_VECTOR_INDEX], static_cast<ScalarType>(0));
 }
-// function set_optimality_criteria_algorithm_outputs
+// function set_mma_algorithm_outputs
 
 /******************************************************************************//**
- * @brief Optimality Criteria (OC) algorithm interface
+ * @brief Method of Moving Asymptotes (MMA) algorithm interface
  * @param [in] aObjective user-defined objective function
  * @param [in] aConstraints user-defined list of constraints
  * @param [in] aInputs Optimality Criteria algorithm inputs
  * @param [in,out] aOutputs Optimality Criteria algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void solve_optimality_criteria(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
-                                      const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
-                                      const Plato::AlgorithmInputsOC<ScalarType, OrdinalType> & aInputs,
-                                      Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
+inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+                      const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
+                      const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
 {
     // ********* ALLOCATE DATA STRUCTURES *********
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
@@ -230,24 +230,24 @@ inline void solve_optimality_criteria(const std::shared_ptr<Plato::Criterion<Sca
     tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
 
     // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> tDataMng;
-    tDataMng = std::make_shared<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>>(tDataFactory);
+    std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> tDataMng;
+    tDataMng = std::make_shared<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>>(tDataFactory);
     tDataMng->setInitialGuess(*aInputs.mInitialGuess);
     tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
     tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
 
     // ********* ALLOCATE STAGE MANAGER MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaStageMng<ScalarType, OrdinalType>> tStageMng;
-    tStageMng = std::make_shared<Plato::OptimalityCriteriaStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
+    std::shared_ptr<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>> tStageMng;
+    tStageMng = std::make_shared<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
 
     // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE OPTIMIZATION PROBLEM *********
-    std::shared_ptr<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>> tSubProblem;
-    tSubProblem = std::make_shared<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>>(tDataFactory);
-    Plato::OptimalityCriteria<ScalarType, OrdinalType> tAlgorithm(tDataMng, tStageMng, tSubProblem);
-    Plato::set_optimality_criteria_algorithm_inputs(aInputs, *tSubProblem, tAlgorithm);
+    std::shared_ptr<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>> tSubProblem;
+    tSubProblem = std::make_shared<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>>(tDataFactory);
+    Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, tDataMng, tSubProblem);
+    Plato::set_mma_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
-    Plato::set_optimality_criteria_algorithm_outputs(tAlgorithm, aOutputs);
+    Plato::set_mma_algorithm_outputs(tAlgorithm, aOutputs);
 }
-// function solve_optimality_criteria
+// function solve_mma
 
 } // namespace Plato
