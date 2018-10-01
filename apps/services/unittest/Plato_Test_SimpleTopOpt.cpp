@@ -646,6 +646,7 @@ TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
     EXPECT_NEAR(0.065024946645311221, tOutputs.mControlStagnationMeasure, tTolerance);
     EXPECT_NEAR(1.4078545110540741e-06, tOutputs.mObjectiveStagnationMeasure, tTolerance);
     EXPECT_NEAR(5.8759036524747e-6, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::getGoldControlOptimalityCriteriaTest();
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
