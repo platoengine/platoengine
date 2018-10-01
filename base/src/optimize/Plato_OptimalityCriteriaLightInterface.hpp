@@ -16,7 +16,7 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Output data structure for Optimality Criteria (OC)  algorithm
+ * @brief Output data structure for the Optimality Criteria (OC) algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct AlgorithmOutputsOC
@@ -38,7 +38,7 @@ struct AlgorithmOutputsOC
 // struct AlgorithmOutputsOC
 
 /******************************************************************************//**
- * @brief Input data structure for Optimality Criteria (OC) algorithm
+ * @brief Input data structure for the Optimality Criteria (OC) algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct AlgorithmInputsOC
@@ -116,6 +116,11 @@ inline void set_optimality_criteria_algorithm_inputs(const Plato::AlgorithmInput
                                                      Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType> & aStepMng,
                                                      Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm)
 {
+    if(aInputs.mPrintDiagnostics == true)
+    {
+        aAlgorithm.enableDiagnostics();
+    }
+
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumIter);
     aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
@@ -132,13 +137,13 @@ inline void set_optimality_criteria_algorithm_inputs(const Plato::AlgorithmInput
 // function set_optimality_criteria_algorithm_inputs
 
 /******************************************************************************//**
- * @brief Set Kelley-Sachs trust region algorithm outputs
- * @param [in] aAlgorithm Kelley-Sachs trust region algorithm interface
- * @param [in,out] aOutputs Kelley-Sachs trust region algorithm outputs
+ * @brief Set Optimality Criteria (OC) algorithm outputs
+ * @param [in] aAlgorithm Optimality Criteria algorithm interface
+ * @param [in,out] aOutputs Optimality Criteria algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_bound_constrained_algorithm_outputs(const Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm,
-                                                    Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
+inline void set_optimality_criteria_algorithm_outputs(const Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm,
+                                                      Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
 {
     aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
     aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
@@ -159,10 +164,10 @@ inline void set_bound_constrained_algorithm_outputs(const Plato::OptimalityCrite
     aOutputs.mConstraints = tConstraintValues.create();
     aOutputs.mConstraints->update(static_cast<ScalarType>(1), tConstraintValues, static_cast<ScalarType>(0));
 }
-// function set_bound_constrained_algorithm_outputs
+// function set_optimality_criteria_algorithm_outputs
 
 /******************************************************************************//**
- * @brief Optimality Criteria (OC) algorithm high-level interface
+ * @brief Optimality Criteria (OC) algorithm interface
  * @param [in] aObjective user-defined objective function
  * @param [in] aConstraints user-defined list of constraints
  * @param [in] aInputs Optimality Criteria algorithm inputs
@@ -198,12 +203,8 @@ inline void solve_optimality_criteria(const std::shared_ptr<Plato::Criterion<Sca
     tSubProblem = std::make_shared<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>>(tDataFactory);
     Plato::OptimalityCriteria<ScalarType, OrdinalType> tAlgorithm(tDataMng, tStageMng, tSubProblem);
     Plato::set_optimality_criteria_algorithm_inputs(aInputs, *tSubProblem, tAlgorithm);
-    if(aInputs.mPrintDiagnostics == true)
-    {
-        tAlgorithm.enableDiagnostics();
-    }
     tAlgorithm.solve();
-    Plato::set_bound_constrained_algorithm_outputs(tAlgorithm, aOutputs);
+    Plato::set_optimality_criteria_algorithm_outputs(tAlgorithm, aOutputs);
 }
 // function solve_optimality_criteria
 

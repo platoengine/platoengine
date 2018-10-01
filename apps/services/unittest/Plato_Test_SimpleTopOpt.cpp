@@ -79,6 +79,205 @@
 #include "Plato_Diagnostics.hpp"
 #include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
 
+namespace Plato
+{
+
+/******************************************************************************//**
+ * @brief Output data structure for the Method of Moving Asymptotes (MMA) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmOutputsMMA
+{
+    OrdinalType mNumOuterIter; /*!< number of outer iterations */
+    OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
+    OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
+
+    ScalarType mKKTMeasure; /*!< Karush-Kuhn-Tucker (KKT) conditions inexactness */
+    ScalarType mObjFuncValue; /*!< objective function value */
+    ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
+    ScalarType mStationarityMeasure; /*!< norm of the descent direction */
+    ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
+    ScalarType mObjectiveStagnationMeasure; /*!< measures stagnation in two subsequent objective function evaluations */
+
+    std::string mStopCriterion; /*!< stopping criterion */
+
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
+};
+// struct AlgorithmOutputsMMA
+
+/******************************************************************************//**
+ * @brief Input data structure for the Method of Moving Asymptotes (MMA) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmInputsMMA
+{
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
+    AlgorithmInputsMMA() :
+            mPrintDiagnostics(false),
+            mMaxNumOuterIter(500),
+            mMovingAsymptoteExpansionFactor(1.2),
+            mMovingAsymptoteContractionFactor(0.4),
+            mInitialMovingAsymptoteScaleFactor(0.5),
+            mMovingAsymptoteUpperBoundScaleFactor(10),
+            mMovingAsymptoteLowerBoundScaleFactor(0.01),
+            mStationarityTolerance(1e-4),
+            mControlStagnationTolerance(1e-8),
+            mObjectiveStagnationTolerance(1e-6),
+            mKarushKuhnTuckerConditionsTolerance(1e-5),
+            mCommWrapper(),
+            mMemorySpace(Plato::MemorySpace::HOST),
+            mDual(nullptr),
+            mLowerBounds(nullptr),
+            mUpperBounds(nullptr),
+            mInitialGuess(nullptr),
+            mReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
+    {
+        mCommWrapper.useDefaultComm();
+    }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
+    virtual ~AlgorithmInputsMMA()
+    {
+    }
+
+    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+
+    OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+
+    ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
+    ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
+    ScalarType mInitialMovingAsymptoteScaleFactor; /*!< initial moving asymptotes' scale factor */
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor; /*!< scale factor for upper bound on moving asymptotes */
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor; /*!< scale factor for lower bound on moving asymptotes */
+
+    ScalarType mStationarityTolerance; /*!< stationarity tolerance */
+    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
+    ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mKarushKuhnTuckerConditionsTolerance; /*!< Karush-Kuhn-Tucker (KKT) inexactness tolerance */
+
+    Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
+    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
+    /*!< operations which require communication across processors, e.g. max, min, global sum */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
+};
+// struct AlgorithmInputsMMA
+
+/******************************************************************************//**
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm inputs
+ * @param [in] aInputs Method of Moving Asymptotes algorithm inputs
+ * @param [in,out] aAlgorithm Method of Moving Asymptotes algorithm interface
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                                     Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm)
+{
+    if(aInputs.mPrintDiagnostics == true)
+    {
+        aAlgorithm.enableDiagnostics();
+    }
+
+    aAlgorithm.setMovingAsymptoteExpansionFactor(aInputs.mMovingAsymptoteExpansionFactor);
+    aAlgorithm.setMovingAsymptoteContractionFactor(aInputs.mMovingAsymptoteContractionFactor);
+    aAlgorithm.setInitialMovingAsymptoteScaleFactor(aInputs.mInitialMovingAsymptoteScaleFactor);
+    aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(aInputs.mMovingAsymptoteUpperBoundScaleFactor);
+    aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(aInputs.mMovingAsymptoteLowerBoundScaleFactor);
+
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
+    aAlgorithm.setStationarityTolerance(aInputs.mStationarityTolerance);
+    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setKarushKuhnTuckerConditionsTolerance(aInputs.mKarushKuhnTuckerConditionsTolerance);
+}
+// function set_mma_algorithm_inputs
+
+/******************************************************************************//**
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm outputs
+ * @param [in] aAlgorithm Method of Moving Asymptotes algorithm interface
+ * @param [in,out] aOutputs Method of Moving Asymptotes algorithm outputs
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_mma_algorithm_outputs(const Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aAlgorithm,
+                                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
+{
+    aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
+    aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
+    aOutputs.mNumObjGradEval = aAlgorithm.getDataMng().getNumObjectiveGradientEvaluations();
+
+    aOutputs.mKKTMeasure = aAlgorithm.getDataMng().getKarushKuhnTuckerConditionsInexactness();
+    aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveFunctionValue();
+    aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormInactiveGradient();
+    aOutputs.mStationarityMeasure = aAlgorithm.getDataMng().getStationarityMeasure();
+    aOutputs.mControlStagnationMeasure = aAlgorithm.getDataMng().getControlStagnationMeasure();
+    aOutputs.mObjectiveStagnationMeasure = aAlgorithm.getDataMng().getObjectiveStagnationMeasure();
+
+    Plato::get_ccsa_stop_criterion(aAlgorithm.getStoppingCriterion(), aOutputs.mStopCriterion);
+
+    const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = aAlgorithm.getDataMng().getCurrentControl();
+    aOutputs.mSolution = tSolution.create();
+    Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
+
+    const OrdinalType tDUAL_VECTOR_INDEX = 0;
+    const Plato::MultiVector<ScalarType, OrdinalType> & tConstraintValues = aAlgorithm.getDataMng().getCurrentConstraintValues();
+    aOutputs.mConstraints = tConstraintValues[tDUAL_VECTOR_INDEX].create();
+    aOutputs.mConstraints->update(static_cast<ScalarType>(1), tConstraintValues[tDUAL_VECTOR_INDEX], static_cast<ScalarType>(0));
+}
+// function set_mma_algorithm_outputs
+
+/******************************************************************************//**
+ * @brief Method of Moving Asymptotes (MMA) algorithm interface
+ * @param [in] aObjective user-defined objective function
+ * @param [in] aConstraints user-defined list of constraints
+ * @param [in] aInputs Optimality Criteria algorithm inputs
+ * @param [in,out] aOutputs Optimality Criteria algorithm outputs
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+                      const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
+                      const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
+{
+    // ********* ALLOCATE DATA STRUCTURES *********
+    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
+    tDataFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
+    tDataFactory->setCommWrapper(aInputs.mCommWrapper);
+    tDataFactory->allocateDual(*aInputs.mDual);
+    tDataFactory->allocateControl(*aInputs.mInitialGuess);
+    tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
+
+    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM DATA MANAGER *********
+    std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> tDataMng;
+    tDataMng = std::make_shared<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>>(tDataFactory);
+    tDataMng->setInitialGuess(*aInputs.mInitialGuess);
+    tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
+    tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
+
+    // ********* ALLOCATE STAGE MANAGER MANAGER *********
+    std::shared_ptr<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>> tStageMng;
+    tStageMng = std::make_shared<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
+
+    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE OPTIMIZATION PROBLEM *********
+    std::shared_ptr<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>> tSubProblem;
+    tSubProblem = std::make_shared<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>>(tDataFactory);
+    Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, tDataMng, tSubProblem);
+    Plato::set_mma_algorithm_inputs(aInputs, tAlgorithm);
+    tAlgorithm.solve();
+    Plato::set_mma_algorithm_outputs(tAlgorithm, aOutputs);
+}
+// function solve_mma
+
+} // namespace Plato
+
+
 namespace PlatoTest
 {
 
@@ -647,7 +846,7 @@ TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
     EXPECT_NEAR(1.4078545110540741e-06, tOutputs.mObjectiveStagnationMeasure, tTolerance);
     EXPECT_NEAR(5.8759036524747e-6, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
-    std::vector<double> tGoldControl = TopoProxy::getGoldControlOptimalityCriteriaTest();
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_optimality_criteria_test();
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
@@ -733,84 +932,67 @@ TEST(PlatoTest, SolveStrucTopoWithGCMMA)
      }
 }
 
-
-TEST(PlatoTest, SolveStrucTopoWithMMA)
+TEST(PlatoTest, SolveStrucTopoMethodMovingAsymptotesLightInterface)
 {
     // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
-     const double tPoissonRatio = 0.3;
-     const double tElasticModulus = 1;
-     const int tNumElementsXdirection = 30;
-     const int tNumElementsYdirection = 10;
-     std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
-             std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
-     tPDE->setFilterRadius(1.2);
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE;
+    tPDE = std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
 
-     // ************** SET FORCE VECTOR **************
-     const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
-     Epetra_SerialDenseVector tForce(tGlobalNumDofs);
-     const int tDOFsIndex = 1;
-     tForce[tDOFsIndex] = -1;
-     tPDE->setForceVector(tForce);
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
 
-     // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
-     std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
-     Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
-     tPDE->setFixedDOFs(tFixedDOFs);
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
 
-     // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
-     std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
-     std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
-     tCompliance->disableFilter();
-     std::shared_ptr<Plato::CriterionList<double>> tConstraints = std::make_shared<Plato::CriterionList<double>>();
-     tConstraints->add(tVolume);
+    // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
+    std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
+    std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
+    tCompliance->disableFilter();
+    std::shared_ptr<Plato::CriterionList<double>> tConstraints = std::make_shared<Plato::CriterionList<double>>();
+    tConstraints->add(tVolume);
 
-     // ********* ALLOCATE CORE DATA STRUCTURES *********
-     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-     const size_t tNumDuals = 1;
-     const size_t tNumVectors = 1;
-     Plato::EpetraSerialDenseMultiVector<double> tDual(tNumVectors, tNumDuals);
-     tDataFactory->allocateDual(tDual);
-     const size_t tNumControls = tPDE->getNumDesignVariables();
-     Plato::EpetraSerialDenseMultiVector<double> tControl(tNumVectors, tNumControls);
-     tDataFactory->allocateControl(tControl);
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumDuals = 1;
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = tPDE->getNumDesignVariables();
+    Plato::AlgorithmInputsMMA<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumDuals);
+    const double tValue = tPDE->getVolumeFraction();
+    tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tValue);
+    tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-3 /* base value */);
 
-     // ********* ALLOCATE PRIMAL PROBLEM STAGE MANAGER *********
-     std::shared_ptr<Plato::PrimalProblemStageMng<double>> tStageMng =
-             std::make_shared<Plato::PrimalProblemStageMng<double>>(tDataFactory, tCompliance, tConstraints);
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsMMA<double> tOutputs;
+    Plato::solve_mma<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
-     // ********* ALLOCATE CCSA ALGORITHM DATA MANAGER *********
-     std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<double>> tDataMng =
-             std::make_shared<Plato::ConservativeConvexSeparableAppxDataMng<double>>(tDataFactory);
-
-     // ********* SET BOUNDS AND INITIAL GUESS *********
-     double tValue = tPDE->getVolumeFraction();
-     tDataMng->setInitialGuess(tValue);
-     tValue = 1e-3;
-     tDataMng->setControlLowerBounds(tValue);
-     tValue = 1;
-     tDataMng->setControlUpperBounds(tValue);
-
-     // ********* ALLOCATE GCMMA SUBPROBLEM MANAGER *********
-     std::shared_ptr<Plato::MethodMovingAsymptotes<double>> tSubProblem =
-             std::make_shared<Plato::MethodMovingAsymptotes<double>>(tDataFactory);
-
-     // ********* ALLOCATE CCSA ALGORITHM AND SOLVE STRUCTURAL TOPOLOGY OPTIMIZATION PROBLEM *********
-     Plato::ConservativeConvexSeparableAppxAlgorithm<double> tAlgorithm(tStageMng, tDataMng, tSubProblem);
-     tAlgorithm.solve();
-
-     // ********* TEST OUTPUT DATA *********
-     const double tTolerance = 1e-6;
-     const double tCurrentObjective = tDataMng->getCurrentObjectiveFunctionValue();
-     const double tGoldObjective = 0.166885064308563;
-     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
-
-     const size_t tVectorIndex = 0;
-     std::vector<double> tGoldControl = TopoProxy::getGoldControlMmaTest();
-     const Plato::Vector<double> & tCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
-     for(size_t tIndex = 0; tIndex < tCurrentControl.size(); tIndex++)
-     {
-         EXPECT_NEAR(tCurrentControl[tIndex], tGoldControl[tIndex], tTolerance);
-     }
+    const double tTolerance = 1e-6;
+    EXPECT_EQ(95, tOutputs.mNumOuterIter);
+    EXPECT_EQ(96, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(96, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.16688506430875721, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(0.00013414822686334704, tOutputs.mKKTMeasure, tTolerance);
+    EXPECT_NEAR(2.9065999369154898e-5, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(-0.078339302681999956, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_NEAR(0.0087197998107464668, tOutputs.mStationarityMeasure, tTolerance);
+    EXPECT_NEAR(0.00046357698689347693, tOutputs.mControlStagnationMeasure, tTolerance);
+    EXPECT_NEAR(8.0091931212167289e-7, tOutputs.mObjectiveStagnationMeasure, tTolerance);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_mma_test();
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+        EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
+    }
 }
 
 TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangian)

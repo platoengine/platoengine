@@ -87,8 +87,8 @@ public:
             mOutputStream(),
             mMaxNumOuterIter(500),
             mNumOuterIterDone(0),
-            mStagnationTolerance(1e-8),
             mStationarityTolerance(1e-4),
+            mControlStagnationTolerance(1e-8),
             mObjectiveStagnationTolerance(1e-6),
             mMovingAsymptoteExpansionFactor(1.2),
             mMovingAsymptoteContractionFactor(0.4),
@@ -158,7 +158,7 @@ public:
     **********************************************************************************/
     ScalarType getControlStagnationTolerance() const
     {
-        return (mStagnationTolerance);
+        return (mControlStagnationTolerance);
     }
 
     /******************************************************************************//**
@@ -167,7 +167,7 @@ public:
     **********************************************************************************/
     void setControlStagnationTolerance(const ScalarType & aInput)
     {
-        mStagnationTolerance = aInput;
+        mControlStagnationTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -243,8 +243,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return moving asymptotes' scale factor
-     * @return moving asymptotes scale factor
+     * @brief Return initial moving asymptotes' scale factor
+     * @return moving initial asymptotes scale factor
     **********************************************************************************/
     ScalarType getInitialMovingAsymptoteScaleFactor() const
     {
@@ -252,8 +252,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Set moving asymptotes' scale factor
-     * @param [in] aInput moving asymptotes scale factor
+     * @brief Set initial moving asymptotes' scale factor
+     * @param [in] aInput initial moving asymptotes scale factor
     **********************************************************************************/
     void setInitialMovingAsymptoteScaleFactor(const ScalarType & aInput)
     {
@@ -329,6 +329,15 @@ public:
     void setStoppingCriterion(const Plato::ccsa::stop_t & aInput)
     {
         mStopCriterion = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Return reference to data manager
+     * @return conservative convex separable approximation (CCSA) algorithm data manager
+    **********************************************************************************/
+    const Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & getDataMng() const
+    {
+        return (*mDataMng);
     }
 
     /******************************************************************************//**
@@ -670,8 +679,8 @@ private:
     OrdinalType mMaxNumOuterIter;
     OrdinalType mNumOuterIterDone;
 
-    ScalarType mStagnationTolerance;
     ScalarType mStationarityTolerance;
+    ScalarType mControlStagnationTolerance;
     ScalarType mObjectiveStagnationTolerance;
     ScalarType mMovingAsymptoteExpansionFactor;
     ScalarType mMovingAsymptoteContractionFactor;

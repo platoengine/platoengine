@@ -55,11 +55,11 @@ namespace TopoProxy
 {
 
 std::vector<double> getGoldControlRolTest();
-std::vector<double> getGoldControlMmaTest();
+std::vector<double> get_gold_control_mma_test();
 std::vector<double> getGoldControlGcmmaTest();
 std::vector<double> getGoldControlTrustRegionTest();
 std::vector<double> getGoldControlTrustRegionBoundTest();
-std::vector<double> getGoldControlOptimalityCriteriaTest();
+std::vector<double> get_gold_control_optimality_criteria_test();
 
 std::vector<double> getGoldStateData();
 std::vector<double> getGoldGradientData();

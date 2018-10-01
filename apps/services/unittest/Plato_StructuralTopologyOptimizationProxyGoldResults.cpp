@@ -83,7 +83,7 @@ std::vector<double> getGoldControlRolTest()
     return (tGoldControl);
 }
 
-std::vector<double> getGoldControlMmaTest()
+std::vector<double> get_gold_control_mma_test()
 {
     std::vector<double> tGoldControl = {1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1, 1, 1, 0.001, 0.001, 0.001,
                                         0.001, 0.001, 0.001, 0.001, 1, 1, 0.001, 1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1,
@@ -233,7 +233,7 @@ std::vector<double> getGoldControlTrustRegionBoundTest()
     return (tGoldControl);
 }
 
-std::vector<double> getGoldControlOptimalityCriteriaTest()
+std::vector<double> get_gold_control_optimality_criteria_test()
 {
     std::vector<double> tGoldControl = {1.00000000000000, 1.00000000000000, 0.11321569633136, 0.00264006159724,
                                         0.00100000000000, 0.00100000000000, 0.00100000000000, 0.12813818215460,
