@@ -85,6 +85,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_OptimalityCriteriaStageMngBase.hpp
                         Plato_OptimalityCriteriaStageMng.hpp
                         Plato_OptimalityCriteriaSubProblem.hpp
+                        Plato_OptimalityCriteriaLightInterface.hpp
                         Plato_OptimalityCriteriaTestInequalityOne.hpp
                         Plato_OptimalityCriteriaTestInequalityTwo.hpp
                         Plato_OptimalityCriteriaTestObjectiveOne.hpp

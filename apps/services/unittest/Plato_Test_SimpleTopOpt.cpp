@@ -50,16 +50,12 @@
 
 #include <vector>
 
-#include "Epetra_SerialDenseMatrix.h"
-#include "Epetra_SerialDenseVector.h"
-
 #include "Plato_SharedField.hpp"
 #include "Plato_SharedValue.hpp"
 #include "Plato_Communication.hpp"
 #include "Plato_StructuralTopologyOptimizationProxyApp.hpp"
 
 #include "Plato_Rosenbrock.hpp"
-#include "Plato_DataFactory.hpp"
 #include "Plato_ProxyVolume.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_ProxyCompliance.hpp"
@@ -67,10 +63,7 @@
 #include "Plato_EpetraSerialDenseMultiVector.hpp"
 #include "Plato_StructuralTopologyOptimization.hpp"
 
-#include "Plato_OptimalityCriteria.hpp"
-#include "Plato_OptimalityCriteriaDataMng.hpp"
-#include "Plato_OptimalityCriteriaStageMng.hpp"
-#include "Plato_NonlinearProgrammingSubProblemOC.hpp"
+#include "Plato_OptimalityCriteriaLightInterface.hpp"
 
 #include "Plato_PrimalProblemStageMng.hpp"
 #include "Plato_MethodMovingAsymptotes.hpp"
@@ -85,203 +78,6 @@
 
 #include "Plato_Diagnostics.hpp"
 #include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
-
-namespace Plato
-{
-
-/******************************************************************************//**
- * @brief Output data structure for Optimality Criteria (OC)  algorithm
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmOutputsOC
-{
-    OrdinalType mNumOuterIter; /*!< number of outer iterations */
-    OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
-    OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
-
-    ScalarType mObjFuncValue; /*!< objective function value */
-    ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
-    ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
-    ScalarType mObjectiveStagnationMeasure; /*!< measures stagnation in two subsequent objective function evaluations */
-
-    std::string mStopCriterion; /*!< stopping criterion */
-
-    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
-};
-// struct AlgorithmOutputsOC
-
-/******************************************************************************//**
- * @brief Input data structure for Optimality Criteria (OC) algorithm
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmInputsOC
-{
-    /******************************************************************************//**
-     * @brief Default constructor
-    **********************************************************************************/
-    AlgorithmInputsOC() :
-            mPrintDiagnostics(false),
-            mMaxNumIter(500),
-            mMoveLimit(0.2),
-            mScaleFactor(0.01),
-            mDampingPower(0.5),
-            mDualLowerBound(0),
-            mDualUpperBound(1e7),
-            mBisectionTolerance(1e-4),
-            mFeasibilityTolerance(1e-5),
-            mObjectiveGradientTolerance(1e-8),
-            mControlStagnationTolerance(1e-2),
-            mObjectiveStagnationTolerance(1e-5),
-            mCommWrapper(),
-            mMemorySpace(Plato::MemorySpace::HOST),
-            mDual(nullptr),
-            mLowerBounds(nullptr),
-            mUpperBounds(nullptr),
-            mInitialGuess(nullptr),
-            mReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
-    {
-        mCommWrapper.useDefaultComm();
-    }
-
-    /******************************************************************************//**
-     * @brief Default destructor
-    **********************************************************************************/
-    virtual ~AlgorithmInputsOC()
-    {
-    }
-
-    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
-
-    OrdinalType mMaxNumIter; /*!< maximum number of outer iterations */
-
-    ScalarType mMoveLimit; /*!< control move limit */
-    ScalarType mScaleFactor; /*!< control update scale factor */
-    ScalarType mDampingPower; /*!< damping exponent */
-    ScalarType mDualLowerBound; /*!< Lagrange multiplier lower bounds */
-    ScalarType mDualUpperBound; /*!< Lagrange multiplier upper bounds */
-
-    ScalarType mBisectionTolerance; /*!< bisection tolerance */
-    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
-    ScalarType mObjectiveGradientTolerance; /*!< gradient norm tolerance */
-    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
-    ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
-
-    Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
-    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
-
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
-    /*!< operations which require communication across processors, e.g. max, min, global sum */
-    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
-};
-// struct AlgorithmInputsOC
-
-/******************************************************************************//**
- * @brief Set Optimality Criteria (OC) algorithm inputs
- * @param [in] aInputs Optimality Criteria algorithm inputs
- * @param [in,out] aStepMng Optimality Criteria subproblem interface
- * @param [in,out] aAlgorithm Optimality Criteria algorithm interface
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_optimality_criteria_algorithm_inputs(const Plato::AlgorithmInputsOC<ScalarType, OrdinalType> & aInputs,
-                                                     Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType> aStepMng,
-                                                     Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm)
-{
-    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumIter);
-    aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
-    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
-    aAlgorithm.setObjectiveGradientTolerance(aInputs.mObjectiveGradientTolerance);
-    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
-
-    aStepMng.setMoveLimit(aInputs.mMoveLimit);
-    aStepMng.setScaleFactor(aInputs.mScaleFactor);
-    aStepMng.setDampingPower(aInputs.mDampingPower);
-    aStepMng.setDualLowerBound(aInputs.mDualLowerBound);
-    aStepMng.setDualUpperBound(aInputs.mDualUpperBound);
-    aStepMng.setBisectionTolerance(aInputs.mBisectionTolerance);
-}
-// function set_optimality_criteria_algorithm_inputs
-
-/******************************************************************************//**
- * @brief Set Kelley-Sachs trust region algorithm outputs
- * @param [in] aAlgorithm Kelley-Sachs trust region algorithm interface
- * @param [in,out] aOutputs Kelley-Sachs trust region algorithm outputs
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_bound_constrained_algorithm_outputs(const Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm,
-                                                    Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
-{
-    aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
-    aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
-    aOutputs.mNumObjGradEval = aAlgorithm.getDataMng().getNumObjectiveGradientEvaluations();
-
-    aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveValue();
-    aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormObjectiveGradient();
-    aOutputs.mControlStagnationMeasure = aAlgorithm.getDataMng().getControlStagnationMeasure();
-    aOutputs.mObjectiveStagnationMeasure = aAlgorithm.getDataMng().getObjectiveStagnationMeasure();
-
-    Plato::get_stop_criterion(aAlgorithm.getStoppingCriterion(), aOutputs.mStopCriterion);
-
-    const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = aAlgorithm.getDataMng().getCurrentControl();
-    aOutputs.mSolution = tSolution.create();
-    Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
-
-    const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = aAlgorithm.getDataMng().getCurrentConstraintValues();
-    aOutputs.mConstraints = tConstraintValues.create();
-    aOutputs.mConstraints.update(static_cast<ScalarType>(1), tConstraintValues, static_cast<ScalarType>(0));
-}
-// function set_bound_constrained_algorithm_outputs
-
-/******************************************************************************//**
- * @brief Optimality Criteria (OC) algorithm high-level interface
- * @param [in] aObjective user-defined objective function
- * @param [in] aConstraints user-defined list of constraints
- * @param [in] aInputs Optimality Criteria algorithm inputs
- * @param [in,out] aOutputs Optimality Criteria algorithm outputs
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-inline void solve_optimality_criteria(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
-                                      const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
-                                      const Plato::AlgorithmInputsOC<ScalarType, OrdinalType> & aInputs,
-                                      Plato::AlgorithmOutputsOC<ScalarType, OrdinalType> & aOutputs)
-{
-    // ********* ALLOCATE DATA STRUCTURES *********
-    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
-    tDataFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
-    tDataFactory->setCommWrapper(aInputs.mCommWrapper);
-    tDataFactory->allocateDual(*aInputs.mDual);
-    tDataFactory->allocateControl(*aInputs.mInitialGuess);
-    tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
-
-    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> tDataMng;
-    tDataMng = std::make_shared<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>>(tDataFactory);
-    tDataMng->setInitialGuess(*aInputs.mInitialGuess);
-    tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
-    tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
-
-    // ********* ALLOCATE STAGE MANAGER MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaStageMng<ScalarType, OrdinalType>> tStageMng;
-    tStageMng = std::make_shared<Plato::OptimalityCriteriaStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
-
-    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE OPTIMIZATION PROBLEM *********
-    std::shared_ptr<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>> tSubProblem;
-    tSubProblem = std::make_shared<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>>(tDataFactory);
-    Plato::OptimalityCriteria<ScalarType, OrdinalType> tAlgorithm(tDataMng, tStageMng, tSubProblem);
-    Plato::set_optimality_criteria_algorithm_inputs(aInputs, tSubProblem, tAlgorithm);
-    if(aInputs.mPrintDiagnostics == true)
-    {
-        tAlgorithm.enableDiagnostics();
-    }
-    tAlgorithm.solve();
-    Plato::set_bound_constrained_algorithm_outputs(tAlgorithm, aOutputs);
-}
-// function solve_optimality_criteria
-
-} // namespace Plato
 
 namespace PlatoTest
 {
@@ -798,15 +594,15 @@ TEST(PlatoTest, ProxyVolume)
     }
 }
 
-TEST(PlatoTest, SolveStrucTopoWithOC)
+TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
 {
     // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
     const double tPoissonRatio = 0.3;
     const double tElasticModulus = 1;
     const int tNumElementsXdirection = 30;
     const int tNumElementsYdirection = 10;
-    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
-            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE;
+    tPDE = std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
 
     // ************** SET FORCE VECTOR **************
     const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
@@ -827,50 +623,27 @@ TEST(PlatoTest, SolveStrucTopoWithOC)
     tConstraints->add(tVolume);
 
     // ********* ALLOCATE CORE DATA STRUCTURES *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumDuals = 1;
     const size_t tNumVectors = 1;
-    Plato::EpetraSerialDenseMultiVector<double> tDual(tNumVectors, tNumDuals);
-    tDataFactory->allocateDual(tDual);
     const size_t tNumControls = tPDE->getNumDesignVariables();
-    Plato::EpetraSerialDenseMultiVector<double> tControl(tNumVectors, tNumControls);
-    tDataFactory->allocateControl(tControl);
+    Plato::AlgorithmInputsOC<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumDuals);
+    const double tValue = tPDE->getVolumeFraction();
+    tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tValue);
+    tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-3 /* base value */);
 
-    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaDataMng<double>> tDataMng =
-            std::make_shared<Plato::OptimalityCriteriaDataMng<double>>(tDataFactory);
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsOC<double> tOutputs;
+    Plato::solve_optimality_criteria<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
-    // ********* SET BOUNDS AND INITIAL GUESS *********
-    double tValue = tPDE->getVolumeFraction();
-    tDataMng->setInitialGuess(tValue);
-    tValue = 1e-3;
-    tDataMng->setControlLowerBounds(tValue);
-    tValue = 1;
-    tDataMng->setControlUpperBounds(tValue);
-
-    // ********* ALLOCATE STAGE MANAGER MANAGER *********
-    std::shared_ptr<Plato::OptimalityCriteriaStageMng<double>> tStageMng =
-            std::make_shared<Plato::OptimalityCriteriaStageMng<double>>(tDataFactory, tCompliance, tConstraints);
-
-    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE STRUCTURAL TOPOLOGY OPTIMIZATION PROBLEM *********
-    std::shared_ptr<Plato::NonlinearProgrammingSubProblemOC<double>> tSubProlem =
-            std::make_shared<Plato::NonlinearProgrammingSubProblemOC<double>>(tDataFactory);
-    Plato::OptimalityCriteria<double> tAlgorithm(tDataMng, tStageMng, tSubProlem);
-    tAlgorithm.solve();
-
-    // ********* TEST OUTPUT DATA *********
-    const double tTolerance = 1e-5;
-    const double tCurrentObjective = tDataMng->getCurrentObjectiveValue();
-    const double tGoldObjective = 0.17786129647595;
-    EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
-
-    const size_t tVectorIndex = 0;
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.17786129647595, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(5.8759036524747e-6, (*tOutputs.mConstraints)[0], tTolerance);
     std::vector<double> tGoldControl = TopoProxy::getGoldControlOptimalityCriteriaTest();
-    const Plato::Vector<double> & tMyCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
-
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
-        EXPECT_NEAR(tMyCurrentControl[tIndex], tGoldControl[tIndex], tTolerance);
+        EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
     }
 }
 
