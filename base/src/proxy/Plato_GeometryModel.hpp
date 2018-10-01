@@ -84,8 +84,8 @@ public:
     virtual ScalarType area() = 0;
 
     /******************************************************************************//**
-     * @brief Compute the gradient with respect to the parameters that defined the geometry.
-     * @param aOutput gradient with respect to the parameters that defined the geometry
+     * @brief Compute the gradient with respect to the parameters that define the geometry.
+     * @param aOutput gradient with respect to the parameters that define the geometry
     **********************************************************************************/
     virtual void gradient(std::vector<ScalarType>& aOutput) = 0;
 
