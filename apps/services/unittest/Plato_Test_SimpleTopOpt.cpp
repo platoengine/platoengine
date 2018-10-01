@@ -638,7 +638,13 @@ TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
     Plato::solve_optimality_criteria<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
     const double tTolerance = 1e-6;
+    EXPECT_EQ(49, tOutputs.mNumOuterIter);
+    EXPECT_EQ(50, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(50, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0.17786129647595, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(0.066488674895463576, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(0.065024946645311221, tOutputs.mControlStagnationMeasure, tTolerance);
+    EXPECT_NEAR(1.4078545110540741e-06, tOutputs.mObjectiveStagnationMeasure, tTolerance);
     EXPECT_NEAR(5.8759036524747e-6, (*tOutputs.mConstraints)[0], tTolerance);
     std::vector<double> tGoldControl = TopoProxy::getGoldControlOptimalityCriteriaTest();
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
