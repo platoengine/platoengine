@@ -56,6 +56,7 @@
 #include <cassert>
 #include <utility>
 #include <string>
+#include <map>
 #include "XMLGenerator.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
@@ -592,174 +593,187 @@ bool XMLGenerator::generateLaunchScript()
 /******************************************************************************/
 {
     FILE *fp=fopen("mpirun.source", "w");
-    if(fp)
+    if(!fp)
     {
-        std::string num_opt_procs = "1";
-        if(!m_InputData.num_opt_processors.empty())
-            num_opt_procs = m_InputData.num_opt_processors;
+        return true;
+    }
 
-        // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
-        // any combination of the above we need to add an mpirun call for this first so it will run as
-        // a pre-processor on the input mesh.
-        int tNumRefines = 0;
-        if(m_InputData.number_refines != "")
-            tNumRefines = std::atoi(m_InputData.number_refines.c_str());
-        if(tNumRefines > 0 ||
-          (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
+    std::string num_opt_procs = "1";
+    if(!m_InputData.num_opt_processors.empty())
+        num_opt_procs = m_InputData.num_opt_processors;
+
+    // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
+    // any combination of the above we need to add an mpirun call for this first so it will run as
+    // a pre-processor on the input mesh.
+    int tNumRefines = 0;
+    if(m_InputData.number_refines != "")
+        tNumRefines = std::atoi(m_InputData.number_refines.c_str());
+    if(tNumRefines > 0 ||
+            (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
+    {
+        // Determine how many processors to use for the prune_and_refine run.
+        std::string tNumberPruneAndRefineProcsString = "1";
+        int tNumberPruneAndRefineProcs = 1;
+        if(m_InputData.number_prune_and_refine_processors != "" &&
+                m_InputData.number_prune_and_refine_processors != "0")
         {
-            // Determine how many processors to use for the prune_and_refine run.
-            std::string tNumberPruneAndRefineProcsString = "1";
-            int tNumberPruneAndRefineProcs = 1;
-            if(m_InputData.number_prune_and_refine_processors != "" &&
-               m_InputData.number_prune_and_refine_processors != "0")
+            tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
+            tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
+        }
+        else
+        {
+            // Find the max number of objective procs.
+            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
             {
-                tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
-                tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
-            }
-            else
-            {
-                // Find the max number of objective procs.
-                for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+                if(!m_InputData.objectives[i].num_procs.empty())
                 {
-                    if(!m_InputData.objectives[i].num_procs.empty())
+                    int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
+                    if(tNumProcs > tNumberPruneAndRefineProcs)
                     {
-                        int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
-                        if(tNumProcs > tNumberPruneAndRefineProcs)
-                        {
-                            tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
-                            tNumberPruneAndRefineProcs = tNumProcs;
-                        }
+                        tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
+                        tNumberPruneAndRefineProcs = tNumProcs;
                     }
                 }
             }
-
-            // First decompose the files that will be involved below
-            if(tNumberPruneAndRefineProcs > 1)
-            {
-                fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
-                if(m_InputData.initial_guess_filename != "")
-                    fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
-            }
-
-            std::string tPruneString = "0";
-            std::string tNumRefinesString = "0";
-            std::string tNumBufferLayersString = "2";
-            if(m_InputData.prune_mesh == "true")
-                tPruneString = "1";
-            if(m_InputData.number_refines != "")
-                tNumRefinesString = m_InputData.number_refines;
-            if(m_InputData.number_buffer_layers != "")
-                tNumBufferLayersString = m_InputData.number_buffer_layers;
-
-            std::string tCommand;
-            std::string tPruneAndRefineExe = "prune_and_refine";
-            if(m_InputData.prune_and_refine_path.length() > 0)
-                tPruneAndRefineExe = m_InputData.prune_and_refine_path;
-            if(m_UseLaunch)
-                tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-            else
-                tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-            if(m_InputData.initial_guess_filename != "")
-                tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
-            tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
-            tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
-            if(m_InputData.initial_guess_field_name != "")
-                tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
-            tCommand += (" --number_of_refines=" + tNumRefinesString);
-            tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
-            tCommand += (" --prune_mesh=" + tPruneString);
-
-            fprintf(fp, "%s\n", tCommand.c_str());
-
-            // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
-            if(tNumberPruneAndRefineProcs > 1)
-            {
-                // Build the extension string we will need.
-                std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
-                for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
-                    tExtensionString += "0";
-                fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
-            }
         }
 
-        // Now do the decomps for the TO run.
-        if(num_opt_procs.compare("1") != 0)
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
-        if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        // First decompose the files that will be involved below
+        if(tNumberPruneAndRefineProcs > 1)
         {
-            std::string num_procs = "4";
-            if(!m_InputData.objectives[i].num_procs.empty())
-                num_procs = m_InputData.objectives[i].num_procs;
-            if(num_procs.compare("1") != 0)
+            fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
+            if(m_InputData.initial_guess_filename != "")
+                fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
+        }
+
+        std::string tPruneString = "0";
+        std::string tNumRefinesString = "0";
+        std::string tNumBufferLayersString = "2";
+        if(m_InputData.prune_mesh == "true")
+            tPruneString = "1";
+        if(m_InputData.number_refines != "")
+            tNumRefinesString = m_InputData.number_refines;
+        if(m_InputData.number_buffer_layers != "")
+            tNumBufferLayersString = m_InputData.number_buffer_layers;
+
+        std::string tCommand;
+        std::string tPruneAndRefineExe = "prune_and_refine";
+        if(m_InputData.prune_and_refine_path.length() > 0)
+            tPruneAndRefineExe = m_InputData.prune_and_refine_path;
+        if(m_UseLaunch)
+            tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+        else
+            tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+        if(m_InputData.initial_guess_filename != "")
+            tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
+        tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
+        tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
+        if(m_InputData.initial_guess_field_name != "")
+            tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
+        tCommand += (" --number_of_refines=" + tNumRefinesString);
+        tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
+        tCommand += (" --prune_mesh=" + tPruneString);
+
+        fprintf(fp, "%s\n", tCommand.c_str());
+
+        // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
+        if(tNumberPruneAndRefineProcs > 1)
+        {
+            // Build the extension string we will need.
+            std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
+            for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
+                tExtensionString += "0";
+            fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
+        }
+    }
+
+    // remember if the run_mesh has been decomposed to this processor count
+    std::map<std::string,int> hasBeenDecompedToThisCount;
+
+    // Now do the decomps for the TO run.
+    if(num_opt_procs.compare("1") != 0) {
+        if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
+        {
+            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
+        }
+    }
+    if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
+        fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        std::string num_procs = "4";
+        if(!m_InputData.objectives[i].num_procs.empty())
+            num_procs = m_InputData.objectives[i].num_procs;
+        if(num_procs.compare("1") != 0)
+        {
+            if(++hasBeenDecompedToThisCount[num_procs] == 1)
             {
                 fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
-                if(m_InputData.objectives[i].ref_frf_file.length() > 0)
-                    fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
             }
+            if(m_InputData.objectives[i].ref_frf_file.length() > 0)
+                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
         }
+    }
 
 #ifndef USING_OPEN_MPI
-        std::string envString = "-env";
-        std::string separationString = " ";
+    std::string envString = "-env";
+    std::string separationString = " ";
 #else
-        std::string envString = "-x";
-        std::string separationString = "=";
+    std::string envString = "-x";
+    std::string separationString = "=";
 #endif
 
-        std::string tLaunchString = "";
-        std::string tNumProcsString = "";
-        if(m_UseLaunch)
-        {
-            tLaunchString = "launch";
-            tNumProcsString = "-n";
-        }
-        else
-        {
-            tLaunchString = "mpiexec";
-            tNumProcsString = "-np";
-        }
-        // Now add the main mpirun call.
-        fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
-        fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-        fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
-        if(m_InputData.plato_main_path.length() != 0)
-            fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
-        else
-            fprintf(fp, "plato_main platomain.xml \\\n");
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        {
-            const Objective& cur_obj = m_InputData.objectives[i];
-            if(!cur_obj.num_procs.empty())
-                fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
-            else
-                fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
-            fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-            fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
-                    cur_obj.name.c_str());
-            if(!cur_obj.code_name.compare("sierra_sd"))
-            {
-                if(m_InputData.sierra_sd_path.length() != 0)
-                    fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
-                else
-                    fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
-            }
-            else if(!cur_obj.code_name.compare("lightmp"))
-            {
-                if(m_InputData.lightmp_path.length() != 0)
-                    fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
-            }
-            else if(!cur_obj.code_name.compare("albany"))
-            {
-                if(m_InputData.albany_path.length() != 0)
-                    fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
-                else
-                    fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
-            }
-        }
-        fclose(fp);
+    std::string tLaunchString = "";
+    std::string tNumProcsString = "";
+    if(m_UseLaunch)
+    {
+        tLaunchString = "launch";
+        tNumProcsString = "-n";
     }
+    else
+    {
+        tLaunchString = "mpiexec";
+        tNumProcsString = "-np";
+    }
+    // Now add the main mpirun call.
+    fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
+    if(m_InputData.plato_main_path.length() != 0)
+        fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
+    else
+        fprintf(fp, "plato_main platomain.xml \\\n");
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        const Objective& cur_obj = m_InputData.objectives[i];
+        if(!cur_obj.num_procs.empty())
+            fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
+        else
+            fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
+        fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+        fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
+                cur_obj.name.c_str());
+        if(!cur_obj.code_name.compare("sierra_sd"))
+        {
+            if(m_InputData.sierra_sd_path.length() != 0)
+                fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
+            else
+                fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
+        }
+        else if(!cur_obj.code_name.compare("lightmp"))
+        {
+            if(m_InputData.lightmp_path.length() != 0)
+                fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
+        }
+        else if(!cur_obj.code_name.compare("albany"))
+        {
+            if(m_InputData.albany_path.length() != 0)
+                fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
+            else
+                fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
+        }
+    }
+
+    fclose(fp);
     return true;
 }
 
