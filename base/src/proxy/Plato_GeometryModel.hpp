@@ -79,19 +79,19 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief compute the area of a defined geometry.
+     * @brief Compute the area of a user-defined geometry.
     **********************************************************************************/
     virtual ScalarType area() = 0;
 
     /******************************************************************************//**
-     * @brief compute the gradient with respect to the parameters that defined a geometry.
-     * @param aOutput gradient with respect to the parameters that defined a geometry
+     * @brief Compute the gradient with respect to the parameters that defined the geometry.
+     * @param aOutput gradient with respect to the parameters that defined the geometry
     **********************************************************************************/
     virtual void gradient(std::vector<ScalarType>& aOutput) = 0;
 
     /******************************************************************************//**
-     * @brief set parameters that define a geometry.
-     * @param aParam parameters that define a geometry
+     * @brief Set parameters that define the geometry.
+     * @param aParam parameters that define the geometry
     **********************************************************************************/
     virtual void update(const std::map<std::string, ScalarType>& aParam) = 0;
 };
