@@ -146,6 +146,7 @@ struct AlgorithmInputsKSBC
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
+    
     /*!< operations which require communication across processors, e.g. max, min, global sum */
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
 };
