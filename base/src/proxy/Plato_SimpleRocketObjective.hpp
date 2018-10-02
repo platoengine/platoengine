@@ -59,8 +59,7 @@
 #include <numeric>
 #include <stdexcept>
 
-#include "Plato_SimpleRocket.hpp"
-#include "Plato_GeometryModel.hpp"
+#include "Plato_AlgebraicRocketModel.hpp"
 
 #include "Plato_Criterion.hpp"
 #include "Plato_MultiVector.hpp"
@@ -78,7 +77,7 @@ public:
      * @param [in] aRocketInputs struct with rocket model inputs
      * @param [in] aChamberGeom chamber's geometry model
      **********************************************************************************/
-    SimpleRocketObjective(const Plato::SimpleRocketInuts<ScalarType>& aRocketInputs,
+    SimpleRocketObjective(const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
                           const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
             mNumFuncEvaluations(0),
             mEpsilon(1e-4),
@@ -303,7 +302,8 @@ private:
 
     ScalarType mEpsilon;
     ScalarType mNormTargetValues;
-    Plato::SimpleRocket<ScalarType> mRocketModel;
+    Plato::AlgebraicRocketModel<ScalarType> mRocketModel;
+
     std::vector<ScalarType> mTargetThrustProfile;
     std::vector<ScalarType> mCachedThrustProfile;
     std::vector<ScalarType> mNormalizationConstants;

@@ -60,9 +60,9 @@
 namespace PlatoTest
 {
 
-TEST(PlatoTest, SimpleRocket)
+TEST(PlatoTest, AlgebraicRocketModel)
 {
-    Plato::SimpleRocket<double> tDriver;
+    Plato::AlgebraicRocketModel<double> tDriver;
     tDriver.solve();
 
     std::vector<double> tTimes = tDriver.getTimeProfile();

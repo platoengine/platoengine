@@ -48,7 +48,6 @@
 
 #include "gtest/gtest.h"
 
-#include "Plato_SimpleRocket.hpp"
 #include "Plato_GradFreeSimpleRocketObjective.hpp"
 
 #include "Plato_StandardVector.hpp"
@@ -97,7 +96,7 @@ std::vector<double> getGoldThrust()
 TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 {
     // allocate problem inputs - use default parameters
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
@@ -136,7 +135,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
 TEST(PlatoTest, SimpleRocketObjective)
 {
     // allocate problem inputs - use default parameters
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
@@ -220,7 +219,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     PlatoSubproblemLibrary::AbstractAuthority tAuthority;
 
     // define objective
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
     std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);;
@@ -256,7 +255,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
 
     // ********* ALLOCATE OBJECTIVE *********
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     std::shared_ptr<Plato::SimpleRocketObjective<double>> tMyObjective =

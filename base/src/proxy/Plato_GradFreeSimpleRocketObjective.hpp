@@ -53,10 +53,8 @@
 #include <utility>
 #include <cstddef>
 
-#include "Plato_SimpleRocket.hpp"
-#include "Plato_GeometryModel.hpp"
-
 #include "PSL_DiscreteObjective.hpp"
+#include "Plato_AlgebraicRocketModel.hpp"
 
 namespace Plato
 {
@@ -72,7 +70,7 @@ public:
      * @param [in] aRocketInputs struct with rocket model inputs
      * @param [in] aChamberGeom chamber's geometry model
      **********************************************************************************/
-    GradFreeSimpleRocketObjective(const Plato::SimpleRocketInuts<double>& aRocketInputs,
+    GradFreeSimpleRocketObjective(const Plato::AlgebraicRocketInputs<double>& aRocketInputs,
                                   const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom);
 
     /******************************************************************************//**
@@ -124,10 +122,11 @@ private:
 
 private:
     double mNormTargetValues;
-    Plato::SimpleRocket<double> mRocketModel;
-    std::vector<double> mTargetThrustProfile;
 
+    std::vector<double> mTargetThrustProfile;
     std::vector<int> mNumEvaluationsPerDim;
+
+    Plato::AlgebraicRocketModel<double> mRocketModel;
     std::pair<std::vector<double>, std::vector<double>> mBounds; /* <lower,upper> */
 };
 // class SimpleRocketObjectiveGradFree
