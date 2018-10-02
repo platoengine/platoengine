@@ -268,11 +268,13 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     const size_t tNumVectors = 1;
     Plato::AlgorithmInputsKSBC<double> tInputs;
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
-    (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
+    (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; 
+    (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
 
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
-    (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
+    (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; 
+    (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
     Plato::AlgorithmOutputsKSBC<double> tOutputs;
