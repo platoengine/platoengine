@@ -41,7 +41,7 @@
  */
 
 /*
- * Plato_GradFreeSimpleRocketObjective.hpp
+ * Plato_GradFreeRocketObjective.hpp
  *
  *  Created on: Aug 30, 2018
  */
@@ -62,7 +62,7 @@ namespace Plato
 /******************************************************************************//**
  * @brief Gradient-free objective interface for quasi-steady rocket model.
  **********************************************************************************/
-class GradFreeSimpleRocketObjective : public PlatoSubproblemLibrary::DiscreteObjective
+class GradFreeRocketObjective : public PlatoSubproblemLibrary::DiscreteObjective
 {
 public:
     /******************************************************************************//**
@@ -70,13 +70,13 @@ public:
      * @param [in] aRocketInputs struct with rocket model inputs
      * @param [in] aChamberGeom chamber's geometry model
      **********************************************************************************/
-    GradFreeSimpleRocketObjective(const Plato::AlgebraicRocketInputs<double>& aRocketInputs,
-                                  const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom);
+    GradFreeRocketObjective(const Plato::AlgebraicRocketInputs<double>& aRocketInputs,
+                            const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom);
 
     /******************************************************************************//**
      * @brief Destructor
      **********************************************************************************/
-    virtual ~GradFreeSimpleRocketObjective();
+    virtual ~GradFreeRocketObjective();
 
     /******************************************************************************//**
      * @brief Set input parameters needed to pose optimization problem

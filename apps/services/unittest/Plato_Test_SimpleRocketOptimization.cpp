@@ -48,7 +48,7 @@
 
 #include "gtest/gtest.h"
 
-#include "Plato_GradFreeSimpleRocketObjective.hpp"
+#include "Plato_GradFreeRocketObjective.hpp"
 
 #include "Plato_StandardVector.hpp"
 #include "Plato_StandardMultiVector.hpp"
@@ -106,7 +106,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
     std::pair<std::vector<double>, std::vector<double>> tBounds =
             std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
-    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);
+    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, tBounds);
 
     /* {chamber_radius, ref_burn_rate} */
@@ -222,7 +222,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
     std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);;
+    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);;
 
     // set inputs for optimization problem
     std::vector<int> tNumEvaluationsPerDim = {100, 100}; // domain dimension = 100x100=10000

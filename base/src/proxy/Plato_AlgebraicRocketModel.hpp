@@ -104,6 +104,7 @@ struct AlgebraicRocketInputs
     {
     }
 };
+// struct AlgebraicRocketInputs
 
 /******************************************************************************//**
  * @brief Design the rocket chamber to achieve desired QoI profile.
