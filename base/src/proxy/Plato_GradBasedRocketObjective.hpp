@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_SimpleRocketObjective.hpp
+ * Plato_GradBasedRocketObjective.hpp
  *
  *  Created on: Aug 31, 2018
  */
@@ -69,7 +69,7 @@ namespace Plato
 {
 
 template<typename ScalarType, typename OrdinalType = size_t>
-class SimpleRocketObjective : public Plato::Criterion<ScalarType, OrdinalType>
+class GradBasedRocketObjective : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
@@ -77,8 +77,8 @@ public:
      * @param [in] aRocketInputs struct with rocket model inputs
      * @param [in] aChamberGeom chamber's geometry model
      **********************************************************************************/
-    SimpleRocketObjective(const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
-                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
+    GradBasedRocketObjective(const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
+                             const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
             mNumFuncEvaluations(0),
             mEpsilon(1e-4),
             mNormTargetValues(0),
@@ -93,7 +93,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    virtual ~SimpleRocketObjective()
+    virtual ~GradBasedRocketObjective()
     {
     }
 
@@ -308,6 +308,6 @@ private:
     std::vector<ScalarType> mCachedThrustProfile;
     std::vector<ScalarType> mNormalizationConstants;
 };
-// class SimpleRocketObjective
+// class GradBasedRocketObjective
 
 } // namespace Plato

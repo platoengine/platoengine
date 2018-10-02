@@ -14,8 +14,8 @@ set(${LIB_NAME}_HEADERS Plato_ProxyVolume.hpp
 						Plato_ProxyCompliance.hpp
 						Plato_RocketDesignApp.hpp
 						Plato_AlgebraicRocketModel.hpp
-						Plato_SimpleRocketObjective.hpp
 						Plato_GradFreeRocketObjective.hpp
+						Plato_GradBasedRocketObjective.hpp
 						Plato_StructuralTopologyOptimization.hpp
 						Plato_StructuralTopologyOptimizationProxyApp.hpp
 						)

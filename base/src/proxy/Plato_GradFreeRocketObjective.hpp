@@ -129,6 +129,6 @@ private:
     Plato::AlgebraicRocketModel<double> mRocketModel;
     std::pair<std::vector<double>, std::vector<double>> mBounds; /* <lower,upper> */
 };
-// class SimpleRocketObjectiveGradFree
+// class GradFreeRocketObjective
 
 }// namespace Plato

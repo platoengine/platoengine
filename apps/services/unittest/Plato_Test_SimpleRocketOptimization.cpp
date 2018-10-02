@@ -52,7 +52,7 @@
 
 #include "Plato_StandardVector.hpp"
 #include "Plato_StandardMultiVector.hpp"
-#include "Plato_SimpleRocketObjective.hpp"
+#include "Plato_GradBasedRocketObjective.hpp"
 #include "Plato_KelleySachsBoundLightInterface.hpp"
 
 #include "PSL_Random.hpp"
@@ -93,7 +93,7 @@ std::vector<double> getGoldThrust()
 }
 
 
-TEST(PlatoTest, SimpleRocketObjectiveGradFree)
+TEST(PlatoTest, GradBasedRocketObjectiveGradFree)
 {
     // allocate problem inputs - use default parameters
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
@@ -132,7 +132,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     }
 }
 
-TEST(PlatoTest, SimpleRocketObjective)
+TEST(PlatoTest, GradBasedRocketObjective)
 {
     // allocate problem inputs - use default parameters
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
@@ -140,7 +140,7 @@ TEST(PlatoTest, SimpleRocketObjective)
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // set normalization constants
-    Plato::SimpleRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
+    Plato::GradBasedRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
     std::vector<double> tUpperBounds = {0.09, 0.007}; /* {chamber_radius_ub, ref_burn_rate_ub} */
     tObjective.setNormalizationConstants(tUpperBounds);
 
@@ -258,8 +258,8 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    std::shared_ptr<Plato::SimpleRocketObjective<double>> tMyObjective =
-            std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketInputs, tGeomModel);
+    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
+            std::make_shared<Plato::GradBasedRocketObjective<double>>(tRocketInputs, tGeomModel);
     tMyObjective->setNormalizationConstants(tNormalizationConstants);
 
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
