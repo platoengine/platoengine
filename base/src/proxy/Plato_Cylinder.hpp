@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_CircularCylinder.hpp
+ * Plato_Cylinder.hpp
  *
  *  Created on: Aug 29, 2018
  */
@@ -67,13 +67,13 @@ namespace Plato
  * @brief Circular cylinder geometry model class
 **********************************************************************************/
 template<typename ScalarType = double>
-class CircularCylinder : public Plato::GeometryModel<ScalarType>
+class Cylinder : public Plato::GeometryModel<ScalarType>
 {
 public:
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    explicit CircularCylinder(const ScalarType aRadius, const ScalarType aLength) :
+    explicit Cylinder(const ScalarType aRadius, const ScalarType aLength) :
             mRadius(aRadius),
             mLength(aLength)
     {
@@ -82,7 +82,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    virtual ~CircularCylinder()
+    virtual ~Cylinder()
     {
     }
 
@@ -170,6 +170,6 @@ private:
     ScalarType mRadius;
     ScalarType mLength;
 };
-// class CircularCylinder
+// class Cylinder
 
 } // namespace Plato

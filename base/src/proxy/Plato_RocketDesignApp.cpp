@@ -109,7 +109,7 @@ void RocketDesignApp::initialize()
 
     Plato::SimpleRocketInuts<double> tRocketSimInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::CircularCylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
+            std::make_shared<Plato::Cylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
     mObjective = std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketSimInputs, tGeomModel);
 }
 

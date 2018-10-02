@@ -49,7 +49,6 @@
 #include "gtest/gtest.h"
 
 #include "Plato_SimpleRocket.hpp"
-#include "Plato_CircularCylinder.hpp"
 #include "Plato_GradFreeSimpleRocketObjective.hpp"
 
 #include "Plato_StandardVector.hpp"
@@ -100,7 +99,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     // allocate problem inputs - use default parameters
     Plato::SimpleRocketInuts<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // domain dimension = 10x10=100
     std::vector<int> tNumEvaluationsPerDim = {100, 100};
@@ -139,7 +138,7 @@ TEST(PlatoTest, SimpleRocketObjective)
     // allocate problem inputs - use default parameters
     Plato::SimpleRocketInuts<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // set normalization constants
     Plato::SimpleRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
@@ -181,12 +180,12 @@ TEST(PlatoTest, SimpleRocketObjective)
     EXPECT_NEAR(tHessian(tVECTOR_INDEX,1), 1., tTolerance);
 }
 
-TEST(PlatoTest, CircularCylinder)
+TEST(PlatoTest, Cylinder)
 {
     // allocate problem inputs - use default parameters
     const double tRadius = 1;
     const double tLength = 2;
-    Plato::CircularCylinder<double> tCylinder(tRadius, tLength);
+    Plato::Cylinder<double> tCylinder(tRadius, tLength);
 
     // test area calculation
     double tTolerance = 1e-6;
@@ -223,7 +222,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     // define objective
     Plato::SimpleRocketInuts<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-    std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+    std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);;
 
     // set inputs for optimization problem
@@ -259,7 +258,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     // ********* ALLOCATE OBJECTIVE *********
     Plato::SimpleRocketInuts<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::CircularCylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     std::shared_ptr<Plato::SimpleRocketObjective<double>> tMyObjective =
             std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketInputs, tGeomModel);
     tMyObjective->setNormalizationConstants(tNormalizationConstants);

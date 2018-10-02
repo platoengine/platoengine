@@ -9,11 +9,11 @@ set(${LIB_NAME}_SOURCES Plato_RocketDesignApp.cpp
                         )
 
 set(${LIB_NAME}_HEADERS Plato_ProxyVolume.hpp
+						Plato_Cylinder.hpp
 						Plato_SimpleRocket.hpp
 						Plato_GeometryModel.hpp
 						Plato_ProxyCompliance.hpp
 						Plato_RocketDesignApp.hpp
-						Plato_CircularCylinder.hpp
 						Plato_SimpleRocketObjective.hpp
 						Plato_GradFreeSimpleRocketObjective.hpp
 						Plato_StructuralTopologyOptimization.hpp

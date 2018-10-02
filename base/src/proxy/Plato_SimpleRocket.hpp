@@ -58,7 +58,7 @@
 #include <cassert>
 #include <cstddef>
 
-#include "Plato_CircularCylinder.hpp"
+#include "Plato_Cylinder.hpp"
 
 namespace Plato
 {
@@ -141,7 +141,7 @@ public:
             mTimes(),
             mThrustProfile(),
             mPressureProfile(),
-            mChamberGeomModel(std::make_shared<Plato::CircularCylinder<ScalarType>>(mChamberRadius, mChamberLength))
+            mChamberGeomModel(std::make_shared<Plato::Cylinder<ScalarType>>(mChamberRadius, mChamberLength))
     {
     }
 
