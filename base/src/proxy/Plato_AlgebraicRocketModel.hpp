@@ -374,11 +374,11 @@ public:
 
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 
-            ScalarType tRdot = mRefBurnRate * std::pow(tTotalPressure, mAlpha) * mInvPrefAlpha;
             tThrust = static_cast<ScalarType>(269.0) * static_cast<ScalarType>(9.8)
                     * tChamberArea * (tTotalPressure - mAmbientPressure)
                     / mCharacteristicVelocity;
 
+            ScalarType tRdot = mRefBurnRate * std::pow(tTotalPressure, mAlpha) * mInvPrefAlpha;
             tChamberGeom.find("BurnRate")->second = tRdot;
             mChamberGeomModel->update(tChamberGeom);
             tTime += mDeltaTime;

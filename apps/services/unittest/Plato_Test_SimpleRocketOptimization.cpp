@@ -216,8 +216,6 @@ TEST(PlatoTest, Cylinder)
 
 TEST(PlatoTest, GradFreeSimpleRocketOptimization)
 {
-    PlatoSubproblemLibrary::AbstractAuthority tAuthority;
-
     // define objective
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
@@ -232,6 +230,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, aBounds);
 
     // define searcher
+    PlatoSubproblemLibrary::AbstractAuthority tAuthority;
     PlatoSubproblemLibrary::IterativeSelection tSearcher(&tAuthority);
     tSearcher.set_objective(&tObjective);
 
