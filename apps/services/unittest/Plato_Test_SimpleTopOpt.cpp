@@ -65,8 +65,7 @@
 
 #include "Plato_OptimalityCriteriaLightInterface.hpp"
 #include "Plato_MethodMovingAsymptotesLightInterface.hpp"
-
-#include "Plato_GloballyConvergentMethodMovingAsymptotes.hpp"
+#include "Plato_GloballyConvergentMethodMovingAsymptotesLightInterface.hpp"
 
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
@@ -75,111 +74,6 @@
 
 #include "Plato_Diagnostics.hpp"
 #include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
-
-
-namespace Plato
-{
-
-/******************************************************************************//**
- * @brief Output data structure for the Globally Convergent Method of Moving Asymptotes (GCMMA) algorithm
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmOutputsGCMMA
-{
-    OrdinalType mNumOuterIter; /*!< number of outer iterations */
-    OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
-    OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
-
-    ScalarType mKKTMeasure; /*!< Karush-Kuhn-Tucker (KKT) conditions inexactness */
-    ScalarType mObjFuncValue; /*!< objective function value */
-    ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
-    ScalarType mStationarityMeasure; /*!< norm of the descent direction */
-    ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
-    ScalarType mObjectiveStagnationMeasure; /*!< measures stagnation in two subsequent objective function evaluations */
-
-    std::string mStopCriterion; /*!< stopping criterion */
-
-    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
-};
-// struct AlgorithmOutputsGCMMA
-
-/******************************************************************************//**
- * @brief Input data structure for the Globally Convergent Method of Moving Asymptotes (GCMMA) algorithm
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmInputsGCMMA
-{
-    /******************************************************************************//**
-     * @brief Default constructor
-    **********************************************************************************/
-    AlgorithmInputsGCMMA() :
-            mPrintDiagnostics(false),
-            mMaxNumOuterIter(500),
-            mMovingAsymptoteExpansionFactor(1.2),
-            mMovingAsymptoteContractionFactor(0.4),
-            mInitialMovingAsymptoteScaleFactor(0.5),
-            mMovingAsymptoteUpperBoundScaleFactor(10),
-            mMovingAsymptoteLowerBoundScaleFactor(0.01),
-            mOuterStationarityTolerance(1e-4),
-            mOuterControlStagnationTolerance(1e-8),
-            mOuterObjectiveStagnationTolerance(1e-6),
-            mOuterKarushKuhnTuckerConditionsTolerance(1e-5),
-            mInnerControlStagnationTolerance(1e-8),
-            mInnerObjectiveStagnationTolerance(1e-6),
-            mInnerKarushKuhnTuckerConditionsTolerance(5e-4),
-            mCommWrapper(),
-            mMemorySpace(Plato::MemorySpace::HOST),
-            mDual(nullptr),
-            mLowerBounds(nullptr),
-            mUpperBounds(nullptr),
-            mInitialGuess(nullptr),
-            mReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
-    {
-        mCommWrapper.useDefaultComm();
-    }
-
-    /******************************************************************************//**
-     * @brief Default destructor
-    **********************************************************************************/
-    virtual ~AlgorithmInputsGCMMA()
-    {
-    }
-
-    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
-
-    OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
-    OrdinalType mMaxNumInnerIter; /*!< maximum number of inner iterations */
-
-    ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
-    ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
-    ScalarType mInitialMovingAsymptoteScaleFactor; /*!< initial moving asymptotes' scale factor */
-    ScalarType mMovingAsymptoteUpperBoundScaleFactor; /*!< scale factor for upper bound on moving asymptotes */
-    ScalarType mMovingAsymptoteLowerBoundScaleFactor; /*!< scale factor for lower bound on moving asymptotes */
-
-    ScalarType mOuterStationarityTolerance; /*!< outer stationarity tolerance */
-    ScalarType mOuterControlStagnationTolerance; /*!< outer control stagnation tolerance */
-    ScalarType mOuterObjectiveStagnationTolerance; /*!< outer objective function stagnation tolerance */
-    ScalarType mOuterKarushKuhnTuckerConditionsTolerance; /*!< outer Karush-Kuhn-Tucker (KKT) inexactness tolerance */
-
-    ScalarType mInnerControlStagnationTolerance; /*!< inner control stagnation tolerance */
-    ScalarType mInnerObjectiveStagnationTolerance; /*!< inner objective function stagnation tolerance */
-    ScalarType mInnerKarushKuhnTuckerConditionsTolerance; /*!< inner Karush-Kuhn-Tucker (KKT) inexactness tolerance */
-
-    Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
-    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
-
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
-
-    /*!< operations which require communication across processors, e.g. max, min, global sum */
-    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
-};
-// struct AlgorithmInputsGCMMA
-
-} // namespace Plato
 
 namespace PlatoTest
 {
@@ -756,83 +650,67 @@ TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
     }
 }
 
-TEST(PlatoTest, SolveStrucTopoWithGCMMA)
+TEST(PlatoTest, SolveStrucTopoGloballyConvergentMethodMovingAsymptotesLightInterface)
 {
     // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
-     const double tPoissonRatio = 0.3;
-     const double tElasticModulus = 1;
-     const int tNumElementsXdirection = 30;
-     const int tNumElementsYdirection = 10;
-     std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
-             std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
-     tPDE->setFilterRadius(1.2);
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE;
+    tPDE = std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
 
-     // ************** SET FORCE VECTOR **************
-     const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
-     Epetra_SerialDenseVector tForce(tGlobalNumDofs);
-     const int tDOFsIndex = 1;
-     tForce[tDOFsIndex] = -1;
-     tPDE->setForceVector(tForce);
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
 
-     // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
-     std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
-     Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
-     tPDE->setFixedDOFs(tFixedDOFs);
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
 
-     // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
-     std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
-     std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
-     tCompliance->disableFilter();
-     std::shared_ptr<Plato::CriterionList<double>> tConstraints = std::make_shared<Plato::CriterionList<double>>();
-     tConstraints->add(tVolume);
+    // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
+    std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
+    std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
+    tCompliance->disableFilter();
+    std::shared_ptr<Plato::CriterionList<double>> tConstraints = std::make_shared<Plato::CriterionList<double>>();
+    tConstraints->add(tVolume);
 
-     // ********* ALLOCATE CORE DATA STRUCTURES *********
-     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-     const size_t tNumDuals = 1;
-     const size_t tNumVectors = 1;
-     Plato::EpetraSerialDenseMultiVector<double> tDual(tNumVectors, tNumDuals);
-     tDataFactory->allocateDual(tDual);
-     const size_t tNumControls = tPDE->getNumDesignVariables();
-     Plato::EpetraSerialDenseMultiVector<double> tControl(tNumVectors, tNumControls);
-     tDataFactory->allocateControl(tControl);
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumDuals = 1;
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = tPDE->getNumDesignVariables();
+    Plato::AlgorithmInputsGCMMA<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumDuals);
+    const double tValue = tPDE->getVolumeFraction();
+    tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tValue);
+    tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-3 /* base value */);
 
-     // ********* ALLOCATE PRIMAL PROBLEM STAGE MANAGER *********
-     std::shared_ptr<Plato::PrimalProblemStageMng<double>> tStageMng =
-             std::make_shared<Plato::PrimalProblemStageMng<double>>(tDataFactory, tCompliance, tConstraints);
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsGCMMA<double> tOutputs;
+    Plato::solve_gcmma<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
-     // ********* ALLOCATE CCSA ALGORITHM DATA MANAGER *********
-     std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<double>> tDataMng =
-             std::make_shared<Plato::ConservativeConvexSeparableAppxDataMng<double>>(tDataFactory);
-
-     // ********* SET BOUNDS AND INITIAL GUESS *********
-     double tValue = tPDE->getVolumeFraction();
-     tDataMng->setInitialGuess(tValue);
-     tValue = 1e-3;
-     tDataMng->setControlLowerBounds(tValue);
-     tValue = 1;
-     tDataMng->setControlUpperBounds(tValue);
-
-     // ********* ALLOCATE GCMMA SUBPROBLEM MANAGER *********
-     std::shared_ptr<Plato::GloballyConvergentMethodMovingAsymptotes<double>> tSubProblem =
-             std::make_shared<Plato::GloballyConvergentMethodMovingAsymptotes<double>>(tDataFactory);
-
-     // ********* ALLOCATE CCSA ALGORITHM AND SOLVE STRUCTURAL TOPOLOGY OPTIMIZATION PROBLEM *********
-     Plato::ConservativeConvexSeparableAppxAlgorithm<double> tAlgorithm(tStageMng, tDataMng, tSubProblem);
-     tAlgorithm.solve();
-
-     // ********* TEST OUTPUT DATA *********
-     const double tTolerance = 1e-6;
-     const double tCurrentObjective = tDataMng->getCurrentObjectiveFunctionValue();
-     const double tGoldObjective = 0.161095582197499;
-     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
-
-     const size_t tVectorIndex = 0;
-     std::vector<double> tGoldControl = TopoProxy::getGoldControlGcmmaTest();
-     const Plato::Vector<double> & tCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
-     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
-     {
-         EXPECT_NEAR(tCurrentControl[tIndex], tGoldControl[tIndex], tTolerance);
-     }
+    const double tTolerance = 1e-6;
+    EXPECT_EQ(53, tOutputs.mNumOuterIter);
+    EXPECT_EQ(73, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(54, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.16109558219749864, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(9.5895893763577866e-5, tOutputs.mKKTMeasure, tTolerance);
+    EXPECT_NEAR(1.6164828039268269e-5, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(-0.079382575722866944, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_NEAR(0.004849448411780428, tOutputs.mStationarityMeasure, tTolerance);
+    EXPECT_NEAR(0.003579306576219354, tOutputs.mControlStagnationMeasure, tTolerance);
+    EXPECT_NEAR(2.5417816987283182e-7, tOutputs.mObjectiveStagnationMeasure, tTolerance);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_gcmma_test();
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+        EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
+    }
 }
 
 TEST(PlatoTest, SolveStrucTopoMethodMovingAsymptotesLightInterface)

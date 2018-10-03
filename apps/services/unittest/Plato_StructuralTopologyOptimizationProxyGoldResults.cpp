@@ -114,7 +114,7 @@ std::vector<double> get_gold_control_mma_test()
     return (tGoldControl);
 }
 
-std::vector<double> getGoldControlGcmmaTest()
+std::vector<double> get_gold_control_gcmma_test()
 {
     std::vector<double> tGoldControl = {1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1, 1, 1, 0.001, 0.001, 0.001,
                                         0.001, 0.001, 0.001, 0.001, 1, 1, 0.001, 1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1,
