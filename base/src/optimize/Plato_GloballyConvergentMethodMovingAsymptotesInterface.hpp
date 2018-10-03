@@ -295,7 +295,7 @@ private:
         // ********* Get User input ***************
         ScalarType tInnerKKTTolerance = mInputData.getGCMMAInnerKKTTolerance();
         ScalarType tOuterKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
-        ScalarType tInnerControlStagnationTolerance = mInputData.getGCMMAInnerControlStagnationTolerance();
+        ScalarType tInnerStagnationTolerance = mInputData.getGCMMAInnerControlStagnationTolerance();
         ScalarType tOuterControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
         ScalarType tOuterObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
         OrdinalType tMaxNumInnerIterations = mInputData.getGCMMAMaxInnerIterations();
@@ -304,7 +304,8 @@ private:
         ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
 
         aSubProblem.setKarushKuhnTuckerConditionsTolerance(tInnerKKTTolerance);
-        aSubProblem.setStagnationTolerance(tInnerControlStagnationTolerance);
+        aSubProblem.setObjectiveStagnationTolerance(tInnerStagnationTolerance);
+        aSubProblem.setControlStagnationTolerance(tInnerStagnationTolerance);
         aSubProblem.setMaxNumIterations(tMaxNumInnerIterations);
 
         aAlgorithm.setMaxNumIterations(tMaxNumOuterIterations);
