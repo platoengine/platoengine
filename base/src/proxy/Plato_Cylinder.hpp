@@ -64,7 +64,7 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Circular cylinder geometry model class
+ * @brief Cylinder geometry model class
 **********************************************************************************/
 template<typename ScalarType = double>
 class Cylinder : public Plato::GeometryModel<ScalarType>
@@ -87,7 +87,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief compute the area of a circular cylinder.
+     * @brief compute the area of the side of a cylinder.
     **********************************************************************************/
     ScalarType area()
     {
@@ -96,7 +96,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief compute the gradient of a circular cylinder with respect to parameters that define geometry.
+     * @brief compute the gradient of a cylinder with respect to parameters that define geometry.
      * @param aOutput gradient with respect to the parameters that defined a geometry
     **********************************************************************************/
     void gradient(std::vector<ScalarType>& aOutput)
@@ -107,8 +107,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief update parameters that define a circular cylinder.
-     * @param aParam parameters that define a circular cylinder
+     * @brief update parameters that define a cylinder.
+     * @param aParam parameters that define a cylinder
     **********************************************************************************/
     void update(const std::map<std::string, ScalarType>& aParam)
     {
@@ -138,7 +138,7 @@ public:
 private:
     /******************************************************************************//**
      * @brief update initial configuration
-     * @param aParam parameters that define a circular cylinder
+     * @param aParam parameters that define a cylinder
      **********************************************************************************/
     void updateInitialConfiguration(const std::map<std::string, ScalarType>& aParam)
     {
@@ -153,7 +153,7 @@ private:
 
     /******************************************************************************//**
      * @brief update dynamic configuration
-     * @param aParam parameters that define a circular cylinder
+     * @param aParam parameters that define a cylinder
      **********************************************************************************/
     void updateDynamicConfiguration(const std::map<std::string, ScalarType>& aParam)
     {
