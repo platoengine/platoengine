@@ -77,6 +77,110 @@
 #include "Plato_StructuralTopologyOptimizationProxyGoldResults.hpp"
 
 
+namespace Plato
+{
+
+/******************************************************************************//**
+ * @brief Output data structure for the Globally Convergent Method of Moving Asymptotes (GCMMA) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmOutputsGCMMA
+{
+    OrdinalType mNumOuterIter; /*!< number of outer iterations */
+    OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
+    OrdinalType mNumObjGradEval; /*!< number of objective gradient evaluations */
+
+    ScalarType mKKTMeasure; /*!< Karush-Kuhn-Tucker (KKT) conditions inexactness */
+    ScalarType mObjFuncValue; /*!< objective function value */
+    ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
+    ScalarType mStationarityMeasure; /*!< norm of the descent direction */
+    ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
+    ScalarType mObjectiveStagnationMeasure; /*!< measures stagnation in two subsequent objective function evaluations */
+
+    std::string mStopCriterion; /*!< stopping criterion */
+
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
+};
+// struct AlgorithmOutputsGCMMA
+
+/******************************************************************************//**
+ * @brief Input data structure for the Globally Convergent Method of Moving Asymptotes (GCMMA) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmInputsGCMMA
+{
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
+    AlgorithmInputsGCMMA() :
+            mPrintDiagnostics(false),
+            mMaxNumOuterIter(500),
+            mMovingAsymptoteExpansionFactor(1.2),
+            mMovingAsymptoteContractionFactor(0.4),
+            mInitialMovingAsymptoteScaleFactor(0.5),
+            mMovingAsymptoteUpperBoundScaleFactor(10),
+            mMovingAsymptoteLowerBoundScaleFactor(0.01),
+            mOuterStationarityTolerance(1e-4),
+            mOuterControlStagnationTolerance(1e-8),
+            mOuterObjectiveStagnationTolerance(1e-6),
+            mOuterKarushKuhnTuckerConditionsTolerance(1e-5),
+            mInnerControlStagnationTolerance(1e-8),
+            mInnerObjectiveStagnationTolerance(1e-6),
+            mInnerKarushKuhnTuckerConditionsTolerance(5e-4),
+            mCommWrapper(),
+            mMemorySpace(Plato::MemorySpace::HOST),
+            mDual(nullptr),
+            mLowerBounds(nullptr),
+            mUpperBounds(nullptr),
+            mInitialGuess(nullptr),
+            mReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
+    {
+        mCommWrapper.useDefaultComm();
+    }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
+    virtual ~AlgorithmInputsGCMMA()
+    {
+    }
+
+    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+
+    OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+    OrdinalType mMaxNumInnerIter; /*!< maximum number of inner iterations */
+
+    ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
+    ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
+    ScalarType mInitialMovingAsymptoteScaleFactor; /*!< initial moving asymptotes' scale factor */
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor; /*!< scale factor for upper bound on moving asymptotes */
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor; /*!< scale factor for lower bound on moving asymptotes */
+
+    ScalarType mOuterStationarityTolerance; /*!< outer stationarity tolerance */
+    ScalarType mOuterControlStagnationTolerance; /*!< outer control stagnation tolerance */
+    ScalarType mOuterObjectiveStagnationTolerance; /*!< outer objective function stagnation tolerance */
+    ScalarType mOuterKarushKuhnTuckerConditionsTolerance; /*!< outer Karush-Kuhn-Tucker (KKT) inexactness tolerance */
+
+    ScalarType mInnerControlStagnationTolerance; /*!< inner control stagnation tolerance */
+    ScalarType mInnerObjectiveStagnationTolerance; /*!< inner objective function stagnation tolerance */
+    ScalarType mInnerKarushKuhnTuckerConditionsTolerance; /*!< inner Karush-Kuhn-Tucker (KKT) inexactness tolerance */
+
+    Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
+    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
+
+    /*!< operations which require communication across processors, e.g. max, min, global sum */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
+};
+// struct AlgorithmInputsGCMMA
+
+} // namespace Plato
+
 namespace PlatoTest
 {
 
