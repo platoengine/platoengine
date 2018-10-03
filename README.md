@@ -39,3 +39,7 @@ Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, `g++ 7.2.0` and `intel 17.0.1` co
 
 # Contributing 
 Please open a GitHub issue to ask a question, report a bug, request features, etc. If you'd like to contribute, please fork the repository and use a feature branch. Make sure to follow the team's [coding style policies](https://github.com/platoengine/platoengine/wiki/Coding-Style). Pull requests are welcome.
+
+# User Support
+
+Users are welcomed to submit questions via email to plato3D-help@sandia.gov.
