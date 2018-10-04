@@ -65,6 +65,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_Rosenbrock.hpp
                         Plato_GloballyConvergentMethodMovingAsymptotes.hpp
                         Plato_GloballyConvergentMethodMovingAsymptotesInterface.hpp
+                        Plato_GloballyConvergentMethodMovingAsymptotesLightInterface.hpp
                         Plato_CcsaTestObjective.hpp
                         Plato_CcsaTestInequality.hpp
                         Plato_AnalyticalHessian.hpp
