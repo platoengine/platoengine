@@ -213,29 +213,29 @@ TEST(PlatoTest, RocketDesignAppObjectiveVal)
 
     // SET NORMALIZATION CONSTANTS
     const size_t tNumVars = 2;
-    std::string tProviderName("Optimizer");
+    std::vector<std::string> tProviderNames = {"Optimizer"};
     std::string tArgumentName("UpperBounds");
     std::vector<double> tNormConst = {0.09, 0.007};
-    Plato::SharedValue tUpperBounds(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    Plato::SharedValue tUpperBounds(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
     tUpperBounds.setData(tNormConst);
     tRocketApp.importData(tArgumentName, tUpperBounds);
     std::string tOperationName("SetNormalizationConstants");
     tRocketApp.compute(tOperationName);
 
     // EVALUATE OBJECTIVE FUNCTION, EXPORT VALUE, AND TEST
-    tProviderName = "Optimizer";
+    tProviderNames[0] = "Optimizer";
     tArgumentName = "DesignVariables";
     std::vector<double> tDesignVars = {0.075 / tNormConst[0], 0.005 / tNormConst[1]};
-    Plato::SharedValue tDesignVariables(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    Plato::SharedValue tDesignVariables(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
     tDesignVariables.setData(tDesignVars);
     tRocketApp.importData(tArgumentName, tDesignVariables);
 
     tOperationName = "ObjectiveValue";
     tRocketApp.compute(tOperationName);
 
-    tProviderName = "Application";
+    tProviderNames[0] = "Application";
     tArgumentName = "ThrustMisfitObjective";
-    Plato::SharedValue tSharedObjective(tArgumentName, tProviderName, tApplicationComm);
+    Plato::SharedValue tSharedObjective(tArgumentName, tProviderNames, tApplicationComm);
     tRocketApp.exportData(tArgumentName, tSharedObjective);
     std::vector<double> tObjValue(1 /* size */);
     tSharedObjective.getData(tObjValue);
@@ -255,29 +255,29 @@ TEST(PlatoTest, RocketDesignAppObjectiveGrad)
 
     // SET NORMALIZATION CONSTANTS
     const size_t tNumVars = 2;
-    std::string tProviderName("Optimizer");
+    std::vector<std::string> tProviderNames = {"Optimizer"};
     std::string tArgumentName("UpperBounds");
     std::vector<double> tNormConst = {0.09, 0.007};
-    Plato::SharedValue tUpperBounds(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    Plato::SharedValue tUpperBounds(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
     tUpperBounds.setData(tNormConst);
     tRocketApp.importData(tArgumentName, tUpperBounds);
     std::string tOperationName("SetNormalizationConstants");
     tRocketApp.compute(tOperationName);
 
     // COMPUTE OBJECTIVE GRADIENT, EXPORT VALUES, AND TEST
-    tProviderName = "Optimizer";
+    tProviderNames[0] = "Optimizer";
     tArgumentName = "DesignVariables";
     std::vector<double> tDesignVars = {0.085 / tNormConst[0], 0.004 / tNormConst[1]};
-    Plato::SharedValue tDesignVariables(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    Plato::SharedValue tDesignVariables(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
     tDesignVariables.setData(tDesignVars);
     tRocketApp.importData(tArgumentName, tDesignVariables);
 
     tOperationName = "ObjectiveGradient";
     tRocketApp.compute(tOperationName);
 
-    tProviderName = "Application";
+    tProviderNames[0] = "Application";
     tArgumentName = "ThrustMisfitObjectiveGradient";
-    Plato::SharedValue tSharedObjGrad(tArgumentName, tProviderName, tApplicationComm, tNumVars);
+    Plato::SharedValue tSharedObjGrad(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
     tRocketApp.exportData(tArgumentName, tSharedObjGrad);
     std::vector<double> tObjGrad(tNumVars);
     tSharedObjGrad.getData(tObjGrad);
