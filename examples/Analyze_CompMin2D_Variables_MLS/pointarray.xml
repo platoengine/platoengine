@@ -1,38 +1,19 @@
-<mesh>
-  <type>unstructured</type>
-  <format>exodus</format>
-  <mesh>mitchell_tri.gen</mesh>
-  <block>
-    <index>1</index>
-    <integration>
-      <type>gauss</type>
-      <order>2</order>
-    </integration>
-    <materialID>1</materialID>
-  </block>
-</mesh>
-
-<output>
-  <file>platomain</file>
-  <format>exodus</format>
-</output>
-
 <PointArray>
   <Name>Design Geometry</Name>
   <Dimensions>2</Dimensions>
-  <N1>31</N1>
-  <N2>21</N2>
-  <Size1>5</Size1>
-  <Size2>3</Size2>
-  <Offset1>-2.5</Offset1>
-  <Offset2>-1.5</Offset2>
-  <Radius>0.15</Radius>
+  <N1>{N1}</N1>
+  <N2>{N2}</N2>
+  <Size1>{Size1}</Size1>
+  <Size2>{Size2}</Size2>
+  <Offset1>{Offset1}</Offset1>
+  <Offset2>{Offset2}</Offset2>
+  <Radius>{Radius}</Radius>
   <NumNeighbors>9</NumNeighbors>
   <Field>
     <Name>Initial Uniform Design</Name>
     <Initializer>Uniform</Initializer>
     <Uniform>
-      <Value>0.1</Value>
+      <Value>0.05</Value>
     </Uniform>
   </Field>
   <Field>

@@ -1,0 +1,642 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <PerformerID>0</PerformerID>
+  <Application> 
+    <Configuration>platoApp.xml</Configuration>
+  </Application> 
+</Performer> 
+
+<Performer> 
+  <For var="I" in="Comms">
+  <Name>Alexa_{I}</Name>
+  </For>
+  <PerformerID>1</PerformerID>
+  <Application> 
+    <AppFile>alexaApp.xml</AppFile>
+  </Application>
+  <Application> 
+    <Configuration>appMLS.xml</Configuration>
+  </Application>
+</Performer> 
+
+<SharedData>
+  <Name>Displacement X</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa_0</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Displacement Y</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Alexa_0</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Topology</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>{N1*N2}</Size>
+  <For var="I" in="Comms">
+  <OwnerName>Alexa_{I}</OwnerName>
+  </For>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>{N1*N2}</Size>
+  <For var="I" in="Comms">
+  <OwnerName>Alexa_{I}</OwnerName>
+  </For>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Optimization DOFs</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>{N1*N2}</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <For var="I" in="Comms">
+  <UserName>Alexa_{I}</UserName>
+  </For>
+</SharedData>
+
+
+<SharedData>
+  <Name>Constraint</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_0</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Design Volume</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_0</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<For var="I" in="Comms">
+<SharedData>
+  <Name>Objective {I}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_{I}</OwnerName>
+  <UserName>Alexa_{I}</UserName>
+</SharedData>
+</For>
+
+<For var="I" in="Comms">
+<SharedData>
+  <Name>Constraint {I}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_{I}</OwnerName>
+  <UserName>Alexa_{I}</UserName>
+</SharedData>
+</For>
+
+<For var="I" in="Comms">
+<SharedData>
+  <Name>Objective Initial Value {I}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_{I}</OwnerName>
+  <UserName>Alexa_{I}</UserName>
+</SharedData>
+</For>
+
+<For var="I" in="Comms">
+<SharedData>
+  <Name>Constraint Initial Value {I}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>Alexa_{I}</OwnerName>
+  <UserName>Alexa_{I}</UserName>
+</SharedData>
+</For>
+
+<SharedData>
+  <Name>Lower Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Lower Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>{N1*N2}</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>{N1*N2}</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<Stage>
+  <Name>Set Lower Bounds</Name>
+  <Input>
+    <SharedDataName>Lower Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Set Lower Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Lower Bound Value</ArgumentName>
+      <SharedDataName>Lower Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Lower Bound Vector</ArgumentName>
+      <SharedDataName>Lower Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Lower Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Set Upper Bounds</Name>
+  <Input>
+    <SharedDataName>Upper Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Set Upper Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Upper Bound Value</ArgumentName>
+      <SharedDataName>Upper Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Upper Bound Vector</ArgumentName>
+      <SharedDataName>Upper Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Upper Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+
+<Stage>
+  <Name>Cache State</Name>
+</Stage>
+
+
+<Stage>
+    <Name>Output To File</Name>
+    <Operation>
+      <Name>Write Output</Name>
+      <PerformerName>Alexa_0</PerformerName>
+      <Output>
+        <ArgumentName>Solution X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Solution Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Output>
+    </Operation>
+    <Operation>
+      <Name>PlatoMainOutput</Name>
+      <PerformerName>PlatoMain</PerformerName>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Input>
+    </Operation>
+</Stage>
+
+<Stage>
+  <Name>Initialize Optimization DOFs</Name>
+  <Output>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Output>
+  <Operation>
+    <Name>Initialize DOF Values</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Output>
+  </Operation>
+</Stage>
+
+<Stage>
+  <Name>Design Volume</Name>
+  <Operation>
+    <Name>Design Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Design Volume</ArgumentName>
+      <SharedDataName>Design Volume</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Design Volume</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Constraint</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Alexa_0</PerformerName>
+    <Name>Compute MLS Design</Name>
+    <Input>
+      <ArgumentName>MLS Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+  </Operation>
+
+  <Operation>
+    <Name>Compute Constraint</Name>
+    <PerformerName>Alexa_0</PerformerName>
+    <Output>
+      <ArgumentName>Constraint Value</ArgumentName>
+      <SharedDataName>Constraint</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Constraint</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Constraint Gradient</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <!-- zero out the gradient -->
+  <Operation>
+    <Name>Initialize Gradient Values</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Values</ArgumentName>
+      <SharedDataName>Constraint Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <!-- Set the initial design on each comm -->
+  <Operation>
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute MLS Design</Name>
+      <Input>
+        <ArgumentName>MLS Values</ArgumentName>
+        <SharedDataName>Optimization DOFs</SharedDataName>
+      </Input>
+    </Operation>
+    </For>
+  </Operation>
+  <!-- Compute the unperturbed constraint on each comm -->
+  <Operation>
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Constraint</Name>
+      <Output>
+        <ArgumentName>Constraint Value</ArgumentName>
+        <SharedDataName>Constraint Initial Value {I}</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+
+  <For var="J" in="Evals">
+  <Operation>
+    <!-- Compute the perturbed design on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Perturbed Design</Name>
+      <Parameter>
+        <ArgumentName>Perturbed Index</ArgumentName>
+        <ArgumentValue>{I*NumEvals+J}</ArgumentValue>
+      </Parameter>
+    </Operation>
+    </For>
+  </Operation>
+
+  <Operation>
+    <!-- Compute the new constraint on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Constraint</Name>
+      <Output>
+        <ArgumentName>Constraint Value</ArgumentName>
+        <SharedDataName>Constraint {I}</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+
+  <Operation>
+    <!-- Compute the gradient entry on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Finite Difference</Name>
+      <Parameter>
+        <ArgumentName>Perturbed Index</ArgumentName>
+        <ArgumentValue>{I*NumEvals+J}</ArgumentValue>
+      </Parameter>
+      <Input>
+        <ArgumentName>Initial Value</ArgumentName>
+        <SharedDataName>Constraint Initial Value {I}</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Perturbed Value</ArgumentName>
+        <SharedDataName>Constraint {I}</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Gradient</ArgumentName>
+        <SharedDataName>Constraint Gradient</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+  </For>
+
+  <Output>
+    <SharedDataName>Constraint Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Objective</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Alexa_0</PerformerName>
+    <Name>Compute MLS Design</Name>
+    <Input>
+      <ArgumentName>MLS Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+  </Operation>
+
+  <Operation>
+    <Name>Compute Nodal Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>MLS Point Values</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>MLS Field Values</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <PerformerName>Alexa_0</PerformerName>
+    <Name>Compute Objective</Name>
+    <Output>
+      <ArgumentName>Objective Value</ArgumentName>
+      <SharedDataName>Objective</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Objective</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage>
+  <Name>Objective Gradient</Name>
+  <Input>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Input>
+
+  <!-- zero out the gradient -->
+  <Operation>
+    <Name>Initialize Gradient Values</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Values</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <!-- Set the initial design on each comm -->
+  <Operation>
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute MLS Design</Name>
+      <Input>
+        <ArgumentName>MLS Values</ArgumentName>
+        <SharedDataName>Optimization DOFs</SharedDataName>
+      </Input>
+    </Operation>
+    </For>
+  </Operation>
+  <!-- Compute the unperturbed objective on each comm -->
+  <Operation>
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Objective</Name>
+      <Output>
+        <ArgumentName>Objective Value</ArgumentName>
+        <SharedDataName>Objective Initial Value {I}</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+
+  <For var="J" in="Evals">
+  <Operation>
+    <!-- Compute the perturbed design on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Perturbed Design</Name>
+      <Parameter>
+        <ArgumentName>Perturbed Index</ArgumentName>
+        <ArgumentValue>{I*NumEvals+J}</ArgumentValue>
+      </Parameter>
+    </Operation>
+    </For>
+  </Operation>
+
+  <Operation>
+    <!-- Compute the new objective on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Objective</Name>
+      <Output>
+        <ArgumentName>Objective Value</ArgumentName>
+        <SharedDataName>Objective {I}</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+
+  <Operation>
+    <!-- Compute the gradient entry on each comm -->
+    <For var="I" in="Comms">
+    <Operation>
+      <PerformerName>Alexa_{I}</PerformerName>
+      <Name>Compute Finite Difference</Name>
+      <Parameter>
+        <ArgumentName>Perturbed Index</ArgumentName>
+        <ArgumentValue>{I*NumEvals+J}</ArgumentValue>
+      </Parameter>
+      <Input>
+        <ArgumentName>Initial Value</ArgumentName>
+        <SharedDataName>Objective Initial Value {I}</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Perturbed Value</ArgumentName>
+        <SharedDataName>Objective {I}</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Gradient</ArgumentName>
+        <SharedDataName>Objective Gradient</SharedDataName>
+      </Output>
+    </Operation>
+    </For>
+  </Operation>
+  </For>
+
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<Optimizer>
+  <Package>MMA</Package>
+<!--
+  <Package>DerivativeChecker</Package>
+  <CheckHessian>false</CheckHessian>
+  <CheckGradient>true</CheckGradient>
+-->
+  <Output>
+    <OutputStage>Output To File</OutputStage>
+  </Output>
+  <OC>
+    <MoveLimiter>1.0</MoveLimiter>
+    <StabilizationParameter>0.5</StabilizationParameter>
+    <UseNewtonSearch>True</UseNewtonSearch>
+    <ConstraintMaxIterations>20</ConstraintMaxIterations>
+  </OC>
+  <OptimizationVariables>
+    <ValueName>Optimization DOFs</ValueName>
+    <InitializationStage>Initialize Optimization DOFs</InitializationStage>
+    <FilteredName>Topology</FilteredName>
+    <FilterControlStage>FilterControl</FilterControlStage>
+    <LowerBoundValueName>Lower Bound Value</LowerBoundValueName>
+    <LowerBoundVectorName>Lower Bound Vector</LowerBoundVectorName>
+    <UpperBoundValueName>Upper Bound Value</UpperBoundValueName>
+    <UpperBoundVectorName>Upper Bound Vector</UpperBoundVectorName>
+    <SetLowerBoundsStage>Set Lower Bounds</SetLowerBoundsStage>
+    <SetUpperBoundsStage>Set Upper Bounds</SetUpperBoundsStage>
+  </OptimizationVariables>
+  <Objective>
+    <ValueName>Objective</ValueName>
+    <ValueStageName>Objective</ValueStageName>
+    <GradientName>Objective Gradient</GradientName>
+    <GradientStageName>Objective Gradient</GradientStageName>
+  </Objective>
+  <BoundConstraint>
+    <Upper>0.199</Upper>
+    <Lower>-0.199</Lower>
+  </BoundConstraint>
+  <Constraint>
+    <Equality>True</Equality>
+    <Linear>True</Linear>
+    <ValueName>Constraint</ValueName>
+    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <GradientName>Constraint Gradient</GradientName>
+    <NormalizedTargetValue>0.25</NormalizedTargetValue>
+    <Tolerance>1e-5</Tolerance>
+  </Constraint>
+  <Convergence>
+    <MaxIterations>2</MaxIterations>
+  </Convergence>
+</Optimizer>
+
+
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>mitchell_tri</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <materialID>1</materialID>
+  </block>
+</mesh>
+
+<output>
+  <file>plato</file>
+  <format>exodus</format>
+</output>

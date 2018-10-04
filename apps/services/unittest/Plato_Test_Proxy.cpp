@@ -215,11 +215,13 @@ TEST(PlatoTest, ProxyApp)
 
         if(tColor == PlatoTest::color::PHYSICS)
         {
-            tObjectiveValue = std::make_shared<Plato::SharedValue>(tVariableName, "PhyscisComm", com_data);
+            std::vector<std::string> tOwnerNames = {"PhyscisComm"};
+            tObjectiveValue = std::make_shared<Plato::SharedValue>(tVariableName, tOwnerNames, com_data);
         }
         else
         {
-            tObjectiveValue = std::make_shared<Plato::SharedValue>(tVariableName, "PlatoComm", com_data);
+            std::vector<std::string> tOwnerNames = {"PlatoComm"};
+            tObjectiveValue = std::make_shared<Plato::SharedValue>(tVariableName, tOwnerNames, com_data);
         }
         EXPECT_EQ(Plato::data::layout_t::SCALAR, tObjectiveValue->myLayout());
 

@@ -308,8 +308,8 @@ TEST(PlatoTest, StructuralTopologyOptimizationProxyApp)
     tOperation = "Objective";
     tApplication.compute(tOperation);
     tArgumentName = "InternalEnergy";
-    std::string tProviderName("Application");
-    Plato::SharedValue tSharedObjective(tArgumentName, tProviderName, tApplicationComm);
+    std::vector<std::string> tProviderNames = {"Application"};
+    Plato::SharedValue tSharedObjective(tArgumentName, tProviderNames, tApplicationComm);
     tApplication.exportData(tArgumentName, tSharedObjective);
     tSharedObjective.transmitData();
 
@@ -322,7 +322,7 @@ TEST(PlatoTest, StructuralTopologyOptimizationProxyApp)
     tOperation = "Constraint";
     tApplication.compute(tOperation);
     tArgumentName = "Volume";
-    Plato::SharedValue tSharedConstraint(tArgumentName, tProviderName, tApplicationComm);
+    Plato::SharedValue tSharedConstraint(tArgumentName, tProviderNames, tApplicationComm);
     tApplication.exportData(tArgumentName, tSharedConstraint);
     tSharedConstraint.transmitData();
 

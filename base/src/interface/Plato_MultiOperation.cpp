@@ -68,9 +68,32 @@ MultiOperation(const Plato::OperationInputDataMng & aOperationDataMng,
   Operation(aOperationDataMng, aPerformer, aSharedData)
 /******************************************************************************/
 {
+    const int tNumSubOperations = aOperationDataMng.getNumOperations();
+    for(int tSubOperationIndex = 0; tSubOperationIndex < tNumSubOperations; tSubOperationIndex++)
+    {
+        const std::string & tPerformerName = aOperationDataMng.getPerformerName(tSubOperationIndex);
+        if(aPerformer->myName() != tPerformerName)
+        {
+             continue;
+        }
+        m_operationName = aOperationDataMng.getOperationName(tPerformerName);
+
+        auto tAllParamsData = aOperationDataMng.get<Plato::InputData>("Parameters");
+        if( tAllParamsData.size<Plato::InputData>(tPerformerName) )
+        {
+            auto tParamsData = tAllParamsData.get<Plato::InputData>(tPerformerName);
+            for( auto tParamData : tParamsData.getByName<Plato::InputData>("Parameter") )
+            {
+                auto tArgName  = Plato::Get::String(tParamData,"ArgumentName");
+                auto tArgValue = Plato::Get::Double(tParamData,"ArgumentValue");
+                m_parameters.insert(
+                  std::pair<std::string, Parameter*>(tArgName, new Parameter(tArgName, m_operationName, tArgValue)));
+            }
+        }
+    }
+
     // collect arrays of all input and output SharedData
     //
-    const int tNumSubOperations = aOperationDataMng.getNumOperations();
     for(int tSubOperationIndex = 0; tSubOperationIndex < tNumSubOperations; tSubOperationIndex++)
     {
         const std::string & tPerformerName = aOperationDataMng.getPerformerName(tSubOperationIndex);

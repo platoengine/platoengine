@@ -1,0 +1,18 @@
+<Define name="N1"        type="int"   value="6"                          />
+<Define name="N2"        type="int"   value="4"                          />
+
+<Define name="Size1"    value="5.0"          />
+<Define name="Size2"    value="3.0"          />
+<Define name="Offset1"  value="{-Size1/2.0}" />
+<Define name="Offset2"  value="{-Size2/2.0}" />
+<Define name="Radius"   value="{Size1/N1}"   />
+
+<Define name="NumPoints" type="int"   value="{N1*N2}"                    />
+<Define name="NumComms"  type="int"   value="{1}"                        />
+<Define name="NumEvals"  type="int"   value="{NumPoints/NumComms}"       />
+
+<Define name="FD_Delta"  value="0.000001"                                   />
+
+<Array  name="Evals"     type="int"   from="0" to="{NumEvals-1}"         />
+<Array  name="Comms"     type="int"   from="0" to="{NumComms-1}"         />
+

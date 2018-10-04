@@ -5,10 +5,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 include( ${CMAKE_SOURCE_DIR}/base/config/tools.cmake )
 Plato_no_src_build()
 
-option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface" OFF)
+option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface"  OFF)
 
-option( GEOMETRY      "Enable Geometry subcomponent"   OFF)
-option( EXPY          "Build exodus python API"        OFF)
+option( GEOMETRY      "Enable Geometry subcomponent"    OFF)
+option( EXPY          "Build exodus python API"         OFF)
 option( SEACAS        "Seacas tools"                    ON)
 option( STK_ENABLED   "Flag to turn on use of STK"     OFF)
 

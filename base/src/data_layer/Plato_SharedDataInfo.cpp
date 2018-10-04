@@ -70,7 +70,7 @@ SharedDataInfo::~SharedDataInfo()
 }
 
 /******************************************************************************/
-const std::string & SharedDataInfo::getProviderName(const int & aIndex) const
+const std::vector<std::string> & SharedDataInfo::getProviderNames(const int & aIndex) const
 /******************************************************************************/
 {
     assert(mSharedDataMap.empty() == false);
@@ -90,10 +90,12 @@ const std::vector<std::string> & SharedDataInfo::getReceiverNames(const int & aI
 }
 
 /******************************************************************************/
-void SharedDataInfo::setSharedDataMap(const std::string & aProviderName, const std::vector<std::string> & aReceiverNames)
+void SharedDataInfo::setSharedDataMap(
+  const std::vector<std::string> & aProviderNames, 
+  const std::vector<std::string> & aReceiverNames)
 /******************************************************************************/
 {
-    mSharedDataMap.push_back(std::make_pair(aProviderName, aReceiverNames));
+    mSharedDataMap.push_back(std::make_pair(aProviderNames, aReceiverNames));
 }
 
 /******************************************************************************/

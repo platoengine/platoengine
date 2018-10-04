@@ -63,17 +63,68 @@ void SharedValue::transmitData()
     int tMyProcID = -1;
     MPI_Comm_rank(mMyComm, &tMyProcID);
 
-    int tGlobalProcID = -1;
-    bool tIsProvider = mLocalCommName == mProviderName;
-    if(tMyProcID == 0 && tIsProvider)
-    {
-        MPI_Comm_rank(mInterComm, &tGlobalProcID);
+    if( mProviderNames.size() == 1 )
+    { // single provider
+        int tGlobalProcID = -1;
+        bool tIsProvider = mLocalCommName == mProviderNames[0];
+        if(tMyProcID == 0 && tIsProvider)
+        {
+            MPI_Comm_rank(mInterComm, &tGlobalProcID);
+        }
+        int tSenderProcID = -1;
+        MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
+        auto tRecv(mData);
+        MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        if( !tIsProvider ){
+            mData = tRecv;
+        }
     }
+    else 
+    { // multiple provider
+    
+        // reduce data from all rank zeros of all provider local comms.
+        //
 
-    int tSenderProcID = -1;
-    MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
-    MPI_Bcast(mData.data(), mData.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        // determine if local rank is a provider
+        bool tIsaProvider = 
+         ( std::find( mProviderNames.begin(), 
+                      mProviderNames.end(), 
+                      mLocalCommName ) != mProviderNames.end() );
+        int tProviderColor = (tMyProcID == 0 && tIsaProvider) ? 1 : 0;
+    
+        // create temporary comm for reducing from multiple providers
+        int tGlobalProcID = -1;
+        MPI_Comm_rank(mInterComm, &tGlobalProcID);
+        MPI_Comm tReductionComm;
+        MPI_Comm_split(mInterComm, tProviderColor, tGlobalProcID, &tReductionComm);
+
+        // reduce data to rank zero of tReductionComm
+        std::vector<double> tRecv(mData.size(), 0.0);
+        MPI_Reduce(mData.data(), tRecv.data(), mData.size(), MPI_DOUBLE, MPI_SUM, /*rank_of_root=*/0, tReductionComm);
+
+
+        // broadcast the result to all ranks in mIntercomm
+        //
+
+        // get rank in mReductionComm
+        int tRankInReductionComm;
+        MPI_Comm_rank(tReductionComm, &tRankInReductionComm);
+
+        // if the local rank is not zero (i.e., the sender), then flip the global rank to -1
+        if( tRankInReductionComm ) tGlobalProcID = -1;
+
+        // global max now returns the rank of the sender
+        int tSenderProcID=-1;
+        MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
+
+        // broadcast the reduced data to all ranks 
+        MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
+        if( !tIsaProvider ){
+            mData = tRecv;
+        }
+    }
 }
+  
 
 /******************************************************************************/
 void SharedValue::setData(const std::vector<double> & aData)
@@ -117,11 +168,11 @@ Plato::data::layout_t SharedValue::myLayout() const
 
 /*****************************************************************************/
 SharedValue::SharedValue(const std::string & aMyName,
-                         const std::string & aProviderName,
+                         const std::vector<std::string> & aProviderNames,
                          const Plato::CommunicationData & aCommData,
                          int aSize) :
         mMyName(aMyName),
-        mProviderName(aProviderName),
+        mProviderNames(aProviderNames),
         mLocalCommName(aCommData.mLocalCommName),
         mMyComm(aCommData.mLocalComm),
         mInterComm(aCommData.mInterComm),
