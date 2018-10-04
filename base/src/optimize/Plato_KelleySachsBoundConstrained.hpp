@@ -185,7 +185,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Solve optimization problem
+     * @brief Solve bound constrained optimization problem
     **********************************************************************************/
     void solve()
     {

@@ -60,7 +60,7 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Output data structure for Kelley-Sachs trust region algorithm
+ * @brief Output data structure for Kelley-Sachs Bound Constrained (KSBC) trust region algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct AlgorithmOutputsKSBC
@@ -84,7 +84,7 @@ struct AlgorithmOutputsKSBC
 // struct AlgorithmOutputsKSBC
 
 /******************************************************************************//**
- * @brief Input data structure for Kelley-Sachs trust region algorithm
+ * @brief Input data structure for Kelley-Sachs Bound Constrained (KSBC) trust region algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct AlgorithmInputsKSBC
@@ -153,13 +153,13 @@ struct AlgorithmInputsKSBC
 // struct AlgorithmInputsKSBC
 
 /******************************************************************************//**
- * @brief Set Kelley-Sachs trust region algorithm inputs
- * @param [in] aInputs Kelley-Sachs trust region algorithm inputs
- * @param [in,out] aAlgorithm Kelley-Sachs trust region algorithm interface
+ * @brief Set Kelley-Sachs Bound Constrained (KSBC) trust region algorithm inputs
+ * @param [in] aInputs Kelley-Sachs Bound Constrained trust region algorithm inputs
+ * @param [in,out] aAlgorithm Kelley-Sachs Bound Constrained trust region algorithm interface
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_bound_constrained_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
-                                                   Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
+inline void set_ksbc_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
+                                      Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
 {
     if(aInputs.mPrintDiagnostics == true)
     {
@@ -181,16 +181,16 @@ inline void set_bound_constrained_algorithm_inputs(const Plato::AlgorithmInputsK
     aAlgorithm.setActualReductionTolerance(aInputs.mOuterActualReductionTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
 }
-// function set_bound_constrained_algorithm_inputs
+// function set_ksbc_algorithm_inputs
 
 /******************************************************************************//**
- * @brief Set Kelley-Sachs trust region algorithm outputs
- * @param [in] aAlgorithm Kelley-Sachs trust region algorithm interface
- * @param [in,out] aOutputs Kelley-Sachs trust region algorithm outputs
+ * @brief Set Kelley-Sachs Bound Constrained (KSBC) trust region algorithm outputs
+ * @param [in] aAlgorithm Kelley-Sachs Bound Constrained trust region algorithm interface
+ * @param [in,out] aOutputs Kelley-Sachs Bound Constrained trust region algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_bound_constrained_algorithm_outputs(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm,
-                                                    Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
+inline void set_ksbc_algorithm_outputs(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm,
+                                       Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
 {
     aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
     aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
@@ -210,13 +210,13 @@ inline void set_bound_constrained_algorithm_outputs(const Plato::KelleySachsBoun
     aOutputs.mSolution = tSolution.create();
     Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
 }
-// function set_bound_constrained_algorithm_outputs
+// function set_ksbc_algorithm_outputs
 
 /******************************************************************************//**
- * @brief Kelley-Sachs trust region algorithm interface
+ * @brief Kelley-Sachs Bound Constrained (KSBC) trust region algorithm interface
  * @param [in] aObjective user-defined objective function
- * @param [in] aInputs Kelley-Sachs trust region algorithm inputs
- * @param [in,out] aOutputs Kelley-Sachs trust region algorithm outputs
+ * @param [in] aInputs Kelley-Sachs Bound Constrained trust region algorithm inputs
+ * @param [in,out] aOutputs Kelley-Sachs Bound Constrained trust region algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
@@ -248,9 +248,9 @@ inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    Plato::set_bound_constrained_algorithm_inputs(aInputs, tAlgorithm);
+    Plato::set_ksbc_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
-    Plato::set_bound_constrained_algorithm_outputs(tAlgorithm, aOutputs);
+    Plato::set_ksbc_algorithm_outputs(tAlgorithm, aOutputs);
 }
 // function solve_ksbc
 

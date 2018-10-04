@@ -327,7 +327,7 @@ public:
     void getCurrentConstraintValues(Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
     /****************************************************************************************************************/
     {
-        Plato::update(1., *mCurrentConstraintValues, 0., aInput);
+        Plato::update(static_cast<ScalarType>(1.), *mCurrentConstraintValues, static_cast<ScalarType>(0.), aInput);
     }
 
     /****************************************************************************************************************/
