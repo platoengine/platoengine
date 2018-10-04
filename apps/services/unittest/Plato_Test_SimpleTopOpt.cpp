@@ -195,10 +195,10 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
                                       Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType> & aStageMng,
                                       Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+/*    if(aInputs.mPrintDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
-    }
+    }*/
 
     aAlgorithm.setMinPenaltyParameter(aInputs.mMinPenaltyParameter);
     aStageMng.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
@@ -250,9 +250,10 @@ inline void set_ksal_algorithm_outputs(const Plato::KelleySachsAugmentedLagrangi
     aOutputs.mSolution = tSolution.create();
     Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
 
-    const Plato::MultiVector<ScalarType, OrdinalType> & tDual = aAlgorithm.getDataMng().getDual();
+    const OrdinalType tDualVectorIndex = 0;
+    const Plato::Vector<ScalarType, OrdinalType> & tDual = aAlgorithm.getDataMng().getDual(tDualVectorIndex);
     aOutputs.mConstraints = tDual.create();
-    aAlgorithm.getStageMng().getCurrentConstraintValues(*aOutputs.mConstraints);
+    aAlgorithm.getStageMng().getCurrentConstraintValues(tDualVectorIndex, *aOutputs.mConstraints);
 }
 // function set_ksal_algorithm_outputs
 
@@ -289,7 +290,7 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
+    //Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_ksal_algorithm_outputs(tAlgorithm, aOutputs);
 }
@@ -856,9 +857,9 @@ TEST(PlatoTest, SolveStrucTopoOptimalityCriteriaLightInterface)
     Plato::solve_optimality_criteria<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
     const double tTolerance = 1e-6;
-    EXPECT_EQ(49, tOutputs.mNumOuterIter);
-    EXPECT_EQ(50, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(50, tOutputs.mNumObjGradEval);
+    EXPECT_EQ(49u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(50u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(50u, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0.17786129647595, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(0.066488674895463576, tOutputs.mNormObjFuncGrad, tTolerance);
     EXPECT_NEAR(0.065024946645311221, tOutputs.mControlStagnationMeasure, tTolerance);
@@ -917,9 +918,9 @@ TEST(PlatoTest, SolveStrucTopoGloballyConvergentMethodMovingAsymptotesLightInter
     Plato::solve_gcmma<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
     const double tTolerance = 1e-6;
-    EXPECT_EQ(53, tOutputs.mNumOuterIter);
-    EXPECT_EQ(73, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(54, tOutputs.mNumObjGradEval);
+    EXPECT_EQ(53u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(73u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(54u, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0.16109558219749864, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(9.5895893763577866e-5, tOutputs.mKKTMeasure, tTolerance);
     EXPECT_NEAR(1.6164828039268269e-5, tOutputs.mNormObjFuncGrad, tTolerance);
@@ -980,9 +981,9 @@ TEST(PlatoTest, SolveStrucTopoMethodMovingAsymptotesLightInterface)
     Plato::solve_mma<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
     const double tTolerance = 1e-6;
-    EXPECT_EQ(95, tOutputs.mNumOuterIter);
-    EXPECT_EQ(96, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(96, tOutputs.mNumObjGradEval);
+    EXPECT_EQ(95u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(96u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(96u, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0.16688506430875721, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(0.00013414822686334704, tOutputs.mKKTMeasure, tTolerance);
     EXPECT_NEAR(2.9065999369154898e-5, tOutputs.mNormObjFuncGrad, tTolerance);
@@ -997,6 +998,72 @@ TEST(PlatoTest, SolveStrucTopoMethodMovingAsymptotesLightInterface)
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
     }
 }
+
+TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared <Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+    tPDE->setFilterRadius(1.2);
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
+    std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
+    std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
+    std::shared_ptr<Plato::CriterionList<double>> tConstraints = std::make_shared<Plato::CriterionList<double>>();
+    tConstraints->add(tVolume);
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumDuals = 1;
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = tPDE->getNumDesignVariables();
+    Plato::AlgorithmInputsKSAL<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumDuals);
+    const double tValue = tPDE->getVolumeFraction();
+    tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tValue);
+    tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-2 /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSAL<double> tOutputs;
+    Plato::solve_ksal<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
+
+    // ********* TEST OUTPUT DATA *********
+    const double tTolerance = 1e-6;
+    EXPECT_EQ(21u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(199u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(41u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.1565636381251273, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(6.8659788675651257e-6, tOutputs.mActualReduction, tTolerance);
+    EXPECT_NEAR(0.018233324049212327, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(0.0021736711087157372, tOutputs.mPenaltyParameter, tTolerance);
+    EXPECT_NEAR(0.018222889097551657, tOutputs.mStationarityMeasure, tTolerance);
+    EXPECT_NEAR(0, tOutputs.mControlStagnationMeasure, tTolerance);
+    EXPECT_NEAR(6.8659788675651257e-6, tOutputs.mObjectiveStagnationMeasure, tTolerance);
+    EXPECT_NEAR(7.5254345816500031e-8, tOutputs.mCurrentTrustRegionRadius, tTolerance);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test();
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+        EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
+    }
+}
+
 
 TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangian)
 {
@@ -1064,7 +1131,7 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangian)
     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
 
     const size_t tVectorIndex = 0;
-    std::vector<double> tGoldControl = TopoProxy::getGoldControlTrustRegionTest();
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test();
     const Plato::Vector<double> & tCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
@@ -1138,7 +1205,7 @@ TEST(DISABLED_PlatoTest, DISABLED_SolveStrucTopoWithTrustRegionAugmentedLagrangi
     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
 
     const size_t tVectorIndex = 0;
-    std::vector<double> tGoldControl = TopoProxy::getGoldControlTrustRegionTest();
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test();
     const Plato::Vector<double> & tCurrentControl = tDataMng->getCurrentControl(tVectorIndex);
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {

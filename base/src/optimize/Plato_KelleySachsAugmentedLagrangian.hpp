@@ -155,7 +155,7 @@ public:
     **********************************************************************************/
     const Plato::TrustRegionAlgorithmDataMng<ScalarType,OrdinalType> & getDataMng() const
     {
-        return (mDataMng);
+        return (*mDataMng);
     }
 
 
@@ -165,7 +165,7 @@ public:
     **********************************************************************************/
     const Plato::KelleySachsStepMng<ScalarType,OrdinalType> & getStepMng() const
     {
-        return (mStepMng);
+        return (*mStepMng);
     }
 
     /******************************************************************************//**
@@ -174,7 +174,7 @@ public:
     **********************************************************************************/
     const Plato::AugmentedLagrangianStageMng<ScalarType,OrdinalType> & getStageMng() const
     {
-        return (mStageMng);
+        return (*mStageMng);
     }
 
     /******************************************************************************//**
