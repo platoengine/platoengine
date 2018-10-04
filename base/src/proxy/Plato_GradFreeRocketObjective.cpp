@@ -1,5 +1,5 @@
 /*
- * Plato_GradFreeSimpleRocketObjective.cpp
+ * Plato_GradFreeRocketObjective.cpp
  *
  *  Created on: Aug 30, 2018
  */
@@ -9,40 +9,40 @@
 #include <numeric>
 #include <cassert>
 
-#include "Plato_GradFreeSimpleRocketObjective.hpp"
+#include "Plato_GradFreeRocketObjective.hpp"
 
 namespace Plato
 {
 
-GradFreeSimpleRocketObjective::GradFreeSimpleRocketObjective(const Plato::SimpleRocketInuts<double>& aRocketInputs,
+GradFreeRocketObjective::GradFreeRocketObjective(const Plato::AlgebraicRocketInputs<double>& aRocketInputs,
                                                              const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom) :
         PlatoSubproblemLibrary::DiscreteObjective(),
         mNormTargetValues(0),
-        mRocketModel(aRocketInputs, aChamberGeom),
         mTargetThrustProfile(),
         mNumEvaluationsPerDim(),
+        mRocketModel(aRocketInputs, aChamberGeom),
         mBounds()
 {
     this->initialize();
 }
 
-GradFreeSimpleRocketObjective::~GradFreeSimpleRocketObjective()
+GradFreeRocketObjective::~GradFreeRocketObjective()
 {
 }
 
-void GradFreeSimpleRocketObjective::setOptimizationInputs(const std::vector<int>& aNumEvaluationsPerDim,
+void GradFreeRocketObjective::setOptimizationInputs(const std::vector<int>& aNumEvaluationsPerDim,
                                                           const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */)
 {
     mBounds = aBounds;
     mNumEvaluationsPerDim = aNumEvaluationsPerDim;
 }
 
-std::vector<double> GradFreeSimpleRocketObjective::getThrustProfile() const
+std::vector<double> GradFreeRocketObjective::getThrustProfile() const
 {
     return (mRocketModel.getThrustProfile());
 }
 
-void GradFreeSimpleRocketObjective::get_domain(std::vector<double>& aLowerBounds,
+void GradFreeRocketObjective::get_domain(std::vector<double>& aLowerBounds,
                                                std::vector<double>& aUpperBounds,
                                                std::vector<int>& aNumEvaluationsPerDim)
 {
@@ -51,7 +51,7 @@ void GradFreeSimpleRocketObjective::get_domain(std::vector<double>& aLowerBounds
     aNumEvaluationsPerDim = mNumEvaluationsPerDim;
 }
 
-double GradFreeSimpleRocketObjective::evaluate(const std::vector<double>& aControls)
+double GradFreeRocketObjective::evaluate(const std::vector<double>& aControls)
 {
     this->update(aControls);
 
@@ -71,7 +71,7 @@ double GradFreeSimpleRocketObjective::evaluate(const std::vector<double>& aContr
     return tObjectiveValue;
 }
 
-void GradFreeSimpleRocketObjective::initialize()
+void GradFreeRocketObjective::initialize()
 {
     mTargetThrustProfile =
     {   0, 1656714.377766964, 1684717.520617273, 1713123.001583093, 1741935.586049868,
@@ -106,7 +106,7 @@ void GradFreeSimpleRocketObjective::initialize()
     mRocketModel.disableOutput();
 }
 
-void GradFreeSimpleRocketObjective::update(const std::vector<double>& aControls)
+void GradFreeRocketObjective::update(const std::vector<double>& aControls)
 {
     std::map<std::string, double> tSimParam;
     tSimParam.insert(std::pair<std::string, double>("RefBurnRate", aControls[1]));

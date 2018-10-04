@@ -114,7 +114,7 @@ std::vector<double> get_gold_control_mma_test()
     return (tGoldControl);
 }
 
-std::vector<double> getGoldControlGcmmaTest()
+std::vector<double> get_gold_control_gcmma_test()
 {
     std::vector<double> tGoldControl = {1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1, 1, 1, 0.001, 0.001, 0.001,
                                         0.001, 0.001, 0.001, 0.001, 1, 1, 0.001, 1, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001, 1,
@@ -143,7 +143,7 @@ std::vector<double> getGoldControlGcmmaTest()
     return (tGoldControl);
 }
 
-std::vector<double> getGoldControlTrustRegionTest()
+std::vector<double> get_gold_control_ksal_test()
 {
     std::vector<double> tGoldControl = {1, 0.990519503273029, 0.0563374434591324, 0.01, 0.01, 0.01, 0.01, 0.0615748005804673,
                                         0.981912674338465, 1, 1, 0.993705396857249, 0.365781453590431, 0.01, 0.01, 0.01, 0.01,

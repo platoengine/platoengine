@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_SimpleRocket.hpp
+ * Plato_AlgebraicRocketModel.hpp
  *
  *  Created on: Aug 29, 2018
  */
@@ -67,7 +67,7 @@ namespace Plato
  * @brief Data structure for rocket problem input parameters.
 **********************************************************************************/
 template<typename ScalarType = double>
-struct SimpleRocketInuts
+struct AlgebraicRocketInputs
 {
     size_t mMaxNumNewtonItr;
 
@@ -87,7 +87,7 @@ struct SimpleRocketInuts
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    SimpleRocketInuts() :
+    AlgebraicRocketInputs() :
             mMaxNumNewtonItr(1000),
             mAlpha(0.38),
             mDeltaTime(0.1),
@@ -104,6 +104,7 @@ struct SimpleRocketInuts
     {
     }
 };
+// struct AlgebraicRocketInputs
 
 /******************************************************************************//**
  * @brief Design the rocket chamber to achieve desired QoI profile.
@@ -116,13 +117,13 @@ struct SimpleRocketInuts
  * kg - kilograms
  **********************************************************************************/
 template<typename ScalarType = double>
-class SimpleRocket
+class AlgebraicRocketModel
 {
 public:
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    SimpleRocket() :
+    AlgebraicRocketModel() :
             mPrint(true),
             mMaxNumNewtonItr(1000),
             mChamberLength(0.65), // m
@@ -149,9 +150,9 @@ public:
      * @brief Constructor
      * @param aInputs input parameters for simulation
      * @param aGeomModel geometry model used for the rocket chamber
-    **********************************************************************************/
-    explicit SimpleRocket(const Plato::SimpleRocketInuts<ScalarType>& aInputs,
-                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeomModel) :
+     **********************************************************************************/
+    explicit AlgebraicRocketModel(const Plato::AlgebraicRocketInputs<ScalarType>& aInputs,
+                                  const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeomModel) :
             mPrint(true),
             mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
             mChamberLength(aInputs.mChamberLength), // m
@@ -177,7 +178,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    ~SimpleRocket()
+    ~AlgebraicRocketModel()
     {
     }
 
@@ -373,11 +374,11 @@ public:
 
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 
-            ScalarType tRdot = mRefBurnRate * std::pow(tTotalPressure, mAlpha) * mInvPrefAlpha;
             tThrust = static_cast<ScalarType>(269.0) * static_cast<ScalarType>(9.8)
                     * tChamberArea * (tTotalPressure - mAmbientPressure)
                     / mCharacteristicVelocity;
 
+            ScalarType tRdot = mRefBurnRate * std::pow(tTotalPressure, mAlpha) * mInvPrefAlpha;
             tChamberGeom.find("BurnRate")->second = tRdot;
             mChamberGeomModel->update(tChamberGeom);
             tTime += mDeltaTime;
@@ -466,6 +467,6 @@ private:
 
     std::shared_ptr<Plato::GeometryModel<ScalarType>> mChamberGeomModel;
 };
-// class SimpleRocket
+// class AlgebraicRocketModel
 
 } //namespace Plato

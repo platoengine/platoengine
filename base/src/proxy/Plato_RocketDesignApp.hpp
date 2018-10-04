@@ -54,7 +54,7 @@
 #include <string>
 
 #include "Plato_Application.hpp"
-#include "Plato_SimpleRocketObjective.hpp"
+#include "Plato_GradBasedRocketObjective.hpp"
 
 namespace Plato
 {
@@ -166,7 +166,7 @@ private:
 private:
     size_t mNumDesigVariables; /*!< import/export parameter map */
 
-    std::shared_ptr<Plato::SimpleRocketObjective<double>> mObjective; /*!< rocket design problem objective */
+    std::shared_ptr<Plato::GradBasedRocketObjective<double>> mObjective; /*!< rocket design problem objective */
     std::vector<std::string> mDefinedOperations; /*!< valid operations recognized by app */
     std::map<std::string, std::vector<double>> mSharedDataMap; /*!< import/export shared data map */
     std::map<std::string, Plato::data::layout_t> mDefinedDataLayout; /*!< valid data layouts */

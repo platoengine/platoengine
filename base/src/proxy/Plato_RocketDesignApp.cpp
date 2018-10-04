@@ -107,10 +107,10 @@ void RocketDesignApp::initialize()
     this->defineOperations();
     this->defineSharedDataMaps();
 
-    Plato::SimpleRocketInuts<double> tRocketSimInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketSimInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
-    mObjective = std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketSimInputs, tGeomModel);
+    mObjective = std::make_shared<Plato::GradBasedRocketObjective<double>>(tRocketSimInputs, tGeomModel);
 }
 
 /******************************************************************************//**

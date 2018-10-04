@@ -41,29 +41,26 @@
 */
 
 /*
- * Plato_KelleySachsBoundLightInterface.hpp
+ * Plato_KelleySachsAugmentedLagrangianLightInterface.hpp
  *
- *  Created on: Sep 29, 2018
+ *  Created on: Oct 3, 2018
  */
 
 #pragma once
 
-#include <string>
-#include <memory>
-
 #include "Plato_DataFactory.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
-#include "Plato_KelleySachsBoundConstrained.hpp"
-#include "Plato_ReducedSpaceTrustRegionStageMng.hpp"
+#include "Plato_AugmentedLagrangianStageMng.hpp"
+#include "Plato_KelleySachsAugmentedLagrangian.hpp"
 
 namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Output data structure for Kelley-Sachs Bound Constrained (KSBC) trust region algorithm
+ * @brief Output structure for Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmOutputsKSBC
+struct AlgorithmOutputsKSAL
 {
     OrdinalType mNumOuterIter; /*!< number of outer iterations */
     OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
@@ -72,6 +69,7 @@ struct AlgorithmOutputsKSBC
     ScalarType mObjFuncValue; /*!< objective function value */
     ScalarType mNormObjFuncGrad; /*!< norm of the objective function gradient */
     ScalarType mActualReduction; /*!< actual reduction */
+    ScalarType mPenaltyParameter; /*!< penalty parameter */
     ScalarType mStationarityMeasure; /*!< norm of the descent direction */
     ScalarType mCurrentTrustRegionRadius; /*!< current trust region radius */
     ScalarType mControlStagnationMeasure; /*!< norm of the difference between two subsequent control fields */
@@ -79,20 +77,21 @@ struct AlgorithmOutputsKSBC
 
     std::string mStopCriterion; /*!< stopping criterion */
 
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mConstraints; /*!< constraint values */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mSolution; /*!< optimal solution */
 };
-// struct AlgorithmOutputsKSBC
+// struct AlgorithmOutputsKSAL
 
 /******************************************************************************//**
- * @brief Input data structure for Kelley-Sachs Bound Constrained (KSBC) trust region algorithm
+ * @brief Input structure for Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmInputsKSBC
+struct AlgorithmInputsKSAL
 {
     /******************************************************************************//**
      * @brief Default constructor
     **********************************************************************************/
-    AlgorithmInputsKSBC() :
+    AlgorithmInputsKSAL() :
             mPrintDiagnostics(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
@@ -101,6 +100,10 @@ struct AlgorithmInputsKSBC
             mMinTrustRegionRadius(1e-8),
             mTrustRegionExpansionFactor(4),
             mTrustRegionContractionFactor(0.75),
+            mMinPenaltyParameter(1e-5),
+            mInitialPenaltyParameter(0.1),
+            mPenaltyParameterScaleFactor(1.2),
+            mFeasibilityTolerance(1e-4),
             mOuterGradientTolerance(1e-8),
             mOuterStationarityTolerance(1e-8),
             mOuterActualReductionTolerance(1e-12),
@@ -108,6 +111,7 @@ struct AlgorithmInputsKSBC
             mOuterObjectiveStagnationTolerance(1e-12),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
+            mDual(nullptr),
             mLowerBounds(nullptr),
             mUpperBounds(nullptr),
             mInitialGuess(nullptr),
@@ -119,7 +123,7 @@ struct AlgorithmInputsKSBC
     /******************************************************************************//**
      * @brief Default destructor
     **********************************************************************************/
-    virtual ~AlgorithmInputsKSBC()
+    virtual ~AlgorithmInputsKSAL()
     {
     }
 
@@ -134,6 +138,11 @@ struct AlgorithmInputsKSBC
     ScalarType mTrustRegionExpansionFactor; /*!< trust region radius expansion factor */
     ScalarType mTrustRegionContractionFactor; /*!< trust region radius contraction factor */
 
+    ScalarType mMinPenaltyParameter; /*!< minimum penalty parameter */
+    ScalarType mInitialPenaltyParameter; /*!< initial penalty parameter */
+    ScalarType mPenaltyParameterScaleFactor; /*!< penalty parameter scale factor */
+
+    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
     ScalarType mOuterGradientTolerance; /*!< gradient norm tolerance */
     ScalarType mOuterStationarityTolerance; /*!< descent direction norm tolerance */
     ScalarType mOuterActualReductionTolerance; /*!< actual reduction tolerance */
@@ -143,28 +152,35 @@ struct AlgorithmInputsKSBC
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
 
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mInitialGuess; /*!< initial guess */
-    
+
     /*!< operations which require communication across processors, e.g. max, min, global sum */
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mReductionOperations;
 };
-// struct AlgorithmInputsKSBC
+// struct AlgorithmInputsKSAL
 
 /******************************************************************************//**
- * @brief Set Kelley-Sachs Bound Constrained (KSBC) trust region algorithm inputs
- * @param [in] aInputs Kelley-Sachs Bound Constrained trust region algorithm inputs
- * @param [in,out] aAlgorithm Kelley-Sachs Bound Constrained trust region algorithm interface
-**********************************************************************************/
+ * @brief Set Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm inputs
+ * @param [in] aInputs Kelley-Sachs Augmented Lagrangian trust region algorithm inputs
+ * @param [in,out] aStageMng interface to user-defined criteria
+ * @param [in,out] aAlgorithm Kelley-Sachs Augmented Lagrangian trust region algorithm interface
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_ksbc_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
-                                      Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
+inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> & aInputs,
+                                      Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType> & aStageMng,
+                                      Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+/*    if(aInputs.mPrintDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
-    }
+    }*/
+
+    aAlgorithm.setMinPenaltyParameter(aInputs.mMinPenaltyParameter);
+    aStageMng.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
+    aStageMng.setPenaltyParameterScaleFactor(aInputs.mPenaltyParameterScaleFactor);
 
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
     aAlgorithm.setMaxNumUpdates(aInputs.mMaxNumOuterLineSearchUpdates);
@@ -176,21 +192,22 @@ inline void set_ksbc_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarTyp
     aAlgorithm.setTrustRegionContraction(aInputs.mTrustRegionContractionFactor);
 
     aAlgorithm.setGradientTolerance(aInputs.mOuterGradientTolerance);
+    aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
     aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);
     aAlgorithm.setStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
     aAlgorithm.setActualReductionTolerance(aInputs.mOuterActualReductionTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
 }
-// function set_ksbc_algorithm_inputs
+// function set_ksal_algorithm_inputs
 
 /******************************************************************************//**
- * @brief Set Kelley-Sachs Bound Constrained (KSBC) trust region algorithm outputs
- * @param [in] aAlgorithm Kelley-Sachs Bound Constrained trust region algorithm interface
- * @param [in,out] aOutputs Kelley-Sachs Bound Constrained trust region algorithm outputs
+ * @brief Set Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm outputs
+ * @param [in] aAlgorithm Kelley-Sachs Augmented Lagrangian trust region algorithm interface
+ * @param [in,out] aOutputs Kelley-Sachs Augmented Lagrangian trust region algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_ksbc_algorithm_outputs(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm,
-                                       Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
+inline void set_ksal_algorithm_outputs(const Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm,
+                                       Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType> & aOutputs)
 {
     aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
     aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
@@ -199,6 +216,7 @@ inline void set_ksbc_algorithm_outputs(const Plato::KelleySachsBoundConstrained<
     aOutputs.mObjFuncValue = aAlgorithm.getDataMng().getCurrentObjectiveFunctionValue();
     aOutputs.mNormObjFuncGrad = aAlgorithm.getDataMng().getNormProjectedGradient();
     aOutputs.mActualReduction = aAlgorithm.getStepMng().getActualReduction();
+    aOutputs.mPenaltyParameter = aAlgorithm.getStageMng().getPenaltyParameter();
     aOutputs.mStationarityMeasure = aAlgorithm.getDataMng().getStationarityMeasure();
     aOutputs.mCurrentTrustRegionRadius = aAlgorithm.getStepMng().getTrustRegionRadius();
     aOutputs.mControlStagnationMeasure = aAlgorithm.getDataMng().getControlStagnationMeasure();
@@ -209,19 +227,26 @@ inline void set_ksbc_algorithm_outputs(const Plato::KelleySachsBoundConstrained<
     const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = aAlgorithm.getDataMng().getCurrentControl();
     aOutputs.mSolution = tSolution.create();
     Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), *aOutputs.mSolution);
+
+    const OrdinalType tDualVectorIndex = 0;
+    const Plato::Vector<ScalarType, OrdinalType> & tDual = aAlgorithm.getDataMng().getDual(tDualVectorIndex);
+    aOutputs.mConstraints = tDual.create();
+    aAlgorithm.getStageMng().getCurrentConstraintValues(tDualVectorIndex, *aOutputs.mConstraints);
 }
-// function set_ksbc_algorithm_outputs
+// function set_ksal_algorithm_outputs
 
 /******************************************************************************//**
- * @brief Kelley-Sachs Bound Constrained (KSBC) trust region algorithm interface
+ * @brief Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm interface
  * @param [in] aObjective user-defined objective function
- * @param [in] aInputs Kelley-Sachs Bound Constrained trust region algorithm inputs
- * @param [in,out] aOutputs Kelley-Sachs Bound Constrained trust region algorithm outputs
+ * @param [in] aConstraints user-defined list of constraints
+ * @param [in] aInputs Kelley-Sachs Augmented Lagrangian trust region algorithm input structure
+ * @param [in,out] aOutputs Kelley-Sachs Augmented Lagrangian trust region algorithm output structure
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
-                       const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
-                       Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
+inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+                       const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
+                       const Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> & aInputs,
+                       Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType> & aOutputs)
 {
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
@@ -237,21 +262,16 @@ inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
     tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
 
-    // ********* ALLOCATE OBJECTIVE FUNCTION LIST *********
-    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tObjectiveList;
-    tObjectiveList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>();
-    tObjectiveList->add(aObjective);
-
-    // ********* ALLOCATE REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> tStageMng;
-    tStageMng = std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, tObjectiveList);
+    // ********* ALLOCATE AUGMENTED LAGRANGIAN STAGE MANAGER *********
+    std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng;
+    tStageMng = std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
-    Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    Plato::set_ksbc_algorithm_inputs(aInputs, tAlgorithm);
+    Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
+    //Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
     tAlgorithm.solve();
-    Plato::set_ksbc_algorithm_outputs(tAlgorithm, aOutputs);
+    Plato::set_ksal_algorithm_outputs(tAlgorithm, aOutputs);
 }
-// function solve_ksbc
+// function solve_ksal
 
 } // namespace Plato

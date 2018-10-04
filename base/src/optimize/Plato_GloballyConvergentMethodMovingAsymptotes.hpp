@@ -80,6 +80,7 @@ public:
             mMaxNumIterations(5),
             mNumIterationsDone(0),
             mControlStagnationTolerance(1e-8),
+            mObjectiveStagnationTolerance(1e-8),
             mMinObjectiveGlobalizationFactor(1e-5),
             mCurrentTrialObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
             mPreviousTrialObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
@@ -106,52 +107,128 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return maximum number of inner iterations
+     * @return maximum number of inner iterations
+    **********************************************************************************/
     OrdinalType getMaxNumIterations() const
     {
         return (mMaxNumIterations);
     }
+
+    /******************************************************************************//**
+     * @brief Set maximum number of inner iterations
+     * @param [in] aInput maximum number of inner iterations
+    **********************************************************************************/
     void setMaxNumIterations(const OrdinalType & aInput)
     {
         mMaxNumIterations = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return number of inner iterations done
+     * @return number of inner iterations done
+    **********************************************************************************/
     OrdinalType getNumIterationsDone() const
     {
         return (mNumIterationsDone);
     }
+
+    /******************************************************************************//**
+     * @brief Set number of inner iterations done
+     * @param [in] aInput number of inner iterations done
+    **********************************************************************************/
     void setNumIterationsDone(const OrdinalType & aInput)
     {
         mNumIterationsDone = aInput;
     }
-    ScalarType getStagnationTolerance() const
+
+    /******************************************************************************//**
+     * @brief Return control stagnation tolerance for GCMMA subproblem
+     * @return control stagnation tolerance for GCMMA subproblem
+    **********************************************************************************/
+    ScalarType getControlStagnationTolerance() const
     {
         return (mControlStagnationTolerance);
     }
-    void setStagnationTolerance(const ScalarType & aInput)
+
+    /******************************************************************************//**
+     * @brief Set control stagnation tolerance for GCMMA subproblem
+     * @param [in] aInput control stagnation tolerance for GCMMA subproblem
+    **********************************************************************************/
+    void setControlStagnationTolerance(const ScalarType & aInput)
     {
         mControlStagnationTolerance = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return stagnation tolerance for first-order objective approximation
+     * @return stagnation tolerance for first-order objective approximation
+    **********************************************************************************/
+    ScalarType getObjectiveStagnationTolerance() const
+    {
+        return (mObjectiveStagnationTolerance);
+    }
+
+    /******************************************************************************//**
+     * @brief Set stagnation tolerance for first-order objective approximation
+     * @param [in] aInput stagnation tolerance for first-order objective approximation
+    **********************************************************************************/
+    void setObjectiveStagnationTolerance(const ScalarType & aInput)
+    {
+        mObjectiveStagnationTolerance = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Return Karush-Kuhn-Tucker (KKT) tolerance for GCMMA subproblem
+     * @return Karush-Kuhn-Tucker (KKT) tolerance for GCMMA subproblem
+    **********************************************************************************/
     ScalarType getKarushKuhnTuckerConditionsTolerance() const
     {
         return (mKarushKuhnTuckerConditionsTolerance);
     }
+
+    /******************************************************************************//**
+     * @brief Set Karush-Kuhn-Tucker (KKT) tolerance for GCMMA subproblem
+     * @param [in] aInput Karush-Kuhn-Tucker (KKT) tolerance for GCMMA subproblem
+    **********************************************************************************/
     void setKarushKuhnTuckerConditionsTolerance(const ScalarType & aInput)
     {
         mKarushKuhnTuckerConditionsTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Return GCMMA subproblem stopping criterion
+     * @return GCMMA subproblem stopping criterion
+    **********************************************************************************/
     Plato::ccsa::stop_t getStoppingCriterion() const
     {
         return (mStoppingCriterion);
     }
+
+    /******************************************************************************//**
+     * @brief Set GCMMA subproblem stopping criterion
+     * @param [in] aInput GCMMA subproblem stopping criterion
+    **********************************************************************************/
     void setStoppingCriterion(const Plato::ccsa::stop_t & aInput)
     {
         mStoppingCriterion = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set algorithm for dual problem
+     * @param [in] aInput algorithm for dual problem
+    **********************************************************************************/
     void setDualSolver(const std::shared_ptr<Plato::DualProblemSolver<ScalarType, OrdinalType>> & aInput)
     {
         mDualSolver = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Solve GCMMA subproblem
+     * @param [in] aStageMng main interface between user-defined criteria
+     * @param [in] aDataMng data manager for CCSA algorithm
+    **********************************************************************************/
     void solve(Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType> & aStageMng,
                Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -366,12 +443,12 @@ private:
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::KKT_CONDITIONS_TOLERANCE);
         }
-        else if(tObjectiveStagnation < this->getStagnationTolerance())
+        else if(tObjectiveStagnation < this->getControlStagnationTolerance())
         {
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::OBJECTIVE_STAGNATION);
         }
-        else if(tControlStagnation < this->getStagnationTolerance())
+        else if(tControlStagnation < this->getControlStagnationTolerance())
         {
             tStop = true;
             this->setStoppingCriterion(Plato::ccsa::CONTROL_STAGNATION);
@@ -410,6 +487,7 @@ private:
     OrdinalType mNumIterationsDone;
 
     ScalarType mControlStagnationTolerance;
+    ScalarType mObjectiveStagnationTolerance;
     ScalarType mMinObjectiveGlobalizationFactor;
     ScalarType mCurrentTrialObjectiveFunctionValue;
     ScalarType mPreviousTrialObjectiveFunctionValue;

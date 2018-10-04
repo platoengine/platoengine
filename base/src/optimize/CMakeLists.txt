@@ -48,6 +48,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_KelleySachsBoundLightInterface.hpp
                         Plato_KelleySachsBoundConstrainedInterface.hpp
                         Plato_KelleySachsAugmentedLagrangianInterface.hpp
+                        Plato_KelleySachsAugmentedLagrangianLightInterface.hpp
                         Plato_KelleySachsStepMng.hpp
                         Plato_MLKelleySachsStepMng.hpp
                         Plato_LineSearch.hpp
@@ -65,6 +66,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_Rosenbrock.hpp
                         Plato_GloballyConvergentMethodMovingAsymptotes.hpp
                         Plato_GloballyConvergentMethodMovingAsymptotesInterface.hpp
+                        Plato_GloballyConvergentMethodMovingAsymptotesLightInterface.hpp
                         Plato_CcsaTestObjective.hpp
                         Plato_CcsaTestInequality.hpp
                         Plato_AnalyticalHessian.hpp

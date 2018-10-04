@@ -99,43 +99,87 @@ public:
     {
         mMinPenaltyParameter = aInput;
     }
+
     void setOptimalityTolerance(const ScalarType & aInput)
     {
         mOptimalityTolerance = aInput;
     }
+
     void setFeasibilityTolerance(const ScalarType & aInput)
     {
         mFeasibilityTolerance = aInput;
     }
+
     void setMinTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMinTrustRegionRadius(aInput);
     }
+
     void setMaxTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMaxTrustRegionRadius(aInput);
     }
+
     void setTrustRegionExpansion(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionExpansion(aInput);
     }
+
     void setTrustRegionContraction(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionContraction(aInput);
     }
+
     void setPenaltyParameterScaleFactor(const ScalarType & aInput)
     {
         mStageMng->setPenaltyParameterScaleFactor(aInput);
     }
+
     void setNormAugmentedLagrangianGradientRelativeToleranceConstant(const ScalarType & aInput)
     {
         mGammaConstant = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set maximum number of trust region subproblem iterations
+     * @param [in] aInput maximum number of trust region subproblem iterations
+    **********************************************************************************/
     void setMaxNumTrustRegionSubProblemIterations(const OrdinalType & aInput)
     {
         mStepMng->setMaxNumTrustRegionSubProblemIterations(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to data manager
+     * @return trust region algorithm's data manager
+    **********************************************************************************/
+    const Plato::TrustRegionAlgorithmDataMng<ScalarType,OrdinalType> & getDataMng() const
+    {
+        return (*mDataMng);
+    }
+
+
+    /******************************************************************************//**
+     * @brief Return reference to trust region step manager
+     * @return trust region step manager
+    **********************************************************************************/
+    const Plato::KelleySachsStepMng<ScalarType,OrdinalType> & getStepMng() const
+    {
+        return (*mStepMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Return reference to stage manager
+     * @return trust region algorithm's stage manager
+    **********************************************************************************/
+    const Plato::AugmentedLagrangianStageMng<ScalarType,OrdinalType> & getStageMng() const
+    {
+        return (*mStageMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Solve constrained optimization problem
+    **********************************************************************************/
     void solve()
     {
         this->checkInitialGuess();

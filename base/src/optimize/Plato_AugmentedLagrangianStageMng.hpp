@@ -82,9 +82,9 @@ public:
     AugmentedLagrangianStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
                                 const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints) :
-            mNumObjectiveFunctionEvaluations(0),
-            mNumObjectiveGradientEvaluations(0),
-            mNumObjectiveHessianEvaluations(0),
+            mNumObjFuncEval(0),
+            mNumObjGradEval(0),
+            mNumObjHessEval(0),
             mTrialObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
@@ -144,21 +144,21 @@ public:
     OrdinalType getNumObjectiveFunctionEvaluations() const
     /****************************************************************************************************************/
     {
-        return (mNumObjectiveFunctionEvaluations);
+        return (mNumObjFuncEval);
     }
 
     /****************************************************************************************************************/
     OrdinalType getNumObjectiveGradientEvaluations() const
     /****************************************************************************************************************/
     {
-        return (mNumObjectiveGradientEvaluations);
+        return (mNumObjGradEval);
     }
 
     /****************************************************************************************************************/
     OrdinalType getNumObjectiveHessianEvaluations() const
     /****************************************************************************************************************/
     {
-        return (mNumObjectiveHessianEvaluations);
+        return (mNumObjHessEval);
     }
 
     /****************************************************************************************************************/
@@ -327,7 +327,15 @@ public:
     void getCurrentConstraintValues(Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
     /****************************************************************************************************************/
     {
-        Plato::update(1., *mCurrentConstraintValues, 0., aInput);
+        Plato::update(static_cast<ScalarType>(1.), *mCurrentConstraintValues, static_cast<ScalarType>(0.), aInput);
+    }
+
+    /****************************************************************************************************************/
+    void getCurrentConstraintValues(const OrdinalType & aIndex, Plato::Vector<ScalarType, OrdinalType> & aInput) const
+    /****************************************************************************************************************/
+    {
+        assert(aIndex < mCurrentConstraintValues->getNumVectors());
+        aInput.update(static_cast<ScalarType>(1.), (*mCurrentConstraintValues)[aIndex], static_cast<ScalarType>(0.));
     }
 
     /****************************************************************************************************************/
@@ -428,6 +436,9 @@ public:
             mConstraintGradientOperator->operator[](tConstraintIndex).update(mStateData.operator*());
             mConstraintHessianOperators->operator[](tConstraintIndex).update(mStateData.operator*());
         }
+
+        aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
+        aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
     }
 
     /****************************************************************************************************************/
@@ -674,21 +685,21 @@ private:
     void increaseObjectiveFunctionEvaluationCounter()
     /****************************************************************************************************************/
     {
-        mNumObjectiveFunctionEvaluations++;
+        mNumObjFuncEval++;
     }
 
     /****************************************************************************************************************/
     void increaseObjectiveGradientEvaluationCounter()
     /****************************************************************************************************************/
     {
-        mNumObjectiveGradientEvaluations++;
+        mNumObjGradEval++;
     }
 
     /****************************************************************************************************************/
     void increaseObjectiveHessianEvaluationCounter()
     /****************************************************************************************************************/
     {
-        mNumObjectiveHessianEvaluations++;
+        mNumObjHessEval++;
     }
 
     /****************************************************************************************************************/
@@ -713,9 +724,9 @@ private:
     }
 
 private:
-    OrdinalType mNumObjectiveFunctionEvaluations;
-    OrdinalType mNumObjectiveGradientEvaluations;
-    OrdinalType mNumObjectiveHessianEvaluations;
+    OrdinalType mNumObjFuncEval;
+    OrdinalType mNumObjGradEval;
+    OrdinalType mNumObjHessEval;
 
     ScalarType mTrialObjectiveValue;
     ScalarType mCurrentObjectiveValue;

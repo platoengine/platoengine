@@ -48,12 +48,11 @@
 
 #include "gtest/gtest.h"
 
-#include "Plato_SimpleRocket.hpp"
-#include "Plato_GradFreeSimpleRocketObjective.hpp"
+#include "Plato_GradFreeRocketObjective.hpp"
 
 #include "Plato_StandardVector.hpp"
 #include "Plato_StandardMultiVector.hpp"
-#include "Plato_SimpleRocketObjective.hpp"
+#include "Plato_GradBasedRocketObjective.hpp"
 #include "Plato_KelleySachsBoundLightInterface.hpp"
 
 #include "PSL_Random.hpp"
@@ -94,10 +93,10 @@ std::vector<double> getGoldThrust()
 }
 
 
-TEST(PlatoTest, SimpleRocketObjectiveGradFree)
+TEST(PlatoTest, GradBasedRocketObjectiveGradFree)
 {
     // allocate problem inputs - use default parameters
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
@@ -107,7 +106,7 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     /* {chamber_radius_lb, ref_burn_rate_lb},  {chamber_radius_ub, ref_burn_rate_ub} */
     std::pair<std::vector<double>, std::vector<double>> tBounds =
             std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
-    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);
+    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, tBounds);
 
     /* {chamber_radius, ref_burn_rate} */
@@ -133,15 +132,15 @@ TEST(PlatoTest, SimpleRocketObjectiveGradFree)
     }
 }
 
-TEST(PlatoTest, SimpleRocketObjective)
+TEST(PlatoTest, GradBasedRocketObjective)
 {
     // allocate problem inputs - use default parameters
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // set normalization constants
-    Plato::SimpleRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
+    Plato::GradBasedRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
     std::vector<double> tUpperBounds = {0.09, 0.007}; /* {chamber_radius_ub, ref_burn_rate_ub} */
     tObjective.setNormalizationConstants(tUpperBounds);
 
@@ -217,13 +216,11 @@ TEST(PlatoTest, Cylinder)
 
 TEST(PlatoTest, GradFreeSimpleRocketOptimization)
 {
-    PlatoSubproblemLibrary::AbstractAuthority tAuthority;
-
     // define objective
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
     std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    Plato::GradFreeSimpleRocketObjective tObjective(tRocketInputs, tGeomModel);;
+    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);;
 
     // set inputs for optimization problem
     std::vector<int> tNumEvaluationsPerDim = {100, 100}; // domain dimension = 100x100=10000
@@ -233,6 +230,7 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, aBounds);
 
     // define searcher
+    PlatoSubproblemLibrary::AbstractAuthority tAuthority;
     PlatoSubproblemLibrary::IterativeSelection tSearcher(&tAuthority);
     tSearcher.set_objective(&tObjective);
 
@@ -256,11 +254,11 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
 
     // ********* ALLOCATE OBJECTIVE *********
-    Plato::SimpleRocketInuts<double> tRocketInputs;
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    std::shared_ptr<Plato::SimpleRocketObjective<double>> tMyObjective =
-            std::make_shared<Plato::SimpleRocketObjective<double>>(tRocketInputs, tGeomModel);
+    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
+            std::make_shared<Plato::GradBasedRocketObjective<double>>(tRocketInputs, tGeomModel);
     tMyObjective->setNormalizationConstants(tNormalizationConstants);
 
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
