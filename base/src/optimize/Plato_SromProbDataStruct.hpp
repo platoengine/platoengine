@@ -127,12 +127,12 @@ struct AlgorithmParamStruct
     Plato::algorithm::stop_t mStop;
     // Input parameters
     OrdinalType mMaxNumIterations;
-    ScalarType mStagnationTolerance;
     ScalarType mMinPenaltyParameter;
     ScalarType mFeasibilityTolerance;
     ScalarType mMaxTrustRegionRadius;
     ScalarType mActualReductionTolerance;
     ScalarType mPenaltyParameterScaleFactor;
+    ScalarType mObjectiveStagnationTolerance;
     // Output parameters
     ScalarType mObjectiveValue;
     ScalarType mConstraintValue;
@@ -140,12 +140,12 @@ struct AlgorithmParamStruct
     AlgorithmParamStruct() :
             mStop(Plato::algorithm::NOT_CONVERGED),
             mMaxNumIterations(1000),
-            mStagnationTolerance(1e-12),
             mMinPenaltyParameter(1e-5),
             mFeasibilityTolerance(1e-4),
             mMaxTrustRegionRadius(1e1),
             mActualReductionTolerance(1e-12),
             mPenaltyParameterScaleFactor(1.2),
+            mObjectiveStagnationTolerance(1e-12),
             mObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mConstraintValue(std::numeric_limits<ScalarType>::max())
     {

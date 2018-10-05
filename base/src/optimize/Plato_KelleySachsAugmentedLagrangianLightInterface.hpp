@@ -98,7 +98,7 @@ struct AlgorithmInputsKSAL
             mMaxNumOuterLineSearchUpdates(10),
             mMaxTrustRegionRadius(1e2),
             mMinTrustRegionRadius(1e-8),
-            mTrustRegionExpansionFactor(4),
+            mTrustRegionExpansionFactor(2),
             mTrustRegionContractionFactor(0.75),
             mMinPenaltyParameter(1e-5),
             mInitialPenaltyParameter(0.1),
@@ -108,7 +108,7 @@ struct AlgorithmInputsKSAL
             mOuterStationarityTolerance(1e-8),
             mOuterActualReductionTolerance(1e-12),
             mOuterControlStagnationTolerance(1e-16),
-            mOuterObjectiveStagnationTolerance(1e-12),
+            mOuterObjectiveStagnationTolerance(1e-8),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
             mDual(nullptr),
@@ -194,8 +194,8 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
     aAlgorithm.setGradientTolerance(aInputs.mOuterGradientTolerance);
     aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
     aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);
-    aAlgorithm.setStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
     aAlgorithm.setActualReductionTolerance(aInputs.mOuterActualReductionTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
 }
 // function set_ksal_algorithm_inputs
@@ -268,7 +268,7 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    //Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
+    Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_ksal_algorithm_outputs(tAlgorithm, aOutputs);
 }

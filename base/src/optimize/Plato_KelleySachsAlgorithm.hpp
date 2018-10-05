@@ -73,7 +73,7 @@ public:
             mNumOuterIterationsDone(0),
             mGradientTolerance(1e-4),
             mStationarityTolerance(1e-4),
-            mStagnationTolerance(1e-8),
+            mObjectiveStagnationTolerance(1e-8),
             mControlStagnationTolerance(std::numeric_limits<ScalarType>::epsilon()),
             mActualReductionTolerance(1e-8),
             mStoppingCriterion(Plato::algorithm::NOT_CONVERGED),
@@ -92,9 +92,9 @@ public:
     {
         mStationarityTolerance = aInput;
     }
-    void setStagnationTolerance(const ScalarType & aInput)
+    void setObjectiveStagnationTolerance(const ScalarType & aInput)
     {
-        mStagnationTolerance = aInput;
+        mObjectiveStagnationTolerance = aInput;
     }
     void setControlStagnationTolerance(const ScalarType & aInput)
     {
@@ -134,9 +134,9 @@ public:
     {
         return (mStationarityTolerance);
     }
-    ScalarType getStagnationTolerance() const
+    ScalarType getObjectiveStagnationTolerance() const
     {
-        return (mStagnationTolerance);
+        return (mObjectiveStagnationTolerance);
     }
     ScalarType getControlStagnationTolerance() const
     {
@@ -228,7 +228,7 @@ private:
 
     ScalarType mGradientTolerance;
     ScalarType mStationarityTolerance;
-    ScalarType mStagnationTolerance;
+    ScalarType mObjectiveStagnationTolerance;
     ScalarType mControlStagnationTolerance;
     ScalarType mStationarityMeasure;
     ScalarType mActualReductionTolerance;

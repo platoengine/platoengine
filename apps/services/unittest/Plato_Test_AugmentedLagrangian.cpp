@@ -1616,10 +1616,10 @@ TEST(PlatoTest, KelleySachsAlgorithm)
 
     // TEST OBJECTIVE TOLERANCE
     tScalarGold = 1e-8;
-    EXPECT_EQ(tScalarGold, tAlgorithm.getStagnationTolerance());
+    EXPECT_EQ(tScalarGold, tAlgorithm.getObjectiveStagnationTolerance());
     tScalarGold = 1e-5;
-    tAlgorithm.setStagnationTolerance(tScalarGold);
-    EXPECT_EQ(tScalarGold, tAlgorithm.getStagnationTolerance());
+    tAlgorithm.setObjectiveStagnationTolerance(tScalarGold);
+    EXPECT_EQ(tScalarGold, tAlgorithm.getObjectiveStagnationTolerance());
 
     // TEST CONTROL STAGNATION TOLERANCE
     double tMyTolerance = 1e-4;

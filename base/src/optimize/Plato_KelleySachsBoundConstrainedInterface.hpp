@@ -179,7 +179,7 @@ private:
         ScalarType tExpansionScaleFactor = mInputData.getKSTrustRegionExpansionFactor();
         ScalarType tOuterGradientTolerance = mInputData.getKSOuterGradientTolerance();
         ScalarType tOuterStationarityTolerance = mInputData.getKSOuterStationarityTolerance();
-        ScalarType tOuterStagnationTolerance = mInputData.getKSOuterStagnationTolerance();
+        ScalarType tOuterObjectiveStagnationTolerance = mInputData.getKSOuterStagnationTolerance();
         ScalarType tOuterControlStagnationTolerance = mInputData.getKSOuterControlStagnationTolerance();
         ScalarType tOuterActualReductionTolerance = mInputData.getKSOuterActualReductionTolerance();
 
@@ -189,9 +189,9 @@ private:
         aAlgorithm.setMaxNumTrustRegionSubProblemIterations(tMaxTrustRegionIterations);
         aAlgorithm.setGradientTolerance(tOuterGradientTolerance);
         aAlgorithm.setStationarityTolerance(tOuterStationarityTolerance);
-        aAlgorithm.setStagnationTolerance(tOuterStagnationTolerance);
         aAlgorithm.setControlStagnationTolerance(tOuterControlStagnationTolerance);
         aAlgorithm.setActualReductionTolerance(tOuterActualReductionTolerance);
+        aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerance);
     }
     /******************************************************************************/
 

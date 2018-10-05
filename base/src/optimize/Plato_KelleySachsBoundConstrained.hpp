@@ -472,11 +472,11 @@ private:
             const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
             // Get termination criteria tolerances
             const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
-            const ScalarType tStagnationTolerance = this->getStagnationTolerance();
             const ScalarType tStationarityTolerance = this->getStationarityTolerance();
             const ScalarType tMinTrustRegionRadius = mStepMng->getMinTrustRegionRadius();
             const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
             const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
+            const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
             if( tStationarityMeasure <= tStationarityTolerance )
             {
                 tStop = true;
@@ -487,7 +487,7 @@ private:
                 this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
                 tStop = true;
             }
-            else if( tStagnationMeasure < tStagnationTolerance )
+            else if( tStagnationMeasure < tObjectiveStagnationTolerance )
             {
                 tStop = true;
                 this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);

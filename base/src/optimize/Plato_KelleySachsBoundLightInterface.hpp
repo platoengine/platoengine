@@ -177,9 +177,9 @@ inline void set_ksbc_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarTyp
 
     aAlgorithm.setGradientTolerance(aInputs.mOuterGradientTolerance);
     aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);
-    aAlgorithm.setStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
     aAlgorithm.setActualReductionTolerance(aInputs.mOuterActualReductionTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
 }
 // function set_ksbc_algorithm_inputs
 

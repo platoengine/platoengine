@@ -142,10 +142,10 @@ inline void set_srom_optimizer_parameters(const Plato::AlgorithmParamStruct<Scal
 {
     aAlgorithm.setMaxNumIterations(aAlgorithmParam.mMaxNumIterations);
     aAlgorithm.setMinPenaltyParameter(aAlgorithmParam.mMinPenaltyParameter);
-    aAlgorithm.setStagnationTolerance(aAlgorithmParam.mStagnationTolerance);
     aAlgorithm.setFeasibilityTolerance(aAlgorithmParam.mFeasibilityTolerance);
     aAlgorithm.setMaxTrustRegionRadius(aAlgorithmParam.mMaxTrustRegionRadius);
     aAlgorithm.setActualReductionTolerance(aAlgorithmParam.mActualReductionTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aAlgorithmParam.mObjectiveStagnationTolerance);
 }
 
 /******************************************************************************//**
