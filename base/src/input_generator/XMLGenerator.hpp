@@ -150,6 +150,7 @@ struct InputData
   std::vector<Block> blocks;
   std::string filter_radius_scale;
   std::string filter_radius_absolute;
+  std::string filter_power;
   std::string num_opt_processors;
   std::string output_frequency;
   std::string output_method;

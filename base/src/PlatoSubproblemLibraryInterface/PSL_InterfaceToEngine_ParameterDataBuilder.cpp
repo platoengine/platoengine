@@ -24,17 +24,25 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     PlatoSubproblemLibrary::ParameterData* result = new PlatoSubproblemLibrary::ParameterData;
 
     // set scale and/or absolute
-    double absolute=-1.0, scale=-1.0;
+    double absolute=-1.0;
+    double scale=-1.0;
+    double power=-1.0;
     if( m_inputData.size<Plato::InputData>("Filter") )
     {
         auto tFilterNode = m_inputData.get<Plato::InputData>("Filter");
-        if(tFilterNode.size<std::string>("Absolute") > 0)
+        if(tFilterNode.size<std::string>("Absolute") > 0) {
             absolute = Plato::Get::Double(tFilterNode, "Absolute");
-        if(tFilterNode.size<std::string>("Scale") > 0)
+        }
+        if(tFilterNode.size<std::string>("Scale") > 0) {
             scale = Plato::Get::Double(tFilterNode, "Scale");
+        }
+        if(tFilterNode.size<std::string>("Power") > 0) {
+            power = Plato::Get::Double(tFilterNode, "Power");
+        }
     }
     const bool meaningful_absolute = (absolute >= 0.);
     const bool meaningful_scale = (scale >= 0.);
+    const bool meaningful_power = (power > 0);
     if(meaningful_absolute)
     {
         result->set_absolute(absolute);
@@ -48,9 +56,15 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
         const double default_scale = 3.5;
         result->set_scale(default_scale);
     }
-
+    if(meaningful_power)
+    {
+        result->set_penalty(power);
+    }
+    else
+    {
+        result->set_penalty(1.0);
+    }
     result->set_iterations(1);
-    result->set_penalty(1.0);
 
     // defaults
     result->set_spatial_searcher(PlatoSubproblemLibrary::spatial_searcher_t::spatial_searcher_t::recommended);

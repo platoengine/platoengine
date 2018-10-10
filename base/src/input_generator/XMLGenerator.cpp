@@ -3431,6 +3431,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.num_opt_processors = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","power"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter power\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.filter_power = tStringValue;
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"filter","radius","scale"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -4511,6 +4520,8 @@ bool XMLGenerator::generatePlatoOperationsXML()
         addChild(tmp_node, "Scale", m_InputData.filter_radius_scale);
     if(m_InputData.filter_radius_absolute != "")
         addChild(tmp_node, "Absolute", m_InputData.filter_radius_absolute);
+    if(m_InputData.filter_power != "")
+        addChild(tmp_node, "Power", m_InputData.filter_power);
 
     // PlatoMainOutput
     tmp_node = doc.append_child("Operation");

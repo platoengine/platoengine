@@ -145,6 +145,7 @@ public:
     std::string getFixedSideset(const int &aIndex) {return m_InputData.fixed_sideset_ids[aIndex];}
     std::string getFixedNodeset(const int &aIndex) {return m_InputData.fixed_nodeset_ids[aIndex];}
     std::string getNumberProcessors() {return m_InputData.num_opt_processors;}
+    std::string getFilterPower() {return m_InputData.filter_power;}
     std::string getFilterScale() {return m_InputData.filter_radius_scale;}
     std::string getFilterAbsolute() {return m_InputData.filter_radius_absolute;}
     std::string getAlgorithm() {return m_InputData.optimization_algorithm;}

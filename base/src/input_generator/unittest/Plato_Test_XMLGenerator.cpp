@@ -1029,6 +1029,25 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
+    // filter power
+    stringInput = "begin optimization parameters\n"
+            "filter power\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter power 2.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterPower(), "2.5");
+
     // algorithm
     stringInput = "begin optimization parameters\n"
             "algorithm\n"

@@ -187,6 +187,7 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.fixed_nodeset_ids.clear();
     m_InputData.filter_radius_scale="";
     m_InputData.filter_radius_absolute="";
+    m_InputData.filter_power="";
     m_InputData.num_opt_processors="";
     m_InputData.output_frequency="";
     m_InputData.output_method="";

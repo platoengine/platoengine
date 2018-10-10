@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>PlatoMainOutput</Function>
+  <Name>PlatoMainOutput</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
+
+<Filter>
+  <Name>Kernel</Name>
+  <Scale>1.48</Scale>
+  <Absolute>-1.0</Absolute>
+  <Power>3.0</Power>
+</Filter>
+
+<Timers>
+    <time>True</time>
+</Timers>
+
+<Operation>
+  <Function>Filter</Function>
+  <Name>FilterControl</Name>
+  <Input>
+    <ArgumentName>Field</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Filtered Field</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>Filter</Function>
+  <Name>FilterGradient</Name>
+  <Input>
+    <ArgumentName>Field</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Filtered Field</ArgumentName>
+  </Output>
+  <Transpose>True</Transpose>
+</Operation>
+
+<Operation>
+  <Function>InitializeField</Function>
+  <Name>Initialize Field</Name>
+  <Method>Uniform</Method>
+  <Output>
+    <ArgumentName>Initialized Field</ArgumentName>
+  </Output>
+  <Uniform>
+    <Value>0.25</Value>
+  </Uniform>
+  <FromFile>
+    <Name>YoMama.exo</Name>
+    <VariableName>density</VariableName>
+  </FromFile>
+</Operation>
+
+<Operation>
+  <Function>DesignVolume</Function>
+  <Name>Design Volume</Name>
+  <Output>
+    <ArgumentName>Design Volume</ArgumentName>
+  </Output>
+  <Blocks>1</Blocks>
+</Operation>
+
+<Operation>
+  <Function>ComputeVolume</Function>
+  <Name>Compute Current Volume</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Volume</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Volume Gradient</ArgumentName>
+  </Output>
+
+  <PenaltyModel>SIMP</PenaltyModel>
+  <SIMP>
+    <PenaltyExponent>1.0</PenaltyExponent>
+    <MinimumValue>0.0</MinimumValue>
+  </SIMP>
+</Operation>
+
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateEnergy</Name>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+    </Input>
+    <Input>
+      <ArgumentName>Value 2</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Aggregate>
+    <Layout>Nodal Field</Layout>
+    <Input>
+      <ArgumentName>Field 1</ArgumentName>
+    </Input>
+    <Input>
+      <ArgumentName>Field 2</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Weighting>
+    <Weight>
+      <Value>0.50</Value>
+    </Weight>
+    <Weight>
+      <Value>0.50</Value>
+    </Weight>
+  </Weighting>
+</Operation>
+<Operation>
+  <Function>SetLowerBounds</Function>
+  <Name>Calculate Lower Bounds</Name>
+  <Input>
+    <ArgumentName>Lower Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Lower Bound Vector</ArgumentName>
+  </Output>
+  <FixedBlocks>
+  </FixedBlocks>
+</Operation>
+<Operation>
+  <Function>SetUpperBounds</Function>
+  <Name>Calculate Upper Bounds</Name>
+  <Input>
+    <ArgumentName>Upper Bound Value</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Upper Bound Vector</ArgumentName>
+  </Output>
+</Operation>
+
+
