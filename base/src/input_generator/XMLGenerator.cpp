@@ -1063,12 +1063,19 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  relaxed_stress_ramp_factor = %s\n", cur_obj.stress_ramp_factor.c_str());
                 }
-                if(m_InputData.constraints[0].type == "volume")
-                    fprintf(fp, "  volume_fraction = %s\n", m_InputData.constraints[0].volume_fraction.c_str());
-                else if(m_InputData.constraints[0].type == "surface area")
+                if(m_InputData.constraints.size() > 0)
                 {
-                    fprintf(fp, "  surface_area_constraint_value = %s\n", m_InputData.constraints[0].surface_area.c_str());
-                    fprintf(fp, "  surface_area_ssid = %s\n", m_InputData.constraints[0].surface_area_ssid.c_str());
+                    if(m_InputData.constraints[0].type == "volume")
+                    {
+                        // putting the volume fraction here is meaningless, right?
+                        // volume fraction calculation is done on platomain
+                        fprintf(fp, "  volume_fraction = %s\n", m_InputData.constraints[0].volume_fraction.c_str());
+                    }
+                    else if(m_InputData.constraints[0].type == "surface area")
+                    {
+                        fprintf(fp, "  surface_area_constraint_value = %s\n", m_InputData.constraints[0].surface_area.c_str());
+                        fprintf(fp, "  surface_area_ssid = %s\n", m_InputData.constraints[0].surface_area_ssid.c_str());
+                    }
                 }
                 if(cur_obj.multi_load_case == "true")
                 {
