@@ -328,7 +328,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     tAlgorithm.solve();
 
     // ********* TEST STOPPING CRITERIA AND NUM ITERATIONS *********
-    size_t tNumIterations = 35;
+    size_t tNumIterations = 20;
     EXPECT_EQ(tNumIterations, tAlgorithm.getNumIterationsDone());
     Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::STATIONARITY_MEASURE;
     EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
@@ -336,7 +336,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-4;
     const double tCurrentObjective = tDataMng->getCurrentObjectiveFunctionValue();
-    const double tGoldObjective = 0.07658214286396095;
+    const double tGoldObjective = 0.079569542222762052;
     EXPECT_NEAR(tCurrentObjective, tGoldObjective, tTolerance);
 
     const size_t tVectorIndex = 0;
@@ -416,7 +416,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
 
     const double tTolerance = 1e-6;
     EXPECT_EQ(29u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(281u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(282u, tOutputs.mNumObjFuncEval);
     EXPECT_EQ(56u, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(0, tOutputs.mActualReduction, tTolerance);

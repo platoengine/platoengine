@@ -1391,6 +1391,11 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             bool tOutputDiagnosticsToFile = Plato::Get::Bool(tOptionsNode, "OutputDiagnosticsToFile");
             aOptimizerEngineStageData.setOutputDiagnosticsToFile(tOutputDiagnosticsToFile);
         }
+        if( tOptionsNode.size<std::string>("HaveHessian") )
+        {
+            bool tHaveHessian = Plato::Get::Bool(tOptionsNode, "HaveHessian");
+            aOptimizerEngineStageData.setHaveHessian(tHaveHessian);
+        }
 
         if( tOptionsNode.size<std::string>("InputFileName") )
         {
@@ -1495,6 +1500,16 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         {
             double tKSOuterActualReductionTolerance = Plato::Get::Double(tOptionsNode, "KSOuterActualReductionTolerance");
             aOptimizerEngineStageData.setKSOuterActualReductionTolerance(tKSOuterActualReductionTolerance);
+        }
+        if(tOptionsNode.size<std::string>("KSInitialRadiusScale"))
+        {
+            double tKSInitialRadiusScale = Plato::Get::Double(tOptionsNode, "KSInitialRadiusScale");
+            aOptimizerEngineStageData.setKSInitialRadiusScale(tKSInitialRadiusScale);
+        }
+        if(tOptionsNode.size<std::string>("KSMaxRadiusScale"))
+        {
+            double tKSMaxRadiusScale = Plato::Get::Double(tOptionsNode, "KSMaxRadiusScale");
+            aOptimizerEngineStageData.setKSMaxRadiusScale(tKSMaxRadiusScale);
         }
     }
 }

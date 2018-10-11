@@ -1063,6 +1063,18 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  relaxed_stress_ramp_factor = %s\n", cur_obj.stress_ramp_factor.c_str());
                 }
+                if(cur_obj.limit_power_initial != "")
+                {
+                    fprintf(fp, "  stress_limit_power_initial = %s\n", cur_obj.limit_power_initial.c_str());
+                }
+                if(cur_obj.limit_power_update != "")
+                {
+                    fprintf(fp, "  stress_limit_power_update = %s\n", cur_obj.limit_power_update.c_str());
+                }
+                if(cur_obj.limit_power_max != "")
+                {
+                    fprintf(fp, "  stress_limit_power_max = %s\n", cur_obj.limit_power_max.c_str());
+                }
                 if(m_InputData.constraints.size() > 0)
                 {
                     if(m_InputData.constraints[0].type == "volume")
@@ -2028,7 +2040,33 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.stress_ramp_factor = tokens[3];
                         }
-
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","initial"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power initial\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_initial = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","update"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power update\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_update = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","max"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power max\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_max = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)
@@ -3038,7 +3076,8 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.KS_outer_stagnation_tolerance = "";
     m_InputData.KS_outer_control_stagnation_tolerance = "";
     m_InputData.KS_outer_actual_reduction_tolerance = "";
-
+    m_InputData.KS_initial_radius_scale = "";
+    m_InputData.KS_max_radius_scale = "";
 
     std::string tStringValue;
     std::vector<std::string> tInputStringList;
@@ -3301,6 +3340,24 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.KS_outer_actual_reduction_tolerance = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","initial","radius","scale"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks initial radius scale\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.KS_initial_radius_scale = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","max","radius","scale"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks max radius scale\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.KS_max_radius_scale = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","max","inner","iterations"}, tStringValue))
                         {
@@ -6073,6 +6130,9 @@ bool XMLGenerator::generateInterfaceXML()
     tmp_node = misc_node.append_child("Options");
     addChild(tmp_node, "DerivativeCheckerInitialSuperscript", "1");
     addChild(tmp_node, "DerivativeCheckerFinalSuperscript", "8");
+    // When we have performers that have Hessian information,
+    // we will have to generalize the following to not always be false.
+    addChild(tmp_node, "HaveHessian", "False");
     if(m_InputData.GCMMA_inner_kkt_tolerance.size() > 0)
         addChild(tmp_node, "GCMMAInnerKKTTolerance", m_InputData.GCMMA_inner_kkt_tolerance);
     if(m_InputData.GCMMA_outer_kkt_tolerance.size() > 0)
@@ -6105,6 +6165,12 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(tmp_node, "KSOuterControlStagnationTolerance", m_InputData.KS_outer_control_stagnation_tolerance);
     if(m_InputData.KS_outer_actual_reduction_tolerance.size() > 0)
         addChild(tmp_node, "KSOuterActualReductionTolerance", m_InputData.KS_outer_actual_reduction_tolerance);
+    if(m_InputData.KS_initial_radius_scale.size() > 0) {
+            addChild(tmp_node, "KSInitialRadiusScale", m_InputData.KS_initial_radius_scale);
+    }
+    if(m_InputData.KS_max_radius_scale.size() > 0) {
+            addChild(tmp_node, "KSMaxRadiusScale", m_InputData.KS_max_radius_scale);
+    }
 
     tmp_node = misc_node.append_child("Output");
     addChild(tmp_node, "OutputStage", "Output To File");

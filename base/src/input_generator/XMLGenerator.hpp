@@ -118,6 +118,9 @@ struct Objective
   std::string atmost_total_num_processors;
   std::string stress_limit;
   std::string stress_ramp_factor;
+  std::string limit_power_initial;
+  std::string limit_power_update;
+  std::string limit_power_max;
 };
 struct Constraint
 {
@@ -202,6 +205,8 @@ struct InputData
   std::string KS_outer_stagnation_tolerance;
   std::string KS_outer_control_stagnation_tolerance;
   std::string KS_outer_actual_reduction_tolerance;
+  std::string KS_initial_radius_scale;
+  std::string KS_max_radius_scale;
   std::vector<std::string> levelset_nodesets;
   std::vector<std::string> fixed_block_ids;
   std::vector<std::string> fixed_sideset_ids;

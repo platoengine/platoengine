@@ -87,12 +87,15 @@ public:
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
             mPrintDiagnostics(false),
             mOptimalityTolerance(1e-5),
+            mScaleOfUnitControlForInitialTrustRegionRadius(-1.), // negative if not specified
+            mScaleOfUnitControlForMaxTrustRegionRadius(-1.), // negative if not specified
             mOutputData(),
             mGradient(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
             mSolver(std::make_shared<Plato::ProjectedSteihaugTointPcg<ScalarType, OrdinalType>>(*aDataFactory)),
             mDataMng(aDataMng),
-            mStageMng(aStageMng)
+            mStageMng(aStageMng),
+            mControlWorkVector(aDataFactory->control().create())
     {
         this->initialize();
     }
@@ -110,6 +113,20 @@ public:
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
+    }
+
+    //! should be positive to be meaningful
+    //! Typically, around 0.1 if control varies between 0 and 1
+    void setScaleOfUnitControlForInitialTrustRegionRadius(const ScalarType & aInput)
+    {
+        mScaleOfUnitControlForInitialTrustRegionRadius = aInput;
+    }
+
+    //! should be positive to be meaningful
+    //! Typically, around 0.5 if control varies between 0 and 1
+    void setScaleOfUnitControlForMaxTrustRegionRadius(const ScalarType & aInput)
+    {
+        mScaleOfUnitControlForMaxTrustRegionRadius = aInput;
     }
 
     /******************************************************************************//**
@@ -320,16 +337,34 @@ private:
     **********************************************************************************/
     void setInitialTrustRegionRadius()
     {
-        if(mStepMng->isInitialTrustRegionRadiusSetToNormProjectedGradient() == true)
+        ScalarType tTrustRegionRadius = -1.;
+
+        // different methods for setting initial radius
+        bool tHaveScaleOfUnitControlForInitialTrustRegionRadius =
+                (0 < mScaleOfUnitControlForInitialTrustRegionRadius);
+        if(tHaveScaleOfUnitControlForInitialTrustRegionRadius)
         {
-            ScalarType tTrustRegionRadius = mDataMng->getNormProjectedGradient();
-            const ScalarType tMaxTrustRegionRadius = mStepMng->getMaxTrustRegionRadius();
-            if(tTrustRegionRadius > tMaxTrustRegionRadius)
-            {
-                tTrustRegionRadius = tMaxTrustRegionRadius;
-            }
-            mStepMng->setTrustRegionRadius(tTrustRegionRadius);
+            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
+            ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
+            tTrustRegionRadius = mScaleOfUnitControlForInitialTrustRegionRadius * tUnitDistance;
         }
+        else if(mStepMng->isInitialTrustRegionRadiusSetToNormProjectedGradient() == true)
+        {
+            tTrustRegionRadius = mDataMng->getNormProjectedGradient();
+        }
+        else
+        {
+            // don't set an initial radius
+            return;
+        }
+
+        // enforce max before set
+        const ScalarType tMaxTrustRegionRadius = mStepMng->getMaxTrustRegionRadius();
+        if(tTrustRegionRadius > tMaxTrustRegionRadius)
+        {
+            tTrustRegionRadius = tMaxTrustRegionRadius;
+        }
+        mStepMng->setTrustRegionRadius(tTrustRegionRadius);
     }
 
     /******************************************************************************//**
@@ -337,6 +372,7 @@ private:
     **********************************************************************************/
     void setInitialProblemData()
     {
+        this->setMaxTrustRegionRadius();
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
         ScalarType tCurrentObjFuncValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
@@ -347,6 +383,27 @@ private:
         mDataMng->computeNormProjectedGradient();
         this->setInitialTrustRegionRadius();
         mDataMng->computeStationarityMeasure();
+    }
+
+    //! methods for setting maximum radius
+    void setMaxTrustRegionRadius()
+    {
+        ScalarType tTrustRegionRadius = -1.;
+
+        // different methods
+        bool tHaveScaleOfUnitControlForMaxTrustRegionRadius = (0 < mScaleOfUnitControlForMaxTrustRegionRadius);
+        if(tHaveScaleOfUnitControlForMaxTrustRegionRadius)
+        {
+            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
+            ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
+            tTrustRegionRadius = mScaleOfUnitControlForMaxTrustRegionRadius * tUnitDistance;
+        }
+
+        // if meaningful, set
+        if(0 < tTrustRegionRadius)
+        {
+            mStepMng->setMaxTrustRegionRadius(tTrustRegionRadius);
+        }
     }
 
     /******************************************************************************//**
@@ -411,6 +468,15 @@ private:
     **********************************************************************************/
     void update()
     {
+        //        if(mContinuation && mod())
+        //        {
+        //            // invoke advance continuation
+        //            mStageMng->updateProblem();
+        //
+        //            // invoke new objective
+        //            mStageMng->computeObjective();
+        //        }
+
         // Cache state data since trial control was accepted
         mStageMng->cacheData();
         // Compute gradient at new midpoint
@@ -547,6 +613,8 @@ private:
     std::ofstream mOutputStream;
 
     ScalarType mOptimalityTolerance;
+    ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
+    ScalarType mScaleOfUnitControlForMaxTrustRegionRadius; // negative if not specified
 
     Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;
@@ -554,6 +622,7 @@ private:
     std::shared_ptr<Plato::ProjectedSteihaugTointPcg<ScalarType,OrdinalType>> mSolver;
     std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType,OrdinalType>> mDataMng;
     std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType,OrdinalType>> mStageMng;
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mControlWorkVector;
 
 private:
     KelleySachsBoundConstrained(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>&);

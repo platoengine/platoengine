@@ -170,7 +170,7 @@ public:
             // Apply projected trial step to Hessian operator
             this->applyProjectedTrialStepToHessian(aDataMng, aStageMng);
             // Compute predicted reduction based on mid trial control
-            ScalarType tPredictedReduction = this->computePredictedReduction(aDataMng);
+            ScalarType tPredictedReduction = this->computePredictedReduction(aDataMng, aStageMng);
 
             if(aDataMng.isObjectiveInexactnessToleranceExceeded() == true)
             {
@@ -237,11 +237,23 @@ private:
         Plato::update(static_cast<ScalarType>(1), *mMidControls, static_cast<ScalarType>(0), *mProjectedTrialStep);
         Plato::update(static_cast<ScalarType>(-1), tCurrentControl, static_cast<ScalarType>(1), *mProjectedTrialStep);
     }
-    ScalarType computePredictedReduction(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    ScalarType computePredictedReduction(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
+                                         Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
     {
+        const bool tHaveHessian = aStageMng.getHaveHessian();
+        if(!tHaveHessian)
+        {
+            // predicted reduction = gradient'*step
+            // without Hessian information, best prediction is linear model (not quadratic).
+
+            ScalarType tGradientBasedPredictedReduction = Plato::dot(*mInactiveGradient, *mProjectedTrialStep);
+            this->setPredictedReduction(tGradientBasedPredictedReduction);
+            return tGradientBasedPredictedReduction;
+        }
+
+        const OrdinalType tNumVectors = aDataMng.getNumControlVectors();
         ScalarType tProjTrialStepDotInactiveGradient = 0;
         ScalarType tProjTrialStepDotHessTimesVector = 0;
-        const OrdinalType tNumVectors = aDataMng.getNumControlVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyInactiveGradient = mInactiveGradient->operator[](tVectorIndex);
@@ -252,10 +264,11 @@ private:
             tProjTrialStepDotInactiveGradient += tMyProjectedTrialStep.dot(tMyInactiveGradient);
         }
 
+        // predicted reduction = gradient'*step + (1/2)*step'*Hessian*step
         ScalarType tPredictedReduction = tProjTrialStepDotInactiveGradient
                 + (static_cast<ScalarType>(0.5) * tProjTrialStepDotHessTimesVector);
-        this->setPredictedReduction(tPredictedReduction);
 
+        this->setPredictedReduction(tPredictedReduction);
         return (tPredictedReduction);
     }
     bool updateTrustRegionRadius(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
@@ -299,13 +312,14 @@ private:
         }
         else if(tIsRatioAboveMidBoundAndBelowUpperBound || tIsRadiusFlagTrueAndRatioAboveUpperBound)
         {
-            tCurrentTrustRegionRadius = tTrustRegionExpansion * tCurrentTrustRegionRadius;
+//            tCurrentTrustRegionRadius = tTrustRegionExpansion * tCurrentTrustRegionRadius;
             tStopTrustRegionSubProblem = true;
         }
         else if(tIsRatioAboveUpperBound && (mRadiusFlag == false))
         {
             tCurrentTrustRegionRadius = tTrustRegionExpansion * tCurrentTrustRegionRadius;
             tCurrentTrustRegionRadius = std::min(tMaxTrustRegionRadius, tCurrentTrustRegionRadius);
+//            tStopTrustRegionSubProblem = true;
         }
         // Check if trust region radius is below allowable tolerance
         const ScalarType tMinTrustRegionRadius = this->getMinTrustRegionRadius();
@@ -314,7 +328,6 @@ private:
             tStopTrustRegionSubProblem = true;
         }
         this->setTrustRegionRadius(tCurrentTrustRegionRadius);
-
 
         return (tStopTrustRegionSubProblem);
     }

@@ -89,6 +89,7 @@ public:
     void solve(Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng,
                Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        const bool tHaveHessian = aStageMng.getHaveHessian();
         OrdinalType tNumVectors = aDataMng.getNumControlVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
@@ -103,8 +104,31 @@ public:
         ScalarType tNormResidual = Plato::norm(*mResidual);
         this->setNormResidual(tNormResidual);
 
-        this->iterate(aDataMng, aStageMng);
+        if(!tHaveHessian)
+        {
+            // use Cauchy point
 
+            // step = - gradient
+            Plato::update(static_cast<ScalarType>(1.), *mResidual, static_cast<ScalarType>(0.), *mNewtonStep);
+
+            // if strictly positive norm
+            ScalarType tNormNewtonStep = Plato::norm(*mNewtonStep);
+            if(static_cast<ScalarType>(0.) < tNormNewtonStep)
+            {
+                // cauchy_point = -1.0 * Trust_Region_Radius * (gradient/norm(gradient))
+                ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
+                ScalarType tCauchyScale = tCurrentTrustRegionRadius / tNormNewtonStep;
+                Plato::scale(tCauchyScale, *mNewtonStep);
+            }
+        }
+        else
+        {
+            // use typical Steihaug-CG
+            this->iterate(aDataMng, aStageMng);
+
+        }
+
+        // if zero step, use (-gradient)
         ScalarType tNormNewtonStep = Plato::norm(*mNewtonStep);
         if(tNormNewtonStep <= static_cast<ScalarType>(0.))
         {

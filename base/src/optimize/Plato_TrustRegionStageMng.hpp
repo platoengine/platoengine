@@ -62,8 +62,22 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class TrustRegionStageMng
 {
 public:
+    TrustRegionStageMng() :
+        mHaveHessian(true)
+    {
+    }
+
     virtual ~TrustRegionStageMng()
     {
+    }
+
+    void setHaveHessian(const bool& aInput)
+    {
+        mHaveHessian = aInput;
+    }
+    bool getHaveHessian() const
+    {
+        return mHaveHessian;
     }
 
     virtual void cacheData() = 0;
@@ -81,6 +95,9 @@ public:
     virtual void applyVectorToInvPreconditioner(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                                 const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                                                 Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
+
+private:
+    bool mHaveHessian;
 };
 
 } // namespace Plato

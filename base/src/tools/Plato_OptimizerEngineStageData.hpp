@@ -69,12 +69,14 @@ public:
     void setUserInitialGuess(const bool & aInput);
     void setOutputControlToFile(const bool & aInput);
     void setOutputDiagnosticsToFile(const bool & aInput);
+    void setHaveHessian(const bool & aInput);
 
     bool getCheckGradient() const;
     bool getCheckHessian() const;
     bool getUserInitialGuess() const;
     bool getOutputControlToFile() const;
     bool getOutputDiagnosticsToFile() const;
+    bool getHaveHessian() const;
 
     std::vector<double> getLowerBoundValues() const;
     std::vector<double> getUpperBoundValues() const;
@@ -235,12 +237,18 @@ public:
     std::string getConstraintGradientName(const std::string & aValueName) const;
     void addConstraintGradientName(const std::string & aValueName, const std::string & aGradientName);
 
+    double getKSInitialRadiusScale() const;
+    void setKSInitialRadiusScale(const double& aInput);
+    double getKSMaxRadiusScale() const;
+    void setKSMaxRadiusScale(const double& aInput);
+
 private:
     bool mCheckGradient;
     bool mCheckHessian;
     bool mUserInitialGuess;
     bool mOutputControlToFile;
     bool mOutputDiagnosticsToFile;
+    bool mHaveHessian;
 
     double mInitialMovingAsymptoteScaleFactor;
     double mGCMMAInnerKKTTolerance;
@@ -256,6 +264,8 @@ private:
     double mKSOuterStagnationTolerance;
     double mKSOuterControlStagnationTolerance;
     double mKSOuterActualReductionTolerance;
+    double mKSInitialRadiusScale;
+    double mKSMaxRadiusScale;
 
     size_t mMaxNumIterations;
 

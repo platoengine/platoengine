@@ -60,6 +60,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mUserInitialGuess(false),
         mOutputControlToFile(false),
         mOutputDiagnosticsToFile(false),
+        mHaveHessian(true),
         mInitialMovingAsymptoteScaleFactor(0.5),
         mGCMMAInnerKKTTolerance(5e-4),
         mCCSAOuterKKTTolerance(1e-10),
@@ -74,6 +75,8 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mKSOuterStagnationTolerance(1e-8),
         mKSOuterControlStagnationTolerance(1e-8),
         mKSOuterActualReductionTolerance(1e-8),
+        mKSInitialRadiusScale(.1),
+        mKSMaxRadiusScale(.5),
         mMaxNumIterations(500),
         mDerivativeCheckerFinalSuperscript(8),
         mDerivativeCheckerInitialSuperscript(1),
@@ -161,6 +164,11 @@ void OptimizerEngineStageData::setOutputDiagnosticsToFile(const bool & aInput)
     mOutputDiagnosticsToFile = aInput;
 }
 
+void OptimizerEngineStageData::setHaveHessian(const bool & aInput)
+{
+    mHaveHessian = aInput;
+}
+
 /******************************************************************************/
 void OptimizerEngineStageData::setCheckGradient(const bool & aInput)
 /******************************************************************************/
@@ -194,6 +202,11 @@ bool OptimizerEngineStageData::getOutputDiagnosticsToFile() const
 /******************************************************************************/
 {
     return (mOutputDiagnosticsToFile);
+}
+
+bool OptimizerEngineStageData::getHaveHessian() const
+{
+    return mHaveHessian;
 }
 
 /******************************************************************************/
@@ -1172,6 +1185,23 @@ void OptimizerEngineStageData::addConstraintGradientName(const std::string & aVa
     {
         mConstraintGradientNames[aValueName] = aGradientName;
     }
+}
+
+double OptimizerEngineStageData::getKSInitialRadiusScale() const
+{
+    return mKSInitialRadiusScale;
+}
+void OptimizerEngineStageData::setKSInitialRadiusScale(const double& aInput)
+{
+    mKSInitialRadiusScale = aInput;
+}
+double OptimizerEngineStageData::getKSMaxRadiusScale() const
+{
+    return mKSMaxRadiusScale;
+}
+void OptimizerEngineStageData::setKSMaxRadiusScale(const double& aInput)
+{
+    mKSMaxRadiusScale = aInput;
 }
 
 } //namespace Plato

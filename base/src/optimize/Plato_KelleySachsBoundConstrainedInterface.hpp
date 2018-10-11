@@ -151,6 +151,10 @@ public:
         {
             tStageMng->setIdentityObjectiveHessian();
         }
+        // Identity Hessian causes problems
+        // If you don't have the Hessian, different behavior
+        ScalarType tHaveHessian = mInputData.getHaveHessian();
+        tStageMng->setHaveHessian(tHaveHessian);
 
         // ********* ALLOCATE KELLEY-SACHS BOUND CONSTRAINED OPTIMIZATION ALGORITHM ********* //
         Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
@@ -182,6 +186,8 @@ private:
         ScalarType tOuterObjectiveStagnationTolerance = mInputData.getKSOuterStagnationTolerance();
         ScalarType tOuterControlStagnationTolerance = mInputData.getKSOuterControlStagnationTolerance();
         ScalarType tOuterActualReductionTolerance = mInputData.getKSOuterActualReductionTolerance();
+        ScalarType tInitialRadiusScale = mInputData.getKSInitialRadiusScale();
+        ScalarType tMaxRadiusScale = mInputData.getKSMaxRadiusScale();
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setTrustRegionContraction(tContractionScaleFactor);
@@ -192,6 +198,8 @@ private:
         aAlgorithm.setControlStagnationTolerance(tOuterControlStagnationTolerance);
         aAlgorithm.setActualReductionTolerance(tOuterActualReductionTolerance);
         aAlgorithm.setObjectiveStagnationTolerance(tOuterObjectiveStagnationTolerance);
+        aAlgorithm.setScaleOfUnitControlForInitialTrustRegionRadius(tInitialRadiusScale);
+        aAlgorithm.setScaleOfUnitControlForMaxTrustRegionRadius(tMaxRadiusScale);
     }
     /******************************************************************************/
 

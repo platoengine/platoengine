@@ -820,16 +820,16 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-6;
-    EXPECT_EQ(21u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(26u, tOutputs.mNumOuterIter);
     EXPECT_EQ(199u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(41u, tOutputs.mNumObjGradEval);
-    EXPECT_NEAR(0.1565636381251273, tOutputs.mObjFuncValue, tTolerance);
-    EXPECT_NEAR(6.8659788675651257e-6, tOutputs.mActualReduction, tTolerance);
-    EXPECT_NEAR(0.018233324049212327, tOutputs.mNormObjFuncGrad, tTolerance);
-    EXPECT_NEAR(0.0021736711087157372, tOutputs.mPenaltyParameter, tTolerance);
-    EXPECT_NEAR(0.018222889097551657, tOutputs.mStationarityMeasure, tTolerance);
+    EXPECT_EQ(51u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.16859900359721744, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(9.8931637069477052e-06, tOutputs.mActualReduction, tTolerance);
+    EXPECT_NEAR(0.014552349858217902, tOutputs.mNormObjFuncGrad, tTolerance);
+    EXPECT_NEAR(0.0012579115212475332, tOutputs.mPenaltyParameter, tTolerance);
+    EXPECT_NEAR(0.014345861227967178, tOutputs.mStationarityMeasure, tTolerance);
     EXPECT_NEAR(0, tOutputs.mControlStagnationMeasure, tTolerance);
-    EXPECT_NEAR(6.8659788675651257e-6, tOutputs.mObjectiveStagnationMeasure, tTolerance);
+    EXPECT_NEAR(9.8931637069477052e-06, tOutputs.mObjectiveStagnationMeasure, tTolerance);
     EXPECT_NEAR(7.5254345816500031e-8, tOutputs.mCurrentTrustRegionRadius, tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to objective stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test();

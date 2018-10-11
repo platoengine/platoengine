@@ -1521,7 +1521,7 @@ TEST(PlatoTest, KelleySachsStepMng)
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getActualOverPredictedReduction(), tTolerance);
     tScalarGoldValue = 3.3980470658923601;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getMidPointObjectiveFunctionValue(), tTolerance);
-    tScalarGoldValue = 0.94440635206736401;
+    tScalarGoldValue = 0.472203176033682;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionRadius(), tTolerance);
     tScalarGoldValue = -2.1019529341076399;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getActualReduction(), tTolerance);
@@ -1734,8 +1734,8 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianCircleRadius)
     PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector);
 
     // TEST CURRENT AUGMENTED LAGRANGIAN GRADIENT
-    tGoldVector(0,0) = 0.175527029911257;
-    tGoldVector(0,1) = 0.523188110576455;
+    tGoldVector(0,0) = 0.17551763569502099;
+    tGoldVector(0,1) = 0.52314282334931494;
     const Plato::MultiVector<double> & tCurrentGradient = tDataMng->getCurrentGradient();
     PlatoTest::checkMultiVectorData(tCurrentGradient, tGoldVector);
 }
