@@ -1046,7 +1046,22 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 else
                 {
-                    fprintf(fp, "  case = compliance_min\n");
+                    if(cur_obj.type == "maximize stiffness")
+                    {
+                        fprintf(fp, "  case = compliance_min\n");
+                    }
+                    else if(cur_obj.type == "limit stress")
+                    {
+                        fprintf(fp, "  case = stress_limit\n");
+                    }
+                }
+                if(cur_obj.stress_limit != "")
+                {
+                    fprintf(fp, "  stress_normalization_factor = %s\n", cur_obj.stress_limit.c_str());
+                }
+                if(cur_obj.stress_ramp_factor != "")
+                {
+                    fprintf(fp, "  relaxed_stress_ramp_factor = %s\n", cur_obj.stress_ramp_factor.c_str());
                 }
                 if(m_InputData.constraints[0].type == "volume")
                     fprintf(fp, "  volume_fraction = %s\n", m_InputData.constraints[0].volume_fraction.c_str());
@@ -1988,6 +2003,25 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.bc_ids.push_back(tokens[j]);
                             }
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","limit"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress limit\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_limit = tokens[2];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","ramp","factor"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress ramp factor\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_ramp_factor = tokens[3];
+                        }
+
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)

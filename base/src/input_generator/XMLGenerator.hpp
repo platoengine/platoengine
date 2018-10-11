@@ -116,6 +116,8 @@ struct Objective
   std::vector<std::string> load_case_weights;
   std::string distribute_objective_type;
   std::string atmost_total_num_processors;
+  std::string stress_limit;
+  std::string stress_ramp_factor;
 };
 struct Constraint
 {

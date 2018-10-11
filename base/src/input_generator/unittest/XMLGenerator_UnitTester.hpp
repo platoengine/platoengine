@@ -95,6 +95,7 @@ public:
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
     size_t getNumObjectives() {return m_InputData.objectives.size();}
     std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
+    std::string getObjectiveType(const int &aIndex) {return m_InputData.objectives[aIndex].type;}
     std::string getObjCodeName(const int &aIndex) {return m_InputData.objectives[aIndex].code_name;}
     std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].performer_name;}
     std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
@@ -102,6 +103,8 @@ public:
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
     std::vector<std::string> getObjLoadIds(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_ids;}
     std::vector<std::string> getObjLoadWeights(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_weights;}
+    std::string getObjStressLimit(const int &aIndex) {return m_InputData.objectives[aIndex].stress_limit;}
+    std::string getObjStressRampFactor(const int &aIndex) {return m_InputData.objectives[aIndex].stress_ramp_factor;}
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
