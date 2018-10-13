@@ -125,6 +125,7 @@ public:
     **********************************************************************************/
     AlgebraicRocketModel() :
             mPrint(true),
+            mNumNewtonItr(0),
             mMaxNumNewtonItr(1000),
             mChamberLength(0.65), // m
             mChamberRadius(0.075), // m
@@ -154,6 +155,7 @@ public:
     explicit AlgebraicRocketModel(const Plato::AlgebraicRocketInputs<ScalarType>& aInputs,
                                   const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeomModel) :
             mPrint(true),
+            mNumNewtonItr(0),
             mMaxNumNewtonItr(aInputs.mMaxNumNewtonItr),
             mChamberLength(aInputs.mChamberLength), // m
             mChamberRadius(aInputs.mChamberRadius), // m
@@ -397,9 +399,9 @@ private:
     ScalarType newton(const ScalarType& aChamberArea, const ScalarType& aTotalPressure, const ScalarType& aThroatArea)
     {
         bool tDone = false;
-        size_t tIteration = 0;
         ScalarType tNewTotalPressure = aTotalPressure;
 
+        mNumNewtonItr = 0;
         while(tDone == false)
         {
             ScalarType tMyResidualEvaluation = this->residual(aChamberArea, tNewTotalPressure, aThroatArea);
@@ -407,8 +409,8 @@ private:
             ScalarType tDeltaPressure = static_cast<ScalarType>(-1.0) * tMyResidualEvaluation / tMyJacobianEvaluation;
             tNewTotalPressure += tDeltaPressure;
 
-            tIteration += static_cast<size_t>(1);
-            tDone = std::abs(tDeltaPressure) < mNewtonTolerance || tIteration > mMaxNumNewtonItr;
+            mNumNewtonItr += static_cast<size_t>(1);
+            tDone = std::abs(tDeltaPressure) < mNewtonTolerance || mNumNewtonItr > mMaxNumNewtonItr;
         }
 
         return (tNewTotalPressure);
@@ -444,6 +446,7 @@ private:
 
 private:
     bool mPrint;
+    size_t mNumNewtonItr;
     size_t mMaxNumNewtonItr;
 
     ScalarType mChamberLength; // m
