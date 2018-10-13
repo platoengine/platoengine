@@ -101,7 +101,7 @@ public:
                              const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
             mNumFuncEvaluations(0),
             mEpsilon(1e-4),
-            mNormTargetValues(std::inner_product(aTargetThrustProfile.begin(), aTargetThrustProfile.end(), aTargetThrustProfile.begin(), 0.0)),
+            mNormTargetValues(std::inner_product(aTargetThrustProfile.begin(), aTargetThrustProfile.end(), aTargetThrustProfile.begin(), static_cast<ScalarType>(0.0))),
             mRocketModel(aRocketInputs, aChamberGeom),
             mTargetThrustProfile(aTargetThrustProfile),
             mCachedThrustProfile(),
