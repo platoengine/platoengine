@@ -66,32 +66,64 @@ namespace PlatoTest
  * @brief Return gold thrust profile for gradient-based unit test example problem
  * @return vector with gold values
 **********************************************************************************/
-std::vector<double> getGoldThrust()
+std::vector<double> get_gold_thrust_profile()
 {
-    std::vector<double> tOutput = {0, 1655522.315222185, 1683521.997071911, 1711924.206708037, 1740733.7145938, 1769955.335738611,
-                                   1799593.930002549, 1829654.402402195, 1860141.703417779, 1891060.829301665, 1922416.822388162,
-                                   1954214.771404665, 1986459.811784134, 2019157.125978916, 2052311.943775886, 2085929.542612965,
-                                   2120015.247896948, 2154574.433322704, 2189612.52119371, 2225134.982743949, 2261147.338461152,
-                                   2297655.158411417, 2334664.062565152, 2372179.721124417, 2410207.854851608, 2448754.235399517,
-                                   2487824.685642763, 2527425.080010583, 2567561.344821009, 2608239.458616416, 2649465.452500456,
-                                   2691245.410476362, 2733585.46978665, 2776491.821254185, 2819970.709624668, 2864028.433910482,
-                                   2908671.347735961, 2953905.859684023, 2999738.433644236, 3046175.589162255, 3093223.901790677,
-                                   3140890.003441307, 3189180.582738817, 3238102.385375825, 3287662.214469391, 3337866.930918911,
-                                   3388723.453765457, 3440238.760552502, 3492419.887688101, 3545273.930808475, 3598808.045143031,
-                                   3653029.445880811, 3707945.408538376, 3763563.269329108, 3819890.425533986, 3876934.335873749,
-                                   3934702.520882559, 3993202.563283048, 4052442.108362866, 4112428.864352653, 4173170.60280544,
-                                   4234675.158977559, 4296950.432210954, 4360004.386316981, 4423845.049961671, 4488480.517052433,
-                                   4553918.94712624, 4620168.565739292, 4687237.664858119, 4755134.60325219, 4823867.806887973,
-                                   4893445.769324492, 4963877.052110332, 5035170.285182183, 5107334.167264794, 5180377.466272492,
-                                   5254309.019712122, 5329137.735087518, 5404872.590305486, 5481522.634083196, 5559096.986357204,
-                                   5637604.838693859, 5717055.454701263, 5797458.170442756, 5878822.394851873, 5961157.610148815,
-                                   6044473.372258459, 6128779.311229875, 6214085.131657324, 6300400.61310283, 6387735.610520262,
-                                   6476100.054680888, 6565503.952600521, 6655957.387968196, 6747470.521576302, 6840053.591752338,
-                                   6933716.914792155, 7028470.885394753, 7124325.977098601, 7221292.742719544};
+    std::vector<double> tOutput =
+        { 0, 1655522.315222185, 1683521.997071911, 1711924.206708037, 1740733.7145938, 1769955.335738611,
+                1799593.930002549, 1829654.402402195, 1860141.703417779, 1891060.829301665, 1922416.822388162,
+                1954214.771404665, 1986459.811784134, 2019157.125978916, 2052311.943775886, 2085929.542612965,
+                2120015.247896948, 2154574.433322704, 2189612.52119371, 2225134.982743949, 2261147.338461152,
+                2297655.158411417, 2334664.062565152, 2372179.721124417, 2410207.854851608, 2448754.235399517,
+                2487824.685642763, 2527425.080010583, 2567561.344821009, 2608239.458616416, 2649465.452500456,
+                2691245.410476362, 2733585.46978665, 2776491.821254185, 2819970.709624668, 2864028.433910482,
+                2908671.347735961, 2953905.859684023, 2999738.433644236, 3046175.589162255, 3093223.901790677,
+                3140890.003441307, 3189180.582738817, 3238102.385375825, 3287662.214469391, 3337866.930918911,
+                3388723.453765457, 3440238.760552502, 3492419.887688101, 3545273.930808475, 3598808.045143031,
+                3653029.445880811, 3707945.408538376, 3763563.269329108, 3819890.425533986, 3876934.335873749,
+                3934702.520882559, 3993202.563283048, 4052442.108362866, 4112428.864352653, 4173170.60280544,
+                4234675.158977559, 4296950.432210954, 4360004.386316981, 4423845.049961671, 4488480.517052433,
+                4553918.94712624, 4620168.565739292, 4687237.664858119, 4755134.60325219, 4823867.806887973,
+                4893445.769324492, 4963877.052110332, 5035170.285182183, 5107334.167264794, 5180377.466272492,
+                5254309.019712122, 5329137.735087518, 5404872.590305486, 5481522.634083196, 5559096.986357204,
+                5637604.838693859, 5717055.454701263, 5797458.170442756, 5878822.394851873, 5961157.610148815,
+                6044473.372258459, 6128779.311229875, 6214085.131657324, 6300400.61310283, 6387735.610520262,
+                6476100.054680888, 6565503.952600521, 6655957.387968196, 6747470.521576302, 6840053.591752338,
+                6933716.914792155, 7028470.885394753, 7124325.977098601, 7221292.742719544 };
 
     return (tOutput);
 }
 
+/******************************************************************************//**
+ * @brief Return target thrust profile for gradient-based unit test
+ * @return standard vector with target thrust profile
+**********************************************************************************/
+std::vector<double> get_target_thrust_profile()
+{
+    std::vector<double> tTargetThrustProfile =
+        { 0, 1656714.377766964, 1684717.520617273, 1713123.001583093, 1741935.586049868, 1771160.083875437,
+                1800801.349693849, 1830864.28322051, 1861353.829558637, 1892274.979507048, 1923632.769869272,
+                1955432.283763989, 1987678.650936801, 2020377.048073344, 2053532.699113719, 2087150.875568287,
+                2121236.896834771, 2155796.130516737, 2190833.992743404, 2226355.948490792, 2262367.511904243,
+                2298874.246622283, 2335881.766101836, 2373395.733944806, 2411421.864226017, 2449965.921822503,
+                2489033.722744186, 2528631.134465915, 2568764.076260844, 2609438.519535244, 2650660.488164633,
+                2692436.058831303, 2734771.361363255, 2777672.579074459, 2821145.949106557, 2865197.762771913,
+                2909834.365898075, 2955062.159173611, 3000887.598495364, 3047317.195317072, 3094357.516999425,
+                3142015.18716148, 3190296.886033527, 3239209.350811319, 3288759.376011737, 3338953.813829865,
+                3389799.574497465, 3441303.626642879, 3493472.997652346, 3546314.774032734, 3599836.101775718,
+                3654044.186723352, 3708946.294935087, 3764549.753056224, 3820861.948687783, 3877890.330757833,
+                3935642.409894215, 3994125.758798767, 4053348.012622938, 4113316.869344868, 4174040.090147917,
+                4235525.499800648, 4297780.987038235, 4360814.504945371, 4424634.071340578, 4489247.76916203,
+                4554663.746854796, 4620890.218759571, 4687935.465502855, 4755807.834388626, 4824515.739791448,
+                4894067.663551098, 4964472.155368621, 5035737.83320389, 5107873.383674653, 5180887.562457044,
+                5254789.194687578, 5329587.175366664, 5405290.469763565, 5481908.11382287, 5559449.214572486,
+                5637922.950533082, 5717338.572129052, 5797705.402100981, 5879032.835919643, 5961330.342201422,
+                6044607.46312535, 6128873.814851565, 6214139.087941348, 6300413.047778608, 6387705.534992979,
+                6476026.465884338, 6565385.832848894, 6655793.704806847, 6747260.227631442, 6839795.624579719,
+                6933410.196724654, 7028114.32338894, 7123918.462580209, 7220833.151427887 };
+
+    return (tTargetThrustProfile);
+}
+// function get_target_thrust_profile
 
 TEST(PlatoTest, GradBasedRocketObjectiveGradFree)
 {
@@ -253,13 +285,15 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     std::vector<double> tNormalizationConstants(tNumControls);
     tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
 
-    // ********* ALLOCATE OBJECTIVE *********
+    // ********* ALLOCATE OBJECTIVE AND SET TARGET THRSUT PROFILE *********
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
             std::make_shared<Plato::GradBasedRocketObjective<double>>(tRocketInputs, tGeomModel);
     tMyObjective->setNormalizationConstants(tNormalizationConstants);
+    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
+    tMyObjective->setTargetThrustProfile(tTargetThrustProfile);
 
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
     const size_t tNumVectors = 1;
@@ -271,6 +305,52 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
 
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; 
+    (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    // ********* TEST SOLUTION *********
+    const double tTolerance = 1e-4;
+    const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
+    const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
+    EXPECT_NEAR(tBest1, 0.074967184692443331, tTolerance);
+    EXPECT_NEAR(tBest2, 0.0050013136704244072, tTolerance);
+
+    // ********* OUTPUT TO TERMINAL *********
+    std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
+    std::cout << "NumFunctionEvaluations = " << tMyObjective->getNumFunctionEvaluations() << std::endl;
+    std::cout << "BestObjectiveValue = " << tOutputs.mObjFuncValue << std::endl;
+    std::cout << "StoppingCriterion = " << tOutputs.mStopCriterion.c_str() << std::endl;
+}
+
+TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterfaceTwo)
+{
+    // ********* SET NORMALIZATION CONSTANTS *********
+    const size_t tNumControls = 2;
+    std::vector<double> tNormalizationConstants(tNumControls);
+    tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
+
+    // ********* ALLOCATE OBJECTIVE AND SET TARGET THRSUT PROFILE *********
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
+    std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
+            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
+    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
+            std::make_shared<Plato::GradBasedRocketObjective<double>>(tTargetThrustProfile, tRocketInputs, tGeomModel);
+    tMyObjective->setNormalizationConstants(tNormalizationConstants);
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
+    (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0];
+    (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
+    (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0];
     (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
