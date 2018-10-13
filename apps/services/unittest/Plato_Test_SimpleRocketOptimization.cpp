@@ -172,7 +172,8 @@ TEST(PlatoTest, GradBasedRocketObjective)
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
 
     // set normalization constants
-    Plato::GradBasedRocketObjective<double> tObjective(tRocketInputs, tGeomModel);
+    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
+    Plato::GradBasedRocketObjective<double> tObjective(tTargetThrustProfile, tRocketInputs, tGeomModel);
     std::vector<double> tUpperBounds = {0.09, 0.007}; /* {chamber_radius_ub, ref_burn_rate_ub} */
     tObjective.setNormalizationConstants(tUpperBounds);
 
@@ -305,52 +306,6 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
 
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; 
-    (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
-
-    // ********* SOLVE OPTIMIZATION PROBLEM *********
-    Plato::AlgorithmOutputsKSBC<double> tOutputs;
-    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
-
-    // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-4;
-    const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
-    const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
-    EXPECT_NEAR(tBest1, 0.074967184692443331, tTolerance);
-    EXPECT_NEAR(tBest2, 0.0050013136704244072, tTolerance);
-
-    // ********* OUTPUT TO TERMINAL *********
-    std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
-    std::cout << "NumFunctionEvaluations = " << tMyObjective->getNumFunctionEvaluations() << std::endl;
-    std::cout << "BestObjectiveValue = " << tOutputs.mObjFuncValue << std::endl;
-    std::cout << "StoppingCriterion = " << tOutputs.mStopCriterion.c_str() << std::endl;
-}
-
-TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterfaceTwo)
-{
-    // ********* SET NORMALIZATION CONSTANTS *********
-    const size_t tNumControls = 2;
-    std::vector<double> tNormalizationConstants(tNumControls);
-    tNormalizationConstants[0] = 0.08; tNormalizationConstants[1] = 0.006;
-
-    // ********* ALLOCATE OBJECTIVE AND SET TARGET THRSUT PROFILE *********
-    Plato::AlgebraicRocketInputs<double> tRocketInputs;
-    std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
-            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
-    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
-            std::make_shared<Plato::GradBasedRocketObjective<double>>(tTargetThrustProfile, tRocketInputs, tGeomModel);
-    tMyObjective->setNormalizationConstants(tNormalizationConstants);
-
-    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
-    const size_t tNumVectors = 1;
-    Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
-    (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0];
-    (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
-    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
-
-    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
-    (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0];
     (*tInputs.mInitialGuess)(0,1) = 0.0055 / tNormalizationConstants[1];
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
