@@ -1,0 +1,17 @@
+<ParameterList name="Geometry Construction">
+  <Parameter name="Geometry Type" type="string" value="Body"/>
+  <Parameter name="Model Type" type="string" value="Non-parameterized"/>
+  <Parameter name="Number of Subdomains" type="int" value="2"/>
+  <Parameter name="Maximum Refinements" type="int" value="0"/>
+  <Parameter name="Maximum Error" type="double" value="1.0e-3"/>
+  <Parameter name="Interface Value" type="double" value="0.0"/>
+  <Parameter name="Level Set Names" type="Array(string)" value="{LS0,LS1}"/>
+  <ParameterList name="Subdomain 0">
+    <Parameter name="Operation" type="string" value="Add"/>
+    <Parameter name="Level Set Indices" type="Array(int)" value="{0}"/>
+  </ParameterList>
+  <ParameterList name="Subdomain 1">
+    <Parameter name="Operation" type="string" value="Subtract"/>
+    <Parameter name="Level Set Indices" type="Array(int)" value="{1}"/>
+  </ParameterList>
+</ParameterList>

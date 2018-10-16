@@ -1,0 +1,12 @@
+<ParameterList name="Geometry Construction">
+  <Parameter name="Geometry Type" type="string" value="Boundary"/>
+  <Parameter name="Model Type" type="string" value="Non-parameterized"/>
+  <Parameter name="Error Checking" type="int" value="5"/>
+  <Parameter name="Number of Subdomains" type="int" value="1"/>
+  <Parameter name="Level Set Names" type="Array(string)" value="{LS00}"/>
+  <Parameter name="Surface Level Set Index" type="int" value="0"/>
+  <ParameterList name="Subdomain 0">
+    <Parameter name="Level Set Indices" type="Array(int)" value="{0}"/>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+</ParameterList>

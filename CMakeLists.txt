@@ -8,15 +8,6 @@ Plato_no_src_build()
 # Advertise that we support shared libs (cmake squawks otherwise)
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-
-option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface"  OFF)
-
-option( GEOMETRY      "Enable Geometry subcomponent"    OFF)
-option( EXPY          "Build exodus python API"         OFF)
-option( SEACAS        "Seacas tools"                    ON)
-option( STK_ENABLED   "Flag to turn on use of STK"     ON)
-
-
 ##################################################################
 ## Load config.cmake                                            ##
 ##################################################################
@@ -166,6 +157,7 @@ add_subdirectory(base/src/proxy)
 add_subdirectory(base/src/tools)
 if(GEOMETRY)
   add_subdirectory(base/src/geometry/MovingLeastSquares)
+  add_subdirectory(base/src/geometry/Cogent)
 endif()
 add_subdirectory(base/src/PlatoSubproblemLibrary/Agent)
 add_subdirectory(base/src/PlatoSubproblemLibraryInterface)

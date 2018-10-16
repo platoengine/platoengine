@@ -1,0 +1,43 @@
+<ParameterList name="Geometry Construction">
+  <Parameter name="Geometry Type" type="string" value="Boundary"/>
+  <Parameter name="Model Type" type="string" value="Parameterized"/>
+  <Parameter name="Error Checking" type="int" value="5"/>
+  <Parameter name="Number of Subdomains" type="int" value="2"/>
+  <Parameter name="Level Set Names" type="Array(string)" value="{LS00,LS01,LS02,LS03,LS04,LS05,LS10,LS11,LS12}"/>
+  <Parameter name="Shape Parameters" type="Array(string)" value="{P0,P1,P2,P3}"/>
+  <Parameter name="Boundary Name" type="string" value="Negative X Face"/>
+  <ParameterList name="Subdomain 0">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Brick"/>
+      <Parameter name="X Dimension" type="string" value="P0"/>
+      <Parameter name="Y Dimension" type="string" value="P1"/>
+      <Parameter name="Z Dimension" type="string" value="P2"/>
+      <Parameter name="X Position" type="string" value="0.0"/>
+      <Parameter name="Y Position" type="string" value="0.0"/>
+      <Parameter name="Z Position" type="string" value="0.0"/>
+      <Parameter name="Number of Aliases" type="int" value="2"/>
+      <ParameterList name="Alias 0">
+        <Parameter name="Surface Name" type="string" value="Negative X"/>
+        <Parameter name="Alias Name" type="string" value="Negative X Face"/>
+      </ParameterList>
+      <ParameterList name="Alias 1">
+        <Parameter name="Surface Name" type="string" value="Positive X"/>
+        <Parameter name="Alias Name" type="string" value="Positive X Face"/>
+      </ParameterList>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+  <ParameterList name="Subdomain 1">
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P2"/>
+      <Parameter name="Axis" type="string" value="Z"/>
+      <Parameter name="X Position" type="string" value="0.0"/>
+      <Parameter name="Y Position" type="string" value="0.0"/>
+      <Parameter name="Z Position" type="string" value="0.0"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+</ParameterList>

@@ -1,0 +1,33 @@
+<ParameterList name="Geometry Construction">
+  <Parameter name="Geometry Type" type="string" value="Body"/>
+  <Parameter name="Model Type" type="string" value="Parameterized"/>
+  <Parameter name="Error Checking" type="int" value="5"/>
+  <Parameter name="Verbosity" type="int" value="3"/>
+  <Parameter name="Maximum Refinement" type="int" value="0"/>
+  <Parameter name="Maximum Error" type="double" value="1e-3"/>
+  <Parameter name="Interface Value" type="double" value="0.0"/>
+  <Parameter name="Uniform Quadrature" type="bool" value="false"/>
+  <Parameter name="Number of Subdomains" type="int" value="2"/>
+  <Parameter name="Level Set Names" type="Array(string)" value="{LS00,LS01,LS02,LS03,LS04,LS05,LS10,LS11,LS12}"/>
+  <Parameter name="Shape Parameters" type="Array(string)" value="{P0,P1,P2,P3}"/>
+  <Parameter name="Shape Parameters Initial Values" type="Array(double)" value="{2.8,2.8,2.8,0.5}"/>
+  <ParameterList name="Subdomain 0">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Brick"/>
+      <Parameter name="X Dimension" type="string" value="P0"/>
+      <Parameter name="Y Dimension" type="string" value="P1"/>
+      <Parameter name="Z Dimension" type="string" value="P2"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+  <ParameterList name="Subdomain 1">
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P2"/>
+      <Parameter name="Axis" type="string" value="Z"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+</ParameterList>
