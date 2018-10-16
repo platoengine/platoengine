@@ -1511,6 +1511,11 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             double tKSMaxRadiusScale = Plato::Get::Double(tOptionsNode, "KSMaxRadiusScale");
             aOptimizerEngineStageData.setKSMaxRadiusScale(tKSMaxRadiusScale);
         }
+        if(tOptionsNode.size<std::string>("ProblemUpdateFrequency"))
+        {
+            double tProblemUpdateFrequency = Plato::Get::Double(tOptionsNode, "ProblemUpdateFrequency");
+            aOptimizerEngineStageData.setProblemUpdateFrequency(tProblemUpdateFrequency);
+        }
     }
 }
 
@@ -1561,6 +1566,12 @@ void parseOptimizerStages(const Plato::InputData & aOptimizerNode, Plato::Optimi
         Plato::InputData tCacheNode = aOptimizerNode.get<Plato::InputData>("CacheStage");
         std::string tCacheStageName = tCacheNode.get<std::string>("Name");
         aOptimizerEngineStageData.setCacheStageName(tCacheStageName);
+    }
+    if( aOptimizerNode.size<Plato::InputData>("UpdateProblemStage") )
+    {
+        Plato::InputData tUpdateProblemNode = aOptimizerNode.get<Plato::InputData>("UpdateProblemStage");
+        std::string tUpdateProblemStageName = tUpdateProblemNode.get<std::string>("Name");
+        aOptimizerEngineStageData.setUpdateProblemStageName(tUpdateProblemStageName);
     }
 
     Plato::Parse::parseInitialGuess(aOptimizerNode, aOptimizerEngineStageData);

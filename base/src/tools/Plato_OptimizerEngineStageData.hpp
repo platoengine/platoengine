@@ -179,6 +179,9 @@ public:
     std::string getCacheStageName() const;
     void setCacheStageName(const std::string & aInput);
 
+    std::string getUpdateProblemStageName() const;
+    void setUpdateProblemStageName(const std::string & aInput);
+
     std::string  getObjectiveValueOutputName() const;
     void setObjectiveValueOutputName(const std::string & aInput);
     std::string  getObjectiveValueStageName() const;
@@ -242,6 +245,9 @@ public:
     double getKSMaxRadiusScale() const;
     void setKSMaxRadiusScale(const double& aInput);
 
+    double getProblemUpdateFrequency() const;
+    void setProblemUpdateFrequency(const double& aInput);
+
 private:
     bool mCheckGradient;
     bool mCheckHessian;
@@ -268,6 +274,7 @@ private:
     double mKSMaxRadiusScale;
 
     size_t mMaxNumIterations;
+    size_t mProblemUpdateFrequency;
 
     int mDerivativeCheckerFinalSuperscript;
     int mDerivativeCheckerInitialSuperscript;
@@ -278,6 +285,7 @@ private:
     std::string mStateName;
     std::string mInputFileName;
     std::string mCacheStageName;
+    std::string mUpdateProblemStageName;
     std::string mOutputStageName;
     std::string mObjectiveValueOutputName;
     std::string mObjectiveHessianOutputName;

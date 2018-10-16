@@ -3078,6 +3078,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.KS_outer_actual_reduction_tolerance = "";
     m_InputData.KS_initial_radius_scale = "";
     m_InputData.KS_max_radius_scale = "";
+    m_InputData.problem_update_frequency = "";
 
     std::string tStringValue;
     std::vector<std::string> tInputStringList;
@@ -3358,6 +3359,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.KS_max_radius_scale = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"problem","update","frequency"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"problem update frequency\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.problem_update_frequency = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","max","inner","iterations"}, tStringValue))
                         {
@@ -4468,6 +4478,11 @@ bool XMLGenerator::generateSalinasOperationsXML()
             tmp_node.set_name("xml");
             pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
             tmp_att.set_value("1.0");
+
+            // Update Problem
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "Update Problem");
+            addChild(tmp_node, "Name", "Update Problem");
 
             // Cache State
             tmp_node = doc.append_child("Operation");
@@ -5962,6 +5977,17 @@ bool XMLGenerator::generateInterfaceXML()
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Optimization DOFs");
 
+    // Update Problem
+    stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Update Problem");
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "Update Problem");
+        Objective cur_obj = m_InputData.objectives[i];
+        addChild(op_node, "PerformerName", cur_obj.performer_name);
+    }
+
     // Cache State
     stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Cache State");
@@ -6171,12 +6197,18 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.KS_max_radius_scale.size() > 0) {
             addChild(tmp_node, "KSMaxRadiusScale", m_InputData.KS_max_radius_scale);
     }
+    if(m_InputData.problem_update_frequency.size() > 0) {
+        addChild(tmp_node, "ProblemUpdateFrequency", m_InputData.problem_update_frequency);
+    }
 
     tmp_node = misc_node.append_child("Output");
     addChild(tmp_node, "OutputStage", "Output To File");
 
     tmp_node = misc_node.append_child("CacheStage");
     addChild(tmp_node, "Name", "Cache State");
+
+    tmp_node = misc_node.append_child("UpdateProblemStage");
+    addChild(tmp_node, "Name", "Update Problem");
 
     tmp_node = misc_node.append_child("OC");
     addChild(tmp_node, "MoveLimiter", "1.0");

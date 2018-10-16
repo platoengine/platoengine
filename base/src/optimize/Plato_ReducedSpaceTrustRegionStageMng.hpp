@@ -141,6 +141,18 @@ public:
         }
     }
 
+    //! Directive to update problem for each criterion.
+    void updateProblem()
+    {
+        // Communicate user that criteria specific data can be cached since trial control was accepted
+        assert(mObjectives.get() != nullptr);
+        const OrdinalType tNumObjectives = mObjectives->size();
+        for(OrdinalType tObjectiveIndex = 0; tObjectiveIndex < tNumObjectives; tObjectiveIndex++)
+        {
+            (*mObjectives)[tObjectiveIndex].updateProblem();
+        }
+    }
+
     /*! Directive that updates current optimization state data and notifies any active gradient and Hessian
      *  approximation methods that they need to update any method specific data since a trial control was accepted. */
     void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)

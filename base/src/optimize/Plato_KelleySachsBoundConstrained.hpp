@@ -89,6 +89,7 @@ public:
             mOptimalityTolerance(1e-5),
             mScaleOfUnitControlForInitialTrustRegionRadius(-1.), // negative if not specified
             mScaleOfUnitControlForMaxTrustRegionRadius(-1.), // negative if not specified
+            mProblemUpdateFrequency(0), // zero for no update
             mOutputData(),
             mGradient(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
@@ -113,6 +114,12 @@ public:
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
+    }
+
+    //! specify outer loop frequency of update. Zero or less if no updates
+    void setProblemUpdateFrequency(const OrdinalType& aInput)
+    {
+        mProblemUpdateFrequency = aInput;
     }
 
     //! should be positive to be meaningful
@@ -468,31 +475,68 @@ private:
     **********************************************************************************/
     void update()
     {
-        //        if(mContinuation && mod())
-        //        {
-        //            // invoke advance continuation
-        //            mStageMng->updateProblem();
-        //
-        //            // invoke new objective
-        //            mStageMng->computeObjective();
-        //        }
+        // mid control is accepted trial
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+
+        // handle updating problems
+        bool tHaveProblemUpdateFrequency = (0 < mProblemUpdateFrequency);
+        bool tDidUpdate = false;
+        if(tHaveProblemUpdateFrequency)
+        {
+            OrdinalType tIterationsDone = this->getNumIterationsDone();
+            bool tIsIterationToUpdate = (tIterationsDone % mProblemUpdateFrequency) == 0;
+            if(tIsIterationToUpdate)
+            {
+                tDidUpdate = true;
+
+                // invoke advance continuation
+                mStageMng->updateProblem();
+
+                // invoke new objective
+                const ScalarType tNewMidObjectiveFunctionValue = mStageMng->evaluateObjective(tMidControl);
+                mStepMng->setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
+            }
+        }
 
         // Cache state data since trial control was accepted
         mStageMng->cacheData();
         // Compute gradient at new midpoint
-        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
         mStageMng->computeGradient(tMidControl, *mGradient);
 
-        if(this->updateControl(*mGradient, *mStepMng, *mDataMng, *mStageMng) == true)
+        // if done update, have to accept mid. otherwise, line search reasonable
+        bool tAcceptMid = false;
+        if(tDidUpdate)
         {
-            // Update new gradient and inequality constraint values since control
-            // was successfully updated; else, keep mid gradient and thus mid control.
-            mStageMng->cacheData();
-            const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
-            mStageMng->computeGradient(tCurrentControl, *mGradient);
-            mDataMng->setCurrentGradient(*mGradient);
+            tAcceptMid = true;
         }
-        else
+        // if lacking Hessian, line search was a scaling of the gradient. Line search is not reasonable
+        const bool tHaveHessian = mStageMng->getHaveHessian();
+        if(!tHaveHessian)
+        {
+            tAcceptMid = true;
+        }
+
+        // update control line search only reachable if not accepting mid
+        if(!tAcceptMid)
+        {
+            if(this->updateControl(*mGradient, *mStepMng, *mDataMng, *mStageMng) == true)
+            {
+                // Update new gradient and inequality constraint values since control
+                // was successfully updated; else, keep mid gradient and thus mid control.
+                mStageMng->cacheData();
+                const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+                mStageMng->computeGradient(tCurrentControl, *mGradient);
+                mDataMng->setCurrentGradient(*mGradient);
+                tAcceptMid = false;
+            }
+            else
+            {
+                tAcceptMid = true;
+            }
+        }
+
+        // possibly need to accept mid
+        if(tAcceptMid)
         {
             // Keep current objective function, control, and gradient values at mid point
             const ScalarType tMidObjectiveFunctionValue = mStepMng->getMidPointObjectiveFunctionValue();
@@ -615,6 +659,7 @@ private:
     ScalarType mOptimalityTolerance;
     ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
     ScalarType mScaleOfUnitControlForMaxTrustRegionRadius; // negative if not specified
+    OrdinalType mProblemUpdateFrequency; // equal to zero if not updating
 
     Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;

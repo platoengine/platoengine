@@ -207,6 +207,7 @@ struct InputData
   std::string KS_outer_actual_reduction_tolerance;
   std::string KS_initial_radius_scale;
   std::string KS_max_radius_scale;
+  std::string problem_update_frequency;
   std::vector<std::string> levelset_nodesets;
   std::vector<std::string> fixed_block_ids;
   std::vector<std::string> fixed_sideset_ids;

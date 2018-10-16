@@ -92,6 +92,7 @@ public:
         assert(aInterface != nullptr);
         mInterface = aInterface;
     }
+
     //! Directive to cache any criterion specific data once trial control is accepted.
     void cacheData()
     {
@@ -115,6 +116,22 @@ public:
             mInterface->compute(tStageNames, *mParameterList);
         }
     }
+
+    //! Directive to update problem criterion.
+    void updateProblem()
+    {
+        assert(mInterface != nullptr);
+
+        // Tell performers to cache the state
+        std::vector<std::string> tStageNames;
+        std::string tUpdateProblemName = mEngineInputData.getUpdateProblemStageName();
+        if(tUpdateProblemName.empty() == false)
+        {
+            tStageNames.push_back(tUpdateProblemName);
+            mInterface->compute(tStageNames, *mParameterList);
+        }
+    }
+
     /*!
      * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}
      * \rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables. This criterion

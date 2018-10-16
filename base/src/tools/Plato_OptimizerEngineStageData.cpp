@@ -78,6 +78,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mKSInitialRadiusScale(.1),
         mKSMaxRadiusScale(.5),
         mMaxNumIterations(500),
+        mProblemUpdateFrequency(0),
         mDerivativeCheckerFinalSuperscript(8),
         mDerivativeCheckerInitialSuperscript(1),
         mGCMMAMaxInnerIterations(5),
@@ -86,6 +87,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mStateName(),
         mInputFileName(),
         mCacheStageName(),
+        mUpdateProblemStageName(),
         mOutputStageName(),
         mObjectiveValueOutputName(),
         mObjectiveHessianOutputName(),
@@ -721,13 +723,25 @@ std::string OptimizerEngineStageData::getCacheStageName() const
 {
     return (mCacheStageName);
 }
-
 /******************************************************************************/
 void OptimizerEngineStageData::setCacheStageName(const std::string & aInput)
 /******************************************************************************/
 {
     mCacheStageName.clear();
     mCacheStageName = aInput;
+}
+
+/******************************************************************************/
+std::string OptimizerEngineStageData::getUpdateProblemStageName() const
+/******************************************************************************/
+{
+    return (mUpdateProblemStageName);
+}
+/******************************************************************************/
+void OptimizerEngineStageData::setUpdateProblemStageName(const std::string & aInput)
+/******************************************************************************/
+{
+    mUpdateProblemStageName = aInput;
 }
 
 /******************************************************************************/
@@ -1202,6 +1216,15 @@ double OptimizerEngineStageData::getKSMaxRadiusScale() const
 void OptimizerEngineStageData::setKSMaxRadiusScale(const double& aInput)
 {
     mKSMaxRadiusScale = aInput;
+}
+
+double OptimizerEngineStageData::getProblemUpdateFrequency() const
+{
+    return mProblemUpdateFrequency;
+}
+void OptimizerEngineStageData::setProblemUpdateFrequency(const double& aInput)
+{
+    mProblemUpdateFrequency = aInput;
 }
 
 } //namespace Plato

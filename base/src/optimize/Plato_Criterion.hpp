@@ -67,6 +67,12 @@ public:
 
     //! Directive to cache any criterion specific data once trial control is accepted.
     virtual void cacheData() = 0;
+
+    //! Directive to update problem criterion.
+    virtual void updateProblem()
+    {
+    }
+
     /*!
      * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}
      * \rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables. This criterion
