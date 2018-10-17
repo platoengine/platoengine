@@ -400,7 +400,9 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrock)
 TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
 {
     // ********* ALLOCATE OBJECTIVE *********
-    std::shared_ptr<Plato::Rosenbrock<double>> tMyObjective = std::make_shared<Plato::Rosenbrock<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    std::shared_ptr<Plato::Rosenbrock<double>> tRosenbrock = std::make_shared<Plato::Rosenbrock<double>>();
+    tMyObjective->add(tRosenbrock);
 
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
     const size_t tNumVectors = 1;

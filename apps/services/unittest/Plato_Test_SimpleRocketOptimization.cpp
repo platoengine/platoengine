@@ -290,15 +290,20 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tMyObjective =
+    std::shared_ptr<Plato::GradBasedRocketObjective<double>> tThrustMisfitObjective =
             std::make_shared<Plato::GradBasedRocketObjective<double>>(tRocketInputs, tGeomModel);
-    tMyObjective->setNormalizationConstants(tNormalizationConstants);
+    tThrustMisfitObjective->setNormalizationConstants(tNormalizationConstants);
     std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
-    tMyObjective->setTargetThrustProfile(tTargetThrustProfile);
+    tThrustMisfitObjective->setTargetThrustProfile(tTargetThrustProfile);
+
+    // ********* SET LIST OF OBJECTIVE FUNCTIONS *********
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tThrustMisfitObjective);
 
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
     const size_t tNumVectors = 1;
     Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mHaveHessian = false;
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; 
     (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
@@ -321,7 +326,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
 
     // ********* OUTPUT TO TERMINAL *********
     std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
-    std::cout << "NumFunctionEvaluations = " << tMyObjective->getNumFunctionEvaluations() << std::endl;
+    std::cout << "NumFunctionEvaluations = " << tThrustMisfitObjective->getNumFunctionEvaluations() << std::endl;
     std::cout << "BestObjectiveValue = " << tOutputs.mObjFuncValue << std::endl;
     std::cout << "StoppingCriterion = " << tOutputs.mStopCriterion.c_str() << std::endl;
 }

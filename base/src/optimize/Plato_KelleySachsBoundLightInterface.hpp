@@ -93,6 +93,7 @@ struct AlgorithmInputsKSBC
      * @brief Default constructor
     **********************************************************************************/
     AlgorithmInputsKSBC() :
+            mHaveHessian(true),
             mPrintDiagnostics(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
@@ -123,6 +124,7 @@ struct AlgorithmInputsKSBC
     {
     }
 
+    bool mHaveHessian; /*!< flag to specify that Hessian information is available (default=true) */
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
@@ -214,12 +216,12 @@ inline void set_ksbc_algorithm_outputs(const Plato::KelleySachsBoundConstrained<
 
 /******************************************************************************//**
  * @brief Kelley-Sachs Bound Constrained (KSBC) trust region algorithm interface
- * @param [in] aObjective user-defined objective function
+ * @param [in] aObjective list of user-defined objective functions
  * @param [in] aInputs Kelley-Sachs Bound Constrained trust region algorithm inputs
  * @param [in,out] aOutputs Kelley-Sachs Bound Constrained trust region algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+inline void solve_ksbc(const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aObjective,
                        const Plato::AlgorithmInputsKSBC<ScalarType, OrdinalType> & aInputs,
                        Plato::AlgorithmOutputsKSBC<ScalarType, OrdinalType> & aOutputs)
 {
@@ -237,14 +239,10 @@ inline void solve_ksbc(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
     tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
 
-    // ********* ALLOCATE OBJECTIVE FUNCTION LIST *********
-    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tObjectiveList;
-    tObjectiveList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>();
-    tObjectiveList->add(aObjective);
-
     // ********* ALLOCATE REDUCED SPACE STAGE MANAGER *********
     std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> tStageMng;
-    tStageMng = std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, tObjectiveList);
+    tStageMng = std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective);
+    tStageMng->setHaveHessian(aInputs.mHaveHessian);
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
