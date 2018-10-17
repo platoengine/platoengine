@@ -10,6 +10,20 @@
 
 namespace Cogent {
 
+struct SimplexStencil {
+   SimplexStencil(std::vector<int> cutPts,
+                  std::vector<std::vector<int>> newPts,
+                  std::vector<std::vector<int>> map,
+                  std::vector<Cogent::Sense> sense);
+   std::vector<int> m_cutPts;
+   std::vector<std::vector<int>> m_newPts;
+   std::vector<std::vector<int>> m_subTets;
+   std::vector<std::vector<int>> m_topoMap;
+   std::vector<Cogent::Sense> m_sense;
+};
+
+std::vector<Cogent::SimplexStencil> makeStencils();
+
 class Dicer
 /**
  *  This class computes a set of conformal tetrahedra from a collection of
@@ -77,6 +91,10 @@ class Dicer
     void CutTet(const std::vector<Simplex<V,P> >& implicitSimplexes, 
                       std::vector<Simplex<V,P> >& explicitSimplexes, const C& comparison, int iTopo);
   
+    template<typename V, typename P>
+    void CutTet(const std::vector<Simplex<V,P> >& implicitSimplexes, 
+                      std::vector<Simplex<V,P> >& explicitSimplexes, int iTopo);
+  
     template<typename C, typename V, typename P>
     void CutTri(const std::vector<Simplex<V,P> >& implicitSimplexes, 
                       std::vector<Simplex<V,P> >& explicitSimplexes, const C comparison, int iTopo);
@@ -95,6 +113,9 @@ class Dicer
     Teuchos::RCP<const Intrepid2::Basis<Kokkos::Serial, RealType, RealType > > m_basis;
     RealType m_interfaceValue;
     uint m_numDims;
+
+    std::vector<Cogent::SimplexStencil> m_cutStencils;
+
 };
 
 } /** end namespace Cogent */

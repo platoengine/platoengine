@@ -115,18 +115,26 @@ void Cogent::Dicer::Cut(
 
   if(implicitSimplexes.size() > 0 && implicitSimplexes[0].points.size()==Cogent::nTetPts) {
     // volume
+#ifdef USE_OLD_DICER
     Positive<P> positive;
     Negative<P> negative;
     CutTet(implicitSimplexes, *simplexListOut, positive, /*iTopo=*/0);
     CutTet(implicitSimplexes, *simplexListOut, negative, /*iTopo=*/0);
+#else
+    CutTet(implicitSimplexes, *simplexListOut, /*iTopo=*/0);
+#endif
     Project(/*in*/ topoData, /*in/out*/ *simplexListOut);
     for(int iTopo=1; iTopo<nTopos; iTopo++){
       listPtr = simplexListIn;
       simplexListIn = simplexListOut;
       simplexListOut = listPtr;
       simplexListOut->clear();
+#ifdef USE_OLD_DICER
       CutTet(*simplexListIn, *simplexListOut, positive, iTopo);
       CutTet(*simplexListIn, *simplexListOut, negative, iTopo);
+#else
+      CutTet(*simplexListIn, *simplexListOut, iTopo);
+#endif
       Project(/*in*/ topoData, /*in/out*/ *simplexListOut);
     }
   } else 
@@ -242,6 +250,62 @@ Cogent::Sense Cogent::Dicer::getSense(
   // To get here, sense is NotSet
   return sense;
 }
+
+
+//******************************************************************************//
+template<typename V, typename P>
+void Cogent::Dicer::CutTet(
+  const std::vector<Simplex<V,P> >& implicitSimplexes,
+        std::vector<Simplex<V,P> >& explicitSimplexes,
+        int iTopo)
+//******************************************************************************//
+{
+  for( auto& implicitSimplex : implicitSimplexes ){
+    const std::vector<std::vector<V>>& topoVals = implicitSimplex.fieldvals;
+    short int d0 = (topoVals[0][iTopo] == 0) ? 1 : ((topoVals[0][iTopo] > 0.0) ? 2 : 0);
+    short int d1 = (topoVals[1][iTopo] == 0) ? 1 : ((topoVals[1][iTopo] > 0.0) ? 2 : 0);
+    short int d2 = (topoVals[2][iTopo] == 0) ? 1 : ((topoVals[2][iTopo] > 0.0) ? 2 : 0);
+    short int d3 = (topoVals[3][iTopo] == 0) ? 1 : ((topoVals[3][iTopo] > 0.0) ? 2 : 0);
+    unsigned short int index = d3*1 + d2*3 + d1*9 + d0*27;
+
+    const SimplexStencil& cutStencil = m_cutStencils[index];
+
+    int nTets = cutStencil.m_subTets.size();
+    int nIntx = cutStencil.m_newPts.size();
+
+    int nPts = 4;
+
+    std::vector<typename Vector3D<P>::Type> p(nPts+nIntx);
+    p[0] = implicitSimplex.points[0];
+    p[1] = implicitSimplex.points[1];
+    p[2] = implicitSimplex.points[2];
+    p[3] = implicitSimplex.points[3];
+    for(int i=0; i<nIntx; i++){
+      int p0 = cutStencil.m_newPts[i][0];
+      int p1 = cutStencil.m_newPts[i][1];
+      auto& v0 = topoVals[p0][iTopo];
+      auto& v1 = topoVals[p1][iTopo];
+      p[nPts+i] = p[p0]*(v1/(v1-v0)) - p[p1]*(v0/(v1-v0));
+    }
+
+    std::vector<int> topoIDs = implicitSimplex.boundaryLS;
+    topoIDs.push_back(iTopo);
+    topoIDs.push_back(-1);
+
+    for(int i=0; i<nTets; i++){
+      Cogent::Simplex<V,P> tet(nPts);
+      auto& topoMap = cutStencil.m_topoMap[i];
+      for(int j=0; j<nPts; j++){
+        tet.points[j] = p[cutStencil.m_subTets[i][j]];
+        tet.boundaryLS[j] = topoIDs[topoMap[j]];
+      }
+      tet.sense = implicitSimplex.sense;
+      tet.sense[iTopo] = cutStencil.m_sense[i];
+      explicitSimplexes.push_back(tet);
+    }
+  }
+}
+
 
 //******************************************************************************//
 template<typename C, typename V, typename P>

@@ -244,6 +244,9 @@ void ParameterizedModel::mapToGeometryData(
     for(int iParam=0; iParam<numParams; ++iParam){
       for(int iMeas=0; iMeas<numMeas; ++iMeas){
         for(int iNode=0; iNode<numNodes; ++iNode){
+          // JR HACK:  shouldn't this be:
+          // dMdG(iMeas,iParam) += dMdT(iMeas,iNode,lsIndex)*dTdG(iNode,iParam);
+          // not:
           dMdG(iMeas,iParam) += dMdT(iMeas,iNode,iLS)*dTdG(iNode,iParam);
         }
       }

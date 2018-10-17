@@ -17,6 +17,7 @@ set(${LIB_NAME}_SOURCES
     core/Cogent_Integrator.cpp
     core/Cogent_IntegratorFactory.cpp
     core/Cogent_Projector.cpp
+    core/Cogent_WriteUtils.cpp
     core/Cogent_ParameterFunction.cpp
     core/Cogent_CoordinateSystem.cpp
     geometry/Cogent_PrimitiveFactory.cpp
