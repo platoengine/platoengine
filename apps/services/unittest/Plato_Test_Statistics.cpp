@@ -544,7 +544,6 @@ TEST(PlatoTest, ComputeMonteCarloData)
 
 TEST(PlatoTest, ComputeUnnormalizedSamples)
 {
-    size_t tNumSamples = 11;
     double tUpperBound = 135.;
     double tLowerBound = 67.5;
     std::vector<double> tValues = {0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};

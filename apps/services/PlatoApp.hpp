@@ -159,11 +159,11 @@ public:
         else if(aExportData.myLayout() == Plato::data::layout_t::SCALAR)
         {
             std::vector<double>* tLocalData = getValue(aArgumentName);
-            if( tLocalData->size() == aExportData.size() )
+            if( int(tLocalData->size()) == aExportData.size() )
             {
                 aExportData.setData(*tLocalData);
             } else
-            if( tLocalData->size() == 1 )
+            if( tLocalData->size() == 1u )
             {
                 std::vector<double> retVec(aExportData.size(), (*tLocalData)[0]);
                 aExportData.setData(retVec);

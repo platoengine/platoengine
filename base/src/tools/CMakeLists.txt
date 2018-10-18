@@ -29,11 +29,6 @@ set(${LIB_NAME}_HEADERS Plato_Parser.hpp
                         Plato_Vector3DVariations.hpp
                         )
 
-set(LIB_NAME Convergence)
-set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
-set(${LIB_NAME}_SOURCES Plato_Convergence.cpp)
-set(${LIB_NAME}_HEADERS Plato_Convergence.hpp)
-
 set(LIB_NAME Exceptions)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_Exceptions.cpp)

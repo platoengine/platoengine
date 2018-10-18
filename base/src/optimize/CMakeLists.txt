@@ -2,9 +2,8 @@ set(LIB_NAMES)
 
 set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
-set(${LIB_NAME}_SOURCES Plato_Optimizer.cpp
-                        Plato_OptimizersIO.cpp
-                        OC_Optimizer.cpp)
+set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
+                        )
 set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_TrustRegionUtilities.hpp
                         Plato_HostDualProbElementWise.hpp
@@ -14,8 +13,6 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_DualProbElementWiseFunctions.hpp
                         Plato_PrimalProbElementWiseFunctions.hpp
                         Plato_CommWrapper.hpp
-                        Plato_Optimizer.hpp
-                        OC_Optimizer.hpp
                         Plato_Types.hpp
                         Plato_Circle.hpp
                         Plato_HostBounds.hpp

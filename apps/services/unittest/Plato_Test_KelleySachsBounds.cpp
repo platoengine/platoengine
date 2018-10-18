@@ -322,7 +322,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     EXPECT_EQ(51u, tOutputs.mNumObjFuncEval);
     EXPECT_NEAR(tOutputs.mObjFuncValue, 0.079569542222762052, tTolerance);
 
-    const size_t tControlVectorIndex = 0;
+//    const size_t tControlVectorIndex = 0;
     std::vector<double> tGoldControl = TopoProxy::getGoldControlTrustRegionBoundTest();
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
