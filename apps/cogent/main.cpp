@@ -7,10 +7,41 @@
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_CommandLineProcessor.hpp>
 
 int main(int argc, char **argv) {
 
   Kokkos::initialize(argc, argv);
+
+
+  // read geometry file and setup
+  //
+  Teuchos::CommandLineProcessor tCLP(
+      /*throwExceptions=*/       false, 
+      /*recogniseAllOptions=*/   false, 
+      /*addOutputSetupOptions=*/ false);
+
+  tCLP.setDocString(
+      "Cogent computes a discrete geometric representation \n"
+      "from a parameterized constructive solid geometry (CSG) model.\n");
+
+  std::string       xmlFileName = "parameterized.xml";
+  tCLP.setOption("input", &xmlFileName, xmlFileName.c_str());
+
+  std::string       outFileName = "model.vtk";
+  tCLP.setOption("output", &outFileName, outFileName.c_str());
+
+  Teuchos::CommandLineProcessor::EParseCommandLineReturn parseReturn =
+      Teuchos::CommandLineProcessor::PARSE_ERROR;
+  parseReturn = tCLP.parse(argc, argv);
+  if (parseReturn != Teuchos::CommandLineProcessor::PARSE_SUCCESSFUL) {
+    std::cerr << "Command line processing failed !" << std::endl;
+    exit(-1);
+  }
+
+  Teuchos::ParameterList geomSpec("Geometry");
+  Teuchos::updateParametersFromXmlFile(xmlFileName, Teuchos::ptrFromRef(geomSpec));
+
 
   // define HEX8 element topology
   const CellTopologyData& celldata = *shards::getCellTopologyData< shards::Hexahedron<8> >();
@@ -20,11 +51,6 @@ int main(int argc, char **argv) {
   Teuchos::RCP<Intrepid2::Basis<Kokkos::Serial, RealType> >
     intrepidBasis = Teuchos::rcp(new Intrepid2::Basis_HGRAD_HEX_C1_FEM<Kokkos::Serial, RealType, RealType>() );
   
-  // read geometry file and setup
-  std::string xmlFileName = "parameterized.xml";
-  Teuchos::ParameterList geomSpec;
-  Teuchos::updateParametersFromXmlFile(xmlFileName, Teuchos::ptrFromRef(geomSpec));
-
   // create integrator
   Cogent::IntegratorFactory integratorFactory;
   Teuchos::RCP<Cogent::Integrator> integrator = integratorFactory.create(celltype, intrepidBasis, geomSpec);
@@ -70,5 +96,10 @@ int main(int argc, char **argv) {
         Cogent::getSurfaceTris(tets,tris);
       }
 
-  Cogent::writeTris(tris);
+  std::ofstream tModelFile;
+  tModelFile.open(outFileName);
+
+  Cogent::writeTris(tris, tModelFile);
+
+  tModelFile.close();
 }

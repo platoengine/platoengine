@@ -39,7 +39,7 @@ void Cogent::writeSurfaceTris(const std::vector<Simplex<RealType,RealType> >& in
   std::vector<Simplex<RealType,RealType>> outTris;
   getSurfaceTris(inTets, outTris);
   
-  writeTris(outTris);
+  writeTris(outTris, std::cout);
 }
 
 //******************************************************************************//
@@ -100,7 +100,6 @@ bool Cogent::isEqual(
   RealType dy = fabs(c0y-c1y);
   RealType dz = fabs(c0z-c1z);
   if(dx*dx+dy*dy+dz*dz > 1e-10) return false;
-  std::cout << "Found a duplicate" << std::endl;
   return true;
 }
 

@@ -228,36 +228,39 @@ void Cogent::writeTetsVTK(const std::vector<Simplex<V,P> >& explicitSimplexes)
 }
 
 //******************************************************************************//
-template<typename V, typename P>
-void Cogent::writeTris(const std::vector<Simplex<V,P> >& explicitSimplexes)
+template<typename V, typename P, typename StreamType >
+void Cogent::writeTris(
+  const std::vector<Simplex<V,P> >& explicitSimplexes,
+  StreamType& aOutStream
+)
 //******************************************************************************//
 {
   int nTris = explicitSimplexes.size();
-  std::cout << "# vtk DataFile Version 2.0" << std::endl;
-  std::cout << "3d tris" << std::endl;
-  std::cout << "ASCII" << std::endl;
-  std::cout << std::endl;
-  std::cout << "DATASET UNSTRUCTURED_GRID" << std::endl;
-  std::cout << "POINTS " << nTris*Cogent::nTriPts << " float" << std::endl;
+  aOutStream << "# vtk DataFile Version 2.0" << std::endl;
+  aOutStream << "3d tris" << std::endl;
+  aOutStream << "ASCII" << std::endl;
+  aOutStream << std::endl;
+  aOutStream << "DATASET UNSTRUCTURED_GRID" << std::endl;
+  aOutStream << "POINTS " << nTris*Cogent::nTriPts << " float" << std::endl;
 
   typename std::vector<Simplex<V,P>>::const_iterator it;
   for(it=explicitSimplexes.begin(); it!=explicitSimplexes.end(); ++it){
     const std::vector<typename Vector3D<P>::Type >& points = it->points;
-    std::cout << points[0](0) << " " << points[0](1) << " " << points[0](2) << std::endl;
-    std::cout << points[1](0) << " " << points[1](1) << " " << points[1](2) << std::endl;
-    std::cout << points[2](0) << " " << points[2](1) << " " << points[2](2) << std::endl;
+    aOutStream << points[0](0) << " " << points[0](1) << " " << points[0](2) << std::endl;
+    aOutStream << points[1](0) << " " << points[1](1) << " " << points[1](2) << std::endl;
+    aOutStream << points[2](0) << " " << points[2](1) << " " << points[2](2) << std::endl;
   }
-  std::cout << std::endl;
-  std::cout << "CELLS " << nTris << " " << nTris*(Cogent::nTriPts+1) << std::endl;
+  aOutStream << std::endl;
+  aOutStream << "CELLS " << nTris << " " << nTris*(Cogent::nTriPts+1) << std::endl;
   int ptIndex=0;
   for(it=explicitSimplexes.begin(); it!=explicitSimplexes.end(); ++it){
-    std::cout << Cogent::nTriPts << " " << ptIndex << " " << ptIndex+1 << " " << ptIndex+2 << std::endl;
+    aOutStream << Cogent::nTriPts << " " << ptIndex << " " << ptIndex+1 << " " << ptIndex+2 << std::endl;
     ptIndex+=Cogent::nTriPts;
   }
-  std::cout << std::endl;
-  std::cout << "CELL_TYPES " << nTris << std::endl;
+  aOutStream << std::endl;
+  aOutStream << "CELL_TYPES " << nTris << std::endl;
   for(it=explicitSimplexes.begin(); it!=explicitSimplexes.end(); ++it){
-    std::cout << "5" << std::endl;
+    aOutStream << "5" << std::endl;
   }
 }
 

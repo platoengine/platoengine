@@ -32,7 +32,7 @@ Cogent::BoundaryIntegrator::getMeasure(
     getBoundarySimplexes(explicitSimplexes, boundarySimplexes, m_model->getSurfaceIndex());
 
     if(m_Verbosity > 2){ 
-      writeTris(boundarySimplexes);
+      writeTris(boundarySimplexes, std::cout);
       writeTets(explicitSimplexes);
     }
 
@@ -82,7 +82,7 @@ Cogent::BoundaryIntegrator::getMeasure(
     getBoundarySimplexes(explicitSimplexes, boundarySimplexes, m_model->getSurfaceIndex());
 
     if(m_Verbosity > 2){ 
-      writeTris(boundarySimplexes);
+      writeTris(boundarySimplexes, std::cout);
       writeTets(explicitSimplexes);
     }
 

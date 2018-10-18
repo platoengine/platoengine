@@ -90,7 +90,7 @@ void Cogent::BoundaryIntegrator_Projected::getCubatureWeights(
 
     if(m_Verbosity > 2){
       writeTets(explicitSimplexes);
-      writeTris(boundarySimplexes);
+      writeTris(boundarySimplexes, std::cout);
     }
 
     getQPointWeights(coordCon, boundarySimplexes, weights);
@@ -137,7 +137,7 @@ void Cogent::BoundaryIntegrator_Projected::getCubatureWeights(
     getBoundarySimplexes(explicitSimplexes, boundarySimplexes, m_model->getSurfaceIndex());
 
     if(m_Verbosity > 2){ 
-      writeTris(boundarySimplexes);
+      writeTris(boundarySimplexes, std::cout);
       writeTets(explicitSimplexes);
     }
 

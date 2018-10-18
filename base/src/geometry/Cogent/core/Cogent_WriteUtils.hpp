@@ -2,6 +2,7 @@
 #define _COGENT_WRITEUTILS_H
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "Cogent_Types.hpp"
 
@@ -47,8 +48,8 @@ class Writer {
   void getSurfaceTris(const std::vector<Simplex<RealType,RealType> >& inTets, 
                       std::vector<Simplex<RealType,RealType> >& outTris);
 
-  template<typename V, typename P>
-  void writeTris(const std::vector<Simplex<V,P> >& explicitSimplexes);
+  template<typename V, typename P, typename StreamType>
+  void writeTris(const std::vector<Simplex<V,P> >& explicitSimplexes, StreamType& aOutStream);
 
 
 } /** end namespace Cogent */
