@@ -58,6 +58,7 @@
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_SteihaugTointSolver.hpp"
 #include "Plato_TrustRegionStageMng.hpp"
+#include "Plato_TrustRegionUtilities.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 
 namespace Plato
@@ -89,8 +90,56 @@ public:
     void solve(Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng,
                Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        this->computeInitialResidual(aDataMng);
+
         const bool tHaveHessian = aStageMng.getHaveHessian();
-        OrdinalType tNumVectors = aDataMng.getNumControlVectors();
+        if(!tHaveHessian)
+        {
+            this->computeCauchyPoint(aDataMng);
+        }
+        else
+        {
+            // use typical Steihaug-CG
+            this->iterate(aDataMng, aStageMng);
+        }
+
+        // if zero step, use projected (-gradient)
+        const ScalarType tNormNewtonStep = Plato::norm(*mNewtonStep);
+        if(tNormNewtonStep <= static_cast<ScalarType>(0.))
+        {
+            this->computeProjectedNewtonStep(aDataMng);
+        }
+        aDataMng.setTrialStep(*mNewtonStep);
+    }
+
+private:
+    void computeCauchyPoint(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        // if strictly positive norm
+        const ScalarType tNormNewtonStep = Plato::norm(*mResidual);
+        if(static_cast<ScalarType>(0.) < tNormNewtonStep)
+        {
+            const ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
+            Plato::scale(static_cast<ScalarType>(-1.), *mResidual); /* compute projected gradient */
+            Plato::compute_cauchy_point(tCurrentTrustRegionRadius, *mResidual, *mNewtonStep);
+        }
+    }
+
+    void computeProjectedNewtonStep(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        const OrdinalType tNumVectors = aDataMng.getNumControlVectors();
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tCurrentGradient = aDataMng.getCurrentGradient(tVectorIndex);
+            (*mNewtonStep)[tVectorIndex].update(static_cast<ScalarType>(-1.), tCurrentGradient, static_cast<ScalarType>(0.));
+            const Plato::Vector<ScalarType, OrdinalType> & tInactiveSet = aDataMng.getInactiveSet(tVectorIndex);
+            (*mNewtonStep)[tVectorIndex].entryWiseProduct(tInactiveSet);
+        }
+    }
+
+    void computeInitialResidual(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        const OrdinalType tNumVectors = aDataMng.getNumControlVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
             (*mNewtonStep)[tVectorIndex].fill(0);
@@ -101,49 +150,10 @@ public:
             const Plato::Vector<ScalarType, OrdinalType> & tInactiveSet = aDataMng.getInactiveSet(tVectorIndex);
             (*mResidual)[tVectorIndex].entryWiseProduct(tInactiveSet);
         }
-        ScalarType tNormResidual = Plato::norm(*mResidual);
+        const ScalarType tNormResidual = Plato::norm(*mResidual);
         this->setNormResidual(tNormResidual);
-
-        if(!tHaveHessian)
-        {
-            // use Cauchy point
-
-            // step = - gradient
-            Plato::update(static_cast<ScalarType>(1.), *mResidual, static_cast<ScalarType>(0.), *mNewtonStep);
-
-            // if strictly positive norm
-            ScalarType tNormNewtonStep = Plato::norm(*mNewtonStep);
-            if(static_cast<ScalarType>(0.) < tNormNewtonStep)
-            {
-                // cauchy_point = -1.0 * Trust_Region_Radius * (gradient/norm(gradient))
-                ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
-                ScalarType tCauchyScale = tCurrentTrustRegionRadius / tNormNewtonStep;
-                Plato::scale(tCauchyScale, *mNewtonStep);
-            }
-        }
-        else
-        {
-            // use typical Steihaug-CG
-            this->iterate(aDataMng, aStageMng);
-
-        }
-
-        // if zero step, use (-gradient)
-        ScalarType tNormNewtonStep = Plato::norm(*mNewtonStep);
-        if(tNormNewtonStep <= static_cast<ScalarType>(0.))
-        {
-            for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
-            {
-                const Plato::Vector<ScalarType, OrdinalType> & tCurrentGradient = aDataMng.getCurrentGradient(tVectorIndex);
-                (*mNewtonStep)[tVectorIndex].update(static_cast<ScalarType>(-1.), tCurrentGradient, static_cast<ScalarType>(0.));
-                const Plato::Vector<ScalarType, OrdinalType> & tInactiveSet = aDataMng.getInactiveSet(tVectorIndex);
-                (*mNewtonStep)[tVectorIndex].entryWiseProduct(tInactiveSet);
-            }
-        }
-        aDataMng.setTrialStep(*mNewtonStep);
     }
 
-private:
     void iterate(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
                  Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
     {

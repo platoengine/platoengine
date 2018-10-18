@@ -6,6 +6,7 @@ set(${LIB_NAME}_SOURCES Plato_Optimizer.cpp
                         Plato_OptimizersIO.cpp
                         OC_Optimizer.cpp)
 set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
+                        Plato_TrustRegionUtilities.hpp
                         Plato_HostDualProbElementWise.hpp
                         Plato_HostPrimalProbElementWise.hpp
                         Plato_DeviceDualProbElementWise.hpp
