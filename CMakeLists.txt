@@ -10,7 +10,7 @@ option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface"  OFF)
 option( GEOMETRY      "Enable Geometry subcomponent"    OFF)
 option( EXPY          "Build exodus python API"         OFF)
 option( SEACAS        "Seacas tools"                    ON)
-option( STK_ENABLED   "Flag to turn on use of STK"     OFF)
+option( STK_ENABLED   "Flag to turn on use of STK"     ON)
 
 
 ##################################################################
@@ -187,6 +187,8 @@ endif()
 if( STK_ENABLED )
   message( "-- Compiling with STK " )
   add_definitions(-DSTK_ENABLED)
+  add_subdirectory(base/src/support_structure)
+  add_subdirectory(base/src/support_structure/main)
 endif()
 
 if( PLATOMAIN )
