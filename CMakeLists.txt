@@ -5,6 +5,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 include( ${CMAKE_SOURCE_DIR}/base/config/tools.cmake )
 Plato_no_src_build()
 
+# Advertise that we support shared libs (cmake squawks otherwise)
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
+
 option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface"  OFF)
 
 option( GEOMETRY      "Enable Geometry subcomponent"    OFF)
@@ -45,36 +49,7 @@ if( DEFINED PLATO_SYSTEM_CONFIG )
     message(FATAL_ERROR " ")
   endif()
 endif()
-
-
-project(PlatoEngine) 
-
-################################################################################
-################################################################################
-
-############################## gtest Setup ####################################
-if( UNIT_TESTING )
 ###############################################################################
-find_library( GTEST_LIBRARY NAMES gtest
-              PATHS ${GTEST_HOME}/lib NO_DEFAULT_PATH)
-
-if( GTEST_LIBRARY )
-  message( "-- Info: Using GTest library: ${GTEST_LIBRARY}" )
-else( GTEST_LIBRARY )
-  message( "-- Error: GTest not found." )
-endif( GTEST_LIBRARY )
-
-find_path( GTEST_INCLUDE NAMES gtest.h
-           PATHS ${GTEST_HOME}/include/gtest NO_DEFAULT_PATH )
-
-if( GTEST_INCLUDE )
-  message( "-- Info: Using GTest headers in ${GTEST_INCLUDE}" )
-  include_directories( ${GTEST_INCLUDE} )
-else( GTEST_INCLUDE )
-  message( "-- Error: GTest headers not found." )
-endif( GTEST_INCLUDE )
-###############################################################################
-endif()
 ###############################################################################
 
 
@@ -96,19 +71,35 @@ endif()
 
 include_directories( ${Trilinos_INCLUDE_DIRS} ${Trilinos_TPL_INCLUDE_DIRS})
 
-###############################################################################
-###############################################################################
 
 
-###############################################################################
-###############################################################################
+###########################  Compiler setup ###################################
+######################## (pre 'project()' command) ############################
 message("Trilinos_CXX_COMPILER_FLAGS: ${Trilinos_CXX_COMPILER_FLAGS}")
 set(CMAKE_C_FLAGS "${Trilinos_C_COMPILER_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS_RELEASE "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+## Compilers cannot be changed after the 'project()' command below:
+message("Trilinos_CXX_COMPILER     ${Trilinos_CXX_COMPILER}")
+message("Trilinos_C_COMPILER       ${Trilinos_C_COMPILER}")
+message("Trilinos_Fortran_COMPILER ${Trilinos_Fortran_COMPILER}")
+set(CMAKE_CXX_COMPILER     ${Trilinos_CXX_COMPILER})
+set(CMAKE_C_COMPILER       ${Trilinos_C_COMPILER})
+set(CMAKE_Fortran_COMPILER ${Trilinos_Fortran_COMPILER})
+
+
+
+###############################################################################
+project(PlatoEngine) 
+###############################################################################
+
+
+
+###########################  Compiler setup ###################################
+####################### (post 'project()' command) ############################
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   # Clang specific flags
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # gnu specific flags
@@ -121,6 +112,34 @@ else()
   message(WARNING "Unknown compiler type: ${CMAKE_CXX_COMPILER_ID}. Using default flags.")
 endif()
 
+
+############################## gtest Setup ####################################
+###############################################################################
+if( UNIT_TESTING )
+find_library( GTEST_LIBRARY NAMES gtest
+              PATHS ${GTEST_HOME}/lib NO_DEFAULT_PATH)
+
+if( GTEST_LIBRARY )
+  message( "-- Info: Using GTest library: ${GTEST_LIBRARY}" )
+else( GTEST_LIBRARY )
+  message( "-- Error: GTest not found." )
+endif( GTEST_LIBRARY )
+
+find_path( GTEST_INCLUDE NAMES gtest.h
+           PATHS ${GTEST_HOME}/include/gtest NO_DEFAULT_PATH )
+
+if( GTEST_INCLUDE )
+  message( "-- Info: Using GTest headers in ${GTEST_INCLUDE}" )
+  include_directories( ${GTEST_INCLUDE} )
+else( GTEST_INCLUDE )
+  message( "-- Error: GTest headers not found." )
+endif( GTEST_INCLUDE )
+endif()
+
+
+
+###############################################################################
+###############################################################################
 if("${CMAKE_BUILD_TYPE}" STREQUAL Release)
   add_definitions( -DNDEBUG)
 endif()
@@ -128,8 +147,6 @@ endif()
 if( GEOMETRY )
   add_definitions( -DGEOMETRY )
 endif()
-###############################################################################
-###############################################################################
 
 if( REGRESSION OR UNIT_TESTING )
     enable_testing()
