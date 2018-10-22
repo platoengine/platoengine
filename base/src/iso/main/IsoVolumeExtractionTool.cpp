@@ -2017,7 +2017,7 @@ IVEHandle IsoVolumeExtractionTool::get_mid_node(const IVEHandle &n1,
         ret = new_node;
       }
       else if(fabs(val1-val2) < 1e-6)
-        ret = -1;
+        ret = 0;
 /*
       if(val1 == iso_val)
         ret = n1;
