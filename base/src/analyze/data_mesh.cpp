@@ -387,28 +387,6 @@ void DataMesh::Connect(int* node_gid_list, int block_index, int nlid_in_blk)
     node_gid_list[i] = conn[i];
 }
 
-
-
-/*****************************************************************************/
-void UnsMesh::CurrentCoordinates(int block_index, int nlid_in_blk, double* curcoor)
-/*****************************************************************************/
-{
-  // get pntr to topo block
-  Topological::Element* elem = myElemBlk[block_index];
-  
-  double **X = new double* [myDimensions];
-  getCoords(X);
-
-  int Nnpe = elem->getNnpe();
-  int* conn = elem->getNodeConnect() + nlid_in_blk*Nnpe;
-  int index = 0;
-  for(int j=0;j<myDimensions;j++)
-    for(int i=0;i<Nnpe;i++) 
-      curcoor[index++] = X[j][conn[i]];
-
-  delete [] X;
-}
-
 //*********************************************************************
 int StrMesh::indexMap(int i, int j, int k, int I, int J, int K)
 //*********************************************************************

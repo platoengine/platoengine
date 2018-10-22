@@ -79,14 +79,9 @@ public:
   virtual bool parseMesh(pugi::xml_node& mesh_spec) { return false; }
 
   virtual void Connect(int* node_gid_list, int block_index, int nlid_in_blk);
-  virtual void CurrentCoordinates(int ieb, int ielem, double* curcoor)=0;
 
   virtual bool hasContactBlock(){return false; }
   virtual int getContactBlockIndex(){ assert(0); return 0; }
-
-
-  virtual bool CurrentCoordinates(Element** blocks, int ieb, 
-                                  int ielem, double* curcoor){return false;}
 
   virtual bool Initialize(Element**){return true;}
 
@@ -209,8 +204,6 @@ public:
 
   virtual bool parseMesh(pugi::xml_node& mesh_spec);
 
-  virtual void CurrentCoordinates(int ieb, int ielem, double* curcoor);
-
   int getNumElemInBlk(int);
   int getNnpeInBlk(int blk);
   virtual const char*  getElemTypeInBlk(int blk);
@@ -241,8 +234,6 @@ public:
   virtual ~StrMesh(){}
 
   virtual bool parseMesh(pugi::xml_node& mesh_spec);
-
-  virtual void CurrentCoordinates(int ieb, int ielem, double* curcoor){}
 
   int getNumElemInBlk(int);
   int getNnpeInBlk(int blk);
