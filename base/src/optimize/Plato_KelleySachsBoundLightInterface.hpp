@@ -95,18 +95,23 @@ struct AlgorithmInputsKSBC
     AlgorithmInputsKSBC() :
             mHaveHessian(true),
             mPrintDiagnostics(false),
+            mDisablePostSmoothing(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
-            mMaxNumOuterLineSearchUpdates(10),
+            mMaxNumLineSearchIter(10),
+            mPostSmoothingScale(1e-10),
             mMaxTrustRegionRadius(1e2),
-            mMinTrustRegionRadius(1e-8),
+            mMinTrustRegionRadius(1e-4),
             mTrustRegionExpansionFactor(4),
             mTrustRegionContractionFactor(0.75),
-            mOuterGradientTolerance(1e-8),
-            mOuterStationarityTolerance(1e-8),
-            mOuterActualReductionTolerance(1e-12),
+            mOuterGradientTolerance(1e-4),
+            mOuterStationarityTolerance(1e-4),
+            mOuterActualReductionTolerance(1e-8),
             mOuterControlStagnationTolerance(1e-16),
             mOuterObjectiveStagnationTolerance(1e-12),
+            mActualOverPredictedReductionMidBound(0.25),
+            mActualOverPredictedReductionLowerBound(0.10),
+            mActualOverPredictedReductionUpperBound(0.75),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
             mLowerBounds(nullptr),
@@ -126,11 +131,13 @@ struct AlgorithmInputsKSBC
 
     bool mHaveHessian; /*!< flag to specify that Hessian information is available (default=true) */
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mDisablePostSmoothing; /*!< flag to disable post smoothing operation (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
-    OrdinalType mMaxNumOuterLineSearchUpdates; /*!< maximum number of outer line search iterations */
+    OrdinalType mMaxNumLineSearchIter; /*!< maximum number of outer line search iterations */
 
+    ScalarType mPostSmoothingScale; /*!< post smoothing operation scale factor */
     ScalarType mMaxTrustRegionRadius; /*!< maximum trust region radius */
     ScalarType mMinTrustRegionRadius; /*!< minimum trust region radius */
     ScalarType mTrustRegionExpansionFactor; /*!< trust region radius expansion factor */
@@ -141,6 +148,9 @@ struct AlgorithmInputsKSBC
     ScalarType mOuterActualReductionTolerance; /*!< actual reduction tolerance */
     ScalarType mOuterControlStagnationTolerance; /*!< control stagnation tolerance */
     ScalarType mOuterObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mActualOverPredictedReductionMidBound; /*!< actual over predicted reduction middle bound */
+    ScalarType mActualOverPredictedReductionLowerBound; /*!< actual over predicted reduction lower bound */
+    ScalarType mActualOverPredictedReductionUpperBound; /*!< actual over predicted reduction upper bound */
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
@@ -168,14 +178,23 @@ inline void set_ksbc_algorithm_inputs(const Plato::AlgorithmInputsKSBC<ScalarTyp
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mDisablePostSmoothing == true)
+    {
+        aAlgorithm.disablePostSmoothing();
+    }
+
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
-    aAlgorithm.setMaxNumUpdates(aInputs.mMaxNumOuterLineSearchUpdates);
+    aAlgorithm.setMaxNumLineSearchIterations(aInputs.mMaxNumLineSearchIter);
     aAlgorithm.setMaxNumTrustRegionSubProblemIterations(aInputs.mMaxTrustRegionSubProblemIter);
 
+    aAlgorithm.setPostSmoothingScale(aInputs.mPostSmoothingScale);
     aAlgorithm.setMaxTrustRegionRadius(aInputs.mMaxTrustRegionRadius);
     aAlgorithm.setMinTrustRegionRadius(aInputs.mMinTrustRegionRadius);
     aAlgorithm.setTrustRegionExpansion(aInputs.mTrustRegionExpansionFactor);
     aAlgorithm.setTrustRegionContraction(aInputs.mTrustRegionContractionFactor);
+    aAlgorithm.setActualOverPredictedReductionMidBound(aInputs.mActualOverPredictedReductionMidBound);
+    aAlgorithm.setActualOverPredictedReductionLowerBound(aInputs.mActualOverPredictedReductionLowerBound);
+    aAlgorithm.setActualOverPredictedReductionUpperBound(aInputs.mActualOverPredictedReductionUpperBound);
 
     aAlgorithm.setGradientTolerance(aInputs.mOuterGradientTolerance);
     aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);

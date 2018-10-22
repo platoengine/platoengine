@@ -75,14 +75,31 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Disable sensitivity filter
+    **********************************************************************************/
     void disableFilter()
     {
         mIsFilterDisabled = true;
     }
+
+    /******************************************************************************//**
+     * @brief Set filter radius
+     * @param [in] aInput filter radius
+    **********************************************************************************/
+    void setFilterRadius(const ScalarType& aInput)
+    {
+        mSolver->setFilterRadius(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Cache displacement solution
+    **********************************************************************************/
     void cacheData()
     {
         mSolver->cacheState();
     }
+
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         const OrdinalType tVectorIndex = 0;

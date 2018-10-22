@@ -57,7 +57,7 @@ namespace Plato
 /******************************************************************************//**
  * @brief Compute Cauchy point: \$f p_{C} = -1.0 \frac{\Delta}{\Vert{g}\Vert} g\$f
  * @param [in] aTrustRegionRadius trust region radius (\$f\Delta\$f)
- * @param [in] aGradient gradient (\$f -1.0*g \$f)
+ * @param [in] aGradient gradient (\$f g \$f)
  * @param [out] aCauchyPoint Cauchy point () (\$f p_{C} \$f)
 **********************************************************************************/
 template<typename ScalarType>

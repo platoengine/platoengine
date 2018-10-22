@@ -119,9 +119,9 @@ private:
         const ScalarType tNormNewtonStep = Plato::norm(*mResidual);
         if(static_cast<ScalarType>(0.) < tNormNewtonStep)
         {
-            const ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
+            const ScalarType tTrustRegionRadius = this->getTrustRegionRadius();
             Plato::scale(static_cast<ScalarType>(-1.), *mResidual); /* compute projected gradient */
-            Plato::compute_cauchy_point(tCurrentTrustRegionRadius, *mResidual, *mNewtonStep);
+            Plato::compute_cauchy_point(tTrustRegionRadius, *mResidual /* projected gradient */, *mNewtonStep /* projected cauchy point */);
         }
     }
 

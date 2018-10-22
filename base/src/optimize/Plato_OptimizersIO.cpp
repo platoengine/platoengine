@@ -98,9 +98,9 @@ void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint)
             << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(12);
 
     // TRUST REGION PROBLEM DATA (INNER-LOOP)
-    aOutputFile << "TR-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed" << std::setw(17) << "TR-Ratio"
-            << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15) << "abs(dF)" << "\n"
-            << std::flush;
+    aOutputFile << "TR-Iter" << std::setw(10) << "LS-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed"
+                << std::setw(17) << "TR-Ratio" << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15)
+                << "abs(dF)" << "\n" << std::flush;
 }
 
 } // namespace Plato

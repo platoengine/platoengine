@@ -148,6 +148,7 @@ struct OutputDataKelleySachs
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mNumIterPCG;  /*!< number preconditioned conjugate gradient iterations */
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
+    OrdinalType mNumLineSearchIter;  /*!< number of line search (i.e. post-smoothing) iterations */
     OrdinalType mNumTrustRegionIter;  /*!< number of trust region (inner-loop) iterations */
 
     ScalarType mActualRed;  /*!< actual reduction */
@@ -429,10 +430,10 @@ void print_ksbc_diagnostics(const Plato::OutputDataKelleySachs<ScalarType, Ordin
             << std::setw(15) << aData.mStationarityMeasure << std::setw(7);
 
     // TRUST REGION PROBLEM DATA (INNER-LOOP)
-    aOutputFile << aData.mNumTrustRegionIter << std::setw(18) << aData.mTrustRegionRadius << std::setw(15)
-            << aData.mActualRed << std::setw(15) << aData.mAredOverPred << std::setw(7) << aData.mNumIterPCG
-            << std::setw(19) << aData.mControlStagnationMeasure << std::setw(16) << aData.mObjectiveStagnationMeasure
-            << "\n" << std::flush;
+    aOutputFile << aData.mNumTrustRegionIter << std::setw(10) << aData.mNumLineSearchIter << std::setw(18)
+            << aData.mTrustRegionRadius << std::setw(15) << aData.mActualRed << std::setw(15) << aData.mAredOverPred
+            << std::setw(7) << aData.mNumIterPCG << std::setw(19) << aData.mControlStagnationMeasure << std::setw(16)
+            << aData.mObjectiveStagnationMeasure << "\n" << std::flush;
 }
 
 } // namespace Plato

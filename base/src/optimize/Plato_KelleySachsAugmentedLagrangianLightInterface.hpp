@@ -183,7 +183,7 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
     aStageMng.setPenaltyParameterScaleFactor(aInputs.mPenaltyParameterScaleFactor);
 
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
-    aAlgorithm.setMaxNumUpdates(aInputs.mMaxNumOuterLineSearchUpdates);
+    aAlgorithm.setMaxNumLineSearchIterations(aInputs.mMaxNumOuterLineSearchUpdates);
     aAlgorithm.setMaxNumTrustRegionSubProblemIterations(aInputs.mMaxTrustRegionSubProblemIter);
 
     aAlgorithm.setMaxTrustRegionRadius(aInputs.mMaxTrustRegionRadius);

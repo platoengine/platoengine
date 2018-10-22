@@ -145,15 +145,15 @@ public:
     {
         mRadiusFlag = false;
         bool tTrialControlAccepted = true;
-        this->setNumTrustRegionSubProblemItrDone(1);
         ScalarType  tMIN_TRUST_REGION_RADIUS = 1e-4;
         if(this->getTrustRegionRadius() < tMIN_TRUST_REGION_RADIUS)
         {
             this->setTrustRegionRadius(tMIN_TRUST_REGION_RADIUS);
         }
 
+        OrdinalType tIteration = 1;
         OrdinalType tMaxNumSubProblemItr = this->getMaxNumTrustRegionSubProblemIterations();
-        while(this->getNumTrustRegionSubProblemItrDone() <= tMaxNumSubProblemItr)
+        while(tIteration <= tMaxNumSubProblemItr)
         {
             // Compute active and inactive sets
             this->computeActiveAndInactiveSet(aDataMng);
@@ -171,13 +171,11 @@ public:
             this->applyProjectedTrialStepToHessian(aDataMng, aStageMng);
             // Compute predicted reduction based on mid trial control
             ScalarType tPredictedReduction = this->computePredictedReduction(aDataMng, aStageMng);
-
             if(aDataMng.isObjectiveInexactnessToleranceExceeded() == true)
             {
                 tTrialControlAccepted = false;
                 break;
             }
-
             // Update objective function inexactness tolerance (bound)
             this->updateObjectiveInexactnessTolerance(tPredictedReduction);
             // Evaluate current mid objective function
@@ -192,12 +190,14 @@ public:
                     (tPredictedReduction + std::numeric_limits<ScalarType>::epsilon());
             this->setActualOverPredictedReduction(tActualOverPredReduction);
             // Update trust region radius: io_->printTrustRegionSubProblemDiagnostics(aDataMng, aSolver, this);
-            if(this->updateTrustRegionRadius(aDataMng) == true)
+            if(this->updateTrustRegionRadius(aDataMng) == true || tIteration == tMaxNumSubProblemItr)
             {
                 break;
             }
-            this->updateNumTrustRegionSubProblemItrDone();
+            tIteration++;
         }
+
+        this->setNumTrustRegionSubProblemItrDone(tIteration);
         return (tTrialControlAccepted);
     }
 

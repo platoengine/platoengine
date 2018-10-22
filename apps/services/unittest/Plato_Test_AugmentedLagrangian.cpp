@@ -1574,10 +1574,10 @@ TEST(PlatoTest, KelleySachsAlgorithm)
 
     // TEST MAXIMUM NUMBER OF UPDATES
     size_t tIntegerGold = 10;
-    EXPECT_EQ(tIntegerGold, tAlgorithm.getMaxNumUpdates());
+    EXPECT_EQ(tIntegerGold, tAlgorithm.getMaxNumLineSearchItr());
     tIntegerGold = 50;
-    tAlgorithm.setMaxNumUpdates(tIntegerGold);
-    EXPECT_EQ(tIntegerGold, tAlgorithm.getMaxNumUpdates());
+    tAlgorithm.setMaxNumLineSearchIterations(tIntegerGold);
+    EXPECT_EQ(tIntegerGold, tAlgorithm.getMaxNumLineSearchItr());
 
     // TEST NUMBER ITERATIONS DONE
     tIntegerGold = 0;

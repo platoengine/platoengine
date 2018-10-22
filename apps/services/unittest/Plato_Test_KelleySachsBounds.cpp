@@ -296,7 +296,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
     std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
     std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
-    tCompliance->disableFilter();
+    tCompliance->setFilterRadius(1.10);
     tMyObjective->add(tCompliance);
     tMyObjective->add(tVolume);
 
@@ -305,9 +305,11 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     const size_t tNumControls = tPDE->getNumDesignVariables();
     double tVolumeFraction = tPDE->getVolumeFraction();
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mTrustRegionExpansionFactor = 2;
-    tInputs.mOuterStationarityTolerance = 1e-4;
-    tInputs.mPrintDiagnostics = true;
+    tInputs.mHaveHessian = false;
+    tInputs.mMaxNumOuterIter = 20;
+    tInputs.mTrustRegionExpansionFactor = 4;
+    tInputs.mOuterControlStagnationTolerance = 1e-2;
+    tInputs.mActualOverPredictedReductionLowerBound = 0.05;
     tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1 /* base value */);
     tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-3 /* base value */);
     tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tVolumeFraction /* base value */);
@@ -319,67 +321,18 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-4;
     EXPECT_EQ(20u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(51u, tOutputs.mNumObjFuncEval);
-    EXPECT_NEAR(tOutputs.mObjFuncValue, 0.079569542222762052, tTolerance);
+    EXPECT_EQ(65u, tOutputs.mNumObjFuncEval);
+    EXPECT_NEAR(tOutputs.mObjFuncValue, 0.1333217255239926, tTolerance);
 
-//    const size_t tControlVectorIndex = 0;
-    std::vector<double> tGoldControl = TopoProxy::getGoldControlTrustRegionBoundTest();
+    const size_t tControlVectorIndex = 0;
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksbc_test();
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
-        //EXPECT_NEAR((*tOutputs.mSolution)(tControlVectorIndex, tIndex), tGoldControl[tIndex], tTolerance);
+        EXPECT_NEAR((*tOutputs.mSolution)(tControlVectorIndex, tIndex), tGoldControl[tIndex], tTolerance);
     }
 }
 
 TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrock)
-{
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    double tScalarValue = 2;
-    tDataMng->setInitialGuess(tScalarValue);
-    tScalarValue = -10;
-    tDataMng->setControlLowerBounds(tScalarValue);
-    tScalarValue = 10;
-    tDataMng->setControlUpperBounds(tScalarValue);
-
-    // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
-    std::shared_ptr<Plato::Rosenbrock<double>> tRosenbrock = std::make_shared<Plato::Rosenbrock<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tObjective = std::make_shared<Plato::CriterionList<double>>();
-    tObjective->add(tRosenbrock);
-
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjective);
-
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setTrustRegionContraction(0.5);
-    tAlgorithm.solve();
-    size_t tGoldNumItertations = 21;
-    EXPECT_EQ(tGoldNumItertations, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE;
-    EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
-
-    // TEST OBJECTIVE FUNCTION VALUE
-    double tScalarGold = 0.;
-    const double tTolerance = 1e-4;
-    EXPECT_NEAR(tScalarGold, tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
-
-    // TEST CONTROL SOLUTION
-    const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
-    tGoldVector(0, 0) = 1.;
-    tGoldVector(0, 1) = 1.;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
-}
-
-TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
 {
     // ********* ALLOCATE OBJECTIVE *********
     std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
@@ -398,10 +351,10 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
     Plato::AlgorithmOutputsKSBC<double> tOutputs;
     Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
 
-    const double tTolerance = 1e-6;
-    EXPECT_EQ(29u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(282u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(56u, tOutputs.mNumObjGradEval);
+    const double tTolerance = 1e-4;
+    EXPECT_EQ(6u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(45u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(12u, tOutputs.mNumObjGradEval);
     EXPECT_NEAR(0, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(0, tOutputs.mActualReduction, tTolerance);
     EXPECT_NEAR(0, tOutputs.mNormObjFuncGrad, tTolerance);
@@ -415,185 +368,140 @@ TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrockLightInterface)
 
 TEST(PlatoTest, KelleySachsBoundConstrainedCircle)
 {
-    // this test is disable because the optimizer does not reach the local minimum
-
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    tDataMng->setInitialGuess(1.2);
-    tDataMng->setControlLowerBounds(0.2);
-    tDataMng->setControlUpperBounds(2.5);
-
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Circle<double>> tCircle = std::make_shared<Plato::Circle<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tObjective = std::make_shared<Plato::CriterionList<double>>();
-    tObjective->add(tCircle);
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tCircle);
 
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjective);
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2.5 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 0.2 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.2 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.solve();
-    size_t tGoldNumItertations = 2;
-    EXPECT_EQ(tGoldNumItertations, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::STATIONARITY_MEASURE;
-    EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(2u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
 
     // TEST OBJECTIVE FUNCTION VALUE
-    double tScalarGold = 0.;
     const double tTolerance = 1e-4;
-    EXPECT_NEAR(tScalarGold, tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CONTROL SOLUTION
-    const size_t tNumVectors = 1;
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
     tGoldVector(0, 0) = 1.;
     tGoldVector(0, 1) = 2.;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
 
     // test gold control evaluates to expected objective
-    EXPECT_NEAR(tScalarGold, tCircle->value(tGoldVector), tTolerance);
+    EXPECT_NEAR(0., tCircle->value(tGoldVector), tTolerance);
 }
 
 TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauOne)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    tDataMng->setInitialGuess(4.);
-    tDataMng->setControlLowerBounds(1.);
-    tDataMng->setControlUpperBounds(5.);
-
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Himmelblau<double>> tHimmelblau = std::make_shared<Plato::Himmelblau<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tObjective = std::make_shared<Plato::CriterionList<double>>();
-    tObjective->add(tHimmelblau);
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tHimmelblau);
 
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjective);
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.solve();
-    size_t tGoldNumItertations = 8;
-    EXPECT_EQ(tGoldNumItertations, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::STATIONARITY_MEASURE;
-    EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(7u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
 
     // TEST OBJECTIVE FUNCTION VALUE
     const double tTolerance = 1e-4;
-    EXPECT_NEAR(0., tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CONTROL SOLUTION
-    const size_t tNumVectors = 1;
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
     tGoldVector(0, 0) = 3.;
     tGoldVector(0, 1) = 2.;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
 }
 
 TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauTwo)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    tDataMng->setInitialGuess(-1.);
-    tDataMng->setControlUpperBounds(5.);
-    tDataMng->setControlLowerBounds(-5.);
-
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Himmelblau<double>> tHimmelblau = std::make_shared<Plato::Himmelblau<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tObjective = std::make_shared<Plato::CriterionList<double>>();
-    tObjective->add(tHimmelblau);
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tHimmelblau);
 
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjective);
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -2 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.solve();
-    size_t tGoldNumItertations = 7;
-    EXPECT_EQ(tGoldNumItertations, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::STATIONARITY_MEASURE;
-    EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(9u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
 
     // TEST OBJECTIVE FUNCTION VALUE
     const double tTolerance = 1e-4;
-    EXPECT_NEAR(0., tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CONTROL SOLUTION
-    const size_t tNumVectors = 1;
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
     tGoldVector(0, 0) = -3.779310255345603;
     tGoldVector(0, 1) = -3.283185949206192;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
 }
 
 TEST(PlatoTest, KelleySachsBoundConstrainedGoldsteinPrice)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    tDataMng->setInitialGuess(1.2);
-    tDataMng->setControlLowerBounds(-20.);
-    tDataMng->setControlUpperBounds(20.);
 
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::GoldsteinPrice<double>> tGoldsteinPrice = std::make_shared<Plato::GoldsteinPrice<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tObjective = std::make_shared<Plato::CriterionList<double>>();
-    tObjective->add(tGoldsteinPrice);
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tGoldsteinPrice);
 
-    // ********* NEWTON ALGORITHM'S REDUCED SPACE STAGE MANAGER *********
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<double>> tStageMng =
-            std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<double>>(tDataFactory, tObjective);
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -2 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -1.2 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsBoundConstrained<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setTrustRegionContraction(0.5);
-    tAlgorithm.solve();
-    size_t tGoldNumItertations = 23;
-    EXPECT_EQ(tGoldNumItertations, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGoldWhy = Plato::algorithm::stop_t::STATIONARITY_MEASURE;
-    EXPECT_EQ(tGoldWhy, tAlgorithm.getStoppingCriterion());
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    tInputs.mMaxTrustRegionRadius = 1e3;
+    tInputs.mTrustRegionExpansionFactor = 2;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(10u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
 
     // TEST OBJECTIVE FUNCTION VALUE
     const double tTolerance = 1e-4;
-    EXPECT_NEAR(3., tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    EXPECT_NEAR(3., tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CONTROL SOLUTION
-    const size_t tNumVectors = 1;
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
     tGoldVector(0, 0) = 0.;
     tGoldVector(0, 1) = -1.;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
 }
 
 }

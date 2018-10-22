@@ -191,6 +191,33 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set actual over predicted reduction middle bound
+     * @param [in] aInput actual over predicted reduction middle bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionMidBound(const ScalarType & aInput)
+    {
+        mStepMng->setActualOverPredictedReductionMidBound(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set actual over predicted reduction lower bound
+     * @param [in] aInput actual over predicted reduction lower bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionLowerBound(const ScalarType & aInput)
+    {
+        mStepMng->setActualOverPredictedReductionLowerBound(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set actual over predicted reduction upper bound
+     * @param [in] aInput actual over predicted reduction upper bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionUpperBound(const ScalarType & aInput)
+    {
+        mStepMng->setActualOverPredictedReductionUpperBound(aInput);
+    }
+
+    /******************************************************************************//**
      * @brief Return reference to data manager
      * @return trust region algorithm's data manager
     **********************************************************************************/
@@ -293,6 +320,7 @@ private:
             mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
             mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
             mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
             mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
 
             mOutputData.mActualRed = mStepMng->getActualReduction();
@@ -498,9 +526,31 @@ private:
             }
         }
 
-        // Cache state data since trial control was accepted
-        mStageMng->cacheData();
+        // Apply post smoothing operation
+        if(this->isPostSmoothingActive() == true)
+        {
+            this->applyPostSmoothing();
+        }
+        // Compute stationarity measure
+        mDataMng->computeStationarityMeasure();
+        // Compute norm of projected gradient
+        mDataMng->computeNormProjectedGradient();
+        // Compute control stagnation measure
+        mDataMng->computeControlStagnationMeasure();
+        // Compute objective stagnation measure
+        mDataMng->computeObjectiveStagnationMeasure();
+        // compute gradient inexactness bound for next trust region sub-problem solve
+        ScalarType tNormProjectedGradient = mDataMng->getNormProjectedGradient();
+        mStepMng->updateGradientInexactnessTolerance(tNormProjectedGradient);
+    }
+
+    /******************************************************************************//**
+     * @brief Apply post trust region subproblem smoothing step
+    **********************************************************************************/
+    void applyPostSmoothing()
+    {
         // Compute gradient at new midpoint
+<<<<<<< HEAD
         mStageMng->computeGradient(tMidControl, *mGradient);
 
         // if done update, have to accept mid. otherwise, line search reasonable
@@ -508,6 +558,25 @@ private:
         if(tDidUpdate)
         {
             tAcceptMid = true;
+=======
+        mStageMng->cacheData();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+        mStageMng->computeGradient(tMidControl, *mGradient);
+
+        bool tControlUpdated = false;
+        if(mStepMng->getNumTrustRegionSubProblemItrDone() != mStepMng->getMaxNumTrustRegionSubProblemIterations())
+        {
+            tControlUpdated = this->updateControl(*mGradient, *mStepMng, *mDataMng, *mStageMng);
+        }
+
+        if(tControlUpdated == true)
+        {
+            // Update new gradient and inequality constraint values since control was updated
+            mStageMng->cacheData();
+            const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+            mStageMng->computeGradient(tCurrentControl, *mGradient);
+            mDataMng->setCurrentGradient(*mGradient);
+>>>>>>> plato: incremental commit. changes needed to improve ksbc performance
         }
         // if lacking Hessian, line search was a scaling of the gradient. Line search is not reasonable
         const bool tHaveHessian = mStageMng->getHaveHessian();
@@ -538,24 +607,13 @@ private:
         // possibly need to accept mid
         if(tAcceptMid)
         {
-            // Keep current objective function, control, and gradient values at mid point
+            // Keep mid objective function, control and gradient at mid point
+            this->setNumLineSearchItrDone(0);
             const ScalarType tMidObjectiveFunctionValue = mStepMng->getMidPointObjectiveFunctionValue();
             mDataMng->setCurrentObjectiveFunctionValue(tMidObjectiveFunctionValue);
             mDataMng->setCurrentControl(tMidControl);
             mDataMng->setCurrentGradient(*mGradient);
         }
-
-        // Compute stationarity measure
-        mDataMng->computeStationarityMeasure();
-        // Compute norm of projected gradient
-        mDataMng->computeNormProjectedGradient();
-        // Compute control stagnation measure
-        mDataMng->computeControlStagnationMeasure();
-        // Compute objective stagnation measure
-        mDataMng->computeObjectiveStagnationMeasure();
-        // compute gradient inexactness bound for next trust region sub-problem solve
-        ScalarType tNormProjectedGradient = mDataMng->getNormProjectedGradient();
-        mStepMng->updateGradientInexactnessTolerance(tNormProjectedGradient);
     }
 
     /******************************************************************************//**
