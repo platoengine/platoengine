@@ -41,6 +41,9 @@ if(ANALYZE)
 endif()
 
 
+IF( STK_ENABLED )
+  add_subdirectory(CreateSupportStructure1)
+ENDIF()
 add_subdirectory(2Load_OC)
 add_subdirectory(2Load_OC_Variables)
 add_subdirectory(2Load_absolute_filter_OC)
