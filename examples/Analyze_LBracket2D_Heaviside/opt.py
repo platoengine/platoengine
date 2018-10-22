@@ -68,9 +68,10 @@ def f(x, grad):
     cellGrad  = analyze.exportData("Objective Gradient", "SCALAR_FIELD")
     value = analyze.exportData("Objective Value", "SCALAR")
   
-    services.importData("Field", "SCALAR_FIELD", cellGrad)
+    services.importData("Field", "SCALAR_FIELD", x.tolist())
+    services.importData("Gradient", "SCALAR_FIELD", cellGrad)
     services.compute("FilterGradient")
-    filtered_grad = services.exportData("Filtered Field", "SCALAR_FIELD")
+    filtered_grad = services.exportData("Filtered Gradient", "SCALAR_FIELD")
     grad[:] = filtered_grad
     
     print " objective value: ", value

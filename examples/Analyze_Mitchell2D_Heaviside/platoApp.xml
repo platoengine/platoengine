@@ -45,6 +45,7 @@
   <Output>
     <ArgumentName>Filtered Field</ArgumentName>
   </Output>
+  <Gradient>False</Gradient>
 </Operation>
 
 <Operation>
@@ -53,10 +54,13 @@
   <Input>
     <ArgumentName>Field</ArgumentName>
   </Input>
+  <Input>
+    <ArgumentName>Gradient</ArgumentName>
+  </Input>
   <Output>
-    <ArgumentName>Filtered Field</ArgumentName>
+    <ArgumentName>Filtered Gradient</ArgumentName>
   </Output>
-  <Transpose>True</Transpose>
+  <Gradient>True</Gradient>
 </Operation>
 
 <Operation>

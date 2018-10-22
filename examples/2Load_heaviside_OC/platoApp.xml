@@ -9,9 +9,12 @@
 </Operation>
 
 <Filter>
-  <Name>Kernel</Name>
+  <Name>KernelThenHeaviside</Name>
   <Scale>1.48</Scale>
   <Absolute>-1.0</Absolute>
+  <HeavisideMin>2.0</HeavisideMin>
+  <HeavisideUpdate>1.0</HeavisideUpdate>
+  <HeavisideMax>10.0</HeavisideMax>
 </Filter>
 
 <Timers>

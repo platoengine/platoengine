@@ -271,10 +271,14 @@
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Gradient</ArgumentName>
       <SharedDataName>Volume Gradient</SharedDataName>
     </Input>
     <Output>
-      <ArgumentName>Filtered Field</ArgumentName>
+      <ArgumentName>Filtered Gradient</ArgumentName>
       <SharedDataName>Volume Gradient</SharedDataName>
     </Output>
   </Operation>
@@ -448,10 +452,14 @@
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Optimization DOFs</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Gradient</ArgumentName>
       <SharedDataName>Internal Energy Gradient</SharedDataName>
     </Input>
     <Output>
-      <ArgumentName>Filtered Field</ArgumentName>
+      <ArgumentName>Filtered Gradient</ArgumentName>
       <SharedDataName>Internal Energy Gradient</SharedDataName>
     </Output>
   </Operation>
@@ -516,7 +524,6 @@
     <ValueName>Optimization DOFs</ValueName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
     <FilteredName>Topology</FilteredName>
-    <FilterControlStage>FilterControl</FilterControlStage>
   </OptimizationVariables>
   <Objective>
     <ValueStageName>Internal Energy</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->

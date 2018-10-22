@@ -40,9 +40,9 @@
 //@HEADER
 */
 
-#include "PlatoEngine_KernelFilter.hpp"
+#include "PlatoEngine_KernelThenHeavisideFilter.hpp"
 
-#include "PSL_KernelFilter.hpp"
+#include "PSL_KernelThenHeavisideFilter.hpp"
 #include "PSL_Interface_BasicGlobalUtilities.hpp"
 #include "PSL_Abstract_GlobalUtilities.hpp"
 #include "PSL_Interface_MpiWrapper.hpp"
@@ -73,34 +73,32 @@
 namespace Plato
 {
 
-KernelFilter::KernelFilter() :
+KernelThenHeavisideFilter::KernelThenHeavisideFilter() :
         AbstractFilter(),
         m_comm(),
-        m_kernel(NULL),
+        m_filter(NULL),
         m_input_data(NULL),
         m_points(NULL),
-        m_parallel_exchanger(NULL),
-        m_maximum_absolute_parallel_error_tolerance(1e-3),
-        m_validate_interface(false)
+        m_parallel_exchanger(NULL)
 {
 }
 
-#define PlatoEngine_KernelFilter_SafeFree(_1) \
+#define PlatoEngine_KernelThenHeavisideFilter_SafeFree(_1) \
     if(_1) { \
         delete _1; \
         _1 = NULL; \
     }
 
-KernelFilter::~KernelFilter()
+KernelThenHeavisideFilter::~KernelThenHeavisideFilter()
 {
-    PlatoEngine_KernelFilter_SafeFree(m_kernel);
-    PlatoEngine_KernelFilter_SafeFree(m_input_data);
-    PlatoEngine_KernelFilter_SafeFree(m_points);
-    PlatoEngine_KernelFilter_SafeFree(m_parallel_exchanger);
-    PlatoEngine_KernelFilter_SafeFree(m_authority);
+    PlatoEngine_KernelThenHeavisideFilter_SafeFree(m_filter);
+    PlatoEngine_KernelThenHeavisideFilter_SafeFree(m_input_data);
+    PlatoEngine_KernelThenHeavisideFilter_SafeFree(m_points);
+    PlatoEngine_KernelThenHeavisideFilter_SafeFree(m_parallel_exchanger);
+    PlatoEngine_KernelThenHeavisideFilter_SafeFree(m_authority);
 }
 
-void KernelFilter::build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh)
+void KernelThenHeavisideFilter::build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh)
 {
     m_comm = aLocalComm;
 
@@ -111,105 +109,59 @@ void KernelFilter::build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* a
     build_parallel_exchanger(aMesh);
 
     // allocate filter
-    m_kernel = new PlatoSubproblemLibrary::KernelFilter(m_authority,
-                                                        m_input_data,
-                                                        m_points,
-                                                        m_parallel_exchanger);
+    m_filter = new PlatoSubproblemLibrary::KernelThenHeavisideFilter(m_authority, m_input_data, m_points, m_parallel_exchanger);
 
     // enable announcing chosen radius
-    m_kernel->announce_radius();
+    m_filter->announce_radius();
 
-    // build kernel
-    m_kernel->build();
-
-    if(m_validate_interface)
-    {
-        // confirm validate
-        const size_t local_num_nodes = m_points->get_num_points();
-        PlatoSubproblemLibrary::example::Interface_ParallelVector pv(std::vector<double>(local_num_nodes, 0.));
-        if(!m_kernel->is_valid(&pv))
-        {
-            m_authority->utilities->fatal_error("KernelFilter::build invalid specification to kernel. Aborting. \n\n");
-        }
-        else
-        {
-            m_authority->utilities->print("KernelFilter::build is_valid confirmed.\n");
-        }
-    }
+    // build filter
+    m_filter->build();
 }
 
-void KernelFilter::apply_on_field(size_t length, double* field_data)
+void KernelThenHeavisideFilter::apply_on_field(size_t length, double* field_data)
 {
+    // build parallel vector
     std::vector<double> input(field_data, field_data + length);
     PlatoSubproblemLibrary::example::Interface_ParallelVector pv(input);
 
-    if(m_validate_interface)
-    {
-        const double initial_parallel_error = m_parallel_exchanger->get_maximum_absolute_parallel_error(&pv);
-        if(m_maximum_absolute_parallel_error_tolerance < initial_parallel_error)
-        {
-            m_authority->utilities->fatal_error("KernelFilter::apply_on_field high parallel error before apply_on_field. Aborting. \n\n");
-        }
-    }
+    // do filter
+    m_filter->apply(&pv);
 
-    m_kernel->apply(&pv);
-
-    if(m_validate_interface)
-    {
-        const double final_parallel_error = m_parallel_exchanger->get_maximum_absolute_parallel_error(&pv);
-        if(m_maximum_absolute_parallel_error_tolerance < final_parallel_error)
-        {
-            m_authority->utilities->fatal_error("KernelFilter::apply_on_field high parallel error after apply_on_field. Aborting. \n\n");
-        }
-    }
-
+    // transfer field data back
     std::copy(pv.m_data.begin(), pv.m_data.end(), field_data);
 }
 
-void KernelFilter::apply_on_gradient(size_t length, double* base_field_data, double* gradient_data)
+void KernelThenHeavisideFilter::apply_on_gradient(size_t length, double* base_field_data, double* gradient_data)
 {
-    std::vector<double> input(gradient_data, gradient_data + length);
-    PlatoSubproblemLibrary::example::Interface_ParallelVector pv(input);
+    // build parallel vectors
+    std::vector<double> input_base_field(base_field_data, base_field_data + length);
+    PlatoSubproblemLibrary::example::Interface_ParallelVector pv_base_field(input_base_field);
+    std::vector<double> input_gradient(gradient_data, gradient_data + length);
+    PlatoSubproblemLibrary::example::Interface_ParallelVector pv_gradient(input_gradient);
 
-    if(m_validate_interface)
-    {
-        const double initial_parallel_error = m_parallel_exchanger->get_maximum_absolute_parallel_error(&pv);
-        if(m_maximum_absolute_parallel_error_tolerance < initial_parallel_error)
-        {
-            m_authority->utilities->fatal_error("KernelFilter::apply_on_gradient high parallel error before apply_on_gradient. Aborting. \n\n");
-        }
-    }
+    // do filter
+    m_filter->apply(&pv_base_field, &pv_gradient);
 
-    m_kernel->apply(NULL, &pv);
-
-    if(m_validate_interface)
-    {
-        const double final_parallel_error = m_parallel_exchanger->get_maximum_absolute_parallel_error(&pv);
-        if(m_maximum_absolute_parallel_error_tolerance < final_parallel_error)
-        {
-            m_authority->utilities->fatal_error("KernelFilter::apply_on_gradient high parallel error after apply_on_gradient. Aborting. \n\n");
-        }
-    }
-
-    std::copy(pv.m_data.begin(), pv.m_data.end(), gradient_data);
+    // transfer gradient data back
+    std::copy(pv_gradient.m_data.begin(), pv_gradient.m_data.end(), gradient_data);
 }
 
-void KernelFilter::build_input_data(InputData aInputData)
+void KernelThenHeavisideFilter::build_input_data(InputData aInputData)
 {
     Plato::InterfaceToEngine_ParameterDataBuilder builder(aInputData);
     m_input_data = builder.build();
 }
 
-void KernelFilter::build_points(DataMesh* mesh)
+void KernelThenHeavisideFilter::build_points(DataMesh* mesh)
 {
     m_points = new Plato::InterfaceToEngine_OptimizationMesh(mesh);
 }
 
-void KernelFilter::build_parallel_exchanger(DataMesh* mesh)
+void KernelThenHeavisideFilter::build_parallel_exchanger(DataMesh* mesh)
 {
     // get globals
     const size_t num_nodes = mesh->getNumNodes();
-    std::vector<size_t> globals(mesh->nodeGlobalIds,mesh->nodeGlobalIds+num_nodes);
+    std::vector<size_t> globals(mesh->nodeGlobalIds, mesh->nodeGlobalIds + num_nodes);
 
     // build
     m_parallel_exchanger = new PlatoSubproblemLibrary::example::Interface_ParallelExchanger_global(m_authority);

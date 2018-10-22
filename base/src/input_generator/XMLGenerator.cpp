@@ -76,20 +76,16 @@ void PrintUnrecognizedTokens(const std::vector<std::string> & unrecognizedTokens
 }
 
 /******************************************************************************/
-XMLGenerator::XMLGenerator()
+XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
+        m_InputFilename(input_filename),
+        m_UseLaunch(use_launch),
+        m_InputData(),
+        m_filterType_kernel_generatorName("kernel"),
+        m_filterType_kernel_XMLName("Kernel"),
+        m_filterType_kernelThenHeaviside_generatorName("kernel then heaviside"),
+        m_filterType_kernelThenHeaviside_XMLName("KernelThenHeaviside")
 /******************************************************************************/
 {
-    m_InputFilename = "";
-    m_UseLaunch = false;
-}
-
-
-/******************************************************************************/
-XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch)
-/******************************************************************************/
-{
-    m_InputFilename = input_filename;
-    m_UseLaunch = use_launch;
 }
 
 /******************************************************************************/
@@ -3079,6 +3075,9 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.KS_initial_radius_scale = "";
     m_InputData.KS_max_radius_scale = "";
     m_InputData.problem_update_frequency = "";
+    m_InputData.filter_heaviside_min = "";
+    m_InputData.filter_heaviside_update = "";
+    m_InputData.filter_heaviside_max = "";
 
     std::string tStringValue;
     std::vector<std::string> tInputStringList;
@@ -3539,7 +3538,92 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.num_opt_processors = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"filter","power"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","type"}, tStringValue))
+                        {
+                            // retrieve input
+                            m_InputData.filter_type = "";
+                            for(size_t j=2; j<tokens.size(); ++j)
+                            {
+                                if(j!=2)
+                                {
+                                    m_InputData.filter_type += " ";
+                                }
+                                m_InputData.filter_type += tokens[j];
+                            }
+
+                            // check input is valid
+                            if(m_InputData.filter_type != m_filterType_kernel_generatorName &&
+                               m_InputData.filter_type != m_filterType_kernelThenHeaviside_generatorName)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter type\" did not match allowed types which include:\n\t"
+                                          <<"\""<<m_filterType_kernel_generatorName<<"\","
+                                          <<"\""<<m_filterType_kernelThenHeaviside_generatorName<<"\""
+                                          <<".\n";
+                                return false;
+                            }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","heaviside","min"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter heaviside min\" keyword(s).\n";
+                                return false;
+                            }
+                            if(m_InputData.filter_heaviside_min!="")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside min\" both specified."
+                                        <<"\tOnly specify one of them. \"max/min/update\" are for updating continuation problems. \"scale\" is used otherwise.\n";
+                                return false;
+                            }
+                            m_InputData.filter_heaviside_min = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","heaviside","update"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter heaviside update\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.filter_heaviside_update = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","heaviside","max"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter heaviside max\" keyword(s).\n";
+                                return false;
+                            }
+                            if(m_InputData.filter_heaviside_max!="")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside max\" both specified."
+                                        <<"\tOnly specify one of them. \"max/min/update\" are for updating continuation problems. \"scale\" is used otherwise.\n";
+                                return false;
+                            }
+                            m_InputData.filter_heaviside_max = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","heaviside","scale"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter heaviside scale\" keyword(s).\n";
+                                return false;
+                            }
+                            if(m_InputData.filter_heaviside_min!="")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside min\" both specified."
+                                        <<"\tOnly specify one of them. \"max/min/update\" are for updating continuation problems. \"scale\" is used otherwise.\n";
+                                return false;
+                            }
+                            if(m_InputData.filter_heaviside_max!="")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside max\" both specified."
+                                        <<"\tOnly specify one of them. \"max/min/update\" are for updating continuation problems. \"scale\" is used otherwise.\n";
+                                return false;
+                            }
+                            m_InputData.filter_heaviside_min = tStringValue;
+                            m_InputData.filter_heaviside_max = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","radial","power"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
@@ -4628,13 +4712,40 @@ bool XMLGenerator::generatePlatoOperationsXML()
 
     // Filter
     tmp_node = doc.append_child("Filter");
-    addChild(tmp_node, "Name", "Kernel");
+    if(m_InputData.filter_type == m_filterType_kernelThenHeaviside_generatorName)
+    {
+        // kernel then heaviside
+        addChild(tmp_node, "Name", m_filterType_kernelThenHeaviside_XMLName);
+    }
+    else
+    {
+        // kernel is default
+        addChild(tmp_node, "Name", m_filterType_kernel_XMLName);
+    }
     if(m_InputData.filter_radius_scale != "")
+    {
         addChild(tmp_node, "Scale", m_InputData.filter_radius_scale);
+    }
     if(m_InputData.filter_radius_absolute != "")
+    {
         addChild(tmp_node, "Absolute", m_InputData.filter_radius_absolute);
+    }
     if(m_InputData.filter_power != "")
+    {
         addChild(tmp_node, "Power", m_InputData.filter_power);
+    }
+    if(m_InputData.filter_heaviside_min != "")
+    {
+        addChild(tmp_node, "HeavisideMin", m_InputData.filter_heaviside_min);
+    }
+    if(m_InputData.filter_heaviside_update != "")
+    {
+        addChild(tmp_node, "HeavisideUpdate", m_InputData.filter_heaviside_update);
+    }
+    if(m_InputData.filter_heaviside_max != "")
+    {
+        addChild(tmp_node, "HeavisideMax", m_InputData.filter_heaviside_max);
+    }
 
     // PlatoMainOutput
     tmp_node = doc.append_child("Operation");
@@ -4703,6 +4814,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
     addChild(tmp_node1, "ArgumentName", "Field");
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "ArgumentName", "Filtered Field");
+    addChild(tmp_node, "Gradient", "False");
 
     // FilterGradient
     tmp_node = doc.append_child("Operation");
@@ -4710,9 +4822,11 @@ bool XMLGenerator::generatePlatoOperationsXML()
     addChild(tmp_node, "Name", "FilterGradient");
     tmp_node1 = tmp_node.append_child("Input");
     addChild(tmp_node1, "ArgumentName", "Field");
+    tmp_node1 = tmp_node.append_child("Input");
+    addChild(tmp_node1, "ArgumentName", "Gradient");
     tmp_node1 = tmp_node.append_child("Output");
-    addChild(tmp_node1, "ArgumentName", "Filtered Field");
-    addChild(tmp_node, "Transpose", "True");
+    addChild(tmp_node1, "ArgumentName", "Filtered Gradient");
+    addChild(tmp_node, "Gradient", "True");
 
     if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
        m_InputData.optimization_algorithm.compare("ksal") == 0)
@@ -4725,7 +4839,8 @@ bool XMLGenerator::generatePlatoOperationsXML()
         addChild(tmp_node1, "ArgumentName", "Field");
         tmp_node1 = tmp_node.append_child("Output");
         addChild(tmp_node1, "ArgumentName", "Filtered Field");
-        addChild(tmp_node, "Transpose", "True");
+        addChild(tmp_node, "Gradient", "False");
+        // this XML is very likely not exercised in solving a full Plato Engine problem?
     }
 
     // InitializeField
@@ -5000,11 +5115,9 @@ bool XMLGenerator::outputVolumeGradientStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5048,15 +5161,17 @@ bool XMLGenerator::outputVolumeGradientStage(pugi::xml_document &doc)
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterGradient");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
+    addChild(input_node, "SharedDataName", "Optimization DOFs");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Gradient");
     addChild(input_node, "SharedDataName", "Volume Gradient");
-
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Volume Gradient");
 
+    // stage output
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Volume Gradient");
 
@@ -5077,11 +5192,9 @@ bool XMLGenerator::outputSurfaceAreaGradientStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5122,15 +5235,17 @@ bool XMLGenerator::outputSurfaceAreaGradientStage(pugi::xml_document &doc)
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterGradient");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
+    addChild(input_node, "SharedDataName", "Optimization DOFs");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Gradient");
     addChild(input_node, "SharedDataName", "Surface Area Gradient");
-
     output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Filtered Field");
+    addChild(output_node, "ArgumentName", "Filtered Gradient");
     addChild(output_node, "SharedDataName", "Surface Area Gradient");
 
+    // stage output
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Surface Area Gradient");
 
@@ -5151,11 +5266,9 @@ bool XMLGenerator::outputVolumeStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5215,11 +5328,9 @@ bool XMLGenerator::outputSurfaceAreaStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5275,11 +5386,9 @@ bool XMLGenerator::outputComputeStateStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5340,11 +5449,9 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc)
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5424,17 +5531,15 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc)
     pugi::xml_node stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Internal Energy Gradient");
 
+    // fitler control
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5499,18 +5604,21 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc)
     addChild(output_node, "ArgumentName", "Field");
     addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
+    // filter gradient
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterGradient");
     addChild(op_node, "PerformerName", "PlatoMain");
-
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
+    addChild(input_node, "SharedDataName", "Optimization DOFs");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Gradient");
     addChild(input_node, "SharedDataName", "Internal Energy Gradient");
-
     output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Filtered Field");
+    addChild(output_node, "ArgumentName", "Filtered Gradient");
     addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
+    // stage output
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
@@ -5530,15 +5638,12 @@ bool XMLGenerator::outputInternalEnergyHessianStage(pugi::xml_document &doc)
     addChild(input_node, "SharedDataName", "Optimization DOFs");
     input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Descent Direction");
-
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterControl");
     addChild(op_node, "PerformerName", "PlatoMain");
-    
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
-    
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Topology");
@@ -5606,14 +5711,13 @@ bool XMLGenerator::outputInternalEnergyHessianStage(pugi::xml_document &doc)
     addChild(output_node, "ArgumentName", "Field");
     addChild(output_node, "SharedDataName", "Internal Energy Hessian");
     
+    // filter Hessian
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "FilterHessian");
     addChild(op_node, "PerformerName", "PlatoMain");
-    
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Field");
     addChild(input_node, "SharedDataName", "Internal Energy Hessian");
-    
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Field");
     addChild(output_node, "SharedDataName", "Internal Energy Hessian");
@@ -6220,7 +6324,6 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(tmp_node, "ValueName", "Optimization DOFs");
     addChild(tmp_node, "InitializationStage", "Initialize Optimization DOFs");
     addChild(tmp_node, "FilteredName", "Topology");
-    addChild(tmp_node, "FilterControlStage", "FilterControl");
     addChild(tmp_node, "LowerBoundValueName", "Lower Bound Value");
     addChild(tmp_node, "LowerBoundVectorName", "Lower Bound Vector");
     addChild(tmp_node, "UpperBoundValueName", "Upper Bound Value");

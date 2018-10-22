@@ -532,7 +532,6 @@
     <ValueName>Optimization DOFs</ValueName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
     <FilteredName>Topology</FilteredName>
-    <FilterControlStage>FilterControl</FilterControlStage>
     <LowerBoundValueName>Lower Bound Value</LowerBoundValueName>
     <LowerBoundVectorName>Lower Bound Vector</LowerBoundVectorName>
     <UpperBoundValueName>Upper Bound Value</UpperBoundValueName>

@@ -192,7 +192,7 @@ PSL_TEST(FreeHelpers, computeOverhang)
     EXPECT_GE(0., func_angle51_radius2.evaluate(&center, &other));
 }
 
-PSL_TEST(FreeHelpers, checkHeavisideDerivative)
+PSL_TEST(FreeHelpers, checkHeavisideDerivative_threshold)
 {
     set_rand_seed();
     // test that heaviside derivative agrees with finite difference approximation
@@ -209,6 +209,27 @@ PSL_TEST(FreeHelpers, checkHeavisideDerivative)
 
     // evaluate derivative
     double analytical_derivative = heaviside_gradient(heaviside_beta, threshold, control_base);
+
+    // expect small error
+    double tolerance = 1e-3;
+    EXPECT_NEAR(finite_diff_approx, analytical_derivative, tolerance);
+}
+PSL_TEST(FreeHelpers, checkHeavisideDerivative_noThreshold)
+{
+    set_rand_seed();
+    // test that heaviside derivative agrees with finite difference approximation
+
+    double heaviside_beta = 6.2;
+    double control_base = 0.425;
+    double control_step = 1e-3;
+
+    // evaluate finite difference
+    double plus_step = heaviside_apply(heaviside_beta, control_base + control_step);
+    double minus_step = heaviside_apply(heaviside_beta, control_base - control_step);
+    double finite_diff_approx = (plus_step - minus_step) / (2. * control_step);
+
+    // evaluate derivative
+    double analytical_derivative = heaviside_gradient(heaviside_beta, control_base);
 
     // expect small error
     double tolerance = 1e-3;

@@ -230,7 +230,6 @@
     <ValueName>Optimization DOFs</ValueName>
     <FilteredName>Topology</FilteredName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
-    <FilterControlStage>FilterControl</FilterControlStage>
   </OptimizationVariables>
   <Objective>
     <ValueStageName>Internal Energy</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->

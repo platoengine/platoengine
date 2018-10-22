@@ -21,14 +21,8 @@ double fractional_spherical_sector(const double& radius_fraction,
 
 double compute_overhang_angle(Point* center, Point* other, Point* normalized_build_direction);
 
-void heaviside_apply(const double& beta,
-                     const std::vector<double>& threshold,
-                     const std::vector<double>& input,
-                     std::vector<double>& output);
-void heaviside_gradient(const double& beta,
-                        const std::vector<double>& threshold,
-                        const std::vector<double>& input,
-                        std::vector<double>& output_gradient);
+double heaviside_apply(const double& beta, const double& input);
+double heaviside_gradient(const double& beta, const double& input);
 double heaviside_apply(const double& beta, const double& threshold, const double& input);
 double heaviside_gradient(const double& beta, const double& threshold, const double& input);
 

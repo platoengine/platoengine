@@ -131,7 +131,7 @@ void KernelThenHeavisideFilter::apply(AbstractInterface::ParallelVector* field)
     const size_t dimension = field->get_length();
     for(size_t i = 0u; i < dimension; i++)
     {
-        field->set_value(i, heaviside_apply(m_current_heaviside_parameter, 0.5, field->get_value(i)));
+        field->set_value(i, heaviside_apply(m_current_heaviside_parameter, field->get_value(i)));
     }
 }
 void KernelThenHeavisideFilter::apply(AbstractInterface::ParallelVector* base_field, AbstractInterface::ParallelVector* gradient)
@@ -151,7 +151,7 @@ void KernelThenHeavisideFilter::apply(AbstractInterface::ParallelVector* base_fi
     {
         double initial_gradient_value = gradient->get_value(control_index);
         double kerneled_value = base_field->get_value(control_index);
-        double heaviside_derivative_value = heaviside_gradient(m_current_heaviside_parameter, 0.5, kerneled_value);
+        double heaviside_derivative_value = heaviside_gradient(m_current_heaviside_parameter, kerneled_value);
         gradient->set_value(control_index, initial_gradient_value * heaviside_derivative_value);
     }
 

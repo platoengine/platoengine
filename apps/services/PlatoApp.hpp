@@ -544,9 +544,10 @@ private:
         void getArguments(std::vector<LocalArg>& aLocalArgs);
     private:
         Plato::AbstractFilter* mFilter;
-        const std::string m_inputName;
-        const std::string m_outputName;
-        bool m_transpose;
+        std::string m_input_toFilter_name;
+        std::string m_input_baseField_name;
+        std::string m_output_fromFilter_name;
+        bool m_isGradient;
     };
     friend class Filter;
 

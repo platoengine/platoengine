@@ -23,26 +23,51 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     // allocate result
     PlatoSubproblemLibrary::ParameterData* result = new PlatoSubproblemLibrary::ParameterData;
 
-    // set scale and/or absolute
+    // get scale and/or absolute
     double absolute=-1.0;
     double scale=-1.0;
     double power=-1.0;
+    double heaviside_min=-1.;
+    double heaviside_update=-1.;
+    double heaviside_max=-1;
     if( m_inputData.size<Plato::InputData>("Filter") )
     {
         auto tFilterNode = m_inputData.get<Plato::InputData>("Filter");
-        if(tFilterNode.size<std::string>("Absolute") > 0) {
+        if(tFilterNode.size<std::string>("Absolute") > 0)
+        {
             absolute = Plato::Get::Double(tFilterNode, "Absolute");
         }
-        if(tFilterNode.size<std::string>("Scale") > 0) {
+        if(tFilterNode.size<std::string>("Scale") > 0)
+        {
             scale = Plato::Get::Double(tFilterNode, "Scale");
         }
-        if(tFilterNode.size<std::string>("Power") > 0) {
+        if(tFilterNode.size<std::string>("Power") > 0)
+        {
             power = Plato::Get::Double(tFilterNode, "Power");
         }
+        if(tFilterNode.size<std::string>("HeavisideMin") > 0)
+        {
+            heaviside_min = Plato::Get::Double(tFilterNode, "HeavisideMin");
+        }
+        if(tFilterNode.size<std::string>("HeavisideUpdate") > 0)
+        {
+            heaviside_update = Plato::Get::Double(tFilterNode, "HeavisideUpdate");
+        }
+        if(tFilterNode.size<std::string>("HeavisideMax") > 0)
+        {
+            heaviside_max = Plato::Get::Double(tFilterNode, "HeavisideMax");
+        }
     }
+
+    // decide if input was meaningful
     const bool meaningful_absolute = (absolute >= 0.);
     const bool meaningful_scale = (scale >= 0.);
     const bool meaningful_power = (power > 0);
+    const bool meaningful_HeavisideMin = (heaviside_min > 0);
+    const bool meaningful_HeavisideUpdate = (heaviside_update >= 0);
+    const bool meaningful_HeavisideMax = (heaviside_max > 0);
+
+    // if not meaningful, use defaults
     if(meaningful_absolute)
     {
         result->set_absolute(absolute);
@@ -65,6 +90,30 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
         result->set_penalty(1.0);
     }
     result->set_iterations(1);
+    if(meaningful_HeavisideMin)
+    {
+        result->set_min_heaviside_parameter(heaviside_min);
+    }
+    else
+    {
+        result->set_min_heaviside_parameter(2.);
+    }
+    if(meaningful_HeavisideUpdate)
+    {
+        result->set_heaviside_continuation_scale(heaviside_update);
+    }
+    else
+    {
+        result->set_heaviside_continuation_scale(1.);
+    }
+    if(meaningful_HeavisideMax)
+    {
+        result->set_max_heaviside_parameter(heaviside_max);
+    }
+    else
+    {
+        result->set_max_heaviside_parameter(10.);
+    }
 
     // defaults
     result->set_spatial_searcher(PlatoSubproblemLibrary::spatial_searcher_t::spatial_searcher_t::recommended);

@@ -161,8 +161,7 @@ public:
     std::string getLightMPPath() {return m_InputData.lightmp_path;}
     std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
     void clearInputData();
-
-
+    InputData* exposeInputData() {return &m_InputData;}
 
 };
 

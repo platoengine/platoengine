@@ -45,6 +45,7 @@
 #include "PlatoEngine_AbstractFilter.hpp"
 #include "PlatoEngine_IdentityFilter.hpp"
 #include "PlatoEngine_KernelFilter.hpp"
+#include "PlatoEngine_KernelThenHeavisideFilter.hpp"
 #include "Plato_Interface.hpp"
 #include "data_mesh.hpp"
 #include "Plato_Parser.hpp"
@@ -73,6 +74,10 @@ Plato::AbstractFilter* build_filter(InputData aInputData, MPI_Comm& aLocalComm, 
         if(tNameString == "Kernel")
         {
             tResult = new Plato::KernelFilter();
+        }
+        else if(tNameString == "KernelThenHeaviside")
+        {
+            tResult = new Plato::KernelThenHeavisideFilter();
         }
         else if(tNameString == "Identity")
         {

@@ -1010,6 +1010,154 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getFilterScale(), "1.6");
 
+    // filter type
+    stringInput = "begin optimization parameters\n"
+            "filter type kernel\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel");
+    stringInput = "begin optimization parameters\n"
+            "filter type kernel then heaviside\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel then heaviside");
+    stringInput = "begin optimization parameters\n"
+            "filter type\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter type lions and tigers\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+
+    // filter heaviside min
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside min\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside min 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
+
+    // filter heaviside update
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"1.526");
+
+    // filter heaviside max
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside max\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside max 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+
+    // filter heaviside scale
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside scale\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside scale 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+
+    // filter heaviside various
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside scale 1.2\n"
+            "filter heaviside min 0.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside scale 1.2\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.2");
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.2");
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside min 0.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"0.5");
+    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
+
     // filter absolute
     stringInput = "begin optimization parameters\n"
             "filter radius absolute\n"
@@ -1029,9 +1177,9 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
-    // filter power
+    // filter absolute
     stringInput = "begin optimization parameters\n"
-            "filter power\n"
+            "filter radius absolute\n"
             "end optimization parameters\n";
     iss.str(stringInput);
     iss.clear();
@@ -1039,7 +1187,26 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
     stringInput = "begin optimization parameters\n"
-            "filter power 2.5\n"
+            "filter radius absolute 1.6\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
+
+    // filter radial power
+    stringInput = "begin optimization parameters\n"
+            "filter radial power\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter radial power 2.5\n"
             "end optimization parameters\n";
     iss.str(stringInput);
     iss.clear();
@@ -1677,6 +1844,24 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
     EXPECT_EQ(tester.getObjStressLimit(0), "");
     EXPECT_EQ(tester.getObjStressRampFactor(0), "");
+    tester.clearInputData();
+
+    stringInput = "begin objective\n"
+            "type limit stress\n"
+            "limit power initial 2.1\n"
+            "limit power update 0.125\n"
+            "limit power max 42.3\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
+    EXPECT_EQ(tester.getObjStressLimit(0), "");
+    EXPECT_EQ(tester.getObjStressRampFactor(0), "");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_initial, "2.1");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_update, "0.125");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_max, "42.3");
     tester.clearInputData();
 
     stringInput = "begin objective\n"

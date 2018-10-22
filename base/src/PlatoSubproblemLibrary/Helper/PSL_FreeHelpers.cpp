@@ -59,35 +59,17 @@ double compute_overhang_angle(Point* center, Point* other, Point* normalized_bui
     return angle;
 }
 
-void heaviside_apply(const double& beta,
-                     const std::vector<double>& threshold,
-                     const std::vector<double>& input,
-                     std::vector<double>& output)
+double heaviside_apply(const double& beta, const double& input)
 {
-    const size_t dimension = input.size();
-    assert(threshold.size() == dimension);
-
-    // do compute
-    output.resize(dimension);
-    for(size_t i = 0u; i < dimension; i++)
-    {
-        output[i] = heaviside_apply(beta, threshold[i], input[i]);
-    }
+    const double exp_term = -std::exp(-beta * input);
+    const double linear_term = input * std::exp(-beta);
+    return 1. + exp_term + linear_term;
 }
-void heaviside_gradient(const double& beta,
-                        const std::vector<double>& threshold,
-                        const std::vector<double>& input,
-                        std::vector<double>& output_gradient)
+double heaviside_gradient(const double& beta, const double& input)
 {
-    const size_t dimension = input.size();
-    assert(threshold.size() == dimension);
-
-    // do compute
-    output_gradient.resize(dimension);
-    for(size_t i = 0u; i < dimension; i++)
-    {
-        output_gradient[i] = heaviside_gradient(beta, threshold[i], input[i]);
-    }
+    const double exp_term = beta * std::exp(-beta * input);
+    const double linear_term = std::exp(-beta);
+    return exp_term + linear_term;
 }
 double heaviside_apply(const double& beta, const double& threshold, const double& input)
 {

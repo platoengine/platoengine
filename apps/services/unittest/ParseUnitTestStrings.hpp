@@ -281,7 +281,6 @@ const std::string InterfaceOptimizerBlock =
 "    <ValueName>Optimization DOFs</ValueName>"
 "    <FilteredName>Topology</FilteredName>"
 "    <InitializationStage>Initialize Optimization DOFs</InitializationStage>"
-"    <FilterControlStage>FilterControl</FilterControlStage>"
 "  </OptimizationVariables>"
 "  <Objective>"
 "    <ValueName>Internal Energy</ValueName>"

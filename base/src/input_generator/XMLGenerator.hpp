@@ -153,9 +153,13 @@ struct InputData
   std::vector<Constraint> constraints;
   std::vector<Material> materials;
   std::vector<Block> blocks;
+  std::string filter_type;
   std::string filter_radius_scale;
   std::string filter_radius_absolute;
   std::string filter_power;
+  std::string filter_heaviside_min;
+  std::string filter_heaviside_update;
+  std::string filter_heaviside_max;
   std::string num_opt_processors;
   std::string output_frequency;
   std::string output_method;
@@ -220,15 +224,11 @@ struct InputData
 class XMLGenerator {
 
 public:
-  XMLGenerator(const std::string &input_filename, bool use_launch = false);
+  XMLGenerator(const std::string &input_filename = "", bool use_launch = false);
   ~XMLGenerator();
   bool generate();
 
 protected:
-  XMLGenerator();
-  std::string m_InputFilename;
-  bool m_UseLaunch;
-  InputData m_InputData;
 
   bool parseLoads(std::istream &fin);
   bool parseBCs(std::istream &fin);
@@ -287,7 +287,13 @@ protected:
                                       const std::vector<std::string> &aInputStrings,
                                       std::string &aReturnStringValue);
 
-
+  std::string m_InputFilename;
+  bool m_UseLaunch;
+  InputData m_InputData;
+  std::string m_filterType_kernel_generatorName;
+  std::string m_filterType_kernel_XMLName;
+  std::string m_filterType_kernelThenHeaviside_generatorName;
+  std::string m_filterType_kernelThenHeaviside_XMLName;
 
 };
 

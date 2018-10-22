@@ -1059,12 +1059,31 @@ PlatoApp::PlatoMainOutput::~PlatoMainOutput()
 
 /******************************************************************************/
 PlatoApp::Filter::Filter(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp), m_inputName("Field"), m_outputName("Filtered Field")
+        LocalOp(aPlatoApp),
+        mFilter(),
+        m_input_toFilter_name(),
+        m_input_baseField_name(),
+        m_output_fromFilter_name(),
+        m_isGradient()
 /******************************************************************************/
 {
+    // retrieve filter
     mFilter = mPlatoApp->getFilter();
 
-    m_transpose = Plato::Get::Bool(aNode, "Transpose");
+    // decide names differently
+    m_isGradient = Plato::Get::Bool(aNode, "Gradient");
+    if(m_isGradient)
+    {
+        m_input_toFilter_name = "Gradient";
+        m_input_baseField_name = "Field";
+        m_output_fromFilter_name = "Filtered Gradient";
+    }
+    else
+    {
+        m_input_toFilter_name = "Field";
+        m_input_baseField_name = "";
+        m_output_fromFilter_name = "Filtered Field";
+    }
 }
 
 /******************************************************************************/
@@ -1073,6 +1092,60 @@ PlatoApp::Filter::~Filter()
 {
     mFilter = nullptr;
 }
+
+/******************************************************************************/
+void PlatoApp::Filter::getArguments(std::vector<LocalArg>& aLocalArgs)
+/******************************************************************************/
+{
+    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_toFilter_name});
+    if(!m_input_baseField_name.empty())
+    {
+        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_baseField_name});
+    }
+    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_output_fromFilter_name});
+}
+
+/******************************************************************************/
+void PlatoApp::Filter::operator()()
+/******************************************************************************/
+{
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
+    }
+
+    // get input data
+    auto infield = mPlatoApp->getNodeField(m_input_toFilter_name);
+    Real* input_field;
+    infield->ExtractView(&input_field);
+    auto outfield = mPlatoApp->getNodeField(m_output_fromFilter_name);
+    Real* output_field;
+    outfield->ExtractView(&output_field);
+
+    // copy input field to output
+    const int length = infield->MyLength();
+    std::copy(input_field, input_field + length, output_field);
+
+    if(m_isGradient)
+    {
+        // get base field for gradient application
+        auto outfield = mPlatoApp->getNodeField(m_input_baseField_name);
+        Real* base_field;
+        outfield->ExtractView(&base_field);
+
+        mFilter->apply_on_gradient(length, base_field, output_field);
+    }
+    else
+    {
+        mFilter->apply_on_field(length, output_field);
+    }
+
+    if(mPlatoApp->mTimersTree)
+    {
+        mPlatoApp->mTimersTree->end_partition();
+    }
+}
+
 
 /******************************************************************************/
 PlatoApp::Roughness::Roughness(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
@@ -2126,48 +2199,6 @@ void PlatoApp::PlatoMainOutput::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::Filter::operator()()
-/******************************************************************************/
-{
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
-    }
-
-    auto infield = mPlatoApp->getNodeField(m_inputName);
-    Real* input_field; infield->ExtractView(&input_field);
-
-    auto outfield = mPlatoApp->getNodeField(m_outputName);
-    Real* output_field; outfield->ExtractView(&output_field);
-
-    const int length = infield->MyLength();
- 
-    std::copy(input_field, input_field + length, output_field);
-
-    if(m_transpose)
-    {
-        mFilter->apply_on_gradient(length, output_field);
-    }
-    else
-    {
-        mFilter->apply_on_field(length, output_field);
-    }
-
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->end_partition();
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::Filter::getArguments(std::vector<LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_inputName});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_outputName});
-}
-
-/******************************************************************************/
 void PlatoApp::DesignVolume::getArguments(std::vector<LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
@@ -2176,8 +2207,11 @@ void PlatoApp::DesignVolume::getArguments(std::vector<LocalArg>& aLocalArgs)
 
 /******************************************************************************/
 PlatoApp::DesignVolume::DesignVolume(PlatoApp* p, Plato::InputData& node) : 
-  LocalOp(p), m_outValueName("Design Volume"){}
+  LocalOp(p), m_outValueName("Design Volume")
 /******************************************************************************/
+{
+
+}
 
 /******************************************************************************/
 void PlatoApp::DesignVolume::operator()()
