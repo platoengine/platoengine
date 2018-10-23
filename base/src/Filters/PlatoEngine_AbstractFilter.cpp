@@ -53,4 +53,8 @@ AbstractFilter::~AbstractFilter()
 {
 }
 
+void AbstractFilter::advance_continuation()
+{
+}
+
 }

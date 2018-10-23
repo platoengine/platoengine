@@ -67,6 +67,8 @@ public:
 
     //! Directive to cache any criterion specific data once the trial control is accepted.
     virtual void cacheData() = 0;
+    //! Directive to update problem definition.
+    virtual void updateProblem() = 0;
     //! Directive to update optimization specific data once the trial control is accepted.
     virtual void update(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 };

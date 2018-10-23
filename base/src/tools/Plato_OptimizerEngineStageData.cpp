@@ -1218,11 +1218,11 @@ void OptimizerEngineStageData::setKSMaxRadiusScale(const double& aInput)
     mKSMaxRadiusScale = aInput;
 }
 
-double OptimizerEngineStageData::getProblemUpdateFrequency() const
+size_t OptimizerEngineStageData::getProblemUpdateFrequency() const
 {
     return mProblemUpdateFrequency;
 }
-void OptimizerEngineStageData::setProblemUpdateFrequency(const double& aInput)
+void OptimizerEngineStageData::setProblemUpdateFrequency(const size_t& aInput)
 {
     mProblemUpdateFrequency = aInput;
 }

@@ -188,7 +188,7 @@ private:
         ScalarType tOuterActualReductionTolerance = mInputData.getKSOuterActualReductionTolerance();
         ScalarType tInitialRadiusScale = mInputData.getKSInitialRadiusScale();
         ScalarType tMaxRadiusScale = mInputData.getKSMaxRadiusScale();
-        ScalarType tProblemUpdateFrequency = mInputData.getProblemUpdateFrequency();
+        OrdinalType tProblemUpdateFrequency = mInputData.getProblemUpdateFrequency();
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setTrustRegionContraction(tContractionScaleFactor);

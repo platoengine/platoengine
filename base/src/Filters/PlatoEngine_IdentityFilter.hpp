@@ -59,6 +59,7 @@ public:
     virtual void build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh);
     virtual void apply_on_field(size_t length, double* field_data);
     virtual void apply_on_gradient(size_t length, double* base_field_data, double* gradient_data);
+    virtual void advance_continuation();
 
 protected:
 };

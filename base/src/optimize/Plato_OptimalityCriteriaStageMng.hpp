@@ -118,6 +118,13 @@ public:
         }
     }
 
+    //! Directive to update problem for each criterion.
+    void updateProblem()
+    {
+        assert(mObjective.get() != nullptr);
+        mObjective->updateProblem();
+    }
+
     //! Directive to update optimization specific data once the trial control is accepted.
     void update(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
     {

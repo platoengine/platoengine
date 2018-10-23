@@ -62,6 +62,9 @@ void IdentityFilter::apply_on_field(size_t length, double* field_data)
 void IdentityFilter::apply_on_gradient(size_t length, double* base_field_data, double* gradient_data)
 {
 }
+void IdentityFilter::advance_continuation()
+{
+}
 
 }
 

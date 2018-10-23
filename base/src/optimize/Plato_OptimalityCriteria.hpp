@@ -83,6 +83,7 @@ public:
             mOutputStream(),
             mMaxNumIterations(50),
             mNumIterationsDone(0),
+            mProblemUpdateFrequency(0), // zero for no update
             mFeasibilityTolerance(1e-5),
             mControlStagnationTolerance(1e-2),
             mObjectiveGradientTolerance(1e-8),
@@ -109,6 +110,12 @@ public:
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
+    }
+
+    //! specify outer loop frequency of update. Zero if no updates
+    void setProblemUpdateFrequency(const OrdinalType& aInput)
+    {
+        mProblemUpdateFrequency = aInput;
     }
 
     /******************************************************************************//**
@@ -246,10 +253,35 @@ public:
             mSubProblem->solve(*mDataMng, *mStageMng);
 
             mNumIterationsDone++;
+
+            this->conditionallyUpdateProblem();
         }
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Invoke update problem stage if needed.
+     **********************************************************************************/
+    void conditionallyUpdateProblem()
+    {
+        // don't update if frequency == 0
+        bool tHaveProblemUpdateFrequency = (0 < mProblemUpdateFrequency);
+        if(!tHaveProblemUpdateFrequency)
+        {
+            return;
+        }
+
+        // only update at requested frequency
+        bool tIsIterationToUpdate = (mNumIterationsDone % mProblemUpdateFrequency) == 0;
+        if(!tIsIterationToUpdate)
+        {
+            return;
+        }
+
+        // invoke advance continuation
+        mStageMng->updateProblem();
+    }
+
     /******************************************************************************//**
      * @brief Compute metrics used to decide if algorithm converged.
     **********************************************************************************/
@@ -482,6 +514,7 @@ private:
 
     OrdinalType mMaxNumIterations;
     OrdinalType mNumIterationsDone;
+    OrdinalType mProblemUpdateFrequency;
 
     ScalarType mFeasibilityTolerance;
     ScalarType mControlStagnationTolerance;

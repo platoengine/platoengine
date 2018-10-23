@@ -265,10 +265,21 @@ private:
         std::shared_ptr<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>> tSubProblem =
                 std::make_shared<Plato::NonlinearProgrammingSubProblemOC<ScalarType, OrdinalType>>(aDataFactory);
         Plato::OptimalityCriteria<ScalarType, OrdinalType> tAlgorithm(aDataMng, tStageMng, tSubProblem);
-        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
-        tAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        this->setParameters(tAlgorithm);
         tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
+    }
+
+private:
+    /******************************************************************************/
+    void setParameters(Plato::OptimalityCriteria<ScalarType, OrdinalType> & aAlgorithm)
+    /******************************************************************************/
+    {
+        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
+        OrdinalType tProblemUpdateFrequency = mInputData.getProblemUpdateFrequency();
+
+        aAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
     }
 
 private:

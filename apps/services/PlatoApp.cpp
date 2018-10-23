@@ -953,6 +953,25 @@ PlatoApp::ComputeVolume::~ComputeVolume()
 }
 
 
+PlatoApp::UpdateProblem::UpdateProblem(PlatoApp* p, Plato::InputData& node) :
+        LocalOp(p)
+{
+}
+PlatoApp::UpdateProblem::~UpdateProblem()
+{
+}
+void PlatoApp::UpdateProblem::operator()()
+{
+    // update filter
+    Plato::AbstractFilter* filter = mPlatoApp->getFilter();
+    filter->advance_continuation();
+
+    // update other portions of the problem here
+}
+void PlatoApp::UpdateProblem::getArguments(std::vector<LocalArg>& aLocalArgs)
+{
+}
+
 /******************************************************************************/
 Plato::data::layout_t 
 getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
@@ -1129,9 +1148,9 @@ void PlatoApp::Filter::operator()()
     if(m_isGradient)
     {
         // get base field for gradient application
-        auto outfield = mPlatoApp->getNodeField(m_input_baseField_name);
+        auto basefield = mPlatoApp->getNodeField(m_input_baseField_name);
         Real* base_field;
-        outfield->ExtractView(&base_field);
+        basefield->ExtractView(&base_field);
 
         mFilter->apply_on_gradient(length, base_field, output_field);
     }
@@ -1649,9 +1668,17 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("Update Problem");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new UpdateProblem(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             std::stringstream tMessage;
             tMessage << "Cannot find specified Function: " << tStrFunction << std::endl;
-            tMessage << "Avallable Functions: " << std::endl;
+            tMessage << "Available Functions: " << std::endl;
             for(auto tMyFunction : tFunctions)
             {
                 tMessage << tMyFunction << std::endl;

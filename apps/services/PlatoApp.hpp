@@ -687,6 +687,17 @@ private:
     };
     friend class ComputeVolume;
 
+    class UpdateProblem : public LocalOp
+    {
+    public:
+        UpdateProblem(PlatoApp* p, Plato::InputData& node);
+        ~UpdateProblem();
+        void operator()();
+        void getArguments(std::vector<LocalArg>& aLocalArgs);
+    private:
+    };
+    friend class UpdateProblem;
+
     void createLocalData(LocalOp* op);
     void createLocalData(LocalArg arg);
 

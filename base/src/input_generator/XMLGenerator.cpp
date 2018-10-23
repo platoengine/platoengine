@@ -4806,6 +4806,11 @@ bool XMLGenerator::generatePlatoOperationsXML()
     addChild(tmp_node, "OutputMethod", m_InputData.output_method.c_str());
     addChild(tmp_node, "Discretization", m_InputData.discretization);
 
+    // Update Problem
+    tmp_node = doc.append_child("Operation");
+    addChild(tmp_node, "Function", "Update Problem");
+    addChild(tmp_node, "Name", "Update Problem");
+
     // FilterControl
     tmp_node = doc.append_child("Operation");
     addChild(tmp_node, "Function", "Filter");
@@ -5168,7 +5173,7 @@ bool XMLGenerator::outputVolumeGradientStage(pugi::xml_document &doc)
     addChild(input_node, "ArgumentName", "Gradient");
     addChild(input_node, "SharedDataName", "Volume Gradient");
     output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Filtered Field");
+    addChild(output_node, "ArgumentName", "Filtered Gradient");
     addChild(output_node, "SharedDataName", "Volume Gradient");
 
     // stage output
@@ -6091,6 +6096,9 @@ bool XMLGenerator::generateInterfaceXML()
         Objective cur_obj = m_InputData.objectives[i];
         addChild(op_node, "PerformerName", cur_obj.performer_name);
     }
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Update Problem");
+    addChild(op_node, "PerformerName", "PlatoMain");
 
     // Cache State
     stage_node = doc.append_child("Stage");
@@ -6252,10 +6260,6 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(misc_node, "CheckGradient", m_InputData.check_gradient);
         addChild(misc_node, "CheckHessian", m_InputData.check_hessian);
     }
-
-
-    tmp_node = misc_node.append_child("NLopt");
-    addChild(tmp_node, "Method", "MMA");
 
     tmp_node = misc_node.append_child("Options");
     addChild(tmp_node, "DerivativeCheckerInitialSuperscript", "1");

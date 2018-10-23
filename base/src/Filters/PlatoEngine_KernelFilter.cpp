@@ -194,6 +194,11 @@ void KernelFilter::apply_on_gradient(size_t length, double* base_field_data, dou
     std::copy(pv.m_data.begin(), pv.m_data.end(), gradient_data);
 }
 
+void KernelFilter::advance_continuation()
+{
+    m_kernel->advance_continuation();
+}
+
 void KernelFilter::build_input_data(InputData aInputData)
 {
     Plato::InterfaceToEngine_ParameterDataBuilder builder(aInputData);

@@ -57,6 +57,8 @@
 #include "Plato_Interface.hpp"
 #include "Plato_OptimizerInterface.hpp"
 #include "Plato_OptimizerFactory.hpp"
+#include "Plato_Exceptions.hpp"
+#include <iostream>
 
 #ifndef NDEBUG
 #include <fenv.h>
@@ -89,6 +91,11 @@ int main(int aArgc, char *aArgv[])
     try
     {
         tPlatoInterface = new Plato::Interface();
+    }
+    catch(Plato::ParsingException& e)
+    {
+        std::cout << e.message() << std::endl;
+        safeExit();
     }
     catch(...)
     {

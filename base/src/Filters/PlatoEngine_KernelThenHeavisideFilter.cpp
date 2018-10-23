@@ -146,6 +146,11 @@ void KernelThenHeavisideFilter::apply_on_gradient(size_t length, double* base_fi
     std::copy(pv_gradient.m_data.begin(), pv_gradient.m_data.end(), gradient_data);
 }
 
+void KernelThenHeavisideFilter::advance_continuation()
+{
+    m_filter->advance_continuation();
+}
+
 void KernelThenHeavisideFilter::build_input_data(InputData aInputData)
 {
     Plato::InterfaceToEngine_ParameterDataBuilder builder(aInputData);

@@ -245,8 +245,8 @@ public:
     double getKSMaxRadiusScale() const;
     void setKSMaxRadiusScale(const double& aInput);
 
-    double getProblemUpdateFrequency() const;
-    void setProblemUpdateFrequency(const double& aInput);
+    size_t getProblemUpdateFrequency() const;
+    void setProblemUpdateFrequency(const size_t& aInput);
 
 private:
     bool mCheckGradient;

@@ -116,7 +116,7 @@ public:
         mPrintDiagnostics = true;
     }
 
-    //! specify outer loop frequency of update. Zero or less if no updates
+    //! specify outer loop frequency of update. Zero if no updates
     void setProblemUpdateFrequency(const OrdinalType& aInput)
     {
         mProblemUpdateFrequency = aInput;

@@ -1513,7 +1513,7 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         }
         if(tOptionsNode.size<std::string>("ProblemUpdateFrequency"))
         {
-            double tProblemUpdateFrequency = Plato::Get::Double(tOptionsNode, "ProblemUpdateFrequency");
+            int tProblemUpdateFrequency = Plato::Get::Int(tOptionsNode, "ProblemUpdateFrequency");
             aOptimizerEngineStageData.setProblemUpdateFrequency(tProblemUpdateFrequency);
         }
     }

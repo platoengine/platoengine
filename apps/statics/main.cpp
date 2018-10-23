@@ -355,6 +355,13 @@ void LocalApp::throwParsingException(std::string aArgumentName, const std::map<s
 void LocalApp::compute(const std::string & aOperationName)
 /******************************************************************************/
 {
+    if(aOperationName == "Update Problem")
+    {
+        // nothing currently to update
+        return;
+    }
+    // Note: LightMP assumes compute objective is the call here.
+
     DistributedVector *topology = m_fieldMap["Topology"];
 
     DistributedVector *iegradient = m_fieldMap["Internal Energy Gradient"];
