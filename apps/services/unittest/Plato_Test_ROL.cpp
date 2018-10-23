@@ -69,7 +69,7 @@
 
 namespace PlatoTest
 {
-
+#ifndef BUILD_IN_SIERRA
 TEST(PlatoTest, DistributedVectorROL)
 {
     double tScalarValue = 1;
@@ -491,5 +491,5 @@ TEST(PlatoTest, ProxyStructuralTopologyOptimizationROL)
         EXPECT_NEAR(tControlData[tIndex], tGoldControl[tIndex], tTolerance);
     }
 }
-
+#endif
 } // PlatoTest

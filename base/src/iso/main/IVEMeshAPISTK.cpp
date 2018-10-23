@@ -433,18 +433,17 @@ IVEHandle IVEMeshAPISTK::new_tri(IVEHandle n1, IVEHandle n2, IVEHandle n3, bool 
   stk::mesh::Entity stk_n3 = get_stk_entity(n3);
   stk::mesh::EntityId entity_id = get_next_entity_id(stk::topology::ELEM_RANK);  
   stk::mesh::Entity stk_tri;
+#ifdef BUILD_IN_SIERRA
   if(is_fixed)
-  {
-    stk_tri = mBulkData->declare_element(entity_id, {mFixedTriPart});
-  //  double* map = stk::mesh::field_data(*mFixedTriMap, stk_tri);
-  //  map[0] = (double)source_global_id;
-  }
+    stk_tri = mBulkData->declare_element(entity_id, stk::mesh::ConstPartVector{mFixedTriPart});
   else
-  {
+      stk_tri = mBulkData->declare_element(entity_id, stk::mesh::ConstPartVector{mOptimizedTriPart});
+#else
+  if(is_fixed)
+    stk_tri = mBulkData->declare_element(entity_id, {mFixedTriPart});
+  else
     stk_tri = mBulkData->declare_element(entity_id, {mOptimizedTriPart});
-  //  double* map = stk::mesh::field_data(*mOptimizedTriMap, stk_tri);
-  //  map[0] = (double)source_global_id;
-  }
+#endif
   mBulkData->declare_relation(stk_tri, stk_n1, 0);
   mBulkData->declare_relation(stk_tri, stk_n2, 1);
   mBulkData->declare_relation(stk_tri, stk_n3, 2);
