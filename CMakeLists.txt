@@ -75,12 +75,6 @@ include_directories( ${Trilinos_INCLUDE_DIRS} ${Trilinos_TPL_INCLUDE_DIRS})
 
 ###########################  Compiler setup ###################################
 ######################## (pre 'project()' command) ############################
-message("Trilinos_CXX_COMPILER_FLAGS: ${Trilinos_CXX_COMPILER_FLAGS}")
-set(CMAKE_C_FLAGS "${Trilinos_C_COMPILER_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS_DEBUG "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS_RELEASE "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
-
 ## Compilers cannot be changed after the 'project()' command below:
 message("Trilinos_CXX_COMPILER     ${Trilinos_CXX_COMPILER}")
 message("Trilinos_C_COMPILER       ${Trilinos_C_COMPILER}")
@@ -99,6 +93,12 @@ project(PlatoEngine)
 
 ###########################  Compiler setup ###################################
 ####################### (post 'project()' command) ############################
+message("Trilinos_CXX_COMPILER_FLAGS: ${Trilinos_CXX_COMPILER_FLAGS}")
+set(CMAKE_C_FLAGS "${Trilinos_C_COMPILER_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS_RELEASE "${Trilinos_CXX_COMPILER_FLAGS} -fPIC")
+
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   # Clang specific flags
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
