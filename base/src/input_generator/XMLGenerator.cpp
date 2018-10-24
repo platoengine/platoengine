@@ -1050,6 +1050,14 @@ bool XMLGenerator::generateSalinasInputDecks()
                     {
                         fprintf(fp, "  case = stress_limit\n");
                     }
+                    else if(cur_obj.type == "compliance and volume min")
+                    {
+                        fprintf(fp, "  case = primary_compliance_secondary_volume\n");
+                    }
+                }
+                if(cur_obj.volume_misfit_target != "")
+                {
+                    fprintf(fp, "  volume_misfit_target = %s\n", cur_obj.volume_misfit_target.c_str());
                 }
                 if(cur_obj.stress_limit != "")
                 {
@@ -1071,19 +1079,22 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  stress_limit_power_max = %s\n", cur_obj.limit_power_max.c_str());
                 }
-                if(m_InputData.constraints.size() > 0)
+                if(frf)
                 {
-                    if(m_InputData.constraints[0].type == "volume")
+                    if(m_InputData.constraints.size() > 0)
                     {
-                        // putting the volume fraction here is meaningless, right?
-                        // volume fraction calculation is done on platomain
-                        fprintf(fp, "  volume_fraction = %s\n", m_InputData.constraints[0].volume_fraction.c_str());
+                        if(m_InputData.constraints[0].type == "surface area")
+                        {
+                            fprintf(fp, "  surface_area_constraint_value = %s\n", m_InputData.constraints[0].surface_area.c_str());
+                            fprintf(fp, "  surface_area_ssid = %s\n", m_InputData.constraints[0].surface_area_ssid.c_str());
+                        }
                     }
-                    else if(m_InputData.constraints[0].type == "surface area")
-                    {
-                        fprintf(fp, "  surface_area_constraint_value = %s\n", m_InputData.constraints[0].surface_area.c_str());
-                        fprintf(fp, "  surface_area_ssid = %s\n", m_InputData.constraints[0].surface_area_ssid.c_str());
-                    }
+                }
+                else
+                {
+                    // this volume fraction communicates single material optimization to Sierra-SD.
+                    // this volume fraction does suggest a constraint value, and hence, is arbitrary.
+                    fprintf(fp, "  volume_fraction = %f\n", 0.314);
                 }
                 if(cur_obj.multi_load_case == "true")
                 {
@@ -2026,6 +2037,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.stress_limit = tokens[2];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","misfit","target"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume misfit target\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_misfit_target = tokens[3];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","ramp","factor"}, tStringValue))
                         {
@@ -6245,20 +6265,31 @@ bool XMLGenerator::generateInterfaceXML()
     // Optimizer
     pugi::xml_node misc_node = doc.append_child("Optimizer");
     if(m_InputData.optimization_algorithm.compare("oc") == 0)
+    {
         addChild(misc_node, "Package", "OC");
+    }
     else if(m_InputData.optimization_algorithm.compare("gcmma") == 0)
+    {
         addChild(misc_node, "Package", "GCMMA");
+    }
     else if(m_InputData.optimization_algorithm.compare("mma") == 0)
+    {
         addChild(misc_node, "Package", "MMA");
+    }
     else if(m_InputData.optimization_algorithm.compare("ksbc") == 0)
+    {
         addChild(misc_node, "Package", "KSBC");
+    }
     else if(m_InputData.optimization_algorithm.compare("ksal") == 0)
+    {
         addChild(misc_node, "Package", "KSAL");
+    }
     else if(m_InputData.optimization_algorithm.compare("derivativechecker") == 0)
     {
         addChild(misc_node, "Package", "DerivativeChecker");
         addChild(misc_node, "CheckGradient", m_InputData.check_gradient);
         addChild(misc_node, "CheckHessian", m_InputData.check_hessian);
+        addChild(misc_node, "UseUserInitialGuess", "True");
     }
 
     tmp_node = misc_node.append_child("Options");

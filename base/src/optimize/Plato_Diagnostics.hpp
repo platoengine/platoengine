@@ -197,6 +197,14 @@ public:
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
         mDidGradientTestPassed = tMinError < mGradientTestBound ? true : false;
+        if(mDidGradientTestPassed)
+        {
+            aOutputMsg << "The checker believes it passed.\n";
+        }
+        else
+        {
+            aOutputMsg << "The checker believes it failed.\n";
+        }
     }
 
     void checkCriterionHessian(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
@@ -282,6 +290,14 @@ public:
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
         mDidHessianTestPassed = tMinError < mHessianTestBound ? true : false;
+        if(mDidHessianTestPassed)
+        {
+            aOutputMsg << "The checker believes it passed.\n";
+        }
+        else
+        {
+            aOutputMsg << "The checker believes it failed.\n";
+        }
     }
 
 private:
@@ -296,6 +312,7 @@ private:
             assert(tMyLength > static_cast<ScalarType>(0));
             for(OrdinalType tElemIndex = 0; tElemIndex < tMyLength; tElemIndex++)
             {
+                // Note: this is a bug, std::rand() and RAND_MAX are integers so tMyVector is being set to the lower bound.
                 tMyVector[tElemIndex] = aLowerBound + ((aUpperBound - aLowerBound) * static_cast<ScalarType>(std::rand() / RAND_MAX));
             }
         }

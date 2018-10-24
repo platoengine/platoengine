@@ -121,6 +121,7 @@ struct Objective
   std::string limit_power_initial;
   std::string limit_power_update;
   std::string limit_power_max;
+  std::string volume_misfit_target;
 };
 struct Constraint
 {

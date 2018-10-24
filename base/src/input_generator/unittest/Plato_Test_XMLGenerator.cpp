@@ -1819,6 +1819,26 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
     tester.clearInputData();
 
+    // Test the "volume misfit target"
+    stringInput = "begin objective\n"
+            "volume misfit target 0.5125\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_misfit_target, "0.5125");
+    tester.clearInputData();
+
+    stringInput = "begin objective\n"
+            "volume misfit target\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    tester.clearInputData();
+
     // Test the "stress limit" keywords
     stringInput = "begin objective\n"
             "type limit stress\n"
