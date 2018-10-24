@@ -1317,9 +1317,8 @@ TEST(PlatoTest, CheckSromObjectiveGradient)
     tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
-    int tMyRank = -1;
-    MPI_Comm_rank(MPI_COMM_WORLD, &tMyRank);
-    if(tMyRank == static_cast<int>(0))
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if(tComm.myProcID() == static_cast<int>(0))
     {
         std::cout << tOutputMsg.str().c_str();
     }
@@ -1341,9 +1340,8 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     tDiagnostics.checkCriterionGradient(tConstraint, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
-    int tMyRank = -1;
-    MPI_Comm_rank(MPI_COMM_WORLD, &tMyRank);
-    if(tMyRank == static_cast<int>(0))
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if(tComm.myProcID() == static_cast<int>(0))
     {
         std::cout << tOutputMsg.str().c_str();
     }
