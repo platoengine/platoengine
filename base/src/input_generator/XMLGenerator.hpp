@@ -122,6 +122,7 @@ struct Objective
   std::string limit_power_update;
   std::string limit_power_max;
   std::string volume_misfit_target;
+  std::string stress_p_norm_power;
 };
 struct Constraint
 {
@@ -291,6 +292,8 @@ protected:
   std::string m_InputFilename;
   bool m_UseLaunch;
   InputData m_InputData;
+  std::string m_filterType_identity_generatorName;
+  std::string m_filterType_identity_XMLName;
   std::string m_filterType_kernel_generatorName;
   std::string m_filterType_kernel_XMLName;
   std::string m_filterType_kernelThenHeaviside_generatorName;

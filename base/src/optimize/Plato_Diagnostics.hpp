@@ -312,8 +312,8 @@ private:
             assert(tMyLength > static_cast<ScalarType>(0));
             for(OrdinalType tElemIndex = 0; tElemIndex < tMyLength; tElemIndex++)
             {
-                // Note: this is a bug, std::rand() and RAND_MAX are integers so tMyVector is being set to the lower bound.
-                tMyVector[tElemIndex] = aLowerBound + ((aUpperBound - aLowerBound) * static_cast<ScalarType>(std::rand() / RAND_MAX));
+                const ScalarType tRand = static_cast<ScalarType>(std::rand()) / static_cast<ScalarType>(RAND_MAX);
+                tMyVector[tElemIndex] = aLowerBound + ((aUpperBound - aLowerBound) * tRand);
             }
         }
     }

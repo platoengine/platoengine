@@ -80,6 +80,8 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
         m_InputFilename(input_filename),
         m_UseLaunch(use_launch),
         m_InputData(),
+        m_filterType_identity_generatorName("identity"),
+        m_filterType_identity_XMLName("Identity"),
         m_filterType_kernel_generatorName("kernel"),
         m_filterType_kernel_XMLName("Kernel"),
         m_filterType_kernelThenHeaviside_generatorName("kernel then heaviside"),
@@ -1004,10 +1006,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                     }
                     if(m_InputData.blocks[n].element_type.empty() == false)
                     {
-                        // For now we will just let sierra_sd determine the element type based
-                        // on what is in the exodus file (unless it is rbar).
-                        if(m_InputData.blocks[n].element_type == "rbar")
-                            fprintf(fp, "  rbar\n");
+                        // pass through element type
+                        fprintf(fp, "  %s\n", m_InputData.blocks[n].element_type.c_str());
+                        // Note: in the future, we may need to map element types for each physics performer
                     }
                     if(frf)
                     {
@@ -1050,6 +1051,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                     {
                         fprintf(fp, "  case = stress_limit\n");
                     }
+                    else if(cur_obj.type == "stress p norm")
+                    {
+                        fprintf(fp, "  case = stress_min\n");
+                    }
                     else if(cur_obj.type == "compliance and volume min")
                     {
                         fprintf(fp, "  case = primary_compliance_secondary_volume\n");
@@ -1062,6 +1067,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                 if(cur_obj.stress_limit != "")
                 {
                     fprintf(fp, "  stress_normalization_factor = %s\n", cur_obj.stress_limit.c_str());
+                }
+                if(cur_obj.stress_p_norm_power != "")
+                {
+                    fprintf(fp, "  stress_p_norm_power = %s\n", cur_obj.stress_p_norm_power.c_str());
                 }
                 if(cur_obj.stress_ramp_factor != "")
                 {
@@ -2037,6 +2046,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.stress_limit = tokens[2];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","p","norm","power"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress p norm power\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_p_norm_power = tokens[4];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"volume","misfit","target"}, tStringValue))
                         {
@@ -3572,11 +3590,13 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
 
                             // check input is valid
-                            if(m_InputData.filter_type != m_filterType_kernel_generatorName &&
-                               m_InputData.filter_type != m_filterType_kernelThenHeaviside_generatorName)
+                            if(m_InputData.filter_type != m_filterType_identity_generatorName &&
+                                    m_InputData.filter_type != m_filterType_kernel_generatorName &&
+                                    m_InputData.filter_type != m_filterType_kernelThenHeaviside_generatorName)
                             {
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter type\" did not match allowed types which include:\n\t"
-                                          <<"\""<<m_filterType_kernel_generatorName<<"\","
+                                        <<"\""<<m_filterType_identity_generatorName<<"\","
+                                        <<"\""<<m_filterType_kernel_generatorName<<"\","
                                           <<"\""<<m_filterType_kernelThenHeaviside_generatorName<<"\""
                                           <<".\n";
                                 return false;
@@ -4736,6 +4756,11 @@ bool XMLGenerator::generatePlatoOperationsXML()
     {
         // kernel then heaviside
         addChild(tmp_node, "Name", m_filterType_kernelThenHeaviside_XMLName);
+    }
+    else if(m_InputData.filter_type == m_filterType_identity_generatorName)
+    {
+        // identity
+        addChild(tmp_node, "Name", m_filterType_identity_XMLName);
     }
     else
     {
