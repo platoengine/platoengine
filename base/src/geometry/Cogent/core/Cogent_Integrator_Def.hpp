@@ -218,14 +218,17 @@ void Cogent::Integrator::getBoundarySimplexes(
 
   typename std::vector<Simplex<V,P> >::iterator it;
   for(it=explicitSimplexes.begin(); it!=explicitSimplexes.end(); it++){
-    if(it->boundaryLS[0] == iTopo){
-      Simplex<V,P> b(nBV);
-      for(int ib=0; ib<nBV; ib++){
-        b.points[ib] = it->points[ib];
-        b.fieldvals[ib] = it->fieldvals[ib];
+    std::vector<std::vector<int>> faceSets({{0,1,2},{1,2,3},{2,3,0},{3,0,1}});
+    for(int iFace=0; iFace<nVerts; iFace++){
+      if(it->boundaryLS[iFace] == iTopo){
+        Simplex<V,P> b(nBV);
+        for(int ib=0; ib<nBV; ib++){
+          b.points[ib] = it->points[faceSets[iFace][ib]];
+          b.fieldvals[ib] = it->fieldvals[faceSets[iFace][ib]];
+        }
+        b.bodyLS = it->boundaryLS[iFace];
+        boundarySimplexes.push_back(b);
       }
-      b.bodyLS = it->boundaryLS[0];
-      boundarySimplexes.push_back(b);
-    }   
+    }
   }
 }
