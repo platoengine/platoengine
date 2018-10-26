@@ -891,7 +891,6 @@ void OptimizerEngineStageData::setSetUpperBoundsStageName(const std::string & aI
 size_t OptimizerEngineStageData::getNumConstraints() const
 /******************************************************************************/
 {
-    assert(mConstraintValueNames.empty() == false);
     return (mConstraintValueNames.size());
 }
 
