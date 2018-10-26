@@ -86,10 +86,10 @@ public:
                                 const std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
             mPrintDiagnostics(false),
+            mProblemUpdateFrequency(0), // 0 = no update, continuation disabled
             mOptimalityTolerance(1e-5),
             mScaleOfUnitControlForInitialTrustRegionRadius(-1.), // negative if not specified
             mScaleOfUnitControlForMaxTrustRegionRadius(-1.), // negative if not specified
-            mProblemUpdateFrequency(0), // zero for no update
             mOutputData(),
             mGradient(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
@@ -116,14 +116,19 @@ public:
         mPrintDiagnostics = true;
     }
 
-    //! specify outer loop frequency of update. Zero if no updates
+    /******************************************************************************//**
+     * @brief Set continuation update frequency
+     * @param [in] aInput continuation frequency
+    **********************************************************************************/
     void setProblemUpdateFrequency(const OrdinalType& aInput)
     {
         mProblemUpdateFrequency = aInput;
     }
 
-    //! should be positive to be meaningful
-    //! Typically, around 0.1 if control varies between 0 and 1
+    /******************************************************************************//**
+     * @brief Scale factor for initial trust region radius
+     * @param [in] aInput scale factor (should be positive to be meaningful, around 0.1 if control varies between 0 and 1)
+    **********************************************************************************/
     void setScaleOfUnitControlForInitialTrustRegionRadius(const ScalarType & aInput)
     {
         mScaleOfUnitControlForInitialTrustRegionRadius = aInput;
@@ -503,34 +508,20 @@ private:
     **********************************************************************************/
     void update()
     {
-        // mid control is accepted trial
-        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+        //        if(mContinuation && mod())
+        //        {
+        //            // invoke advance continuation
+        //            mStageMng->updateProblem();
+        //
+        //            // invoke new objective
+        //            mStageMng->computeObjective();
+        //        }
 
-        // handle updating problems
-        bool tHaveProblemUpdateFrequency = (0 < mProblemUpdateFrequency);
-        bool tDidUpdate = false;
-        if(tHaveProblemUpdateFrequency)
-        {
-            OrdinalType tIterationsDone = this->getNumIterationsDone();
-            bool tIsIterationToUpdate = (tIterationsDone % mProblemUpdateFrequency) == 0;
-            if(tIsIterationToUpdate)
-            {
-                tDidUpdate = true;
-
-                // invoke advance continuation
-                mStageMng->updateProblem();
-
-                // invoke new objective
-                const ScalarType tNewMidObjectiveFunctionValue = mStageMng->evaluateObjective(tMidControl);
-                mStepMng->setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
-            }
-        }
-
+        const bool tContinuationDone = this->performContinuation();
         // Apply post smoothing operation
-        if(this->isPostSmoothingActive() == true)
-        {
-            this->applyPostSmoothing();
-        }
+        const bool tControlUpdated = this->applyPostSmoothing(tContinuationDone);
+        // Update current state
+        this->updateCurrentState(tControlUpdated);
         // Compute stationarity measure
         mDataMng->computeStationarityMeasure();
         // Compute norm of projected gradient
@@ -545,75 +536,145 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Apply post trust region subproblem smoothing step
+     * @brief If active, application code can do continuation on app-based parameters
+     * @return flag: true = continuation was done, false = continuation was not done
     **********************************************************************************/
-    void applyPostSmoothing()
+    bool performContinuation()
     {
-        // Compute gradient at new midpoint
-<<<<<<< HEAD
-        mStageMng->computeGradient(tMidControl, *mGradient);
-
-        // if done update, have to accept mid. otherwise, line search reasonable
-        bool tAcceptMid = false;
-        if(tDidUpdate)
+        // handle updating problems
+        bool tDidUpdate = false;
+        const bool tHaveProblemUpdateFrequency = (static_cast<OrdinalType>(0) < mProblemUpdateFrequency);
+        if(tHaveProblemUpdateFrequency == true)
         {
-            tAcceptMid = true;
-=======
-        mStageMng->cacheData();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
-        mStageMng->computeGradient(tMidControl, *mGradient);
+            const OrdinalType tIterationsDone = this->getNumIterationsDone();
+            bool tIsIterationToUpdate = (tIterationsDone % mProblemUpdateFrequency) == static_cast<OrdinalType>(0);
+            if(tIsIterationToUpdate)
+            {
+                tDidUpdate = true;
 
-        bool tControlUpdated = false;
-        if(mStepMng->getNumTrustRegionSubProblemItrDone() != mStepMng->getMaxNumTrustRegionSubProblemIterations())
-        {
-            tControlUpdated = this->updateControl(*mGradient, *mStepMng, *mDataMng, *mStageMng);
+                // invoke advance continuation
+                mStageMng->updateProblem();
+
+                // invoke new objective
+                const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+                const ScalarType tNewMidObjectiveFunctionValue = mStageMng->evaluateObjective(tMidControl);
+                mStepMng->setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
+            }
         }
+        return (tDidUpdate);
+    }
 
-        if(tControlUpdated == true)
+    /******************************************************************************//**
+     * @brief Update current criteria values, controls and gradient
+     * @param [in] aSmoothingDone: true = post-smoothing done; false = post-smoothing was not done
+    **********************************************************************************/
+    void updateCurrentState(const bool & aPostSmoothingDone)
+    {
+        if(aPostSmoothingDone == true)
         {
-            // Update new gradient and inequality constraint values since control was updated
+            // Update current gradient since control was updated
             mStageMng->cacheData();
             const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
-            mStageMng->computeGradient(tCurrentControl, *mGradient);
-            mDataMng->setCurrentGradient(*mGradient);
->>>>>>> plato: incremental commit. changes needed to improve ksbc performance
-        }
-        // if lacking Hessian, line search was a scaling of the gradient. Line search is not reasonable
-        const bool tHaveHessian = mStageMng->getHaveHessian();
-        if(!tHaveHessian)
-        {
-            tAcceptMid = true;
-        }
-
-        // update control line search only reachable if not accepting mid
-        if(!tAcceptMid)
-        {
-            if(this->updateControl(*mGradient, *mStepMng, *mDataMng, *mStageMng) == true)
-            {
-                // Update new gradient and inequality constraint values since control
-                // was successfully updated; else, keep mid gradient and thus mid control.
-                mStageMng->cacheData();
-                const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
-                mStageMng->computeGradient(tCurrentControl, *mGradient);
-                mDataMng->setCurrentGradient(*mGradient);
-                tAcceptMid = false;
-            }
-            else
-            {
-                tAcceptMid = true;
-            }
-        }
-
-        // possibly need to accept mid
-        if(tAcceptMid)
-        {
-            // Keep mid objective function, control and gradient at mid point
-            this->setNumLineSearchItrDone(0);
-            const ScalarType tMidObjectiveFunctionValue = mStepMng->getMidPointObjectiveFunctionValue();
-            mDataMng->setCurrentObjectiveFunctionValue(tMidObjectiveFunctionValue);
-            mDataMng->setCurrentControl(tMidControl);
+            mStageMng->computeGradient(tCurrentControl, *mGradient /* new/current gradient */);
             mDataMng->setCurrentGradient(*mGradient);
         }
+        else
+        {
+            this->acceptMidPoint(*mGradient /* mid point gradient */);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Apply post trust region subproblem smoothing step
+     * @param [in] aDidContinuation flag: true = continuation done, false = continuation not done
+     * @return Flag indicating if mid-point control was updated (updated = true, not updated = false)
+    **********************************************************************************/
+    bool applyPostSmoothing(const bool & aDidContinuation)
+    {
+        bool tControlUpdated = false;
+        // Compute gradient at new midpoint
+        mStageMng->cacheData();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+        mStageMng->computeGradient(tMidControl, *mGradient /* mid point gradient */);
+
+        bool tContinuationNotDone = aDidContinuation == false;
+        bool tPostSmoothingActive = this->isPostSmoothingActive() == true;
+        bool tNumTrustRegionIterLessThanMaxNumIter = mStepMng->getNumTrustRegionSubProblemItrDone()
+                != mStepMng->getMaxNumTrustRegionSubProblemIterations();
+        if(tNumTrustRegionIterLessThanMaxNumIter && tPostSmoothingActive && tContinuationNotDone)
+        {
+            tControlUpdated = this->updateControl(*mGradient /* mid point gradient */, *mStepMng, *mDataMng, *mStageMng);
+        }
+        return (tControlUpdated);
+    }
+
+    /******************************************************************************//**
+     * @brief Accept mid-point, i.e. solution from trust region subproblem, and ignore line search
+     * @param [in] aGradient mid-point gradient
+    **********************************************************************************/
+    void acceptMidPoint(const Plato::MultiVector<ScalarType, OrdinalType>& aGradient)
+    {
+        // Keep mid objective function, control and gradient at mid point
+        this->setNumLineSearchItrDone(0);
+        const ScalarType tMidObjectiveFunctionValue = mStepMng->getMidPointObjectiveFunctionValue();
+        mDataMng->setCurrentObjectiveFunctionValue(tMidObjectiveFunctionValue);
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
+        mDataMng->setCurrentControl(tMidControl);
+        mDataMng->setCurrentGradient(aGradient);
+    }
+
+    /******************************************************************************//**
+     * @brief Check stopping tolerances
+     * @return flag: true = stop algorithm, false = continue
+    **********************************************************************************/
+    bool checkStoppingTolerance()
+    {
+        bool tStop = false;
+        // Get termination criteria
+        const OrdinalType tNumIterations = this->getNumIterationsDone();
+        const ScalarType tActualReduction = mStepMng->getActualReduction();
+        const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
+        const ScalarType tCurrentTrustRegionRadius = mStepMng->getTrustRegionRadius();
+        const ScalarType tStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+        const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+        // Get termination criteria tolerances
+        const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
+        const ScalarType tStationarityTolerance = this->getStationarityTolerance();
+        const ScalarType tMinTrustRegionRadius = mStepMng->getMinTrustRegionRadius();
+        const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
+        const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
+        const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
+        if( tStationarityMeasure <= tStationarityTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::STATIONARITY_MEASURE);
+        }
+        else if( (tNumIterations > static_cast<OrdinalType>(1)) && (std::abs(tActualReduction) < tActualReductionTolerance) )
+        {
+            this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
+            tStop = true;
+        }
+        else if( tStagnationMeasure < tObjectiveStagnationTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);
+        }
+        else if( tCurrentTrustRegionRadius < tMinTrustRegionRadius )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS);
+        }
+        else if( tControlStagnationMeasure < tControlStagnationTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::CONTROL_STAGNATION);
+        }
+        else if( tNumIterations >= tMaxNumIterations )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS);
+        }
+        return (tStop);
     }
 
     /******************************************************************************//**
@@ -631,52 +692,8 @@ private:
         }
         else
         {
-            // Get termination criteria
-            const OrdinalType tNumIterations = this->getNumIterationsDone();
-            const ScalarType tActualReduction = mStepMng->getActualReduction();
-            const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
-            const ScalarType tCurrentTrustRegionRadius = mStepMng->getTrustRegionRadius();
-            const ScalarType tStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
-            const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-            // Get termination criteria tolerances
-            const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
-            const ScalarType tStationarityTolerance = this->getStationarityTolerance();
-            const ScalarType tMinTrustRegionRadius = mStepMng->getMinTrustRegionRadius();
-            const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
-            const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
-            const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
-            if( tStationarityMeasure <= tStationarityTolerance )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::STATIONARITY_MEASURE);
-            }
-            else if( (tNumIterations > static_cast<OrdinalType>(1)) && (std::abs(tActualReduction) < tActualReductionTolerance) )
-            {
-                this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
-                tStop = true;
-            }
-            else if( tStagnationMeasure < tObjectiveStagnationTolerance )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);
-            }
-            else if( tCurrentTrustRegionRadius < tMinTrustRegionRadius )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS);
-            }
-            else if( tControlStagnationMeasure < tControlStagnationTolerance )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::CONTROL_STAGNATION);
-            }
-            else if( tNumIterations >= tMaxNumIterations )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS);
-            }
+            tStop = this->checkStoppingTolerance();
         }
-
         return (tStop);
     }
 
@@ -714,10 +731,11 @@ private:
     bool mPrintDiagnostics;
     std::ofstream mOutputStream;
 
+    OrdinalType mProblemUpdateFrequency;
+
     ScalarType mOptimalityTolerance;
-    ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
     ScalarType mScaleOfUnitControlForMaxTrustRegionRadius; // negative if not specified
-    OrdinalType mProblemUpdateFrequency; // equal to zero if not updating
+    ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
 
     Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;

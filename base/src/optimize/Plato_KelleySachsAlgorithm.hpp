@@ -309,6 +309,12 @@ public:
         return (mStoppingCriterion);
     }
 
+    /******************************************************************************//**
+     * @brief Return scale factor for backtracking line search routine
+     * @param [in] aIteration current line search iteration
+     * @param [in] aPreviousScale scale factor for previous line search iteration
+     * @return line search scale factor
+    **********************************************************************************/
     ScalarType computeLineSearchScale(const OrdinalType & aIteration, const ScalarType & aPreviousScale)
     {
         ScalarType tOuput = 0;
@@ -358,7 +364,6 @@ public:
             {
                 tControlUpdated = true;
                 aDataMng.setCurrentControl(*mControlWorkVector);
-                //assert(tTrialObjectiveValue < aDataMng.getCurrentObjectiveFunctionValue());
                 aDataMng.setCurrentObjectiveFunctionValue(tTrialObjectiveValue);
                 break;
             }
