@@ -508,15 +508,6 @@ private:
     **********************************************************************************/
     void update()
     {
-        //        if(mContinuation && mod())
-        //        {
-        //            // invoke advance continuation
-        //            mStageMng->updateProblem();
-        //
-        //            // invoke new objective
-        //            mStageMng->computeObjective();
-        //        }
-
         const bool tContinuationDone = this->performContinuation();
         // Apply post smoothing operation
         const bool tControlUpdated = this->applyPostSmoothing(tContinuationDone);
