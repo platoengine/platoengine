@@ -139,11 +139,11 @@ struct OutputDataOC
 
 /******************************************************************************//**
  *
- * @brief Diagnostic data for Kelley-Sachs algorithm
+ * @brief Diagnostic data for Kelley-Sachs Bound Constrained (KSBC) algorithm
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct OutputDataKelleySachs
+struct OutputDataKSBC
 {
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mNumIterPCG;  /*!< number preconditioned conjugate gradient iterations */
@@ -159,9 +159,36 @@ struct OutputDataKelleySachs
     ScalarType mStationarityMeasure;  /*!< norm of the descent direction */
     ScalarType mControlStagnationMeasure;  /*!< norm of the difference between two subsequent control fields */
     ScalarType mObjectiveStagnationMeasure;  /*!< measures stagnation in two subsequent objective function evaluations */
-    std::vector<ScalarType> mConstraints;  /*!< residual value for each constraint */
 };
-// struct OutputDataKelleySachs
+// struct OutputDataKSBC
+
+/******************************************************************************//**
+ *
+ * @brief Diagnostic data for Kelley-Sachs Augmented Lagrangian (KSAL) algorithm
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct OutputDataKSAL
+{
+    OrdinalType mNumIter;  /*!< number of outer iterations */
+    OrdinalType mNumIterPCG;  /*!< number preconditioned conjugate gradient iterations */
+    OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
+    OrdinalType mNumLineSearchIter;  /*!< number of line search (i.e. post-smoothing) iterations */
+    OrdinalType mNumTrustRegionIter;  /*!< number of trust region (inner-loop) iterations */
+
+    ScalarType mPenalty;  /*!< Lagrange multipliers' penalty */
+    ScalarType mActualRed;  /*!< actual reduction */
+    ScalarType mAredOverPred;  /*!< actual over predicted reduction ratio */
+    ScalarType mObjFuncValue;  /*!< objective function value */
+    ScalarType mNormObjFuncGrad;  /*!< norm of the objective function gradient */
+    ScalarType mTrustRegionRadius;  /*!< trust region radius */
+    ScalarType mStationarityMeasure;  /*!< norm of the descent direction */
+    ScalarType mControlStagnationMeasure;  /*!< norm of the difference between two subsequent control fields */
+    ScalarType mObjectiveStagnationMeasure;  /*!< measures stagnation in two subsequent objective function evaluations */
+
+    std::vector<ScalarType> mConstraintValues;  /*!< constraint values */
+};
+// struct OutputDataKSAL
 
 // *********************************************** END OUTPUT DATA STRUCT ***********************************************
 
@@ -169,7 +196,7 @@ struct OutputDataKelleySachs
  *
  * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint = false);
@@ -201,7 +228,7 @@ void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, O
  * @brief Print header for CCSA diagnostics file
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -254,7 +281,7 @@ void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, Ordin
  * @brief Print diagnostics for CCSA algorithm
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -300,7 +327,7 @@ void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>
  * @brief Print header for Optimality Criteria (OC) diagnostics file
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -326,7 +353,6 @@ void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalTy
         }
         throw std::invalid_argument(tMessage.str().c_str());
     }
-    assert(aData.mConstraints.size() > static_cast<OrdinalType>(0));
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
             << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(10);
@@ -353,7 +379,7 @@ void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalTy
  * @brief Print diagnostics for Optimality Criteria (OC) algorithm
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -399,11 +425,11 @@ void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aD
  * @brief Print diagnostics for Kelley-Sachs-Bound-Constrained (KSBC) algorithm
  * @param [in] aData diagnostic data for Kelley-Sachs-Bound-Constrained algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disable)
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void print_ksbc_diagnostics(const Plato::OutputDataKelleySachs<ScalarType, OrdinalType>& aData,
+void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
                             std::ofstream& aOutputFile,
                             bool aPrint = false)
 {
@@ -434,6 +460,113 @@ void print_ksbc_diagnostics(const Plato::OutputDataKelleySachs<ScalarType, Ordin
             << aData.mTrustRegionRadius << std::setw(15) << aData.mActualRed << std::setw(15) << aData.mAredOverPred
             << std::setw(7) << aData.mNumIterPCG << std::setw(19) << aData.mControlStagnationMeasure << std::setw(16)
             << aData.mObjectiveStagnationMeasure << "\n" << std::flush;
+}
+
+/******************************************************************************//**
+ *
+ * @brief Print diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
+ * @param [in] aData diagnostic data for KSAL algorithm
+ * @param [in,out] aOutputFile output file
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData,
+                                   std::ofstream& aOutputFile,
+                                   bool aPrint = false)
+{
+    try
+    {
+        Plato::error::is_file_open(aOutputFile);
+        Plato::error::is_vector_empty(aData.mConstraintValues);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+        << "\n LINE: " << __LINE__ << "\n ********";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    // ******** PRIMARY DIAGNOSTICS  (OUTER-LOOP) ********
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
+            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(10);
+
+    // ******** DIAGNOSTICS FOR CONSTRAINTS ********
+    const OrdinalType tNumConstraints = aData.mConstraintValues.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        if(tIndex != static_cast<OrdinalType>(0))
+        {
+            aOutputFile << "H" << tIndex + static_cast<OrdinalType>(1) << "(X)" << std::setw(14);
+        }
+        else
+        {
+            const OrdinalType tWidth = tNumConstraints > static_cast<OrdinalType>(1) ? 11 : 14;
+            aOutputFile << "H" << tIndex + static_cast<OrdinalType>(1) << "(X)" << std::setw(tWidth);
+        }
+    }
+
+    // ******** TRUST REGION PROBLEM DATA (INNER-LOOP) ********
+    aOutputFile << "TR-Iter" << std::setw(10) << "LS-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed"
+                << std::setw(17) << "TR-Ratio" << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15)
+                << "abs(dF)" << std::setw(15) << "Penalty" << "\n" << std::flush;
+}
+
+/******************************************************************************//**
+ *
+ * @brief Print diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
+ * @param [in] aData diagnostic data for KSAL algorithm
+ * @param [in,out] aOutputFile output file
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void print_ksal_diagnostics(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData, std::ofstream& aOutputFile, bool aPrint =
+                                    false)
+{
+    try
+    {
+        Plato::error::is_file_open(aOutputFile);
+        Plato::error::is_vector_empty(aData.mConstraintValues);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+        << "\n LINE: " << __LINE__ << "\n ********";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    // ******** PRIMARY DIAGNOSTICS  (OUTER-LOOP) ********
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
+            << aData.mObjFuncCount << std::setw(20) << aData.mObjFuncValue << std::setw(15) << aData.mNormObjFuncGrad
+            << std::setw(15) << aData.mStationarityMeasure << std::setw(15);
+
+    // ******** DIAGNOSTICS FOR CONSTRAINTS ********
+    const OrdinalType tNumConstraints = aData.mConstraintValues.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        const OrdinalType tWidth = tIndex != (tNumConstraints - static_cast<OrdinalType>(1)) ? 15 : 8;
+        aOutputFile << aData.mConstraintValues[tIndex] << std::setw(tWidth);
+    }
+
+    // ******** TRUST REGION PROBLEM DATA (INNER-LOOP) ********
+    aOutputFile << aData.mNumTrustRegionIter << std::setw(10) << aData.mNumLineSearchIter << std::setw(18)
+            << aData.mTrustRegionRadius << std::setw(15) << aData.mActualRed << std::setw(15) << aData.mAredOverPred
+            << std::setw(7) << aData.mNumIterPCG << std::setw(19) << aData.mControlStagnationMeasure << std::setw(16)
+            << aData.mObjectiveStagnationMeasure << std::setw(15) << aData.mPenalty << "\n" << std::flush;
 }
 
 } // namespace Plato

@@ -57,7 +57,6 @@
 #include <algorithm>
 
 #include "Plato_Types.hpp"
-#include "Plato_ErrorChecks.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_OptimizersIO.hpp"
@@ -89,6 +88,7 @@ public:
             mMinPenaltyParameter(1e-4),
             mOptimalityTolerance(1e-4),
             mFeasibilityTolerance(1e-4),
+            mOutputData(),
             mGradient(aDataFactory->control().create()),
             mCurrentConstraintValues(aDataFactory->dual().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
@@ -237,7 +237,7 @@ public:
     **********************************************************************************/
     void solve()
     {
-        this->checkInitialGuess();
+        this->checkInitialGuess(*mDataMng);
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
@@ -301,8 +301,11 @@ private:
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
+                const OrdinalType tNumConstraints = mStageMng->getNumConstraints();
+                mOutputData.mConstraintValues.clear();
+                mOutputData.mConstraintValues.resize(tNumConstraints);
                 mOutputStream.open("plato_ksal_algorithm_diagnostics.txt");
-                //Plato::print_ksbc_diagnostics_header(mOutputStream, mPrintDiagnostics);
+                Plato::print_ksal_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }
     }
@@ -340,6 +343,50 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Print diagnostics for Kelley-Sachs augmented Lagrangian algorithm
+    **********************************************************************************/
+    void outputDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = this->getNumIterationsDone();
+            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
+            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
+
+            mOutputData.mPenalty = mStageMng->getPenaltyParameter();
+            mOutputData.mActualRed = mStepMng->getActualReduction();
+            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
+            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
+            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            const OrdinalType tCONSTRAINT_VECTOR_INDEX = 0;
+            const OrdinalType tNumConstraints = mStageMng->getNumConstraints();
+            for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+            {
+                mOutputData.mConstraintValues[tIndex] =
+                        mDataMng->getCurrentConstraintValues(tCONSTRAINT_VECTOR_INDEX, tIndex);
+            }
+
+            Plato::print_ksal_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Check and initialize control lower and upper bounds
+    **********************************************************************************/
     void initialize()
     {
         // Check Bounds
@@ -356,40 +403,6 @@ private:
         }
     }
 
-    void checkInitialGuess()
-    {
-        try
-        {
-            bool tIsInitialGuessSet = mDataMng->isInitialGuessSet();
-            Plato::error::checkInitialGuessIsSet(tIsInitialGuessSet);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
-        }
-
-        try
-        {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
-            const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-            const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-            Plato::error::checkInitialGuess(tControl, tLowerBounds, tUpperBounds);
-        }
-        catch(const std::invalid_argument & tErrorMsg)
-        {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
-        }
-
-        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWorkMultiVector = tControl.create();
-        Plato::update(static_cast<ScalarType>(1), tControl, static_cast<ScalarType>(0), *tWorkMultiVector);
-        mDataMng->bounds().project(tLowerBounds, tUpperBounds, *tWorkMultiVector);
-        mDataMng->setCurrentControl(*tWorkMultiVector);
-    }
     void update()
     {
         // Update objectives and inequalities values
@@ -479,50 +492,7 @@ private:
         }
         else
         {
-            // Get termination criteria
-            const OrdinalType tNumIterations = this->getNumIterationsDone();
-            const ScalarType tActualReduction = mStepMng->getActualReduction();
-            const ScalarType tStagnationMeasure = mStageMng->getStagnationMeasure();
-            const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
-            const ScalarType tCurrentTrustRegionRadius = mStepMng->getTrustRegionRadius();
-            const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-            // Get termination criteria tolerances
-            const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
-            const ScalarType tStationarityTolerance = this->getStationarityTolerance();
-            const ScalarType tMinTrustRegionRadius = mStepMng->getMinTrustRegionRadius();
-            const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
-            const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
-            const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
-            if(tStationarityMeasure <= tStationarityTolerance)
-            {
-                this->setStoppingCriterion(Plato::algorithm::stop_t::STATIONARITY_MEASURE);
-                tStop = true;
-            }
-            else if( (tNumIterations > static_cast<OrdinalType>(1)) && (std::abs(tActualReduction) < tActualReductionTolerance) )
-            {
-                this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
-                tStop = true;
-            }
-            else if( (tNumIterations > static_cast<OrdinalType>(1)) && (tStagnationMeasure < tObjectiveStagnationTolerance) )
-            {
-                this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);
-                tStop = true;
-            }
-            else if( tCurrentTrustRegionRadius < tMinTrustRegionRadius )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS);
-            }
-            else if( tControlStagnationMeasure < tControlStagnationTolerance )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::CONTROL_STAGNATION);
-            }
-            else if( tNumIterations >= tMaxNumIterations )
-            {
-                tStop = true;
-                this->setStoppingCriterion(Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS);
-            }
+            tStop = this->checkStoppingTolerance(*mDataMng, *mStepMng);
         }
 
         return (tStop);
@@ -574,6 +544,8 @@ private:
     ScalarType mMinPenaltyParameter;
     ScalarType mOptimalityTolerance;
     ScalarType mFeasibilityTolerance;
+
+    Plato::OutputDataKSAL<ScalarType, OrdinalType> mOutputData;
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;

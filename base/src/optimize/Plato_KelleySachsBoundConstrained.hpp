@@ -1,10 +1,4 @@
 /*
- * Plato_KelleySachsBoundConstrained.hpp
- *
- *  Created on: Dec 20, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_KelleySachsBoundConstrained.hpp
+ *
+ *  Created on: Dec 20, 2017
+ */
 
 #ifndef PLATO_KELLEYSACHSBOUNDCONSTRAINED_HPP_
 #define PLATO_KELLEYSACHSBOUNDCONSTRAINED_HPP_
@@ -89,11 +89,11 @@ public:
             mOptimalityTolerance(1e-5),
             mOutputData(),
             mGradient(aDataFactory->control().create()),
+            mControlWorkVector(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
             mSolver(std::make_shared<Plato::ProjectedSteihaugTointPcg<ScalarType, OrdinalType>>(*aDataFactory)),
             mDataMng(aDataMng),
-            mStageMng(aStageMng),
-            mControlWorkVector(aDataFactory->control().create())
+            mStageMng(aStageMng)
     {
         this->initialize();
     }
@@ -218,7 +218,7 @@ public:
     void solve()
     {
         this->openOutputFile();
-        this->checkInitialGuess();
+        this->checkInitialGuess(*mDataMng);
         this->setInitialProblemData();
         mStageMng->updateOptimizationData(*mDataMng);
         this->outputDiagnostics();
@@ -382,44 +382,6 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Check that control initial guess is within bounds
-    **********************************************************************************/
-    void checkInitialGuess()
-    {
-        try
-        {
-            bool tIsInitialGuessSet = mDataMng->isInitialGuessSet();
-            Plato::error::checkInitialGuessIsSet(tIsInitialGuessSet);
-        }
-        catch(const std::invalid_argument & tError)
-        {
-            std::cout << tError.what() << std::flush;
-            throw tError;
-        }
-
-        try
-        {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
-            const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-            const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-            Plato::error::checkInitialGuess(tControl, tLowerBounds, tUpperBounds);
-        }
-        catch(const std::invalid_argument & tError)
-        {
-            std::cout << tError.what() << std::flush;
-            throw tError;
-        }
-
-        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWorkMultiVector = tControl.create();
-        Plato::update(static_cast<ScalarType>(1), tControl, static_cast<ScalarType>(0), *tWorkMultiVector);
-        mDataMng->bounds().project(tLowerBounds, tUpperBounds, *tWorkMultiVector);
-        mDataMng->setCurrentControl(*tWorkMultiVector);
-    }
-
-    /******************************************************************************//**
      * @brief Update trial control if current mid-point actual reduction tolerance is violated.
     **********************************************************************************/
     void update()
@@ -486,61 +448,6 @@ private:
         return (tControlUpdated);
     }
 
-
-    /******************************************************************************//**
-     * @brief Check stopping tolerances
-     * @return flag: true = stop algorithm, false = continue
-    **********************************************************************************/
-    bool checkStoppingTolerance()
-    {
-        bool tStop = false;
-        // Get termination criteria
-        const OrdinalType tNumIterations = this->getNumIterationsDone();
-        const ScalarType tActualReduction = mStepMng->getActualReduction();
-        const ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
-        const ScalarType tCurrentTrustRegionRadius = mStepMng->getTrustRegionRadius();
-        const ScalarType tStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
-        const ScalarType tControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-        // Get termination criteria tolerances
-        const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
-        const ScalarType tStationarityTolerance = this->getStationarityTolerance();
-        const ScalarType tMinTrustRegionRadius = mStepMng->getMinTrustRegionRadius();
-        const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
-        const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
-        const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
-        if( tStationarityMeasure <= tStationarityTolerance )
-        {
-            tStop = true;
-            this->setStoppingCriterion(Plato::algorithm::stop_t::STATIONARITY_MEASURE);
-        }
-        else if( (tNumIterations > static_cast<OrdinalType>(1)) && (std::abs(tActualReduction) < tActualReductionTolerance) )
-        {
-            this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
-            tStop = true;
-        }
-        else if( tStagnationMeasure < tObjectiveStagnationTolerance )
-        {
-            tStop = true;
-            this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);
-        }
-        else if( tCurrentTrustRegionRadius < tMinTrustRegionRadius )
-        {
-            tStop = true;
-            this->setStoppingCriterion(Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS);
-        }
-        else if( tControlStagnationMeasure < tControlStagnationTolerance )
-        {
-            tStop = true;
-            this->setStoppingCriterion(Plato::algorithm::stop_t::CONTROL_STAGNATION);
-        }
-        else if( tNumIterations >= tMaxNumIterations )
-        {
-            tStop = true;
-            this->setStoppingCriterion(Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS);
-        }
-        return (tStop);
-    }
-
     /******************************************************************************//**
      * @brief Check stopping criteria
      * @return stopping criteria flag (true = stop algorithm, false = continue to next iteration)
@@ -556,7 +463,7 @@ private:
         }
         else
         {
-            tStop = this->checkStoppingTolerance();
+            tStop = this->checkStoppingTolerance(*mDataMng, *mStepMng);
         }
         return (tStop);
     }
@@ -596,13 +503,15 @@ private:
     std::ofstream mOutputStream;
     ScalarType mOptimalityTolerance;
 
-    Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
+    Plato::OutputDataKSBC<ScalarType, OrdinalType> mOutputData;
+
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;
+    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mControlWorkVector;
+
     std::shared_ptr<Plato::KelleySachsStepMng<ScalarType, OrdinalType>> mStepMng;
     std::shared_ptr<Plato::ProjectedSteihaugTointPcg<ScalarType,OrdinalType>> mSolver;
     std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType,OrdinalType>> mDataMng;
     std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType,OrdinalType>> mStageMng;
-    std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mControlWorkVector;
 
 private:
     KelleySachsBoundConstrained(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>&);

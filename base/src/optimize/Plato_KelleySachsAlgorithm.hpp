@@ -52,8 +52,7 @@
 #include <memory>
 
 #include "Plato_Types.hpp"
-#include "Plato_Vector.hpp"
-#include "Plato_MultiVector.hpp"
+#include "Plato_ErrorChecks.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_KelleySachsStepMng.hpp"
@@ -523,6 +522,102 @@ public:
             tTrustRegionRadius = tMaxTrustRegionRadius;
         }
         aStepMng.setTrustRegionRadius(tTrustRegionRadius);
+    }
+
+    /******************************************************************************//**
+     * @brief Check that control initial guess is within bounds
+     * @param [in] aDataMng trust region algorithm data manager
+    **********************************************************************************/
+    void checkInitialGuess(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        try
+        {
+            bool tIsInitialGuessSet = aDataMng.isInitialGuessSet();
+            Plato::error::checkInitialGuessIsSet(tIsInitialGuessSet);
+        }
+        catch(const std::invalid_argument & tErrorMsg)
+        {
+            std::cout << tErrorMsg.what() << std::flush;
+            std::abort();
+        }
+
+        try
+        {
+            const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();
+            const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getControlLowerBounds();
+            const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getControlUpperBounds();
+            Plato::error::checkInitialGuess(tControl, tLowerBounds, tUpperBounds);
+        }
+        catch(const std::invalid_argument & tErrorMsg)
+        {
+            std::cout << tErrorMsg.what() << std::flush;
+            std::abort();
+        }
+
+        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getControlLowerBounds();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getControlUpperBounds();
+        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWorkMultiVector = tControl.create();
+        Plato::update(static_cast<ScalarType>(1), tControl, static_cast<ScalarType>(0), *tWorkMultiVector);
+        aDataMng.bounds().project(tLowerBounds, tUpperBounds, *tWorkMultiVector);
+        aDataMng.setCurrentControl(*tWorkMultiVector);
+    }
+
+    /******************************************************************************//**
+     * @brief Check stopping tolerances
+     * @param [in] aDataMng trust region algorithm data manager
+     * @param [in] aStepMng trust region step data manager
+     * @return flag: true = stop algorithm, false = continue
+    **********************************************************************************/
+    bool checkStoppingTolerance(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
+                                const Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng)
+    {
+        bool tStop = false;
+        // Get termination criteria
+        const OrdinalType tNumIterations = this->getNumIterationsDone();
+        const ScalarType tActualReduction = aStepMng.getActualReduction();
+        const ScalarType tStationarityMeasure = aDataMng.getStationarityMeasure();
+        const ScalarType tCurrentTrustRegionRadius = aStepMng.getTrustRegionRadius();
+        const ScalarType tStagnationMeasure = aDataMng.getObjectiveStagnationMeasure();
+        const ScalarType tControlStagnationMeasure = aDataMng.getControlStagnationMeasure();
+        // Get termination criteria tolerances
+        const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
+        const ScalarType tStationarityTolerance = this->getStationarityTolerance();
+        const ScalarType tMinTrustRegionRadius = aStepMng.getMinTrustRegionRadius();
+        const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
+        const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
+        const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
+        if( tStationarityMeasure <= tStationarityTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::STATIONARITY_MEASURE);
+        }
+        else if( (tNumIterations > static_cast<OrdinalType>(1)) && (std::abs(tActualReduction) < tActualReductionTolerance) )
+        {
+            this->setStoppingCriterion(Plato::algorithm::stop_t::ACTUAL_REDUCTION_TOLERANCE);
+            tStop = true;
+        }
+        else if( tStagnationMeasure < tObjectiveStagnationTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::OBJECTIVE_STAGNATION);
+        }
+        else if( tCurrentTrustRegionRadius < tMinTrustRegionRadius )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::SMALL_TRUST_REGION_RADIUS);
+        }
+        else if( tControlStagnationMeasure < tControlStagnationTolerance )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::CONTROL_STAGNATION);
+        }
+        else if( tNumIterations >= tMaxNumIterations )
+        {
+            tStop = true;
+            this->setStoppingCriterion(Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS);
+        }
+        return (tStop);
     }
 
     virtual void solve() = 0;

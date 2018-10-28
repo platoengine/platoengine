@@ -338,6 +338,19 @@ public:
         aInput.update(static_cast<ScalarType>(1.), (*mCurrentConstraintValues)[aIndex], static_cast<ScalarType>(0.));
     }
 
+    /******************************************************************************//**
+     * @brief Return constraint value
+     * @param [in] aVecIndex vector index
+     * @param [in] aConstraintIndex constraint index
+     * @return constraint value
+    **********************************************************************************/
+    ScalarType getCurrentConstraintValues(const OrdinalType & aVecIndex, const OrdinalType & aConstraintIndex) const
+    {
+        assert(aVecIndex < mCurrentConstraintValues->getNumVectors());
+        assert(aConstraintIndex < (*mCurrentConstraintValues)[aVecIndex].size());
+        return ((*mCurrentConstraintValues)(aVecIndex, aConstraintIndex));
+    }
+
     /****************************************************************************************************************/
     void setObjectiveGradient(const std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> & aInput)
     /****************************************************************************************************************/
