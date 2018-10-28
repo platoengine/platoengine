@@ -1,10 +1,4 @@
 /*
- * Plato_KelleySachsAugmentedLagrangian.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,20 +40,27 @@
 //@HEADER
 */
 
+/*
+ * Plato_KelleySachsAugmentedLagrangian.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
 #ifndef PLATO_KELLEYSACHSAUGMENTEDLAGRANGIAN_HPP_
 #define PLATO_KELLEYSACHSAUGMENTEDLAGRANGIAN_HPP_
 
 #include <cmath>
 #include <memory>
+#include <sstream>
 #include <cassert>
 #include <iostream>
 #include <algorithm>
 
 #include "Plato_Types.hpp"
-#include "Plato_Vector.hpp"
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_DataFactory.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_KelleySachsStepMng.hpp"
 #include "Plato_KelleySachsAlgorithm.hpp"
 #include "Plato_ProjectedSteihaugTointPcg.hpp"
@@ -73,10 +74,17 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class KelleySachsAugmentedLagrangian : public Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aDataFactory manage allocation of linear algebra data structures
+     * @param [in] aDataMng trust region augmented Lagrangian data base manager
+     * @param [in] aStageMng manage evaluation of augmented Lagrangian criteria
+    **********************************************************************************/
     KelleySachsAugmentedLagrangian(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                                    const std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng,
                                    const std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> & aStageMng) :
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
+            mPrintDiagnostics(false),
             mGammaConstant(1),
             mMinPenaltyParameter(1e-4),
             mOptimalityTolerance(1e-4),
@@ -91,50 +99,98 @@ public:
     {
         this->initialize();
     }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     virtual ~KelleySachsAugmentedLagrangian()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Enable output of diagnostics (i.e. optimization problem status)
+    **********************************************************************************/
+    void enableDiagnostics()
+    {
+        mPrintDiagnostics = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Set minimum Lagrange multipliers' penalty value
+     * @param [in] aInput minimum Lagrange multipliers' penalty value
+    **********************************************************************************/
     void setMinPenaltyParameter(const ScalarType & aInput)
     {
         mMinPenaltyParameter = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set optimality stopping tolerance
+     * @param [in] aInput optimality stopping tolerance
+    **********************************************************************************/
     void setOptimalityTolerance(const ScalarType & aInput)
     {
         mOptimalityTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set feasibility stopping tolerance
+     * @param [in] aInput feasibility stopping tolerance
+    **********************************************************************************/
     void setFeasibilityTolerance(const ScalarType & aInput)
     {
         mFeasibilityTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set minimum trust region radius
+     * @param [in] aInput minimum trust region radius
+    **********************************************************************************/
     void setMinTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMinTrustRegionRadius(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum trust region radius
+     * @param [in] aInput maximum trust region radius
+    **********************************************************************************/
     void setMaxTrustRegionRadius(const ScalarType & aInput)
     {
         mStepMng->setMaxTrustRegionRadius(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set trust region expansion factor
+     * @param [in] aInput trust region expansion factor
+    **********************************************************************************/
     void setTrustRegionExpansion(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionExpansion(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set trust region contraction factor
+     * @param [in] aInput trust region contraction factor
+    **********************************************************************************/
     void setTrustRegionContraction(const ScalarType & aInput)
     {
         mStepMng->setTrustRegionContraction(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set Lagrange multipliers' penalty contraction factor
+     * @param [in] aInput Lagrange multipliers' penalty contraction factor
+    **********************************************************************************/
     void setPenaltyParameterScaleFactor(const ScalarType & aInput)
     {
         mStageMng->setPenaltyParameterScaleFactor(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set relative tolerance constant for norm of augmented Lagrangian gradient
+     * @param [in] aInput relative tolerance constant for norm of augmented Lagrangian gradient
+    **********************************************************************************/
     void setNormAugmentedLagrangianGradientRelativeToleranceConstant(const ScalarType & aInput)
     {
         mGammaConstant = aInput;
@@ -157,7 +213,6 @@ public:
     {
         return (*mDataMng);
     }
-
 
     /******************************************************************************//**
      * @brief Return reference to trust region step manager
@@ -236,6 +291,55 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Open output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.open("plato_ksal_algorithm_diagnostics.txt");
+                //Plato::print_ksbc_diagnostics_header(mOutputStream, mPrintDiagnostics);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion into diagnostics file.
+    **********************************************************************************/
+    void outputMyStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::algorithm::stop_t tStopCriterion = this->getStoppingCriterion();
+                Plato::get_stop_criterion(tStopCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
     void initialize()
     {
         // Check Bounds
@@ -251,6 +355,7 @@ private:
             std::abort();
         }
     }
+
     void checkInitialGuess()
     {
         try
@@ -462,6 +567,9 @@ private:
     }
 
 private:
+    bool mPrintDiagnostics;
+    std::ofstream mOutputStream;
+
     ScalarType mGammaConstant;
     ScalarType mMinPenaltyParameter;
     ScalarType mOptimalityTolerance;

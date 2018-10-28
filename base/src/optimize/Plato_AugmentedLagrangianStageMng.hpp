@@ -386,6 +386,21 @@ public:
         mObjectiveHessianOperator = std::make_shared<Plato::IdentityHessian<ScalarType, OrdinalType>>();
     }
 
+    //! Directive to update problem for each criterion (e.g. application based continuation).
+    void updateProblem()
+    {
+        // Communicate user that criteria specific data can be cached since trial control was accepted
+        assert(mObjective.get() != nullptr);
+        mObjective->updateProblem();
+
+        const OrdinalType tNumConstraints = mConstraints->size();
+        assert(tNumConstraints == mConstraints->size());
+        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        {
+            (*mConstraints)[tConstraintIndex].updateProblem();
+        }
+    }
+
     /****************************************************************************************************************/
     //! Directive to cache any criterion specific data once the trial control is accepted.
     /****************************************************************************************************************/

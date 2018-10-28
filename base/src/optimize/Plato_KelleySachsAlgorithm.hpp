@@ -1,10 +1,4 @@
 /*
- * Plato_KelleySachsAlgorithm.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,6 +40,12 @@
 //@HEADER
 */
 
+/*
+ * Plato_KelleySachsAlgorithm.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
 #ifndef PLATO_KELLEYSACHSALGORITHM_HPP_
 #define PLATO_KELLEYSACHSALGORITHM_HPP_
 
@@ -77,12 +77,15 @@ public:
             mNumLineSearchItrDone(0),
             mMaxNumOuterIterations(100),
             mNumOuterIterationsDone(0),
+            mProblemUpdateFrequency(0), // 0 = continuation disabled
             mGradientTolerance(1e-4),
             mStationarityTolerance(1e-4),
             mPostSmoothingAlphaScale(1e-4),
             mObjectiveStagnationTolerance(1e-8),
             mControlStagnationTolerance(std::numeric_limits<ScalarType>::epsilon()),
             mActualReductionTolerance(1e-8),
+            mScaleOfUnitControlForMaxTrustRegionRadius(-1.), // negative if not specified
+            mScaleOfUnitControlForInitialTrustRegionRadius(-1.), // negative if not specified
             mStoppingCriterion(Plato::algorithm::NOT_CONVERGED),
             mControlWorkVector(aDataFactory.control().create())
     {
@@ -111,6 +114,16 @@ public:
     {
         return (mIsPostSmoothingActive);
     }
+
+    /******************************************************************************//**
+     * @brief Set continuation frequency
+     * @param [in] aInput frequency
+    **********************************************************************************/
+    void setProblemUpdateFrequency(const OrdinalType& aInput)
+    {
+        mProblemUpdateFrequency = aInput;
+    }
+
     /******************************************************************************//**
      * @brief Set post smoothing operation scale
      * @param [in] aInput post smoothing operation scale
@@ -208,6 +221,24 @@ public:
     void setStoppingCriterion(const Plato::algorithm::stop_t & aInput)
     {
         mStoppingCriterion = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Scale factor for initial trust region radius
+     * @param [in] aInput scale factor (should be positive to be meaningful, around 0.1 if control varies between 0 and 1)
+    **********************************************************************************/
+    void setScaleOfUnitControlForInitialTrustRegionRadius(const ScalarType & aInput)
+    {
+        mScaleOfUnitControlForInitialTrustRegionRadius = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Scale factor for maximum trust region radius
+     * @param [in] aInput scale factor (should be positive to be meaningful, around 0.5 if control varies between 0 and 1)
+    **********************************************************************************/
+    void setScaleOfUnitControlForMaxTrustRegionRadius(const ScalarType & aInput)
+    {
+        mScaleOfUnitControlForMaxTrustRegionRadius = aInput;
     }
 
     /******************************************************************************//**
@@ -310,6 +341,28 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set maximum trust region radius
+    **********************************************************************************/
+    void initializeMaxTrustRegionRadius(Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng)
+    {
+        ScalarType tTrustRegionRadius = -1.;
+        const bool tHaveScaleOfUnitControlForMaxTrustRegionRadius =
+                (static_cast<ScalarType>(0) < mScaleOfUnitControlForMaxTrustRegionRadius);
+        if(tHaveScaleOfUnitControlForMaxTrustRegionRadius)
+        {
+            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
+            const ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
+            tTrustRegionRadius = mScaleOfUnitControlForMaxTrustRegionRadius * tUnitDistance;
+        }
+
+        // if meaningful, set
+        if(static_cast<ScalarType>(0) < tTrustRegionRadius)
+        {
+            aStepMng.setMaxTrustRegionRadius(tTrustRegionRadius);
+        }
+    }
+
+    /******************************************************************************//**
      * @brief Return scale factor for backtracking line search routine
      * @param [in] aIteration current line search iteration
      * @param [in] aPreviousScale scale factor for previous line search iteration
@@ -330,6 +383,13 @@ public:
         return (tOuput);
     }
 
+    /******************************************************************************//**
+     * @brief Perform backtracking line search on mid-point solution (i.e. trust region solution)
+     * @param [in] aMidGradient mid-point gradient
+     * @param [in] aStepMng trust region step data manager
+     * @param [in] aDataMng trust region algorithm data manager
+     * @param [in] aStageMng trust region algorithm criteria evaluation manager
+    **********************************************************************************/
     bool updateControl(const Plato::MultiVector<ScalarType, OrdinalType> & aMidGradient,
                        Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng,
                        Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
@@ -377,6 +437,94 @@ public:
         return (tControlUpdated);
     }
 
+    /******************************************************************************//**
+     * @brief If active, application code can do continuation on app-based parameters
+     * @param [in] aStepMng trust region step data manager
+     * @param [in] aStageMng trust region algorithm criteria evaluation manager
+     * @return flag: true = continuation was done, false = continuation was not done
+    **********************************************************************************/
+    bool performContinuation(Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng,
+                             Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
+    {
+        // handle updating problems
+        bool tDidUpdate = false;
+        const bool tHaveProblemUpdateFrequency = (static_cast<OrdinalType>(0) < mProblemUpdateFrequency);
+        if(tHaveProblemUpdateFrequency == true)
+        {
+            const OrdinalType tIterationsDone = this->getNumIterationsDone();
+            bool tIsIterationToUpdate = (tIterationsDone % mProblemUpdateFrequency) == static_cast<OrdinalType>(0);
+            if(tIsIterationToUpdate)
+            {
+                tDidUpdate = true;
+
+                // invoke advance continuation
+                aStageMng.updateProblem();
+
+                // invoke new objective
+                const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = aStepMng.getMidPointControls();
+                const ScalarType tNewMidObjectiveFunctionValue = aStageMng.evaluateObjective(tMidControl);
+                aStepMng.setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
+            }
+        }
+        return (tDidUpdate);
+    }
+
+    /******************************************************************************//**
+     * @brief Accept mid-point, i.e. solution from trust region subproblem, and ignore line search
+     * @param [in] aGradient mid-point gradient
+     * @param [in] aStepMng trust region step data manager
+     * @param [in] aDataMng trust region algorithm data manager
+    **********************************************************************************/
+    void acceptMidPoint(const Plato::MultiVector<ScalarType, OrdinalType>& aGradient,
+                        const Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng,
+                        Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        // Keep mid objective function, control and gradient at mid point
+        this->setNumLineSearchItrDone(0);
+        const ScalarType tMidObjectiveFunctionValue = aStepMng.getMidPointObjectiveFunctionValue();
+        aDataMng.setCurrentObjectiveFunctionValue(tMidObjectiveFunctionValue);
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = aStepMng.getMidPointControls();
+        aDataMng.setCurrentControl(tMidControl);
+        aDataMng.setCurrentGradient(aGradient);
+    }
+
+    /******************************************************************************//**
+     * @brief Set initial trust region radius to initial norm of the gradient
+     * @param [in] aDataMng trust region algorithm data manager
+     * @param [in] aStepMng trust region step data manager
+     **********************************************************************************/
+    void initializeTrustRegionRadius(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
+                                     Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng)
+    {
+        ScalarType tTrustRegionRadius = -1.;
+        // different methods for setting initial radius
+        const bool tHaveScaleOfUnitControlForInitialTrustRegionRadius =
+                (static_cast<ScalarType>(0) < mScaleOfUnitControlForInitialTrustRegionRadius);
+        if(tHaveScaleOfUnitControlForInitialTrustRegionRadius)
+        {
+            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
+            ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
+            tTrustRegionRadius = mScaleOfUnitControlForInitialTrustRegionRadius * tUnitDistance;
+        }
+        else if(aStepMng.isInitialTrustRegionRadiusSetToNormProjectedGradient() == true)
+        {
+            tTrustRegionRadius = aDataMng.getNormProjectedGradient();
+        }
+        else
+        {
+            // don't set an initial radius
+            return;
+        }
+
+        // enforce max before set
+        const ScalarType tMaxTrustRegionRadius = aStepMng.getMaxTrustRegionRadius();
+        if(tTrustRegionRadius > tMaxTrustRegionRadius)
+        {
+            tTrustRegionRadius = tMaxTrustRegionRadius;
+        }
+        aStepMng.setTrustRegionRadius(tTrustRegionRadius);
+    }
+
     virtual void solve() = 0;
 
 private:
@@ -386,6 +534,7 @@ private:
     OrdinalType mNumLineSearchItrDone;
     OrdinalType mMaxNumOuterIterations;
     OrdinalType mNumOuterIterationsDone;
+    OrdinalType mProblemUpdateFrequency;
 
     ScalarType mGradientTolerance;
     ScalarType mStationarityTolerance;
@@ -394,6 +543,9 @@ private:
     ScalarType mControlStagnationTolerance;
     ScalarType mStationarityMeasure;
     ScalarType mActualReductionTolerance;
+
+    ScalarType mScaleOfUnitControlForMaxTrustRegionRadius; // negative if not specified
+    ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
 
     Plato::algorithm::stop_t mStoppingCriterion;
 

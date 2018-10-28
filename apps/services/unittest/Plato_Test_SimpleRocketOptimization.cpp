@@ -174,6 +174,7 @@ TEST(PlatoTest, GradBasedRocketObjective)
     // set normalization constants
     std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
     Plato::GradBasedRocketObjective<double> tObjective(tTargetThrustProfile, tRocketInputs, tGeomModel);
+    tObjective.disableObjectiveNormalization();
     std::vector<double> tUpperBounds = {0.09, 0.007}; /* {chamber_radius_ub, ref_burn_rate_ub} */
     tObjective.setNormalizationConstants(tUpperBounds);
 
@@ -304,6 +305,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     const size_t tNumVectors = 1;
     Plato::AlgorithmInputsKSBC<double> tInputs;
     tInputs.mHaveHessian = false;
+    tInputs.mMinTrustRegionRadius = 1e-6;
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; 
     (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
@@ -321,13 +323,14 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     const double tTolerance = 1e-4;
     const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
     const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
-    EXPECT_NEAR(tBest1, 0.074967184692443331, tTolerance);
-    EXPECT_NEAR(tBest2, 0.0050013136704244072, tTolerance);
+    EXPECT_NEAR(tBest1, 0.0749614, tTolerance);
+    EXPECT_NEAR(tBest2, 0.00500168, tTolerance);
 
     // ********* OUTPUT TO TERMINAL *********
     std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
     std::cout << "NumFunctionEvaluations = " << tThrustMisfitObjective->getNumFunctionEvaluations() << std::endl;
     std::cout << "BestObjectiveValue = " << tOutputs.mObjFuncValue << std::endl;
+    std::cout << "BestValue 1 = " << tBest1 << ", BestValue 2 = " << tBest2 << std::endl;
     std::cout << "StoppingCriterion = " << tOutputs.mStopCriterion.c_str() << std::endl;
 }
 

@@ -49,6 +49,7 @@
 #pragma once
 
 #include <map>
+#include <limits>
 #include <string>
 #include <vector>
 #include <memory>
@@ -79,9 +80,12 @@ public:
      **********************************************************************************/
     GradBasedRocketObjective(const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
                              const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
+            mNormalizeObjFunc(true),
+            mIsFirstObjFuncValueSet(false),
             mNumFuncEvaluations(0),
             mEpsilon(1e-4),
             mNormTargetValues(0),
+            mFirstObjFuncValue(1),
             mRocketModel(aRocketInputs, aChamberGeom),
             mTargetThrustProfile(),
             mCachedThrustProfile(),
@@ -99,9 +103,12 @@ public:
     GradBasedRocketObjective(const std::vector<ScalarType> & aTargetThrustProfile,
                              const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
                              const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
+            mNormalizeObjFunc(true),
+            mIsFirstObjFuncValueSet(false),
             mNumFuncEvaluations(0),
             mEpsilon(1e-4),
             mNormTargetValues(std::inner_product(aTargetThrustProfile.begin(), aTargetThrustProfile.end(), aTargetThrustProfile.begin(), static_cast<ScalarType>(0.0))),
+            mFirstObjFuncValue(1),
             mRocketModel(aRocketInputs, aChamberGeom),
             mTargetThrustProfile(aTargetThrustProfile),
             mCachedThrustProfile(),
@@ -115,6 +122,15 @@ public:
     **********************************************************************************/
     virtual ~GradBasedRocketObjective()
     {
+    }
+
+    /******************************************************************************//**
+     * @brief Set perturbation parameter used for finite difference gradient approximation.
+     * @param [in] aInput perturbation parameter
+     **********************************************************************************/
+    void disableObjectiveNormalization()
+    {
+        mNormalizeObjFunc = false;
     }
 
     /******************************************************************************//**
@@ -197,6 +213,13 @@ public:
         const ScalarType tDenominator = static_cast<ScalarType>(2.0) * tNumElements * mNormTargetValues;
         tObjectiveValue = (static_cast<ScalarType>(1.0) / tDenominator) * tObjectiveValue;
 
+        if(mIsFirstObjFuncValueSet == false && mNormalizeObjFunc == true)
+        {
+            mFirstObjFuncValue = tObjectiveValue;
+            mIsFirstObjFuncValueSet = true;
+        }
+
+        tObjectiveValue = tObjectiveValue / mFirstObjFuncValue;
         return tObjectiveValue;
     }
 
@@ -327,10 +350,13 @@ private:
     }
 
 private:
+    bool mNormalizeObjFunc;
+    bool mIsFirstObjFuncValueSet;
     OrdinalType mNumFuncEvaluations;
 
     ScalarType mEpsilon;
     ScalarType mNormTargetValues;
+    ScalarType mFirstObjFuncValue;
     Plato::AlgebraicRocketModel<ScalarType> mRocketModel;
 
     std::vector<ScalarType> mTargetThrustProfile;

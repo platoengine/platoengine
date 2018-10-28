@@ -86,10 +86,7 @@ public:
                                 const std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
             mPrintDiagnostics(false),
-            mProblemUpdateFrequency(0), // 0 = no update, continuation disabled
             mOptimalityTolerance(1e-5),
-            mScaleOfUnitControlForInitialTrustRegionRadius(-1.), // negative if not specified
-            mScaleOfUnitControlForMaxTrustRegionRadius(-1.), // negative if not specified
             mOutputData(),
             mGradient(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
@@ -114,31 +111,6 @@ public:
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
-    }
-
-    /******************************************************************************//**
-     * @brief Set continuation update frequency
-     * @param [in] aInput continuation frequency
-    **********************************************************************************/
-    void setProblemUpdateFrequency(const OrdinalType& aInput)
-    {
-        mProblemUpdateFrequency = aInput;
-    }
-
-    /******************************************************************************//**
-     * @brief Scale factor for initial trust region radius
-     * @param [in] aInput scale factor (should be positive to be meaningful, around 0.1 if control varies between 0 and 1)
-    **********************************************************************************/
-    void setScaleOfUnitControlForInitialTrustRegionRadius(const ScalarType & aInput)
-    {
-        mScaleOfUnitControlForInitialTrustRegionRadius = aInput;
-    }
-
-    //! should be positive to be meaningful
-    //! Typically, around 0.5 if control varies between 0 and 1
-    void setScaleOfUnitControlForMaxTrustRegionRadius(const ScalarType & aInput)
-    {
-        mScaleOfUnitControlForMaxTrustRegionRadius = aInput;
     }
 
     /******************************************************************************//**
@@ -373,46 +345,11 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Set initial trust region radius to initial norm of the gradient
-    **********************************************************************************/
-    void setInitialTrustRegionRadius()
-    {
-        ScalarType tTrustRegionRadius = -1.;
-
-        // different methods for setting initial radius
-        bool tHaveScaleOfUnitControlForInitialTrustRegionRadius =
-                (0 < mScaleOfUnitControlForInitialTrustRegionRadius);
-        if(tHaveScaleOfUnitControlForInitialTrustRegionRadius)
-        {
-            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
-            ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
-            tTrustRegionRadius = mScaleOfUnitControlForInitialTrustRegionRadius * tUnitDistance;
-        }
-        else if(mStepMng->isInitialTrustRegionRadiusSetToNormProjectedGradient() == true)
-        {
-            tTrustRegionRadius = mDataMng->getNormProjectedGradient();
-        }
-        else
-        {
-            // don't set an initial radius
-            return;
-        }
-
-        // enforce max before set
-        const ScalarType tMaxTrustRegionRadius = mStepMng->getMaxTrustRegionRadius();
-        if(tTrustRegionRadius > tMaxTrustRegionRadius)
-        {
-            tTrustRegionRadius = tMaxTrustRegionRadius;
-        }
-        mStepMng->setTrustRegionRadius(tTrustRegionRadius);
-    }
-
-    /******************************************************************************//**
      * @brief Compute initial objective value and gradient.
     **********************************************************************************/
     void setInitialProblemData()
     {
-        this->setMaxTrustRegionRadius();
+        this->initializeMaxTrustRegionRadius(*mStepMng);
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
         ScalarType tCurrentObjFuncValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
@@ -421,29 +358,8 @@ private:
         mStageMng->computeGradient(tCurrentControl, *mGradient);
         mDataMng->setCurrentGradient(*mGradient);
         mDataMng->computeNormProjectedGradient();
-        this->setInitialTrustRegionRadius();
+        this->initializeTrustRegionRadius(*mDataMng, *mStepMng);
         mDataMng->computeStationarityMeasure();
-    }
-
-    //! methods for setting maximum radius
-    void setMaxTrustRegionRadius()
-    {
-        ScalarType tTrustRegionRadius = -1.;
-
-        // different methods
-        bool tHaveScaleOfUnitControlForMaxTrustRegionRadius = (0 < mScaleOfUnitControlForMaxTrustRegionRadius);
-        if(tHaveScaleOfUnitControlForMaxTrustRegionRadius)
-        {
-            Plato::fill(static_cast<ScalarType>(1), *mControlWorkVector);
-            ScalarType tUnitDistance = Plato::norm(*mControlWorkVector);
-            tTrustRegionRadius = mScaleOfUnitControlForMaxTrustRegionRadius * tUnitDistance;
-        }
-
-        // if meaningful, set
-        if(0 < tTrustRegionRadius)
-        {
-            mStepMng->setMaxTrustRegionRadius(tTrustRegionRadius);
-        }
     }
 
     /******************************************************************************//**
@@ -508,7 +424,7 @@ private:
     **********************************************************************************/
     void update()
     {
-        const bool tContinuationDone = this->performContinuation();
+        const bool tContinuationDone = this->performContinuation(*mStepMng, *mStageMng);
         // Apply post smoothing operation
         const bool tControlUpdated = this->applyPostSmoothing(tContinuationDone);
         // Update current state
@@ -527,35 +443,6 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief If active, application code can do continuation on app-based parameters
-     * @return flag: true = continuation was done, false = continuation was not done
-    **********************************************************************************/
-    bool performContinuation()
-    {
-        // handle updating problems
-        bool tDidUpdate = false;
-        const bool tHaveProblemUpdateFrequency = (static_cast<OrdinalType>(0) < mProblemUpdateFrequency);
-        if(tHaveProblemUpdateFrequency == true)
-        {
-            const OrdinalType tIterationsDone = this->getNumIterationsDone();
-            bool tIsIterationToUpdate = (tIterationsDone % mProblemUpdateFrequency) == static_cast<OrdinalType>(0);
-            if(tIsIterationToUpdate)
-            {
-                tDidUpdate = true;
-
-                // invoke advance continuation
-                mStageMng->updateProblem();
-
-                // invoke new objective
-                const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
-                const ScalarType tNewMidObjectiveFunctionValue = mStageMng->evaluateObjective(tMidControl);
-                mStepMng->setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
-            }
-        }
-        return (tDidUpdate);
-    }
-
-    /******************************************************************************//**
      * @brief Update current criteria values, controls and gradient
      * @param [in] aSmoothingDone: true = post-smoothing done; false = post-smoothing was not done
     **********************************************************************************/
@@ -571,7 +458,7 @@ private:
         }
         else
         {
-            this->acceptMidPoint(*mGradient /* mid point gradient */);
+            this->acceptMidPoint(*mGradient /* mid point gradient */, *mStepMng, *mDataMng);
         }
     }
 
@@ -599,20 +486,6 @@ private:
         return (tControlUpdated);
     }
 
-    /******************************************************************************//**
-     * @brief Accept mid-point, i.e. solution from trust region subproblem, and ignore line search
-     * @param [in] aGradient mid-point gradient
-    **********************************************************************************/
-    void acceptMidPoint(const Plato::MultiVector<ScalarType, OrdinalType>& aGradient)
-    {
-        // Keep mid objective function, control and gradient at mid point
-        this->setNumLineSearchItrDone(0);
-        const ScalarType tMidObjectiveFunctionValue = mStepMng->getMidPointObjectiveFunctionValue();
-        mDataMng->setCurrentObjectiveFunctionValue(tMidObjectiveFunctionValue);
-        const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
-        mDataMng->setCurrentControl(tMidControl);
-        mDataMng->setCurrentGradient(aGradient);
-    }
 
     /******************************************************************************//**
      * @brief Check stopping tolerances
@@ -721,12 +594,7 @@ private:
 private:
     bool mPrintDiagnostics;
     std::ofstream mOutputStream;
-
-    OrdinalType mProblemUpdateFrequency;
-
     ScalarType mOptimalityTolerance;
-    ScalarType mScaleOfUnitControlForMaxTrustRegionRadius; // negative if not specified
-    ScalarType mScaleOfUnitControlForInitialTrustRegionRadius; // negative if not specified
 
     Plato::OutputDataKelleySachs<ScalarType, OrdinalType> mOutputData;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mGradient;
