@@ -26,29 +26,29 @@ class AbstractData {
     // this is clunky, but the derived template only instantiates the correct accessor.
     // functions that aren't derived are superfluous, and should error out by default.
     virtual void getData( int*& data     , StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
-    virtual void getData( int, int*& data, StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
-    virtual void getData( int, int& data , StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
-    virtual void setData( int, int data  , StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
+    virtual void getData( int i, int*& data, StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
+    virtual void getData( int i, int& data , StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
+    virtual void setData( int i, int data  , StateIndex state=CURRENT ) { pXcout << "request for integer from non-integer data" << endl; assert(0); }
 
     virtual void getData( Real*& data     , StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
-    virtual void getData( int, Real*& data, StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
-    virtual void getData( int, Real& data , StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
-    virtual void setData( int, Real data  , StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
+    virtual void getData( int i, Real*& data, StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
+    virtual void getData( int i, Real& data , StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
+    virtual void setData( int i, Real data  , StateIndex state=CURRENT ) { pXcout << "request for Real from non-Real data" << endl; assert(0); }
 
     virtual void getData( Vector*& data     , StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
-    virtual void getData( int, Vector*& data, StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
-    virtual void getData( int, Vector& data , StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
-    virtual void setData( int, Vector data  , StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
+    virtual void getData( int i, Vector*& data, StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
+    virtual void getData( int i, Vector& data , StateIndex state) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
+    virtual void setData( int i, Vector data  , StateIndex state=CURRENT ) { pXcout << "request for Vector from non-Vector data" << endl; assert(0); }
 
     virtual void getData( Tensor*& data     , StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
-    virtual void getData( int, Tensor*& data, StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
-    virtual void getData( int, Tensor& data , StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
-    virtual void setData( int, Tensor data  , StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
+    virtual void getData( int i, Tensor*& data, StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
+    virtual void getData( int i, Tensor& data , StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
+    virtual void setData( int i, Tensor data  , StateIndex state=CURRENT ) { pXcout << "request for Tensor from non-Tensor data" << endl; assert(0); }
 
     virtual void getData( SymTensor*& data     , StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
-    virtual void getData( int, SymTensor*& data, StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
-    virtual void getData( int, SymTensor& data , StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
-    virtual void setData( int, SymTensor data  , StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
+    virtual void getData( int i, SymTensor*& data, StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
+    virtual void getData( int i, SymTensor& data , StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
+    virtual void setData( int i, SymTensor data  , StateIndex state=CURRENT ) { pXcout << "request for SymTensor from non-SymTensor data" << endl; assert(0); }
 
     void dump();
 
@@ -122,7 +122,7 @@ class DataEntity : public AbstractData {
           initialState[i] = data[map[i]];
       }
 
-    ~DataEntity() {
+    virtual ~DataEntity() {
         if( !varExternal ){
           for(int i=0; i<varNumStates; i++) 
             delete [] varPntr[i];
@@ -153,6 +153,8 @@ class DataEntity : public AbstractData {
       }
     }
 
+    using AbstractData::getData;
+    using AbstractData::setData;
     void getData( dataType*& data       , StateIndex state=CURRENT){ data = varPntr[state]; }
     void getData( int i, dataType*& data, StateIndex state=CURRENT){ data = varPntr[state]+i; }
     void getData( int i, dataType& data , StateIndex state=CURRENT){ data = varPntr[state][i]; }
@@ -174,14 +176,16 @@ class ExternalVector : public AbstractData {
   public:
     ExternalVector( Real** data, string name, int numData,      DataCentering cntr, int numStates, bool plot );
     ExternalVector( Real** data, string name, vector<int>& map, DataCentering cntr, int numStates, bool plot );
-    ~ExternalVector();
+    virtual ~ExternalVector();
 
-    void getData( Vector*& data       , StateIndex state=CURRENT){ data = varData[state]; }
-    void getData( int i, Vector*& data, StateIndex state=CURRENT){ data = varData[state]+i; }
-    void getData( int i, Vector& data , StateIndex state=CURRENT){ data = varData[state][i]; }
-    void setData( int i, Vector data  , StateIndex state=CURRENT){ varData[state][i] = data; }
+    using AbstractData::getData;
+    using AbstractData::setData;
+    virtual void getData( Vector*& data       , StateIndex state=CURRENT);
+    virtual void getData( int i, Vector*& data, StateIndex state=CURRENT);
+    virtual void getData( int i, Vector& data , StateIndex state=CURRENT);
+    virtual void setData( int i, Vector data  , StateIndex state=CURRENT);
 
-    void advanceState();
+    virtual void advanceState();
 
   private:
     Real* varPntr[3];
@@ -192,14 +196,16 @@ class ExternalTensor : public AbstractData {
   public:
     ExternalTensor( Real** data, string name, int numData,      DataCentering cntr, int numStates, bool plot );
     ExternalTensor( Real** data, string name, vector<int>& map, DataCentering cntr, int numStates, bool plot );
-    ~ExternalTensor();
+    virtual ~ExternalTensor();
 
-    void getData( Tensor*& data       , StateIndex state=CURRENT){ data = varData[state]; }
-    void getData( int i, Tensor*& data, StateIndex state=CURRENT){ data = varData[state]+i; }
-    void getData( int i, Tensor& data , StateIndex state=CURRENT){ data = varData[state][i]; }
-    void setData( int i, Tensor data  , StateIndex state=CURRENT){ varData[state][i] = data; }
+    using AbstractData::getData;
+    using AbstractData::setData;
+    virtual void getData( Tensor*& data       , StateIndex state=CURRENT);
+    virtual void getData( int i, Tensor*& data, StateIndex state=CURRENT);
+    virtual void getData( int i, Tensor& data , StateIndex state=CURRENT);
+    virtual void setData( int i, Tensor data  , StateIndex state=CURRENT);
 
-    void advanceState();
+    virtual void advanceState();
 
   private:
     Real* varPntr[9];
@@ -208,16 +214,18 @@ class ExternalTensor : public AbstractData {
 };
 class ExternalSymTensor : public AbstractData {
   public:
-    ExternalSymTensor( Real** data, string name, int numData,      DataCentering cntr, int numStates, bool plot );
-    ExternalSymTensor( Real** data, string name, vector<int>& map, DataCentering cntr, int numStates, bool plot );
-    ~ExternalSymTensor();
+    ExternalSymTensor(Real** data, string name, int numData, DataCentering cntr, int numStates, bool plot);
+    ExternalSymTensor(Real** data, string name, vector<int>& map, DataCentering cntr, int numStates, bool plot);
+    virtual ~ExternalSymTensor();
 
-    void getData( SymTensor*& data       , StateIndex state=CURRENT){ data = varData[state]; }
-    void getData( int i, SymTensor*& data, StateIndex state=CURRENT){ data = varData[state]+i; }
-    void getData( int i, SymTensor& data , StateIndex state=CURRENT){ data = varData[state][i]; }
-    void setData( int i, SymTensor data  , StateIndex state=CURRENT){ varData[state][i] = data; }
+    using AbstractData::getData;
+    using AbstractData::setData;
+    virtual void getData(SymTensor*& data, StateIndex state = CURRENT);
+    virtual void getData(int i, SymTensor*& data, StateIndex state = CURRENT);
+    virtual void getData(int i, SymTensor& data, StateIndex state = CURRENT);
+    virtual void setData(int i, SymTensor data, StateIndex state = CURRENT);
 
-    void advanceState();
+    virtual void advanceState();
 
   private:
     Real* varPntr[6];

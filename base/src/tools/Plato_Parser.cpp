@@ -939,13 +939,10 @@ bool boolFromString(const std::string & strval)
     {
         return true;
     }
-    else
-    {
-        std::stringstream ss;
-        ss << "Plato::Parser: expected a boolean ('True','False'), not '" << strval << "'.";
-        throw Plato::ParsingException(ss.str());
-    }
-    return false;  // prevents compiler warnings
+
+    std::stringstream ss;
+    ss << "Plato::Parser: expected a boolean ('True','False'), not '" << strval << "'.";
+    throw Plato::ParsingException(ss.str());
 }
 
 /******************************************************************************/

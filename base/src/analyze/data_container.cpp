@@ -46,6 +46,23 @@ ExternalVector::ExternalVector( Real** data, string name, int numData,
   }
 }
 
+void ExternalVector::getData(Vector*& data, StateIndex state)
+{
+    data = varData[state];
+}
+void ExternalVector::getData(int i, Vector*& data, StateIndex state)
+{
+    data = varData[state] + i;
+}
+void ExternalVector::getData(int i, Vector& data, StateIndex state)
+{
+    data = varData[state][i];
+}
+void ExternalVector::setData(int i, Vector data, StateIndex state)
+{
+    varData[state][i] = data;
+}
+
 void ExternalVector::advanceState(){
   if( varNumStates == 1 ) return;
   if( varNumStates == 2 ) {
@@ -128,11 +145,33 @@ ExternalTensor::ExternalTensor( Real** data, string name, int numData,
   }
 }
 
-void ExternalTensor::advanceState(){
-  if( varNumStates == 1 ) return;
-  if( varNumStates == 2 ) {
-    memcpy( varData[CURRENT], varData[UPDATED], varLength*sizeof(Tensor) );
-  } else {
+void ExternalTensor::getData(Tensor*& data, StateIndex state)
+{
+    data = varData[state];
+}
+void ExternalTensor::getData(int i, Tensor*& data, StateIndex state)
+{
+    data = varData[state] + i;
+}
+void ExternalTensor::getData(int i, Tensor& data, StateIndex state)
+{
+    data = varData[state][i];
+}
+void ExternalTensor::setData(int i, Tensor data, StateIndex state)
+{
+    varData[state][i] = data;
+}
+
+void ExternalTensor::advanceState()
+{
+    if(varNumStates == 1)
+        return;
+    if(varNumStates == 2)
+    {
+        memcpy(varData[CURRENT], varData[UPDATED], varLength * sizeof(Tensor));
+    }
+    else
+    {
     Tensor* back = varData[varNumStates-1];
     for( int i=3; i<varNumStates; i++){
       varData[i] = varData[i-1];
@@ -222,8 +261,25 @@ void ExternalSymTensor::advanceState(){
     varData[2] = varData[CURRENT];
     varData[CURRENT] = varData[UPDATED];
     varData[UPDATED] = back;
-    memcpy( varData[UPDATED], varData[CURRENT], varLength*sizeof(SymTensor) );
-  }
+    memcpy(varData[UPDATED], varData[CURRENT], varLength * sizeof(SymTensor));
+    }
+}
+
+void ExternalSymTensor::getData(SymTensor*& data, StateIndex state)
+{
+    data = varData[state];
+}
+void ExternalSymTensor::getData(int i, SymTensor*& data, StateIndex state)
+{
+    data = varData[state] + i;
+}
+void ExternalSymTensor::getData(int i, SymTensor& data, StateIndex state)
+{
+    data = varData[state][i];
+}
+void ExternalSymTensor::setData(int i, SymTensor data, StateIndex state)
+{
+    varData[state][i] = data;
 }
 
 ExternalSymTensor::~ExternalSymTensor()
