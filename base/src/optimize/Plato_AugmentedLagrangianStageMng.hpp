@@ -637,6 +637,7 @@ public:
             {
                 ScalarType tBeta = tPenalty * (*mCurrentConstraintValues)(tVectorIndex, tConstraintIndex);
                 tMyLambda[tConstraintIndex] = tMyLambda[tConstraintIndex] + tBeta;
+                tMyLambda[tConstraintIndex] = std::max(static_cast<ScalarType>(0), tMyLambda[tConstraintIndex]);
             }
         }
         mDynamicFeasibilityTolerance = static_cast<ScalarType>(1) / (static_cast<ScalarType>(1) + tPenalty);

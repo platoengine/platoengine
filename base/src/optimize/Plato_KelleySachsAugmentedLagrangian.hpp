@@ -259,9 +259,11 @@ public:
             this->update();
             // Update stage manager data
             mStageMng->updateOptimizationData(mDataMng.operator*());
+            // check penalty parameter, update if necessary
+            bool tStoppingCriterionMet = this->checkPenaltyParameter();
             // output diagnostics
             this->outputDiagnostics();
-            if(this->checkPenaltyParameter() == true)
+            if(tStoppingCriterionMet == true)
             {
                 this->outputMyStoppingCriterion();
                 this->closeOutputFile();
