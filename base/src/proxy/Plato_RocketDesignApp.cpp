@@ -133,6 +133,7 @@ void RocketDesignApp::initialize()
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
     mObjective = std::make_shared<Plato::GradBasedRocketObjective<double>>(tTargetThrustProfile, tRocketSimInputs, tGeomModel);
+    mObjective->disableObjectiveNormalization();
 }
 
 /******************************************************************************//**
