@@ -166,7 +166,6 @@ public:
     /****************************************************************************************************************/
     {
         assert(mNumConstraintEvaluations.empty() == false);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         assert(aIndex < mNumConstraintEvaluations.size());
         return (mNumConstraintEvaluations[aIndex]);
     }
@@ -176,7 +175,6 @@ public:
     /****************************************************************************************************************/
     {
         assert(mNumConstraintGradientEvaluations.empty() == false);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         assert(aIndex < mNumConstraintGradientEvaluations.size());
         return (mNumConstraintGradientEvaluations[aIndex]);
     }
@@ -186,7 +184,6 @@ public:
     /****************************************************************************************************************/
     {
         assert(mNumConstraintHessianEvaluations.empty() == false);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         assert(aIndex < mNumConstraintHessianEvaluations.size());
         return (mNumConstraintHessianEvaluations[aIndex]);
     }
@@ -268,7 +265,6 @@ public:
     /****************************************************************************************************************/
     {
         assert(mLagrangeMultipliers.get() != nullptr);
-        assert(aValue >= static_cast<ScalarType>(0));
         assert(mLagrangeMultipliers->getNumVectors() > static_cast<OrdinalType>(0));
         if(aValue < static_cast<ScalarType>(0))
         {
@@ -288,11 +284,7 @@ public:
     /****************************************************************************************************************/
     {
         assert(mLagrangeMultipliers.get() != nullptr);
-        assert(aValue >= static_cast<ScalarType>(0));
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
-        assert(aConstraintIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mLagrangeMultipliers->getNumVectors());
-        assert(mLagrangeMultipliers->operator[](aVectorIndex).size() >= static_cast<OrdinalType>(0));
         assert(aConstraintIndex < mLagrangeMultipliers->operator[](aVectorIndex).size());
         mLagrangeMultipliers->operator ()(aVectorIndex, aConstraintIndex).fill(aValue);
         if(aValue < static_cast<ScalarType>(0))
@@ -308,7 +300,6 @@ public:
     /****************************************************************************************************************/
     {
         assert(mLagrangeMultipliers.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mLagrangeMultipliers->getNumVectors());
         assert(mLagrangeMultipliers->operator[](aVectorIndex).size() == aInput.size());
         for(OrdinalType tIndex = 0; tIndex < aInput.size(); tIndex++)
