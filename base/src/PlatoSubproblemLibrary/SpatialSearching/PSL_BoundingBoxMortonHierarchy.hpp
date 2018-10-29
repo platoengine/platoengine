@@ -16,6 +16,7 @@ public:
     BoundingBoxMortonHierarchy();
     virtual ~BoundingBoxMortonHierarchy();
 
+    using AbstractInterface::OverlapSearcher::build;
     // build searcher
     virtual void build(const std::vector<AxisAlignedBoundingBox>& answer_boxes);
     // find overlaps

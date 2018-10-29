@@ -67,13 +67,11 @@ bool SparseMatrixBuilder::needs_value_this_pass()
         {
             // do not need values on first pass
             return false;
-            break;
         }
         case 1u:
         {
             // need values on second pass
             return true;
-            break;
         }
         default:
         {

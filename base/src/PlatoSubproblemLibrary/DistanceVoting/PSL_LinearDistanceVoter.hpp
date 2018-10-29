@@ -16,6 +16,7 @@ public:
     LinearDistanceVoter(AbstractAuthority* authority);
     virtual ~LinearDistanceVoter();
 
+    using DistanceVoter::choose_output;
     virtual int choose_output(const int& output_class_size,
                               const std::vector<double>& distances_per_instance,
                               const std::vector<int>& classes_per_instance);

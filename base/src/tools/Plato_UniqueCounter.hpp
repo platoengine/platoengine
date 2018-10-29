@@ -69,6 +69,7 @@ private:
 
     size_t m_unassigned_index;
     std::map<size_t, bool> m_is_assigned;
+    size_t m_max_unassigned_index;
 
 };
 

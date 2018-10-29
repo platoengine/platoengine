@@ -69,7 +69,6 @@ namespace TestingSupervisedLearning
 
 void get_testCrossValidation(const datasets_t::datasets_t& dataset, ParameterData& parameter_data, double& accuracy, double& time)
 {
-    //        return;
     PSL_SerialOnlyTest
     // allocate needed interfaces
     AbstractAuthority authority;
@@ -103,10 +102,9 @@ void test_testCrossValidation(const datasets_t::datasets_t& dataset,
     EXPECT_NEAR(actual_accuracy, expected_accuracy, accuracy_tolerance);
 }
 
-PSL_TEST(SupervisedLearning,makeTable)
+PSL_TEST(SupervisedLearning,DISABLED_makeTable)
 {
     set_rand_seed();
-    return;
 
     // set datasets table
     const int num_repeat = 8;
@@ -221,10 +219,9 @@ PSL_TEST(SupervisedLearning,makeTable)
     }
 }
 
-PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_popFailures_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pop_failures_dataset;
     ParameterData parameter_data;
@@ -236,10 +233,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_popFailures_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pop_failures_dataset;
     ParameterData parameter_data;
@@ -249,9 +245,8 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_popFailures_RF)
 {
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pop_failures_dataset;
     ParameterData parameter_data;
@@ -261,10 +256,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_popFailures_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_nicotine_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::nicotine_dataset;
     ParameterData parameter_data;
@@ -276,10 +270,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_nicotine_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::nicotine_dataset;
     ParameterData parameter_data;
@@ -289,10 +282,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_nicotine_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::nicotine_dataset;
     ParameterData parameter_data;
@@ -302,10 +294,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_kNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_nicotine_kNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::nicotine_dataset;
     ParameterData parameter_data;
@@ -317,10 +308,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_nicotine_kNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_lsvt_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::lsvt_dataset;
     ParameterData parameter_data;
@@ -332,10 +322,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_lsvt_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::lsvt_dataset;
     ParameterData parameter_data;
@@ -345,10 +334,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_lsvt_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::lsvt_dataset;
     ParameterData parameter_data;
@@ -358,10 +346,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_lsvt_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_frogsMFCCs_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::frogs_MFCCs_dataset;
     ParameterData parameter_data;
@@ -373,10 +360,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_frogsMFCCs_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::frogs_MFCCs_dataset;
     ParameterData parameter_data;
@@ -386,10 +372,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_frogsMFCCs_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::frogs_MFCCs_dataset;
     ParameterData parameter_data;
@@ -399,10 +384,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_frogsMFCCs_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_biodeg_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::biodeg_dataset;
     ParameterData parameter_data;
@@ -414,10 +398,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_biodeg_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::biodeg_dataset;
     ParameterData parameter_data;
@@ -427,10 +410,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_biodeg_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::biodeg_dataset;
     ParameterData parameter_data;
@@ -440,10 +422,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_kNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_biodeg_kNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::biodeg_dataset;
     ParameterData parameter_data;
@@ -455,10 +436,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_biodeg_kNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wilt_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wilt_dataset;
     ParameterData parameter_data;
@@ -470,10 +450,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wilt_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wilt_dataset;
     ParameterData parameter_data;
@@ -483,10 +462,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wilt_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wilt_dataset;
     ParameterData parameter_data;
@@ -496,10 +474,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wilt_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_onlineNews_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::online_news_dataset;
     ParameterData parameter_data;
@@ -511,10 +488,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_onlineNews_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::online_news_dataset;
     ParameterData parameter_data;
@@ -524,10 +500,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_onlineNews_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::online_news_dataset;
     ParameterData parameter_data;
@@ -537,10 +512,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_onlineNews_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_htru2_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::htru2_dataset;
     ParameterData parameter_data;
@@ -552,10 +526,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_htru2_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::htru2_dataset;
     ParameterData parameter_data;
@@ -565,10 +538,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_htru2_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::htru2_dataset;
     ParameterData parameter_data;
@@ -578,10 +550,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_htru2_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_dota2Test_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::dota2_test_dataset;
     ParameterData parameter_data;
@@ -593,10 +564,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_dota2Test_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::dota2_test_dataset;
     ParameterData parameter_data;
@@ -606,10 +576,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_dota2Test_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::dota2_test_dataset;
     ParameterData parameter_data;
@@ -619,10 +588,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_dota2Test_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_defaultCredit_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::default_credit_dataset;
     ParameterData parameter_data;
@@ -634,10 +602,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_defaultCredit_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::default_credit_dataset;
     ParameterData parameter_data;
@@ -647,10 +614,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_defaultCredit_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::default_credit_dataset;
     ParameterData parameter_data;
@@ -660,10 +626,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_defaultCredit_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_waveform_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::waveform_dataset;
     ParameterData parameter_data;
@@ -675,10 +640,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_waveform_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::waveform_dataset;
     ParameterData parameter_data;
@@ -688,10 +652,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_waveform_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::waveform_dataset;
     ParameterData parameter_data;
@@ -701,10 +664,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_waveform_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wineQuality_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wine_quality_dataset;
     ParameterData parameter_data;
@@ -716,10 +678,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wineQuality_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wine_quality_dataset;
     ParameterData parameter_data;
@@ -729,10 +690,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_wineQuality_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::wine_quality_dataset;
     ParameterData parameter_data;
@@ -742,10 +702,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_wineQuality_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_legacyMLTR_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::legacy_mltr_dataset;
     ParameterData parameter_data;
@@ -757,10 +716,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_legacyMLTR_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::legacy_mltr_dataset;
     ParameterData parameter_data;
@@ -770,10 +728,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_legacyMLTR_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::legacy_mltr_dataset;
     ParameterData parameter_data;
@@ -783,10 +740,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_legacyMLTR_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_cervicalCancer_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::cervical_cancer_dataset;
     ParameterData parameter_data;
@@ -798,10 +754,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_cervicalCancer_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::cervical_cancer_dataset;
     ParameterData parameter_data;
@@ -811,10 +766,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_cervicalCancer_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::cervical_cancer_dataset;
     ParameterData parameter_data;
@@ -824,10 +778,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_cervicalCancer_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_connect4_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::connect_4_dataset;
     ParameterData parameter_data;
@@ -839,10 +792,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_connect4_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::connect_4_dataset;
     ParameterData parameter_data;
@@ -852,10 +804,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_connect4_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::connect_4_dataset;
     ParameterData parameter_data;
@@ -865,10 +816,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_connect4_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_pendigits_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pen_digits_dataset;
     ParameterData parameter_data;
@@ -880,10 +830,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_pendigits_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pen_digits_dataset;
     ParameterData parameter_data;
@@ -893,10 +842,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_pendigits_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::pen_digits_dataset;
     ParameterData parameter_data;
@@ -906,10 +854,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_pendigits_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_seizure_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::seizure_dataset;
     ParameterData parameter_data;
@@ -921,10 +868,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_seizure_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::seizure_dataset;
     ParameterData parameter_data;
@@ -934,10 +880,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_seizure_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::seizure_dataset;
     ParameterData parameter_data;
@@ -947,10 +892,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_seizure_RF)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_sensorlessDrive_FFNN)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_sensorlessDrive_FFNN)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::sensorless_drive_dataset;
     ParameterData parameter_data;
@@ -962,10 +906,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_sensorlessDrive_FFNN)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_sensorlessDrive_SVM)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_sensorlessDrive_SVM)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::sensorless_drive_dataset;
     ParameterData parameter_data;
@@ -975,10 +918,9 @@ PSL_TEST(SupervisedLearning,TestCrossValidation_sensorlessDrive_SVM)
 
     test_testCrossValidation(dataset, parameter_data, expected_accuracy, accuracy_tolerance);
 }
-PSL_TEST(SupervisedLearning,TestCrossValidation_sensorlessDrive_RF)
+PSL_TEST(SupervisedLearning,DISABLED_TestCrossValidation_sensorlessDrive_RF)
 {
     set_rand_seed();
-    return;
 
     datasets_t::datasets_t dataset = datasets_t::datasets_t::sensorless_drive_dataset;
     ParameterData parameter_data;

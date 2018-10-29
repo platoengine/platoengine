@@ -25,7 +25,6 @@ public:
 
     virtual size_t get_rank();
     virtual size_t get_size();
-
     virtual double get_time();
 
     virtual void send(size_t target_rank, std::vector<int>& send_vector);

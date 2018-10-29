@@ -52,7 +52,8 @@ namespace Plato
 
 UniqueCounter::UniqueCounter() :
         m_unassigned_index(0u),
-        m_is_assigned()
+        m_is_assigned(),
+        m_max_unassigned_index(5000000u)
 {
 }
 UniqueCounter::~UniqueCounter()
@@ -84,6 +85,12 @@ size_t UniqueCounter::assign_next_unique()
 
         // continue scan
         m_unassigned_index++;
+
+        // avoid infinite loop by max
+        if(m_max_unassigned_index < m_unassigned_index)
+        {
+            break;
+        }
     }
 
     // should never reach here

@@ -185,10 +185,9 @@ public:
 protected:
 
 };
-PSL_TEST(SupervisedGenerator, spiralsErrorMinimization)
+PSL_TEST(SupervisedGenerator, DISABLED_spiralsErrorMinimization)
 {
     set_rand_seed();
-    return;
     PSL_SerialOnlyTest
 
     // define objective

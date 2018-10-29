@@ -184,23 +184,15 @@ protected:
 
 };
 
-PSL_TEST(SupportVectorMachine, errorMinimization)
+PSL_TEST(SupportVectorMachine, DISABLED_errorMinimization)
 {
     set_rand_seed();
-    return;
     PSL_SerialOnlyTest
 
     // allocate
     AbstractAuthority authority;
 
     // define objective
-    /*std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
-                                                    datasets_t::datasets_t::pop_failures_dataset,
-                                                    datasets_t::datasets_t::nicotine_dataset,
-                                                    datasets_t::datasets_t::lsvt_dataset,
-                                                    datasets_t::datasets_t::frogs_MFCCs_dataset,
-                                                    datasets_t::datasets_t::biodeg_dataset,
-                                                    datasets_t::datasets_t::wilt_dataset};*/
     std::vector<datasets_t::datasets_t> datasets = {datasets_t::datasets_t::iris_dataset,
                                                     datasets_t::datasets_t::pop_failures_dataset,
                                                     datasets_t::datasets_t::nicotine_dataset,
