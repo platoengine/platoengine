@@ -64,13 +64,11 @@
 #include "Plato_IdentityPreconditioner.hpp"
 #include "Plato_LinearCriterionHessian.hpp"
 #include "Plato_CentralDifferenceHessian.hpp"
-#include "Plato_TrustRegionAlgorithmDataMng.hpp"
-#include "Plato_AugmentedLagrangianStageMng.hpp"
-#include "Plato_KelleySachsAugmentedLagrangian.hpp"
-#include "Plato_StandardVectorReductionOperations.hpp"
 #include "Plato_GoldsteinPrice.hpp"
 #include "Plato_Himmelblau.hpp"
 #include "Plato_ShiftedEllipse.hpp"
+
+#include "Plato_KelleySachsAugmentedLagrangianLightInterface.hpp"
 
 namespace PlatoTest
 {
@@ -1666,97 +1664,50 @@ TEST(PlatoTest, KelleySachsAlgorithm)
 
 TEST(PlatoTest, KelleySachsAugmentedLagrangianCircleRadius)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory =
-            std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumDuals = 1;
-    const size_t tNumControls = 2;
-    tDataFactory->allocateDual(tNumDuals);
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    double tScalarValue = 0.5;
-    tDataMng->setInitialGuess(tScalarValue);
-    tScalarValue = 0;
-    tDataMng->setControlLowerBounds(tScalarValue);
-    tScalarValue = 10;
-    tDataMng->setControlUpperBounds(tScalarValue);
-
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Circle<double>> tCircle = std::make_shared<Plato::Circle<double>>();
     std::shared_ptr<Plato::Radius<double>> tRadius = std::make_shared<Plato::Radius<double>>();
     std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
     tConstraintList->add(tRadius);
 
-    // ********* AUGMENTED LAGRANGIAN STAGE MANAGER *********
-    std::shared_ptr<Plato::AugmentedLagrangianStageMng<double>> tStageMng =
-            std::make_shared<Plato::AugmentedLagrangianStageMng<double>>(tDataFactory, tCircle, tConstraintList);
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumDuals = 1;
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSAL<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumDuals);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 0.5 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 0.0 /* base value */);
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsAugmentedLagrangian<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setMaxNumTrustRegionSubProblemIterations(10);
-    tAlgorithm.setMaxTrustRegionRadius(1e1);
-    tAlgorithm.solve();
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSAL<double> tOutputs;
+    tInputs.mPrintDiagnostics = true;
+    tInputs.mPenaltyParameterScaleFactor = 1.5;
+    Plato::solve_ksal<double, size_t>(tCircle, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 38;
-    EXPECT_EQ(tIntegerGold, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGold = Plato::algorithm::stop_t::SMALL_PENALTY_PARAMETER;
-    EXPECT_EQ(tGold, tAlgorithm.getStoppingCriterion());
+    EXPECT_EQ(26u, tOutputs.mNumOuterIter);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to actual reduction tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
 
     // TEST OBJECTIVE FUNCTION VALUE
     const double tTolerance = 1e-6;
-    double tScalarGold = 2.6779179289265822;
-    EXPECT_NEAR(tScalarGold, tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    EXPECT_NEAR(2.677976516140359, tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CURRENT CONSTRAINT VALUE
-    const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double> tConstraintValues(tNumVectors, tNumDuals);
-    tStageMng->getCurrentConstraintValues(tConstraintValues);
-    Plato::StandardMultiVector<double> tGoldConstraintValues(tNumVectors, tNumDuals);
-    tGoldConstraintValues(0,0) = 1.746176845440761e-04;
-    PlatoTest::checkMultiVectorData(tConstraintValues, tGoldConstraintValues);
-
-    // TEST LAGRANGE MULTIPLIERS
-    Plato::StandardMultiVector<double> tLagrangeMulipliers(tNumVectors, tNumDuals);
-    tStageMng->getLagrangeMultipliers(tLagrangeMulipliers);
-    Plato::StandardMultiVector<double> tGoldtLagrangeMulipliers(tNumVectors, tNumDuals);
-    tGoldtLagrangeMulipliers(0,0) = 1;
-    PlatoTest::checkMultiVectorData(tLagrangeMulipliers, tGoldtLagrangeMulipliers);
+    Plato::StandardVector<double> tGoldConstraintValues(tNumDuals);
+    tGoldConstraintValues[0] = 3.637206842244e-5;
+    PlatoTest::checkVectorData(*tOutputs.mConstraints, tGoldConstraintValues);
 
     // TEST CONTROL SOLUTION
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
-    tGoldVector(0,0) = 0.312106477189628;
-    tGoldVector(0,1) = 0.950139023817475;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector);
-
-    // TEST CURRENT AUGMENTED LAGRANGIAN GRADIENT
-    tGoldVector(0,0) = 0.17551763569502099;
-    tGoldVector(0,1) = 0.52314282334931494;
-    const Plato::MultiVector<double> & tCurrentGradient = tDataMng->getCurrentGradient();
-    PlatoTest::checkMultiVectorData(tCurrentGradient, tGoldVector);
+    tGoldVector(0,0) = 0.31157843366511567;
+    tGoldVector(0,1) = 0.95023957597187847;
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector);
 }
 
 TEST(PlatoTest, KelleySachsAugmentedLagrangianRosenbrockRadius)
 {
-    // ********* ALLOCATE DATA FACTORY *********
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory =
-            std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumDuals = 1;
-    const size_t tNumControls = 2;
-    tDataFactory->allocateDual(tNumDuals);
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<double>> tDataMng =
-            std::make_shared<Plato::TrustRegionAlgorithmDataMng<double>>(tDataFactory);
-    tDataMng->setInitialGuess(.1);
-    tDataMng->setControlLowerBounds(-1.5);
-    tDataMng->setControlUpperBounds(1.5);
-
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Rosenbrock<double>> tRosenbrock = std::make_shared<Plato::Rosenbrock<double>>();
     std::shared_ptr<Plato::Radius<double>> tRadius = std::make_shared<Plato::Radius<double>>();
@@ -1764,43 +1715,40 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianRosenbrockRadius)
     std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
     tConstraintList->add(tRadius);
 
-    // ********* AUGMENTED LAGRANGIAN STAGE MANAGER *********
-    std::shared_ptr<Plato::AugmentedLagrangianStageMng<double>> tStageMng =
-            std::make_shared<Plato::AugmentedLagrangianStageMng<double>>(tDataFactory, tRosenbrock, tConstraintList);
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumDuals = 1;
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSAL<double> tInputs;
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumDuals);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -5 /* base value */);
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 5 /* base value */);
 
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM *********
-    Plato::KelleySachsAugmentedLagrangian<double> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    tAlgorithm.setMaxNumTrustRegionSubProblemIterations(20);
-    tAlgorithm.setMaxTrustRegionRadius(1e1);
-    tAlgorithm.solve();
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSAL<double> tOutputs;
+    tInputs.mPrintDiagnostics = true;
+    tInputs.mPenaltyParameterScaleFactor = 1.5;
+    Plato::solve_ksal<double, size_t>(tRosenbrock, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 38;
-    EXPECT_EQ(tIntegerGold, tAlgorithm.getNumIterationsDone());
-    Plato::algorithm::stop_t tGold = Plato::algorithm::stop_t::SMALL_PENALTY_PARAMETER;
-    EXPECT_EQ(tGold, tAlgorithm.getStoppingCriterion());
+    EXPECT_EQ(26u, tOutputs.mNumOuterIter);
+    EXPECT_STREQ("\n\n****** Optimization stopping due to actual reduction tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
 
     // TEST OBJECTIVE FUNCTION VALUE
-    double tScalarGold = 0.;
-    double tTolerance = 1e-4;
-    EXPECT_NEAR(tScalarGold, tDataMng->getCurrentObjectiveFunctionValue(), tTolerance);
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
 
     // TEST CURRENT CONSTRAINT VALUE
-    const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double> tConstraintValues(tNumVectors, tNumDuals);
-    tStageMng->getCurrentConstraintValues(tConstraintValues);
-    Plato::StandardMultiVector<double> tGoldConstraintValues(tNumVectors, tNumDuals);
-    tTolerance = 1e-3;
-    tGoldConstraintValues(0,0) = 0;
-    PlatoTest::checkMultiVectorData(tConstraintValues, tGoldConstraintValues, tTolerance);
+    Plato::StandardVector<double> tGoldConstraintValues(tNumDuals);
+    tGoldConstraintValues[0] = 0.;
+    PlatoTest::checkVectorData(*tOutputs.mConstraints, tGoldConstraintValues);
 
     // TEST CONTROL SOLUTION
     Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
-    tTolerance = 1e-3;
     tGoldVector(0,0) = 1.;
     tGoldVector(0,1) = 1.;
-    const Plato::MultiVector<double> & tCurrentControl = tDataMng->getCurrentControl();
-    PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector);
 }
 
 TEST(PlatoTest, KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse)

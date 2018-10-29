@@ -219,7 +219,7 @@ public:
     {
         this->openOutputFile();
         this->checkInitialGuess(*mDataMng);
-        this->setInitialProblemData();
+        this->setInitialStateData();
         mStageMng->updateOptimizationData(*mDataMng);
         this->outputDiagnostics();
 
@@ -230,7 +230,7 @@ public:
             this->setNumIterationsDone(tIteration);
             mDataMng->cacheCurrentStageData();
             // Compute adaptive constants to ensure superlinear convergence
-            this->computeAdaptiveConstant();
+            this->computeAdaptiveConstant(*mDataMng, *mStepMng);
             // Solve trust region subproblem
             mStepMng->solveSubProblem(*mDataMng, *mStageMng, *mSolver);
             // Update mid objective, control, and gradient information if necessary
@@ -260,7 +260,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_ksbc_algorithm_diagnostics.txt");
-                Plato::print_ksbc_diagnostics_header(mOutputStream, mPrintDiagnostics);
+                Plato::print_ksbc_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }
     }
@@ -331,23 +331,9 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Compute adaptive constants to ensure superlinear convergence
-    **********************************************************************************/
-    void computeAdaptiveConstant()
-    {
-        ScalarType tStationarityMeasure = mDataMng->getStationarityMeasure();
-        ScalarType tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.75));
-        ScalarType tEpsilon = std::min(static_cast<ScalarType>(1e-3), tValue);
-        mStepMng->setEpsilonConstant(tEpsilon);
-        tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.95));
-        ScalarType tEta = static_cast<ScalarType>(0.1) * std::min(static_cast<ScalarType>(1e-1), tValue);
-        mStepMng->setEtaConstant(tEta);
-    }
-
-    /******************************************************************************//**
      * @brief Compute initial objective value and gradient.
     **********************************************************************************/
-    void setInitialProblemData()
+    void setInitialStateData()
     {
         this->initializeMaxTrustRegionRadius(*mStepMng);
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
@@ -386,6 +372,7 @@ private:
     **********************************************************************************/
     void update()
     {
+        // Perform application-based continuation
         const bool tContinuationDone = this->performContinuation(*mStepMng, *mStageMng);
         // Apply post smoothing operation
         const bool tControlUpdated = this->applyPostSmoothing(tContinuationDone);

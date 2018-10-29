@@ -69,7 +69,21 @@ namespace error
  * @param [in] aOutputFile output file
  *
 **********************************************************************************/
-void is_file_open(const std::ofstream& aOutputFile);
+template<typename Type>
+void is_file_open(const Type& aOutputFile)
+{
+    try
+    {
+        if(aOutputFile.is_open() == false)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument & tError)
+    {
+        throw tError;
+    }
+}
 
 /******************************************************************************//**
  *
@@ -193,20 +207,47 @@ struct OutputDataKSAL
 // *********************************************** END OUTPUT DATA STRUCT ***********************************************
 
 /******************************************************************************//**
- *
  * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
-void print_ksbc_diagnostics_header(std::ofstream& aOutputFile, bool aPrint = false);
+template<typename ScalarType, typename OrdinalType>
+void print_ksbc_diagnostics_header(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
+                                   std::ofstream& aOutputFile,
+                                   bool aPrint = false)
+{
+    try
+    {
+        Plato::error::is_file_open(aOutputFile);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+
+        std::ostringstream tMessage;
+        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
+        << ", LINE: " << __LINE__ << " ******** \n\n";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    // PRIMARY DIAGNOSTICS  (OUTER-LOOP)
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
+            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(12);
+
+    // TRUST REGION PROBLEM DATA (INNER-LOOP)
+    aOutputFile << "TR-Iter" << std::setw(10) << "LS-Iter" << std::setw(14) << "TR-Radius" << std::setw(12) << "ARed"
+                << std::setw(17) << "TR-Ratio" << std::setw(13) << "PCG-Iter" << std::setw(13) << "abs(dX)" << std::setw(15)
+                << "abs(dF)" << "\n" << std::flush;
+}
 
 /******************************************************************************//**
- *
  * @brief Check for errors in CCSA algorithm diagnostics
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in] aOutputFile output file
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
@@ -224,12 +265,10 @@ void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, O
 }
 
 /******************************************************************************//**
- *
  * @brief Print header for CCSA diagnostics file
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
@@ -277,12 +316,10 @@ void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, Ordin
 }
 
 /******************************************************************************//**
- *
  * @brief Print diagnostics for CCSA algorithm
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
@@ -323,12 +360,10 @@ void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>
 }
 
 /******************************************************************************//**
- *
  * @brief Print header for Optimality Criteria (OC) diagnostics file
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalType>& aData,
@@ -375,12 +410,10 @@ void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalTy
 }
 
 /******************************************************************************//**
- *
  * @brief Print diagnostics for Optimality Criteria (OC) algorithm
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aData,
@@ -421,12 +454,10 @@ void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aD
 }
 
 /******************************************************************************//**
- *
  * @brief Print diagnostics for Kelley-Sachs-Bound-Constrained (KSBC) algorithm
  * @param [in] aData diagnostic data for Kelley-Sachs-Bound-Constrained algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
@@ -463,12 +494,10 @@ void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>
 }
 
 /******************************************************************************//**
- *
  * @brief Print diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData,
@@ -520,16 +549,15 @@ void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, Ordin
 }
 
 /******************************************************************************//**
- *
  * @brief Print diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void print_ksal_diagnostics(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData, std::ofstream& aOutputFile, bool aPrint =
-                                    false)
+void print_ksal_diagnostics(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData,
+                            std::ofstream& aOutputFile,
+                            bool aPrint = false)
 {
     try
     {

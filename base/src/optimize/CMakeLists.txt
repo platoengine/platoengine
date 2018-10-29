@@ -4,6 +4,7 @@ set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
                         )
+                        
 set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_TrustRegionUtilities.hpp
                         Plato_HostDualProbElementWise.hpp

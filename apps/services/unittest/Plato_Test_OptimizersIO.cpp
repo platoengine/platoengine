@@ -362,8 +362,8 @@ TEST(PlatoTest, PrintKsbcDiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
     Plato::OutputDataKSBC<double> tData;
-    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tData, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
     ASSERT_THROW(Plato::print_ksbc_diagnostics(tData, tFile1), std::invalid_argument);
     ASSERT_THROW(Plato::print_ksbc_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
 }
@@ -387,7 +387,7 @@ TEST(PlatoTest, PrintDiagnosticsKSBC)
     tData.mControlStagnationMeasure = 1.2345678e6;
     tData.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
 
-    ASSERT_NO_THROW(Plato::print_ksbc_diagnostics_header(tWriteFile));
+    ASSERT_NO_THROW(Plato::print_ksbc_diagnostics_header(tData, tWriteFile));
     ASSERT_NO_THROW(Plato::print_ksbc_diagnostics(tData, tWriteFile));
     tData.mNumIter = 1;
     tData.mNumIterPCG = 34;

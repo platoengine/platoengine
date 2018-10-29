@@ -92,7 +92,9 @@ struct AlgorithmInputsKSAL
      * @brief Default constructor
     **********************************************************************************/
     AlgorithmInputsKSAL() :
+            mHaveHessian(true),
             mPrintDiagnostics(false),
+            mDisablePostSmoothing(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
             mMaxNumOuterLineSearchUpdates(10),
@@ -127,7 +129,9 @@ struct AlgorithmInputsKSAL
     {
     }
 
+    bool mHaveHessian; /*!< flag to specify that Hessian information is available (default=true) */
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mDisablePostSmoothing; /*!< flag to disable post smoothing operation (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
@@ -173,10 +177,15 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
                                       Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType> & aStageMng,
                                       Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
 {
-/*    if(aInputs.mPrintDiagnostics == true)
+    if(aInputs.mPrintDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
-    }*/
+    }
+
+    if(aInputs.mDisablePostSmoothing == true)
+    {
+        aAlgorithm.disablePostSmoothing();
+    }
 
     aAlgorithm.setMinPenaltyParameter(aInputs.mMinPenaltyParameter);
     aStageMng.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
@@ -252,6 +261,7 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
     tDataFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>(aInputs.mMemorySpace);
     tDataFactory->setCommWrapper(aInputs.mCommWrapper);
+    tDataFactory->allocateDual(*aInputs.mDual);
     tDataFactory->allocateControl(*aInputs.mInitialGuess);
     tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
 
@@ -265,6 +275,7 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     // ********* ALLOCATE AUGMENTED LAGRANGIAN STAGE MANAGER *********
     std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng;
     tStageMng = std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
+    tStageMng->setHaveHessian(aInputs.mHaveHessian);
 
     // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
     Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);

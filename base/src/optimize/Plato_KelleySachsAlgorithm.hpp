@@ -620,6 +620,23 @@ public:
         return (tStop);
     }
 
+    /******************************************************************************//**
+     * @brief Compute adaptive constants to ensure superlinear convergence
+     * @param [in] aDataMng trust region algorithm data manager
+     * @param [in] aStepMng trust region step data manager
+    **********************************************************************************/
+    void computeAdaptiveConstant(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
+                                 Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng)
+    {
+        ScalarType tStationarityMeasure = aDataMng.getStationarityMeasure();
+        ScalarType tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.75));
+        ScalarType tEpsilon = std::min(static_cast<ScalarType>(1e-3), tValue);
+        aStepMng.setEpsilonConstant(tEpsilon);
+        tValue = std::pow(tStationarityMeasure, static_cast<ScalarType>(0.95));
+        ScalarType tEta = static_cast<ScalarType>(0.1) * std::min(static_cast<ScalarType>(1e-1), tValue);
+        aStepMng.setEtaConstant(tEta);
+    }
+
     virtual void solve() = 0;
 
 private:
