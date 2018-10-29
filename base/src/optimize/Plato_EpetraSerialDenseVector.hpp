@@ -157,14 +157,12 @@ public:
     ScalarType & operator [](const OrdinalType & aIndex)
     {
         assert(aIndex < this->size());
-        assert(aIndex >= static_cast<OrdinalType>(0));
         return (mData[aIndex]);
     }
     //! Operator overloads the square bracket operator
     const ScalarType & operator [](const OrdinalType & aIndex) const
     {
         assert(aIndex < this->size());
-        assert(aIndex >= static_cast<OrdinalType>(0));
         return (mData[aIndex]);
     }
     //! Returns a direct pointer to the memory array used internally by the vector to store its owned elements.

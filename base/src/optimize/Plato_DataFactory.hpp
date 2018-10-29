@@ -302,7 +302,6 @@ public:
     /********************************************************************************/
     {
         assert(mDual.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mDual->getNumVectors());
 
         return (mDual.operator *().operator [](aVectorIndex));
@@ -329,7 +328,6 @@ public:
     /********************************************************************************/
     {
         assert(mState.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mState->getNumVectors());
 
         return (mState.operator *().operator [](aVectorIndex));
@@ -356,7 +354,6 @@ public:
     /********************************************************************************/
     {
         assert(mControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControl->getNumVectors());
 
         return (mControl.operator *().operator [](aVectorIndex));

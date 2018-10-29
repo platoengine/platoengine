@@ -152,7 +152,6 @@ public:
     ScalarType & operator [](const OrdinalType & aIndex)
     {
         assert(aIndex < this->size());
-        assert(aIndex >= static_cast<OrdinalType>(0));
 
         return (mData[aIndex]);
     }
@@ -160,7 +159,6 @@ public:
     const ScalarType & operator [](const OrdinalType & aIndex) const
     {
         assert(aIndex < this->size());
-        assert(aIndex >= static_cast<OrdinalType>(0));
 
         return (mData[aIndex]);
     }

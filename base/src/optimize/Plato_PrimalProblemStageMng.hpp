@@ -129,7 +129,6 @@ public:
     OrdinalType getNumConstraintEvaluations(const OrdinalType & aIndex) const
     {
         assert(mNumConstraintEval.empty() == false);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         assert(aIndex < mNumConstraintEval.size());
         return (mNumConstraintEval[aIndex]);
     }
@@ -142,7 +141,6 @@ public:
     OrdinalType getNumConstraintGradientEvaluations(const OrdinalType & aIndex) const
     {
         assert(mNumConstraintGradientEvaluations.empty() == false);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         assert(aIndex < mNumConstraintGradientEvaluations.size());
         return (mNumConstraintGradientEvaluations[aIndex]);
     }

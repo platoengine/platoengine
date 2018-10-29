@@ -237,7 +237,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getConstraintGlobalizationFactors(const OrdinalType & aVectorIndex) const
     {
         assert(mConstraintGlobalizationFactors.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mConstraintGlobalizationFactors->getNumVectors());
         return (mConstraintGlobalizationFactors->operator [](aVectorIndex));
     }
@@ -249,7 +248,6 @@ public:
     void setConstraintGlobalizationFactors(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mConstraintGlobalizationFactors.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mConstraintGlobalizationFactors->getNumVectors());
         mConstraintGlobalizationFactors->operator [](aVectorIndex).update(1., aInput, 0.);
     }
@@ -288,7 +286,6 @@ public:
     void setInitialGuess(const OrdinalType & aVectorIndex, const ScalarType & aValue)
     {
         assert(mCurrentControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentControl->getNumVectors());
 
         mCurrentControl->operator [](aVectorIndex).fill(aValue);
@@ -297,7 +294,6 @@ public:
     void setInitialGuess(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentControl->getNumVectors());
 
         mCurrentControl->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -319,7 +315,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getDual(const OrdinalType & aVectorIndex) const
     {
         assert(mDual.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mDual->getNumVectors());
         return (mDual->operator [](aVectorIndex));
     }
@@ -331,7 +326,6 @@ public:
     void setDual(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mDual.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mDual->getNumVectors());
         mDual->operator [](aVectorIndex).update(1., aInput, 0.);
     }
@@ -346,7 +340,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getTrialStep(const OrdinalType & aVectorIndex) const
     {
         assert(mTrialStep.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mTrialStep->getNumVectors());
 
         return (mTrialStep->operator [](aVectorIndex));
@@ -359,7 +352,6 @@ public:
     void setTrialStep(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mTrialStep.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mTrialStep->getNumVectors());
 
         mTrialStep->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -375,7 +367,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getActiveSet(const OrdinalType & aVectorIndex) const
     {
         assert(mActiveSet.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mActiveSet->getNumVectors());
 
         return (mActiveSet->operator [](aVectorIndex));
@@ -388,7 +379,6 @@ public:
     void setActiveSet(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mActiveSet.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mActiveSet->getNumVectors());
 
         mActiveSet->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -404,7 +394,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getInactiveSet(const OrdinalType & aVectorIndex) const
     {
         assert(mInactiveSet.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mInactiveSet->getNumVectors());
 
         return (mInactiveSet->operator [](aVectorIndex));
@@ -417,7 +406,6 @@ public:
     void setInactiveSet(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mInactiveSet.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mInactiveSet->getNumVectors());
 
         mInactiveSet->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -433,7 +421,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentControl(const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentControl->getNumVectors());
 
         return (mCurrentControl->operator [](aVectorIndex));
@@ -446,7 +433,6 @@ public:
     void setCurrentControl(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentControl->getNumVectors());
 
         mCurrentControl->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -462,7 +448,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getPreviousControl(const OrdinalType & aVectorIndex) const
     {
         assert(mPreviousControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mPreviousControl->getNumVectors());
 
         return (mPreviousControl->operator [](aVectorIndex));
@@ -475,7 +460,6 @@ public:
     void setPreviousControl(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mPreviousControl.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mPreviousControl->getNumVectors());
 
         mPreviousControl->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -491,7 +475,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentObjectiveGradient(const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentObjectiveGradient.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentObjectiveGradient->getNumVectors());
 
         return (mCurrentObjectiveGradient->operator [](aVectorIndex));
@@ -504,7 +487,6 @@ public:
     void setCurrentObjectiveGradient(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentObjectiveGradient.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentObjectiveGradient->getNumVectors());
 
         mCurrentObjectiveGradient->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -520,7 +502,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentSigma(const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentSigma.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentSigma->getNumVectors());
 
         return (mCurrentSigma->operator [](aVectorIndex));
@@ -538,7 +519,6 @@ public:
     void setCurrentSigma(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentSigma.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentSigma->getNumVectors());
 
         mCurrentSigma->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -554,7 +534,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getControlLowerBounds(const OrdinalType & aVectorIndex) const
     {
         assert(mControlLowerBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlLowerBounds->getNumVectors());
 
         return (mControlLowerBounds->operator [](aVectorIndex));
@@ -573,7 +552,6 @@ public:
     void setControlLowerBounds(const OrdinalType & aVectorIndex, const ScalarType & aValue)
     {
         assert(mControlLowerBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlLowerBounds->getNumVectors());
 
         mControlLowerBounds->operator [](aVectorIndex).fill(aValue);
@@ -581,7 +559,6 @@ public:
     void setControlLowerBounds(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mControlLowerBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlLowerBounds->getNumVectors());
 
         mControlLowerBounds->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -602,7 +579,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getControlUpperBounds(const OrdinalType & aVectorIndex) const
     {
         assert(mControlUpperBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlUpperBounds->getNumVectors());
 
         return (mControlUpperBounds->operator [](aVectorIndex));
@@ -621,7 +597,6 @@ public:
     void setControlUpperBounds(const OrdinalType & aVectorIndex, const ScalarType & aValue)
     {
         assert(mControlUpperBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlUpperBounds->getNumVectors());
 
         mControlUpperBounds->operator [](aVectorIndex).fill(aValue);
@@ -629,7 +604,6 @@ public:
     void setControlUpperBounds(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mControlUpperBounds.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mControlUpperBounds->getNumVectors());
 
         mControlUpperBounds->operator [](aVectorIndex).update(1., aInput, 0.);
@@ -658,7 +632,6 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValues(const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentConstraintValues.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentConstraintValues->getNumVectors());
         return (mCurrentConstraintValues->operator [](aVectorIndex));
     }
@@ -672,7 +645,6 @@ public:
     ScalarType getCurrentConstraintValue(const OrdinalType & aVectorIndex, const OrdinalType & aConstraintIndex) const
     {
         assert(mCurrentConstraintValues.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentConstraintValues->getNumVectors());
         return ((*mCurrentConstraintValues)[aVectorIndex][aConstraintIndex]);
     }
@@ -695,7 +667,6 @@ public:
     void setCurrentConstraintValues(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentConstraintValues.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
         assert(aVectorIndex < mCurrentConstraintValues->getNumVectors());
         mCurrentConstraintValues->operator [](aVectorIndex).update(1., aInput, 0.);
     }
@@ -712,7 +683,6 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentConstraintGradients(const OrdinalType & aConstraintIndex) const
     {
         assert(mCurrentConstraintGradients.get() != nullptr);
-        assert(aConstraintIndex >= static_cast<OrdinalType>(0));
         assert(aConstraintIndex < mCurrentConstraintGradients->size());
         assert(mCurrentConstraintGradients->ptr(aConstraintIndex).get() != nullptr);
 
@@ -722,8 +692,6 @@ public:
                                                                                  const OrdinalType & aVectorIndex) const
     {
         assert(mCurrentConstraintGradients.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
-        assert(aConstraintIndex >= static_cast<OrdinalType>(0));
         assert(aConstraintIndex < mCurrentConstraintGradients->size());
         assert(mCurrentConstraintGradients->ptr(aConstraintIndex).get() != nullptr);
         assert(aVectorIndex < mCurrentConstraintGradients->operator[](aConstraintIndex).getNumVectors());
@@ -747,7 +715,6 @@ public:
                                        const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentConstraintGradients.get() != nullptr);
-        assert(aConstraintIndex >= static_cast<OrdinalType>(0));
         assert(aConstraintIndex < mCurrentConstraintGradients->size());
         assert(mCurrentConstraintGradients->ptr(aConstraintIndex).get() != nullptr);
         assert(aInput.getNumVectors() == mCurrentConstraintGradients->operator[](aConstraintIndex).getNumVectors());
@@ -762,8 +729,6 @@ public:
                                        const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentConstraintGradients.get() != nullptr);
-        assert(aVectorIndex >= static_cast<OrdinalType>(0));
-        assert(aConstraintIndex >= static_cast<OrdinalType>(0));
         assert(aConstraintIndex < mCurrentConstraintGradients->size());
         assert(aVectorIndex < mCurrentConstraintGradients->operator[](aConstraintIndex).getNumVectors());
         assert(aInput.size() == mCurrentConstraintGradients->operator()(aConstraintIndex, aVectorIndex).size());

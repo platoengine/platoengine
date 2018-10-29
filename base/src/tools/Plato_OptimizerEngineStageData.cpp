@@ -243,7 +243,6 @@ size_t OptimizerEngineStageData::getMaxNumIterations() const
 void OptimizerEngineStageData::setMaxNumIterations(const size_t & aInput)
 /******************************************************************************/
 {
-    assert(aInput >= static_cast<size_t>(0));
     mMaxNumIterations = aInput;
 }
 
@@ -634,7 +633,6 @@ std::vector<std::string> OptimizerEngineStageData::getControlNames() const
 std::string OptimizerEngineStageData::getControlName(const size_t & aInput) const
 /******************************************************************************/
 {
-    assert(aInput >= static_cast<size_t>(0));
     assert(mControlNames.empty() == false);
     assert(aInput < mControlNames.size());
     return (mControlNames[aInput]);
@@ -666,7 +664,6 @@ std::vector<std::string> OptimizerEngineStageData::getDescentDirectionNames() co
 std::string OptimizerEngineStageData::getDescentDirectionName(const size_t & aInput) const
 /******************************************************************************/
 {
-    assert(aInput >= static_cast<size_t>(0));
     assert(mDescentDirectionNames.empty() == false);
     assert(aInput < mDescentDirectionNames.size());
     return (mDescentDirectionNames[aInput]);
@@ -899,7 +896,6 @@ double OptimizerEngineStageData::getConstraintNormalizedTargetValue(const size_t
 /******************************************************************************/
 {
     assert(mConstraintNormalizedTargetValues.empty() == false);
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintNormalizedTargetValues.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, double>::const_iterator tIterator;
@@ -947,7 +943,6 @@ bool OptimizerEngineStageData::constraintNormalizedTargetValueWasSet(const std::
 double OptimizerEngineStageData::getConstraintAbsoluteTargetValue(const size_t & aIndex) const
 /******************************************************************************/
 {
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintAbsoluteTargetValues.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, double>::const_iterator tIterator;
@@ -1000,7 +995,6 @@ double OptimizerEngineStageData::getConstraintReferenceValue(const size_t & aInd
 /******************************************************************************/
 {
     assert(mConstraintReferenceValues.empty() == false);
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintReferenceValues.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, double>::const_iterator tIterator;
@@ -1056,7 +1050,6 @@ std::vector<std::string> OptimizerEngineStageData::getConstraintValueNames() con
 std::string OptimizerEngineStageData::getConstraintValueName(const size_t & aIndex) const
 /******************************************************************************/
 {
-    assert(aIndex >= static_cast<size_t>(0));
     assert(mConstraintValueNames.empty() == false);
     assert(aIndex < mConstraintValueNames.size());
     return (mConstraintValueNames[aIndex]);
@@ -1084,7 +1077,6 @@ std::string OptimizerEngineStageData::getConstraintReferenceValueName(const size
 {
     if(mConstraintReferenceValueNames.empty() == true)
         return "";
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintReferenceValueNames.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, std::string>::const_iterator tIterator;
@@ -1125,7 +1117,6 @@ std::string OptimizerEngineStageData::getConstraintHessianName(const size_t & aI
 /******************************************************************************/
 {
     assert(mConstraintHessianNames.empty() == false);
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintHessianNames.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, std::string>::const_iterator tIterator;
@@ -1165,7 +1156,6 @@ std::string OptimizerEngineStageData::getConstraintGradientName(const size_t & a
 /******************************************************************************/
 {
     assert(mConstraintGradientNames.empty() == false);
-    assert(aIndex >= static_cast<size_t>(0));
     assert(aIndex < static_cast<size_t>(mConstraintGradientNames.size()));
     const std::string & tValueName = mConstraintValueNames[aIndex];
     std::map<std::string, std::string>::const_iterator tIterator;

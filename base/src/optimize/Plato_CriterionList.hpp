@@ -109,21 +109,18 @@ public:
     {
         assert(mWeights.empty() == false);
         assert(aIndex < mWeights.size());
-        assert(aIndex >= static_cast<OrdinalType>(0));
         return (mWeights[aIndex]);
     }
     Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
         assert(aIndex < mCriterionList.size());
         assert(mCriterionList[aIndex].get() != nullptr);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         return (mCriterionList[aIndex].operator*());
     }
     const Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
         assert(aIndex < mCriterionList.size());
         assert(mCriterionList[aIndex].get() != nullptr);
-        assert(aIndex >= static_cast<OrdinalType>(0));
         return (mCriterionList[aIndex].operator*());
     }
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> create() const
