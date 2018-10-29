@@ -774,7 +774,7 @@ TEST(PlatoTest, SolveStrucTopoMethodMovingAsymptotesLightInterface)
     }
 }
 
-TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight)
+TEST(DISABLED_PlatoTest, DISABLED_SolveStrucTopoWithTrustRegionAugmentedLagrangianLight)
 {
     // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
     const double tPoissonRatio = 0.3;

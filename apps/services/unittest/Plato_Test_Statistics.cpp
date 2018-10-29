@@ -974,7 +974,7 @@ TEST(PlatoTest, BetaCDF2)
     }
 }
 
-TEST(PlatoTest, PlotBetaCDF)
+TEST(DISABLED_PlatoTest, DISABLED_PlotBetaCDF)
 {
     // BUILD BETA DISTRIBUTION
     const double tMean = 90;
@@ -1349,7 +1349,7 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     }
 }
 
-TEST(PlatoTest, SromOptimizationProblem)
+TEST(DISABLED_PlatoTest, DISABLED_SromOptimizationProblem)
 {
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory =
@@ -1469,7 +1469,7 @@ TEST(PlatoTest, SromOptimizationProblem)
     EXPECT_NEAR(0.37473602993589383, tSromObjective->getSromCDF(tRANDOM_VEC_DIM)[3], tTolerance);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_checkSize)
+TEST(DISABLED_PlatoTest, DISABLED_solveUncertaintyProblem_checkSize)
 {
     // POSE INPUT DISTRIBUTION
     Plato::UncertaintyInputStruct<double, size_t> tInput;
@@ -1520,7 +1520,7 @@ TEST(PlatoTest, solveUncertaintyProblem_checkSize)
     EXPECT_NEAR(0.69463977781434583, tDiagnostics.mTrueCDF[3], tTolerance);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_beta)
+TEST(DISABLED_PlatoTest, DISABLED_solveUncertaintyProblem_beta)
 {
     const double tTol = 1e-6;
 
@@ -1558,7 +1558,7 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     EXPECT_NEAR(tTotalProbability, 0.99994331392953051, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_uniform)
+TEST(DISABLED_PlatoTest, DISABLED_solveUncertaintyProblem_uniform)
 {
     const double tTol = 1e-6;
 
@@ -1595,7 +1595,7 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     EXPECT_NEAR(tTotalProbability, 1.0001125176405061, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_normal)
+TEST(DISABLED_PlatoTest, DISABLED_solveUncertaintyProblem_normal)
 {
     const double tTol = 1e-6;
 

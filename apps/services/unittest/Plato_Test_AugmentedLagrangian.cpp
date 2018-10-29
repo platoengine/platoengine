@@ -1706,7 +1706,7 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianCircleRadius)
     PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector);
 }
 
-TEST(PlatoTest, KelleySachsAugmentedLagrangianRosenbrockRadius)
+TEST(DISABLED_PlatoTest, DISABLED_KelleySachsAugmentedLagrangianRosenbrockRadius)
 {
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
     std::shared_ptr<Plato::Rosenbrock<double>> tRosenbrock = std::make_shared<Plato::Rosenbrock<double>>();
@@ -1751,7 +1751,7 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianRosenbrockRadius)
     PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector);
 }
 
-TEST(PlatoTest, KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse)
+TEST(DISABLED_PlatoTest, DISABLED_KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse)
 {
     // ********* ALLOCATE DATA FACTORY *********
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory =
@@ -1858,7 +1858,7 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianHimmelblauShiftedEllipseTestOne)
     PlatoTest::checkMultiVectorData(tCurrentControl, tGoldVector, tTolerance);
 }
 
-TEST(PlatoTest, KelleySachsAugmentedLagrangianHimmelblauShiftedEllipseTestTwo)
+TEST(DISABLED_PlatoTest, DISABLED_KelleySachsAugmentedLagrangianHimmelblauShiftedEllipseTestTwo)
 {
     // this test focuses more on minimizing the objective and having a tight tolerance on the constraint
 
