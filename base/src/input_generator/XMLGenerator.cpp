@@ -818,10 +818,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                             fprintf(fp, "    load=%s\n", cur_load_case.id.c_str());
                         }
                     }
-                    if(cur_obj.analysis_solver_tolerance.length() > 0)
-                    {
-                        fprintf(fp, "  solver gdsw\n");
-                    }
+                    fprintf(fp, "  solver gdsw\n");
                     fprintf(fp, "END\n");
                 }
                 else
@@ -829,10 +826,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "SOLUTION\n");
                     fprintf(fp, "  case '%s'\n", cur_obj.name.c_str());
                     fprintf(fp, "  topology_optimization\n");
-                    if(cur_obj.analysis_solver_tolerance.length() > 0)
-                    {
-                        fprintf(fp, "  solver gdsw\n");
-                    }
+                    fprintf(fp, "  solver gdsw\n");
                     fprintf(fp, "END\n");
                 }
                 if(cur_obj.wtmass_scale_factor.length() > 0)
@@ -957,15 +951,33 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "  data 1e6 1\n");
                     fprintf(fp, "END\n");
                 }
-                if(cur_obj.analysis_solver_tolerance.length() > 0)
+                bool isDifficultForSolver = false;
+                if(cur_obj.type == "limit stress")
                 {
-                    fprintf(fp, "GDSW\n");
-                 //   fprintf(fp, "  diag_scaling diagonal\n");
-                    fprintf(fp, "  solver_tol = %s\n", cur_obj.analysis_solver_tolerance.c_str());
-                 //   fprintf(fp, "  krylov_method = GMRESClassic\n");
-                 //   fprintf(fp, "  orthog=0\n");
-                    fprintf(fp, "END\n");
+                    isDifficultForSolver = true;
                 }
+                else if(cur_obj.type == "stress p norm")
+                {
+                    isDifficultForSolver = true;
+                }
+                fprintf(fp, "GDSW\n");
+                const bool haveSolverTolerance = (cur_obj.analysis_solver_tolerance.length() > 0);
+                if(haveSolverTolerance)
+                {
+                    fprintf(fp, "  solver_tol = %s\n", cur_obj.analysis_solver_tolerance.c_str());
+                }
+                if(isDifficultForSolver)
+                {
+                    fprintf(fp, "  diag_scaling diagonal\n");
+                    fprintf(fp, "  krylov_method = GMRESClassic\n");
+                    fprintf(fp, "  orthog = 0\n");
+                    fprintf(fp, "  bailout true\n");
+                    if(!haveSolverTolerance)
+                    {
+                        fprintf(fp, "  solver_tol = 1e-4\n");
+                    }
+                }
+                fprintf(fp, "END\n");
                 fprintf(fp, "OUTPUTS\n");
                 if(!frf)
                     fprintf(fp, "  topology\n");
@@ -1066,7 +1078,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 }
                 if(cur_obj.stress_limit != "")
                 {
-                    fprintf(fp, "  stress_normalization_factor = %s\n", cur_obj.stress_limit.c_str());
+                    fprintf(fp, "  stress_limit_value = %s\n", cur_obj.stress_limit.c_str());
                 }
                 if(cur_obj.stress_p_norm_power != "")
                 {
@@ -1076,17 +1088,41 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  relaxed_stress_ramp_factor = %s\n", cur_obj.stress_ramp_factor.c_str());
                 }
-                if(cur_obj.limit_power_initial != "")
+                if(cur_obj.limit_power_min != "")
                 {
-                    fprintf(fp, "  stress_limit_power_initial = %s\n", cur_obj.limit_power_initial.c_str());
-                }
-                if(cur_obj.limit_power_update != "")
-                {
-                    fprintf(fp, "  stress_limit_power_update = %s\n", cur_obj.limit_power_update.c_str());
+                    fprintf(fp, "  limit_min = %s\n", cur_obj.limit_power_min.c_str());
                 }
                 if(cur_obj.limit_power_max != "")
                 {
-                    fprintf(fp, "  stress_limit_power_max = %s\n", cur_obj.limit_power_max.c_str());
+                    fprintf(fp, "  limit_max = %s\n", cur_obj.limit_power_max.c_str());
+                }
+                if(cur_obj.limit_power_feasible_bias != "")
+                {
+                    fprintf(fp, "  limit_feasible_bias = %s\n", cur_obj.limit_power_feasible_bias.c_str());
+                }
+                if(cur_obj.limit_power_feasible_slope != "")
+                {
+                    fprintf(fp, "  limit_feasible_slope = %s\n", cur_obj.limit_power_feasible_slope.c_str());
+                }
+                if(cur_obj.limit_power_infeasible_bias != "")
+                {
+                    fprintf(fp, "  limit_infeasible_bias = %s\n", cur_obj.limit_power_infeasible_bias.c_str());
+                }
+                if(cur_obj.limit_power_infeasible_slope != "")
+                {
+                    fprintf(fp, "  limit_infeasible_slope = %s\n", cur_obj.limit_power_infeasible_slope.c_str());
+                }
+                if(cur_obj.inequality_allowable_feasiblity_lower != "")
+                {
+                    fprintf(fp, "  stress_ineq_lower = %s\n", cur_obj.inequality_allowable_feasiblity_lower.c_str());
+                }
+                if(cur_obj.inequality_allowable_feasiblity_upper != "")
+                {
+                    fprintf(fp, "  stress_ineq_upper = %s\n", cur_obj.inequality_allowable_feasiblity_upper.c_str());
+                }
+                if(cur_obj.stress_inequality_power != "")
+                {
+                    fprintf(fp, "  stress_inequality_power = %s\n", cur_obj.stress_inequality_power.c_str());
                 }
                 if(frf)
                 {
@@ -2074,23 +2110,14 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.stress_ramp_factor = tokens[3];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","initial"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","min"}, tStringValue))
                         {
                             if(tokens.size() < 4)
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power initial\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power min\" keywords.\n";
                                 return false;
                             }
-                            new_objective.limit_power_initial = tokens[3];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","update"}, tStringValue))
-                        {
-                            if(tokens.size() < 4)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power update\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.limit_power_update = tokens[3];
+                            new_objective.limit_power_min = tokens[3];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"limit","power","max"}, tStringValue))
                         {
@@ -2101,6 +2128,70 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.limit_power_max = tokens[3];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","feasible","bias"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power feasible bias\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_feasible_bias = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","feasible","slope"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power feasible slope\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_feasible_slope = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","infeasible","bias"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power infeasible bias\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_infeasible_bias = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","power","infeasible","slope"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit power infeasible slope\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_power_infeasible_slope = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","lower"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality allowable feasibility lower\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_allowable_feasiblity_lower = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","upper"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality allowable feasibility upper\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_allowable_feasiblity_upper = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","inequality","power"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress inequality power\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_inequality_power = tokens[3];
+                        }
+
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)
