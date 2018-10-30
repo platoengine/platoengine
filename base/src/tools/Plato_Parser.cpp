@@ -1393,6 +1393,11 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             bool tHaveHessian = Plato::Get::Bool(tOptionsNode, "HaveHessian");
             aOptimizerEngineStageData.setHaveHessian(tHaveHessian);
         }
+        if(tOptionsNode.size<std::string>("DisablePostSmoothing"))
+        {
+            bool tDisablePostSmoothing = Plato::Get::Bool(tOptionsNode, "DisablePostSmoothing");
+            aOptimizerEngineStageData.setDisablePostSmoothing(tDisablePostSmoothing);
+        }
 
         if( tOptionsNode.size<std::string>("InputFileName") )
         {

@@ -3112,6 +3112,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.KS_outer_actual_reduction_tolerance = "";
     m_InputData.KS_initial_radius_scale = "";
     m_InputData.KS_max_radius_scale = "";
+    m_InputData.KS_disable_post_smoothing = "";
     m_InputData.problem_update_frequency = "";
     m_InputData.filter_heaviside_min = "";
     m_InputData.filter_heaviside_update = "";
@@ -3370,6 +3371,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.KS_outer_control_stagnation_tolerance = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","disable","post","smoothing"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks disable post smoothing\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.KS_disable_post_smoothing = tStringValue;
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","actual","reduction","tolerance"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -3611,7 +3621,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             if(m_InputData.filter_heaviside_min!="")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside min\" both specified."
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter heaviside scale\" and \"filter heaviside min\" both specified.\n"
                                         <<"\tOnly specify one of them. \"max/min/update\" are for updating continuation problems. \"scale\" is used otherwise.\n";
                                 return false;
                             }
@@ -6363,6 +6373,9 @@ bool XMLGenerator::generateInterfaceXML()
     }
     if(m_InputData.problem_update_frequency.size() > 0) {
         addChild(tmp_node, "ProblemUpdateFrequency", m_InputData.problem_update_frequency);
+    }
+    if(m_InputData.KS_disable_post_smoothing.size() > 0) {
+        addChild(tmp_node, "DisablePostSmoothing", m_InputData.KS_disable_post_smoothing);
     }
 
     tmp_node = misc_node.append_child("Output");

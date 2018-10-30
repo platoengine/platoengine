@@ -70,6 +70,7 @@ public:
     void setOutputControlToFile(const bool & aInput);
     void setOutputDiagnosticsToFile(const bool & aInput);
     void setHaveHessian(const bool & aInput);
+    void setDisablePostSmoothing(const bool & aInput);
 
     bool getCheckGradient() const;
     bool getCheckHessian() const;
@@ -77,6 +78,7 @@ public:
     bool getOutputControlToFile() const;
     bool getOutputDiagnosticsToFile() const;
     bool getHaveHessian() const;
+    bool getDisablePostSmoothing() const;
 
     std::vector<double> getLowerBoundValues() const;
     std::vector<double> getUpperBoundValues() const;
@@ -255,6 +257,7 @@ private:
     bool mOutputControlToFile;
     bool mOutputDiagnosticsToFile;
     bool mHaveHessian;
+    bool mDisablePostSmoothing;
 
     double mInitialMovingAsymptoteScaleFactor;
     double mGCMMAInnerKKTTolerance;

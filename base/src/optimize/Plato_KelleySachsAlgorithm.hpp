@@ -98,7 +98,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Disable port smoothing operation
+     * @brief Disable post smoothing operation
     **********************************************************************************/
     void disablePostSmoothing()
     {

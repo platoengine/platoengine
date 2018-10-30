@@ -527,6 +527,34 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
 
+    // ks max trust region iterations
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing fALse\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->KS_disable_post_smoothing, "false");
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing tRuE\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->KS_disable_post_smoothing, "true");
+
     // ks trust region expansion factor
     stringInput = "begin optimization parameters\n"
             "ks trust region expansion factor\n"

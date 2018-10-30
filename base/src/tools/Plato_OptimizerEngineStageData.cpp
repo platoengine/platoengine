@@ -61,6 +61,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mOutputControlToFile(false),
         mOutputDiagnosticsToFile(false),
         mHaveHessian(true),
+        mDisablePostSmoothing(false),
         mInitialMovingAsymptoteScaleFactor(0.5),
         mGCMMAInnerKKTTolerance(5e-4),
         mCCSAOuterKKTTolerance(1e-10),
@@ -170,6 +171,10 @@ void OptimizerEngineStageData::setHaveHessian(const bool & aInput)
 {
     mHaveHessian = aInput;
 }
+void OptimizerEngineStageData::setDisablePostSmoothing(const bool & aInput)
+{
+    mDisablePostSmoothing = aInput;
+}
 
 /******************************************************************************/
 void OptimizerEngineStageData::setCheckGradient(const bool & aInput)
@@ -209,6 +214,10 @@ bool OptimizerEngineStageData::getOutputDiagnosticsToFile() const
 bool OptimizerEngineStageData::getHaveHessian() const
 {
     return mHaveHessian;
+}
+bool OptimizerEngineStageData::getDisablePostSmoothing() const
+{
+    return mDisablePostSmoothing;
 }
 
 /******************************************************************************/
