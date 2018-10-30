@@ -99,18 +99,21 @@ struct AlgorithmInputsKSAL
             mMaxTrustRegionSubProblemIter(25),
             mMaxNumOuterLineSearchUpdates(10),
             mMaxTrustRegionRadius(1e2),
-            mMinTrustRegionRadius(1e-8),
-            mTrustRegionExpansionFactor(2),
+            mMinTrustRegionRadius(1e-5),
+            mTrustRegionExpansionFactor(4),
             mTrustRegionContractionFactor(0.75),
             mMinPenaltyParameter(1e-5),
             mInitialPenaltyParameter(0.1),
             mPenaltyParameterScaleFactor(1.2),
             mFeasibilityTolerance(1e-4),
-            mOuterGradientTolerance(1e-8),
-            mOuterStationarityTolerance(1e-8),
-            mOuterActualReductionTolerance(1e-12),
+            mOuterGradientTolerance(1e-4),
+            mOuterStationarityTolerance(1e-4),
+            mOuterActualReductionTolerance(1e-6),
             mOuterControlStagnationTolerance(1e-16),
-            mOuterObjectiveStagnationTolerance(1e-8),
+            mOuterObjectiveStagnationTolerance(1e-6),
+            mActualOverPredictedReductionMidBound(0.25),
+            mActualOverPredictedReductionLowerBound(0.10),
+            mActualOverPredictedReductionUpperBound(0.75),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
             mDual(nullptr),
@@ -152,6 +155,10 @@ struct AlgorithmInputsKSAL
     ScalarType mOuterActualReductionTolerance; /*!< actual reduction tolerance */
     ScalarType mOuterControlStagnationTolerance; /*!< control stagnation tolerance */
     ScalarType mOuterObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mActualOverPredictedReductionMidBound; /*!< actual over predicted reduction middle bound */
+    ScalarType mActualOverPredictedReductionLowerBound; /*!< actual over predicted reduction lower bound */
+    ScalarType mActualOverPredictedReductionUpperBound; /*!< actual over predicted reduction upper bound */
+
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */

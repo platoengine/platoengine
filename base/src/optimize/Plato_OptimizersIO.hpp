@@ -194,7 +194,9 @@ struct OutputDataKSAL
     ScalarType mActualRed;  /*!< actual reduction */
     ScalarType mAredOverPred;  /*!< actual over predicted reduction ratio */
     ScalarType mObjFuncValue;  /*!< objective function value */
+    ScalarType mAugLagFuncValue;  /*!< augmented Lagrangian function value */
     ScalarType mNormObjFuncGrad;  /*!< norm of the objective function gradient */
+    ScalarType mNormAugLagFuncGrad;  /*!< norm of the augmented Lagrangian function gradient */
     ScalarType mTrustRegionRadius;  /*!< trust region radius */
     ScalarType mStationarityMeasure;  /*!< norm of the descent direction */
     ScalarType mControlStagnationMeasure;  /*!< norm of the difference between two subsequent control fields */
@@ -524,8 +526,9 @@ void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, Ordin
     }
 
     // ******** PRIMARY DIAGNOSTICS  (OUTER-LOOP) ********
-    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
-            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(S)" << std::setw(10);
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count" << std::setw(14)
+                << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(15) << "Norm(L')" << std::setw(15) << "Norm(S)"
+                << std::setw(10);
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********
     const OrdinalType tNumConstraints = aData.mConstraintValues.size();
@@ -580,7 +583,7 @@ void print_ksal_diagnostics(const Plato::OutputDataKSAL<ScalarType, OrdinalType>
     // ******** PRIMARY DIAGNOSTICS  (OUTER-LOOP) ********
     aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
             << aData.mObjFuncCount << std::setw(20) << aData.mObjFuncValue << std::setw(15) << aData.mNormObjFuncGrad
-            << std::setw(15) << aData.mStationarityMeasure << std::setw(15);
+            << std::setw(15) << aData.mNormAugLagFuncGrad << std::setw(15) << aData.mStationarityMeasure << std::setw(15);
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********
     const OrdinalType tNumConstraints = aData.mConstraintValues.size();

@@ -441,6 +441,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
     tData.mAredOverPred = 0;
     tData.mObjFuncValue = 1.0;
     tData.mNormObjFuncGrad = 4.5656e-3;
+    tData.mNormAugLagFuncGrad = 5.234e-2;
     tData.mTrustRegionRadius = 1e2;
     tData.mStationarityMeasure = 2.34e-2;
     tData.mControlStagnationMeasure = 1.2345678e6;
@@ -463,6 +464,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
     tData.mAredOverPred = 0.78;
     tData.mObjFuncValue = 0.298736;
     tData.mNormObjFuncGrad = 3.45656e-1;
+    tData.mNormAugLagFuncGrad = 8.234e-1;
     tData.mTrustRegionRadius = 4;
     tData.mStationarityMeasure = 2.34e-1;
     tData.mControlStagnationMeasure = 0.18743;
@@ -483,9 +485,9 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
     std::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
-    tGold << "IterF-countF(X)Norm(F')Norm(S)H1(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
-    tGold << "011.000000e+004.565600e-032.340000e-021.230000e-05001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
-    tGold << "132.987360e-013.456560e-012.340000e-012.450000e-072244.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
+    tGold << "IterF-countF(X)Norm(F')Norm(L')Norm(S)H1(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
+    tGold << "011.000000e+004.565600e-035.234000e-022.340000e-021.230000e-05001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
+    tGold << "132.987360e-013.456560e-018.234000e-012.340000e-012.450000e-072244.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
@@ -505,6 +507,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
     tData.mAredOverPred = 0;
     tData.mObjFuncValue = 1.0;
     tData.mNormObjFuncGrad = 4.5656e-3;
+    tData.mNormAugLagFuncGrad = 2.34e-1;
     tData.mTrustRegionRadius = 1e2;
     tData.mStationarityMeasure = 2.34e-2;
     tData.mControlStagnationMeasure = 1.2345678e6;
@@ -527,6 +530,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
     tData.mActualRed = 0.1435;
     tData.mAredOverPred = 0.78;
     tData.mObjFuncValue = 0.298736;
+    tData.mNormAugLagFuncGrad = 1.234;
     tData.mNormObjFuncGrad = 3.45656e-1;
     tData.mTrustRegionRadius = 4;
     tData.mStationarityMeasure = 2.34e-1;
@@ -549,9 +553,9 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
     std::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
-    tGold << "IterF-countF(X)Norm(F')Norm(S)H1(X)H2(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
-    tGold << "011.000000e+004.565600e-032.340000e-021.230000e-053.330000e-03001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
-    tGold << "132.987360e-013.456560e-012.340000e-012.450000e-074.230000e-082214.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
+    tGold << "IterF-countF(X)Norm(F')Norm(L')Norm(S)H1(X)H2(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
+    tGold << "011.000000e+004.565600e-032.340000e-012.340000e-021.230000e-053.330000e-03001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
+    tGold << "132.987360e-013.456560e-011.234000e+002.340000e-012.450000e-074.230000e-082214.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 

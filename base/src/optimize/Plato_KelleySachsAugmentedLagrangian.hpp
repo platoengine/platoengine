@@ -340,19 +340,22 @@ private:
         {
             mOutputData.mNumIter = this->getNumIterationsDone();
             mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
-            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
-            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
             mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mAugLagFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
             mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
 
             mOutputData.mPenalty = mStageMng->getPenaltyParameter();
             mOutputData.mActualRed = mStepMng->getActualReduction();
             mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
-            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
             mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
             mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+            mOutputData.mNormAugLagFuncGrad = mDataMng->getNormProjectedGradient();
             mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
             mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            mOutputData.mObjFuncValue = mStageMng->getCurrentObjectiveFunctionValue();
+            mOutputData.mNormObjFuncGrad = mStageMng->getNormObjectiveFunctionGradient();
 
             const OrdinalType tCONSTRAINT_VECTOR_INDEX = 0;
             const OrdinalType tNumConstraints = mStageMng->getNumConstraints();
