@@ -72,7 +72,7 @@ public:
     **********************************************************************************/
     explicit KelleySachsAlgorithm(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory) :
             mIsPostSmoothingActive(true),
-            mMaxNumLineSearchItr(10),
+            mMaxNumLineSearchItr(5),
             mNumLineSearchItrDone(0),
             mMaxNumOuterIterations(100),
             mNumOuterIterationsDone(0),

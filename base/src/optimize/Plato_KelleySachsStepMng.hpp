@@ -139,6 +139,12 @@ public:
         return (mMidControls.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Solve trust region subproblem
+     * @param [in] aDataMng augmented Lagrangian algorithm data manager
+     * @param [in] aStageMng criteria value, gradient and Hessian evaluation manager
+     * @param [in] aSolver Krylov solver interface
+    **********************************************************************************/
     bool solveSubProblem(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
                          Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng,
                          Plato::SteihaugTointSolver<ScalarType, OrdinalType> & aSolver)
@@ -364,15 +370,26 @@ private:
                       *mHessianTimesVector);
     }
 
+    /******************************************************************************//**
+     * @brief Compute sufficient decrease condition.
+     *
+     * The sufficient decrease condition is defined as /f$-\mu_0\sigma(x_c)\Vert
+     * x_c - P(x_c - \hat{\lambda}_c P_{I}\nabla{f}(u_c))\Vert_{2}/f$, see "A Trust
+     * Region Method for Parabolic Boundary Control Problems", C. T. Kelley and E. W.
+     * Sachs, SIAM Journal on Optimization 1999 9:4, 1064-1081, Eq. (2.18) and (2.19)
+     *
+     * @param [in] aDataMng augmented Lagrangian algorithm data manager
+     * @return sufficient decrease condition
+    **********************************************************************************/
     ScalarType computeSufficientDecreaseCondition(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        ScalarType tConditionOne = this->getTrustRegionRadius()
+        ScalarType tCauchyScale = this->getTrustRegionRadius()
                 / (mNormInactiveGradient + std::numeric_limits<ScalarType>::epsilon());
-        ScalarType tLambda = std::min(tConditionOne, static_cast<ScalarType>(1.));
+        ScalarType tLambdaScale = std::min(tCauchyScale, static_cast<ScalarType>(1.));
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = aDataMng.getCurrentControl();
         Plato::update(static_cast<ScalarType>(1), tCurrentControl, static_cast<ScalarType>(0), *mWorkMultiVectorOne);
-        Plato::update(-tLambda, *mInactiveGradient, static_cast<ScalarType>(1), *mWorkMultiVectorOne);
+        Plato::update(-tLambdaScale, *mInactiveGradient, static_cast<ScalarType>(1), *mWorkMultiVectorOne);
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getControlLowerBounds();
         const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getControlUpperBounds();

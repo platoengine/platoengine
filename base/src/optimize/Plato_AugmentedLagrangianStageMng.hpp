@@ -87,9 +87,12 @@ public:
             mNumObjFuncEval(0),
             mNumObjGradEval(0),
             mNumObjHessEval(0),
-            mTrialObjectiveValue(std::numeric_limits<ScalarType>::max()),
-            mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
+            mTrialObjFuncValue(std::numeric_limits<ScalarType>::max()),
+            mCurrentObjFuncValue(std::numeric_limits<ScalarType>::max()),
+            mTrialAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
+            mCurrentAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
+            mPreviousAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mMinPenaltyValue(1e-10),
             mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
@@ -219,7 +222,16 @@ public:
     **********************************************************************************/
     ScalarType getCurrentObjectiveFunctionValue() const
     {
-        return (mCurrentObjectiveValue);
+        return (mCurrentObjFuncValue);
+    }
+
+    /******************************************************************************//**
+     * @brief Return current augmented Lagrangian function value
+     * @return current augmented Lagrangian function value
+    **********************************************************************************/
+    ScalarType getCurrentAugmenteLagrangianFunctionValue() const
+    {
+        return (mCurrentAugLagFuncValue);
     }
 
     /******************************************************************************//**
@@ -462,7 +474,8 @@ public:
     void storePreviousState()
     /****************************************************************************************************************/
     {
-        mPreviousObjectiveValue = mCurrentObjectiveValue;
+        mPreviousObjectiveValue = mCurrentObjFuncValue;
+        mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
     }
 
     /****************************************************************************************************************/
@@ -470,7 +483,7 @@ public:
     /****************************************************************************************************************/
     {
         // compute objective and constraint stagnation measures
-        mObjectiveStagnationMeasure = std::abs(mCurrentObjectiveValue - mPreviousObjectiveValue);
+        mObjectiveStagnationMeasure = std::abs(mCurrentObjFuncValue - mPreviousObjectiveValue);
         this->computeFeasibiltiyStagnation();
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
@@ -498,6 +511,25 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Evaluate augmented Lagrangian function
+     * @param [in] aControl optimization variables
+     **********************************************************************************/
+    ScalarType evaluateAugmentedLagrangian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    {
+        // Evaluate objective function, f(\mathbf{z})
+        mCurrentObjFuncValue = mObjective->value(aControl);
+        mNumObjFuncEval++;
+
+        // Evaluate inequality constraints, h(\mathbf{u}(\mathbf{z}),\mathbf{z})
+        this->evaluateConstraint(aControl, *mCurrentConstraintValues);
+
+        // Evaluate augmented Lagrangian
+        mCurrentAugLagFuncValue = this->evaluateAugmentedLagrangianCriterion(mCurrentObjFuncValue);
+
+        return (mCurrentAugLagFuncValue);
+    }
+
+    /******************************************************************************//**
      * @brief Compute/Evaluate objective function
      * @param [in] aControl optimization variables
      * @param [in] aTolerance objective inexactness tolerance
@@ -506,16 +538,16 @@ public:
                                  ScalarType aTolerance = std::numeric_limits<ScalarType>::max())
     {
         // Evaluate objective function, f(\mathbf{z})
-        mTrialObjectiveValue = mObjective->value(aControl);
+        mTrialObjFuncValue = mObjective->value(aControl);
         mNumObjFuncEval++;
 
         // Evaluate inequality constraints, h(\mathbf{u}(\mathbf{z}),\mathbf{z})
-        this->evaluateConstraint(aControl);
+        this->evaluateConstraint(aControl, *mTrialConstraintValues);
 
         // Evaluate augmented Lagrangian
-        ScalarType tAugmentedLagrangianValue = this->evaluateAugmentedLagrangianCriterion();
+        mTrialAugLagFuncValue = this->evaluateAugmentedLagrangianCriterion(mTrialObjFuncValue);
 
-        return (tAugmentedLagrangianValue);
+        return (mTrialAugLagFuncValue);
     }
 
     /******************************************************************************//**
@@ -575,16 +607,18 @@ public:
     /******************************************************************************//**
      * @brief Evaluate inequality constraints
     **********************************************************************************/
-    void evaluateConstraint(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    void evaluateConstraint(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                            Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
         // Evaluate inequality constraints, h(\mathbf{u}(\mathbf{z}),\mathbf{z})
-        const OrdinalType tNumConstraintVectors = mTrialConstraintValues->getNumVectors();
-        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumConstraintVectors; tVectorIndex++)
+        const OrdinalType tNumVectors = aOutput.getNumVectors();
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
-            const OrdinalType tNumConstraints = (*mTrialConstraintValues)[tVectorIndex].size();
+            const OrdinalType tNumConstraints = aOutput[tVectorIndex].size();
+            Plato::Vector<ScalarType, OrdinalType> & tMyConstraint  = aOutput[tVectorIndex];
             for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
             {
-                (*mTrialConstraintValues)(tVectorIndex, tConstraintIndex) = (*mConstraints)[tConstraintIndex].value(aControl);
+                tMyConstraint[tConstraintIndex] = (*mConstraints)[tConstraintIndex].value(aControl);
                 mNumConstraintEvaluations[tConstraintIndex] = mNumConstraintEvaluations[tConstraintIndex] + static_cast<OrdinalType>(1);
             }
         }
@@ -621,14 +655,15 @@ public:
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
         const ScalarType tPenalty = static_cast<ScalarType>(1) / mPenaltyParameter;
-        mDynamicFeasibilityTolerance = mInitialDynamicFeasibilityTolerance / (static_cast<ScalarType>(1) + tPenalty);
+        mDynamicFeasibilityTolerance = mInitialDynamicFeasibilityTolerance / std::sqrt(tPenalty);
     }
 
     /****************************************************************************************************************/
     void cacheCurrentCriteriaValues()
     /****************************************************************************************************************/
     {
-        mPreviousObjectiveValue = mCurrentObjectiveValue;
+        mPreviousObjectiveValue = mCurrentObjFuncValue;
+        mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
         Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mPreviousConstraintValues);
     }
 
@@ -636,7 +671,8 @@ public:
     void updateCurrentCriteriaValues()
     /****************************************************************************************************************/
     {
-        mCurrentObjectiveValue = mTrialObjectiveValue;
+        mCurrentObjFuncValue = mTrialObjFuncValue;
+        mCurrentAugLagFuncValue = mTrialAugLagFuncValue;
         Plato::update(static_cast<ScalarType>(1), *mTrialConstraintValues, static_cast<ScalarType>(0), *mCurrentConstraintValues);
     }
 
@@ -685,30 +721,32 @@ private:
 
     /******************************************************************************//**
      * @brief Evaluate augmented Lagrangian criterion
+     * @param [in] aObjFuncValue objective function value
      * @return augmented Lagrangian evaluation
     **********************************************************************************/
-    ScalarType evaluateAugmentedLagrangianCriterion()
+    ScalarType evaluateAugmentedLagrangianCriterion(const ScalarType & aObjFuncValue)
     {
-        ScalarType tOutput = mTrialObjectiveValue;
+        ScalarType tOutput = aObjFuncValue;
 
         const OrdinalType tCONSTRAINT_VEC_INDEX = 0;
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            ScalarType tMyConstraintValue = (*mTrialConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyConstraintValue > static_cast<OrdinalType>(0))
+            const ScalarType tMyCurrentConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
+            if(tMyCurrentConstraintValue > static_cast<ScalarType>(1e-4))
             {
                 // Evaluate Lagrangian functional, \ell(\mathbf{u}(\mathbf{z}),\mathbf{z},\mu) =
                 //   f(\mathbf{u}(\mathbf{z}),\mathbf{z}) + \mu^{T}h(\mathbf{u}(\mathbf{z}),\mathbf{z})
-                ScalarType tLagrangeMultipliersDotInequalityValue =
+                const ScalarType tMyConstraintValue = (*mTrialConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
+                const ScalarType tLagrangeMultipliersDotInequalityValue =
                         (*mLagrangeMultipliers)(tCONSTRAINT_VEC_INDEX, tIndex) * tMyConstraintValue;
 
                 // Evaluate augmented Lagrangian functional, \mathcal{L}(\mathbf{z}),\mathbf{z},\mu) =
                 //   \ell(\mathbf{u}(\mathbf{z}),\mathbf{z},\mu) +
                 //   \frac{1}{2\beta}(h(\mathbf{u}(\mathbf{z}),\mathbf{z})^{T}h(\mathbf{u}(\mathbf{z}),\mathbf{z})),
                 //   where \beta\in\mathbb{R} denotes a penalty parameter
-                ScalarType tInequalityValueDotInequalityValue = tMyConstraintValue * tMyConstraintValue;
-                ScalarType tMyConstraintContribution = tLagrangeMultipliersDotInequalityValue
+                const ScalarType tInequalityValueDotInequalityValue = tMyConstraintValue * tMyConstraintValue;
+                const ScalarType tMyConstraintContribution = tLagrangeMultipliersDotInequalityValue
                         + ((static_cast<ScalarType>(0.5) / mPenaltyParameter) * tInequalityValueDotInequalityValue);
 
                 tOutput += tMyConstraintContribution;
@@ -738,7 +776,7 @@ private:
             assert(mConstraintGradientOperator->ptr(tIndex).get() != nullptr);
 
             ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyConstraintValue > static_cast<OrdinalType>(0))
+            if(tMyConstraintValue > static_cast<ScalarType>(1e-4))
             {
 
                 // Add contribution from: \lambda_i\frac{\partial h_i}{\partial\mathbf{z}} to Lagrangian gradient
@@ -753,7 +791,7 @@ private:
                 Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mObjectiveGradient);
 
                 // Add contribution from: \mu*h_i(\mathbf{u}(\mathbf{z}),\mathbf{z})\frac{\partial h_i}{\partial\mathbf{z}}.
-                ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
+                const ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
                 Plato::update(tAlpha, tMyConstraintGradient, static_cast<ScalarType>(1), *mObjectiveGradient);
 
                 // Compute Augmented Lagrangian gradient
@@ -785,7 +823,7 @@ private:
             assert(mConstraintHessianOperators->ptr(tIndex).get() != nullptr);
 
             ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyConstraintValue > static_cast<OrdinalType>(0))
+            if(tMyConstraintValue > static_cast<ScalarType>(1e-4))
             {
                 // Add contribution from: \lambda_i\frac{\partial^2 h_i}{\partial\mathbf{z}^2}
                 Plato::fill(static_cast<ScalarType>(0), *mControlWorkVec);
@@ -816,9 +854,12 @@ private:
     OrdinalType mNumObjGradEval;
     OrdinalType mNumObjHessEval;
 
-    ScalarType mTrialObjectiveValue;
-    ScalarType mCurrentObjectiveValue;
+    ScalarType mTrialObjFuncValue;
+    ScalarType mCurrentObjFuncValue;
+    ScalarType mTrialAugLagFuncValue;
+    ScalarType mCurrentAugLagFuncValue;
     ScalarType mPreviousObjectiveValue;
+    ScalarType mPreviousAugLagFuncValue;
     ScalarType mObjectiveStagnationMeasure;
 
     ScalarType mMinPenaltyValue;
