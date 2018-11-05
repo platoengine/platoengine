@@ -1443,8 +1443,8 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse_1)
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
     size_t tIntegerGold = 6;
-    EXPECT_EQ(15u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(124u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(14u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(105u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
 
     // TEST OBJECTIVE FUNCTION VALUE
@@ -1536,7 +1536,7 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianHimmelblauShiftedEllipse_1)
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
     size_t tIntegerGold = 6;
     EXPECT_EQ(22u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(360u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(461u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
 
     // TEST OBJECTIVE FUNCTION VALUE

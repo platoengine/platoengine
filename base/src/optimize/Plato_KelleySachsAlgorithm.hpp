@@ -79,7 +79,7 @@ public:
             mProblemUpdateFrequency(0), // 0 = continuation disabled
             mGradientTolerance(1e-4),
             mStationarityTolerance(1e-4),
-            mPostSmoothingAlphaScale(1e-4),
+            mPostSmoothingAlphaScale(1e-10),
             mObjectiveStagnationTolerance(1e-8),
             mControlStagnationTolerance(std::numeric_limits<ScalarType>::epsilon()),
             mActualReductionTolerance(1e-8),
