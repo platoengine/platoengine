@@ -63,10 +63,10 @@
 #include "Plato_OptimizersIO.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_KelleySachsStepMng.hpp"
+#include "Plato_TrustRegionStageMng.hpp"
 #include "Plato_KelleySachsAlgorithm.hpp"
 #include "Plato_ProjectedSteihaugTointPcg.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
-#include "Plato_ReducedSpaceTrustRegionStageMng.hpp"
 
 namespace Plato
 {
@@ -83,7 +83,7 @@ public:
     **********************************************************************************/
     KelleySachsBoundConstrained(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
                                 const std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng,
-                                const std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
+                                const std::shared_ptr<Plato::TrustRegionStageMng<ScalarType, OrdinalType>> & aStageMng) :
             Plato::KelleySachsAlgorithm<ScalarType, OrdinalType>(*aDataFactory),
             mPrintDiagnostics(false),
             mOptimalityTolerance(1e-5),
@@ -91,9 +91,9 @@ public:
             mGradient(aDataFactory->control().create()),
             mControlWorkVector(aDataFactory->control().create()),
             mStepMng(std::make_shared<Plato::KelleySachsStepMng<ScalarType, OrdinalType>>(*aDataFactory)),
+            mStageMng(aStageMng),
             mSolver(std::make_shared<Plato::ProjectedSteihaugTointPcg<ScalarType, OrdinalType>>(*aDataFactory)),
-            mDataMng(aDataMng),
-            mStageMng(aStageMng)
+            mDataMng(aDataMng)
     {
         this->initialize();
     }
@@ -195,6 +195,23 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set number of constraints (output specific)
+     * @param [in] aInput number of constraints
+    **********************************************************************************/
+    void setNumConstraints(const OrdinalType & aInput)
+    {
+        mOutputData.mNumConstraints = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Directive to use current trust region radius (reentrant mode)
+    **********************************************************************************/
+    void useCurrentTrustRegionRadius()
+    {
+        mStepMng->setInitialTrustRegionRadiusSetToNormProjectedGradient(false);
+    }
+
+    /******************************************************************************//**
      * @brief Return reference to data manager
      * @return trust region algorithm's data manager
     **********************************************************************************/
@@ -210,6 +227,15 @@ public:
     const Plato::KelleySachsStepMng<ScalarType, OrdinalType> & getStepMng() const
     {
         return (*mStepMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Return reference to stage manager
+     * @return trust region problem stage manager
+    **********************************************************************************/
+    const Plato::TrustRegionStageMng<ScalarType, OrdinalType> & getStageMng() const
+    {
+        return (*mStageMng);
     }
 
     /******************************************************************************//**
@@ -248,6 +274,41 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Solve constrained optimization problem
+    **********************************************************************************/
+    void solve(std::ofstream & aOutputStream)
+    {
+        OrdinalType tIteration = 0;
+        this->setNumIterationsDone(tIteration);
+
+        this->checkInitialGuess(*mDataMng);
+        this->setInitialStateData();
+        mStageMng->updateOptimizationData(*mDataMng);
+        this->outputDiagnostics(aOutputStream);
+
+        while(1)
+        {
+            tIteration++;
+            this->setNumIterationsDone(tIteration);
+            mDataMng->cacheCurrentStageData();
+            // Compute adaptive constants to ensure superlinear convergence
+            this->computeAdaptiveConstant(*mDataMng, *mStepMng);
+            // Solve trust region subproblem
+            mStepMng->solveSubProblem(*mDataMng, *mStageMng, *mSolver);
+            // Update mid objective, control, and gradient information if necessary
+            this->update();
+            // Update stage manager data
+            mStageMng->updateOptimizationData(*mDataMng);
+            // output diagnostics
+            this->outputDiagnostics(aOutputStream);
+            if(this->checkStoppingCriteria() == true)
+            {
+                break;
+            }
+        }
+    }
+
 private:
     /******************************************************************************//**
      * @brief Open output file (i.e. diagnostics file)
@@ -281,7 +342,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics for Kelley-Sachs bound constrained algorithm
+     * @brief Print diagnostics for Kelley-Sachs bound constrained optimization algorithm
     **********************************************************************************/
     void outputDiagnostics()
     {
@@ -309,6 +370,38 @@ private:
             mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
 
             Plato::print_ksbc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print diagnostics for Kelley-Sachs constrained optimization algorithm
+    **********************************************************************************/
+    void outputDiagnostics(std::ofstream & aOutputStream)
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = this->getNumIterationsDone();
+            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
+            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
+
+            mOutputData.mActualRed = mStepMng->getActualReduction();
+            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
+            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
+            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            Plato::print_ksal_inner_diagnostics(mOutputData, aOutputStream, mPrintDiagnostics);
         }
     }
 
@@ -343,6 +436,7 @@ private:
         mStageMng->cacheData();
         mStageMng->computeGradient(tCurrentControl, *mGradient);
         mDataMng->setCurrentGradient(*mGradient);
+        mDataMng->computeActiveAndInactiveSet();
         mDataMng->computeNormProjectedGradient();
         this->initializeTrustRegionRadius(*mDataMng, *mStepMng);
         mDataMng->computeStationarityMeasure();
@@ -378,6 +472,8 @@ private:
         const bool tControlUpdated = this->applyPostSmoothing(tContinuationDone);
         // Update current state
         this->updateCurrentState(tControlUpdated);
+        // Compute active and inactive set
+        mDataMng->computeActiveAndInactiveSet();
         // Compute stationarity measure
         mDataMng->computeStationarityMeasure();
         // Compute norm of projected gradient
@@ -496,9 +592,9 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mControlWorkVector;
 
     std::shared_ptr<Plato::KelleySachsStepMng<ScalarType, OrdinalType>> mStepMng;
+    std::shared_ptr<Plato::TrustRegionStageMng<ScalarType,OrdinalType>> mStageMng;
     std::shared_ptr<Plato::ProjectedSteihaugTointPcg<ScalarType,OrdinalType>> mSolver;
     std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType,OrdinalType>> mDataMng;
-    std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType,OrdinalType>> mStageMng;
 
 private:
     KelleySachsBoundConstrained(const Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>&);

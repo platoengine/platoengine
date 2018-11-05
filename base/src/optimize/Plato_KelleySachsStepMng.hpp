@@ -406,6 +406,9 @@ private:
         return (tLowerBound);
     }
 
+    /******************************************************************************//**
+     * @brief Compute active and inactive sets
+    **********************************************************************************/
     void computeActiveAndInactiveSet(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> & tMyLowerBound = aDataMng.getControlLowerBounds();
@@ -429,16 +432,25 @@ private:
                                                        *mUpperBoundLimit,
                                                        *mActiveSet,
                                                        *mInactiveSet);
-        /* Check if all the controls are inside the active set, if true, activate
-         *  inactive set and let the projection handle the box constraints. */
-        const ScalarType tNormInactiveSet = Plato::norm(*mInactiveSet);
-        if(tNormInactiveSet <= static_cast<ScalarType>(0))
+        this->checkInactiveSet();
+    }
+
+    /******************************************************************************//**
+     * @brief Check if inactive set is null
+    **********************************************************************************/
+    void checkInactiveSet()
+    {
+        const OrdinalType tNumControlVectors = mInactiveSet->getNumVectors();
+        for(OrdinalType tIndex = 0; tIndex < tNumControlVectors; tIndex++)
         {
-            Plato::fill(static_cast<ScalarType>(0), *mActiveSet);
-            Plato::fill(static_cast<ScalarType>(1), *mInactiveSet);
+            ScalarType tNormInactiveSet = mInactiveSet->operator[](tIndex).dot(mInactiveSet->operator[](tIndex));
+            tNormInactiveSet = std::sqrt(tNormInactiveSet);
+            if(tNormInactiveSet <= static_cast<ScalarType>(0))
+            {
+                mActiveSet->operator[](tIndex).fill(static_cast<ScalarType>(0));
+                mInactiveSet->operator[](tIndex).fill(static_cast<ScalarType>(1));
+            }
         }
-        aDataMng.setActiveSet(*mActiveSet);
-        aDataMng.setInactiveSet(*mInactiveSet);
     }
 
 private:

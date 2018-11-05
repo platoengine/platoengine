@@ -296,7 +296,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
     std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
     std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
-    tCompliance->setFilterRadius(1.10);
+    tCompliance->setFilterRadius(1.20);
     tMyObjective->add(tCompliance);
     tMyObjective->add(tVolume);
 
@@ -306,7 +306,6 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     double tVolumeFraction = tPDE->getVolumeFraction();
     Plato::AlgorithmInputsKSBC<double> tInputs;
     tInputs.mHaveHessian = false;
-    tInputs.mMaxNumOuterIter = 20;
     tInputs.mTrustRegionExpansionFactor = 4;
     tInputs.mOuterControlStagnationTolerance = 1e-2;
     tInputs.mActualOverPredictedReductionLowerBound = 0.05;
@@ -320,9 +319,9 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-4;
-    EXPECT_EQ(20u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(65u, tOutputs.mNumObjFuncEval);
-    EXPECT_NEAR(tOutputs.mObjFuncValue, 0.1333217255239926, tTolerance);
+    EXPECT_EQ(15u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(72u, tOutputs.mNumObjFuncEval);
+    EXPECT_NEAR(tOutputs.mObjFuncValue, 0.20562284799373526, tTolerance);
 
     const size_t tControlVectorIndex = 0;
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksbc_test();

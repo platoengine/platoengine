@@ -48,10 +48,7 @@
 
 #pragma once
 
-#include "Plato_DataFactory.hpp"
-#include "Plato_TrustRegionAlgorithmDataMng.hpp"
-#include "Plato_AugmentedLagrangianStageMng.hpp"
-#include "Plato_KelleySachsAugmentedLagrangian.hpp"
+#include "Plato_AugmentedLagrangian.hpp"
 
 namespace Plato
 {
@@ -95,22 +92,22 @@ struct AlgorithmInputsKSAL
             mHaveHessian(true),
             mPrintDiagnostics(false),
             mDisablePostSmoothing(false),
-            mMaxNumOuterIter(500),
+            mMaxNumOuterIter(50),
+            mMaxNumAugLagSubProbIter(5),
+            mMaxNumPostSmoothingIter(5),
             mMaxTrustRegionSubProblemIter(25),
-            mMaxNumOuterLineSearchUpdates(5),
             mMaxTrustRegionRadius(1e2),
-            mMinTrustRegionRadius(1e-5),
+            mMinTrustRegionRadius(1e-6),
             mTrustRegionExpansionFactor(4),
             mTrustRegionContractionFactor(0.75),
-            mMinPenaltyParameter(1e-5),
-            mInitialPenaltyParameter(0.1),
-            mPenaltyParameterScaleFactor(1.5),
+            mInitialPenaltyParameter(0.05),
+            mPenaltyParameterScaleFactor(2),
+            mGradientTolerance(1e-4),
             mFeasibilityTolerance(1e-4),
-            mOuterGradientTolerance(1e-4),
-            mOuterStationarityTolerance(1e-4),
-            mOuterActualReductionTolerance(1e-8),
-            mOuterControlStagnationTolerance(1e-16),
-            mOuterObjectiveStagnationTolerance(1e-8),
+            mStationarityTolerance(1e-4),
+            mActualReductionTolerance(1e-8),
+            mControlStagnationTolerance(1e-16),
+            mObjectiveStagnationTolerance(1e-8),
             mActualOverPredictedReductionMidBound(0.25),
             mActualOverPredictedReductionLowerBound(0.10),
             mActualOverPredictedReductionUpperBound(0.75),
@@ -137,28 +134,27 @@ struct AlgorithmInputsKSAL
     bool mDisablePostSmoothing; /*!< flag to disable post smoothing operation (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+    OrdinalType mMaxNumAugLagSubProbIter; /*!< maximum number of augmented Lagrangian subproblem iterations */
+    OrdinalType mMaxNumPostSmoothingIter; /*!< maximum number of outer line search iterations */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
-    OrdinalType mMaxNumOuterLineSearchUpdates; /*!< maximum number of outer line search iterations */
 
     ScalarType mMaxTrustRegionRadius; /*!< maximum trust region radius */
     ScalarType mMinTrustRegionRadius; /*!< minimum trust region radius */
     ScalarType mTrustRegionExpansionFactor; /*!< trust region radius expansion factor */
     ScalarType mTrustRegionContractionFactor; /*!< trust region radius contraction factor */
 
-    ScalarType mMinPenaltyParameter; /*!< minimum penalty parameter */
     ScalarType mInitialPenaltyParameter; /*!< initial penalty parameter */
     ScalarType mPenaltyParameterScaleFactor; /*!< penalty parameter scale factor */
 
+    ScalarType mGradientTolerance; /*!< gradient norm tolerance */
     ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
-    ScalarType mOuterGradientTolerance; /*!< gradient norm tolerance */
-    ScalarType mOuterStationarityTolerance; /*!< descent direction norm tolerance */
-    ScalarType mOuterActualReductionTolerance; /*!< actual reduction tolerance */
-    ScalarType mOuterControlStagnationTolerance; /*!< control stagnation tolerance */
-    ScalarType mOuterObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mStationarityTolerance; /*!< descent direction norm tolerance */
+    ScalarType mActualReductionTolerance; /*!< actual reduction tolerance */
+    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
+    ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
     ScalarType mActualOverPredictedReductionMidBound; /*!< actual over predicted reduction middle bound */
     ScalarType mActualOverPredictedReductionLowerBound; /*!< actual over predicted reduction lower bound */
     ScalarType mActualOverPredictedReductionUpperBound; /*!< actual over predicted reduction upper bound */
-
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
@@ -176,13 +172,11 @@ struct AlgorithmInputsKSAL
 /******************************************************************************//**
  * @brief Set Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm inputs
  * @param [in] aInputs Kelley-Sachs Augmented Lagrangian trust region algorithm inputs
- * @param [in,out] aStageMng interface to user-defined criteria
  * @param [in,out] aAlgorithm Kelley-Sachs Augmented Lagrangian trust region algorithm interface
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> & aInputs,
-                                      Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType> & aStageMng,
-                                      Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
+                                      Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
 {
     if(aInputs.mPrintDiagnostics == true)
     {
@@ -194,12 +188,13 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
         aAlgorithm.disablePostSmoothing();
     }
 
-    aAlgorithm.setMinPenaltyParameter(aInputs.mMinPenaltyParameter);
-    aStageMng.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
-    aStageMng.setPenaltyParameterScaleFactor(aInputs.mPenaltyParameterScaleFactor);
+    aAlgorithm.setHaveHessian(aInputs.mHaveHessian);
+    aAlgorithm.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
+    aAlgorithm.setPenaltyParameterScaleFactor(aInputs.mPenaltyParameterScaleFactor);
 
-    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
-    aAlgorithm.setMaxNumLineSearchIterations(aInputs.mMaxNumOuterLineSearchUpdates);
+    aAlgorithm.setMaxNumOuterIterations(aInputs.mMaxNumOuterIter);
+    aAlgorithm.setMaxNumAugLagSubProbIter(aInputs.mMaxNumAugLagSubProbIter);
+    aAlgorithm.setMaxNumPostSmoothingIter(aInputs.mMaxNumPostSmoothingIter);
     aAlgorithm.setMaxNumTrustRegionSubProblemIterations(aInputs.mMaxTrustRegionSubProblemIter);
 
     aAlgorithm.setMaxTrustRegionRadius(aInputs.mMaxTrustRegionRadius);
@@ -207,12 +202,12 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
     aAlgorithm.setTrustRegionExpansion(aInputs.mTrustRegionExpansionFactor);
     aAlgorithm.setTrustRegionContraction(aInputs.mTrustRegionContractionFactor);
 
-    aAlgorithm.setGradientTolerance(aInputs.mOuterGradientTolerance);
+    aAlgorithm.setGradientTolerance(aInputs.mGradientTolerance);
     aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
-    aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);
-    aAlgorithm.setActualReductionTolerance(aInputs.mOuterActualReductionTolerance);
-    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
-    aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
+    aAlgorithm.setStationarityTolerance(aInputs.mStationarityTolerance);
+    aAlgorithm.setActualReductionTolerance(aInputs.mActualReductionTolerance);
+    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
 }
 // function set_ksal_algorithm_inputs
 
@@ -222,10 +217,10 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
  * @param [in,out] aOutputs Kelley-Sachs Augmented Lagrangian trust region algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_ksal_algorithm_outputs(const Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm,
+inline void set_ksal_algorithm_outputs(const Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm,
                                        Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType> & aOutputs)
 {
-    aOutputs.mNumOuterIter = aAlgorithm.getNumIterationsDone();
+    aOutputs.mNumOuterIter = aAlgorithm.getNumOuterIterDone();
     aOutputs.mNumObjFuncEval = aAlgorithm.getDataMng().getNumObjectiveFunctionEvaluations();
     aOutputs.mNumObjGradEval = aAlgorithm.getDataMng().getNumObjectiveGradientEvaluations();
 
@@ -272,21 +267,14 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     tDataFactory->allocateControl(*aInputs.mInitialGuess);
     tDataFactory->allocateControlReductionOperations(*aInputs.mReductionOperations);
 
-    // ********* ALLOCATE TRUST REGION ALGORITHM DATA MANAGER *********
-    std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> tDataMng;
-    tDataMng = std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(tDataFactory);
-    tDataMng->setInitialGuess(*aInputs.mInitialGuess);
-    tDataMng->setControlLowerBounds(*aInputs.mLowerBounds);
-    tDataMng->setControlUpperBounds(*aInputs.mUpperBounds);
+    // ********* ALLOCATE AUGMENTED LAGRANGIAN ALGORITHM *********
+    Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aObjective, aConstraints, tDataFactory);
+    tAlgorithm.setInitialGuess(*aInputs.mInitialGuess);
+    tAlgorithm.setControlLowerBounds(*aInputs.mLowerBounds);
+    tAlgorithm.setControlUpperBounds(*aInputs.mUpperBounds);
 
-    // ********* ALLOCATE AUGMENTED LAGRANGIAN STAGE MANAGER *********
-    std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng;
-    tStageMng = std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(tDataFactory, aObjective, aConstraints);
-    tStageMng->setHaveHessian(aInputs.mHaveHessian);
-
-    // ********* ALLOCATE KELLEY-SACHS ALGORITHM, SOLVE OPTIMIZATION PROBLEM, AND SAVE SOLUTION *********
-    Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
-    Plato::set_ksal_algorithm_inputs(aInputs, *tStageMng, tAlgorithm);
+    // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
+    Plato::set_ksal_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_ksal_algorithm_outputs(tAlgorithm, aOutputs);
 }

@@ -160,6 +160,11 @@ public:
     **********************************************************************************/
     void allocateDual(const OrdinalType & aNumElements, OrdinalType aNumVectors = 1)
     {
+        if(mDual.use_count() != 0)
+        {
+            mDual.reset();
+        }
+
         assert(aNumElements > static_cast<OrdinalType>(0));
         mNumDuals = aNumElements;
         Plato::StandardVector<ScalarType, OrdinalType> tVector(aNumElements);

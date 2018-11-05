@@ -116,7 +116,7 @@ public:
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
         ScalarType tCurrentObjectiveFunctionValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
         mDataMng->setCurrentObjectiveFunctionValue(tCurrentObjectiveFunctionValue);
-        mStageMng->updateCurrentCriteriaValues();
+        mStageMng->cacheCurrentCriteriaValues();
 
         mStageMng->cacheData();
         mStageMng->computeGradient(tCurrentControl, *mGradient);
@@ -165,7 +165,7 @@ private:
         // Cache state data since trial control was accepted
         mStageMng->cacheData();
         // Update inequality constraint values at mid point
-        mStageMng->updateCurrentCriteriaValues();
+        mStageMng->cacheCurrentCriteriaValues();
         // Compute gradient at new midpoint
         const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = mStepMng->getMidPointControls();
         mStageMng->computeGradient(tMidControl, *mGradient);
@@ -175,7 +175,7 @@ private:
             // Update new gradient and inequality constraint values since control
             // was successfully updated; else, keep mid gradient and thus mid control.
             mStageMng->cacheData();
-            mStageMng->updateCurrentCriteriaValues();
+            mStageMng->cacheCurrentCriteriaValues();
             const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
             mStageMng->computeGradient(tCurrentControl, *mGradient);
             mDataMng->setCurrentGradient(*mGradient);

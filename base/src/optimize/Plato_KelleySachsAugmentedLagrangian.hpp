@@ -291,7 +291,7 @@ private:
                 mOutputData.mConstraintValues.clear();
                 mOutputData.mConstraintValues.resize(tNumConstraints);
                 mOutputStream.open("plato_ksal_algorithm_diagnostics.txt");
-                Plato::print_ksal_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                //Plato::print_ksal_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }
     }
@@ -343,16 +343,10 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             mOutputData.mNumIter = this->getNumIterationsDone();
-            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
-            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
             mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
             mOutputData.mAugLagFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
-            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
 
             mOutputData.mPenalty = mStageMng->getPenaltyParameter();
-            mOutputData.mActualRed = mStepMng->getActualReduction();
-            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
-            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
             mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
             mOutputData.mNormAugLagFuncGrad = mDataMng->getNormProjectedGradient();
             mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
@@ -369,7 +363,7 @@ private:
                         mStageMng->getCurrentConstraintValues(tCONSTRAINT_VECTOR_INDEX, tIndex);
             }
 
-            Plato::print_ksal_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            //Plato::print_ksal_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
         }
     }
 
@@ -441,13 +435,13 @@ private:
     void checkMidPointSolution()
     {
         // Update objectives and inequality constraints
-        mStageMng->updateCurrentCriteriaValues();
+        mStageMng->cacheTrialCriteriaValues();
         // Compute mid-objective function. Feasible point detected, do not include feasible constraints.
         const ScalarType tAugLagFuncValue = mStageMng->getCurrentAugmenteLagrangianFunctionValue();
         if(tAugLagFuncValue < static_cast<ScalarType>(0))
         {
             this->recomputeMidPointObjFunc();
-            mStageMng->updateCurrentCriteriaValues();
+            mStageMng->cacheTrialCriteriaValues();
         }
         // Compute gradient at new midpoint
         mStageMng->cacheData();
@@ -465,7 +459,7 @@ private:
         {
             // Update current gradient since control was updated
             mStageMng->cacheData();
-            mStageMng->updateCurrentCriteriaValues();
+            mStageMng->cacheTrialCriteriaValues();
             const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
             mStageMng->computeGradient(tCurrentControl, *mGradient /* new/current gradient */);
             mDataMng->setCurrentGradient(*mGradient);
@@ -518,8 +512,7 @@ private:
     bool checkPenaltyParameter()
     {
         bool tStop = false;
-        mStageMng->getCurrentConstraintValues(*mCurrentConstraintValues);
-        const ScalarType tNormConstraintValues = Plato::norm(*mCurrentConstraintValues);
+        const ScalarType tNormConstraintValues = mStageMng->getNormConstraintVector();
         const ScalarType tDynamicFeasibilityTolerance = mStageMng->getDynamicFeasibilityTolerance();
         const ScalarType tMyFeasibilityTolerance = std::max(mFeasibilityTolerance, tDynamicFeasibilityTolerance);
         if(tNormConstraintValues <= tMyFeasibilityTolerance)

@@ -662,6 +662,23 @@ public:
         return (mNormProjectedGradient);
     }
 
+    void computeActiveAndInactiveSet()
+    {
+        assert(mCurrentControl.get() != nullptr);
+        assert(mCurrentGradient.get() != nullptr);
+        assert(mControlLowerBounds.get() != nullptr);
+        assert(mControlUpperBounds.get() != nullptr);
+
+        Plato::update(1., *mCurrentControl, 0., *mControlWorkMultiVector);
+        Plato::update(-1., *mCurrentGradient, 1., *mControlWorkMultiVector);
+        mBounds->computeActiveAndInactiveSets(*mControlWorkMultiVector,
+                                              *mControlLowerBounds,
+                                              *mControlUpperBounds,
+                                              *mActiveSet,
+                                              *mInactiveSet);
+        this->checkInactiveSet();
+    }
+
     // NOTE: STATIONARITY MEASURE CALCULATION
     void computeStationarityMeasure()
     {
@@ -674,8 +691,10 @@ public:
         Plato::update(-1., *mCurrentGradient, 1., *mControlWorkMultiVector);
         mBounds->project(*mControlLowerBounds, *mControlUpperBounds, *mControlWorkMultiVector);
         Plato::update(1., *mCurrentControl, -1., *mControlWorkMultiVector);
+        Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
         mStationarityMeasure = Plato::norm(*mControlWorkMultiVector);
     }
+
     ScalarType getStationarityMeasure() const
     {
         return (mStationarityMeasure);
@@ -713,12 +732,20 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Return bound constraints interface
+     * @return bound constraints interface
+    **********************************************************************************/
     const Plato::BoundsBase<ScalarType, OrdinalType> & bounds() const
     {
         return (*mBounds);
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize defaults for core data structures
+     * @param [in] aDataFactory linear algebra factory
+    **********************************************************************************/
     void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
     {
         assert(aDataFactory.control().getNumVectors() > 0);
@@ -746,6 +773,24 @@ private:
             {
                 mBounds = std::make_shared<Plato::HostBounds<ScalarType, OrdinalType>>();
                 break;
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Check if inactive set is null
+    **********************************************************************************/
+    void checkInactiveSet()
+    {
+        const OrdinalType tNumControlVectors = mInactiveSet->getNumVectors();
+        for(OrdinalType tIndex = 0; tIndex < tNumControlVectors; tIndex++)
+        {
+            ScalarType tNormInactiveSet = mInactiveSet->operator[](tIndex).dot(mInactiveSet->operator[](tIndex));
+            tNormInactiveSet = std::sqrt(tNormInactiveSet);
+            if(tNormInactiveSet <= static_cast<ScalarType>(0))
+            {
+                mActiveSet->operator[](tIndex).fill(static_cast<ScalarType>(0));
+                mInactiveSet->operator[](tIndex).fill(static_cast<ScalarType>(1));
             }
         }
     }

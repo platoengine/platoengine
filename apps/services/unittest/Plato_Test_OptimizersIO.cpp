@@ -429,48 +429,75 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
 {
     std::ofstream tWriteFile;
     tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataKSAL<double> tData;
-    tData.mNumIter = 0;
-    tData.mNumIterPCG = 0;
-    tData.mObjFuncCount = 1;
-    tData.mNumTrustRegionIter = 0;
-    tData.mNumLineSearchIter = 0;
-
-    tData.mPenalty = 0.1;
-    tData.mActualRed = 0;
-    tData.mAredOverPred = 0;
-    tData.mObjFuncValue = 1.0;
-    tData.mNormObjFuncGrad = 4.5656e-3;
-    tData.mNormAugLagFuncGrad = 5.234e-2;
-    tData.mTrustRegionRadius = 1e2;
-    tData.mStationarityMeasure = 2.34e-2;
-    tData.mControlStagnationMeasure = 1.2345678e6;
-    tData.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
-
+    Plato::OutputDataKSBC<double> tDataKSBC;
     const size_t tNumConstraints = 1;
-    tData.mConstraintValues.resize(tNumConstraints);
-    tData.mConstraintValues[0] = 1.23e-5;
+    Plato::OutputDataKSAL<double> tDataKSAL(tNumConstraints);
+    tDataKSBC.mNumConstraints = tNumConstraints;
 
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics_header(tData, tWriteFile));
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics(tData, tWriteFile));
-    tData.mNumIter = 1;
-    tData.mNumIterPCG = 34;
-    tData.mObjFuncCount = 3;
-    tData.mNumTrustRegionIter = 22;
-    tData.mNumLineSearchIter = 4;
+    // **** AUGMENTED LAGRANGIAN SUBPROBLEM OUTPUT ****
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mNumIterPCG = 0;
+    tDataKSBC.mObjFuncCount = 1;
+    tDataKSBC.mNumTrustRegionIter = 0;
+    tDataKSBC.mNumLineSearchIter = 0;
+    tDataKSBC.mActualRed = 0;
+    tDataKSBC.mAredOverPred = 0;
+    tDataKSBC.mObjFuncValue = 1.0;
+    tDataKSBC.mNormObjFuncGrad = 4.5656e-3;
+    tDataKSBC.mTrustRegionRadius = 1e2;
+    tDataKSBC.mStationarityMeasure = 2.34e-2;
+    tDataKSBC.mControlStagnationMeasure = 1.2345678e6;
+    tDataKSBC.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
+    ASSERT_NO_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tWriteFile));
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
 
-    tData.mPenalty = 0.075;
-    tData.mActualRed = 0.1435;
-    tData.mAredOverPred = 0.78;
-    tData.mObjFuncValue = 0.298736;
-    tData.mNormObjFuncGrad = 3.45656e-1;
-    tData.mNormAugLagFuncGrad = 8.234e-1;
-    tData.mTrustRegionRadius = 4;
-    tData.mStationarityMeasure = 2.34e-1;
-    tData.mControlStagnationMeasure = 0.18743;
-    tData.mObjectiveStagnationMeasure = 0.7109;
-    tData.mConstraintValues[0] = 2.45e-7;
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics(tData, tWriteFile));
+    tDataKSBC.mNumIter = 1;
+    tDataKSBC.mNumIterPCG = 34;
+    tDataKSBC.mObjFuncCount = 3;
+    tDataKSBC.mNumTrustRegionIter = 22;
+    tDataKSBC.mNumLineSearchIter = 4;
+    tDataKSBC.mActualRed = 0.1435;
+    tDataKSBC.mAredOverPred = 0.78;
+    tDataKSBC.mObjFuncValue = 0.298736;
+    tDataKSBC.mNormObjFuncGrad = 3.45656e-1;
+    tDataKSBC.mTrustRegionRadius = 4;
+    tDataKSBC.mStationarityMeasure = 2.34e-1;
+    tDataKSBC.mControlStagnationMeasure = 0.18743;
+    tDataKSBC.mObjectiveStagnationMeasure = 0.7109;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+
+    // **** AUGMENTED LAGRANGIAN OUTPUT ****
+    tDataKSAL.mConstraintValues[0] = 1.23e-5;
+    tDataKSAL.mAugLagFuncValue = 1.234459e-1;
+    tDataKSAL.mControlStagnationMeasure = 0.23;
+    tDataKSAL.mNormAugLagFuncGrad = 2.123e-5;
+    tDataKSAL.mNormObjFuncGrad = 8.123e-6;
+    tDataKSAL.mNumIter = 1;
+    tDataKSAL.mObjFuncCount = 3;
+    tDataKSAL.mObjFuncValue = 8.2359e-2;
+    tDataKSAL.mObjectiveStagnationMeasure = 2.34e-1;
+    tDataKSAL.mPenalty = 10;
+    tDataKSAL.mStationarityMeasure = 2.123e-5;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mObjFuncCount = 4;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSBC.mNumIter = 1;
+    tDataKSBC.mObjFuncCount = 5;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSBC.mNumIter = 2;
+    tDataKSBC.mObjFuncCount = 6;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSAL.mNumIter = 2;
+    tDataKSAL.mObjFuncCount = 6;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mObjFuncCount = 7;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSAL.mNumIter = 3;
+    tDataKSAL.mObjFuncCount = 7;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
     tWriteFile.close();
 
     std::ifstream tReadFile;
@@ -485,9 +512,17 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
     std::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
-    tGold << "IterF-countF(X)Norm(F')Norm(L')Norm(S)H1(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
-    tGold << "011.000000e+004.565600e-035.234000e-022.340000e-021.230000e-05001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
-    tGold << "132.987360e-013.456560e-018.234000e-012.340000e-012.450000e-072244.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
+    tGold << "IterF-countPenaltyF(X)Norm(F')H1(X)AL-IterL(X)Norm(L')Norm(S)abs(dX)abs(dF)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iter";
+    tGold << "000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00******";
+    tGold << "*1****01.000000e+004.565600e-032.340000e-021.234568e+061.797693e+308001.000000e+020.000000e+000.000000e+000";
+    tGold << "*3****12.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "131.000000e+018.235900e-028.123000e-061.230000e-05*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
+    tGold << "*4****02.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "*5****12.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "*6****22.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "261.000000e+018.235900e-028.123000e-061.230000e-05*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
+    tGold << "*7****02.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "371.000000e+018.235900e-028.123000e-061.230000e-05*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
@@ -495,50 +530,76 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
 {
     std::ofstream tWriteFile;
     tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataKSAL<double> tData;
-    tData.mNumIter = 0;
-    tData.mNumIterPCG = 0;
-    tData.mObjFuncCount = 1;
-    tData.mNumTrustRegionIter = 0;
-    tData.mNumLineSearchIter = 0;
-
-    tData.mPenalty = 0.1;
-    tData.mActualRed = 0;
-    tData.mAredOverPred = 0;
-    tData.mObjFuncValue = 1.0;
-    tData.mNormObjFuncGrad = 4.5656e-3;
-    tData.mNormAugLagFuncGrad = 2.34e-1;
-    tData.mTrustRegionRadius = 1e2;
-    tData.mStationarityMeasure = 2.34e-2;
-    tData.mControlStagnationMeasure = 1.2345678e6;
-    tData.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
-
+    Plato::OutputDataKSBC<double> tDataKSBC;
     const size_t tNumConstraints = 2;
-    tData.mConstraintValues.resize(tNumConstraints);
-    tData.mConstraintValues[0] = 1.23e-5;
-    tData.mConstraintValues[1] = 3.33e-3;
+    Plato::OutputDataKSAL<double> tDataKSAL(tNumConstraints);
+    tDataKSBC.mNumConstraints = tNumConstraints;
 
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics_header(tData, tWriteFile));
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics(tData, tWriteFile));
-    tData.mNumIter = 1;
-    tData.mNumIterPCG = 34;
-    tData.mObjFuncCount = 3;
-    tData.mNumTrustRegionIter = 22;
-    tData.mNumLineSearchIter = 1;
+    // **** AUGMENTED LAGRANGIAN SUBPROBLEM OUTPUT ****
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mNumIterPCG = 0;
+    tDataKSBC.mObjFuncCount = 1;
+    tDataKSBC.mNumTrustRegionIter = 0;
+    tDataKSBC.mNumLineSearchIter = 0;
+    tDataKSBC.mActualRed = 0;
+    tDataKSBC.mAredOverPred = 0;
+    tDataKSBC.mObjFuncValue = 1.0;
+    tDataKSBC.mNormObjFuncGrad = 4.5656e-3;
+    tDataKSBC.mTrustRegionRadius = 1e2;
+    tDataKSBC.mStationarityMeasure = 2.34e-2;
+    tDataKSBC.mControlStagnationMeasure = 1.2345678e6;
+    tDataKSBC.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
+    ASSERT_NO_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tWriteFile));
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
 
-    tData.mPenalty = 0.075;
-    tData.mActualRed = 0.1435;
-    tData.mAredOverPred = 0.78;
-    tData.mObjFuncValue = 0.298736;
-    tData.mNormAugLagFuncGrad = 1.234;
-    tData.mNormObjFuncGrad = 3.45656e-1;
-    tData.mTrustRegionRadius = 4;
-    tData.mStationarityMeasure = 2.34e-1;
-    tData.mControlStagnationMeasure = 0.18743;
-    tData.mObjectiveStagnationMeasure = 0.7109;
-    tData.mConstraintValues[0] = 2.45e-7;
-    tData.mConstraintValues[1] = 4.23e-8;
-    ASSERT_NO_THROW(Plato::print_ksal_diagnostics(tData, tWriteFile));
+    tDataKSBC.mNumIter = 1;
+    tDataKSBC.mNumIterPCG = 34;
+    tDataKSBC.mObjFuncCount = 3;
+    tDataKSBC.mNumTrustRegionIter = 22;
+    tDataKSBC.mNumLineSearchIter = 4;
+    tDataKSBC.mActualRed = 0.1435;
+    tDataKSBC.mAredOverPred = 0.78;
+    tDataKSBC.mObjFuncValue = 0.298736;
+    tDataKSBC.mNormObjFuncGrad = 3.45656e-1;
+    tDataKSBC.mTrustRegionRadius = 4;
+    tDataKSBC.mStationarityMeasure = 2.34e-1;
+    tDataKSBC.mControlStagnationMeasure = 0.18743;
+    tDataKSBC.mObjectiveStagnationMeasure = 0.7109;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+
+    // **** AUGMENTED LAGRANGIAN OUTPUT ****
+    tDataKSAL.mConstraintValues[0] = 1.23e-5;
+    tDataKSAL.mConstraintValues[1] = 3.65e-3;
+    tDataKSAL.mAugLagFuncValue = 1.234459e-1;
+    tDataKSAL.mControlStagnationMeasure = 0.23;
+    tDataKSAL.mNormAugLagFuncGrad = 2.123e-5;
+    tDataKSAL.mNormObjFuncGrad = 8.123e-6;
+    tDataKSAL.mNumIter = 1;
+    tDataKSAL.mObjFuncCount = 3;
+    tDataKSAL.mObjFuncValue = 8.2359e-2;
+    tDataKSAL.mObjectiveStagnationMeasure = 2.34e-1;
+    tDataKSAL.mPenalty = 10;
+    tDataKSAL.mStationarityMeasure = 2.123e-5;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mObjFuncCount = 4;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSBC.mNumIter = 1;
+    tDataKSBC.mObjFuncCount = 5;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSBC.mNumIter = 2;
+    tDataKSBC.mObjFuncCount = 6;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSAL.mNumIter = 2;
+    tDataKSAL.mObjFuncCount = 6;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
+    tDataKSBC.mNumIter = 0;
+    tDataKSBC.mObjFuncCount = 7;
+    ASSERT_NO_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tWriteFile));
+    tDataKSAL.mNumIter = 3;
+    tDataKSAL.mObjFuncCount = 7;
+    ASSERT_NO_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tWriteFile));
     tWriteFile.close();
 
     std::ifstream tReadFile;
@@ -553,20 +614,32 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
     std::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
-    tGold << "IterF-countF(X)Norm(F')Norm(L')Norm(S)H1(X)H2(X)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)Penalty";
-    tGold << "011.000000e+004.565600e-032.340000e-012.340000e-021.230000e-053.330000e-03001.000000e+020.000000e+000.000000e+0001.234568e+061.797693e+3081.000000e-01";
-    tGold << "132.987360e-013.456560e-011.234000e+002.340000e-012.450000e-074.230000e-082214.000000e+001.435000e-017.800000e-01341.874300e-017.109000e-017.500000e-02";
+    tGold << "IterF-countPenaltyF(X)Norm(F')H1(X)H2(X)AL-IterL(X)Norm(L')Norm(S)abs(dX)abs(dF)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iter";
+    tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00******";
+    tGold << "*1*****01.000000e+004.565600e-032.340000e-021.234568e+061.797693e+308001.000000e+020.000000e+000.000000e+000";
+    tGold << "*3*****12.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "131.000000e+018.235900e-028.123000e-061.230000e-053.650000e-03*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
+    tGold << "*4*****02.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "*5*****12.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "*6*****22.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "261.000000e+018.235900e-028.123000e-061.230000e-053.650000e-03*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
+    tGold << "*7*****02.987360e-013.456560e-012.340000e-011.874300e-017.109000e-012244.000000e+001.435000e-017.800000e-0134";
+    tGold << "371.000000e+018.235900e-028.123000e-061.230000e-053.650000e-03*1.234459e-012.123000e-052.123000e-052.300000e-012.340000e-01******";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, PrintKsalDiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
-    Plato::OutputDataKSAL<double> tData;
-    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    Plato::OutputDataKSAL<double> tDataKSAL;
+    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tFile1, true /* print message */), std::invalid_argument);
+
+    Plato::OutputDataKSBC<double> tDataKSBC;
+    ASSERT_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tFile1, true /* print message */), std::invalid_argument);
 }
 
 TEST(PlatoTest, TestStoppingCriterionOutputAlgorithm)

@@ -88,8 +88,8 @@ struct UncertaintyInputStruct
             mLowerBound(0.),
             mUpperBound(0.),
             mVariance(0.),
-            mMomentErrorCriterionWeight(1/1e2),
-            mCumulativeDistributionFuncErrorWeight(1/1e2),
+            mMomentErrorCriterionWeight(1.0),
+            mCumulativeDistributionFuncErrorWeight(1.0),
             mNumSamples(0),
             mNumMonteCarloSamples(1000),
             mMaxNumDistributionMoments(4)
@@ -119,38 +119,5 @@ struct SromProblemDiagnosticsStruct
     ScalarType mCumulativeDistributionFunctionError;
 };
 // struct SromProblemOutputStruct
-
-template<typename ScalarType, typename OrdinalType = size_t>
-struct AlgorithmParamStruct
-{
-    // Stopping criterion
-    Plato::algorithm::stop_t mStop;
-    // Input parameters
-    OrdinalType mMaxNumIterations;
-    ScalarType mMinPenaltyParameter;
-    ScalarType mFeasibilityTolerance;
-    ScalarType mMaxTrustRegionRadius;
-    ScalarType mActualReductionTolerance;
-    ScalarType mPenaltyParameterScaleFactor;
-    ScalarType mObjectiveStagnationTolerance;
-    // Output parameters
-    ScalarType mObjectiveValue;
-    ScalarType mConstraintValue;
-    /*! @brief Default constructor */
-    AlgorithmParamStruct() :
-            mStop(Plato::algorithm::NOT_CONVERGED),
-            mMaxNumIterations(1000),
-            mMinPenaltyParameter(1e-5),
-            mFeasibilityTolerance(1e-4),
-            mMaxTrustRegionRadius(1e1),
-            mActualReductionTolerance(1e-12),
-            mPenaltyParameterScaleFactor(1.2),
-            mObjectiveStagnationTolerance(1e-12),
-            mObjectiveValue(std::numeric_limits<ScalarType>::max()),
-            mConstraintValue(std::numeric_limits<ScalarType>::max())
-    {
-    }
-};
-// struct AlgorithmParamStruct
 
 } // namespace Plato

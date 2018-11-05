@@ -1,10 +1,4 @@
 /*
- * Plato_AugmentedLagrangianStageMng.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_AugmentedLagrangianStageMng.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
 
 #ifndef PLATO_AUGMENTEDLAGRANGIANSTAGEMNG_HPP_
 #define PLATO_AUGMENTEDLAGRANGIANSTAGEMNG_HPP_
@@ -95,10 +95,12 @@ public:
             mPreviousAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mMinPenaltyValue(1e-10),
-            mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
+            mNormConstraints(std::numeric_limits<ScalarType>::max()),
+            mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
+            mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mFeasibilityStagnationMeasure(std::numeric_limits<ScalarType>::max()),
-            mPenaltyParameter(0.1),
-            mPenaltyParameterScaleFactor(1.2),
+            mPenaltyParameter(0.05),
+            mPenaltyParameterScaleFactor(2),
             mDynamicFeasibilityTolerance(1e-2),
             mInitialDynamicFeasibilityTolerance(1e-2),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -296,7 +298,16 @@ public:
     **********************************************************************************/
     ScalarType getNormObjectiveFunctionGradient() const
     {
-        return (mNormObjectiveGradient);
+        return (mNormObjFuncGrad);
+    }
+
+    /******************************************************************************//**
+     * @brief Return norm of augmented Lagrangian gradient
+     * @return norm of augmented Lagrangian gradient
+    **********************************************************************************/
+    ScalarType getNormAugmentedLagrangianGradient() const
+    {
+        return (mNormAugLagFuncGrad);
     }
 
     /******************************************************************************//**
@@ -391,6 +402,24 @@ public:
         return ((*mCurrentConstraintValues)(aVecIndex, aConstraintIndex));
     }
 
+    /******************************************************************************//**
+     * @brief Return norm of constraint vector
+     * @return norm of constraint vector
+    **********************************************************************************/
+    ScalarType getNormConstraintVector() const
+    {
+        return (mNormConstraints);
+    }
+
+    /******************************************************************************//**
+     * @brief Compute norm of constraint vector
+     * @return norm of constraint vector
+    **********************************************************************************/
+    void computeNormConstraintVector()
+    {
+        mNormConstraints = Plato::norm(*mCurrentConstraintValues);
+    }
+
     /****************************************************************************************************************/
     void setObjectiveGradient(const std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> & aInput)
     /****************************************************************************************************************/
@@ -468,14 +497,8 @@ public:
         {
             (*mConstraints)[tConstraintIndex].cacheData();
         }
-    }
 
-    /****************************************************************************************************************/
-    void storePreviousState()
-    /****************************************************************************************************************/
-    {
-        mPreviousObjectiveValue = mCurrentObjFuncValue;
-        mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
+        this->cacheTrialCriteriaValues();
     }
 
     /****************************************************************************************************************/
@@ -563,10 +586,11 @@ public:
         // Compute objective function gradient: \frac{\partial f}{\partial\mathbf{z}}
         Plato::fill(static_cast<ScalarType>(0), aOutput);
         mObjectiveGradientOperator->compute(aControl, aOutput);
-        mNormObjectiveGradient = Plato::norm(aOutput);
+        mNormObjFuncGrad = Plato::norm(aOutput);
         mNumObjGradEval++;
 
         this->computeAugmentedLagrangianGradient(aControl, aOutput);
+        mNormAugLagFuncGrad = Plato::norm(aOutput);
     }
 
     /******************************************************************************//**
@@ -668,7 +692,7 @@ public:
     }
 
     /****************************************************************************************************************/
-    void updateCurrentCriteriaValues()
+    void cacheTrialCriteriaValues()
     /****************************************************************************************************************/
     {
         mCurrentObjFuncValue = mTrialObjFuncValue;
@@ -715,7 +739,7 @@ private:
             mCostraintGradients->add(mControlWorkVec.operator*());
         }
 
-        const ScalarType tInitialLagrangeMultipliers = 1;
+        const ScalarType tInitialLagrangeMultipliers = 0.5;
         Plato::fill(tInitialLagrangeMultipliers, *mLagrangeMultipliers);
     }
 
@@ -732,9 +756,6 @@ private:
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            const ScalarType tMyCurrentConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyCurrentConstraintValue > static_cast<ScalarType>(1e-4))
-            {
                 // Evaluate Lagrangian functional, \ell(\mathbf{u}(\mathbf{z}),\mathbf{z},\mu) =
                 //   f(\mathbf{u}(\mathbf{z}),\mathbf{z}) + \mu^{T}h(\mathbf{u}(\mathbf{z}),\mathbf{z})
                 const ScalarType tMyConstraintValue = (*mTrialConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
@@ -750,7 +771,6 @@ private:
                         + ((static_cast<ScalarType>(0.5) / mPenaltyParameter) * tInequalityValueDotInequalityValue);
 
                 tOutput += tMyConstraintContribution;
-            }
         }
 
         return (tOutput);
@@ -775,28 +795,24 @@ private:
         {
             assert(mConstraintGradientOperator->ptr(tIndex).get() != nullptr);
 
-            ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyConstraintValue > static_cast<ScalarType>(1e-4))
-            {
+            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
 
-                // Add contribution from: \lambda_i\frac{\partial h_i}{\partial\mathbf{z}} to Lagrangian gradient
-                Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradient =
-                        mCostraintGradients->operator[](tCONSTRAINT_VEC_INDEX);
-                Plato::fill(static_cast<ScalarType>(0), tMyConstraintGradient);
-                mConstraintGradientOperator->operator[](tIndex).compute(aControl, tMyConstraintGradient);
-                mNumConstraintGradientEvaluations[tIndex] = mNumConstraintGradientEvaluations[tIndex]
-                        + static_cast<OrdinalType>(1);
+            // Add contribution from: \lambda_i\frac{\partial h_i}{\partial\mathbf{z}} to Lagrangian gradient
+            Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradient =
+                    mCostraintGradients->operator[](tCONSTRAINT_VEC_INDEX);
+            Plato::fill(static_cast<ScalarType>(0), tMyConstraintGradient);
+            mConstraintGradientOperator->operator[](tIndex).compute(aControl, tMyConstraintGradient);
+            mNumConstraintGradientEvaluations[tIndex] = mNumConstraintGradientEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
-                const ScalarType tLagrangeMultiplier = mLagrangeMultipliers->operator()(tCONSTRAINT_VEC_INDEX, tIndex);
-                Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mObjectiveGradient);
+            const ScalarType tLagrangeMultiplier = mLagrangeMultipliers->operator()(tCONSTRAINT_VEC_INDEX, tIndex);
+            Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mObjectiveGradient);
 
-                // Add contribution from: \mu*h_i(\mathbf{u}(\mathbf{z}),\mathbf{z})\frac{\partial h_i}{\partial\mathbf{z}}.
-                const ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
-                Plato::update(tAlpha, tMyConstraintGradient, static_cast<ScalarType>(1), *mObjectiveGradient);
+            // Add contribution from: \mu*h_i(\mathbf{u}(\mathbf{z}),\mathbf{z})\frac{\partial h_i}{\partial\mathbf{z}}.
+            const ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
+            Plato::update(tAlpha, tMyConstraintGradient, static_cast<ScalarType>(1), *mObjectiveGradient);
 
-                // Compute Augmented Lagrangian gradient
-                Plato::update(static_cast<ScalarType>(1), *mObjectiveGradient, static_cast<ScalarType>(1), aOutput);
-            }
+            // Compute Augmented Lagrangian gradient
+            Plato::update(static_cast<ScalarType>(1), *mObjectiveGradient, static_cast<ScalarType>(1), aOutput);
         }
     }
 
@@ -822,30 +838,27 @@ private:
         {
             assert(mConstraintHessianOperators->ptr(tIndex).get() != nullptr);
 
-            ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
-            if(tMyConstraintValue > static_cast<ScalarType>(1e-4))
-            {
-                // Add contribution from: \lambda_i\frac{\partial^2 h_i}{\partial\mathbf{z}^2}
-                Plato::fill(static_cast<ScalarType>(0), *mControlWorkVec);
-                (*mConstraintHessianOperators)[tIndex].apply(aControl, aVector, *mControlWorkVec);
-                mNumConstraintHessianEvaluations[tIndex] = mNumConstraintHessianEvaluations[tIndex] + static_cast<OrdinalType>(1);
+            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
+            // Add contribution from: \lambda_i\frac{\partial^2 h_i}{\partial\mathbf{z}^2}
+            Plato::fill(static_cast<ScalarType>(0), *mControlWorkVec);
+            (*mConstraintHessianOperators)[tIndex].apply(aControl, aVector, *mControlWorkVec);
+            mNumConstraintHessianEvaluations[tIndex] = mNumConstraintHessianEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
-                Plato::update((*mLagrangeMultipliers)(tCONSTRAINT_VEC_INDEX, tIndex),
-                              *mControlWorkVec,
-                              static_cast<ScalarType>(1),
-                              aOutput);
+            Plato::update((*mLagrangeMultipliers)(tCONSTRAINT_VEC_INDEX, tIndex),
+                          *mControlWorkVec,
+                          static_cast<ScalarType>(1),
+                          aOutput);
 
-                // Add contribution from: \mu\frac{\partial^2 h_i}{\partial\mathbf{z}^2}\h_i(\mathbf{z})
-                ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
-                Plato::update(tAlpha, *mControlWorkVec, static_cast<ScalarType>(1), aOutput);
+            // Add contribution from: \mu\frac{\partial^2 h_i}{\partial\mathbf{z}^2}\h_i(\mathbf{z})
+            ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
+            Plato::update(tAlpha, *mControlWorkVec, static_cast<ScalarType>(1), aOutput);
 
-                // Compute Jacobian, i.e. \frac{\partial h_i}{\partial\mathbf{z}}
-                ScalarType tJacobianDotTrialDirection = Plato::dot(tMyConstraintGradients, aVector);
-                ScalarType tBeta = tOneOverPenalty * tJacobianDotTrialDirection;
-                // Add contribution from: \mu\left(\frac{\partial h_i}{\partial\mathbf{z}}^{T}
-                //                        \frac{\partial h_i}{\partial\mathbf{z}}\right)
-                Plato::update(tBeta, tMyConstraintGradients, static_cast<ScalarType>(1), aOutput);
-            }
+            // Compute Jacobian, i.e. \frac{\partial h_i}{\partial\mathbf{z}}
+            ScalarType tJacobianDotTrialDirection = Plato::dot(tMyConstraintGradients, aVector);
+            ScalarType tBeta = tOneOverPenalty * tJacobianDotTrialDirection;
+            // Add contribution from: \mu\left(\frac{\partial h_i}{\partial\mathbf{z}}^{T}
+            //                        \frac{\partial h_i}{\partial\mathbf{z}}\right)
+            Plato::update(tBeta, tMyConstraintGradients, static_cast<ScalarType>(1), aOutput);
         }
     }
 
@@ -863,7 +876,9 @@ private:
     ScalarType mObjectiveStagnationMeasure;
 
     ScalarType mMinPenaltyValue;
-    ScalarType mNormObjectiveGradient;
+    ScalarType mNormConstraints;
+    ScalarType mNormObjFuncGrad;
+    ScalarType mNormAugLagFuncGrad;
     ScalarType mFeasibilityStagnationMeasure;
     ScalarType mPenaltyParameter;
     ScalarType mPenaltyParameterScaleFactor;
