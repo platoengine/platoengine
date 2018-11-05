@@ -24,7 +24,7 @@ set( IO_COMM_INDEX 0 )
 set( INTERFACE_FILE interface.xml )
 
 # Set file names for diff
-set( OUT_FILE "solution.txt")
+set( OUT_FILE "plato_ksbc_algorithm_diagnostics.txt")
 set( GOLD_FILE "solution.txt.gold")
 
 # Create simple regression test and define the PlatoMain performer

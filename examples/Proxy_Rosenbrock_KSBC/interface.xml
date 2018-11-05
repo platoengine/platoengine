@@ -149,7 +149,7 @@
   <Options>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
-    <KSTrustRegionContractionFactor>0.5</KSTrustRegionContractionFactor>
+    <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
   </Options>
   <OptimizationVariables>
     <ValueName>Control</ValueName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
