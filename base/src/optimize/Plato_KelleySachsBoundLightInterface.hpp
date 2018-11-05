@@ -98,7 +98,7 @@ struct AlgorithmInputsKSBC
             mDisablePostSmoothing(false),
             mMaxNumOuterIter(500),
             mMaxTrustRegionSubProblemIter(25),
-            mMaxNumLineSearchIter(10),
+            mMaxNumLineSearchIter(5),
             mPostSmoothingScale(1e-10),
             mMaxTrustRegionRadius(1e2),
             mMinTrustRegionRadius(1e-4),
