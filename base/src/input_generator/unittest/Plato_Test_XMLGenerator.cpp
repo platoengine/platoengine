@@ -2390,7 +2390,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     const double load0z = std::atof(tester.getLoadDirectionZ("0", 0).c_str());
     std::cout << "0:" << load0x << "," << load0y << "," << load0z << std::endl;
     EXPECT_NEAR(load0x, 7.0, 0.5);
-    EXPECT_NEAR(load0y, 0.7, 0.5);
+    EXPECT_NEAR(load0y, 0.017, 0.5);
     EXPECT_NEAR(load0z, 0, 1e-5);
     EXPECT_EQ(tester.getLoadType("2",0), "force");
     EXPECT_EQ(tester.getLoadApplicationType("2",0), "nodeset");
@@ -2400,7 +2400,7 @@ TEST(PlatoTestXMLGenerator,uncertainLoad_single)
     const double load2z = std::atof(tester.getLoadDirectionZ("2", 0).c_str());
     std::cout << "2:" << load2x << "," << load2y << "," << load2z << std::endl;
     EXPECT_NEAR(load2x, 6.1, 0.5);
-    EXPECT_NEAR(load2y, 3.4, 0.5);
+    EXPECT_NEAR(load2y, 2.6, 0.5);
     EXPECT_NEAR(load2z, 0, 1e-5);
 
     // check load ids
