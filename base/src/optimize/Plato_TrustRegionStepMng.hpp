@@ -64,11 +64,11 @@ class TrustRegionStepMng
 public:
     TrustRegionStepMng() :
             mActualReduction(0),
-            mTrustRegionRadius(1e3),
+            mTrustRegionRadius(1e2),
             mPredictedReduction(0),
-            mMinTrustRegionRadius(1e-8),
-            mMaxTrustRegionRadius(1e3),
-            mTrustRegionExpansion(2.),
+            mMinTrustRegionRadius(1e-4),
+            mMaxTrustRegionRadius(1e2),
+            mTrustRegionExpansion(4),
             mTrustRegionContraction(0.75),
             mMinCosineAngleTolerance(1e-2),
             mGradientInexactnessTolerance(std::numeric_limits<ScalarType>::max()),

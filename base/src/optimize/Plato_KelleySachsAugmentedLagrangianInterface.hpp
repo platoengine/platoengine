@@ -125,6 +125,7 @@ public:
                 std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(tDataFactory);
 
         // ********* SET UPPER AND LOWER BOUNDS ********* //
+        Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> tInputsKSAL;
         this->setLowerBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
         this->setUpperBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
 

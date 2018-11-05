@@ -1117,9 +1117,9 @@ TEST(PlatoTest, TrustRegionStepMng)
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getActualReduction(), tTolerance);
 
     // ********* TEST TRUST REGION RADIUS FUNCTIONS *********
-    tScalarGoldValue = 1e3;
-    EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionRadius(), tTolerance);
     tScalarGoldValue = 1e2;
+    EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionRadius(), tTolerance);
+    tScalarGoldValue = 1e1;
     tStepMng.setTrustRegionRadius(tScalarGoldValue);
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionRadius(), tTolerance);
 
@@ -1131,21 +1131,21 @@ TEST(PlatoTest, TrustRegionStepMng)
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionContraction(), tTolerance);
 
     // ********* TEST TRUST REGION EXPANSION FUNCTIONS *********
-    tScalarGoldValue = 2;
+    tScalarGoldValue = 4;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionExpansion(), tTolerance);
     tScalarGoldValue = 8;
     tStepMng.setTrustRegionExpansion(tScalarGoldValue);
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getTrustRegionExpansion(), tTolerance);
 
     // ********* TEST MIN TRUST REGION RADIUS FUNCTIONS *********
-    tScalarGoldValue = 1e-8;
+    tScalarGoldValue = 1e-4;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getMinTrustRegionRadius(), tTolerance);
     tScalarGoldValue = 1e-2;
     tStepMng.setMinTrustRegionRadius(tScalarGoldValue);
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getMinTrustRegionRadius(), tTolerance);
 
     // ********* TEST MAX TRUST REGION RADIUS FUNCTIONS *********
-    tScalarGoldValue = 1e3;
+    tScalarGoldValue = 1e2;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getMaxTrustRegionRadius(), tTolerance);
     tScalarGoldValue = 1e1;
     tStepMng.setMaxTrustRegionRadius(tScalarGoldValue);
@@ -1162,7 +1162,7 @@ TEST(PlatoTest, TrustRegionStepMng)
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getGradientInexactnessTolerance(), tTolerance);
     tScalarGoldValue = 1e3;
     tStepMng.updateGradientInexactnessTolerance(tScalarGoldValue);
-    tScalarGoldValue = 200;
+    tScalarGoldValue = 20;
     EXPECT_NEAR(tScalarGoldValue, tStepMng.getGradientInexactnessTolerance(), tTolerance);
     // TEST INEXACTNESS TOLERANCE: SELECT USER INPUT
     tScalarGoldValue = 1e1;
