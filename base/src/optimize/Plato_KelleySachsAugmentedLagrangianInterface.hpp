@@ -62,11 +62,11 @@
 #include "Plato_OptimizerUtilities.hpp"
 #include "Plato_OptimizerInterface.hpp"
 #include "Plato_StandardMultiVector.hpp"
+#include "Plato_AugmentedLagrangian.hpp"
 #include "Plato_LinearCriterionHessian.hpp"
 #include "Plato_OptimizerEngineStageData.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
-#include "Plato_KelleySachsAugmentedLagrangian.hpp"
 
 namespace Plato
 {
@@ -164,9 +164,9 @@ public:
         }
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
-        Plato::KelleySachsAugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
+        Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
-        tAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        tAlgorithm.setMaxNumOuterIterations(tMaxNumIterations);
         tAlgorithm.solve();
 
         this->finalize();

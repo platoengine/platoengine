@@ -46,6 +46,33 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Engine constructor
+     * @param [in] aDataFactory factory for linear algebra data structure
+     * @param [in] aDataMng linear algebra data manager
+     * @param [in] aStageMng criteria evaluation manager
+    **********************************************************************************/
+    AugmentedLagrangian(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
+                        const std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng,
+                        const std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> & aStageMng) :
+            mPrintDiagnostics(false),
+            mNumAugLagIter(0),
+            mMaxNumAugLagIter(100),
+            mMaxNumAugLagSubProbIter(5),
+            mOptimalityTolerance(1e-4),
+            mControlStagnationTol(1e-16),
+            mFeasibilityTolerance(1e-4),
+            mDynamicAugLagProbTolerance(5e-2),
+            mDynamicFeasibilityTolerance(1e-1),
+            mStoppingCriterion(Plato::algorithm::stop_t::NOT_CONVERGED),
+            mOutputData(),
+            mDataMng(aDataMng),
+            mStageMng(aStageMng),
+            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, aDataMng, aStageMng))
+    {
+        this->initialize();
+    }
+
+    /******************************************************************************//**
      * @brief Default destructor
     **********************************************************************************/
     ~AugmentedLagrangian()

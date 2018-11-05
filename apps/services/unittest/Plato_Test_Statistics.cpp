@@ -67,7 +67,6 @@
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
-#include "Plato_KelleySachsAugmentedLagrangian.hpp"
 #include "Plato_StandardVectorReductionOperations.hpp"
 
 #include "Plato_UnitTestUtils.hpp"

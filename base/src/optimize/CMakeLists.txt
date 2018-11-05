@@ -41,7 +41,6 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_TrustRegionStageMng.hpp
                         Plato_TrustRegionStepMng.hpp
                         Plato_TrustRegionAlgorithmDataMng.hpp
-                        Plato_KelleySachsAugmentedLagrangian.hpp
                         Plato_MLKelleySachsAugmentedLagrangian.hpp
                         Plato_KelleySachsBoundConstrained.hpp
                         Plato_ReducedSpaceTrustRegionStageMng.hpp
