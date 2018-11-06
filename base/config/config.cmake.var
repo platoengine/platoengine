@@ -5,6 +5,7 @@ option( SALINAS       "Flag to turn on testing of Salinas performer"       OFF )
 option( ALBANY        "Flag to turn on testing of Albany performer"        OFF )
 option( ANALYZE       "Flag to turn on testing of Plato Analyze performer" OFF )
 option( UNIT_TESTING  "Flag to turn on unit testing"                        ON )
+option( PLATOPROXY    "Flag to turn on regression test with proxy apps"     ON )
 
 set( TRILINOS_INSTALL_DIR   ${PE_TRILINOS}                 CACHE STRING "path to Trilinos library")
 set( CMAKE_CXX_COMPILER     ${PE_CXX}                      CACHE STRING "c++ compiler")
