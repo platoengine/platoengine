@@ -210,9 +210,29 @@ public:
 
     size_t getNumConstraints() const;
 
+    /******************************************************************************//**
+     * @brief Return list of names assign to constraint shared values
+     * @return list with the names assign to constraint shared values
+    ***********************************************************************************/
     std::vector<std::string> getConstraintValueNames() const;
+
+    /******************************************************************************//**
+     * @brief Return name assign to constraint shared value
+     * @param [in] aIndex constraint index
+     * @return name assign to constraint shared value
+    ***********************************************************************************/
     std::string getConstraintValueName(const size_t & aIndex) const;
+
+    /******************************************************************************//**
+     * @brief Add constraint shared value name to list
+     * @param [in] aInput constraint shared value name
+    ***********************************************************************************/
     void addConstraintValueName(const std::string & aValueName);
+
+    /******************************************************************************//**
+     * @brief Set list of constraint shared value names
+     * @param [in] aInput list of constraint shared value names
+    ***********************************************************************************/
     void setConstraintValueNames(const std::vector<std::string> & aInput);
 
     double getConstraintNormalizedTargetValue(const size_t & aIndex) const;
@@ -241,6 +261,81 @@ public:
     std::string getConstraintGradientName(const size_t & aIndex) const;
     std::string getConstraintGradientName(const std::string & aValueName) const;
     void addConstraintGradientName(const std::string & aValueName, const std::string & aGradientName);
+
+    /******************************************************************************//**
+     * @brief Return list of names assign to the constraint value stages
+     * @return list of names assign to the constraint value stages
+    ***********************************************************************************/
+    std::vector<std::string> getConstraintValueStageNames() const;
+
+    /******************************************************************************//**
+     * @brief Return name assign to constraint value stage
+     * @param [in] aIndex constraint index
+     * @return name assign to constraint value stage
+    ***********************************************************************************/
+    std::string getConstraintValueStageName(const size_t & aIndex) const;
+
+    /******************************************************************************//**
+     * @brief Add constraint value stage name to list
+     * @param [in] aInput constraint value stage name
+    ***********************************************************************************/
+    void addConstraintValueStageName(const std::string & aInput);
+
+    /******************************************************************************//**
+     * @brief Set list of constraint value stage names
+     * @param [in] aInput list of constraint value stage names
+    ***********************************************************************************/
+    void setConstraintValueStageNames(const std::vector<std::string> & aInput);
+
+    /******************************************************************************//**
+     * @brief Return list of names assign to the constraint gradient stages
+     * @return list of names assign to the constraint gradient stages
+    ***********************************************************************************/
+    std::vector<std::string> getConstraintGradientStageNames() const;
+
+    /******************************************************************************//**
+     * @brief Return name assign to constraint gradient stage
+     * @param [in] aIndex constraint index
+     * @return name assign to constraint gradient stage
+    ***********************************************************************************/
+    std::string getConstraintGradientStageName(const size_t & aIndex) const;
+
+    /******************************************************************************//**
+     * @brief Add constraint gradient stage name to list
+     * @param [in] aInput constraint gradient stage name
+    ***********************************************************************************/
+    void addConstraintGradientStageName(const std::string & aInput);
+
+    /******************************************************************************//**
+     * @brief Set list of constraint gradient stage names
+     * @param [in] aInput list of constraint gradient stage names
+    ***********************************************************************************/
+    void setConstraintGradientStageNames(const std::vector<std::string> & aInput);
+
+    /******************************************************************************//**
+     * @brief Return list of names assign to the constraint Hessian stages
+     * @return list of names assign to the constraint Hessian stages
+    ***********************************************************************************/
+    std::vector<std::string> getConstraintHessianStageNames() const;
+
+    /******************************************************************************//**
+     * @brief Return name assign to constraint Hessian stage
+     * @param [in] aIndex constraint index
+     * @return name assign to constraint Hessian stage
+    ***********************************************************************************/
+    std::string getConstraintHessianStageName(const size_t & aIndex) const;
+
+    /******************************************************************************//**
+     * @brief Add constraint Hessian stage name to list
+     * @param [in] aInput constraint Hessian stage name
+    ***********************************************************************************/
+    void addConstraintHessianStageName(const std::string & aInput);
+
+    /******************************************************************************//**
+     * @brief Set list of constraint Hessian stage names
+     * @param [in] aInput list of constraint Hessian stage names
+    ***********************************************************************************/
+    void setConstraintHessianStageNames(const std::vector<std::string> & aInput);
 
     double getKSInitialRadiusScale() const;
     void setKSInitialRadiusScale(const double& aInput);
@@ -314,6 +409,10 @@ private:
     std::vector<std::string> mControlNames;
     std::vector<std::string> mConstraintValueNames;
     std::vector<std::string> mDescentDirectionNames;
+    std::vector<std::string> mConstraintValueStageNames;
+    std::vector<std::string> mConstraintHessianStageNames;
+    std::vector<std::string> mConstraintGradientStageNames;
+
     std::map<std::string, std::string> mConstraintHessianNames;
     std::map<std::string, std::string> mConstraintGradientNames;
     std::map<std::string, std::string> mConstraintReferenceValueNames;

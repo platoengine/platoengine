@@ -609,9 +609,11 @@
   <Constraint>
     <Equality>True</Equality>
     <Linear>True</Linear>
+    <ValueStageName>Constraint</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT VALUE STAGE-->
     <ValueName>Constraint</ValueName>
-    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <GradientStageName>Constraint Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <GradientName>Constraint Gradient</GradientName>
+    <ReferenceValueName>Design Volume</ReferenceValueName>
     <NormalizedTargetValue>0.25</NormalizedTargetValue>
     <Tolerance>1e-5</Tolerance>
   </Constraint>

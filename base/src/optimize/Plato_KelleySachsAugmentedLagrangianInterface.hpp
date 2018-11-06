@@ -1,10 +1,4 @@
 /*
- * Plato_KelleySachsAugmentedLagrangianInterface.hpp
- *
- *  Created on: Dec 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_KelleySachsAugmentedLagrangianInterface.hpp
+ *
+ *  Created on: Dec 21, 2017
+ */
 
 #ifndef PLATO_KELLEYSACHSAUGMENTEDLAGRANGIANINTERFACE_HPP_
 #define PLATO_KELLEYSACHSAUGMENTEDLAGRANGIANINTERFACE_HPP_
@@ -131,16 +131,39 @@ public:
         // ********* SET INITIAL GUESS ********* //
         this->setInitialGuess(tAlgebraFactory, *tDataMng);
 
+        // ********* SOLVE OPTIMIZATION PROBLEM ********* //
+        this->solveOptimizationProblem(tDataFactory, tDataMng);
+
+        this->finalize();
+    }
+
+    /******************************************************************************//**
+     * @brief Notification from optimizer stating that problem has been solved.
+    **********************************************************************************/
+    void finalize()
+    {
+        mInterface->getStage("Terminate");
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Solve optimization problem
+     * @param [in] aDataFactory linear algebra factory
+     * @param [in] aDataMng optimizer data manager
+    **********************************************************************************/
+    void solveOptimizationProblem(std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory,
+                                  std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> & aDataMng)
+    {
         // ********* ALLOCATE OBJECTIVE FUNCTION ********* //
         std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tObjective =
-                std::make_shared<Plato::EngineObjective<ScalarType, OrdinalType>>(*tDataFactory, mInputData, mInterface);
+                std::make_shared<Plato::EngineObjective<ScalarType, OrdinalType>>(*aDataFactory, mInputData, mInterface);
 
         // ********* ALLOCATE CONSTRAINT LIST ********* //
         const OrdinalType tNumConstraints = mInputData.getNumConstraints();
         std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> tConstraintList(tNumConstraints);
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            tConstraintList[tIndex] = std::make_shared<Plato::EngineConstraint<ScalarType, OrdinalType>>(tIndex, *tDataFactory, mInputData, mInterface);
+            tConstraintList[tIndex] = std::make_shared<Plato::EngineConstraint<ScalarType, OrdinalType>>(tIndex, *aDataFactory, mInputData, mInterface);
         }
         std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints =
                 std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>();
@@ -148,7 +171,7 @@ public:
 
         // ********* ALLOCATE STAGE MANAGER FOR AUGMENTED LAGRANGIAN FORMULATION ********* //
         std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng =
-                std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(tDataFactory, tObjective, tConstraints);
+                std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(aDataFactory, tObjective, tConstraints);
 
         // ********* ALLOCATE HESSIAN FOR EACH CONSTRAINT ********* //
         std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> tConstraintHessianList =
@@ -164,22 +187,13 @@ public:
         }
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
-        Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
+        Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         tAlgorithm.setMaxNumOuterIterations(tMaxNumIterations);
+        tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
-
-        this->finalize();
     }
 
-    /******************************************************************************/
-    void finalize()
-    /******************************************************************************/
-    {
-        mInterface->getStage("Terminate");
-    }
-
-private:
     /******************************************************************************/
     void setUpperBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                         Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,

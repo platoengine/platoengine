@@ -68,10 +68,13 @@ public:
             mLimit(1)
     {
     }
+
     virtual ~Radius()
     {
     }
-    void setLimit(ScalarType aLimit) {
+
+    void setLimit(const ScalarType & aLimit)
+    {
         mLimit = aLimit;
     }
 

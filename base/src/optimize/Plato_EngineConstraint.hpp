@@ -128,8 +128,10 @@ public:
         mParameterList->set(tMyConstraintName, &tConstraintValue);
 
         // ********* Compute constraint value ********* //
+        std::string tMyStageName = mEngineInputData.getConstraintValueStageName(mMyConstraintID);
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tMyConstraintName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
 
         const ScalarType tConstraintTarget = mEngineInputData.getConstraintNormalizedTargetValue(mMyConstraintID);
@@ -173,8 +175,10 @@ public:
         mParameterList->set(tConstraintGradientName, mGradient.data());
 
         // ********* Compute constraint gradient ********* //
+        std::string tMyStageName = mEngineInputData.getConstraintGradientStageName(mMyConstraintID);
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tConstraintGradientName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
         this->copy(mGradient, aOutput);
 
@@ -219,8 +223,10 @@ public:
         mParameterList->set(tHessianName, mHessianTimesVector.data());
 
         // ********* Apply vector to Hessian operator ********* //
+        std::string tMyStageName = mEngineInputData.getConstraintHessianStageName(mMyConstraintID);
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tHessianName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
         this->copy(mHessianTimesVector, aOutput);
 

@@ -551,9 +551,11 @@
   <Constraint>
     <Equality>True</Equality>
     <Linear>True</Linear>
-    <ValueName>Volume</ValueName>
+    <ValueStageName>Volume</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT VALUE STAGE-->
+    <ValueName>Volume</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT VALUE STAGE-->
+    <GradientStageName>Volume Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+    <GradientName>Volume Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <ReferenceValueName>Design Volume</ReferenceValueName>
-    <GradientName>Volume Gradient</GradientName>
     <NormalizedTargetValue>0.2</NormalizedTargetValue>
     <Tolerance>1e-3</Tolerance>
   </Constraint>

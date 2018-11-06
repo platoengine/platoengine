@@ -1195,19 +1195,21 @@ void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Pl
 void parseConstraintValueNames(const Plato::InputData & aOptimizationNode, Plato::OptimizerEngineStageData & aOptimizerEngineStageData)
 /******************************************************************************/
 {
-    auto tNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
-    for(auto tNode=tNodes.begin(); tNode!=tNodes.end(); ++tNode)
+    auto tConstraintNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
+    for(auto tMyConstraintNode = tConstraintNodes.begin(); tMyConstraintNode != tConstraintNodes.end(); ++tMyConstraintNode)
     {
-        if( tNode->size<std::string>("ValueName") )
+        if( tMyConstraintNode->size<std::string>("ValueName") || tMyConstraintNode->size<std::string>("ValueStageName") )
         {
-            std::string tValueName = Plato::Get::String(*tNode, "ValueName");
+            std::string tValueName = Plato::Get::String(*tMyConstraintNode, "ValueName");
+            std::string tValueStageName = Plato::Get::String(*tMyConstraintNode, "ValueStageName");
             aOptimizerEngineStageData.addConstraintValueName(tValueName);
+            aOptimizerEngineStageData.addConstraintValueStageName(tValueStageName);
         }
         else
         {
             std::ostringstream tMsg;
-            tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                 << ", LINE = " << __LINE__ << ", MESSAGE: USERT DID NOT DEFINE A VALUE NAME FOR CONSTRAINT. "
+            tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << "\n FUNCTION = " << __PRETTY_FUNCTION__
+                 << "\n LINE = " << __LINE__ << "\n MESSAGE: USER DID NOT DEFINE CONSTRAINT VALUE OUTPUT SHARED DATA OR STAGE NAME.\n"
                  << "**********\n\n";
             throw Plato::ParsingException(tMsg.str().c_str());
         }
@@ -1219,21 +1221,23 @@ void parseConstraintGradientNames(const Plato::InputData & aOptimizationNode,
                                   Plato::OptimizerEngineStageData & aOptimizerEngineStageData)
 /******************************************************************************/
 {
-    auto tNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
-    for( auto tNode=tNodes.begin(); tNode!=tNodes.end(); ++tNode)
+    auto tConstraintNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
+    for( auto tMyConstraintNode = tConstraintNodes.begin(); tMyConstraintNode != tConstraintNodes.end(); ++tMyConstraintNode)
     {
-        if( tNode->size<std::string>("GradientName") )
+        if( tMyConstraintNode->size<std::string>("GradientName") || tMyConstraintNode->size<std::string>("GradientStageName") )
         {
-            std::string tValueName = tNode->get<std::string>("ValueName");
+            std::string tValueName = tMyConstraintNode->get<std::string>("ValueName");
             assert(tValueName.empty() == false);
-            std::string tGradientName = tNode->get<std::string>("GradientName");
+            std::string tGradientName = tMyConstraintNode->get<std::string>("GradientName");
             aOptimizerEngineStageData.addConstraintGradientName(tValueName, tGradientName);
+            std::string tGradientStageName = tMyConstraintNode->get<std::string>("GradientStageName");
+            aOptimizerEngineStageData.addConstraintGradientStageName(tGradientStageName);
         }
         else
         {
             std::ostringstream tMsg;
-            tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                 << ", LINE = " << __LINE__ << ", MESSAGE: USERT DID NOT DEFINE A GRADIENT NAME FOR CONSTRAINT. "
+            tMsg << "\n\n **********\n PLATO ERROR: FILE = " << __FILE__ << "\n FUNCTION = " << __PRETTY_FUNCTION__
+                 << "\n LINE = " << __LINE__ << "\n MESSAGE: USER DID NOT DEFINE CONSTRAINT GRADIENT OUTPUT SHARED DATA OR STAGE NAME.\n"
                  << "**********\n\n";
             throw Plato::ParsingException(tMsg.str().c_str());
         }
@@ -1245,14 +1249,20 @@ void parseConstraintHessianNames(const Plato::InputData & aOptimizationNode,
                                  Plato::OptimizerEngineStageData & aOptimizerEngineStageData)
 /******************************************************************************/
 {
-    auto tNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
-    for(auto tNode=tNodes.begin(); tNode!=tNodes.end(); ++tNode)
+    auto tConstraintNodes = aOptimizationNode.getByName<Plato::InputData>("Constraint");
+    for(auto tMyConstraintNode = tConstraintNodes.begin(); tMyConstraintNode != tConstraintNodes.end(); ++tMyConstraintNode)
     {
-        const std::string tValueName = tNode->get<std::string>("ValueName");
+        const std::string tValueName = tMyConstraintNode->get<std::string>("ValueName");
         assert(tValueName.empty() == false);
-        std::string tHessianName = Plato::Get::String(*tNode,"HessianName");
+        std::string tHessianName = Plato::Get::String(*tMyConstraintNode, "HessianName");
         tHessianName = tHessianName.empty() == true ? "LinearCriterionHessian" : tHessianName;
         aOptimizerEngineStageData.addConstraintHessianName(tValueName, tHessianName);
+
+        std::string tHessianStageName = Plato::Get::String(*tMyConstraintNode, "HessianStageName");
+        if(tHessianStageName.empty() == false)
+        {
+            aOptimizerEngineStageData.addConstraintHessianStageName(tHessianStageName);
+        }
     }
 }
 
@@ -1286,11 +1296,19 @@ void parseConstraintTargetValues(const Plato::InputData & aOptimizationNode,
         assert(tValueName.empty() == false);
         if(tNode->size<std::string>("NormalizedTargetValue"))
         {
+            // Assumes that the app provides only the constraint value
             double tValue = Plato::Get::Double(*tNode, "NormalizedTargetValue");
             aOptimizerEngineStageData.addConstraintNormalizedTargetValue(tValueName, tValue);
         }
+        else if(!tNode->size<std::string>("AbsoluteTargetValue"))
+        {
+            // Assumes that the app provides full constraint residual
+            aOptimizerEngineStageData.addConstraintNormalizedTargetValue(tValueName, 0.0 /* default target value */ );
+        }
+
         if(tNode->size<std::string>("AbsoluteTargetValue"))
         {
+            // Assumes app will provide only the constraint value (i.e. residual is not provided)
             double tValue = Plato::Get::Double(*tNode, "AbsoluteTargetValue");
             aOptimizerEngineStageData.addConstraintAbsoluteTargetValue(tValueName, tValue);
         }
@@ -1306,7 +1324,6 @@ void parseConstraintReferenceValues(const Plato::InputData & aOptimizationNode,
     for(auto tNode=tNodes.begin(); tNode!=tNodes.end(); ++tNode)
     {
         const std::string tValueName = tNode->get<std::string>("ValueName");
-        assert(tValueName.empty() == false);
         double tValue = Plato::Get::Double(*tNode, "ReferenceValue");
         tValue = (tValue == static_cast<double>(0.0)) ? static_cast<double>(1) : tValue;
         aOptimizerEngineStageData.addConstraintReferenceValue(tValueName, tValue);

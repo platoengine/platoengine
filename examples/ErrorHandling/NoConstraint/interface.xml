@@ -360,9 +360,11 @@
   <Constraint>
     <Equality>True</Equality>
     <Linear>True</Linear>
+    <ValueStageName>Volume</ValueStageName>
     <ValueName>Volume</ValueName>
-    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <GradientStageName>Volume Gradient</GradientStageName>
     <GradientName>Volume Gradient</GradientName>
+    <ReferenceValueName>Design Volume</ReferenceValueName>
     <NormalizedTargetValue>0.2</NormalizedTargetValue>
     <Tolerance>1e-3</Tolerance>
   </Constraint>

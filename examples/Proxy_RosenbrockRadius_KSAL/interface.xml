@@ -1,0 +1,284 @@
+<?xml version="1.0"?>
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <PerformerID>0</PerformerID>
+</Performer> 
+
+<Performer> 
+  <Name>Proxy</Name>
+  <Code>RosenbrockRadiusProxy</Code>
+  <PerformerID>1</PerformerID>
+</Performer> 
+
+<!---DEFINE OWNERS AND USERS OF SHARED DATA-->
+
+<SharedData>
+  <Name>Objective Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Hessian</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Hessian</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+
+<SharedData>
+  <Name>Control</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<!---OBJECTIVE FUNCTION STAGE-->
+<Stage>
+  <Name>Rosenbrock Objective</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveValue</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RosenbrockObjective</ArgumentName>
+      <SharedDataName>Objective Value</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Objective Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION GRADIENT STAGE-->
+<Stage>
+  <Name>Rosenbrock Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveGradient</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RosenbrockGradient</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION HESSIAN STAGE-->
+<Stage>
+  <Name>Rosenbrock Hessian</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  <Input>
+    <SharedDataName>Vector</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveHessian</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Direction</ArgumentName>
+      <SharedDataName>Vector</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RosenbrockHessian</ArgumentName>
+      <SharedDataName>Objective Hessian</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Hessian</SharedDataName>
+  </Output>
+</Stage>
+
+<!---CONSTRAINT FUNCTION STAGE-->
+<Stage>
+  <Name>Radius Value</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ConstraintValue</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RadiusConstraint</ArgumentName>
+      <SharedDataName>Constraint Value</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Constraint Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---CONSTRAINT GRADIENT STAGE-->
+<Stage>
+  <Name>Radius Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ConstraintGradient</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RadiusGradient</ArgumentName>
+      <SharedDataName>Constraint Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Constraint Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---CONSTRAINT HESSIAN STAGE-->
+<Stage>
+  <Name>Radius Hessian</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ConstraintHessian</Name>
+    <Input>
+      <ArgumentName>Controls</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>RadiusHessian</ArgumentName>
+      <SharedDataName>Constraint Hessian</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Constraint Hessian</SharedDataName>
+  </Output>
+</Stage>
+
+<!---SET OPTIMIZER'S OPTIONS-->
+<Optimizer>
+  <Package>KSAL</Package>
+  <Options>
+    <OutputControlToFile>true</OutputControlToFile>
+    <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+    <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
+  </Options>
+  <OptimizationVariables>
+    <ValueName>Control</ValueName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
+    <DescentDirectionName>Vector</DescentDirectionName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
+  </OptimizationVariables>
+  <Objective>
+    <ValueStageName>Rosenbrock Objective</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <ValueName>Objective Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <GradientStageName>Rosenbrock Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <GradientName>Objective Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <HessianStageName>Rosenbrock Hessian</HessianStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE HESSIAN STAGE-->
+    <HessianName>Objective Hessian</HessianName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE HESSIAN STAGE-->
+  </Objective>
+  <Constraint>
+    <ValueStageName>Radius Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT FUNCTION STAGE-->
+    <ValueName>Constraint Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT FUNCTION STAGE-->
+    <GradientStageName>Radius Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+    <GradientName>Constraint Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+    <HessianStageName>Radius Hessian</HessianStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT HESSIAN STAGE-->
+    <HessianName>Constraint Hessian</HessianName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT HESSIAN STAGE-->
+  </Constraint>
+  <BoundConstraint>
+    <Upper>5</Upper>
+    <Lower>-5</Lower>
+  </BoundConstraint>
+  <InitialGuess>
+    <Value>2</Value>
+  </InitialGuess>
+</Optimizer>

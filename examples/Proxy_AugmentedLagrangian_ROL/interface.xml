@@ -185,7 +185,9 @@
     <Value>0.4</Value>
   </InitialGuess>
   <Constraint>
+    <ValueStageName>Constraint Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT VALUE STAGE-->
     <ValueName>Constraint Value</ValueName> <!---NEEDS TO MATCH CONSTRAINT VALUE STAGE NAME---->
+    <GradientStageName>Constraint Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <GradientName>Constraint Gradient</GradientName> <!---NEEDS TO MATCH CONSTRAINT GRADIENT STAGE NAME---->
   </Constraint>
 </Optimizer>

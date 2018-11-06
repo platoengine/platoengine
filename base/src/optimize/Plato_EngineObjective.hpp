@@ -162,10 +162,10 @@ public:
         mParameterList->set(tValueOutputName, &tObjectiveValue);
 
         // ********* Compute objective function value ********* //
-        std::string tMyName = mEngineInputData.getObjectiveValueStageName();
-        assert(tMyName.empty() == false);
+        std::string tMyStageName = mEngineInputData.getObjectiveValueStageName();
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tMyName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
 
         return (tObjectiveValue);
@@ -201,10 +201,10 @@ public:
         mParameterList->set(tGradientOutputName, mGradient.data());
 
         // ********* Compute objective function gradient ********* //
-        std::string tMyName = mEngineInputData.getObjectiveGradientStageName();
-        assert(tMyName.empty() == false);
+        std::string tMyStageName = mEngineInputData.getObjectiveGradientStageName();
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tMyName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
         this->copy(mGradient, aOutput);
     }
@@ -247,10 +247,10 @@ public:
         mParameterList->set(tHessianOutputName, mHessianTimesVector.data());
 
         // ********* Apply vector to Hessian operator ********* //
-        std::string tMyName = mEngineInputData.getObjectiveHessianStageName();
-        assert(tMyName.empty() == false);
+        std::string tMyStageName = mEngineInputData.getObjectiveHessianStageName();
+        assert(tMyStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tMyName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
         this->copy(mHessianTimesVector, aOutput);
     }

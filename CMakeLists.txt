@@ -216,6 +216,7 @@ endif()
 if( PLATOPROXY )
   message( "-- Compiling PlatoProxy " )
   add_subdirectory(apps/proxy)
+  add_subdirectory(apps/ksal_proxy)
   add_subdirectory(apps/rosenbrock)
 endif()
 
