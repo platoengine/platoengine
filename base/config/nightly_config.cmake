@@ -8,6 +8,7 @@ option( PARALLEL      "Flag to compile for parallel computing"             ON )
 option( UNIT_TESTING  "Flag to turn on unit testing"                       ON )
 option( ENABLE_PBCS   "Flag to turn on Periodic Boundary Conditions"      OFF )
 option( EXECUTION_SUITE "Flag to enable execution suite"                  OFF )
+option( PLATOPROXY    "Flag to turn on regression test with proxy apps"    ON )
 
 set( TRILINOS_INSTALL_DIR   /projects/plato/dev/opt/trilinos/Latest/gcc-4.9.3-dbg
   CACHE STRING "path to Trilinos library")
