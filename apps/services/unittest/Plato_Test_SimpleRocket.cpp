@@ -54,8 +54,8 @@
 #include "Plato_SharedValue.hpp"
 #include "Plato_Communication.hpp"
 #include "Plato_AppErrorChecks.hpp"
-#include "Plato_RocketDesignApp.hpp"
 #include "Plato_StandardMultiVector.hpp"
+#include "Plato_AlgebraicRocketModel.hpp"
 
 namespace PlatoTest
 {
@@ -199,91 +199,6 @@ TEST(PlatoTest, IsSharedDataArgumentDefinedCheck)
     ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("ThrustMisfitObjective", tSharedDataMap));
     ASSERT_NO_THROW(Plato::check_shared_data_argument_definition("ThrustMisfitObjectiveGradient", tSharedDataMap));
     ASSERT_THROW(Plato::check_shared_data_argument_definition("InequalityGradient", tSharedDataMap), std::invalid_argument);
-}
-
-TEST(PlatoTest, RocketDesignAppObjectiveVal)
-{
-    Plato::RocketDesignApp tRocketApp;
-    tRocketApp.initialize();
-
-    Plato::CommunicationData tApplicationComm;
-    tApplicationComm.mLocalComm = MPI_COMM_WORLD;
-    tApplicationComm.mInterComm = MPI_COMM_WORLD;
-    tApplicationComm.mLocalCommName = "Application";
-
-    // SET NORMALIZATION CONSTANTS
-    const size_t tNumVars = 2;
-    std::vector<std::string> tProviderNames = {"Optimizer"};
-    std::string tArgumentName("UpperBounds");
-    std::vector<double> tNormConst = {0.09, 0.007};
-    Plato::SharedValue tUpperBounds(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
-    tUpperBounds.setData(tNormConst);
-    tRocketApp.importData(tArgumentName, tUpperBounds);
-    std::string tOperationName("SetNormalizationConstants");
-    tRocketApp.compute(tOperationName);
-
-    // EVALUATE OBJECTIVE FUNCTION, EXPORT VALUE, AND TEST
-    tProviderNames[0] = "Optimizer";
-    tArgumentName = "DesignVariables";
-    std::vector<double> tDesignVars = {0.075 / tNormConst[0], 0.005 / tNormConst[1]};
-    Plato::SharedValue tDesignVariables(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
-    tDesignVariables.setData(tDesignVars);
-    tRocketApp.importData(tArgumentName, tDesignVariables);
-
-    tOperationName = "ObjectiveValue";
-    tRocketApp.compute(tOperationName);
-
-    tProviderNames[0] = "Application";
-    tArgumentName = "ThrustMisfitObjective";
-    Plato::SharedValue tSharedObjective(tArgumentName, tProviderNames, tApplicationComm);
-    tRocketApp.exportData(tArgumentName, tSharedObjective);
-    std::vector<double> tObjValue(1 /* size */);
-    tSharedObjective.getData(tObjValue);
-    const double tTolerance = 1e-6;
-    EXPECT_NEAR(tObjValue[0], 0.0, tTolerance);
-}
-
-TEST(PlatoTest, RocketDesignAppObjectiveGrad)
-{
-    Plato::RocketDesignApp tRocketApp;
-    tRocketApp.initialize();
-
-    Plato::CommunicationData tApplicationComm;
-    tApplicationComm.mLocalComm = MPI_COMM_WORLD;
-    tApplicationComm.mInterComm = MPI_COMM_WORLD;
-    tApplicationComm.mLocalCommName = "Application";
-
-    // SET NORMALIZATION CONSTANTS
-    const size_t tNumVars = 2;
-    std::vector<std::string> tProviderNames = {"Optimizer"};
-    std::string tArgumentName("UpperBounds");
-    std::vector<double> tNormConst = {0.09, 0.007};
-    Plato::SharedValue tUpperBounds(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
-    tUpperBounds.setData(tNormConst);
-    tRocketApp.importData(tArgumentName, tUpperBounds);
-    std::string tOperationName("SetNormalizationConstants");
-    tRocketApp.compute(tOperationName);
-
-    // COMPUTE OBJECTIVE GRADIENT, EXPORT VALUES, AND TEST
-    tProviderNames[0] = "Optimizer";
-    tArgumentName = "DesignVariables";
-    std::vector<double> tDesignVars = {0.085 / tNormConst[0], 0.004 / tNormConst[1]};
-    Plato::SharedValue tDesignVariables(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
-    tDesignVariables.setData(tDesignVars);
-    tRocketApp.importData(tArgumentName, tDesignVariables);
-
-    tOperationName = "ObjectiveGradient";
-    tRocketApp.compute(tOperationName);
-
-    tProviderNames[0] = "Application";
-    tArgumentName = "ThrustMisfitObjectiveGradient";
-    Plato::SharedValue tSharedObjGrad(tArgumentName, tProviderNames, tApplicationComm, tNumVars);
-    tRocketApp.exportData(tArgumentName, tSharedObjGrad);
-    std::vector<double> tObjGrad(tNumVars);
-    tSharedObjGrad.getData(tObjGrad);
-    const double tTolerance = 1e-6;
-    EXPECT_NEAR(tObjGrad[0], -0.0048183366343682423, tTolerance);
-    EXPECT_NEAR(tObjGrad[1], -0.0057808715527571993, tTolerance);
 }
 
 } // namespace PlatoTest

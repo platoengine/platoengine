@@ -159,9 +159,17 @@ inline void getUpperBoundsInputData(const Plato::OptimizerEngineStageData & aInp
     else
     {
         std::vector<ScalarType> tUpperBounds = aInputData.getUpperBoundValues();
-        assert(tUpperBounds.size() == static_cast<size_t>(1));
-        const ScalarType tValue = tUpperBounds[0];
-        std::fill(aOutput.begin(), aOutput.end(), tValue);
+        if(tUpperBounds.size() != static_cast<size_t>(1))
+        {
+            assert(tUpperBounds.size() == aOutput.size());
+            std::copy(tUpperBounds.begin(), tUpperBounds.end(), aOutput.begin());
+        }
+        else
+        {
+            assert(tUpperBounds.size() == static_cast<size_t>(1));
+            const ScalarType tValue = tUpperBounds[0];
+            std::fill(aOutput.begin(), aOutput.end(), tValue);
+        }
     }
 }
 
@@ -188,9 +196,17 @@ inline void getLowerBoundsInputData(const Plato::OptimizerEngineStageData & aInp
     else
     {
         std::vector<ScalarType> tLowerBounds = aInputData.getLowerBoundValues();
-        assert(tLowerBounds.size() == static_cast<size_t>(1));
-        const ScalarType tValue = tLowerBounds[0];
-        std::fill(aOutput.begin(), aOutput.end(), tValue);
+        if(tLowerBounds.size() != static_cast<size_t>(1))
+        {
+            assert(tLowerBounds.size() == aOutput.size());
+            std::copy(tLowerBounds.begin(), tLowerBounds.end(), aOutput.begin());
+        }
+        else
+        {
+            assert(tLowerBounds.size() == static_cast<size_t>(1));
+            const ScalarType tValue = tLowerBounds[0];
+            std::fill(aOutput.begin(), aOutput.end(), tValue);
+        }
     }
 }
 

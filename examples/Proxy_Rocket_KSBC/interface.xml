@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <PerformerID>0</PerformerID>
+</Performer> 
+
+<Performer> 
+  <Name>Proxy</Name>
+  <Code>RocketProxy</Code>
+  <PerformerID>1</PerformerID>
+</Performer> 
+
+<!---DEFINE OWNERS AND USERS OF SHARED DATA-->
+
+<SharedData>
+  <Name>Objective Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Control</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<!---OBJECTIVE FUNCTION STAGE-->
+<Stage>
+  <Name>Rocket Objective</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveValue</Name>
+    <Input>
+      <ArgumentName>DesignVariables</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>ThrustMisfitObjective</ArgumentName>
+      <SharedDataName>Objective Value</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Objective Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION GRADIENT STAGE-->
+<Stage>
+  <Name>Rocket Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveGradient</Name>
+    <Input>
+      <ArgumentName>DesignVariables</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>ThrustMisfitObjectiveGradient</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---SET OPTIMIZER'S OPTIONS-->
+<Optimizer>
+  <Package>KSBC</Package>
+  <Options>
+    <HaveHessian>false</HaveHessian>
+    <OutputControlToFile>true</OutputControlToFile>
+    <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+    <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
+  </Options>
+  <OptimizationVariables>
+    <ValueName>Control</ValueName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
+  </OptimizationVariables>
+  <Objective>
+    <ValueStageName>Rocket Objective</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <ValueName>Objective Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <GradientStageName>Rocket Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <GradientName>Objective Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+  </Objective>
+  <BoundConstraint>
+    <Upper>1</Upper>
+    <Upper>1</Upper>
+    <Lower>0.75</Lower>
+    <Lower>0.5</Lower>
+  </BoundConstraint>
+  <InitialGuess>
+    <Value>0.925</Value>
+    <Value>0.91666666667</Value>
+  </InitialGuess>
+</Optimizer>

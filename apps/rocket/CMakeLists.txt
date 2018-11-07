@@ -1,17 +1,19 @@
 ###############################################################################
 # Sources:
 ###############################################################################
-SET(ExeName PlatoRocketDesign)
+SET(ExeName RocketDesign)
 
-SET(${ExeName}_SRCS RocketDesignMain.cpp)
-SET(${ExeName}_HDRS )
+SET(${ExeName}_SRCS RocketDesignMain.cpp
+                    Plato_RocketDesignApp.cpp
+                    )
+SET(${ExeName}_HDRS Plato_RocketDesignApp.hpp)
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 
 # actual target:
 set(${ExeName}_LIBS ${PLATO_LIBRARIES} ${PLATO_LIBRARIES}
-    ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} ${PYTHON_LIBRARY} 
-    ${PYTHON_LINK_LIBS} ${Plato_EXTRA_LINK_FLAGS})
+    ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES}
+    ${Plato_EXTRA_LINK_FLAGS})
 add_executable(${ExeName} ${${ExeName}_SRCS})
 target_link_libraries(${ExeName} ${${ExeName}_LIBS})
 set(PLATOROCEKTDESIGN_BINARY ${CMAKE_BINARY_DIR}/apps/rocket/${ExeName} PARENT_SCOPE)

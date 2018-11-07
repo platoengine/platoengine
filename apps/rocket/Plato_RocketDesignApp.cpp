@@ -133,7 +133,7 @@ void RocketDesignApp::initialize()
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketSimInputs.mChamberRadius, tRocketSimInputs.mChamberLength);
     mObjective = std::make_shared<Plato::GradBasedRocketObjective<double>>(tTargetThrustProfile, tRocketSimInputs, tGeomModel);
-    mObjective->disableObjectiveNormalization();
+    this->setNormalizationConstants();
 }
 
 /******************************************************************************//**
@@ -267,7 +267,6 @@ void RocketDesignApp::defineOperations()
 {
     mDefinedOperations.push_back("ObjectiveValue");
     mDefinedOperations.push_back("ObjectiveGradient");
-    mDefinedOperations.push_back("SetNormalizationConstants");
 }
 
 /******************************************************************************//**
@@ -285,10 +284,6 @@ void RocketDesignApp::defineSharedDataMaps()
     mDefinedDataLayout[tName] = Plato::data::SCALAR;
 
     tName = "ThrustMisfitObjectiveGradient";
-    mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
-    mDefinedDataLayout[tName] = Plato::data::SCALAR;
-
-    tName = "UpperBounds";
     mSharedDataMap[tName] = std::vector<double>(mNumDesigVariables);
     mDefinedDataLayout[tName] = Plato::data::SCALAR;
 }
@@ -340,10 +335,8 @@ void RocketDesignApp::computeObjectiveGradient()
 **********************************************************************************/
 void RocketDesignApp::setNormalizationConstants()
 {
-    std::string tArgumentName("UpperBounds");
-    auto tIterator = mSharedDataMap.find(tArgumentName);
-    assert(tIterator != mSharedDataMap.end());
-    std::vector<double> & tValues = tIterator->second;
+    std::vector<double> tValues(mNumDesigVariables);
+    tValues[0] = 0.08; tValues[1] = 0.006;
     mObjective->setNormalizationConstants(tValues);
 }
 
@@ -360,10 +353,6 @@ void RocketDesignApp::performOperation(const std::string & aOperationName)
     else if (aOperationName.compare("ObjectiveGradient") == static_cast<int>(0))
     {
         this->computeObjectiveGradient();
-    }
-    else
-    {
-        this->setNormalizationConstants();
     }
 }
 
