@@ -628,35 +628,18 @@ public:
     // NOTE: NORM OF CURRENT PROJECTED GRADIENT
     ScalarType computeProjectedVectorNorm(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
-        ScalarType tCummulativeDotProduct = 0.;
-        OrdinalType tNumVectors = aInput.getNumVectors();
-        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
-        {
-            const Plato::Vector<ScalarType, OrdinalType> & tMyInactiveSet = (*mInactiveSet)[tIndex];
-            const Plato::Vector<ScalarType, OrdinalType> & tMyInputVector = aInput[tIndex];
-
-            mControlWorkVector->update(1., tMyInputVector, 0.);
-            mControlWorkVector->entryWiseProduct(tMyInactiveSet);
-            tCummulativeDotProduct += mControlWorkVector->dot(*mControlWorkVector);
-        }
-        ScalarType tOutput = std::sqrt(tCummulativeDotProduct);
+        Plato::update(1., aInput, 0., *mControlWorkMultiVector);
+        Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
+        const ScalarType tOutput = Plato::norm(*mControlWorkMultiVector);
         return(tOutput);
     }
     void computeNormProjectedGradient()
     {
-        ScalarType tCummulativeDotProduct = 0.;
-        OrdinalType tNumVectors = mCurrentGradient->getNumVectors();
-        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
-        {
-            const Plato::Vector<ScalarType, OrdinalType> & tMyInactiveSet = (*mInactiveSet)[tIndex];
-            const Plato::Vector<ScalarType, OrdinalType> & tMyGradient = (*mCurrentGradient)[tIndex];
-
-            mControlWorkVector->update(1., tMyGradient, 0.);
-            mControlWorkVector->entryWiseProduct(tMyInactiveSet);
-            tCummulativeDotProduct += mControlWorkVector->dot(*mControlWorkVector);
-        }
-        mNormProjectedGradient = std::sqrt(tCummulativeDotProduct);
+        Plato::update(1., *mCurrentGradient, 0., *mControlWorkMultiVector);
+        Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
+        mNormProjectedGradient = Plato::norm(*mControlWorkMultiVector);
     }
+
     ScalarType getNormProjectedGradient() const
     {
         return (mNormProjectedGradient);
