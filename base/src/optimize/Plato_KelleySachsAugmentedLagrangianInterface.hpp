@@ -184,12 +184,14 @@ private:
         if(mInputData.getObjectiveHessianOutputName().empty() == true)
         {
             tStageMng->setIdentityObjectiveHessian();
+            tStageMng->setHaveHessian(false);
         }
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
         Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         tAlgorithm.setMaxNumOuterIterations(tMaxNumIterations);
+        tAlgorithm.disablePostSmoothing();
         tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
     }

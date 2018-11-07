@@ -428,6 +428,7 @@ private:
     **********************************************************************************/
     void setInitialStateData()
     {
+        mStepMng->setNumTrustRegionSubProblemItrDone(0);
         this->initializeMaxTrustRegionRadius(*mStepMng);
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();

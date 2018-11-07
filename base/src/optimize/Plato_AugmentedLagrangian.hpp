@@ -232,6 +232,33 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set actual over predicted reduction middle bound
+     * @param [in] aInput actual over predicted reduction middle bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionMidBound(const ScalarType & aInput)
+    {
+        mOptimizer->setActualOverPredictedReductionMidBound(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set actual over predicted reduction lower bound
+     * @param [in] aInput actual over predicted reduction lower bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionLowerBound(const ScalarType & aInput)
+    {
+        mOptimizer->setActualOverPredictedReductionLowerBound(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set actual over predicted reduction upper bound
+     * @param [in] aInput actual over predicted reduction upper bound
+    **********************************************************************************/
+    void setActualOverPredictedReductionUpperBound(const ScalarType & aInput)
+    {
+        mOptimizer->setActualOverPredictedReductionUpperBound(aInput);
+    }
+
+    /******************************************************************************//**
      * @brief Set minimum trust region radius
      * @param [in] aInput minimum trust region radius
     **********************************************************************************/
