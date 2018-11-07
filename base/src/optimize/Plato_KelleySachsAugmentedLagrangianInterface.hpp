@@ -172,20 +172,7 @@ private:
         // ********* ALLOCATE STAGE MANAGER FOR AUGMENTED LAGRANGIAN FORMULATION ********* //
         std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng =
                 std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(aDataFactory, tObjective, tConstraints);
-
-        // ********* ALLOCATE HESSIAN FOR EACH CONSTRAINT ********* //
-        std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> tConstraintHessianList =
-                std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>();
-        this->setConstraintHessianList(*tConstraints, *tConstraintHessianList);
-        tStageMng->setConstraintHessians(tConstraintHessianList);
-
-        // ********* SET OBJECTIVE HESSIANS TO IDENTITY IF HESSIAN NAME IS NOT DEFINED ********* //
-        // *********    IN THE OBJECTIVE SUBBLOCK DEFINED INSIDE THE OPTIMIZER BLOCK   ********* //
-        if(mInputData.getObjectiveHessianOutputName().empty() == true)
-        {
-            tStageMng->setIdentityObjectiveHessian();
-            tStageMng->setHaveHessian(false);
-        }
+        tStageMng->setHaveHessian(mInputData.getHaveHessian());
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
         Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
