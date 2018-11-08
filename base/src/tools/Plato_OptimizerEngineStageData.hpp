@@ -354,6 +354,7 @@ private:
     bool mHaveHessian;
     bool mDisablePostSmoothing;
 
+    int mGCMMAMaxInnerIterations;
     double mInitialMovingAsymptoteScaleFactor;
     double mGCMMAInnerKKTTolerance;
     double mCCSAOuterKKTTolerance;
@@ -361,6 +362,8 @@ private:
     double mGCMMAInnerControlStagnationTolerance;
     double mCCSAOuterObjectiveStagnationTolerance;
     double mCCSAOuterStationarityTolerance;
+
+    int mKSMaxTrustRegionIterations;
     double mKSTrustRegionExpansionFactor;
     double mKSTrustRegionContractionFactor;
     double mKSOuterGradientTolerance;
@@ -376,8 +379,6 @@ private:
 
     int mDerivativeCheckerFinalSuperscript;
     int mDerivativeCheckerInitialSuperscript;
-    int mGCMMAMaxInnerIterations;
-    int mKSMaxTrustRegionIterations;
 
     std::string mAlgebra;
     std::string mStateName;
