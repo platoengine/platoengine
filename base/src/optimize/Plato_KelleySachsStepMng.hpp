@@ -341,33 +341,37 @@ private:
     void applyProjectedTrialStepToHessian(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng,
                                           Plato::TrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
     {
-        // Compute active projected trial step
+        const bool tHaveHessian = aStageMng.getHaveHessian();
         Plato::fill(static_cast<ScalarType>(0), *mHessianTimesVector);
-        Plato::update(static_cast<ScalarType>(1),
-                      *mProjectedTrialStep,
-                      static_cast<ScalarType>(0),
-                      *mActiveProjectedTrialStep);
-        const Plato::MultiVector<ScalarType, OrdinalType> & tActiveSet = aDataMng.getActiveSet();
-        Plato::entryWiseProduct(tActiveSet, *mActiveProjectedTrialStep);
+        if(tHaveHessian == true)
+        {
+            // Compute active projected trial step
+            Plato::update(static_cast<ScalarType>(1),
+                          *mProjectedTrialStep,
+                          static_cast<ScalarType>(0),
+                          *mActiveProjectedTrialStep);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tActiveSet = aDataMng.getActiveSet();
+            Plato::entryWiseProduct(tActiveSet, *mActiveProjectedTrialStep);
 
-        // Compute inactive projected trial step
-        Plato::update(static_cast<ScalarType>(1),
-                      *mProjectedTrialStep,
-                      static_cast<ScalarType>(0),
-                      *mInactiveProjectedTrialStep);
-        const Plato::MultiVector<ScalarType, OrdinalType> & tInactiveSet = aDataMng.getInactiveSet();
-        Plato::entryWiseProduct(tInactiveSet, *mInactiveProjectedTrialStep);
+            // Compute inactive projected trial step
+            Plato::update(static_cast<ScalarType>(1),
+                          *mProjectedTrialStep,
+                          static_cast<ScalarType>(0),
+                          *mInactiveProjectedTrialStep);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tInactiveSet = aDataMng.getInactiveSet();
+            Plato::entryWiseProduct(tInactiveSet, *mInactiveProjectedTrialStep);
 
-        // Apply inactive projected trial step to Hessian
-        const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = aDataMng.getCurrentControl();
-        aStageMng.applyVectorToHessian(tCurrentControl, *mInactiveProjectedTrialStep, *mHessianTimesVector);
+            // Apply inactive projected trial step to Hessian
+            const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = aDataMng.getCurrentControl();
+            aStageMng.applyVectorToHessian(tCurrentControl, *mInactiveProjectedTrialStep, *mHessianTimesVector);
 
-        // Compute Hessian times projected trial step, i.e. ( ActiveSet + (InactiveSet' * Hess * InactiveSet) ) * Vector
-        Plato::entryWiseProduct(tInactiveSet, *mHessianTimesVector);
-        Plato::update(static_cast<ScalarType>(1),
-                      *mActiveProjectedTrialStep,
-                      static_cast<ScalarType>(1),
-                      *mHessianTimesVector);
+            // Compute Hessian times projected trial step, i.e. ( ActiveSet + (InactiveSet' * Hess * InactiveSet) ) * Vector
+            Plato::entryWiseProduct(tInactiveSet, *mHessianTimesVector);
+            Plato::update(static_cast<ScalarType>(1),
+                          *mActiveProjectedTrialStep,
+                          static_cast<ScalarType>(1),
+                          *mHessianTimesVector);
+        }
     }
 
     /******************************************************************************//**

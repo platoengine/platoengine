@@ -74,6 +74,12 @@ public:
     int getNumDesignVariables() const;
     int getGlobalNumDofs() const;
 
+    /******************************************************************************//**
+     * @brief Set perturbation parameter used for finite difference gradient approximation.
+     * @param [in] aInput perturbation parameter
+     **********************************************************************************/
+    void disableObjectiveNormalization();
+
     // ************* DELLOCATE APPLICATION MEMORY *************
     void finalize();
     // ************* ALLOCATE APPLICATION MEMORY *************
@@ -102,11 +108,15 @@ private:
     void computeFilteredObjectiveGradient();
 
 private:
+    bool mNormalizeObjFunc;
+    bool mIsFirstObjFuncValueSet;
+
     int mNumElemXDirection;
     int mNumElemYDirection;
 
     double mPoissonRatio;
     double mElasticModulus;
+    double mFirstObjFuncValue;
 
     std::vector<int> mMyStateOwnedGlobalIDs;
     std::vector<int> mMyControlOwnedGlobalIDs;

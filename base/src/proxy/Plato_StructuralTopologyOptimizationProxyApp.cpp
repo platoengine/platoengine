@@ -59,10 +59,13 @@ namespace Plato
 {
 
 StructuralTopologyOptimizationProxyApp::StructuralTopologyOptimizationProxyApp() :
+        mNormalizeObjFunc(true),
+        mIsFirstObjFuncValueSet(false),
         mNumElemXDirection(30),
         mNumElemYDirection(10),
         mPoissonRatio(0.3),
         mElasticModulus(1),
+        mFirstObjFuncValue(1),
         mMyStateOwnedGlobalIDs(),
         mMyControlOwnedGlobalIDs(),
         mPDE(),
@@ -71,10 +74,13 @@ StructuralTopologyOptimizationProxyApp::StructuralTopologyOptimizationProxyApp()
 }
 
 StructuralTopologyOptimizationProxyApp::StructuralTopologyOptimizationProxyApp(int aArgc, char **aArgv) :
+        mNormalizeObjFunc(true),
+        mIsFirstObjFuncValueSet(false),
         mNumElemXDirection(30),
         mNumElemYDirection(10),
         mPoissonRatio(0.3),
         mElasticModulus(1),
+        mFirstObjFuncValue(1),
         mMyControlOwnedGlobalIDs(),
         mPDE(),
         mDataMap()
@@ -83,6 +89,11 @@ StructuralTopologyOptimizationProxyApp::StructuralTopologyOptimizationProxyApp(i
 
 StructuralTopologyOptimizationProxyApp::~StructuralTopologyOptimizationProxyApp()
 {
+}
+
+void StructuralTopologyOptimizationProxyApp::disableObjectiveNormalization()
+{
+    mNormalizeObjFunc = false;
 }
 
 int StructuralTopologyOptimizationProxyApp::getNumDesignVariables() const
@@ -103,6 +114,7 @@ void StructuralTopologyOptimizationProxyApp::initialize()
 {
     mPDE = std::make_shared<Plato::StructuralTopologyOptimization>(mPoissonRatio, mElasticModulus, mNumElemXDirection, mNumElemYDirection);
     mPDE->disableCacheState();
+    mPDE->setFilterRadius(1.25);
 
     this->makeGraph();
 
@@ -366,6 +378,13 @@ void StructuralTopologyOptimizationProxyApp::evaluateObjective()
     tArgumentName = "InternalEnergy";
     tIterator = mDataMap.find(tArgumentName);
     assert(tIterator != mDataMap.end());
+
+    if(mIsFirstObjFuncValueSet == false && mNormalizeObjFunc == true)
+    {
+        mFirstObjFuncValue = tObjectiveValue;
+        mIsFirstObjFuncValueSet = true;
+    }
+    tObjectiveValue = tObjectiveValue / mFirstObjFuncValue;
     const int tIndex = 0;
     tIterator->second->A()[tIndex] = tObjectiveValue;
 }
@@ -382,6 +401,12 @@ void StructuralTopologyOptimizationProxyApp::computeObjectiveGradient()
     assert(tIterator != mDataMap.end());
     Epetra_SerialDenseVector & tGradient = tIterator->second.operator*();
     mPDE->computeComplianceGradient(tControl, tGradient);
+
+    if(mIsFirstObjFuncValueSet == true && mNormalizeObjFunc == true)
+    {
+        double tScale = 1.0 / mFirstObjFuncValue;
+        tGradient.SCAL(tGradient.Length(), tScale, tGradient.A());
+    }
 }
 
 void StructuralTopologyOptimizationProxyApp::computeFilteredObjectiveGradient()
