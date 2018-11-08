@@ -1442,7 +1442,6 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse_1)
     Plato::solve_ksal<double, size_t>(tGoldsteinPrice, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 6;
     EXPECT_EQ(14u, tOutputs.mNumOuterIter);
     EXPECT_EQ(105u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
@@ -1488,7 +1487,6 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianGoldsteinPriceShiftedEllipse_2)
     Plato::solve_ksal<double, size_t>(tGoldsteinPrice, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 6;
     EXPECT_EQ(14u, tOutputs.mNumOuterIter);
     EXPECT_EQ(64u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
@@ -1534,7 +1532,6 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianHimmelblauShiftedEllipse_1)
     Plato::solve_ksal<double, size_t>(tHimmelblau, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 6;
     EXPECT_EQ(22u, tOutputs.mNumOuterIter);
     EXPECT_EQ(461u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
@@ -1581,7 +1578,6 @@ TEST(PlatoTest, KelleySachsAugmentedLagrangianHimmelblauShiftedEllipse_2)
     Plato::solve_ksal<double, size_t>(tHimmelblau, tConstraintList, tInputs, tOutputs);
 
     // TEST NUMBER OF ITERATIONS AND STOPPING CRITERION
-    size_t tIntegerGold = 6;
     EXPECT_EQ(22u, tOutputs.mNumOuterIter);
     EXPECT_EQ(433u, tOutputs.mNumObjFuncEval);
     EXPECT_STREQ("\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n", tOutputs.mStopCriterion.c_str());
