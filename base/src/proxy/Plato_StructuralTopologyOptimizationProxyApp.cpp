@@ -114,7 +114,7 @@ void StructuralTopologyOptimizationProxyApp::initialize()
 {
     mPDE = std::make_shared<Plato::StructuralTopologyOptimization>(mPoissonRatio, mElasticModulus, mNumElemXDirection, mNumElemYDirection);
     mPDE->disableCacheState();
-    mPDE->setFilterRadius(1.25);
+    mPDE->setFilterRadius(1.2);
 
     this->makeGraph();
 

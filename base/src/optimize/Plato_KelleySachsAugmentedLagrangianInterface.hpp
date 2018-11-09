@@ -75,38 +75,46 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class KelleySachsAugmentedLagrangianInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
 {
 public:
-    /******************************************************************************/
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aInterface PLATO Engine interface
+     * @param [in] local application MPI communicator
+    **********************************************************************************/
     explicit KelleySachsAugmentedLagrangianInterface(Plato::Interface* aInterface, const MPI_Comm & aComm) :
             mComm(aComm),
             mInterface(aInterface),
             mInputData(Plato::OptimizerEngineStageData())
-    /******************************************************************************/
     {
     }
 
-    /******************************************************************************/
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     virtual ~KelleySachsAugmentedLagrangianInterface()
-    /******************************************************************************/
     {
     }
 
-    /******************************************************************************/
+    /******************************************************************************//**
+     * @brief Return optimization algorithm used to solve optimization problem
+     * @return optimization algorithm type
+    **********************************************************************************/
     Plato::optimizer::algorithm_t type() const
-    /******************************************************************************/
     {
         return (Plato::optimizer::algorithm_t::KELLEY_SACHS_AUGMENTED_LAGRANGIAN);
     }
 
-    /******************************************************************************/
+    /******************************************************************************//**
+     * @brief Read input arguments from input file
+    **********************************************************************************/
     void initialize()
-    /******************************************************************************/
     {
         Plato::initialize<ScalarType, OrdinalType>(mInterface, mInputData);
     }
 
-    /******************************************************************************/
+    /******************************************************************************//**
+     * @brief Solve optimization problem with Kelley-Sachs augmented Lagrangian (KSAL) algorithm
+    **********************************************************************************/
     void optimize()
-    /******************************************************************************/
     {
         mInterface->handleExceptions();
 
@@ -176,7 +184,6 @@ private:
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
         Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
-        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         this->setAlgorithmParams(tAlgorithm);
         tAlgorithm.solve();
     }
@@ -214,7 +221,6 @@ private:
     void setUpperBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                         Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
                         Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
     {
         const OrdinalType tCONTROL_VECTOR_INDEX = 0;
         std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
@@ -236,7 +242,6 @@ private:
     void setLowerBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                         Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
                         Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
     {
         const OrdinalType tCONTROL_VECTOR_INDEX = 0;
         std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
@@ -257,7 +262,6 @@ private:
     /******************************************************************************/
     void setConstraintHessianList(const Plato::CriterionList<ScalarType, OrdinalType> & aConstraints,
                                   Plato::LinearOperatorList<ScalarType, OrdinalType> & aHessianList)
-    /******************************************************************************/
     {
         const OrdinalType tNumConstraints = mInputData.getNumConstraints();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
@@ -277,7 +281,6 @@ private:
     /******************************************************************************/
     void setInitialGuess(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                          Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
     {
         // ********* Allocate Plato::Vector of controls *********
         const OrdinalType tCONTROL_VECTOR_INDEX = 0;
@@ -296,7 +299,6 @@ private:
     /******************************************************************************/
     void allocateBaselineDataStructures(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                                         Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
-    /******************************************************************************/
     {
         // ********* Allocate dual vectors baseline data structures *********
         const OrdinalType tNumDuals = mInputData.getNumConstraints();

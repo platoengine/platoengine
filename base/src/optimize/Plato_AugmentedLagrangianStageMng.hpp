@@ -95,15 +95,12 @@ public:
             mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mPreviousAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
-            mMinPenaltyValue(1e-10),
             mNormConstraints(std::numeric_limits<ScalarType>::max()),
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mFeasibilityStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
             mPenaltyParameterScaleFactor(2),
-            mDynamicFeasibilityTolerance(1e-2),
-            mInitialDynamicFeasibilityTolerance(1e-2),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintHessianEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -268,37 +265,6 @@ public:
     /****************************************************************************************************************/
     {
         mPenaltyParameterScaleFactor = aInput;
-    }
-
-    /******************************************************************************//**
-     * @brief Return dynamic feasibility tolerance
-     * @return dynamic feasibility tolerance
-    **********************************************************************************/
-    ScalarType getDynamicFeasibilityTolerance() const
-    {
-        return (mDynamicFeasibilityTolerance);
-    }
-
-    /****************************************************************************************************************/
-    void setDynamicFeasibilityTolerance(const ScalarType & aInput)
-    /****************************************************************************************************************/
-    {
-        mDynamicFeasibilityTolerance = aInput;
-    }
-
-    /******************************************************************************//**
-     * @brief Return initial dynamic feasibility tolerance
-     * @return initial dynamic feasibility tolerance
-    **********************************************************************************/
-    ScalarType getInitialDynamicFeasibilityTolerance() const
-    {
-        return (mInitialDynamicFeasibilityTolerance);
-    }
-
-    void setInitialDynamicFeasibilityTolerance(const ScalarType & aInput)
-    {
-        mInitialDynamicFeasibilityTolerance = aInput;
-        mDynamicFeasibilityTolerance = mInitialDynamicFeasibilityTolerance;
     }
 
     /******************************************************************************//**
@@ -688,7 +654,6 @@ public:
                 tMyLambda[tConstraintIndex] = std::max(static_cast<ScalarType>(0), tMyLambda[tConstraintIndex]);
             }
         }
-        mDynamicFeasibilityTolerance = static_cast<ScalarType>(1) / (static_cast<ScalarType>(1) + tPenalty);
     }
 
     /****************************************************************************************************************/
@@ -697,7 +662,6 @@ public:
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
         const ScalarType tPenalty = static_cast<ScalarType>(1) / mPenaltyParameter;
-        mDynamicFeasibilityTolerance = mInitialDynamicFeasibilityTolerance / std::sqrt(tPenalty);
     }
 
     /****************************************************************************************************************/
@@ -895,15 +859,12 @@ private:
     ScalarType mPreviousAugLagFuncValue;
     ScalarType mObjectiveStagnationMeasure;
 
-    ScalarType mMinPenaltyValue;
     ScalarType mNormConstraints;
     ScalarType mNormObjFuncGrad;
     ScalarType mNormAugLagFuncGrad;
     ScalarType mFeasibilityStagnationMeasure;
     ScalarType mPenaltyParameter;
     ScalarType mPenaltyParameterScaleFactor;
-    ScalarType mDynamicFeasibilityTolerance;
-    ScalarType mInitialDynamicFeasibilityTolerance;
 
     std::vector<OrdinalType> mNumConstraintEvaluations;
     std::vector<OrdinalType> mNumConstraintGradientEvaluations;
