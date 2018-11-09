@@ -98,7 +98,6 @@ public:
             mNormConstraints(std::numeric_limits<ScalarType>::max()),
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
-            mFeasibilityStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
             mPenaltyParameterScaleFactor(2),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -452,7 +451,9 @@ public:
         mObjectiveHessianOperator = std::make_shared<Plato::IdentityHessian<ScalarType, OrdinalType>>();
     }
 
-    //! Directive to update problem for each criterion (e.g. application based continuation).
+    /*******************************************************************************//**
+     * @brief Directive to update problem for each criterion (e.g. application based continuation).
+    ***********************************************************************************/
     void updateProblem()
     {
         // Communicate user that criteria specific data can be cached since trial control was accepted
@@ -467,9 +468,9 @@ public:
         }
     }
 
-    /****************************************************************************************************************/
-    //! Directive to cache any criterion specific data once the trial control is accepted.
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Cache criteria specific data once the trial control is accepted.
+    **********************************************************************************/
     void cacheData()
     {
         // Communicate user that criteria specific data can be cached since trial control was accepted
@@ -485,13 +486,14 @@ public:
         this->cacheTrialCriteriaValues();
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Update state data
+     * @param [out] aDataMng optimization algorithm data manager
+    **********************************************************************************/
     void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
-    /****************************************************************************************************************/
     {
         // compute objective and constraint stagnation measures
         mObjectiveStagnationMeasure = std::abs(mCurrentObjFuncValue - mPreviousObjectiveValue);
-        this->computeFeasibiltiyStagnation();
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
@@ -595,15 +597,26 @@ public:
         this->computeAugmentedLagrangianHessian(aControl, aVector, aOutput);
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Apply vector to preconditioner operator
+     * @param [in] aControl vector of optimization variables
+     * @param [in] aVector descent direction
+     * @param [out] aOutput application of vector to preconditioner operator
+    **********************************************************************************/
     void applyVectorToPreconditioner(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                      const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                                      Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
-    /****************************************************************************************************************/
     {
         assert(mPreconditioner.get() != nullptr);
         mPreconditioner->applyPreconditioner(aControl, aVector, aOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Apply vector to inverse preconditioner operator
+     * @param [in] aControl vector of optimization variables
+     * @param [in] aVector descent direction
+     * @param [out] aOutput application of vector to inverse preconditioner operator
+    **********************************************************************************/
     void applyVectorToInvPreconditioner(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                         const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                                         Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -656,56 +669,32 @@ public:
         }
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Update augmented Lagrangian penalty parameter
+    **********************************************************************************/
     void updatePenaltyParameter()
-    /****************************************************************************************************************/
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
-        const ScalarType tPenalty = static_cast<ScalarType>(1) / mPenaltyParameter;
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Cache current objective and constraint criteria values
+    **********************************************************************************/
     void cacheCurrentCriteriaValues()
-    /****************************************************************************************************************/
     {
         mPreviousObjectiveValue = mCurrentObjFuncValue;
         mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
         Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mPreviousConstraintValues);
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Cache trial objective and constraint criteria values
+    **********************************************************************************/
     void cacheTrialCriteriaValues()
-    /****************************************************************************************************************/
     {
         mCurrentObjFuncValue = mTrialObjFuncValue;
         mCurrentAugLagFuncValue = mTrialAugLagFuncValue;
         Plato::update(static_cast<ScalarType>(1), *mTrialConstraintValues, static_cast<ScalarType>(0), *mCurrentConstraintValues);
-    }
-
-    /****************************************************************************************************************/
-    ScalarType getStagnationMeasure() const
-    /****************************************************************************************************************/
-    {
-        const ScalarType tOutput = mObjectiveStagnationMeasure + mFeasibilityStagnationMeasure;
-        return (tOutput);
-    }
-
-    /****************************************************************************************************************/
-    void computeFeasibiltiyStagnation()
-    /****************************************************************************************************************/
-    {
-        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkMultiVec);
-        Plato::update(static_cast<ScalarType>(-1), *mPreviousConstraintValues, static_cast<ScalarType>(1), *mDualWorkMultiVec);
-        const OrdinalType tNumVectors = mDualWorkMultiVec->getNumVectors();
-        std::vector<ScalarType> tSum(tNumVectors);
-        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
-        {
-            Plato::Vector<ScalarType, OrdinalType> & tMyVector = (*mDualWorkMultiVec)[tVectorIndex];
-            tMyVector.modulus();
-            tSum[tVectorIndex] = mDualReductionOperations->sum(tMyVector);
-        }
-        const ScalarType tBaseValue = 0;
-        mFeasibilityStagnationMeasure = std::accumulate(tSum.begin(), tSum.end(), tBaseValue);
     }
 
 private:
@@ -862,7 +851,6 @@ private:
     ScalarType mNormConstraints;
     ScalarType mNormObjFuncGrad;
     ScalarType mNormAugLagFuncGrad;
-    ScalarType mFeasibilityStagnationMeasure;
     ScalarType mPenaltyParameter;
     ScalarType mPenaltyParameterScaleFactor;
 
