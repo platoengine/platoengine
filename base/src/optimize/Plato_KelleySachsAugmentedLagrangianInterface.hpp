@@ -177,10 +177,37 @@ private:
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
         Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
-        tAlgorithm.setMaxNumOuterIterations(tMaxNumIterations);
-        tAlgorithm.disablePostSmoothing();
-        tAlgorithm.enableDiagnostics();
+        this->setAlgorithmParams(tAlgorithm);
         tAlgorithm.solve();
+    }
+
+    /******************************************************************************//**
+     * @brief Set Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm inputs
+     * @param [in,out] aAlgorithm Kelley-Sachs Augmented Lagrangian trust region algorithm interface
+    **********************************************************************************/
+    void setAlgorithmParams(Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
+    {
+        aAlgorithm.enableDiagnostics();
+        aAlgorithm.disablePostSmoothing();
+        aAlgorithm.setMeanNorm(mInputData.getMeanNorm());
+
+        aAlgorithm.setPenaltyParameter(mInputData.getAugLagPenaltyParameter());
+        aAlgorithm.setPenaltyParameterScaleFactor(mInputData.getAugLagPenaltyScaleParameter());
+
+        aAlgorithm.setMaxNumOuterIterations(mInputData.getMaxNumIterations());
+        aAlgorithm.setMaxNumAugLagSubProbIter(mInputData.getMaxNumAugLagSubProbIter());
+        aAlgorithm.setMaxNumTrustRegionSubProblemIterations(mInputData.getKSMaxTrustRegionIterations());
+
+        aAlgorithm.setMaxTrustRegionRadius(mInputData.getMaxTrustRegionRadius());
+        aAlgorithm.setMinTrustRegionRadius(mInputData.getMinTrustRegionRadius());
+        aAlgorithm.setTrustRegionExpansion(mInputData.getKSTrustRegionExpansionFactor());
+        aAlgorithm.setTrustRegionContraction(mInputData.getKSTrustRegionContractionFactor());
+
+        aAlgorithm.setFeasibilityTolerance(mInputData.getFeasibilityTolerance());
+        aAlgorithm.setGradientTolerance(mInputData.getKSOuterGradientTolerance());
+        aAlgorithm.setStationarityTolerance(mInputData.getKSOuterStationarityTolerance());
+        aAlgorithm.setActualReductionTolerance(mInputData.getKSOuterActualReductionTolerance());
+        aAlgorithm.setControlStagnationTolerance(mInputData.getKSOuterControlStagnationTolerance());
     }
 
     /******************************************************************************/

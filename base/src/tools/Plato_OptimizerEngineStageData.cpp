@@ -55,6 +55,7 @@ namespace Plato
 
 /******************************************************************************/
 OptimizerEngineStageData::OptimizerEngineStageData() :
+        mMeanNorm(false),
         mCheckGradient(false),
         mCheckHessian(false),
         mUserInitialGuess(false),
@@ -80,6 +81,12 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mKSOuterActualReductionTolerance(1e-8),
         mKSInitialRadiusScale(.1),
         mKSMaxRadiusScale(.5),
+        mMaxNumAugLagSubProbIter(5),
+        mFeasibilityTolerance(1e-4),
+        mMinTrustRegionRadius(1e-6),
+        mMaxTrustRegionRadius(1e2),
+        mAugLagPenaltyParameter(0.05),
+        mAugLagPenaltyScaleParameter(1.2),
         mMaxNumIterations(500),
         mProblemUpdateFrequency(0),
         mDerivativeCheckerFinalSuperscript(8),
@@ -165,15 +172,23 @@ void OptimizerEngineStageData::setOutputControlToFile(const bool & aInput)
 
 /******************************************************************************/
 void OptimizerEngineStageData::setOutputDiagnosticsToFile(const bool & aInput)
-/******************************************************************************/
 {
     mOutputDiagnosticsToFile = aInput;
 }
 
+/******************************************************************************/
+void OptimizerEngineStageData::setMeanNorm(const bool & aInput)
+{
+    mMeanNorm = aInput;
+}
+
+/******************************************************************************/
 void OptimizerEngineStageData::setHaveHessian(const bool & aInput)
 {
     mHaveHessian = aInput;
 }
+
+/******************************************************************************/
 void OptimizerEngineStageData::setDisablePostSmoothing(const bool & aInput)
 {
     mDisablePostSmoothing = aInput;
@@ -181,7 +196,6 @@ void OptimizerEngineStageData::setDisablePostSmoothing(const bool & aInput)
 
 /******************************************************************************/
 void OptimizerEngineStageData::setCheckGradient(const bool & aInput)
-/******************************************************************************/
 {
     mCheckGradient = aInput;
 }
@@ -209,15 +223,23 @@ bool OptimizerEngineStageData::getOutputControlToFile() const
 
 /******************************************************************************/
 bool OptimizerEngineStageData::getOutputDiagnosticsToFile() const
-/******************************************************************************/
 {
     return (mOutputDiagnosticsToFile);
 }
 
+/******************************************************************************/
+bool OptimizerEngineStageData::getMeanNorm() const
+{
+    return mMeanNorm;
+}
+
+/******************************************************************************/
 bool OptimizerEngineStageData::getHaveHessian() const
 {
     return mHaveHessian;
 }
+
+/******************************************************************************/
 bool OptimizerEngineStageData::getDisablePostSmoothing() const
 {
     return mDisablePostSmoothing;
@@ -225,14 +247,12 @@ bool OptimizerEngineStageData::getDisablePostSmoothing() const
 
 /******************************************************************************/
 bool OptimizerEngineStageData::getCheckGradient() const
-/******************************************************************************/
 {
     return mCheckGradient;
 }
 
 /******************************************************************************/
 bool OptimizerEngineStageData::getCheckHessian() const
-/******************************************************************************/
 {
     return mCheckHessian;
 }
@@ -536,8 +556,79 @@ void OptimizerEngineStageData::setKSOuterActualReductionTolerance(const double &
 }
 
 /******************************************************************************/
-std::string OptimizerEngineStageData::getStateName() const
+double OptimizerEngineStageData::getAugLagPenaltyParameter() const
+{
+    return (mAugLagPenaltyParameter);
+}
+
 /******************************************************************************/
+void OptimizerEngineStageData::setAugLagPenaltyParameter(const double & aInput)
+{
+    mAugLagPenaltyParameter = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getAugLagPenaltyScaleParameter() const
+{
+    return (mAugLagPenaltyScaleParameter);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setAugLagPenaltyScaleParameter(const double & aInput)
+{
+    mAugLagPenaltyScaleParameter = aInput;
+}
+
+/******************************************************************************/
+size_t OptimizerEngineStageData::getMaxNumAugLagSubProbIter() const
+{
+    return (mMaxNumAugLagSubProbIter);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setMaxNumAugLagSubProbIter(const size_t & aInput)
+{
+    mMaxNumAugLagSubProbIter = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getMinTrustRegionRadius() const
+{
+    return (mMinTrustRegionRadius);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setMinTrustRegionRadius(const double & aInput)
+{
+    mMinTrustRegionRadius = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getMaxTrustRegionRadius() const
+{
+    return (mMaxTrustRegionRadius);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setMaxTrustRegionRadius(const double & aInput)
+{
+    mMaxTrustRegionRadius = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getFeasibilityTolerance() const
+{
+    return (mFeasibilityTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setFeasibilityTolerance(const double & aInput)
+{
+    mFeasibilityTolerance = aInput;
+}
+
+/******************************************************************************/
+std::string OptimizerEngineStageData::getStateName() const
 {
     assert(mStateName.empty() == false);
     return (mStateName);
@@ -545,7 +636,6 @@ std::string OptimizerEngineStageData::getStateName() const
 
 /******************************************************************************/
 void OptimizerEngineStageData::setStateNames(const std::string & aInput)
-/******************************************************************************/
 {
     assert(aInput.empty() == false);
     mStateName = aInput;
@@ -553,7 +643,6 @@ void OptimizerEngineStageData::setStateNames(const std::string & aInput)
 
 /******************************************************************************/
 std::string OptimizerEngineStageData::getInputFileName() const
-/******************************************************************************/
 {
     return (mInputFileName);
 }

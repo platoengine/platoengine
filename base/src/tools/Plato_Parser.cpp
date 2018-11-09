@@ -1410,6 +1410,11 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             bool tHaveHessian = Plato::Get::Bool(tOptionsNode, "HaveHessian");
             aOptimizerEngineStageData.setHaveHessian(tHaveHessian);
         }
+        if( tOptionsNode.size<std::string>("MeanNorm") )
+        {
+            bool tMeanNorm = Plato::Get::Bool(tOptionsNode, "MeanNorm");
+            aOptimizerEngineStageData.setMeanNorm(tMeanNorm);
+        }
         if(tOptionsNode.size<std::string>("DisablePostSmoothing"))
         {
             bool tDisablePostSmoothing = Plato::Get::Bool(tOptionsNode, "DisablePostSmoothing");
@@ -1534,6 +1539,36 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         {
             int tProblemUpdateFrequency = Plato::Get::Int(tOptionsNode, "ProblemUpdateFrequency");
             aOptimizerEngineStageData.setProblemUpdateFrequency(tProblemUpdateFrequency);
+        }
+        if(tOptionsNode.size<std::string>("MaxNumAugLagSubProbIter"))
+        {
+            int tMaxNumAugLagSubProbIter = Plato::Get::Int(tOptionsNode, "MaxNumAugLagSubProbIter");
+            aOptimizerEngineStageData.setMaxNumAugLagSubProbIter(tMaxNumAugLagSubProbIter);
+        }
+        if(tOptionsNode.size<std::string>("FeasibilityTolerance"))
+        {
+            double tFeasibilityTolerance = Plato::Get::Double(tOptionsNode, "FeasibilityTolerance");
+            aOptimizerEngineStageData.setFeasibilityTolerance(tFeasibilityTolerance);
+        }
+        if(tOptionsNode.size<std::string>("MinTrustRegionRadius"))
+        {
+            double tMinTrustRegionRadius = Plato::Get::Double(tOptionsNode, "MinTrustRegionRadius");
+            aOptimizerEngineStageData.setMinTrustRegionRadius(tMinTrustRegionRadius);
+        }
+        if(tOptionsNode.size<std::string>("MaxTrustRegionRadius"))
+        {
+            double tMaxTrustRegionRadius = Plato::Get::Double(tOptionsNode, "MaxTrustRegionRadius");
+            aOptimizerEngineStageData.setMaxTrustRegionRadius(tMaxTrustRegionRadius);
+        }
+        if(tOptionsNode.size<std::string>("AugLagPenaltyParameter"))
+        {
+            double tAugLagPenaltyParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyParameter");
+            aOptimizerEngineStageData.setAugLagPenaltyParameter(tAugLagPenaltyParameter);
+        }
+        if(tOptionsNode.size<std::string>("AugLagPenaltyScaleParameter"))
+        {
+            double tAugLagPenaltyScaleParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyScaleParameter");
+            aOptimizerEngineStageData.setAugLagPenaltyScaleParameter(tAugLagPenaltyScaleParameter);
         }
     }
 }

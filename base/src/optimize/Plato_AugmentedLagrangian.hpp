@@ -122,8 +122,21 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Specify if analytical/approx Hessian is available
-     * @param [in] aInput flag: true = Hessian available; false = Hessian not available
+     * @brief Specify if Hessian information is provided
+     * @param [in] aInput true = information available; false = information is not available
+    **********************************************************************************/
+    void setMeanNorm(const bool & aInput)
+    {
+        if(aInput == true)
+        {
+            mDataMng->enableMeanNorm();
+            mStageMng->enableMeanNorm();
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Enable mean norm calculations
+     * @param [in] aInput true = enable; false = disable
     **********************************************************************************/
     void setHaveHessian(const bool & aInput)
     {

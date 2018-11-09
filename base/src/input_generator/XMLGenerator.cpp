@@ -6442,6 +6442,8 @@ bool XMLGenerator::generateInterfaceXML()
             addChild(tmp_node, "ValueName", "Volume");
             addChild(tmp_node, "ReferenceValueName", "Design Volume");
             addChild(tmp_node, "GradientName", "Volume Gradient");
+            addChild(tmp_node, "ValueStageName", "Volume");
+            addChild(tmp_node, "GradientStageName", "Volume Gradient");
             if(m_InputData.constraints[b].volume_fraction != "")
                 addChild(tmp_node, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
             if(m_InputData.constraints[b].volume_absolute != "")
@@ -6457,6 +6459,8 @@ bool XMLGenerator::generateInterfaceXML()
             addChild(tmp_node, "GradientName", "Surface Area Gradient");
             addChild(tmp_node, "NormalizedTargetValue", "1.0");
             addChild(tmp_node, "Tolerance", "1e-3");
+            addChild(tmp_node, "ValueStageName", "Surface Area");
+            addChild(tmp_node, "GradientStageName", "Surface Area Gradient");
         }
     }
 

@@ -84,6 +84,7 @@ public:
             mObjectiveInexactnessTolerance(0),
             mCurrentObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
             mPreviousObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
+            mIsMeanNormEnabled(false),
             mIsInitialGuessSet(false),
             mGradientInexactnessToleranceExceeded(false),
             mObjectiveInexactnessToleranceExceeded(false),
@@ -267,6 +268,14 @@ public:
         assert(aInput.getNumVectors() == mCurrentControl->getNumVectors());
         Plato::update(1., aInput, 0., *mCurrentControl);
         mIsInitialGuessSet = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Enable mean norm, i.e. /f$ \mu = \frac{1}{N} \sum_{i=1}^{N} x_i * x_i /f$
+    **********************************************************************************/
+    void enableMeanNorm()
+    {
+        mIsMeanNormEnabled = true;
     }
 
     // NOTE: DUAL VECTOR
@@ -630,14 +639,16 @@ public:
     {
         Plato::update(1., aInput, 0., *mControlWorkMultiVector);
         Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
-        const ScalarType tOutput = Plato::norm(*mControlWorkMultiVector);
+        const ScalarType tOutput =
+                mIsMeanNormEnabled == true ? Plato::norm_mean(*mControlWorkMultiVector) : Plato::norm(*mControlWorkMultiVector);
         return(tOutput);
     }
     void computeNormProjectedGradient()
     {
         Plato::update(1., *mCurrentGradient, 0., *mControlWorkMultiVector);
         Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
-        mNormProjectedGradient = Plato::norm(*mControlWorkMultiVector);
+        mNormProjectedGradient =
+                mIsMeanNormEnabled == true ? Plato::norm_mean(*mControlWorkMultiVector) : Plato::norm(*mControlWorkMultiVector);
     }
 
     ScalarType getNormProjectedGradient() const
@@ -675,7 +686,8 @@ public:
         mBounds->project(*mControlLowerBounds, *mControlUpperBounds, *mControlWorkMultiVector);
         Plato::update(1., *mCurrentControl, -1., *mControlWorkMultiVector);
         Plato::entryWiseProduct(*mInactiveSet, *mControlWorkMultiVector);
-        mStationarityMeasure = Plato::norm(*mControlWorkMultiVector);
+        mStationarityMeasure =
+                mIsMeanNormEnabled == true ? Plato::norm_mean(*mControlWorkMultiVector) : Plato::norm(*mControlWorkMultiVector);
     }
 
     ScalarType getStationarityMeasure() const
@@ -793,6 +805,7 @@ private:
     ScalarType mCurrentObjectiveFunctionValue;
     ScalarType mPreviousObjectiveFunctionValue;
 
+    bool mIsMeanNormEnabled;
     bool mIsInitialGuessSet;
     bool mGradientInexactnessToleranceExceeded;
     bool mObjectiveInexactnessToleranceExceeded;

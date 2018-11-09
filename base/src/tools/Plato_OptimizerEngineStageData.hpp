@@ -69,7 +69,17 @@ public:
     void setUserInitialGuess(const bool & aInput);
     void setOutputControlToFile(const bool & aInput);
     void setOutputDiagnosticsToFile(const bool & aInput);
+
+    /******************************************************************************//**
+     * @brief Enable mean norm calculations, yes = true or no = false
+    ***********************************************************************************/
+    void setMeanNorm(const bool & aInput);
+
+    /******************************************************************************//**
+     * @brief Hessian information provided, yes = true or no = false
+    ***********************************************************************************/
     void setHaveHessian(const bool & aInput);
+
     void setDisablePostSmoothing(const bool & aInput);
 
     bool getCheckGradient() const;
@@ -77,7 +87,20 @@ public:
     bool getUserInitialGuess() const;
     bool getOutputControlToFile() const;
     bool getOutputDiagnosticsToFile() const;
+
+    /******************************************************************************//**
+     * @brief Return mean norm flag
+     * @return yes = true or no = false
+    ***********************************************************************************/
+    bool getMeanNorm() const;
+
+    /******************************************************************************//**
+     * @brief Return have Hessian flag
+     * @return yes = true or no = false
+    ***********************************************************************************/
     bool getHaveHessian() const;
+
+
     bool getDisablePostSmoothing() const;
 
     std::vector<double> getLowerBoundValues() const;
@@ -144,6 +167,78 @@ public:
 
     double getKSOuterActualReductionTolerance() const;
     void setKSOuterActualReductionTolerance(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return maximum number of augmented Lagrangian sub problem iterations
+     * @return maximum number of augmented Lagrangian sub problem iterations
+    ***********************************************************************************/
+    size_t getMaxNumAugLagSubProbIter() const;
+
+    /******************************************************************************//**
+     * @brief Set maximum number of augmented Lagrangian sub problem iterations
+     * @param [in] aInput maximum number of augmented Lagrangian sub problem iterations
+    ***********************************************************************************/
+    void setMaxNumAugLagSubProbIter(const size_t & aInput);
+
+    /******************************************************************************//**
+     * @brief Return penalty parameter for augmented Lagrangian algorithm
+     * @return penalty parameter for augmented Lagrangian algorithm
+    ***********************************************************************************/
+    double getAugLagPenaltyParameter() const;
+
+    /******************************************************************************//**
+     * @brief Set penalty parameter for augmented Lagrangian algorithm
+     * @param [in] aInput penalty parameter for augmented Lagrangian algorithm
+    ***********************************************************************************/
+    void setAugLagPenaltyParameter(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return scaling penalty parameter for augmented Lagrangian algorithm
+     * @return scaling penalty parameter for augmented Lagrangian algorithm
+    ***********************************************************************************/
+    double getAugLagPenaltyScaleParameter() const;
+
+    /******************************************************************************//**
+     * @brief Set scaling penalty parameter for augmented Lagrangian algorithm
+     * @param [in] aInput scaling penalty parameter for augmented Lagrangian algorithm
+    ***********************************************************************************/
+    void setAugLagPenaltyScaleParameter(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return minimum trust region radius
+     * @return minimum trust region radius
+    ***********************************************************************************/
+    double getMinTrustRegionRadius() const;
+
+    /******************************************************************************//**
+     * @brief Set minimum trust region radius
+     * @param [in] aInput minimum trust region radius
+    ***********************************************************************************/
+    void setMinTrustRegionRadius(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return maximum trust region radius
+     * @return maximum trust region radius
+    ***********************************************************************************/
+    double getMaxTrustRegionRadius() const;
+
+    /******************************************************************************//**
+     * @brief Set maximum trust region radius
+     * @param [in] aInput maximum trust region radius
+    ***********************************************************************************/
+    void setMaxTrustRegionRadius(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return feasibility tolerance
+     * @return feasibility tolerance
+    ***********************************************************************************/
+    double getFeasibilityTolerance() const;
+
+    /******************************************************************************//**
+     * @brief Set feasibility tolerance
+     * @param [in] aInput feasibility tolerance
+    ***********************************************************************************/
+    void setFeasibilityTolerance(const double & aInput);
 
     std::string getStateName() const;
     void setStateNames(const std::string & aInput);
@@ -346,6 +441,7 @@ public:
     void setProblemUpdateFrequency(const size_t& aInput);
 
 private:
+    bool mMeanNorm;
     bool mCheckGradient;
     bool mCheckHessian;
     bool mUserInitialGuess;
@@ -373,6 +469,13 @@ private:
     double mKSOuterActualReductionTolerance;
     double mKSInitialRadiusScale;
     double mKSMaxRadiusScale;
+
+    size_t mMaxNumAugLagSubProbIter;
+    double mFeasibilityTolerance;
+    double mMinTrustRegionRadius;
+    double mMaxTrustRegionRadius;
+    double mAugLagPenaltyParameter;
+    double mAugLagPenaltyScaleParameter;
 
     size_t mMaxNumIterations;
     size_t mProblemUpdateFrequency;

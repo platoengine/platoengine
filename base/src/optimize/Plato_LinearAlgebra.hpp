@@ -58,6 +58,12 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Compute inner product: /f$ \alpha = \sum_{i=1}^{N} x_i * y_i /f$
+ * @param [in] aVectorOne input multi-vector
+ * @param [in] aVectorTwo input multi-vector
+ * @return inner product output
+***********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 ScalarType dot(const Plato::MultiVector<ScalarType, OrdinalType> & aVectorOne,
                const Plato::MultiVector<ScalarType, OrdinalType> & aVectorTwo)
@@ -66,7 +72,7 @@ ScalarType dot(const Plato::MultiVector<ScalarType, OrdinalType> & aVectorOne,
     assert(aVectorOne.getNumVectors() == aVectorTwo.getNumVectors());
 
     ScalarType tCummulativeSum = 0;
-    OrdinalType tNumVectors = aVectorOne.getNumVectors();
+    const OrdinalType tNumVectors = aVectorOne.getNumVectors();
     for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         assert(aVectorOne[tVectorIndex].size() > static_cast<OrdinalType>(0));
@@ -85,7 +91,7 @@ void entryWiseProduct(const Plato::MultiVector<ScalarType, OrdinalType> & aInput
     assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
     assert(aInput.getNumVectors() == aOutput.getNumVectors());
 
-    OrdinalType tNumVectors = aInput.getNumVectors();
+    const OrdinalType tNumVectors = aInput.getNumVectors();
     for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         assert(aInput[tVectorIndex].size() > static_cast<OrdinalType>(0));
@@ -101,7 +107,7 @@ void fill(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalType
 {
     assert(aOutput.getNumVectors() > static_cast<OrdinalType>(0));
 
-    OrdinalType tNumVectors = aOutput.getNumVectors();
+    const OrdinalType tNumVectors = aOutput.getNumVectors();
     for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         assert(aOutput[tVectorIndex].size() > static_cast<OrdinalType>(0));
@@ -115,7 +121,7 @@ void scale(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalTyp
 {
     assert(aOutput.getNumVectors() > static_cast<OrdinalType>(0));
 
-    OrdinalType tNumVectors = aOutput.getNumVectors();
+    const OrdinalType tNumVectors = aOutput.getNumVectors();
     for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         assert(aOutput[tVectorIndex].size() > static_cast<OrdinalType>(0));
@@ -125,10 +131,20 @@ void scale(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalTyp
 }
 
 template<typename ScalarType, typename OrdinalType>
+ScalarType norm_mean(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
+{
+    const OrdinalType tVECTOR_INDEX = 0;
+    const OrdinalType tNumElem = aInput[tVECTOR_INDEX].size() * aInput.getNumVectors();
+    const ScalarType tDotProduct = Plato::dot(aInput, aInput);
+    const ScalarType tNorm = tDotProduct / tNumElem;
+    return(tNorm);
+}
+
+template<typename ScalarType, typename OrdinalType>
 ScalarType norm(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
 {
-    ScalarType tDotProduct = Plato::dot(aInput, aInput);
-    ScalarType tNorm = std::sqrt(tDotProduct);
+    const ScalarType tDotProduct = Plato::dot(aInput, aInput);
+    const ScalarType tNorm = std::sqrt(tDotProduct);
     return(tNorm);
 }
 
@@ -142,7 +158,7 @@ void update(const ScalarType & aAlpha,
     assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
     assert(aInput.getNumVectors() == aOutput.getNumVectors());
 
-    OrdinalType tNumVectors = aInput.getNumVectors();
+    const OrdinalType tNumVectors = aInput.getNumVectors();
     for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         assert(aInput[tVectorIndex].size() > static_cast<OrdinalType>(0));

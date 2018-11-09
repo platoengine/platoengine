@@ -80,10 +80,11 @@ class AugmentedLagrangianStageMng : public Plato::TrustRegionStageMng<ScalarType
 public:
     /******************************************************************************//**
      * @brief Default constructor
-    **********************************************************************************/
+     **********************************************************************************/
     AugmentedLagrangianStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
                                 const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints) :
+            mIsMeanNormEnabled(false),
             mNumObjFuncEval(0),
             mNumObjGradEval(0),
             mNumObjHessEval(0),
@@ -107,7 +108,7 @@ public:
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintHessianEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mStateData(std::make_shared<Plato::StateData<ScalarType, OrdinalType>>(aFactory.operator*())),
-            mDualWorkVec(aFactory->dual().create()),
+            mDualWorkMultiVec(aFactory->dual().create()),
             mControlWorkVec(aFactory->control().create()),
             mObjectiveGradient(aFactory->control().create()),
             mLagrangeMultipliers(aFactory->dual().create()),
@@ -133,6 +134,14 @@ public:
     **********************************************************************************/
     virtual ~AugmentedLagrangianStageMng()
     {
+    }
+
+    /******************************************************************************//**
+     * @brief Enable mean norm, i.e. /f$ \mu = \frac{1}{N} \sum_{i=1}^{N} x_i * x_i /f$
+    **********************************************************************************/
+    void enableMeanNorm()
+    {
+        mIsMeanNormEnabled = true;
     }
 
     /******************************************************************************//**
@@ -412,12 +421,21 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Compute norm of constraint vector
-     * @return norm of constraint vector
+     * @brief Compute l1-norm of constraint vector
+     * @return l1-norm of constraint vector
     **********************************************************************************/
     void computeNormConstraintVector()
     {
-        mNormConstraints = Plato::norm(*mCurrentConstraintValues);
+        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkMultiVec);
+
+        const OrdinalType tNumVectors = mCurrentConstraintValues->getNumVectors();
+        std::vector<ScalarType> tContainer(tNumVectors);
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; ++tIndex)
+        {
+            (*mDualWorkMultiVec)[tIndex].modulus();
+            tContainer[tIndex] = mDualReductionOperations->max( (*mDualWorkMultiVec)[tIndex] );
+        }
+        mNormConstraints = *std::max_element(tContainer.begin(), tContainer.end());
     }
 
     /****************************************************************************************************************/
@@ -586,11 +604,11 @@ public:
         // Compute objective function gradient: \frac{\partial f}{\partial\mathbf{z}}
         Plato::fill(static_cast<ScalarType>(0), aOutput);
         mObjectiveGradientOperator->compute(aControl, aOutput);
-        mNormObjFuncGrad = Plato::norm(aOutput);
+        mNormObjFuncGrad = mIsMeanNormEnabled == true ? Plato::norm_mean(aOutput) : Plato::norm(aOutput);
         mNumObjGradEval++;
 
         this->computeAugmentedLagrangianGradient(aControl, aOutput);
-        mNormAugLagFuncGrad = Plato::norm(aOutput);
+        mNormAugLagFuncGrad = mIsMeanNormEnabled == true ? Plato::norm_mean(aOutput) : Plato::norm(aOutput);
     }
 
     /******************************************************************************//**
@@ -712,13 +730,13 @@ public:
     void computeFeasibiltiyStagnation()
     /****************************************************************************************************************/
     {
-        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkVec);
-        Plato::update(static_cast<ScalarType>(-1), *mPreviousConstraintValues, static_cast<ScalarType>(1), *mDualWorkVec);
-        const OrdinalType tNumVectors = mDualWorkVec->getNumVectors();
+        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkMultiVec);
+        Plato::update(static_cast<ScalarType>(-1), *mPreviousConstraintValues, static_cast<ScalarType>(1), *mDualWorkMultiVec);
+        const OrdinalType tNumVectors = mDualWorkMultiVec->getNumVectors();
         std::vector<ScalarType> tSum(tNumVectors);
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
-            Plato::Vector<ScalarType, OrdinalType> & tMyVector = (*mDualWorkVec)[tVectorIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tMyVector = (*mDualWorkMultiVec)[tVectorIndex];
             tMyVector.modulus();
             tSum[tVectorIndex] = mDualReductionOperations->sum(tMyVector);
         }
@@ -863,6 +881,8 @@ private:
     }
 
 private:
+    bool mIsMeanNormEnabled;
+
     OrdinalType mNumObjFuncEval;
     OrdinalType mNumObjGradEval;
     OrdinalType mNumObjHessEval;
@@ -891,7 +911,7 @@ private:
 
     std::shared_ptr<Plato::StateData<ScalarType, OrdinalType>> mStateData;
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWorkVec;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWorkMultiVec;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWorkVec;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjectiveGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLagrangeMultipliers;
