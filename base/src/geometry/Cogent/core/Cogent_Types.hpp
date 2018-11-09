@@ -7,12 +7,12 @@
 #include <Kokkos_ViewFactory.hpp>
 #include <MiniTensor.h>
 
-typedef unsigned int uint;
-typedef double RealType;
-typedef Sacado::Fad::DFad<RealType> FadType;
-typedef Sacado::mpl::apply<FadType,RealType>::type DFadType;
-
 namespace Cogent {
+
+  typedef unsigned int uint;
+  typedef double RealType;
+  typedef Sacado::Fad::DFad<RealType> FadType;
+  typedef Sacado::mpl::apply<FadType,RealType>::type DFadType;
 
   enum struct Axis {X, Y, Z};
 

@@ -151,7 +151,6 @@ RealType Integrator::getBodySimplexes(
   return measure;
 }
 
-}
 
 //******************************************************************************//
 RealType Cogent::Integrator::getUniformScaling(const FContainer<RealType>& coordCon)
@@ -531,3 +530,4 @@ Cogent::Integrator::Integrator(
 }
 
 
+}

@@ -74,6 +74,7 @@ double MeshServices::getTotalVolume()
 
       FieldContainer<double>& cubPoints = elblock.getCubaturePoints();
       FieldContainer<double>& cubWeights = elblock.getCubatureWeights();
+      auto uniformCubature = elblock.cubatureIsUniform();
 
       // Evaluate basis values and gradients at cubature points
       int numFieldsG = elblock.getBasis().getCardinality();
@@ -100,6 +101,8 @@ double MeshServices::getTotalVolume()
       if(spaceDim > 1) coords[1] = myMesh.getY();
       if(spaceDim > 2) coords[2] = myMesh.getZ();
 
+      FieldContainer<double> cWeights(cubWeights);
+
       // *** Element loop ***
       for (int iel=0; iel<numElemsThisBlock; iel++) {
 
@@ -115,8 +118,12 @@ double MeshServices::getTotalVolume()
         CellTools::setJacobian(Jacobian, cubPoints, Nodes, topo);
         CellTools::setJacobianDet(JacobDet, Jacobian );
 
-        // compute weighted measure
-        fst::computeCellMeasure<double>(weightedMeasure, JacobDet, cubWeights);
+        if (!uniformCubature) {
+          elblock.getCubatureWeights(cWeights, Nodes);
+          weightedMeasure = cWeights;
+        } else {
+          fst::computeCellMeasure<double>(weightedMeasure, JacobDet, cWeights);
+        }
 
         for(int cubPoint=0; cubPoint<numCubPoints; cubPoint++){
           totalVolume += weightedMeasure(0, cubPoint);
@@ -163,6 +170,7 @@ MeshServices::getCurrentVolume(
 
       FieldContainer<double>& cubPoints = elblock.getCubaturePoints();
       FieldContainer<double>& cubWeights = elblock.getCubatureWeights();
+      auto uniformCubature = elblock.cubatureIsUniform();
 
       // Evaluate basis values and gradients at cubature points
       int numFieldsG = elblock.getBasis().getCardinality();
@@ -190,6 +198,8 @@ MeshServices::getCurrentVolume(
       if(spaceDim > 1) coords[1] = myMesh.getY();
       if(spaceDim > 2) coords[2] = myMesh.getZ();
 
+      FieldContainer<double> cWeights(cubWeights);
+
       // *** Element loop ***
       for (int iel=0; iel<numElemsThisBlock; iel++) {
 
@@ -207,8 +217,12 @@ MeshServices::getCurrentVolume(
         CellTools::setJacobian(Jacobian, cubPoints, Nodes, topo);
         CellTools::setJacobianDet(JacobDet, Jacobian );
 
-        // compute weighted measure
-        fst::computeCellMeasure<double>(weightedMeasure, JacobDet, cubWeights);
+        if (!uniformCubature) {
+          elblock.getCubatureWeights(cWeights, Nodes);
+          weightedMeasure = cWeights;
+        } else {
+          fst::computeCellMeasure<double>(weightedMeasure, JacobDet, cWeights);
+        }
 
         for(int iQP=0; iQP<numCubPoints; iQP++){
           double topoVal=0.0;

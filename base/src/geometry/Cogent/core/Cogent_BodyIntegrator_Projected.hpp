@@ -7,7 +7,7 @@
 
 namespace Cogent {
 
-class BodyIntegrator_Projected : public BodyIntegrator, public Projector
+class BodyIntegrator_Projected : virtual public BodyIntegrator, virtual public Projector
 {
   public:
     BodyIntegrator_Projected(
@@ -64,7 +64,7 @@ class BodyIntegrator_Projected : public BodyIntegrator, public Projector
           const FContainer<RealType>& geomData, 
           const FContainer<RealType>& coordCon);
 
-  void
+  virtual void
   getStandardPoints(FContainer<RealType>& refPoints);
 
   private:

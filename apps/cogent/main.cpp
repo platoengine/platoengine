@@ -11,6 +11,8 @@
 
 int main(int argc, char **argv) {
 
+  using Cogent::RealType;
+
   Kokkos::initialize(argc, argv);
 
 
@@ -60,7 +62,7 @@ int main(int argc, char **argv) {
   int numDims = celltype->getDimension();
   Cogent::FContainer<RealType> coordCon("coordCon", numNodes, numDims);
 
-  Teuchos::Array<double> paramVals = geomSpec.get<Teuchos::Array<double>>("Shape Parameters Initial Values");
+  Teuchos::Array<double> paramVals = geomSpec.get<Teuchos::Array<double>>("Shape Parameter Values");
   int numVals = paramVals.size();
   Cogent::FContainer<RealType> geomVals("geomVals",numVals);
   for(int i=0; i<numVals; i++) geomVals(i) = paramVals[i];

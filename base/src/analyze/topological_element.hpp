@@ -52,6 +52,7 @@
 
 #include "types.hpp"
 #include "Plato_Parser.hpp"
+#include "core/Cogent_Integrator.hpp"
 #include <cassert>
 
 #include <string>
@@ -65,24 +66,26 @@ namespace Topological {
 
 class ElementIntegration{
   public: 
-    ElementIntegration() {}
+    ElementIntegration(bool uniform = false) : uniformCubature(uniform) {}
     virtual ~ElementIntegration();
     Intrepid::FieldContainer<Real>& getCubaturePoints() { return *cubPoints; }
     Intrepid::FieldContainer<Real>& getCubatureWeights() { return *cubWeights; }
-    int getNumIntPoints(){ return numPoints; }
+    virtual void getCubatureWeights(Intrepid::FieldContainer<double>& cubWeights, 
+                                    const Intrepid::FieldContainer<double>& nodes){}
+    bool cubatureIsUniform(){ return uniformCubature; }
+    int getNumIntPoints(){ return cubPoints->dimension(0); }
   protected:
+    bool uniformCubature;
     Intrepid::FieldContainer<double> *cubPoints;
     Intrepid::FieldContainer<double> *cubWeights;
-    int numPoints;
 };
 
 class IntrepidIntegration : public ElementIntegration
 {
   public: 
-    IntrepidIntegration( pugi::xml_node& node, shards::CellTopology *blockTopology );
+    IntrepidIntegration( pugi::xml_node& node, Teuchos::RCP<shards::CellTopology> blockTopology );
     virtual ~IntrepidIntegration() {}
   private:
-    Intrepid::DefaultCubatureFactory<double> cubfactory;
     Teuchos::RCP<Intrepid::Cubature<double> > cubature;
 };
 
@@ -91,6 +94,20 @@ class CustomIntegration : public ElementIntegration
   public: 
     CustomIntegration( pugi::xml_node& node, int myDim );
     virtual ~CustomIntegration() {}
+};
+
+class CogentIntegration : public ElementIntegration
+{
+  public: 
+    CogentIntegration( pugi::xml_node& node, Teuchos::RCP<shards::CellTopology> blockTopology );
+    virtual ~CogentIntegration() {}
+    void getCubatureWeights(Intrepid::FieldContainer<double>& cubWeights, 
+                      const Intrepid::FieldContainer<double>& nodes);
+  private:
+    int mNumNodes, mNumDims, mNumPts;
+    Teuchos::RCP<Cogent::Integrator> mCubature;
+    Kokkos::DynRankView<Real, Kokkos::Serial> mCoordVals;
+    Kokkos::DynRankView<Real, Kokkos::Serial> mWeights;
 };
 
 class Element {
@@ -123,6 +140,13 @@ public:
   int getNumIntPoints(){ return elementIntegration->getNumIntPoints(); }
   Intrepid::FieldContainer<Real>& getCubaturePoints() { return elementIntegration->getCubaturePoints(); }
   Intrepid::FieldContainer<Real>& getCubatureWeights() { return elementIntegration->getCubatureWeights(); }
+  void getCubatureWeights(Intrepid::FieldContainer<Real>& weights, 
+                    const Intrepid::FieldContainer<Real>& nodes )
+  {
+    elementIntegration->getCubatureWeights(weights, nodes);
+  }
+  bool cubatureIsUniform(){ return elementIntegration->cubatureIsUniform(); }
+
   Intrepid::Basis<double, Intrepid::FieldContainer<double> >& getBasis(){ return *blockBasis; }
   shards::CellTopology& getTopology() { return *blockTopology; }
 
@@ -153,7 +177,7 @@ protected:
   int groupID; //! Also blockid in exodus-lingo
 
   ElementIntegration* elementIntegration;
-  shards::CellTopology *blockTopology;
+  Teuchos::RCP<shards::CellTopology> blockTopology;
   Intrepid::Basis<double, Intrepid::FieldContainer<double> > *blockBasis;
 
 private:

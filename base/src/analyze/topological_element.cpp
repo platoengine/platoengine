@@ -44,6 +44,11 @@
 #include "exception_handling.hpp"
 #include "types.hpp"
 #include <math.h>
+#include <Intrepid2_HGRAD_HEX_Cn_FEM.hpp>
+#include <core/Cogent_IntegratorFactory.hpp>
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+
 
 #ifdef DEBUG
 #include "communicator.hpp"
@@ -71,13 +76,14 @@ ElementIntegration::~ElementIntegration()
 
 /*****************************************************************************/
 IntrepidIntegration::IntrepidIntegration(pugi::xml_node& node, 
-                                         shards::CellTopology *blockTopology )
+                                         Teuchos::RCP<shards::CellTopology> blockTopology )
 /*****************************************************************************/
 {
   int integrationOrder = Plato::Parse::getInt( node, "order" );
+  Intrepid::DefaultCubatureFactory<double> cubfactory;
   cubature = cubfactory.create( *blockTopology, integrationOrder );
   int dim = cubature->getDimension();
-  numPoints = cubature->getNumPoints();
+  int numPoints = cubature->getNumPoints();
   cubPoints = new Intrepid::FieldContainer<double>(numPoints, dim);
   cubWeights = new Intrepid::FieldContainer<double>(numPoints);
   cubature->getCubature(*cubPoints, *cubWeights);
@@ -87,7 +93,7 @@ IntrepidIntegration::IntrepidIntegration(pugi::xml_node& node,
 CustomIntegration::CustomIntegration(pugi::xml_node& node, int myDim )
 /*****************************************************************************/
 {
-  numPoints = Plato::Parse::numChildren(node, "weights" );
+  int numPoints = Plato::Parse::numChildren(node, "weights" );
   int xpoints = Plato::Parse::numChildren(node, "x" );
   int ypoints = Plato::Parse::numChildren(node, "y" );
   if( myDim == 3 ){
@@ -125,11 +131,84 @@ CustomIntegration::CustomIntegration(pugi::xml_node& node, int myDim )
 }
 
 /*****************************************************************************/
+CogentIntegration::CogentIntegration( pugi::xml_node& node, 
+                                      Teuchos::RCP<shards::CellTopology> blockTopology ) :
+  ElementIntegration(/*uniform=*/ false)
+/*****************************************************************************/
+{
+  // parse and create Cogent cubature
+  Teuchos::ParameterList geomSpec("Geometry");
+  std::string xmlFileName = Plato::Parse::getString( node, "geometry" );
+  Teuchos::updateParametersFromXmlFile(xmlFileName, Teuchos::ptrFromRef(geomSpec));
+
+  if ( !(geomSpec.isType<int>("Projection Order")) ) {
+    int defaultProjectionOrder = 2;
+    p0cout << "!!! 'Projection Order' not specified in " << xmlFileName << "." << endl;
+    p0cout << "!!! Setting 'Projection Order' to " << defaultProjectionOrder << "." << endl;
+    geomSpec.set<int>("Projection Order", defaultProjectionOrder);
+  }
+
+  if ( !(geomSpec.isType<Teuchos::Array<double>>("Shape Parameter Values")) ) {
+    throw ParsingException("'Shape Parameter Values' missing from geometry definition." );
+  }
+
+  // currently only works for hex8 elements
+  mNumNodes = 8;
+
+  // define basis
+  Teuchos::RCP<Intrepid2::Basis<Kokkos::Serial, Real> >
+    intrepidBasis = Teuchos::rcp(new Intrepid2::Basis_HGRAD_HEX_C1_FEM<Kokkos::Serial, Real, Real>() );
+
+  Cogent::IntegratorFactory iFactory;
+  mCubature = iFactory.create(blockTopology, intrepidBasis, geomSpec);
+
+  
+  Kokkos::DynRankView<Real, Kokkos::Serial> points("points", 0, 0);
+  mCubature->getStandardPoints(points);
+
+  mNumDims = points.dimension(1);
+  mNumPts = points.dimension(0);
+
+  cubPoints = new Intrepid::FieldContainer<double>(mNumPts, mNumDims);
+  cubWeights = new Intrepid::FieldContainer<double>(mNumPts);
+
+  auto& p = *cubPoints;
+  auto& w = *cubWeights;
+
+  for(int iPt=0; iPt<mNumPts; iPt++) {
+    w(iPt) = 0.0;
+    for(int iDim=0; iDim<mNumDims; iDim++) {
+      p(iPt, iDim) = points(iPt, iDim);
+    }
+  }
+
+  // create containers
+  mCoordVals = Kokkos::DynRankView<Real, Kokkos::Serial>("coords", mNumNodes, mNumDims);
+  mWeights   = Kokkos::DynRankView<Real, Kokkos::Serial>("coords", mNumPts);
+  
+}
+/*****************************************************************************/
+void CogentIntegration::getCubatureWeights(Intrepid::FieldContainer<double>& weights, 
+                                     const Intrepid::FieldContainer<double>& nodes)
+/*****************************************************************************/
+{
+  
+  for( int inode=0; inode<mNumNodes; inode++) {
+    for( int idim=0; idim<mNumDims; idim++) {
+      mCoordVals(inode, idim) = nodes(0, inode, idim);
+    }
+  }
+  mCubature->getCubatureWeights(mWeights, mCoordVals);
+  for( int ipt=0; ipt<mNumPts; ipt++) {
+    weights(ipt) = mWeights(ipt);
+  }
+}
+
+/*****************************************************************************/
 Element::~Element()
 /*****************************************************************************/
 {
   if(elementIntegration) delete elementIntegration;
-  if(blockTopology) delete blockTopology;
   if(blockBasis) delete blockBasis;
 }
 
@@ -143,9 +222,12 @@ void Element::setIntegrationMethod(pugi::xml_node& node)
   string intgType = Plato::Parse::getString(node, "type");
   if( intgType == "gauss" ){
     elementIntegration = new IntrepidIntegration( node, blockTopology );
-  } else if( intgType == "external" ){
-  } else if( intgType == "custom" ){
+  } else
+  if( intgType == "custom" ){
     elementIntegration = new CustomIntegration( node, myDim );
+  } else
+  if( intgType == "cogent" ){
+    elementIntegration = new CogentIntegration( node, blockTopology );
   }
 }
 
@@ -194,7 +276,7 @@ void Tri3::init()
   myDim = 2;
   NODECONNECT = UNSET_VAR_INDEX;
   GLOBALID    = UNSET_VAR_INDEX;
-  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Triangle<3> >() );
+  blockTopology = Teuchos::rcp(new shards::CellTopology(shards::getCellTopologyData<shards::Triangle<3> >() ) );
   blockBasis = new Intrepid::Basis_HGRAD_TRI_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
 }
 
@@ -282,7 +364,7 @@ void Beam::init()
   myDim = 1;
   NODECONNECT = UNSET_VAR_INDEX;
   GLOBALID    = UNSET_VAR_INDEX;
-  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Line<2> >() );
+  blockTopology = Teuchos::rcp(new shards::CellTopology(shards::getCellTopologyData<shards::Line<2> >() ) );
   blockBasis = new Intrepid::Basis_HGRAD_LINE_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
 }
 
@@ -421,7 +503,7 @@ void Hex8::init()
   myDim = 3;
   NODECONNECT = UNSET_VAR_INDEX;
   GLOBALID    = UNSET_VAR_INDEX;
-  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Hexahedron<8> >() );
+  blockTopology = Teuchos::rcp(new shards::CellTopology(shards::getCellTopologyData<shards::Hexahedron<8> >() ) );
   blockBasis = new Intrepid::Basis_HGRAD_HEX_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
 }
 
@@ -546,7 +628,7 @@ void Tet4::init()
   myDim = 3;
   NODECONNECT = UNSET_VAR_INDEX;
   GLOBALID    = UNSET_VAR_INDEX;
-  blockTopology = new shards::CellTopology(shards::getCellTopologyData<shards::Tetrahedron<4> >() );
+  blockTopology = Teuchos::rcp(new shards::CellTopology(shards::getCellTopologyData<shards::Tetrahedron<4> >() ) );
   blockBasis = new Intrepid::Basis_HGRAD_TET_C1_FEM<double, Intrepid::FieldContainer<double> >() ;
 }
 
@@ -618,7 +700,6 @@ void Element::zeroset()
   GLOBALID    = UNSET_VAR_INDEX;
 
   elementIntegration = nullptr;
-  blockTopology = nullptr;
   blockBasis = nullptr;
 }
 
