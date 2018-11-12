@@ -6,6 +6,8 @@
 #include "core/Cogent_Types.hpp"
 #include "core/Cogent_ParameterizedModel.hpp"
 
+using Cogent::RealType;
+
 static RealType tolerance = 1e-9;
 
 /******************************************************************************

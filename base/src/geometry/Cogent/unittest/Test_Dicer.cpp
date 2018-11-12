@@ -14,6 +14,9 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
+using Cogent::RealType;
+using Cogent::DFadType;
+
 static RealType tolerance = 1e-6;
 static const int nPts = 4;
 static const int nDim = 3;

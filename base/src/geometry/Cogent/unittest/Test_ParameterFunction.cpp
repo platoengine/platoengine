@@ -3,6 +3,9 @@
 #include "core/Cogent_Types.hpp"
 #include "core/Cogent_ParameterFunction.hpp"
 
+using Cogent::RealType;
+using Cogent::DFadType;
+
 /******************************************************************************
 *  Test: simpleAddition
 *  Purpose:  Check for basic functionality of ParameterFunction class

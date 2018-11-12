@@ -10,6 +10,8 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
+using Cogent::RealType;
+
 static RealType tolerance = 1e-9;
 
 TEST(BodyReducedTest, shapeParameter)
