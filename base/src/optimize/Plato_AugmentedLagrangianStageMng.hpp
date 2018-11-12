@@ -90,9 +90,9 @@ public:
             mNumObjHessEval(0),
             mTrialObjFuncValue(std::numeric_limits<ScalarType>::max()),
             mCurrentObjFuncValue(std::numeric_limits<ScalarType>::max()),
+            mPreviousObjFuncValue(std::numeric_limits<ScalarType>::max()),
             mTrialAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mCurrentAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
-            mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
             mPreviousAugLagFuncValue(std::numeric_limits<ScalarType>::max()),
             mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
             mNormConstraints(std::numeric_limits<ScalarType>::max()),
@@ -493,7 +493,7 @@ public:
     void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         // compute objective and constraint stagnation measures
-        mObjectiveStagnationMeasure = std::abs(mCurrentObjFuncValue - mPreviousObjectiveValue);
+        mObjectiveStagnationMeasure = std::abs(mCurrentObjFuncValue - mPreviousObjFuncValue);
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
@@ -682,22 +682,16 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Cache current objective and constraint criteria values
-    **********************************************************************************/
-    void cacheCurrentCriteriaValues()
-    {
-        mPreviousObjectiveValue = mCurrentObjFuncValue;
-        mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
-        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mPreviousConstraintValues);
-    }
-
-    /******************************************************************************//**
      * @brief Cache trial objective and constraint criteria values
     **********************************************************************************/
     void cacheTrialCriteriaValues()
     {
+        mPreviousObjFuncValue = mCurrentObjFuncValue;
         mCurrentObjFuncValue = mTrialObjFuncValue;
+
+        mPreviousAugLagFuncValue = mCurrentAugLagFuncValue;
         mCurrentAugLagFuncValue = mTrialAugLagFuncValue;
+        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mPreviousConstraintValues);
         Plato::update(static_cast<ScalarType>(1), *mTrialConstraintValues, static_cast<ScalarType>(0), *mCurrentConstraintValues);
     }
 
@@ -846,9 +840,9 @@ private:
 
     ScalarType mTrialObjFuncValue;
     ScalarType mCurrentObjFuncValue;
+    ScalarType mPreviousObjFuncValue;
     ScalarType mTrialAugLagFuncValue;
     ScalarType mCurrentAugLagFuncValue;
-    ScalarType mPreviousObjectiveValue;
     ScalarType mPreviousAugLagFuncValue;
     ScalarType mObjectiveStagnationMeasure;
 
