@@ -63,6 +63,10 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class StateData
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aDataFactory linear algebra factory
+    **********************************************************************************/
     explicit StateData(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory) :
             mCurrentObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
             mCurrentControl(aDataFactory.control().create()),
@@ -71,23 +75,46 @@ public:
             mCurrentConstraintGradient(aDataFactory.control().create())
     {
     }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     ~StateData()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return current objective function value
+     * @return current objective function value
+    **********************************************************************************/
     ScalarType getCurrentObjectiveFunctionValue() const
     {
         return (mCurrentObjectiveFunctionValue);
     }
+
+    /******************************************************************************//**
+     * @brief Set current objective function value
+     * @param [in] aInput current objective function value
+    **********************************************************************************/
     void setCurrentObjectiveFunctionValue(const ScalarType & aInput)
     {
         mCurrentObjectiveFunctionValue = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Return constant reference to current control multi-vector
+     * @return current control multi-vector
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentControl() const
     {
         assert(mCurrentControl.get() != nullptr);
         return (mCurrentControl.operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Set current control multi-vector
+     * @param [in] aInput current control multi-vector
+    **********************************************************************************/
     void setCurrentControl(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentControl.get() != nullptr);
@@ -95,11 +122,20 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentControl.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Return constant reference to current descent direction
+     * @return current descent direction
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentTrialStep() const
     {
         assert(mCurrentTrialStep.get() != nullptr);
         return (mCurrentTrialStep.operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Set current descent direction
+     * @param [in] aInput current descent direction
+    **********************************************************************************/
     void setCurrentTrialStep(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentTrialStep.get() != nullptr);
@@ -107,11 +143,20 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentTrialStep.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Return constant reference to current objective function gradient
+     * @return current objective function gradient
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentObjectiveGradient() const
     {
         assert(mCurrentObjectiveGradient.get() != nullptr);
         return (mCurrentObjectiveGradient);
     }
+
+    /******************************************************************************//**
+     * @brief Set current objective function gradient
+     * @param [in] aInput current objective function gradient
+    **********************************************************************************/
     void setCurrentObjectiveGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentObjectiveGradient.get() != nullptr);
@@ -119,11 +164,16 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentObjectiveGradient.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Return constant reference to current constraint gradient
+     * @return current constraint gradient
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentConstraintGradient() const
     {
         assert(mCurrentConstraintGradient.get() != nullptr);
         return (mCurrentConstraintGradient);
     }
+
     void setCurrentConstraintGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(mCurrentConstraintGradient.get() != nullptr);
@@ -143,6 +193,7 @@ private:
     StateData(const Plato::StateData<ScalarType, OrdinalType>&);
     Plato::StateData<ScalarType, OrdinalType> & operator=(const Plato::StateData<ScalarType, OrdinalType>&);
 };
+// class StateData
 
 } // namespace Plato
 

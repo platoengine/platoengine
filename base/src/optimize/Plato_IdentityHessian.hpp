@@ -74,6 +74,7 @@ public:
     {
         return;
     }
+
     void apply(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
