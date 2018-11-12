@@ -497,8 +497,8 @@ public:
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
-        mStateData->setCurrentObjectiveGradient(aDataMng.getCurrentGradient());
-        mStateData->setCurrentObjectiveFunctionValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mStateData->setCurrentCriteriaGradient(aDataMng.getCurrentGradient());
+        mStateData->setCurrentCriteriaValue(aDataMng.getCurrentObjectiveFunctionValue());
 
         mObjectiveGradientOperator->update(mStateData.operator*());
         mObjectiveHessianOperator->update(mStateData.operator*());
@@ -506,13 +506,15 @@ public:
 
         const OrdinalType tNumConstraints = mConstraints->size();
         assert(tNumConstraints == mCostraintGradients->size());
-        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        const OrdinalType tDUAL_VECTOR_INDEX = 0;
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradient =
-                    mCostraintGradients->operator[](tConstraintIndex);
-            mStateData->setCurrentConstraintGradient(tMyConstraintGradient);
-            mConstraintGradientOperator->operator[](tConstraintIndex).update(mStateData.operator*());
-            mConstraintHessianOperators->operator[](tConstraintIndex).update(mStateData.operator*());
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad = (*mCostraintGradients)[tIndex];
+            mStateData->setCurrentCriteriaGradient(tMyConstraintGrad);
+            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VECTOR_INDEX, tIndex);
+            mStateData->setCurrentCriteriaValue(tMyConstraintValue);
+            (*mConstraintGradientOperator)[tIndex].update(*mStateData);
+            (*mConstraintHessianOperators)[tIndex].update(*mStateData);
         }
 
         aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);

@@ -163,8 +163,8 @@ public:
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
-        mStateData->setCurrentObjectiveGradient(aDataMng.getCurrentGradient());
-        mStateData->setCurrentObjectiveFunctionValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mStateData->setCurrentCriteriaGradient(aDataMng.getCurrentGradient());
+        mStateData->setCurrentCriteriaValue(aDataMng.getCurrentObjectiveFunctionValue());
         mPreconditioner->update(mStateData.operator*());
 
         const OrdinalType tNumObjectives = mObjectives->size();

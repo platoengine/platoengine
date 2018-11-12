@@ -68,11 +68,10 @@ public:
      * @param [in] aDataFactory linear algebra factory
     **********************************************************************************/
     explicit StateData(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory) :
-            mCurrentObjectiveFunctionValue(std::numeric_limits<ScalarType>::max()),
+            mCurrentCriteriaValue(std::numeric_limits<ScalarType>::max()),
             mCurrentControl(aDataFactory.control().create()),
             mCurrentTrialStep(aDataFactory.control().create()),
-            mCurrentObjectiveGradient(aDataFactory.control().create()),
-            mCurrentConstraintGradient(aDataFactory.control().create())
+            mCurrentCriteriaGradient(aDataFactory.control().create())
     {
     }
 
@@ -84,21 +83,21 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return current objective function value
-     * @return current objective function value
+     * @brief Return current criteria value
+     * @return current criteria value
     **********************************************************************************/
-    ScalarType getCurrentObjectiveFunctionValue() const
+    ScalarType getCurrentCriteriaValue() const
     {
-        return (mCurrentObjectiveFunctionValue);
+        return (mCurrentCriteriaValue);
     }
 
     /******************************************************************************//**
-     * @brief Set current objective function value
-     * @param [in] aInput current objective function value
+     * @brief Set current criteria value
+     * @param [in] aInput current criteria value
     **********************************************************************************/
-    void setCurrentObjectiveFunctionValue(const ScalarType & aInput)
+    void setCurrentCriteriaValue(const ScalarType & aInput)
     {
-        mCurrentObjectiveFunctionValue = aInput;
+        mCurrentCriteriaValue = aInput;
     }
 
     /******************************************************************************//**
@@ -144,50 +143,31 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to current objective function gradient
-     * @return current objective function gradient
+     * @brief Return constant reference to current criteria gradient
+     * @return current criteria gradient
     **********************************************************************************/
-    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentObjectiveGradient() const
+    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentCriteriaGradient() const
     {
-        assert(mCurrentObjectiveGradient.get() != nullptr);
-        return (mCurrentObjectiveGradient);
+        assert(mCurrentCriteriaGradient.get() != nullptr);
+        return (mCurrentCriteriaGradient);
     }
 
     /******************************************************************************//**
-     * @brief Set current objective function gradient
-     * @param [in] aInput current objective function gradient
+     * @brief Set current criteria gradient
+     * @param [in] aInput current criteria gradient
     **********************************************************************************/
-    void setCurrentObjectiveGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
+    void setCurrentCriteriaGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mCurrentObjectiveGradient.get() != nullptr);
-        assert(aInput.getNumVectors() == mCurrentObjectiveGradient->getNumVectors());
-        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentObjectiveGradient.operator*());
-    }
-
-    /******************************************************************************//**
-     * @brief Return constant reference to current constraint gradient
-     * @return current constraint gradient
-    **********************************************************************************/
-    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentConstraintGradient() const
-    {
-        assert(mCurrentConstraintGradient.get() != nullptr);
-        return (mCurrentConstraintGradient);
-    }
-
-    void setCurrentConstraintGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
-    {
-        assert(mCurrentConstraintGradient.get() != nullptr);
-        assert(aInput.getNumVectors() == mCurrentConstraintGradient->getNumVectors());
-
-        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentConstraintGradient.operator*());
+        assert(mCurrentCriteriaGradient.get() != nullptr);
+        assert(aInput.getNumVectors() == mCurrentCriteriaGradient->getNumVectors());
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mCurrentCriteriaGradient.operator*());
     }
 
 private:
-    ScalarType mCurrentObjectiveFunctionValue;
+    ScalarType mCurrentCriteriaValue;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControl;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentTrialStep;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentObjectiveGradient;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintGradient;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentCriteriaGradient;
 
 private:
     StateData(const Plato::StateData<ScalarType, OrdinalType>&);
