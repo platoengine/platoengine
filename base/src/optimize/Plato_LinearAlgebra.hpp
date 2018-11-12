@@ -1,10 +1,4 @@
 /*
- * Plato_LinearAlgebra.hpp
- *
- *  Created on: Oct 17, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,13 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_LinearAlgebra.hpp
+ *
+ *  Created on: Oct 17, 2017
+ */
+
 
 #ifndef PLATO_LINEARALGEBRA_HPP_
 #define PLATO_LINEARALGEBRA_HPP_
