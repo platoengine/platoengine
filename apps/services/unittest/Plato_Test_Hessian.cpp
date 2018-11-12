@@ -4,6 +4,7 @@
  *  Created on: Nov 11, 2018
  */
 
+#include <cmath>
 #include <cassert>
 
 namespace Plato
@@ -16,6 +17,10 @@ public:
     explicit HessianLBFGS(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory, OrdinalType aStorage = 8) :
             mMaxStorage(aStorage),
             mMemoryLength(0),
+            mLowerBoundCurvature(1e-7),
+            mUpperBoundCurvature(1e7),
+            mNewDeltaControl(aDataFactory.control().create()),
+            mNewDeltaGradient(aDataFactory.control().create()),
             mOldHessTimesVector(aDataFactory.control().create()),
             mNewHessTimesVector(aDataFactory.control().create()),
             mDeltaControl(),
@@ -37,8 +42,22 @@ public:
         this->initialize();
     }
 
+    void setCurvatureBounds(const ScalarType & aLower, const ScalarType & aUpper)
+    {
+        mLowerBoundCurvature = aLower;
+        mUpperBoundCurvature = aUpper;
+    }
+
     void update(const Plato::StateData<ScalarType, OrdinalType> & aStateData)
     {
+        const ScalarType tCurrentCriterionValue = aStateData.getCurrentCriterionValue();
+        const ScalarType tNormCurrentControl = Plato::norm(aStateData.getCurrentControl());
+        const ScalarType tNormCurrentCriterionGrad = Plato::norm(aStateData.getCurrentCriterionGradient());
+        if(std::isfinite(tCurrentCriterionValue) && std::isfinite(tNormCurrentControl) && std::isfinite(tNormCurrentCriterionGrad))
+        {
+            this->computeNewSecantInformation(aStateData);
+            this->updateMemory();
+        }
     }
 
     void apply(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
@@ -48,6 +67,7 @@ public:
         if(mMemoryLength == static_cast<OrdinalType>(0))
         {
             Plato::update(static_cast<ScalarType>(1), aVector, static_cast<ScalarType>(0), aOutput);
+            return;
         }
 
         this->computeInitialApproximation(aVector);
@@ -60,7 +80,7 @@ public:
                 this->bfgs(tIndex_I, (*mDeltaControl)[tIndex_J], (*mOldHessTimesDeltaControl)[tIndex_J], (*mNewHessTimesDeltaControl)[tIndex_J]);
             }
             this->bfgs(tIndex_I, aVector, *mOldHessTimesVector, *mNewHessTimesVector);
-            this->advance();
+            this->advance(tIndex_I);
         }
     }
 
@@ -86,10 +106,10 @@ private:
         mNewHessTimesDeltaControl = std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>(mMaxStorage, *mNewHessTimesVector);
     }
 
-    void advance()
+    void advance(const OrdinalType & aOuterIndex)
     {
         Plato::update(static_cast<ScalarType>(1), *mNewHessTimesVector, static_cast<ScalarType>(0), *mOldHessTimesVector);
-        for(OrdinalType tIndex = tIndex_I; tIndex < mMemoryLength; tIndex++)
+        for(OrdinalType tIndex = aOuterIndex; tIndex < mMemoryLength; tIndex++)
         {
             Plato::update(static_cast<ScalarType>(1), (*mNewHessTimesDeltaControl)[tIndex], static_cast<ScalarType>(0), (*mOldHessTimesDeltaControl)[tIndex]);
         }
@@ -133,10 +153,52 @@ private:
         Plato::update(tBeta, tMyDeltaGrad, static_cast<ScalarType>(1), aOutput);
     }
 
+    void updateMemory()
+    {
+        const ScalarType tCurvatureCondition = Plato::dot(*mNewDeltaControl, *mNewDeltaGradient);
+        bool tIsCurvatureConditionAboveLowerBound = tCurvatureCondition > mLowerBoundCurvature ? true : false;
+        bool tIsCurvatureConditionBelowUpperBound = tCurvatureCondition < mUpperBoundCurvature ? true : false;
+        if(tIsCurvatureConditionAboveLowerBound && tIsCurvatureConditionBelowUpperBound)
+        {
+            if(mMemoryLength == mMaxStorage)
+            {
+                const OrdinalType tLength = mMaxStorage - static_cast<OrdinalType>(1);
+                for(OrdinalType tBaseIndex = 0; tBaseIndex < tLength; tBaseIndex++)
+                {
+                    const OrdinalType tNextIndex = tBaseIndex + static_cast<OrdinalType>(1);
+                    Plato::update(static_cast<ScalarType>(1), (*mDeltaControl)[tNextIndex], static_cast<ScalarType>(0), (mDeltaControl)[tBaseIndex]);
+                    Plato::update(static_cast<ScalarType>(1), (*mDeltaGradient)[tNextIndex], static_cast<ScalarType>(0), (mDeltaGradient)[tBaseIndex]);
+                }
+            }
+
+            Plato::MultiVector<ScalarType, OrdinalType> & tMyDeltaControl = (*mDeltaControl)[mMemoryLength];
+            Plato::update(static_cast<ScalarType>(1), *mNewDeltaControl, static_cast<ScalarType>(0), tMyDeltaControl);
+            Plato::MultiVector<ScalarType, OrdinalType> & tMyDeltaGradient = (*mDeltaGradient)[mMemoryLength];
+            Plato::update(static_cast<ScalarType>(1), *mNewDeltaGradient, static_cast<ScalarType>(0), tMyDeltaGradient);
+
+            mMemoryLength++;
+            mMemoryLength = std::min(mMemoryLength, mMaxStorage);
+        }
+    }
+
+
+    void computeNewSecantInformation(const Plato::StateData<ScalarType, OrdinalType> & aStateData)
+    {
+        Plato::update(static_cast<ScalarType>(1), aStateData.getCurrentControl(), static_cast<ScalarType>(0), *mNewDeltaControl);
+        Plato::update(static_cast<ScalarType>(-1), aStateData.getPreviousControl(), static_cast<ScalarType>(1), *mNewDeltaControl);
+        Plato::update(static_cast<ScalarType>(1), aStateData.getCurrentCriterionGradient(), static_cast<ScalarType>(0), *mNewDeltaGradient);
+        Plato::update(static_cast<ScalarType>(-1), aStateData.getPreviousCriterionGradient(), static_cast<ScalarType>(1), *mNewDeltaGradient);
+    }
+
 private:
     OrdinalType mMaxStorage;
     OrdinalType mMemoryLength;
 
+    ScalarType mLowerBoundCurvature;
+    ScalarType mUpperBoundCurvature;
+
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mNewDeltaControl;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mNewDeltaGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mOldHessTimesVector;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mNewHessTimesVector;
 
