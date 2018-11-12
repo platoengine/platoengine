@@ -48,6 +48,8 @@
 
 #include "gtest/gtest.h"
 
+#include "Plato_UnitTestUtils.hpp"
+
 #include <cmath>
 #include <cassert>
 #include <algorithm>
@@ -274,6 +276,24 @@ TEST(PlatoTest, HessianLBFGS)
 
     const size_t tMaxMemoryLength = 4;
     Plato::HessianLBFGS<double> tHessian(tDataFactory, tMaxMemoryLength);
+
+    // **** FIRST CALL TO APPLY ****
+    const size_t tVECTOR_INDEX = 0;
+    Plato::StateData<double> tStateData(tDataFactory);
+    tControl(tVECTOR_INDEX, 0) = 0.552783345944550;
+    tControl(tVECTOR_INDEX, 1) = 1.03909065350496;
+    tControl(tVECTOR_INDEX, 2) = -1.11763868326521;
+    tControl(tVECTOR_INDEX, 3) = 1.26065870912090;
+    tStateData.setCurrentControl(tControl);
+    Plato::StandardMultiVector<double> tGrad(tNumVectors, tNumControls);
+    tGrad(tVECTOR_INDEX, 0) = -0.485176625320520;
+    tGrad(tVECTOR_INDEX, 1) = 2.00321866981568;
+    tGrad(tVECTOR_INDEX, 2) = -0.753023677610612;
+    tGrad(tVECTOR_INDEX, 3) = 0.00503015828035112;
+    tStateData.setCurrentCriterionGradient(tGrad);
+    Plato::StandardMultiVector<double> tOutput(tNumVectors, tNumControls);
+    tHessian.apply(tControl, tGrad, tOutput);
+    PlatoTest::checkMultiVectorData(tOutput, tGrad);
 }
 
 } // namespace PlatoTest
