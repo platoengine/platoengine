@@ -125,7 +125,6 @@ public:
 
         for(OrdinalType tIndex_I = 1; tIndex_I < mMemoryLength; tIndex_I++)
         {
-            Plato::fill(static_cast<ScalarType>(0), *mNewHessTimesDeltaControl);
             for(OrdinalType tIndex_J = tIndex_I; tIndex_J < mMemoryLength; tIndex_J++)
             {
                 this->bfgs(tIndex_I, (*mDeltaControl)[tIndex_J], (*mOldHessTimesDeltaControl)[tIndex_J], (*mNewHessTimesDeltaControl)[tIndex_J]);
@@ -174,7 +173,6 @@ private:
                 Plato::dot( (*mDeltaGradient)[mMemoryLength], (*mDeltaGradient)[mMemoryLength] );
         const ScalarType tGamma0 = tDeltaGradDotDeltaGrad / tDeltaControlDotDeltaGrad;
 
-        Plato::fill(static_cast<ScalarType>(0), *mOldHessTimesDeltaControl);
         for(OrdinalType tIndex = 0; tIndex < mMemoryLength; tIndex++)
         {
             Plato::update(tGamma0, (*mDeltaControl)[tIndex], static_cast<ScalarType>(0), (*mOldHessTimesDeltaControl)[tIndex]);
@@ -217,8 +215,8 @@ private:
                 for(OrdinalType tBaseIndex = 0; tBaseIndex < tLength; tBaseIndex++)
                 {
                     const OrdinalType tNextIndex = tBaseIndex + static_cast<OrdinalType>(1);
-                    Plato::update(static_cast<ScalarType>(1), (*mDeltaControl)[tNextIndex], static_cast<ScalarType>(0), (mDeltaControl)[tBaseIndex]);
-                    Plato::update(static_cast<ScalarType>(1), (*mDeltaGradient)[tNextIndex], static_cast<ScalarType>(0), (mDeltaGradient)[tBaseIndex]);
+                    Plato::update(static_cast<ScalarType>(1), (*mDeltaControl)[tNextIndex], static_cast<ScalarType>(0), (*mDeltaControl)[tBaseIndex]);
+                    Plato::update(static_cast<ScalarType>(1), (*mDeltaGradient)[tNextIndex], static_cast<ScalarType>(0), (*mDeltaGradient)[tBaseIndex]);
                 }
             }
 
@@ -262,3 +260,20 @@ private:
 
 }
 // namespace Plato
+
+namespace PlatoTest
+{
+
+TEST(PlatoTest, HessianLBFGS)
+{
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 10;
+    Plato::DataFactory<double> tDataFactory;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumControls);
+    tDataFactory.allocateControl(tControl);
+
+    const size_t tMaxMemoryLength = 4;
+    Plato::HessianLBFGS<double> tHessian(tDataFactory, tMaxMemoryLength);
+}
+
+} // namespace PlatoTest
