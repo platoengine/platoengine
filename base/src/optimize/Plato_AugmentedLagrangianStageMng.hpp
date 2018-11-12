@@ -111,7 +111,8 @@ public:
             mTrialConstraintValues(aFactory->dual().create()),
             mCurrentConstraintValues(aFactory->dual().create()),
             mPreviousConstraintValues(aFactory->dual().create()),
-            mCostraintGradients(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>()),
+            mCurrentCostraintGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>()),
+            mPreviousCostraintGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>()),
             mObjective(aObjective),
             mConstraints(aConstraints),
             mPreconditioner(std::make_shared<Plato::IdentityPreconditioner<ScalarType, OrdinalType>>()),
@@ -507,14 +508,16 @@ public:
         mPreconditioner->update(*mStateData);
 
         const OrdinalType tNumConstraints = mConstraints->size();
-        assert(tNumConstraints == mCostraintGradients->size());
+        assert(tNumConstraints == mCurrentCostraintGrad->size());
         const OrdinalType tDUAL_VECTOR_INDEX = 0;
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad = (*mCostraintGradients)[tIndex];
-            mStateData->setCurrentCriterionGradient(tMyConstraintGrad);
             const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VECTOR_INDEX, tIndex);
             mStateData->setCurrentCriterionValue(tMyConstraintValue);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyCurrentGrad = (*mCurrentCostraintGrad)[tIndex];
+            mStateData->setCurrentCriterionGradient(tMyCurrentGrad);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyPreviousGrad = (*mPreviousCostraintGrad)[tIndex];
+            mStateData->setPreviousCriterionGradient(tMyPreviousGrad);
             (*mConstraintGradientOperator)[tIndex].update(*mStateData);
             (*mConstraintHessianOperators)[tIndex].update(*mStateData);
         }
@@ -703,9 +706,10 @@ private:
     {
         const OrdinalType tVECTOR_INDEX = 0;
         const OrdinalType tNumConstraints = mCurrentConstraintValues->operator[](tVECTOR_INDEX).size();
-        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            mCostraintGradients->add(mControlWorkVec.operator*());
+            mCurrentCostraintGrad->add(*mControlWorkVec);
+            mPreviousCostraintGrad->add(*mControlWorkVec);
         }
 
         const ScalarType tInitialLagrangeMultipliers = 0.5;
@@ -756,7 +760,7 @@ private:
         assert(mConstraintGradientOperator.get() != nullptr);
 
         // Compute inequality constraint gradient: \frac{\partial h_i}{\partial\mathbf{z}}
-        const OrdinalType tCONSTRAINT_VEC_INDEX = 0;
+        const OrdinalType tDUAL_VEC_INDEX = 0;
         const ScalarType tOneOverPenalty = static_cast<ScalarType>(1.) / mPenaltyParameter;
 
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -764,16 +768,16 @@ private:
         {
             assert(mConstraintGradientOperator->ptr(tIndex).get() != nullptr);
 
-            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
+            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VEC_INDEX, tIndex);
 
             // Add contribution from: \lambda_i\frac{\partial h_i}{\partial\mathbf{z}} to Lagrangian gradient
             Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradient =
-                    mCostraintGradients->operator[](tCONSTRAINT_VEC_INDEX);
+                    mCurrentCostraintGrad->operator[](tDUAL_VEC_INDEX);
             Plato::fill(static_cast<ScalarType>(0), tMyConstraintGradient);
             mConstraintGradientOperator->operator[](tIndex).compute(aControl, tMyConstraintGradient);
             mNumConstraintGradientEvaluations[tIndex] = mNumConstraintGradientEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
-            const ScalarType tLagrangeMultiplier = mLagrangeMultipliers->operator()(tCONSTRAINT_VEC_INDEX, tIndex);
+            const ScalarType tLagrangeMultiplier = mLagrangeMultipliers->operator()(tDUAL_VEC_INDEX, tIndex);
             Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mObjectiveGradient);
 
             // Add contribution from: \mu*h_i(\mathbf{u}(\mathbf{z}),\mathbf{z})\frac{\partial h_i}{\partial\mathbf{z}}.
@@ -798,22 +802,22 @@ private:
         assert(mConstraintHessianOperators.get() != nullptr);
 
         // Apply vector to inequality constraint Hessian operator and add contribution to total Hessian
-        const OrdinalType tCONSTRAINT_VEC_INDEX = 0;
+        const OrdinalType tDUAL_VEC_INDEX = 0;
         const ScalarType tOneOverPenalty = static_cast<ScalarType>(1.) / mPenaltyParameter;
 
         const OrdinalType tNumConstraints = mConstraints->size();
-        const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGradients = (*mCostraintGradients)[tCONSTRAINT_VEC_INDEX];
+        const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad = (*mCurrentCostraintGrad)[tDUAL_VEC_INDEX];
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             assert(mConstraintHessianOperators->ptr(tIndex).get() != nullptr);
 
-            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tCONSTRAINT_VEC_INDEX, tIndex);
+            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VEC_INDEX, tIndex);
             // Add contribution from: \lambda_i\frac{\partial^2 h_i}{\partial\mathbf{z}^2}
             Plato::fill(static_cast<ScalarType>(0), *mControlWorkVec);
             (*mConstraintHessianOperators)[tIndex].apply(aControl, aVector, *mControlWorkVec);
             mNumConstraintHessianEvaluations[tIndex] = mNumConstraintHessianEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
-            Plato::update((*mLagrangeMultipliers)(tCONSTRAINT_VEC_INDEX, tIndex),
+            Plato::update((*mLagrangeMultipliers)(tDUAL_VEC_INDEX, tIndex),
                           *mControlWorkVec,
                           static_cast<ScalarType>(1),
                           aOutput);
@@ -823,11 +827,11 @@ private:
             Plato::update(tAlpha, *mControlWorkVec, static_cast<ScalarType>(1), aOutput);
 
             // Compute Jacobian, i.e. \frac{\partial h_i}{\partial\mathbf{z}}
-            ScalarType tJacobianDotTrialDirection = Plato::dot(tMyConstraintGradients, aVector);
+            ScalarType tJacobianDotTrialDirection = Plato::dot(tMyConstraintGrad, aVector);
             ScalarType tBeta = tOneOverPenalty * tJacobianDotTrialDirection;
             // Add contribution from: \mu\left(\frac{\partial h_i}{\partial\mathbf{z}}^{T}
             //                        \frac{\partial h_i}{\partial\mathbf{z}}\right)
-            Plato::update(tBeta, tMyConstraintGradients, static_cast<ScalarType>(1), aOutput);
+            Plato::update(tBeta, tMyConstraintGrad, static_cast<ScalarType>(1), aOutput);
         }
     }
 
@@ -866,7 +870,8 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousConstraintValues;
 
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mCostraintGradients;
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mCurrentCostraintGrad;
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mPreviousCostraintGrad;
 
     std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
