@@ -189,20 +189,20 @@ public:
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
-        mStateData->setCurrentCriteriaGradient(aDataMng.getCurrentObjectiveGradient());
-        mStateData->setCurrentCriteriaValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentObjectiveGradient());
+        mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
 
-        mObjectiveGradient->update(mStateData.operator*());
+        mObjectiveGradient->update(*mStateData);
 
         const OrdinalType tDUAL_VECTOR_INDEX = 0;
         const OrdinalType tNumConstraints = aDataMng.getNumConstraints();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             const ScalarType tMyConstraintValue = aDataMng.getCurrentConstraintValue(tDUAL_VECTOR_INDEX, tIndex);
-            mStateData->setCurrentCriteriaValue(tMyConstraintValue);
+            mStateData->setCurrentCriterionValue(tMyConstraintValue);
             const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad =
                     aDataMng.getCurrentConstraintGradients(tIndex);
-            mStateData->setCurrentCriteriaGradient(tMyConstraintGrad);
+            mStateData->setCurrentCriterionGradient(tMyConstraintGrad);
             (*mConstraintGradients)[tIndex].update(*mStateData);
         }
     }

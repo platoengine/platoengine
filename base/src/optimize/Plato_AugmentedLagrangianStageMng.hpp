@@ -497,12 +497,14 @@ public:
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
-        mStateData->setCurrentCriteriaGradient(aDataMng.getCurrentGradient());
-        mStateData->setCurrentCriteriaValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mStateData->setPreviousControl(aDataMng.getPreviousControl());
+        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
+        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
+        mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
 
-        mObjectiveGradientOperator->update(mStateData.operator*());
-        mObjectiveHessianOperator->update(mStateData.operator*());
-        mPreconditioner->update(mStateData.operator*());
+        mObjectiveGradientOperator->update(*mStateData);
+        mObjectiveHessianOperator->update(*mStateData);
+        mPreconditioner->update(*mStateData);
 
         const OrdinalType tNumConstraints = mConstraints->size();
         assert(tNumConstraints == mCostraintGradients->size());
@@ -510,9 +512,9 @@ public:
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad = (*mCostraintGradients)[tIndex];
-            mStateData->setCurrentCriteriaGradient(tMyConstraintGrad);
+            mStateData->setCurrentCriterionGradient(tMyConstraintGrad);
             const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VECTOR_INDEX, tIndex);
-            mStateData->setCurrentCriteriaValue(tMyConstraintValue);
+            mStateData->setCurrentCriterionValue(tMyConstraintValue);
             (*mConstraintGradientOperator)[tIndex].update(*mStateData);
             (*mConstraintHessianOperators)[tIndex].update(*mStateData);
         }

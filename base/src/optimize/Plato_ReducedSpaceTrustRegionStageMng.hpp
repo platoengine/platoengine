@@ -163,15 +163,17 @@ public:
 
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
-        mStateData->setCurrentCriteriaGradient(aDataMng.getCurrentGradient());
-        mStateData->setCurrentCriteriaValue(aDataMng.getCurrentObjectiveFunctionValue());
-        mPreconditioner->update(mStateData.operator*());
+        mStateData->setPreviousControl(aDataMng.getPreviousControl());
+        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
+        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
+        mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mPreconditioner->update(*mStateData);
 
         const OrdinalType tNumObjectives = mObjectives->size();
         for(OrdinalType tObjectiveIndex = 0; tObjectiveIndex < tNumObjectives; tObjectiveIndex++)
         {
-            mObjectivesGradient->operator[](tObjectiveIndex).update(mStateData.operator*());
-            mObjectiveHessians->operator[](tObjectiveIndex).update(mStateData.operator*());
+            mObjectivesGradient->operator[](tObjectiveIndex).update(*mStateData);
+            mObjectiveHessians->operator[](tObjectiveIndex).update(*mStateData);
         }
 
         aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
