@@ -101,6 +101,18 @@ public:
         mUpperBoundCurvature = aUpper;
     }
 
+    const Plato::MultiVector<ScalarType, OrdinalType> & getDeltaControl(const OrdinalType & tIndex)
+    {
+        assert(tIndex < mMaxStorage);
+        return ( (*mDeltaControl)[tIndex] );
+    }
+
+    const Plato::MultiVector<ScalarType, OrdinalType> & getDeltaGradient(const OrdinalType & tIndex)
+    {
+        assert(tIndex < mMaxStorage);
+        return ( (*mDeltaGradient)[tIndex] );
+    }
+
     void update(const Plato::StateData<ScalarType, OrdinalType> & aStateData)
     {
         const ScalarType tCurrentCriterionValue = aStateData.getCurrentCriterionValue();
@@ -232,7 +244,6 @@ private:
         }
     }
 
-
     void computeNewSecantInformation(const Plato::StateData<ScalarType, OrdinalType> & aStateData)
     {
         Plato::update(static_cast<ScalarType>(1), aStateData.getCurrentControl(), static_cast<ScalarType>(0), *mNewDeltaControl);
@@ -280,6 +291,7 @@ TEST(PlatoTest, HessianLBFGS)
     // **** FIRST CALL TO APPLY ****
     const size_t tVECTOR_INDEX = 0;
     Plato::StateData<double> tStateData(tDataFactory);
+    tStateData.setCurrentCriterionValue(1);
     tControl(tVECTOR_INDEX, 0) = 0.552783345944550;
     tControl(tVECTOR_INDEX, 1) = 1.03909065350496;
     tControl(tVECTOR_INDEX, 2) = -1.11763868326521;
@@ -294,6 +306,35 @@ TEST(PlatoTest, HessianLBFGS)
     Plato::StandardMultiVector<double> tOutput(tNumVectors, tNumControls);
     tHessian.apply(tControl, tGrad, tOutput);
     PlatoTest::checkMultiVectorData(tOutput, tGrad);
+
+    // **** FIRST CALL TO UPDATE ****
+    tStateData.setPreviousControl(tControl);
+    tStateData.setPreviousCriterionGradient(tGrad);
+    tStateData.setCurrentCriterionValue(1.817160461668281);
+    tControl(tVECTOR_INDEX, 0) = 1.03795997126507;
+    tControl(tVECTOR_INDEX, 1) = -0.964128016310720;
+    tControl(tVECTOR_INDEX, 2) = -0.364615005654596;
+    tControl(tVECTOR_INDEX, 3) = 1.25562855084055;
+    tStateData.setCurrentControl(tControl);
+    tGrad(tVECTOR_INDEX, 0) = 2.52394128404335;
+    tGrad(tVECTOR_INDEX, 1) = -2.08147201454278;
+    tGrad(tVECTOR_INDEX, 2) = -0.0939313592226049;
+    tGrad(tVECTOR_INDEX, 3) = 0.489260463064621;
+    tStateData.setCurrentCriterionGradient(tGrad);
+    tHessian.update(tStateData);
+    // TEST SECANT INFORMATION
+    Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
+    tGold(tVECTOR_INDEX, 0) = 0.485176625320520;
+    tGold(tVECTOR_INDEX, 1) = -2.00321866981568;
+    tGold(tVECTOR_INDEX, 2) = 0.753023677610612;
+    tGold(tVECTOR_INDEX, 3) = -0.00503015828035114;
+    size_t tMemoryIndex = 0;
+    PlatoTest::checkMultiVectorData(tHessian.getDeltaControl(tMemoryIndex), tGold);
+    tGold(tVECTOR_INDEX, 0) = 3.00911790936387;
+    tGold(tVECTOR_INDEX, 1) = -4.08469068435845;
+    tGold(tVECTOR_INDEX, 2) = 0.659092318388008;
+    tGold(tVECTOR_INDEX, 3) = 0.484230304784270;
+    PlatoTest::checkMultiVectorData(tHessian.getDeltaGradient(tMemoryIndex), tGold);
 }
 
 } // namespace PlatoTest
