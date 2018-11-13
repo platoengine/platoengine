@@ -21,6 +21,7 @@ set(${LIB_NAME}_HEADERS Plato_OptimizerFactory.hpp
                         Plato_Himmelblau.hpp
                         Plato_KokkosTypes.hpp
                         Plato_ErrorChecks.hpp
+                        Plato_HessianLBFGS.hpp
                         Plato_DeviceBounds.hpp
                         Plato_OptimizersIO.hpp
                         Plato_GoldsteinPrice.hpp
