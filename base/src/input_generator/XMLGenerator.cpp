@@ -970,8 +970,11 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  diag_scaling diagonal\n");
                     fprintf(fp, "  krylov_method = GMRESClassic\n");
+                    fprintf(fp, "  stag_tol = 0.001\n");
                     fprintf(fp, "  orthog = 0\n");
-                    fprintf(fp, "  bailout true\n");
+                    fprintf(fp, "  num_GS_steps = 2\n"); // TMPDEBUG
+                    fprintf(fp, "  overlap = 4\n"); // TMPDEBUG
+//                    fprintf(fp, "  bailout true\n"); // TMPDEBUG
                     if(!haveSolverTolerance)
                     {
                         fprintf(fp, "  solver_tol = 1e-4\n");
@@ -1112,6 +1115,14 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  limit_infeasible_slope = %s\n", cur_obj.limit_power_infeasible_slope.c_str());
                 }
+                if(cur_obj.limit_reset_subfrequency != "")
+                {
+                    fprintf(fp, "  limit_reset_subfrequency = %s\n", cur_obj.limit_reset_subfrequency.c_str());
+                }
+                if(cur_obj.limit_reset_count != "")
+                {
+                    fprintf(fp, "  limit_reset_count = %s\n", cur_obj.limit_reset_count.c_str());
+                }
                 if(cur_obj.inequality_allowable_feasiblity_lower != "")
                 {
                     fprintf(fp, "  stress_ineq_lower = %s\n", cur_obj.inequality_allowable_feasiblity_lower.c_str());
@@ -1120,9 +1131,37 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  stress_ineq_upper = %s\n", cur_obj.inequality_allowable_feasiblity_upper.c_str());
                 }
+                if(cur_obj.inequality_feasibility_scale != "")
+                {
+                    fprintf(fp, "  inequality_feasiblity_scale = %s\n", cur_obj.inequality_feasibility_scale.c_str());
+                }
+                if(cur_obj.inequality_infeasibility_scale != "")
+                {
+                    fprintf(fp, "  inequality_infeasiblity_scale = %s\n", cur_obj.inequality_infeasibility_scale.c_str());
+                }
                 if(cur_obj.stress_inequality_power != "")
                 {
                     fprintf(fp, "  stress_inequality_power = %s\n", cur_obj.stress_inequality_power.c_str());
+                }
+                if(cur_obj.stress_favor_final != "")
+                {
+                    fprintf(fp, "  stress_favor_final = %s\n", cur_obj.stress_favor_final.c_str());
+                }
+                if(cur_obj.stress_favor_updates != "")
+                {
+                    fprintf(fp, "  stress_favor_updates = %s\n", cur_obj.stress_favor_updates.c_str());
+                }
+                if(cur_obj.volume_penalty_power != "")
+                {
+                    fprintf(fp, "  volume_penalty_power = %s\n", cur_obj.volume_penalty_power.c_str());
+                }
+                if(cur_obj.volume_penalty_divisor != "")
+                {
+                    fprintf(fp, "  volume_penalty_divisor = %s\n", cur_obj.volume_penalty_divisor.c_str());
+                }
+                if(cur_obj.volume_penalty_bias != "")
+                {
+                    fprintf(fp, "  volume_penalty_bias = %s\n", cur_obj.volume_penalty_bias.c_str());
                 }
                 if(frf)
                 {
@@ -2164,6 +2203,24 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.limit_power_infeasible_slope = tokens[4];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","reset","subfrequency"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit reset subfrequency\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_reset_subfrequency = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","reset","count"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit reset count\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_reset_count = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","lower"}, tStringValue))
                         {
                             if(tokens.size() < 5)
@@ -2182,6 +2239,24 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.inequality_allowable_feasiblity_upper = tokens[4];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","feasibility","scale"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality feasibility scale\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_feasibility_scale = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","infeasibility","scale"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality infeasibility scale\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_infeasibility_scale = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","inequality","power"}, tStringValue))
                         {
                             if(tokens.size() < 4)
@@ -2191,7 +2266,51 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.stress_inequality_power = tokens[3];
                         }
-
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","favor","final"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress favor final\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_favor_final = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","favor","updates"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress favor updates\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_favor_updates = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","power"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty power\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_power = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","divisor"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty divisor\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_divisor = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","bias"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty bias\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_bias = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)

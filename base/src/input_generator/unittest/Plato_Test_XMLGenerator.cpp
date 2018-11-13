@@ -1942,9 +1942,18 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
             "limit power feasible slope 1.9\n"
             "limit power infeasible bias -0.51\n"
             "limit power infeasible slope 0.92\n"
+            "limit reset subfrequency 11\n"
+            "limit reset count 3\n"
             "inequality allowable feasibility lower -0.31\n"
             "inequality allowable feasibility upper 0.045\n"
             "stress inequality power 1.51\n"
+            "volume penalty power 1.254\n"
+            "volume penalty divisor 5.124\n"
+            "volume penalty bias 0.4242\n"
+            "inequality feasibility scale 2.2\n"
+            "inequality infeasibility scale 0.48\n"
+            "stress favor final 10.12\n"
+            "stress favor updates 39\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
@@ -1962,6 +1971,15 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_lower, "-0.31");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_upper, "0.045");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_inequality_power, "1.51");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_power, "1.254");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_divisor, "5.124");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_bias, "0.4242");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_reset_subfrequency, "11");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_reset_count, "3");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_feasibility_scale, "2.2");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_infeasibility_scale, "0.48");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_final, "10.12");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_updates, "39");
     tester.clearInputData();
 
     stringInput = "begin objective\n"

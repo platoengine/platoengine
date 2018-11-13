@@ -116,6 +116,9 @@ struct Objective
   std::vector<std::string> load_case_weights;
   std::string distribute_objective_type;
   std::string atmost_total_num_processors;
+  std::string volume_misfit_target;
+  std::string stress_p_norm_power;
+
   std::string stress_limit;
   std::string stress_ramp_factor;
   std::string limit_power_min;
@@ -124,11 +127,18 @@ struct Objective
   std::string limit_power_feasible_slope;
   std::string limit_power_infeasible_bias;
   std::string limit_power_infeasible_slope;
+  std::string limit_reset_subfrequency;
+  std::string limit_reset_count;
   std::string inequality_allowable_feasiblity_lower;
   std::string inequality_allowable_feasiblity_upper;
+  std::string inequality_feasibility_scale;
+  std::string inequality_infeasibility_scale;
+  std::string stress_favor_final;
+  std::string stress_favor_updates;
   std::string stress_inequality_power;
-  std::string volume_misfit_target;
-  std::string stress_p_norm_power;
+  std::string volume_penalty_power;
+  std::string volume_penalty_divisor;
+  std::string volume_penalty_bias;
 };
 struct Constraint
 {
