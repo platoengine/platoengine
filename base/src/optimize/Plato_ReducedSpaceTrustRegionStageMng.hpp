@@ -1,10 +1,4 @@
 /*
- * Plato_ReducedSpaceTrustRegionStageMng.hpp
- *
- *  Created on: Dec 20, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,6 +40,12 @@
 //@HEADER
 */
 
+/*
+ * Plato_ReducedSpaceTrustRegionStageMng.hpp
+ *
+ *  Created on: Dec 20, 2017
+ */
+
 #ifndef PLATO_REDUCEDSPACETRUSTREGIONSTAGEMNG_HPP_
 #define PLATO_REDUCEDSPACETRUSTREGIONSTAGEMNG_HPP_
 
@@ -70,6 +70,11 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class ReducedSpaceTrustRegionStageMng : public Plato::TrustRegionStageMng<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aFactory linear algebra factory
+     * @param [in] aObjectives list of objective functions
+    **********************************************************************************/
     ReducedSpaceTrustRegionStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                     const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aObjectives) :
             mNumObjFuncEval(0),
@@ -85,45 +90,90 @@ public:
             mObjectivesGradient(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(aObjectives))
     {
     }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     virtual ~ReducedSpaceTrustRegionStageMng()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return number of objective function evaluations
+     * @return number of objective function evaluations
+    **********************************************************************************/
     OrdinalType getNumObjectiveFunctionEvaluations() const
     {
         return (mNumObjFuncEval);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of objective gradient evaluations
+     * @return number of objective gradient evaluations
+    **********************************************************************************/
     OrdinalType getNumObjectiveGradientEvaluations() const
     {
         return (mNumObjGradEval);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of objective Hessian evaluations
+     * @return number of objective Hessian evaluations
+    **********************************************************************************/
     OrdinalType getNumObjectiveHessianEvaluations() const
     {
         return (mNumObjectiveHessianEvaluations);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of preconditioner evaluations
+     * @return number of preconditioner evaluations
+    **********************************************************************************/
     OrdinalType getNumPreconditionerEvaluations() const
     {
         return (mNumPreconditionerEvaluations);
     }
+
+    /******************************************************************************//**
+     * @brief Return number of inverse preconditioner evaluations
+     * @return number of inverse preconditioner evaluations
+    **********************************************************************************/
     OrdinalType getNumInversePreconditionerEvaluations() const
     {
         return (mNumInversePreconditionerEvaluations);
     }
 
+    /******************************************************************************//**
+     * @brief Set numerical methods used to evaluate each objective gradient
+     * @param [in] aInput numerical methods used to evaluate each objective gradient
+    **********************************************************************************/
     void setObjectiveGradient(const std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> & aInput)
     {
         mObjectivesGradient = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set numerical methods used to evaluate each objective Hessian
+     * @param [in] aInput numerical methods used to evaluate each objective Hessian
+    **********************************************************************************/
     void setObjectiveHessian(const std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> & aInput)
     {
         mObjectiveHessians = aInput;
     }
+
+    /******************************************************************************//**
+     * @brief Set all objective Hessian numerical methods to identity. Basically, Hessian information is not provided.
+    **********************************************************************************/
     void setIdentityObjectiveHessian()
     {
         mObjectiveHessians.reset();
         const OrdinalType tNumObjectives = mObjectives->size();
         mObjectiveHessians = std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(tNumObjectives);
     }
+
+    /******************************************************************************//**
+     * @brief Set preconditioner to identity. Basically, preconditioner is disabled.
+    **********************************************************************************/
     void setPreconditioner(const std::shared_ptr<Plato::Preconditioner<ScalarType, OrdinalType>> & aInput)
     {
         mPreconditioner = aInput;
