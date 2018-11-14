@@ -527,7 +527,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
 
-    // ks max trust region iterations
+    // ks disable post smoothing
     stringInput = "begin optimization parameters\n"
             "ks disable post smoothing\n"
             "end optimization parameters\n";
@@ -536,6 +536,8 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "end optimization parameters\n";
     stringInput = "begin optimization parameters\n"
             "ks disable post smoothing fALse\n"
             "end optimization parameters\n";
@@ -554,6 +556,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.exposeInputData()->KS_disable_post_smoothing, "true");
+
 
     // ks trust region expansion factor
     stringInput = "begin optimization parameters\n"
@@ -1933,9 +1936,15 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
 
     stringInput = "begin objective\n"
             "type limit stress\n"
-            "limit power initial 2.1\n"
-            "limit power update 0.125\n"
+            "limit power min 2.1\n"
             "limit power max 42.3\n"
+            "limit power feasible bias 1.1\n"
+            "limit power feasible slope 1.9\n"
+            "limit power infeasible bias -0.51\n"
+            "limit power infeasible slope 0.92\n"
+            "inequality allowable feasibility lower -0.31\n"
+            "inequality allowable feasibility upper 0.045\n"
+            "stress inequality power 1.51\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
@@ -1944,9 +1953,15 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
     EXPECT_EQ(tester.getObjStressLimit(0), "");
     EXPECT_EQ(tester.getObjStressRampFactor(0), "");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_initial, "2.1");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_update, "0.125");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_min, "2.1");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_max, "42.3");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_feasible_bias, "1.1");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_feasible_slope, "1.9");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_bias, "-0.51");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_slope, "0.92");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_lower, "-0.31");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_upper, "0.045");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_inequality_power, "1.51");
     tester.clearInputData();
 
     stringInput = "begin objective\n"

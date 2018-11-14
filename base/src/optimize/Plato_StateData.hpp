@@ -109,7 +109,7 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentControl() const
     {
         assert(mCurrentControl.get() != nullptr);
-        return (mCurrentControl.operator*());
+        return (*mCurrentControl);
     }
 
     /******************************************************************************//**
@@ -130,7 +130,7 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousControl() const
     {
         assert(mPreviousControl.get() != nullptr);
-        return (mPreviousControl.operator*());
+        return (*mPreviousControl);
     }
 
     /******************************************************************************//**
@@ -151,7 +151,7 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentTrialStep() const
     {
         assert(mCurrentTrialStep.get() != nullptr);
-        return (mCurrentTrialStep.operator*());
+        return (*mCurrentTrialStep);
     }
 
     /******************************************************************************//**
@@ -172,7 +172,7 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentCriterionGradient() const
     {
         assert(mCurrentCriterionGradient.get() != nullptr);
-        return (mCurrentCriterionGradient);
+        return (*mCurrentCriterionGradient);
     }
 
     /******************************************************************************//**
@@ -193,7 +193,7 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousCriterionGradient() const
     {
         assert(mPreviousCriterionGradient.get() != nullptr);
-        return (mPreviousCriterionGradient);
+        return (*mPreviousCriterionGradient);
     }
 
     /******************************************************************************//**

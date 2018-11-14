@@ -118,9 +118,15 @@ struct Objective
   std::string atmost_total_num_processors;
   std::string stress_limit;
   std::string stress_ramp_factor;
-  std::string limit_power_initial;
-  std::string limit_power_update;
+  std::string limit_power_min;
   std::string limit_power_max;
+  std::string limit_power_feasible_bias;
+  std::string limit_power_feasible_slope;
+  std::string limit_power_infeasible_bias;
+  std::string limit_power_infeasible_slope;
+  std::string inequality_allowable_feasiblity_lower;
+  std::string inequality_allowable_feasiblity_upper;
+  std::string stress_inequality_power;
   std::string volume_misfit_target;
   std::string stress_p_norm_power;
 };
