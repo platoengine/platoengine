@@ -66,7 +66,7 @@ namespace Topological {
 
 class ElementIntegration{
   public: 
-    ElementIntegration(bool uniform = false) : uniformCubature(uniform) {}
+    ElementIntegration(bool uniform = true) : uniformCubature(uniform) {}
     virtual ~ElementIntegration();
     Intrepid::FieldContainer<Real>& getCubaturePoints() { return *cubPoints; }
     Intrepid::FieldContainer<Real>& getCubatureWeights() { return *cubWeights; }
