@@ -45,7 +45,9 @@
 #include "types.hpp"
 #include <math.h>
 #include <Intrepid2_HGRAD_HEX_Cn_FEM.hpp>
+#ifdef GEOMETRY
 #include <core/Cogent_IntegratorFactory.hpp>
+#endif
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
@@ -130,6 +132,7 @@ CustomIntegration::CustomIntegration(pugi::xml_node& node, int myDim )
   }
 }
 
+#ifdef GEOMETRY
 /*****************************************************************************/
 CogentIntegration::CogentIntegration( pugi::xml_node& node, 
                                       Teuchos::RCP<shards::CellTopology> blockTopology ) :
@@ -203,6 +206,7 @@ void CogentIntegration::getCubatureWeights(Intrepid::FieldContainer<double>& wei
     weights(ipt) = mWeights(ipt);
   }
 }
+#endif // GEOMETRY
 
 /*****************************************************************************/
 Element::~Element()
@@ -222,13 +226,17 @@ void Element::setIntegrationMethod(pugi::xml_node& node)
   string intgType = Plato::Parse::getString(node, "type");
   if( intgType == "gauss" ){
     elementIntegration = new IntrepidIntegration( node, blockTopology );
-  } else
+  } 
+  else
   if( intgType == "custom" ){
     elementIntegration = new CustomIntegration( node, myDim );
-  } else
+  } 
+#ifdef GEOMETRY
+  else
   if( intgType == "cogent" ){
     elementIntegration = new CogentIntegration( node, blockTopology );
   }
+#endif
 }
 
 /*****************************************************************************/
