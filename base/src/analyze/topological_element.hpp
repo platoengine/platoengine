@@ -52,7 +52,9 @@
 
 #include "types.hpp"
 #include "Plato_Parser.hpp"
+#ifdef GEOMETRY
 #include "core/Cogent_Integrator.hpp"
+#endif
 #include <cassert>
 
 #include <string>
@@ -96,6 +98,7 @@ class CustomIntegration : public ElementIntegration
     virtual ~CustomIntegration() {}
 };
 
+#ifdef GEOMETRY
 class CogentIntegration : public ElementIntegration
 {
   public: 
@@ -109,6 +112,7 @@ class CogentIntegration : public ElementIntegration
     Kokkos::DynRankView<Real, Kokkos::Serial> mCoordVals;
     Kokkos::DynRankView<Real, Kokkos::Serial> mWeights;
 };
+#endif
 
 class Element {
   

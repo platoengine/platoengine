@@ -44,8 +44,8 @@
 #include "exception_handling.hpp"
 #include "types.hpp"
 #include <math.h>
-#include <Intrepid2_HGRAD_HEX_Cn_FEM.hpp>
 #ifdef GEOMETRY
+#include <Intrepid2_HGRAD_HEX_Cn_FEM.hpp>
 #include <core/Cogent_IntegratorFactory.hpp>
 #endif
 #include <Teuchos_ParameterList.hpp>
