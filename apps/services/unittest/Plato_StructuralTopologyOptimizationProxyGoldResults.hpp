@@ -58,6 +58,7 @@ std::vector<double> getGoldControlRolTest();
 std::vector<double> get_gold_control_mma_test();
 std::vector<double> get_gold_control_gcmma_test();
 std::vector<double> get_gold_control_ksbc_test();
+std::vector<double> get_gold_control_ksbc_lbfgs_test();
 std::vector<double> get_gold_control_ksal_test_one();
 std::vector<double> get_gold_control_ksal_test_two();
 std::vector<double> get_gold_control_ksal_test_three();

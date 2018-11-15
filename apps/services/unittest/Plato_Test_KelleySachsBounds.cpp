@@ -331,6 +331,67 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     }
 }
 
+TEST(PlatoTest, KelleySachsBoundConstrainedTopo_LBFGS)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tDofs = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tDofs.data(), tDofs.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE VOLUME AND COMPLIANCE CRITERION **************
+    std::shared_ptr<Plato::ProxyVolume<double>> tVolume = std::make_shared<Plato::ProxyVolume<double>>(tPDE);
+    std::shared_ptr<Plato::ProxyCompliance<double>> tCompliance = std::make_shared<Plato::ProxyCompliance<double>>(tPDE);
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tCompliance->setFilterRadius(1.20);
+    tMyObjective->add(tCompliance);
+    tMyObjective->add(tVolume);
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = tPDE->getNumDesignVariables();
+    double tVolumeFraction = tPDE->getVolumeFraction();
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mTrustRegionExpansionFactor = 4;
+    tInputs.mHessianMethod = Plato::Hessian::LBFGS;
+    tInputs.mOuterControlStagnationTolerance = 1e-2;
+    tInputs.mActualOverPredictedReductionLowerBound = 0.05;
+    tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, 1e-3 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double>>(tNumVectors, tNumControls, tVolumeFraction /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    // ********* TEST OUTPUT DATA *********
+    const double tTolerance = 1e-4;
+    EXPECT_EQ(40u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(85u, tOutputs.mNumObjFuncEval);
+    EXPECT_NEAR(tOutputs.mObjFuncValue, 0.14055601333489973, tTolerance);
+
+    const size_t tControlVectorIndex = 0;
+    std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksbc_lbfgs_test();
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+        EXPECT_NEAR((*tOutputs.mSolution)(tControlVectorIndex, tIndex), tGoldControl[tIndex], tTolerance);
+    }
+}
+
 TEST(PlatoTest, KelleySachsBoundConstrainedRosenbrock)
 {
     // ********* ALLOCATE OBJECTIVE *********
