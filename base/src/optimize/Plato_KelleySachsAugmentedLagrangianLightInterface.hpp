@@ -93,6 +93,7 @@ struct AlgorithmInputsKSAL
             mPrintDiagnostics(false),
             mDisablePostSmoothing(false),
             mMaxNumOuterIter(50),
+            mLimitedMemorySize(8),
             mMaxNumAugLagSubProbIter(5),
             mMaxNumPostSmoothingIter(5),
             mMaxTrustRegionSubProblemIter(25),
@@ -112,6 +113,7 @@ struct AlgorithmInputsKSAL
             mActualOverPredictedReductionLowerBound(0.10),
             mActualOverPredictedReductionUpperBound(0.75),
             mCommWrapper(),
+            mHessianMethod(Plato::Hessian::ANALYTICAL),
             mMemorySpace(Plato::MemorySpace::HOST),
             mDual(nullptr),
             mLowerBounds(nullptr),
@@ -134,6 +136,7 @@ struct AlgorithmInputsKSAL
     bool mDisablePostSmoothing; /*!< flag to disable post smoothing operation (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+    OrdinalType mLimitedMemorySize; /*!< limited memory size */
     OrdinalType mMaxNumAugLagSubProbIter; /*!< maximum number of augmented Lagrangian subproblem iterations */
     OrdinalType mMaxNumPostSmoothingIter; /*!< maximum number of outer line search iterations */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
@@ -157,6 +160,7 @@ struct AlgorithmInputsKSAL
     ScalarType mActualOverPredictedReductionUpperBound; /*!< actual over predicted reduction upper bound */
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
+    Plato::Hessian::type_t mHessianMethod; /*!< numerical method: ANALYTICAL (default), LBFGS and DISABLED */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
 
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mDual; /*!< Lagrange multipliers */

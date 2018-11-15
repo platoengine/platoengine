@@ -304,7 +304,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
     const size_t tNumVectors = 1;
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mHaveHessian = false;
+    tInputs.mHessianMethod = Plato::Hessian::DISABLED;
     tInputs.mMinTrustRegionRadius = 1e-6;
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; 

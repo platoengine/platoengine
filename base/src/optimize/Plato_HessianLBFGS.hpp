@@ -88,6 +88,28 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aMultiVec multi-vector template
+     * @param [in] aStorage memory size (default = 8)
+    **********************************************************************************/
+    explicit HessianLBFGS(const Plato::MultiVector<ScalarType, OrdinalType> & aMultiVec, OrdinalType aStorage = 8) :
+            mMaxStorage(aStorage),
+            mMemoryLength(0),
+            mLowerBoundCurvature(1e-7),
+            mUpperBoundCurvature(1e7),
+            mNewDeltaControl(aMultiVec.create()),
+            mNewDeltaGradient(aMultiVec.create()),
+            mOldHessTimesVector(aMultiVec.create()),
+            mNewHessTimesVector(aMultiVec.create()),
+            mDeltaControl(),
+            mDeltaGradient(),
+            mOldHessTimesDeltaControl(),
+            mNewHessTimesDeltaControl()
+    {
+        this->initialize();
+    }
+
+    /******************************************************************************//**
      * @brief Default destructor
     **********************************************************************************/
     virtual ~HessianLBFGS()

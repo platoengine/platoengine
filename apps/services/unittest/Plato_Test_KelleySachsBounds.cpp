@@ -305,7 +305,7 @@ TEST(PlatoTest, KelleySachsBoundConstrainedTopo)
     const size_t tNumControls = tPDE->getNumDesignVariables();
     double tVolumeFraction = tPDE->getVolumeFraction();
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mHaveHessian = false;
+    tInputs.mHessianMethod = Plato::Hessian::DISABLED;
     tInputs.mTrustRegionExpansionFactor = 4;
     tInputs.mOuterControlStagnationTolerance = 1e-2;
     tInputs.mActualOverPredictedReductionLowerBound = 0.05;
@@ -467,6 +467,76 @@ TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauTwo)
     PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
 }
 
+TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauOne_LBFGS)
+{
+    // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
+    std::shared_ptr<Plato::Himmelblau<double>> tHimmelblau = std::make_shared<Plato::Himmelblau<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tHimmelblau);
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mPrintDiagnostics = true;
+    tInputs.mHessianMethod = Plato::Hessian::LBFGS;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1 /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(12u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
+
+    // TEST OBJECTIVE FUNCTION VALUE
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
+
+    // TEST CONTROL SOLUTION
+    Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
+    tGoldVector(0, 0) = 3.0;
+    tGoldVector(0, 1) = 2.0;
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
+}
+
+TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauOne_NoHessian)
+{
+    // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
+    std::shared_ptr<Plato::Himmelblau<double>> tHimmelblau = std::make_shared<Plato::Himmelblau<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tHimmelblau);
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mPrintDiagnostics = true;
+    tInputs.mHessianMethod = Plato::Hessian::DISABLED;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1 /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(23u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to small trust region radius. ******\n\n", tOutputs.mStopCriterion);
+
+    // TEST OBJECTIVE FUNCTION VALUE
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(0., tOutputs.mObjFuncValue, tTolerance);
+
+    // TEST CONTROL SOLUTION
+    Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
+    tGoldVector(0, 0) = 3.0;
+    tGoldVector(0, 1) = 2.0;
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
+}
+
 TEST(PlatoTest, KelleySachsBoundConstrainedGoldsteinPrice)
 {
 
@@ -490,6 +560,43 @@ TEST(PlatoTest, KelleySachsBoundConstrainedGoldsteinPrice)
     Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
 
     EXPECT_EQ(10u, tOutputs.mNumOuterIter);
+    EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
+
+    // TEST OBJECTIVE FUNCTION VALUE
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(3., tOutputs.mObjFuncValue, tTolerance);
+
+    // TEST CONTROL SOLUTION
+    Plato::StandardMultiVector<double> tGoldVector(tNumVectors, tNumControls);
+    tGoldVector(0, 0) = 0.;
+    tGoldVector(0, 1) = -1.;
+    PlatoTest::checkMultiVectorData(*tOutputs.mSolution, tGoldVector, tTolerance);
+}
+
+TEST(PlatoTest, KelleySachsBoundConstrainedGoldsteinPrice_LBFGS)
+{
+
+    // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
+    std::shared_ptr<Plato::GoldsteinPrice<double>> tGoldsteinPrice = std::make_shared<Plato::GoldsteinPrice<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tMyObjective = std::make_shared<Plato::CriterionList<double>>();
+    tMyObjective->add(tGoldsteinPrice);
+
+    // ********* SET OPTIMIZATION ALGORITHM INPUTS *********
+    const size_t tNumVectors = 1;
+    const size_t tNumControls = 2;
+    Plato::AlgorithmInputsKSBC<double> tInputs;
+    tInputs.mHessianMethod = Plato::Hessian::LBFGS;
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 2 /* base value */);
+    tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -2 /* base value */);
+    tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -1.2 /* base value */);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsKSBC<double> tOutputs;
+    tInputs.mMaxTrustRegionRadius = 1e3;
+    tInputs.mTrustRegionExpansionFactor = 2;
+    Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
+
+    EXPECT_EQ(19u, tOutputs.mNumOuterIter);
     EXPECT_EQ("\n\n****** Optimization stopping due to stationary measure being met. ******\n\n", tOutputs.mStopCriterion);
 
     // TEST OBJECTIVE FUNCTION VALUE

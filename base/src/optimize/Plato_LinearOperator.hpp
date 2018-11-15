@@ -52,6 +52,20 @@
 namespace Plato
 {
 
+struct Hessian
+{
+    enum type_t
+    {
+        ANALYTICAL = 1, LBFGS = 2, DISABLED = 3
+    };
+};
+// struct Hessian
+
+} // namespace Plato
+
+namespace Plato
+{
+
 template<typename ScalarType, typename OrdinalType>
 class StateData;
 template<typename ScalarType, typename OrdinalType>
@@ -61,15 +75,30 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class LinearOperator
 {
 public:
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     virtual ~LinearOperator()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Update state data since new control was accepted.
+     * @param [in] aStateData data structure with core state data
+    **********************************************************************************/
     virtual void update(const Plato::StateData<ScalarType, OrdinalType> & aStateData) = 0;
+
+    /******************************************************************************//**
+     * @brief Apply vector to Hessian operator.
+     * @param [in] aControl optimization variables
+     * @param [in] aVector descent direction
+     * @param [in,out] aOutput application of vector to Hessian operator
+    **********************************************************************************/
     virtual void apply(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                        const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                        Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
 };
+// class LinearOperator
 
 } // namespace Plato
 

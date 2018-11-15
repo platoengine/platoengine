@@ -57,9 +57,11 @@
 #include "Plato_DataFactory.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_CriterionList.hpp"
+#include "Plato_HessianLBFGS.hpp"
+#include "Plato_MultiVectorList.hpp"
 #include "Plato_LinearOperatorList.hpp"
-#include "Plato_TrustRegionStageMng.hpp"
 #include "Plato_GradientOperatorList.hpp"
+#include "Plato_TrustRegionStageMng.hpp"
 #include "Plato_IdentityPreconditioner.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 
@@ -83,10 +85,12 @@ public:
             mNumPreconditionerEvaluations(0),
             mNumInversePreconditionerEvaluations(0),
             mWorkVec(aFactory->control().create()),
+            mOldObjFuncGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>(aObjectives->size(), aFactory->control())),
+            mNewObjFuncGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>(aObjectives->size(), aFactory->control())),
             mStateData(std::make_shared<Plato::StateData<ScalarType, OrdinalType>>(*aFactory)),
             mObjectives(aObjectives),
             mPreconditioner(std::make_shared<Plato::IdentityPreconditioner<ScalarType, OrdinalType>>()),
-            mObjectiveHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aObjectives)),
+            mObjFuncHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aObjectives)),
             mObjectivesGradient(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(aObjectives))
     {
     }
@@ -144,8 +148,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Set numerical methods used to evaluate each objective gradient
-     * @param [in] aInput numerical methods used to evaluate each objective gradient
+     * @brief Set numerical methods used to compute gradients
+     * @param [in] aInput numerical methods used to compute gradients
     **********************************************************************************/
     void setObjectiveGradient(const std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> & aInput)
     {
@@ -153,22 +157,27 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Set numerical methods used to evaluate each objective Hessian
-     * @param [in] aInput numerical methods used to evaluate each objective Hessian
+     * @brief Set numerical methods used to evaluate Hessians
+     * @param [in] aInput numerical methods used to evaluate Hessians
     **********************************************************************************/
     void setObjectiveHessian(const std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> & aInput)
     {
-        mObjectiveHessians = aInput;
+        mObjFuncHessians = aInput;
     }
 
     /******************************************************************************//**
-     * @brief Set all objective Hessian numerical methods to identity. Basically, Hessian information is not provided.
+     * @brief Set all Hessian numerical methods to LBFGS.
+     * @param [in] aMaxMemory memory size (default = 8)
     **********************************************************************************/
-    void setIdentityObjectiveHessian()
+    void setHessianLBFGS(OrdinalType aMaxMemory = 8)
     {
-        mObjectiveHessians.reset();
-        const OrdinalType tNumObjectives = mObjectives->size();
-        mObjectiveHessians = std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(tNumObjectives);
+        mObjFuncHessians.reset();
+        mObjFuncHessians = std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>();
+        const OrdinalType tNumObjFuncs = mObjectives->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumObjFuncs; tIndex++)
+        {
+            mObjFuncHessians->add(std::make_shared<Plato::HessianLBFGS<ScalarType, OrdinalType>>(*mWorkVec, aMaxMemory));
+        }
     }
 
     /******************************************************************************//**
@@ -203,8 +212,12 @@ public:
         }
     }
 
-    /*! Directive that updates current optimization state data and notifies any active gradient and Hessian
-     *  approximation methods that they need to update any method specific data since a trial control was accepted. */
+    /******************************************************************************//**
+     * @brief Update current state data and notify any active gradient and Hessian
+     * numerical approximation methods to update any method-specific state data
+     * since a new control was accepted.
+     * @param [in] aDataMng state data manager
+    **********************************************************************************/
     void updateOptimizationData(Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         assert(mStateData.get() != nullptr);
@@ -214,17 +227,11 @@ public:
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
         mStateData->setPreviousControl(aDataMng.getPreviousControl());
-        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
-        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
         mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
-        mPreconditioner->update(*mStateData);
 
-        const OrdinalType tNumObjectives = mObjectives->size();
-        for(OrdinalType tObjectiveIndex = 0; tObjectiveIndex < tNumObjectives; tObjectiveIndex++)
-        {
-            mObjectivesGradient->operator[](tObjectiveIndex).update(*mStateData);
-            mObjectiveHessians->operator[](tObjectiveIndex).update(*mStateData);
-        }
+        this->updatePreconditionerMethodStateData(aDataMng);
+        this->updateSensitivityMethodsStateData();
+        this->cacheObjFuncGradients();
 
         aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
         aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
@@ -260,10 +267,11 @@ public:
         const OrdinalType tNumObjectives = mObjectivesGradient->size();
         for(OrdinalType tIndex = 0; tIndex < tNumObjectives; tIndex++)
         {
-            Plato::fill(static_cast<ScalarType>(0), *mWorkVec);
-            (*mObjectivesGradient)[tIndex].compute(aControl, *mWorkVec);
+            Plato::MultiVector<ScalarType, OrdinalType> & tMyObjFuncGrad = (*mNewObjFuncGrad)[tIndex];
+            Plato::fill(static_cast<ScalarType>(0), tMyObjFuncGrad);
+            (*mObjectivesGradient)[tIndex].compute(aControl, tMyObjFuncGrad);
             ScalarType tMyWeight = mObjectives->weight(tIndex);
-            Plato::update(tMyWeight, *mWorkVec, static_cast<ScalarType>(1), aOutput);
+            Plato::update(tMyWeight, tMyObjFuncGrad, static_cast<ScalarType>(1), aOutput);
         }
         mNumObjGradEval++;
     }
@@ -275,14 +283,14 @@ public:
                               Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
         assert(mObjectives.get() != nullptr);
-        assert(mObjectiveHessians.get() != nullptr);
+        assert(mObjFuncHessians.get() != nullptr);
 
         Plato::fill(static_cast<ScalarType>(0), aOutput);
-        const OrdinalType tNumObjectives = mObjectiveHessians->size();
+        const OrdinalType tNumObjectives = mObjFuncHessians->size();
         for(OrdinalType tIndex = 0; tIndex < tNumObjectives; tIndex++)
         {
             Plato::fill(static_cast<ScalarType>(0), *mWorkVec);
-            (*mObjectiveHessians)[tIndex].apply(aControl, aVector, *mWorkVec);
+            (*mObjFuncHessians)[tIndex].apply(aControl, aVector, *mWorkVec);
             ScalarType tMyWeight = mObjectives->weight(tIndex);
             Plato::update(tMyWeight, *mWorkVec, static_cast<ScalarType>(1), aOutput);
         }
@@ -297,6 +305,7 @@ public:
         mPreconditioner->applyPreconditioner(aControl, aVector, aOutput);
         mNumPreconditionerEvaluations++;
     }
+
     /*! Compute the application of a vector to the inverse preconditioner operator. */
     void applyVectorToInvPreconditioner(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                         const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
@@ -307,6 +316,45 @@ public:
         mNumInversePreconditionerEvaluations++;
     }
 
+    /******************************************************************************//**
+     * @brief Update the state data needed to approximate first- and second-order sensitivities.
+     *   Operation is null if analytical sensitivities are provided or calculations are disabled.
+    **********************************************************************************/
+    void updateSensitivityMethodsStateData()
+    {
+        const OrdinalType tNumObjFuncs = mObjectives->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumObjFuncs; tIndex++)
+        {
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyNewObjFuncGrad = (*mNewObjFuncGrad)[tIndex];
+            mStateData->setCurrentCriterionGradient(tMyNewObjFuncGrad);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyOldObjFuncGrad = (*mOldObjFuncGrad)[tIndex];
+            mStateData->setPreviousCriterionGradient(tMyOldObjFuncGrad);
+            (*mObjectivesGradient)[tIndex].update(*mStateData);
+           (*mObjFuncHessians)[tIndex].update(*mStateData);
+        }
+    }
+    /******************************************************************************//**
+     * @brief Update the state data used to compute the application of a vector to the preconditioner.
+    **********************************************************************************/
+    void updatePreconditionerMethodStateData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
+        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
+        mPreconditioner->update(*mStateData);
+    }
+
+    /******************************************************************************//**
+     * @brief Cache objective gradients
+    **********************************************************************************/
+    void cacheObjFuncGradients()
+    {
+        const OrdinalType tNumObjFuncs = mObjectives->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumObjFuncs; tIndex++)
+        {
+            Plato::update(static_cast<ScalarType>(1), (*mNewObjFuncGrad)[tIndex], static_cast<ScalarType>(0), (*mOldObjFuncGrad)[tIndex]);
+        }
+    }
+
 private:
     OrdinalType mNumObjFuncEval;
     OrdinalType mNumObjGradEval;
@@ -315,11 +363,13 @@ private:
     OrdinalType mNumInversePreconditionerEvaluations;
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mWorkVec;
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mOldObjFuncGrad;
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mNewObjFuncGrad;
 
     std::shared_ptr<Plato::StateData<ScalarType, OrdinalType>> mStateData;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mObjectives;
     std::shared_ptr<Plato::Preconditioner<ScalarType, OrdinalType>> mPreconditioner;
-    std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> mObjectiveHessians;
+    std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> mObjFuncHessians;
     std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> mObjectivesGradient;
 
 private:

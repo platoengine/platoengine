@@ -144,15 +144,6 @@ public:
         // ********* ALLOCATE REDUCED SPACE FORMULATION MANAGER FOR TRUST REGION ALGORITHM ********* //
         std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> tStageMng =
                 std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, tCriterionList);
-
-        // ********* SET OBJECTIVE HESSIANS TO IDENTITY IF HESSIAN NAME IS NOT DEFINED ********* //
-        // *********    IN THE OBJECTIVE SUBBLOCK DEFINED INSIDE THE OPTIMIZER BLOCK   ********* //
-        if(mInputData.getObjectiveHessianOutputName().empty() == true)
-        {
-            tStageMng->setIdentityObjectiveHessian();
-        }
-        // Identity Hessian causes problems
-        // If you don't have the Hessian, different behavior
         ScalarType tHaveHessian = mInputData.getHaveHessian();
         tStageMng->setHaveHessian(tHaveHessian);
 
@@ -203,6 +194,7 @@ private:
         aAlgorithm.setScaleOfUnitControlForInitialTrustRegionRadius(tInitialRadiusScale);
         aAlgorithm.setScaleOfUnitControlForMaxTrustRegionRadius(tMaxRadiusScale);
         aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
+
         if(tDisablePostSmoothing)
         {
             aAlgorithm.disablePostSmoothing();

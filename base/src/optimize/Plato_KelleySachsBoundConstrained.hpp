@@ -62,6 +62,7 @@
 #include "Plato_MultiVector.hpp"
 #include "Plato_OptimizersIO.hpp"
 #include "Plato_LinearAlgebra.hpp"
+#include "Plato_LinearOperator.hpp"
 #include "Plato_KelleySachsStepMng.hpp"
 #include "Plato_TrustRegionStageMng.hpp"
 #include "Plato_KelleySachsAlgorithm.hpp"
