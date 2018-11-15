@@ -11,7 +11,8 @@ webcut volume all with plane yplane offset 1
 webcut volume all with plane yplane offset -1
 imprint all
 merge all
-volume all size 0.05
+# volume all size 0.05
+volume all size 0.15
 volume all scheme tetmesh
 mesh surface 33 31 24 45 38
 block 1 surface 33 31 24 45 38

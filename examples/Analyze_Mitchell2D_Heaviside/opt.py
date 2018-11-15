@@ -132,7 +132,7 @@ opt.add_inequality_constraint(g, 1e-6)
 opt.set_lower_bounds(-0.199)
 opt.set_upper_bounds(0.199)
 opt.set_xtol_rel(1e-6)
-opt.set_maxeval(50)
+opt.set_maxeval(20)
 
 xopt = opt.optimize(xinit)
 minf = opt.last_optimum_value()

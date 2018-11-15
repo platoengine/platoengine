@@ -1,0 +1,22 @@
+## /projects/cubit/claro.Lin64.15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 412665
+## Revised 2018-06-05 14:19:56 -0600 (Tue, 05 Jun 2018)
+## Running 06/08/2018 02:10:37 PM
+## Command Options:
+create brick x 5 y 3 z 1
+webcut volume all with plane yplane offset 0.25
+webcut volume all with plane yplane offset -0.25
+webcut volume all with plane yplane offset 1
+webcut volume all with plane yplane offset -1
+imprint all
+merge all
+# volume all size 0.05
+volume all size 0.15
+volume all scheme tetmesh
+mesh surface 33 31 24 45 38
+block 1 surface 33 31 24 45 38
+block 1 element type TRI
+sideset 1 curve 43
+nodeset 2 curve 58 65
+export mesh "mitchell_tri.gen" dimension 2 overwrite

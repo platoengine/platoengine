@@ -17,7 +17,8 @@
 #{bolt_inset=0.375}
 #{mount_radius=0.5}
 #{mount_inset=0.5}
-#{mesh_size=0.08}
+##{mesh_size=0.08}
+#{mesh_size=0.24}
 create brick x {base_thickness} y {base_height} z {base_width}
 create brick x {bracket_length} y {base_height} z {bracket_thickness}
 move surface 10 location surface 6
@@ -49,7 +50,8 @@ webcut volume all with plane yplane
 webcut volume all with plane zplane
 imprint all
 merge all
-volume all scheme tetmesh
+# volume all scheme tetmesh
+volume all scheme tetmesh geometry approximation angle 30
 volume all size {mesh_size}
 mesh volume all
 block 1 volume all
