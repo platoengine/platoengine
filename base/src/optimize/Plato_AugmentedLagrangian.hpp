@@ -374,6 +374,17 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set criteria Hessians to LBFGS.
+     * @param [in] aMaxMemory memory size (default = 8)
+    **********************************************************************************/
+    void setCriteriaHessiansLBFGS(OrdinalType aMaxMemory = 8)
+    {
+        mStageMng->setHaveHessian(true);
+        mStageMng->setObjectiveHessianLBFGS(aMaxMemory);
+        mStageMng->setConstraintHessiansLBFGS(aMaxMemory);
+    }
+
+    /******************************************************************************//**
      * @brief Return reference to data manager
      * @return trust region algorithm's data manager
     **********************************************************************************/

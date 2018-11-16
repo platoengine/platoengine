@@ -229,8 +229,8 @@ public:
         mStateData->setPreviousControl(aDataMng.getPreviousControl());
         mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
 
-        this->updatePreconditionerMethodStateData(aDataMng);
-        this->updateSensitivityMethodsStateData();
+        this->updatePreconditionerStateData(aDataMng);
+        this->updateObjFuncStateData();
         this->cacheObjFuncGradients();
 
         aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
@@ -255,6 +255,7 @@ public:
         mNumObjFuncEval++;
         return (tOutput);
     }
+
     /*! Compute reduced gradient, \nabla_{\mathbf{z}}{F}=\sum_{i=1}^{n}\nabla_{\mathbf{z}}f_i(\mathbf{z})\
      *  \forall\ i=1,\dots,n, where i\in\mathcal{N} and $n$ denotes the number of objective functions. */
     void computeGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
@@ -317,10 +318,10 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Update the state data needed to approximate first- and second-order sensitivities.
+     * @brief Update the state data needed to approximate the objective'sfirst- and second-order sensitivities.
      *   Operation is null if analytical sensitivities are provided or calculations are disabled.
     **********************************************************************************/
-    void updateSensitivityMethodsStateData()
+    void updateObjFuncStateData()
     {
         const OrdinalType tNumObjFuncs = mObjectives->size();
         for(OrdinalType tIndex = 0; tIndex < tNumObjFuncs; tIndex++)
@@ -333,10 +334,11 @@ public:
            (*mObjFuncHessians)[tIndex].update(*mStateData);
         }
     }
+
     /******************************************************************************//**
      * @brief Update the state data used to compute the application of a vector to the preconditioner.
     **********************************************************************************/
-    void updatePreconditionerMethodStateData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    void updatePreconditionerStateData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
         mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());

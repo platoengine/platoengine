@@ -812,9 +812,9 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_3)
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
     Plato::AlgorithmOutputsKSAL<double> tOutputs;
-    tInputs.mHaveHessian = false;
     tInputs.mDisablePostSmoothing = true;
     tInputs.mControlStagnationTolerance = 1e-2;
+    tInputs.mHessianMethod = Plato::Hessian::DISABLED;
     Plato::solve_ksal<double, size_t>(tCompliance, tConstraints, tInputs, tOutputs);
 
     // ********* TEST OUTPUT DATA *********

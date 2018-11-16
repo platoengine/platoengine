@@ -56,10 +56,11 @@
 #include "Plato_Vector.hpp"
 #include "Plato_StateData.hpp"
 #include "Plato_Criterion.hpp"
-#include "Plato_DataFactory.hpp"
 #include "Plato_MultiVector.hpp"
-#include "Plato_LinearAlgebra.hpp"
 #include "Plato_CriterionList.hpp"
+#include "Plato_DataFactory.hpp"
+#include "Plato_LinearAlgebra.hpp"
+#include "Plato_HessianLBFGS.hpp"
 #include "Plato_Preconditioner.hpp"
 #include "Plato_MultiVectorList.hpp"
 #include "Plato_IdentityHessian.hpp"
@@ -106,20 +107,21 @@ public:
             mStateData(std::make_shared<Plato::StateData<ScalarType, OrdinalType>>(aFactory.operator*())),
             mDualWorkMultiVec(aFactory->dual().create()),
             mControlWorkVec(aFactory->control().create()),
-            mObjectiveGradient(aFactory->control().create()),
             mLagrangeMultipliers(aFactory->dual().create()),
             mTrialConstraintValues(aFactory->dual().create()),
             mCurrentConstraintValues(aFactory->dual().create()),
             mPreviousConstraintValues(aFactory->dual().create()),
+            mCurrentObjFuncGrad(aFactory->control().create()),
+            mPreviousObjFuncGrad(aFactory->control().create()),
             mCurrentCostraintGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>()),
             mPreviousCostraintGrad(std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>()),
             mObjective(aObjective),
             mConstraints(aConstraints),
             mPreconditioner(std::make_shared<Plato::IdentityPreconditioner<ScalarType, OrdinalType>>()),
-            mObjectiveHessianOperator(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(aObjective)),
-            mConstraintHessianOperators(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aConstraints)),
+            mObjFuncHessian(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(aObjective)),
+            mConstraintHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aConstraints)),
             mDualReductionOperations(aFactory->getDualReductionOperations().create()),
-            mObjectiveGradientOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(aObjective)),
+            mObjectiveGradOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(aObjective)),
             mConstraintGradientOperator(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(aConstraints))
     /****************************************************************************************************************/
     {
@@ -260,9 +262,11 @@ public:
         return (mPenaltyParameterScaleFactor);
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set scale factor used to update penalty parameter
+     * @param [in] aInput scale factor
+    **********************************************************************************/
     void setPenaltyParameterScaleFactor(const ScalarType & aInput)
-    /****************************************************************************************************************/
     {
         mPenaltyParameterScaleFactor = aInput;
     }
@@ -295,13 +299,15 @@ public:
         Plato::update(1., *mLagrangeMultipliers, 0., aInput);
     }
 
-    /****************************************************************************************************************/
-    void setLagrangeMultipliers(const ScalarType & aValue)
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set all the Lagrange multipliers to input scalar value
+     * @param [in] aInput Lagrange multipliers
+    **********************************************************************************/
+    void setLagrangeMultipliers(const ScalarType & aInput)
     {
         assert(mLagrangeMultipliers.get() != nullptr);
         assert(mLagrangeMultipliers->getNumVectors() > static_cast<OrdinalType>(0));
-        if(aValue < static_cast<ScalarType>(0))
+        if(aInput < static_cast<ScalarType>(0))
         {
             std::cout << "\n\n**** ERROR IN: " << __FILE__ << ", FUNCTION:" << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
                       << ", MESSAGE: NEGATIVE INPUT LAGRANGE MULTIPLIER. ABORT. ****\n\n";
@@ -310,13 +316,17 @@ public:
         OrdinalType tNumVectors = mLagrangeMultipliers->getNumVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
-            mLagrangeMultipliers->operator [](tVectorIndex).fill(aValue);
+            mLagrangeMultipliers->operator [](tVectorIndex).fill(aInput);
         }
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set Lagrange multipliers to input scalar value
+     * @param [in] aVectorIndex dual vector index
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aValue scalar value
+    **********************************************************************************/
     void setLagrangeMultipliers(const OrdinalType & aVectorIndex, const OrdinalType & aConstraintIndex, const ScalarType & aValue)
-    /****************************************************************************************************************/
     {
         assert(mLagrangeMultipliers.get() != nullptr);
         assert(aVectorIndex < mLagrangeMultipliers->getNumVectors());
@@ -330,9 +340,12 @@ public:
         }
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set vector of Lagrange multipliers
+     * @param [in] aVectorIndex dual vector index
+     * @param [in] aInput vector of Lagrange multipliers
+    **********************************************************************************/
     void setLagrangeMultipliers(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
-    /****************************************************************************************************************/
     {
         assert(mLagrangeMultipliers.get() != nullptr);
         assert(aVectorIndex < mLagrangeMultipliers->getNumVectors());
@@ -349,16 +362,20 @@ public:
         mLagrangeMultipliers->operator [](aVectorIndex).update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Return all the constraint values
+     * @param [out] aInput multi-vector of constraint values
+    **********************************************************************************/
     void getCurrentConstraintValues(Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
-    /****************************************************************************************************************/
     {
         Plato::update(static_cast<ScalarType>(1.), *mCurrentConstraintValues, static_cast<ScalarType>(0.), aInput);
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Return all the constraint values
+     * @param [out] aInput vector of constraint values
+    **********************************************************************************/
     void getCurrentConstraintValues(const OrdinalType & aIndex, Plato::Vector<ScalarType, OrdinalType> & aInput) const
-    /****************************************************************************************************************/
     {
         assert(aIndex < mCurrentConstraintValues->getNumVectors());
         aInput.update(static_cast<ScalarType>(1.), (*mCurrentConstraintValues)[aIndex], static_cast<ScalarType>(0.));
@@ -404,52 +421,79 @@ public:
         mNormConstraints = *std::max_element(tContainer.begin(), tContainer.end());
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set numerical method used to compute the objective gradient
+     * @param [in] aInput interface to numerical method
+    **********************************************************************************/
     void setObjectiveGradient(const std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> & aInput)
-    /****************************************************************************************************************/
     {
         assert(aInput.get() != nullptr);
-        mObjectiveGradientOperator = aInput;
+        mObjectiveGradOperator = aInput;
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set numerical method used to compute the constraint gradients
+     * @param [in] aInput interface to numerical method
+    **********************************************************************************/
     void setConstraintGradients(const std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> & aInput)
-    /****************************************************************************************************************/
     {
         assert(aInput.get() != nullptr);
         mConstraintGradientOperator = aInput;
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set numerical method used to compute the application of a vector to the objective Hessian
+     * @param [in] aInput interface to numerical method.
+    **********************************************************************************/
     void setObjectiveHessian(const std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> & aInput)
-    /****************************************************************************************************************/
     {
         assert(aInput.get() != nullptr);
-        mObjectiveHessianOperator = aInput;
+        mObjFuncHessian = aInput;
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set objective function Hessian to LBFGS.
+     * @param [in] aMaxMemory memory size (default = 8)
+    **********************************************************************************/
+    void setObjectiveHessianLBFGS(OrdinalType aMaxMemory = 8)
+    {
+        mObjFuncHessian.reset();
+        mObjFuncHessian = std::make_shared<Plato::HessianLBFGS<ScalarType, OrdinalType>>(*mControlWorkVec, aMaxMemory);
+    }
+
+    /******************************************************************************//**
+     * @brief Set numerical method used to compute the application of a vector to the constraint function Hessians
+     * @param [in] aInput interface to numerical method.
+    **********************************************************************************/
     void setConstraintHessians(const std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> & aInput)
-    /****************************************************************************************************************/
     {
         assert(aInput.get() != nullptr);
-        mConstraintHessianOperators = aInput;
+        mConstraintHessians = aInput;
     }
 
-    /****************************************************************************************************************/
+    /******************************************************************************//**
+     * @brief Set constraint Hessians to LBFGS.
+     * @param [in] aMaxMemory memory size (default = 8)
+    **********************************************************************************/
+    void setConstraintHessiansLBFGS(OrdinalType aMaxMemory = 8)
+    {
+        mConstraintHessians.reset();
+        mConstraintHessians = std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>();
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            mConstraintHessians->add(std::make_shared<Plato::HessianLBFGS<ScalarType, OrdinalType>>(*mControlWorkVec, aMaxMemory));
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set numerical method used to compute the application of a vector to the preconditioner
+     * @param [in] aInput interface to numerical method
+    **********************************************************************************/
     void setPreconditioner(const std::shared_ptr<Plato::Preconditioner<ScalarType, OrdinalType>> & aInput)
-    /****************************************************************************************************************/
     {
         assert(aInput.get() != nullptr);
         mPreconditioner = aInput;
-    }
-
-    /****************************************************************************************************************/
-    void setIdentityObjectiveHessian()
-    /****************************************************************************************************************/
-    {
-        mObjectiveHessianOperator.reset();
-        mObjectiveHessianOperator = std::make_shared<Plato::IdentityHessian<ScalarType, OrdinalType>>();
     }
 
     /*******************************************************************************//**
@@ -499,28 +543,11 @@ public:
         mStateData->setCurrentTrialStep(aDataMng.getTrialStep());
         mStateData->setCurrentControl(aDataMng.getCurrentControl());
         mStateData->setPreviousControl(aDataMng.getPreviousControl());
-        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
-        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
-        mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
 
-        mObjectiveGradientOperator->update(*mStateData);
-        mObjectiveHessianOperator->update(*mStateData);
-        mPreconditioner->update(*mStateData);
-
-        const OrdinalType tNumConstraints = mConstraints->size();
-        assert(tNumConstraints == mCurrentCostraintGrad->size());
-        const OrdinalType tDUAL_VECTOR_INDEX = 0;
-        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
-        {
-            const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VECTOR_INDEX, tIndex);
-            mStateData->setCurrentCriterionValue(tMyConstraintValue);
-            const Plato::MultiVector<ScalarType, OrdinalType> & tMyCurrentGrad = (*mCurrentCostraintGrad)[tIndex];
-            mStateData->setCurrentCriterionGradient(tMyCurrentGrad);
-            const Plato::MultiVector<ScalarType, OrdinalType> & tMyPreviousGrad = (*mPreviousCostraintGrad)[tIndex];
-            mStateData->setPreviousCriterionGradient(tMyPreviousGrad);
-            (*mConstraintGradientOperator)[tIndex].update(*mStateData);
-            (*mConstraintHessianOperators)[tIndex].update(*mStateData);
-        }
+        this->updatePreconditionerStateData(aDataMng);
+        this->updateConstraintsStateData();
+        this->updateObjFuncStateData();
+        this->cacheCriteriaGradients();
 
         aDataMng.setNumObjectiveFunctionEvaluations(mNumObjFuncEval);
         aDataMng.setNumObjectiveGradientEvaluations(mNumObjGradEval);
@@ -574,12 +601,14 @@ public:
     void computeGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                          Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
-        assert(mObjectiveGradientOperator.get() != nullptr);
+        assert(mObjectiveGradOperator.get() != nullptr);
 
         // Compute objective function gradient: \frac{\partial f}{\partial\mathbf{z}}
         Plato::fill(static_cast<ScalarType>(0), aOutput);
-        mObjectiveGradientOperator->compute(aControl, aOutput);
-        mNormObjFuncGrad = mIsMeanNormEnabled == true ? Plato::norm_mean(aOutput) : Plato::norm(aOutput);
+        mObjectiveGradOperator->compute(aControl, aOutput);
+        Plato::update(static_cast<ScalarType>(1), aOutput, static_cast<ScalarType>(0), *mCurrentObjFuncGrad);
+        mNormObjFuncGrad =
+                mIsMeanNormEnabled == true ? Plato::norm_mean(*mCurrentObjFuncGrad) : Plato::norm(*mCurrentObjFuncGrad);
         mNumObjGradEval++;
 
         this->computeAugmentedLagrangianGradient(aControl, aOutput);
@@ -596,9 +625,9 @@ public:
                               const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                               Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
-        assert(mObjectiveHessianOperator.get() != nullptr);
+        assert(mObjFuncHessian.get() != nullptr);
         Plato::fill(static_cast<ScalarType>(0), aOutput);
-        mObjectiveHessianOperator->apply(aControl, aVector, aOutput);
+        mObjFuncHessian->apply(aControl, aVector, aOutput);
         mNumObjHessEval++;
 
         this->computeAugmentedLagrangianHessian(aControl, aVector, aOutput);
@@ -778,14 +807,14 @@ private:
             mNumConstraintGradientEvaluations[tIndex] = mNumConstraintGradientEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
             const ScalarType tLagrangeMultiplier = mLagrangeMultipliers->operator()(tDUAL_VEC_INDEX, tIndex);
-            Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mObjectiveGradient);
+            Plato::update(tLagrangeMultiplier, tMyConstraintGradient, static_cast<ScalarType>(0), *mControlWorkVec);
 
             // Add contribution from: \mu*h_i(\mathbf{u}(\mathbf{z}),\mathbf{z})\frac{\partial h_i}{\partial\mathbf{z}}.
             const ScalarType tAlpha = tOneOverPenalty * tMyConstraintValue;
-            Plato::update(tAlpha, tMyConstraintGradient, static_cast<ScalarType>(1), *mObjectiveGradient);
+            Plato::update(tAlpha, tMyConstraintGradient, static_cast<ScalarType>(1), *mControlWorkVec);
 
             // Compute Augmented Lagrangian gradient
-            Plato::update(static_cast<ScalarType>(1), *mObjectiveGradient, static_cast<ScalarType>(1), aOutput);
+            Plato::update(static_cast<ScalarType>(1), *mControlWorkVec, static_cast<ScalarType>(1), aOutput);
         }
     }
 
@@ -799,7 +828,7 @@ private:
                                            const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                                            Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
-        assert(mConstraintHessianOperators.get() != nullptr);
+        assert(mConstraintHessians.get() != nullptr);
 
         // Apply vector to inequality constraint Hessian operator and add contribution to total Hessian
         const OrdinalType tDUAL_VEC_INDEX = 0;
@@ -809,12 +838,12 @@ private:
         const Plato::MultiVector<ScalarType, OrdinalType> & tMyConstraintGrad = (*mCurrentCostraintGrad)[tDUAL_VEC_INDEX];
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            assert(mConstraintHessianOperators->ptr(tIndex).get() != nullptr);
+            assert(mConstraintHessians->ptr(tIndex).get() != nullptr);
 
             const ScalarType tMyConstraintValue = (*mCurrentConstraintValues)(tDUAL_VEC_INDEX, tIndex);
             // Add contribution from: \lambda_i\frac{\partial^2 h_i}{\partial\mathbf{z}^2}
             Plato::fill(static_cast<ScalarType>(0), *mControlWorkVec);
-            (*mConstraintHessianOperators)[tIndex].apply(aControl, aVector, *mControlWorkVec);
+            (*mConstraintHessians)[tIndex].apply(aControl, aVector, *mControlWorkVec);
             mNumConstraintHessianEvaluations[tIndex] = mNumConstraintHessianEvaluations[tIndex] + static_cast<OrdinalType>(1);
 
             Plato::update((*mLagrangeMultipliers)(tDUAL_VEC_INDEX, tIndex),
@@ -832,6 +861,67 @@ private:
             // Add contribution from: \mu\left(\frac{\partial h_i}{\partial\mathbf{z}}^{T}
             //                        \frac{\partial h_i}{\partial\mathbf{z}}\right)
             Plato::update(tBeta, tMyConstraintGrad, static_cast<ScalarType>(1), aOutput);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Update the state data used to compute the application of a vector to the preconditioner.
+    **********************************************************************************/
+    void updatePreconditionerStateData(const Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType> & aDataMng)
+    {
+        mStateData->setCurrentCriterionGradient(aDataMng.getCurrentGradient());
+        mStateData->setPreviousCriterionGradient(aDataMng.getPreviousGradient());
+        mStateData->setCurrentCriterionValue(aDataMng.getCurrentObjectiveFunctionValue());
+        mPreconditioner->update(*mStateData);
+    }
+
+    /******************************************************************************//**
+     * @brief Update the state data needed to approximate the objective's sensitivities.
+     *   Operation is null if analytical sensitivities are provided or calculations are disabled.
+    **********************************************************************************/
+    void updateObjFuncStateData()
+    {
+        mStateData->setCurrentCriterionValue(mCurrentObjFuncValue);
+        mStateData->setCurrentCriterionGradient(*mCurrentObjFuncGrad);
+        mStateData->setPreviousCriterionGradient(*mPreviousObjFuncGrad);
+        mObjectiveGradOperator->update(*mStateData);
+        mObjFuncHessian->update(*mStateData);
+    }
+
+    /******************************************************************************//**
+     * @brief Update the state data needed to approximate the constraints' sensitivities.
+     *   Operation is null if analytical sensitivities are provided or disabled by the user.
+    **********************************************************************************/
+    void updateConstraintsStateData()
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        assert(tNumConstraints == mCurrentCostraintGrad->size());
+
+        const OrdinalType tVECTOR_INDEX = 0;
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            const ScalarType tMyCurrentValue = (*mCurrentConstraintValues)(tVECTOR_INDEX, tIndex);
+            mStateData->setCurrentCriterionValue(tMyCurrentValue);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyCurrentGrad = (*mCurrentCostraintGrad)[tIndex];
+            mStateData->setCurrentCriterionGradient(tMyCurrentGrad);
+            const Plato::MultiVector<ScalarType, OrdinalType> & tMyPreviousGrad = (*mPreviousCostraintGrad)[tIndex];
+            mStateData->setPreviousCriterionGradient(tMyPreviousGrad);
+            (*mConstraintGradientOperator)[tIndex].update(*mStateData);
+            (*mConstraintHessians)[tIndex].update(*mStateData);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Cache criteria gradients
+    **********************************************************************************/
+    void cacheCriteriaGradients()
+    {
+        Plato::update(static_cast<ScalarType>(1), *mCurrentObjFuncGrad, static_cast<ScalarType>(0), *mPreviousObjFuncGrad);
+
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            Plato::update(static_cast<ScalarType>(1), (*mCurrentCostraintGrad)[tIndex], static_cast<ScalarType>(0), (*mPreviousCostraintGrad)[tIndex]);
         }
     }
 
@@ -864,12 +954,13 @@ private:
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWorkMultiVec;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWorkVec;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjectiveGradient;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLagrangeMultipliers;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mTrialConstraintValues;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousConstraintValues;
 
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentObjFuncGrad;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousObjFuncGrad;
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mCurrentCostraintGrad;
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mPreviousCostraintGrad;
 
@@ -877,12 +968,12 @@ private:
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
 
     std::shared_ptr<Plato::Preconditioner<ScalarType, OrdinalType>> mPreconditioner;
-    std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> mObjectiveHessianOperator;
-    std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> mConstraintHessianOperators;
+    std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> mObjFuncHessian;
+    std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> mConstraintHessians;
 
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
 
-    std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> mObjectiveGradientOperator;
+    std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> mObjectiveGradOperator;
     std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> mConstraintGradientOperator;
 
 private:

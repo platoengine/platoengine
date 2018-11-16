@@ -192,7 +192,6 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
         aAlgorithm.disablePostSmoothing();
     }
 
-    aAlgorithm.setHaveHessian(aInputs.mHaveHessian);
     aAlgorithm.setPenaltyParameter(aInputs.mInitialPenaltyParameter);
     aAlgorithm.setPenaltyParameterScaleFactor(aInputs.mPenaltyParameterScaleFactor);
 
@@ -251,6 +250,38 @@ inline void set_ksal_algorithm_outputs(const Plato::AugmentedLagrangian<ScalarTy
 // function set_ksal_algorithm_outputs
 
 /******************************************************************************//**
+ * @brief Set numerical method use to compute Hessians
+ * @param [in] aInputs Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm inputs
+ * @param [in,out] aAlgorithm interface to optimization algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_hessian_computation_method(const Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> & aInputs,
+                                  Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
+{
+    aAlgorithm.setHaveHessian(aInputs.mHaveHessian);
+    switch(aInputs.mHessianMethod)
+    {
+        case Plato::Hessian::LBFGS:
+        {
+            aAlgorithm.setCriteriaHessiansLBFGS(aInputs.mLimitedMemorySize);
+            break;
+        }
+        case Plato::Hessian::ANALYTICAL:
+        {
+            aAlgorithm.setHaveHessian(true);
+            break;
+        }
+        default:
+        case Plato::Hessian::DISABLED:
+        {
+            aAlgorithm.setHaveHessian(false);
+            break;
+        }
+    }
+}
+// set_hessian_computation_method
+
+/******************************************************************************//**
  * @brief Kelley-Sachs Augmented Lagrangian (KSAL) trust region algorithm interface
  * @param [in] aObjective user-defined objective function
  * @param [in] aConstraints user-defined list of constraints
@@ -278,6 +309,7 @@ inline void solve_ksal(const std::shared_ptr<Plato::Criterion<ScalarType, Ordina
     tAlgorithm.setControlUpperBounds(*aInputs.mUpperBounds);
 
     // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
+    Plato::set_hessian_computation_method(aInputs, tAlgorithm);
     Plato::set_ksal_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_ksal_algorithm_outputs(tAlgorithm, aOutputs);

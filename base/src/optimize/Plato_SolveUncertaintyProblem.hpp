@@ -250,11 +250,11 @@ inline void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, Or
     Plato::set_srom_problem_initial_guess(tNumSamples, aInputsKSAL);
 
     // solve srom optimization problem
-    aInputsKSAL.mHaveHessian = false;
     aInputsKSAL.mMaxTrustRegionRadius = 1.0;
     aInputsKSAL.mDisablePostSmoothing = true;
     aInputsKSAL.mControlStagnationTolerance = 1e-5;
     aInputsKSAL.mPrintDiagnostics = aPrintDiagnostics;
+    aInputsKSAL.mHessianMethod = Plato::Hessian::DISABLED;
     Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType> tOutputsKSAL;
     Plato::solve_ksal<ScalarType, OrdinalType>(tSromObjective, tSromConstraints, aInputsKSAL, tOutputsKSAL);
 
