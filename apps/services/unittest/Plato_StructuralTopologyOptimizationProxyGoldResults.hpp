@@ -62,6 +62,8 @@ std::vector<double> get_gold_control_ksbc_lbfgs_test();
 std::vector<double> get_gold_control_ksal_test_one();
 std::vector<double> get_gold_control_ksal_test_two();
 std::vector<double> get_gold_control_ksal_test_three();
+std::vector<double> get_gold_control_ksal_test_four();
+std::vector<double> get_gold_control_ksal_test_five();
 std::vector<double> get_gold_control_optimality_criteria_test();
 
 std::vector<double> getGoldStateData();
