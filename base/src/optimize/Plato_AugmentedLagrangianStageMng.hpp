@@ -567,7 +567,7 @@ public:
         this->evaluateConstraint(aControl, *mCurrentConstraintValues);
 
         // Evaluate augmented Lagrangian
-        mCurrentAugLagFuncValue = this->evaluateFeasibilityCriterion(mCurrentObjFuncValue);
+        mCurrentAugLagFuncValue = this->evaluateAugmentedLagrangianFunc(mCurrentObjFuncValue);
 
         return (mCurrentAugLagFuncValue);
     }
@@ -588,7 +588,7 @@ public:
         this->evaluateConstraint(aControl, *mTrialConstraintValues);
 
         // Evaluate augmented Lagrangian
-        mTrialAugLagFuncValue = this->evaluateFeasibilityCriterion(mTrialObjFuncValue);
+        mTrialAugLagFuncValue = this->evaluateAugmentedLagrangianFunc(mTrialObjFuncValue);
 
         return (mTrialAugLagFuncValue);
     }
@@ -611,7 +611,7 @@ public:
                 mIsMeanNormEnabled == true ? Plato::norm_mean(*mCurrentObjFuncGrad) : Plato::norm(*mCurrentObjFuncGrad);
         mNumObjGradEval++;
 
-        this->computeFeasibilityCriterionGradient(aControl, aOutput);
+        this->computeAugmentedLagrangianGradient(aControl, aOutput);
         mNormAugLagFuncGrad = mIsMeanNormEnabled == true ? Plato::norm_mean(aOutput) : Plato::norm(aOutput);
     }
 
@@ -630,7 +630,7 @@ public:
         mObjFuncHessian->apply(aControl, aVector, aOutput);
         mNumObjHessEval++;
 
-        this->computeFeasibilityCriterionHessian(aControl, aVector, aOutput);
+        this->computeAugmentedLagrangianHessian(aControl, aVector, aOutput);
     }
 
     /******************************************************************************//**
@@ -750,7 +750,7 @@ private:
      * @param [in] aObjFuncValue objective function value
      * @return augmented Lagrangian evaluation
     **********************************************************************************/
-    ScalarType evaluateFeasibilityCriterion(const ScalarType & aObjFuncValue)
+    ScalarType evaluateAugmentedLagrangianFunc(const ScalarType & aObjFuncValue)
     {
         ScalarType tOutput = aObjFuncValue;
 
@@ -783,7 +783,7 @@ private:
      * @param [in] aControl optimization variables
      * @param [out] aOutput augmented Lagrangian gradient
     **********************************************************************************/
-    void computeFeasibilityCriterionGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+    void computeAugmentedLagrangianGradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                             Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
         assert(mConstraintGradientOperator.get() != nullptr);
@@ -824,7 +824,7 @@ private:
      * @param [in] aVector descent direction
      * @param [out] aOutput augmented Lagrangian Hessian
     **********************************************************************************/
-    void computeFeasibilityCriterionHessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+    void computeAugmentedLagrangianHessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                            const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                                            Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
