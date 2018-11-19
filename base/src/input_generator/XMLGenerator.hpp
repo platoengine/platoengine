@@ -188,6 +188,8 @@ struct InputData
   std::string optimization_algorithm;
   std::string check_gradient;
   std::string check_hessian;
+  std::string hessian_type;
+  std::string limited_memory_storage;
   std::string restart_iteration;
   std::string initial_guess_filename;
   std::string initial_guess_field_name;

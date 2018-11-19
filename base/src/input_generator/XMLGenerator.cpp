@@ -3185,6 +3185,8 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.output_method="epu";
     m_InputData.check_gradient = "false";
     m_InputData.check_hessian = "false";
+    m_InputData.hessian_type = "Disabled";
+    m_InputData.limited_memory_storage = "8";
     m_InputData.GCMMA_inner_kkt_tolerance = "";
     m_InputData.GCMMA_outer_kkt_tolerance = "";
     m_InputData.GCMMA_inner_control_stagnation_tolerance = "";
@@ -3826,6 +3828,24 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.check_hessian = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"hessian","type"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"hessian type\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.hessian_type = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limited","memory","storage"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"limited memory storage\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.limited_memory_storage = tStringValue;
                         }
                         else
                         {
@@ -6421,9 +6441,10 @@ bool XMLGenerator::generateInterfaceXML()
     tmp_node = misc_node.append_child("Options");
     addChild(tmp_node, "DerivativeCheckerInitialSuperscript", "1");
     addChild(tmp_node, "DerivativeCheckerFinalSuperscript", "8");
-    // When we have performers that have Hessian information,
-    // we will have to generalize the following to not always be false.
-    addChild(tmp_node, "HaveHessian", "False");
+    if(m_InputData.hessian_type.size() > 0)
+        addChild(tmp_node, "HessianType", m_InputData.hessian_type);
+    if(m_InputData.limited_memory_storage.size() > 0)
+        addChild(tmp_node, "LimitedMemoryStorage", m_InputData.limited_memory_storage);
     if(m_InputData.GCMMA_inner_kkt_tolerance.size() > 0)
         addChild(tmp_node, "GCMMAInnerKKTTolerance", m_InputData.GCMMA_inner_kkt_tolerance);
     if(m_InputData.GCMMA_outer_kkt_tolerance.size() > 0)

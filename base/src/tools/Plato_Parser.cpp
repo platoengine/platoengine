@@ -1405,16 +1405,26 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             bool tOutputDiagnosticsToFile = Plato::Get::Bool(tOptionsNode, "OutputDiagnosticsToFile");
             aOptimizerEngineStageData.setOutputDiagnosticsToFile(tOutputDiagnosticsToFile);
         }
-        if( tOptionsNode.size<std::string>("HaveHessian") )
+
+        if( tOptionsNode.size<std::string>("HessianType") )
         {
-            bool tHaveHessian = Plato::Get::Bool(tOptionsNode, "HaveHessian");
-            aOptimizerEngineStageData.setHaveHessian(tHaveHessian);
+            std::string tHessianType = Plato::Get::String(tOptionsNode, "HessianType");
+            aOptimizerEngineStageData.setHessianType(tHessianType);
         }
+
+        if( tOptionsNode.size<std::string>("LimitedMemoryStorage") )
+        {
+            int tLimitedMemoryStorage = Plato::Get::Int(tOptionsNode, "LimitedMemoryStorage");
+            assert(tLimitedMemoryStorage > 0);
+            aOptimizerEngineStageData.setLimitedMemoryStorage(tLimitedMemoryStorage);
+        }
+
         if( tOptionsNode.size<std::string>("MeanNorm") )
         {
             bool tMeanNorm = Plato::Get::Bool(tOptionsNode, "MeanNorm");
             aOptimizerEngineStageData.setMeanNorm(tMeanNorm);
         }
+
         if(tOptionsNode.size<std::string>("DisablePostSmoothing"))
         {
             bool tDisablePostSmoothing = Plato::Get::Bool(tOptionsNode, "DisablePostSmoothing");

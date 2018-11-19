@@ -96,7 +96,7 @@
 <Optimizer>
   <Package>KSBC</Package>
   <Options>
-    <HaveHessian>false</HaveHessian>
+    <HessianType>Disabled</HessianType>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>

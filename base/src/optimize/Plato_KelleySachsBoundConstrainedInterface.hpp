@@ -144,13 +144,11 @@ public:
         // ********* ALLOCATE REDUCED SPACE FORMULATION MANAGER FOR TRUST REGION ALGORITHM ********* //
         std::shared_ptr<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>> tStageMng =
                 std::make_shared<Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType>>(tDataFactory, tCriterionList);
-        ScalarType tHaveHessian = mInputData.getHaveHessian();
-        tStageMng->setHaveHessian(tHaveHessian);
+        this->setHessianMethod(*tStageMng);
 
         // ********* ALLOCATE KELLEY-SACHS BOUND CONSTRAINED OPTIMIZATION ALGORITHM ********* //
         Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> tAlgorithm(tDataFactory, tDataMng, tStageMng);
         this->setParameters(tAlgorithm);
-        tAlgorithm.enableDiagnostics();
         tAlgorithm.solve();
 
         this->finalize();
@@ -164,10 +162,33 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Set numerical method use to compute application of vector to Hessian operator
+     * @param [in,out] aStageMng interface to criteria value, gradient and Hessian evaluations
+     **********************************************************************************/
+    void setHessianMethod(Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
+    {
+        if(mInputData.getHessianType() == "LBFGS")
+        {
+            aStageMng.setHaveHessian(true);
+            aStageMng.setHessianLBFGS(mInputData.getLimitedMemoryStorage());
+        }
+        else if(mInputData.getHessianType() == "Analytical")
+        {
+            aStageMng.setHaveHessian(true);
+        }
+        else
+        {
+            aStageMng.setHaveHessian(false);
+        }
+    }
+
     /******************************************************************************/
     void setParameters(Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType> & aAlgorithm)
     /******************************************************************************/
     {
+        aAlgorithm.enableDiagnostics();
+
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         OrdinalType tMaxTrustRegionIterations = mInputData.getKSMaxTrustRegionIterations();
         ScalarType tContractionScaleFactor = mInputData.getKSTrustRegionContractionFactor();
