@@ -43,6 +43,7 @@ endif()
 
 IF( STK_ENABLED )
   add_subdirectory(CreateSupportStructure1)
+  add_subdirectory(CreateSupportStructure2)
 ENDIF()
 add_subdirectory(2Load_OC)
 add_subdirectory(2Load_OC_Variables)
