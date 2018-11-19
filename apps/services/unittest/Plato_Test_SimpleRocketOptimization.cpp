@@ -376,9 +376,9 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface_LBFGS)
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
     const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
-    EXPECT_EQ(19, tOutputs.mNumOuterIter);
-    EXPECT_EQ(82, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(20, tOutputs.mNumObjGradEval);
+    EXPECT_EQ(19u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(82u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(20u, tOutputs.mNumObjGradEval);
     const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
     EXPECT_NEAR(tBest1, 0.0750002, tTolerance);
     EXPECT_NEAR(tBest2, 0.00499999, tTolerance);
