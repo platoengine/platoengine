@@ -3873,11 +3873,11 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mUseMeanNorm = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"AL","penalty","parameter"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","penalty","parameter"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"AL penalty parameter\" keyword(s).\n";
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al penalty parameter\" keyword(s).\n";
                                 return false;
                             }
                             m_InputData.mAugLagPenaltyParam = tStringValue;
@@ -3891,20 +3891,20 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mFeasibilityTolerance = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"AL","penalty","scale","factor"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","penalty","scale","factor"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"AL penalty scale factor\" keyword(s).\n";
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al penalty scale factor\" keyword(s).\n";
                                 return false;
                             }
                             m_InputData.mAugLagPenaltyParamScale = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"AL","max","subproblem","iterations"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","max","subproblem","iterations"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"AL max subproblem iterations\" keyword(s).\n";
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al max subproblem iterations\" keyword(s).\n";
                                 return false;
                             }
                             m_InputData.mMaxNumAugLagSubProbIter = tStringValue;
