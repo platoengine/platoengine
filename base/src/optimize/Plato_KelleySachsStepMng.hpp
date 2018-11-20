@@ -288,6 +288,7 @@ private:
         const ScalarType tActualOverPredLowerBound = this->getActualOverPredictedReductionLowerBound();
         const ScalarType tActualOverPredUpperBound = this->getActualOverPredictedReductionUpperBound();
         const ScalarType tSufficientDecreaseCondition = this->computeSufficientDecreaseCondition(aDataMng);
+
         // Set termination criteria for trust region subproblem
         bool tIsRatioBelowMidBound = tActualOverPredReduction < tActualOverPredMidBound;
         bool tIsRatioAboveMidBound = tActualOverPredReduction >= tActualOverPredMidBound;
@@ -298,9 +299,12 @@ private:
         bool tIsRatioAboveMidBoundAndBelowUpperBound = tIsRatioAboveMidBound && tIsRatioBelowUpperBound;
         bool tIsRadiusFlagTrueAndRatioAboveUpperBound = (mRadiusFlag == true) && tIsRatioAboveUpperBound;
         bool tIsActualReductionAboveSufficientDecreaseCondition = tActualReduction >= tSufficientDecreaseCondition;
+
         // Check termination criteria for trust region subproblem
         bool tStopTrustRegionSubProblem = false;
         ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
+        tCurrentTrustRegionRadius = std::min(tMaxTrustRegionRadius, tCurrentTrustRegionRadius);
+
         bool tIsTurstRegionRadiusEqualMaxRadius = tCurrentTrustRegionRadius == tMaxTrustRegionRadius;
         if(tIsRatioBelowLowerBound || tIsActualReductionAboveSufficientDecreaseCondition)
         {
