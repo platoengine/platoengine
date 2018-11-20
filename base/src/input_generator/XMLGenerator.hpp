@@ -161,6 +161,7 @@ struct InputData
   std::vector<Constraint> constraints;
   std::vector<Material> materials;
   std::vector<Block> blocks;
+
   std::string filter_type;
   std::string filter_radius_scale;
   std::string filter_radius_absolute;
@@ -168,6 +169,7 @@ struct InputData
   std::string filter_heaviside_min;
   std::string filter_heaviside_update;
   std::string filter_heaviside_max;
+
   std::string num_opt_processors;
   std::string output_frequency;
   std::string output_method;
@@ -188,8 +190,7 @@ struct InputData
   std::string optimization_algorithm;
   std::string check_gradient;
   std::string check_hessian;
-  std::string hessian_type;
-  std::string limited_memory_storage;
+
   std::string restart_iteration;
   std::string initial_guess_filename;
   std::string initial_guess_field_name;
@@ -197,36 +198,52 @@ struct InputData
   std::string number_refines;
   std::string number_buffer_layers;
   std::string initial_density_value;
+
   std::string create_levelset_spheres;
   std::string levelset_sphere_radius;
   std::string levelset_sphere_packing_factor;
   std::string levelset_initialization_method;
   std::string levelset_material_box_min;
   std::string levelset_material_box_max;
-  std::string GCMMA_inner_kkt_tolerance;
-  std::string GCMMA_outer_kkt_tolerance;
-  std::string GCMMA_inner_control_stagnation_tolerance;
-  std::string GCMMA_outer_control_stagnation_tolerance;
-  std::string GCMMA_outer_objective_stagnation_tolerance;
-  std::string GCMMA_max_inner_iterations;
-  std::string GCMMA_outer_stationarity_tolerance;
-  std::string GCMMA_initial_moving_asymptotes_scale_factor;
-  std::string KS_max_trust_region_iterations;
-  std::string KS_trust_region_expansion_factor;
-  std::string KS_trust_region_contraction_factor;
-  std::string KS_outer_gradient_tolerance;
-  std::string KS_outer_stationarity_tolerance;
-  std::string KS_outer_stagnation_tolerance;
-  std::string KS_outer_control_stagnation_tolerance;
-  std::string KS_outer_actual_reduction_tolerance;
-  std::string KS_initial_radius_scale;
-  std::string KS_max_radius_scale;
-  std::string KS_disable_post_smoothing;
-  std::string problem_update_frequency;
+
+  std::string mInnerKKTtoleranceGCMMA;
+  std::string mOuterKKTtoleranceGCMMA;
+  std::string mMaxInnerIterationsGCMMA;
+  std::string mOuterStationarityToleranceGCMMA;
+  std::string mInnerControlStagnationToleranceGCMMA;
+  std::string mOuterControlStagnationToleranceGCMMA;
+  std::string mOuterObjectiveStagnationToleranceGCMMA;
+  std::string mInitialMovingAsymptotesScaleFactorGCMMA;
+
+  std::string mHessianType;
+  std::string mLimitedMemoryStorage;
+  std::string mProblemUpdateFrequency;
+  std::string mDisablePostSmoothingKS;
+  std::string mOuterGradientToleranceKS;
+  std::string mOuterStationarityToleranceKS;
+  std::string mOuterStagnationToleranceKS;
+  std::string mOuterControlStagnationToleranceKS;
+  std::string mOuterActualReductionToleranceKS;
+
+  std::string mMaxRadiusScale;
+  std::string mInitialRadiusScale;
+  std::string mMaxTrustRegionRadius;
+  std::string mMinTrustRegionRadius;
+  std::string mMaxTrustRegionIterations;
+  std::string mTrustRegionExpansionFactor;
+  std::string mTrustRegionContractionFactor;
+
+  std::string mUseMeanNorm;
+  std::string mAugLagPenaltyParam;
+  std::string mFeasibilityTolerance;
+  std::string mAugLagPenaltyParamScale;
+  std::string mMaxNumAugLagSubProbIter;
+
   std::vector<std::string> levelset_nodesets;
   std::vector<std::string> fixed_block_ids;
   std::vector<std::string> fixed_sideset_ids;
   std::vector<std::string> fixed_nodeset_ids;
+
   std::vector<LoadCase> load_cases;
   std::vector<BC> bcs;
   std::vector<Uncertainty> uncertainties;
@@ -308,6 +325,47 @@ protected:
   std::string m_filterType_kernelThenHeaviside_generatorName;
   std::string m_filterType_kernelThenHeaviside_XMLName;
 
+private:
+  /******************************************************************************//**
+   * @brief Initialize Plato problem options
+  **********************************************************************************/
+  void initializePlatoProblemOptions();
+
+  /******************************************************************************//**
+   * @brief Set algorithm used to solve optimization problem
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setOptimizerMethod(pugi::xml_node & aXMLnode);
+
+  /******************************************************************************//**
+   * @brief Set parameters associated with the Optimality Criteria algorithm
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setOptimalityCriteriaOptions(pugi::xml_node & aXMLnode);
+
+  /******************************************************************************//**
+   * @brief Set parameters associated with the augmented Lagrangian algorithm
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setAugmentedLagrangianOptions(const pugi::xml_node & aXMLnode);
+
+  /******************************************************************************//**
+   * @brief Set parameters associated with the trust region algorithm
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setTrustRegionAlgorithmOptions(const pugi::xml_node & aXMLnode);
+
+  /******************************************************************************//**
+   * @brief Set parameters associated with the trust region Kelley-Sachs algorithm
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setKelleySachsAlgorithmOptions(const pugi::xml_node & aXMLnode);
+
+  /******************************************************************************//**
+   * @brief Set parameters associated with the Globally Convergent Method of Moving Asymptotes algorithm
+   * @param [in] aXMLnode data structure with information parsed from XML input file.
+  **********************************************************************************/
+  bool setGCMMAoptions(const pugi::xml_node & aXMLnode);
 };
 
 

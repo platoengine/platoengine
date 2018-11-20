@@ -123,22 +123,22 @@ public:
     std::string getRestartIteration() {return m_InputData.restart_iteration;}
     std::string getRestartFieldName() {return m_InputData.initial_guess_field_name;}
     std::string getRestartMeshFilename() {return m_InputData.initial_guess_filename;}
-    std::string getKSMaxTrustIterations() {return m_InputData.KS_max_trust_region_iterations;}
-    std::string getKSExpansionFactor() {return m_InputData.KS_trust_region_expansion_factor;}
-    std::string getKSContractionFactor() {return m_InputData.KS_trust_region_contraction_factor;}
-    std::string getKSOuterGradientTolerance() {return m_InputData.KS_outer_gradient_tolerance;}
-    std::string getKSOuterStationarityTolerance() {return m_InputData.KS_outer_stationarity_tolerance;}
-    std::string getKSOuterStagnationTolerance() {return m_InputData.KS_outer_stagnation_tolerance;}
-    std::string getKSOuterControlStagnationTolerance() {return m_InputData.KS_outer_control_stagnation_tolerance;}
-    std::string getKSOuterActualReductionTolerance() {return m_InputData.KS_outer_actual_reduction_tolerance;}
-    std::string getGCMMAMaxInnerIterations() {return m_InputData.GCMMA_max_inner_iterations;}
-    std::string getGCMMAInnerKKTTolerance() {return m_InputData.GCMMA_inner_kkt_tolerance;}
-    std::string getGCMMAInnerControlStagnationTolerance() {return m_InputData.GCMMA_inner_control_stagnation_tolerance;}
-    std::string getGCMMAOuterKKTTolerance() {return m_InputData.GCMMA_outer_kkt_tolerance;}
-    std::string getGCMMAOuterControlStagnationTolerance() {return m_InputData.GCMMA_outer_control_stagnation_tolerance;}
-    std::string getGCMMAOuterObjectiveStagnationTolerance() {return m_InputData.GCMMA_outer_objective_stagnation_tolerance;}
-    std::string getGCMMAOuterStationarityTolerance() {return m_InputData.GCMMA_outer_stationarity_tolerance;}
-    std::string getGCMMAInitialMovingAsymptotesScaleFactor() {return m_InputData.GCMMA_initial_moving_asymptotes_scale_factor;}
+    std::string getKSMaxTrustIterations() {return m_InputData.mMaxTrustRegionIterations;}
+    std::string getKSExpansionFactor() {return m_InputData.mTrustRegionExpansionFactor;}
+    std::string getKSContractionFactor() {return m_InputData.mTrustRegionContractionFactor;}
+    std::string getKSOuterGradientTolerance() {return m_InputData.mOuterGradientToleranceKS;}
+    std::string getKSOuterStationarityTolerance() {return m_InputData.mOuterStationarityToleranceKS;}
+    std::string getKSOuterStagnationTolerance() {return m_InputData.mOuterStagnationToleranceKS;}
+    std::string getKSOuterControlStagnationTolerance() {return m_InputData.mOuterControlStagnationToleranceKS;}
+    std::string getKSOuterActualReductionTolerance() {return m_InputData.mOuterActualReductionToleranceKS;}
+    std::string getGCMMAMaxInnerIterations() {return m_InputData.mMaxInnerIterationsGCMMA;}
+    std::string getGCMMAInnerKKTTolerance() {return m_InputData.mInnerKKTtoleranceGCMMA;}
+    std::string getGCMMAInnerControlStagnationTolerance() {return m_InputData.mInnerControlStagnationToleranceGCMMA;}
+    std::string getGCMMAOuterKKTTolerance() {return m_InputData.mOuterKKTtoleranceGCMMA;}
+    std::string getGCMMAOuterControlStagnationTolerance() {return m_InputData.mOuterControlStagnationToleranceGCMMA;}
+    std::string getGCMMAOuterObjectiveStagnationTolerance() {return m_InputData.mOuterObjectiveStagnationToleranceGCMMA;}
+    std::string getGCMMAOuterStationarityTolerance() {return m_InputData.mOuterStationarityToleranceGCMMA;}
+    std::string getGCMMAInitialMovingAsymptotesScaleFactor() {return m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA;}
     std::string getLevelsetSpherePackingFactor() {return m_InputData.levelset_sphere_packing_factor;}
     std::string getLevelsetSphereRadius() {return m_InputData.levelset_sphere_radius;}
     std::string getLevelsetNodeset(const int &aIndex) {return m_InputData.levelset_nodesets[aIndex];}
