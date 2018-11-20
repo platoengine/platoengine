@@ -159,12 +159,12 @@ private:
      **********************************************************************************/
     void setHessianMethod(Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
     {
-        if(mInputData.getHessianType() == "LBFGS")
+        if(mInputData.getHessianType() == "lbfgs")
         {
             aAlgorithm.setHaveHessian(true);
             aAlgorithm.setCriteriaHessiansLBFGS(mInputData.getLimitedMemoryStorage());
         }
-        else if(mInputData.getHessianType() == "Analytical")
+        else if(mInputData.getHessianType() == "analytical")
         {
             aAlgorithm.setHaveHessian(true);
         }

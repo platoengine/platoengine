@@ -168,12 +168,12 @@ private:
      **********************************************************************************/
     void setHessianMethod(Plato::ReducedSpaceTrustRegionStageMng<ScalarType, OrdinalType> & aStageMng)
     {
-        if(mInputData.getHessianType() == "LBFGS")
+        if(mInputData.getHessianType() == "lbfgs")
         {
             aStageMng.setHaveHessian(true);
             aStageMng.setHessianLBFGS(mInputData.getLimitedMemoryStorage());
         }
-        else if(mInputData.getHessianType() == "Analytical")
+        else if(mInputData.getHessianType() == "analytical")
         {
             aStageMng.setHaveHessian(true);
         }

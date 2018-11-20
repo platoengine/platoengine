@@ -3185,7 +3185,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.output_method="epu";
     m_InputData.check_gradient = "false";
     m_InputData.check_hessian = "false";
-    m_InputData.hessian_type = "Disabled";
+    m_InputData.hessian_type = "disabled";
     m_InputData.limited_memory_storage = "8";
     m_InputData.GCMMA_inner_kkt_tolerance = "";
     m_InputData.GCMMA_outer_kkt_tolerance = "";

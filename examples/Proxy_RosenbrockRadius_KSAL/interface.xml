@@ -250,7 +250,7 @@
 <Optimizer>
   <Package>KSAL</Package>
   <Options>
-    <HessianType>Analytical</HessianType>
+    <HessianType>analytical</HessianType>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>

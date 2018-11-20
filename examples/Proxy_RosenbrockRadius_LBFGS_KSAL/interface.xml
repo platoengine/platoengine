@@ -250,7 +250,7 @@
 <Optimizer>
   <Package>KSAL</Package>
   <Options>
-    <HessianType>LBFGS</HessianType>
+    <HessianType>lbfgs</HessianType>
     <LimitedMemoryStorage>6</LimitedMemoryStorage>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>

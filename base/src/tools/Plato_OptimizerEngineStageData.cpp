@@ -93,7 +93,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mDerivativeCheckerInitialSuperscript(1),
         mAlgebra(),
         mStateName(),
-        mHessianType("Disabled"),
+        mHessianType("disabled"),
         mInputFileName(),
         mCacheStageName(),
         mUpdateProblemStageName(),
