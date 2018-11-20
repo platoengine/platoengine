@@ -80,6 +80,9 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mKSOuterActualReductionTolerance(1e-8),
         mKSInitialRadiusScale(.1),
         mKSMaxRadiusScale(.5),
+        mKSTrustRegionRatioLow(.1),
+        mKSTrustRegionRatioMid(.25),
+        mKSTrustRegionRatioUpper(.75),
         mMaxNumAugLagSubProbIter(5),
         mFeasibilityTolerance(1e-4),
         mMinTrustRegionRadius(1e-6),
@@ -1395,6 +1398,7 @@ void OptimizerEngineStageData::setKSInitialRadiusScale(const double& aInput)
 {
     mKSInitialRadiusScale = aInput;
 }
+
 double OptimizerEngineStageData::getKSMaxRadiusScale() const
 {
     return mKSMaxRadiusScale;
@@ -1411,6 +1415,31 @@ size_t OptimizerEngineStageData::getProblemUpdateFrequency() const
 void OptimizerEngineStageData::setProblemUpdateFrequency(const size_t& aInput)
 {
     mProblemUpdateFrequency = aInput;
+}
+
+double OptimizerEngineStageData::getKSTrustRegionRatioLow() const
+{
+    return mKSTrustRegionRatioLow;
+}
+void OptimizerEngineStageData::setKSTrustRegionRatioLow(const double& aInput)
+{
+    mKSTrustRegionRatioLow = aInput;
+}
+double OptimizerEngineStageData::getKSTrustRegionRatioMid() const
+{
+    return mKSTrustRegionRatioMid;
+}
+void OptimizerEngineStageData::setKSTrustRegionRatioMid(const double& aInput)
+{
+    mKSTrustRegionRatioMid = aInput;
+}
+double OptimizerEngineStageData::getKSTrustRegionRatioUpper() const
+{
+    return mKSTrustRegionRatioUpper;
+}
+void OptimizerEngineStageData::setKSTrustRegionRatioUpper(const double& aInput)
+{
+    mKSTrustRegionRatioUpper = aInput;
 }
 
 } //namespace Plato

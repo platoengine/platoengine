@@ -227,6 +227,9 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.mOuterStagnationToleranceKS="";
     m_InputData.mOuterControlStagnationToleranceKS="";
     m_InputData.mOuterActualReductionToleranceKS="";
+    m_InputData.mTrustRegionRatioLowKS="";
+    m_InputData.mTrustRegionRatioMidKS="";
+    m_InputData.mTrustRegionRatioUpperKS="";
     m_InputData.mDisablePostSmoothingKS="";
     m_InputData.uncertainties.clear();
 }

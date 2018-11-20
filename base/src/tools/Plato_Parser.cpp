@@ -1557,6 +1557,21 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             double tKSMaxRadiusScale = Plato::Get::Double(tOptionsNode, "KSMaxRadiusScale");
             aOptimizerEngineStageData.setKSMaxRadiusScale(tKSMaxRadiusScale);
         }
+        if(tOptionsNode.size<std::string>("KSTrustRegionRatioLow"))
+        {
+            double tKSTrustRegionRatioLow = Plato::Get::Double(tOptionsNode, "KSTrustRegionRatioLow");
+            aOptimizerEngineStageData.setKSTrustRegionRatioLow(tKSTrustRegionRatioLow);
+        }
+        if(tOptionsNode.size<std::string>("KSTrustRegionRatioMid"))
+        {
+            double tKSTrustRegionRatioMid = Plato::Get::Double(tOptionsNode, "KSTrustRegionRatioMid");
+            aOptimizerEngineStageData.setKSTrustRegionRatioMid(tKSTrustRegionRatioMid);
+        }
+        if(tOptionsNode.size<std::string>("KSTrustRegionRatioUpper"))
+        {
+            double tKSTrustRegionRatioUpper = Plato::Get::Double(tOptionsNode, "KSTrustRegionRatioUpper");
+            aOptimizerEngineStageData.setKSTrustRegionRatioUpper(tKSTrustRegionRatioUpper);
+        }
         if(tOptionsNode.size<std::string>("ProblemUpdateFrequency"))
         {
             int tProblemUpdateFrequency = Plato::Get::Int(tOptionsNode, "ProblemUpdateFrequency");

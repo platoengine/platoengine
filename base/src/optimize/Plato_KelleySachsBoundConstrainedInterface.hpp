@@ -202,6 +202,9 @@ private:
         ScalarType tMaxRadiusScale = mInputData.getKSMaxRadiusScale();
         OrdinalType tProblemUpdateFrequency = mInputData.getProblemUpdateFrequency();
         bool tDisablePostSmoothing = mInputData.getDisablePostSmoothing();
+        ScalarType tTrustRegionRatioLow = mInputData.getKSTrustRegionRatioLow();
+        ScalarType tTrustRegionRatioMid = mInputData.getKSTrustRegionRatioMid();
+        ScalarType tTrustRegionRatioUpper = mInputData.getKSTrustRegionRatioUpper();
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setTrustRegionContraction(tContractionScaleFactor);
@@ -215,11 +218,13 @@ private:
         aAlgorithm.setScaleOfUnitControlForInitialTrustRegionRadius(tInitialRadiusScale);
         aAlgorithm.setScaleOfUnitControlForMaxTrustRegionRadius(tMaxRadiusScale);
         aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
-
         if(tDisablePostSmoothing)
         {
             aAlgorithm.disablePostSmoothing();
         }
+        aAlgorithm.setActualOverPredictedReductionLowerBound(tTrustRegionRatioLow);
+        aAlgorithm.setActualOverPredictedReductionMidBound(tTrustRegionRatioMid);
+        aAlgorithm.setActualOverPredictedReductionUpperBound(tTrustRegionRatioUpper);
     }
     /******************************************************************************/
 

@@ -972,9 +972,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                     fprintf(fp, "  krylov_method = GMRESClassic\n");
                     fprintf(fp, "  stag_tol = 0.001\n");
                     fprintf(fp, "  orthog = 0\n");
-                    fprintf(fp, "  num_GS_steps = 2\n"); // TMPDEBUG
-                    fprintf(fp, "  overlap = 4\n"); // TMPDEBUG
-//                    fprintf(fp, "  bailout true\n"); // TMPDEBUG
+                    fprintf(fp, "  num_GS_steps = 2\n");
+                    fprintf(fp, "  overlap = 4\n");
+                    fprintf(fp, "  bailout true\n");
                     if(!haveSolverTolerance)
                     {
                         fprintf(fp, "  solver_tol = 1e-4\n");
@@ -1083,6 +1083,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  stress_limit_value = %s\n", cur_obj.stress_limit.c_str());
                 }
+                if(cur_obj.relative_stress_limit != "")
+                {
+                    fprintf(fp, "  relative_stress_limit = %s\n", cur_obj.relative_stress_limit.c_str());
+                }
                 if(cur_obj.stress_p_norm_power != "")
                 {
                     fprintf(fp, "  stress_p_norm_power = %s\n", cur_obj.stress_p_norm_power.c_str());
@@ -1122,10 +1126,6 @@ bool XMLGenerator::generateSalinasInputDecks()
                 if(cur_obj.limit_reset_count != "")
                 {
                     fprintf(fp, "  limit_reset_count = %s\n", cur_obj.limit_reset_count.c_str());
-                }
-                if(cur_obj.inequality_allowable_feasiblity_lower != "")
-                {
-                    fprintf(fp, "  stress_ineq_lower = %s\n", cur_obj.inequality_allowable_feasiblity_lower.c_str());
                 }
                 if(cur_obj.inequality_allowable_feasiblity_upper != "")
                 {
@@ -2120,7 +2120,26 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress limit\" keywords.\n";
                                 return false;
                             }
+                            if(new_objective.relative_stress_limit != "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: Only specify \"relative stress limit\" or \"stress limit\".\n";
+                                return false;
+                            }
                             new_objective.stress_limit = tokens[2];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"relative","stress","limit"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"relative stress limit\" keywords.\n";
+                                return false;
+                            }
+                            if(new_objective.stress_limit != "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: Only specify \"relative stress limit\" or \"stress limit\".\n";
+                                return false;
+                            }
+                            new_objective.relative_stress_limit = tokens[3];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","p","norm","power"}, tStringValue))
                         {
@@ -2220,15 +2239,6 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.limit_reset_count = tokens[3];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","lower"}, tStringValue))
-                        {
-                            if(tokens.size() < 5)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality allowable feasibility lower\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.inequality_allowable_feasiblity_lower = tokens[4];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","upper"}, tStringValue))
                         {
@@ -3617,6 +3627,33 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.mOuterActualReductionToleranceKS = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","ratio","low"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region ratio low\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mTrustRegionRatioLowKS = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","ratio","mid"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region ratio mid\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mTrustRegionRatioMidKS = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","ratio","upper"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region ratio upper\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mTrustRegionRatioUpperKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","initial","radius","scale"}, tStringValue))
                         {
@@ -6877,6 +6914,18 @@ bool XMLGenerator::setKelleySachsAlgorithmOptions(const pugi::xml_node & aXMLnod
     if(m_InputData.mDisablePostSmoothingKS.size() > 0)
     {
         this->addChild(aXMLnode, "DisablePostSmoothing", m_InputData.mDisablePostSmoothingKS);
+    }
+    if(m_InputData.mTrustRegionRatioLowKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSTrustRegionRatioLow", m_InputData.mTrustRegionRatioLowKS);
+    }
+    if(m_InputData.mTrustRegionRatioMidKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSTrustRegionRatioMid", m_InputData.mTrustRegionRatioMidKS);
+    }
+    if(m_InputData.mTrustRegionRatioUpperKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSTrustRegionRatioUpper", m_InputData.mTrustRegionRatioUpperKS);
     }
 
     return (true);

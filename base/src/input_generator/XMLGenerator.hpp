@@ -98,6 +98,19 @@ struct Objective
   std::string performer_name;
   std::string weight;
   std::string num_procs;
+  std::string analysis_solver_tolerance;
+  std::string multi_load_case;
+  std::vector<std::string> output_for_plotting;
+  std::vector<std::string> load_case_ids;
+  std::vector<std::string> bc_ids;
+  std::vector<std::string> load_case_weights;
+  std::string distribute_objective_type;
+  std::string atmost_total_num_processors;
+
+  // type: "match frf data"
+  std::string complex_error_measure;
+  std::string convert_to_tet10;
+  std::vector<std::string> frf_match_nodesets;
   std::string freq_min;
   std::string freq_max;
   std::string freq_step;
@@ -105,21 +118,16 @@ struct Objective
   std::string raleigh_damping_alpha;
   std::string raleigh_damping_beta;
   std::string wtmass_scale_factor;
-  std::string analysis_solver_tolerance;
-  std::string complex_error_measure;
-  std::string convert_to_tet10;
-  std::string multi_load_case;
-  std::vector<std::string> frf_match_nodesets;
-  std::vector<std::string> output_for_plotting;
-  std::vector<std::string> load_case_ids;
-  std::vector<std::string> bc_ids;
-  std::vector<std::string> load_case_weights;
-  std::string distribute_objective_type;
-  std::string atmost_total_num_processors;
+
+  // type: "compliance and volume min"
   std::string volume_misfit_target;
+
+  // type: "stress p norm"
   std::string stress_p_norm_power;
 
+  // type: "stress limit"
   std::string stress_limit;
+  std::string relative_stress_limit;
   std::string stress_ramp_factor;
   std::string limit_power_min;
   std::string limit_power_max;
@@ -234,6 +242,9 @@ struct InputData
   std::string mOuterStagnationToleranceKS;
   std::string mOuterControlStagnationToleranceKS;
   std::string mOuterActualReductionToleranceKS;
+  std::string mTrustRegionRatioLowKS;
+  std::string mTrustRegionRatioMidKS;
+  std::string mTrustRegionRatioUpperKS;
 
   std::string mMaxRadiusScale;
   std::string mInitialRadiusScale;

@@ -112,7 +112,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     }
     else
     {
-        result->set_max_heaviside_parameter(12.);
+        result->set_max_heaviside_parameter(4.2);
     }
 
     // defaults

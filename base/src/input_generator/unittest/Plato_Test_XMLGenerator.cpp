@@ -527,6 +527,45 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
 
+    // ks trust region ratio low/mid/upper
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio low\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio mid\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio upper\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio low 1.1\n"
+            "ks trust region ratio mid 2.1\n"
+            "ks trust region ratio upper 3.1\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioLowKS, "1.1");
+    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioMidKS, "2.1");
+    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioUpperKS, "3.1");
+
     // ks disable post smoothing
     stringInput = "begin optimization parameters\n"
             "ks disable post smoothing\n"
@@ -1944,7 +1983,6 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
             "limit power infeasible slope 0.92\n"
             "limit reset subfrequency 11\n"
             "limit reset count 3\n"
-            "inequality allowable feasibility lower -0.31\n"
             "inequality allowable feasibility upper 0.045\n"
             "stress inequality power 1.51\n"
             "volume penalty power 1.254\n"
@@ -1954,6 +1992,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
             "inequality infeasibility scale 0.48\n"
             "stress favor final 10.12\n"
             "stress favor updates 39\n"
+            "relative stress limit 1.57\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
@@ -1968,7 +2007,6 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_feasible_slope, "1.9");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_bias, "-0.51");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_slope, "0.92");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_lower, "-0.31");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_upper, "0.045");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_inequality_power, "1.51");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_power, "1.254");
@@ -1980,11 +2018,34 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_infeasibility_scale, "0.48");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_final, "10.12");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_updates, "39");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].relative_stress_limit, "1.57");
     tester.clearInputData();
 
     stringInput = "begin objective\n"
             "type limit stress\n"
             "stress limit\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    tester.clearInputData();
+
+    stringInput = "begin objective\n"
+            "type limit stress\n"
+            "stress limit 1.5\n"
+            "relative stress limit 2.5\n"
+            "end objective\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), false);
+    tester.clearInputData();
+
+    stringInput = "begin objective\n"
+            "type limit stress\n"
+            "relative stress limit 1.3\n"
+            "stress limit 2.1\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();

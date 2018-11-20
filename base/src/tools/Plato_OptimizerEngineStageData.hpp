@@ -457,6 +457,13 @@ public:
     size_t getProblemUpdateFrequency() const;
     void setProblemUpdateFrequency(const size_t& aInput);
 
+    double getKSTrustRegionRatioLow() const;
+    void setKSTrustRegionRatioLow(const double& aInput);
+    double getKSTrustRegionRatioMid() const;
+    void setKSTrustRegionRatioMid(const double& aInput);
+    double getKSTrustRegionRatioUpper() const;
+    void setKSTrustRegionRatioUpper(const double& aInput);
+
 private:
     bool mMeanNorm;
     bool mCheckGradient;
@@ -485,6 +492,9 @@ private:
     double mKSOuterActualReductionTolerance;
     double mKSInitialRadiusScale;
     double mKSMaxRadiusScale;
+    double mKSTrustRegionRatioLow;
+    double mKSTrustRegionRatioMid;
+    double mKSTrustRegionRatioUpper;
 
     size_t mMaxNumAugLagSubProbIter;
     double mFeasibilityTolerance;
