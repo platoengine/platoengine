@@ -72,14 +72,20 @@ public:
 
     /******************************************************************************//**
      * @brief Enable mean norm calculations, yes = true or no = false
+     * @param [in] aInput flag
     ***********************************************************************************/
     void setMeanNorm(const bool & aInput);
 
     /******************************************************************************//**
-     * @brief Hessian information provided, yes = true or no = false
+     * @brief Return mean norm flag
+     * @return yes = true or no = false
     ***********************************************************************************/
-    void setHaveHessian(const bool & aInput);
+    bool getMeanNorm() const;
 
+    /******************************************************************************//**
+     * @brief Disable post-smoothing operation in Kelley-Sachs trust region algorithm, yes = true or no = false
+     * @param [in] aInput flag
+    ***********************************************************************************/
     void setDisablePostSmoothing(const bool & aInput);
 
     bool getCheckGradient() const;
@@ -89,17 +95,16 @@ public:
     bool getOutputDiagnosticsToFile() const;
 
     /******************************************************************************//**
-     * @brief Return mean norm flag
-     * @return yes = true or no = false
+     * @brief Numerical method used to compute application of vector to Hessian operator
+     * @param [in] aInput numerical method
     ***********************************************************************************/
-    bool getMeanNorm() const;
+    void setHessianType(const std::string & aInput);
 
     /******************************************************************************//**
-     * @brief Return have Hessian flag
-     * @return yes = true or no = false
+     * @brief Return numerical method used to compute application of vector to Hessian operator
+     * @return numerical method
     ***********************************************************************************/
-    bool getHaveHessian() const;
-
+    std::string getHessianType() const;
 
     bool getDisablePostSmoothing() const;
 
@@ -167,6 +172,18 @@ public:
 
     double getKSOuterActualReductionTolerance() const;
     void setKSOuterActualReductionTolerance(const double & aInput);
+
+    /******************************************************************************//**
+     * @brief Return limited memory storage capacity for LBFG Hessian method
+     * @return limited memory storage capacity
+    ***********************************************************************************/
+    size_t getLimitedMemoryStorage() const;
+
+    /******************************************************************************//**
+     * @brief Set limited memory storage capacity for LBFG Hessian method
+     * @param [in] aInput limited memory storage capacity
+    ***********************************************************************************/
+    void setLimitedMemoryStorage(const size_t & aInput);
 
     /******************************************************************************//**
      * @brief Return maximum number of augmented Lagrangian sub problem iterations
@@ -447,7 +464,6 @@ private:
     bool mUserInitialGuess;
     bool mOutputControlToFile;
     bool mOutputDiagnosticsToFile;
-    bool mHaveHessian;
     bool mDisablePostSmoothing;
 
     int mGCMMAMaxInnerIterations;
@@ -478,6 +494,7 @@ private:
     double mAugLagPenaltyScaleParameter;
 
     size_t mMaxNumIterations;
+    size_t mLimitedMemoryStorage;
     size_t mProblemUpdateFrequency;
 
     int mDerivativeCheckerFinalSuperscript;
@@ -485,6 +502,7 @@ private:
 
     std::string mAlgebra;
     std::string mStateName;
+    std::string mHessianType;
     std::string mInputFileName;
     std::string mCacheStageName;
     std::string mUpdateProblemStageName;

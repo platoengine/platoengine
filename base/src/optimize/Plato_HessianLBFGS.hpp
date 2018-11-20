@@ -224,10 +224,9 @@ private:
     **********************************************************************************/
     void initialize()
     {
-        const OrdinalType tVECTOR_INDEX = 0;
         assert(mMaxStorage > static_cast<OrdinalType>(0));
         assert(mNewHessTimesVector->getNumVectors() > static_cast<OrdinalType>(0));
-        assert((*mNewHessTimesVector)[tVECTOR_INDEX].size() > static_cast<OrdinalType>(0));
+        assert((*mNewHessTimesVector)[0 /* VECTOR_INDEX */].size() > static_cast<OrdinalType>(0));
 
         mDeltaControl = std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>(mMaxStorage, *mNewHessTimesVector);
         mDeltaGradient = std::make_shared<Plato::MultiVectorList<ScalarType, OrdinalType>>(mMaxStorage, *mNewHessTimesVector);

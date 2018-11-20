@@ -567,7 +567,7 @@ public:
         this->evaluateConstraint(aControl, *mCurrentConstraintValues);
 
         // Evaluate augmented Lagrangian
-        mCurrentAugLagFuncValue = this->evaluateAugmentedLagrangianCriterion(mCurrentObjFuncValue);
+        mCurrentAugLagFuncValue = this->evaluateAugmentedLagrangianFunc(mCurrentObjFuncValue);
 
         return (mCurrentAugLagFuncValue);
     }
@@ -588,7 +588,7 @@ public:
         this->evaluateConstraint(aControl, *mTrialConstraintValues);
 
         // Evaluate augmented Lagrangian
-        mTrialAugLagFuncValue = this->evaluateAugmentedLagrangianCriterion(mTrialObjFuncValue);
+        mTrialAugLagFuncValue = this->evaluateAugmentedLagrangianFunc(mTrialObjFuncValue);
 
         return (mTrialAugLagFuncValue);
     }
@@ -750,7 +750,7 @@ private:
      * @param [in] aObjFuncValue objective function value
      * @return augmented Lagrangian evaluation
     **********************************************************************************/
-    ScalarType evaluateAugmentedLagrangianCriterion(const ScalarType & aObjFuncValue)
+    ScalarType evaluateAugmentedLagrangianFunc(const ScalarType & aObjFuncValue)
     {
         ScalarType tOutput = aObjFuncValue;
 

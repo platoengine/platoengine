@@ -49,8 +49,7 @@
 #ifndef PLATO_KELLEYSACHSAUGMENTEDLAGRANGIANINTERFACE_HPP_
 #define PLATO_KELLEYSACHSAUGMENTEDLAGRANGIANINTERFACE_HPP_
 
-#include <string>
-#include <memory>
+#include <cstring>
 
 #include "Plato_Parser.hpp"
 #include "Plato_Interface.hpp"
@@ -155,6 +154,27 @@ public:
 
 private:
     /******************************************************************************//**
+     * @brief Set numerical method use to compute application of vector to Hessian operator
+     * @param [in,out] aAlgorithm interface to optimization algorithm
+     **********************************************************************************/
+    void setHessianMethod(Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
+    {
+        if(mInputData.getHessianType() == "lbfgs")
+        {
+            aAlgorithm.setHaveHessian(true);
+            aAlgorithm.setCriteriaHessiansLBFGS(mInputData.getLimitedMemoryStorage());
+        }
+        else if(mInputData.getHessianType() == "analytical")
+        {
+            aAlgorithm.setHaveHessian(true);
+        }
+        else
+        {
+            aAlgorithm.setHaveHessian(false);
+        }
+    }
+
+    /******************************************************************************//**
      * @brief Solve optimization problem
      * @param [in] aDataFactory linear algebra factory
      * @param [in] aDataMng optimizer data manager
@@ -180,7 +200,6 @@ private:
         // ********* ALLOCATE STAGE MANAGER FOR AUGMENTED LAGRANGIAN FORMULATION ********* //
         std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> tStageMng =
                 std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(aDataFactory, tObjective, tConstraints);
-        tStageMng->setHaveHessian(mInputData.getHaveHessian());
 
         // ********* ALLOCATE KELLEY-SACHS AUGMENTED LAGRANGIAN TRUST REGION ALGORITHM ********* //
         Plato::AugmentedLagrangian<ScalarType, OrdinalType> tAlgorithm(aDataFactory, aDataMng, tStageMng);
@@ -194,6 +213,8 @@ private:
     **********************************************************************************/
     void setAlgorithmParams(Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
     {
+        this->setHessianMethod(aAlgorithm);
+
         aAlgorithm.enableDiagnostics();
         aAlgorithm.disablePostSmoothing();
         aAlgorithm.setMeanNorm(mInputData.getMeanNorm());

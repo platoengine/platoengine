@@ -27,6 +27,9 @@
 #include <stk_io/StkMeshIoBroker.hpp>
 #include <stk_mesh/base/Field.hpp>
 
+#define FIELD_DENSITY 0
+#define FIELD_SUPPORT 1
+
 namespace plato
 {
 
@@ -66,8 +69,10 @@ public:
     void get_shared_boundary_nodes(std::set<uint64_t> &shared_boundary_nodes);
     stk::mesh::Entity getStkEntity(const uint64_t &handle) const;
     double getMaxNodalIsoFieldVariable(uint64_t node) const;
-    void nodeCoordinates(stk::mesh::Entity &aNode, double aCoords[3]);
-    void setSetSupportStructureFieldValue(uint64_t nodeLocalId, double value);
+    double getFieldValue(const stk::mesh::Entity &aNode, int aFieldType);
+    void nodeCoordinates(const stk::mesh::Entity &aNode, double aCoords[3]);
+    void setSupportStructureFieldValue(uint64_t nodeLocalId, double value);
+    double getSupportStructureFieldValue(uint64_t nodeLocalId);
     void write_exodus_mesh(std::string &meshfile, int concatenate);
 };
 

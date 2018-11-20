@@ -85,7 +85,7 @@ void MeshWrapper::get_shared_boundary_nodes(std::set<uint64_t> &aSharedBoundaryN
     }
 }
 
-void MeshWrapper::nodeCoordinates(stk::mesh::Entity &aNode, double aCoords[3])
+void MeshWrapper::nodeCoordinates(const stk::mesh::Entity &aNode, double aCoords[3])
 {
     double* vals = stk::mesh::field_data(*mCoordsField, aNode);
     aCoords[0] = vals[0];
@@ -98,6 +98,29 @@ stk::mesh::Entity MeshWrapper::getStkEntity(const uint64_t &handle) const
     stk::mesh::Entity entity;
     entity.m_value = handle;
     return entity;
+}
+
+double MeshWrapper::getFieldValue(const stk::mesh::Entity &aNode, int aFieldType)
+{
+  double returnValue = 0.0;
+
+  if(aFieldType == FIELD_DENSITY)
+  {
+    double maxVal = 0.0;
+    for(size_t i=0; i<mIsoFields.size(); ++i)
+    {
+        double* vals = stk::mesh::field_data(*(mIsoFields[i]), aNode);
+        if(*vals > maxVal)
+            maxVal = *vals;
+    }
+    returnValue = maxVal;
+  }
+  else if(aFieldType == FIELD_SUPPORT)
+  {
+    double* val = stk::mesh::field_data(*mSupportStructureField, aNode);
+    returnValue =  *val;
+  }
+  return returnValue;
 }
 
 double MeshWrapper::getMaxNodalIsoFieldVariable(uint64_t node) const
@@ -113,11 +136,30 @@ double MeshWrapper::getMaxNodalIsoFieldVariable(uint64_t node) const
     return maxVal;
 }
 
-void MeshWrapper::setSetSupportStructureFieldValue(uint64_t nodeLocalId, double value)
+void MeshWrapper::setSupportStructureFieldValue(uint64_t nodeLocalId, double value)
+{
+    stk::mesh::Entity nodeEntity = getStkEntity(nodeLocalId);
+
+
+    double coords[3];
+    this->nodeCoordinates(nodeEntity, coords);
+    if(fabs(coords[0]-.1) < 1e-12 &&
+       fabs(coords[1]+.4) < 1e-12 &&
+       fabs(coords[2]+.3) < 1e-12)
+    {
+        int g= 0;
+        g++;
+    }
+
+    double* val = stk::mesh::field_data(*mSupportStructureField, nodeEntity);
+    *val = value;
+}
+
+double MeshWrapper::getSupportStructureFieldValue(uint64_t nodeLocalId)
 {
     stk::mesh::Entity nodeEntity = getStkEntity(nodeLocalId);
     double* val = stk::mesh::field_data(*mSupportStructureField, nodeEntity);
-    *val = value;
+    return *val;
 }
 
 bool MeshWrapper::read_exodus_mesh( std::string &aMeshFile, std::string &aFieldName,

@@ -61,7 +61,6 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mUserInitialGuess(false),
         mOutputControlToFile(false),
         mOutputDiagnosticsToFile(false),
-        mHaveHessian(true),
         mDisablePostSmoothing(false),
         mGCMMAMaxInnerIterations(5),
         mInitialMovingAsymptoteScaleFactor(0.5),
@@ -88,11 +87,13 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mAugLagPenaltyParameter(0.05),
         mAugLagPenaltyScaleParameter(1.2),
         mMaxNumIterations(500),
+        mLimitedMemoryStorage(8),
         mProblemUpdateFrequency(0),
         mDerivativeCheckerFinalSuperscript(8),
         mDerivativeCheckerInitialSuperscript(1),
         mAlgebra(),
         mStateName(),
+        mHessianType("disabled"),
         mInputFileName(),
         mCacheStageName(),
         mUpdateProblemStageName(),
@@ -183,9 +184,9 @@ void OptimizerEngineStageData::setMeanNorm(const bool & aInput)
 }
 
 /******************************************************************************/
-void OptimizerEngineStageData::setHaveHessian(const bool & aInput)
+void OptimizerEngineStageData::setHessianType(const std::string & aInput)
 {
-    mHaveHessian = aInput;
+    mHessianType = aInput;
 }
 
 /******************************************************************************/
@@ -234,9 +235,9 @@ bool OptimizerEngineStageData::getMeanNorm() const
 }
 
 /******************************************************************************/
-bool OptimizerEngineStageData::getHaveHessian() const
+std::string OptimizerEngineStageData::getHessianType() const
 {
-    return mHaveHessian;
+    return mHessianType;
 }
 
 /******************************************************************************/
@@ -577,6 +578,18 @@ double OptimizerEngineStageData::getAugLagPenaltyScaleParameter() const
 void OptimizerEngineStageData::setAugLagPenaltyScaleParameter(const double & aInput)
 {
     mAugLagPenaltyScaleParameter = aInput;
+}
+
+/******************************************************************************/
+size_t OptimizerEngineStageData::getLimitedMemoryStorage() const
+{
+    return (mLimitedMemoryStorage);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setLimitedMemoryStorage(const size_t & aInput)
+{
+    mLimitedMemoryStorage = aInput;
 }
 
 /******************************************************************************/

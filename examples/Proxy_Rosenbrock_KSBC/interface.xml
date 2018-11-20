@@ -147,6 +147,7 @@
 <Optimizer>
   <Package>KSBC</Package>
   <Options>
+    <HessianType>analytical</HessianType>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
