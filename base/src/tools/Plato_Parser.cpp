@@ -305,7 +305,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 std::string tStrValues = tArrayNode.attribute("values").value();
                 if( tStrValues != "" )
                 {
-                    // parse values, e.g, "{2, 3, 4, 6}"
+                    tArrays[tVarName] = tokenize(tStrValues,',');
                 }
                 else 
                 {
@@ -363,7 +363,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 std::string tStrValues = tArrayNode.attribute("values").value();
                 if( tStrValues != "" )
                 {
-                    // parse values, e.g, "{2, 3, 4, 6}"
+                    tArrays[tVarName] = tokenize(tStrValues,',');
                 }
                 else 
                 {
