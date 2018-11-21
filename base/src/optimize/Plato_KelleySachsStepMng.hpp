@@ -301,11 +301,11 @@ private:
         bool tIsActualReductionAboveSufficientDecreaseCondition = tActualReduction >= tSufficientDecreaseCondition;
 
         // Check termination criteria for trust region subproblem
-        bool tStopTrustRegionSubProblem = false;
         ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
         tCurrentTrustRegionRadius = std::min(tMaxTrustRegionRadius, tCurrentTrustRegionRadius);
-
         bool tIsTurstRegionRadiusEqualMaxRadius = tCurrentTrustRegionRadius == tMaxTrustRegionRadius;
+
+        bool tStopTrustRegionSubProblem = false;
         if(tIsRatioBelowLowerBound || tIsActualReductionAboveSufficientDecreaseCondition)
         {
             tCurrentTrustRegionRadius = tTrustRegionContraction * tCurrentTrustRegionRadius;

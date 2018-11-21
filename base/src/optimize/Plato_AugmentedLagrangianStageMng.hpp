@@ -730,7 +730,7 @@ public:
     void updatePenaltyParameter()
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
-        std::max(mPenaltyParameter, mPenaltyParameterLowerBound);
+        std::min(mPenaltyParameter, mPenaltyParameterLowerBound);
     }
 
     /******************************************************************************//**
