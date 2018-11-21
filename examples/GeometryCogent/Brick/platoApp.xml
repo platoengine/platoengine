@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<Operation>
+  <Function>ComputeVolume</Function>
+  <Name>Compute Cogent Volume</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Volume</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Volume Gradient</ArgumentName>
+  </Output>
+  <PenaltyModel>SIMP</PenaltyModel>
+  <SIMP>
+    <PenaltyExponent>1.0</PenaltyExponent>
+    <MinimumValue>0.0</MinimumValue>
+  </SIMP>
+</Operation>

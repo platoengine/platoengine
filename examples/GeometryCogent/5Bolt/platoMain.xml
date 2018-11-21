@@ -1,0 +1,14 @@
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>background.gen</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>cogent</type>
+      <order>2</order>
+      <geometry>5bolt.cogent</geometry>
+    </integration>
+    <materialID>1</materialID>
+  </block>
+</mesh>

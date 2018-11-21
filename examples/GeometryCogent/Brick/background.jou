@@ -1,0 +1,14 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 11/05/2018 02:12:13 PM
+## Command Options:
+#{ cube_len = 20.0 }
+#{ cube_nel = 2 }
+create brick x {cube_len} y {cube_len} z {cube_len}
+move volume 1 x {cube_len/2.0} y {cube_len/2.0} z {cube_len/2.0}
+body all size {cube_len/cube_nel}
+mesh volume all
+export mesh "background.gen" overwrite
+exit

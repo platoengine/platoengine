@@ -1,0 +1,317 @@
+<ParameterList name="Geometry Construction">
+  <ParameterList name="Background Grid">
+    <ParameterList name="Limits">
+      <Parameter name="X" type="Array(double)" value="{0.0, 100.0}"/>
+      <Parameter name="Y" type="Array(double)" value="{0.0, 100.0}"/>
+      <Parameter name="Z" type="Array(double)" value="{0.0, 100.0}"/>
+    </ParameterList>
+    <Parameter name="Grid Size" type="double" value="5.00"/>
+  </ParameterList>
+
+<!--
+  <Parameter name="Projection Order" type="int" value="2"/>
+-->
+  <Parameter name="Geometry Type" type="string" value="Body"/>
+  <Parameter name="Model Type" type="string" value="Parameterized"/>
+  <Parameter name="Number of Subdomains" type="int" value="12"/>
+  <!--
+    PO: X dimension of design volume
+    P1: Y dimension of design volume
+    P2: Z dimension of design volume
+    P3: Radius of bolt holes
+    P4: offset of bolt holes
+    P5: mount height
+    P6: cutout radius
+  -->
+  <Parameter name="Shape Parameters" type="Array(string)" value="{P0,P1,P2,P3,P4,P5,P6}"/>
+  <Parameter name="Shape Parameter Values" type="Array(double)" value="{96.0,96.0,96.0,6.0,30.0,10.0,8.0}"/>
+
+  <ParameterList name="Local Coordinate System">
+    <ParameterList name="Origin">
+      <Parameter name="X" type="string" value="2.0+P0/2.0"/>
+      <Parameter name="Y" type="string" value="2.0+P1/2.0"/>
+      <Parameter name="Z" type="string" value="2.0+P2/2.0"/>
+    </ParameterList>
+    <ParameterList name="Basis">
+      <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+      <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+      <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+    </ParameterList>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 0"> <!-- Design volume -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="0.0"/>
+        <Parameter name="Y" type="string" value="0.0"/>
+        <Parameter name="Z" type="string" value="0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Brick"/>
+      <Parameter name="X Dimension" type="string" value="P0"/>
+      <Parameter name="Y Dimension" type="string" value="P1"/>
+      <Parameter name="Z Dimension" type="string" value="P2"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 1"> <!-- bolt shaft cutout -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P0/2.0+P5/2.0"/>
+        <Parameter name="Y" type="string" value="-P4"/>
+        <Parameter name="Z" type="string" value="-P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 2">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P0/2.0+P5/2.0"/>
+        <Parameter name="Y" type="string" value="P4"/>
+        <Parameter name="Z" type="string" value="-P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 3">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P0/2.0+P5/2.0"/>
+        <Parameter name="Y" type="string" value="P4"/>
+        <Parameter name="Z" type="string" value="P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 4">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P0/2.0+P5/2.0"/>
+        <Parameter name="Y" type="string" value="-P4"/>
+        <Parameter name="Z" type="string" value="P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 5">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P4"/>
+        <Parameter name="Y" type="string" value="0.0"/>
+        <Parameter name="Z" type="string" value="0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P3"/>
+      <Parameter name="Height" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="Z"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 6"> <!-- bolt access cutout -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P5/2.0"/>
+        <Parameter name="Y" type="string" value="-P4"/>
+        <Parameter name="Z" type="string" value="-P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="P0-P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 7"> <!-- bolt access cutout -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P5/2.0"/>
+        <Parameter name="Y" type="string" value="P4"/>
+        <Parameter name="Z" type="string" value="-P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="P0-P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 8"> <!-- bolt access cutout -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P5/2.0"/>
+        <Parameter name="Y" type="string" value="P4"/>
+        <Parameter name="Z" type="string" value="P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="P0-P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 9"> <!-- bolt access cutout -->
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P5/2.0"/>
+        <Parameter name="Y" type="string" value="-P4"/>
+        <Parameter name="Z" type="string" value="P4"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="P0-P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 10">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P4"/>
+        <Parameter name="Y" type="string" value="0.0"/>
+        <Parameter name="Z" type="string" value="(P0+P5)/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="(P0-P5)/2.0"/>
+      <Parameter name="Axis" type="string" value="Z"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 11">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="P4"/>
+        <Parameter name="Y" type="string" value="0.0"/>
+        <Parameter name="Z" type="string" value="-(P0+P5)/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0,  0.0,  0.0 }"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,  1.0,  0.0 }"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 0.0,  0.0,  1.0 }"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Cylinder"/>
+      <Parameter name="Radius" type="string" value="P6"/>
+      <Parameter name="Height" type="string" value="(P0-P5)/2.0"/>
+      <Parameter name="Axis" type="string" value="Z"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Subtract"/>
+  </ParameterList>
+</ParameterList> <!-- end Geometry Construction -->
