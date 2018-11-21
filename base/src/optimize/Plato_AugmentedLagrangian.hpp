@@ -153,6 +153,15 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set lower bound on penalty parameter, /f$\mu_{lb}\in(0,1)/f$
+     * @param [in] aInput lower bound on penalty parameter
+    **********************************************************************************/
+    void setPenaltyParameterLowerBound(const ScalarType & aInput)
+    {
+        mStageMng->setPenaltyParameterLowerBound(aInput);
+    }
+
+    /******************************************************************************//**
      * @brief Set maximum number of outer iterations
      * @param [in] aInput maximum number of outer iterations
     **********************************************************************************/

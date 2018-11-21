@@ -256,7 +256,7 @@ inline void set_ksal_algorithm_outputs(const Plato::AugmentedLagrangian<ScalarTy
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_hessian_computation_method(const Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType> & aInputs,
-                                  Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
+                                           Plato::AugmentedLagrangian<ScalarType, OrdinalType> & aAlgorithm)
 {
     aAlgorithm.setHaveHessian(aInputs.mHaveHessian);
     switch(aInputs.mHessianMethod)

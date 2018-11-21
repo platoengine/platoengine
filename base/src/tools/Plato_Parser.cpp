@@ -1419,9 +1419,9 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             aOptimizerEngineStageData.setLimitedMemoryStorage(tLimitedMemoryStorage);
         }
 
-        if( tOptionsNode.size<std::string>("MeanNorm") )
+        if( tOptionsNode.size<std::string>("UseMeanNorm") )
         {
-            bool tMeanNorm = Plato::Get::Bool(tOptionsNode, "MeanNorm");
+            bool tMeanNorm = Plato::Get::Bool(tOptionsNode, "UseMeanNorm");
             aOptimizerEngineStageData.setMeanNorm(tMeanNorm);
         }
 
@@ -1570,14 +1570,14 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             double tMaxTrustRegionRadius = Plato::Get::Double(tOptionsNode, "MaxTrustRegionRadius");
             aOptimizerEngineStageData.setMaxTrustRegionRadius(tMaxTrustRegionRadius);
         }
-        if(tOptionsNode.size<std::string>("AugLagPenaltyParameter"))
+        if(tOptionsNode.size<std::string>("AugLagPenaltyParam"))
         {
-            double tAugLagPenaltyParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyParameter");
+            double tAugLagPenaltyParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyParam");
             aOptimizerEngineStageData.setAugLagPenaltyParameter(tAugLagPenaltyParameter);
         }
-        if(tOptionsNode.size<std::string>("AugLagPenaltyScaleParameter"))
+        if(tOptionsNode.size<std::string>("AugLagPenaltyParamScaleFactor"))
         {
-            double tAugLagPenaltyScaleParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyScaleParameter");
+            double tAugLagPenaltyScaleParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyParamScaleFactor");
             aOptimizerEngineStageData.setAugLagPenaltyScaleParameter(tAugLagPenaltyScaleParameter);
         }
     }

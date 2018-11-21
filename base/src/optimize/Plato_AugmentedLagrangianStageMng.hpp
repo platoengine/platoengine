@@ -100,6 +100,7 @@ public:
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
+            mPenaltyParameterLowerBound(1e-6),
             mPenaltyParameterScaleFactor(2),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -269,6 +270,24 @@ public:
     void setPenaltyParameterScaleFactor(const ScalarType & aInput)
     {
         mPenaltyParameterScaleFactor = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Return lower bound on penalty parameter
+     * @return lower bound on penalty parameter
+    **********************************************************************************/
+    ScalarType getPenaltyParameterLowerBound() const
+    {
+        return (mPenaltyParameterLowerBound);
+    }
+
+    /******************************************************************************//**
+     * @brief Set lower bound on penalty parameter
+     * @param [in] aInput lower bound on penalty parameter
+    **********************************************************************************/
+    void setPenaltyParameterLowerBound(const ScalarType & aInput)
+    {
+        mPenaltyParameterLowerBound = aInput;
     }
 
     /******************************************************************************//**
@@ -711,6 +730,7 @@ public:
     void updatePenaltyParameter()
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
+        std::max(mPenaltyParameter, mPenaltyParameterLowerBound);
     }
 
     /******************************************************************************//**
@@ -944,6 +964,7 @@ private:
     ScalarType mNormObjFuncGrad;
     ScalarType mNormAugLagFuncGrad;
     ScalarType mPenaltyParameter;
+    ScalarType mPenaltyParameterLowerBound;
     ScalarType mPenaltyParameterScaleFactor;
 
     std::vector<OrdinalType> mNumConstraintEvaluations;

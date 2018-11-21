@@ -96,7 +96,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     }
     else
     {
-        result->set_min_heaviside_parameter(2.);
+        result->set_min_heaviside_parameter(3.);
     }
     if(meaningful_HeavisideUpdate)
     {
@@ -104,7 +104,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     }
     else
     {
-        result->set_heaviside_continuation_scale(1.);
+        result->set_heaviside_continuation_scale(.75);
     }
     if(meaningful_HeavisideMax)
     {
@@ -112,7 +112,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     }
     else
     {
-        result->set_max_heaviside_parameter(10.);
+        result->set_max_heaviside_parameter(12.);
     }
 
     // defaults

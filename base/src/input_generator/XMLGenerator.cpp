@@ -970,8 +970,11 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  diag_scaling diagonal\n");
                     fprintf(fp, "  krylov_method = GMRESClassic\n");
+                    fprintf(fp, "  stag_tol = 0.001\n");
                     fprintf(fp, "  orthog = 0\n");
-                    fprintf(fp, "  bailout true\n");
+                    fprintf(fp, "  num_GS_steps = 2\n"); // TMPDEBUG
+                    fprintf(fp, "  overlap = 4\n"); // TMPDEBUG
+//                    fprintf(fp, "  bailout true\n"); // TMPDEBUG
                     if(!haveSolverTolerance)
                     {
                         fprintf(fp, "  solver_tol = 1e-4\n");
@@ -1112,6 +1115,14 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  limit_infeasible_slope = %s\n", cur_obj.limit_power_infeasible_slope.c_str());
                 }
+                if(cur_obj.limit_reset_subfrequency != "")
+                {
+                    fprintf(fp, "  limit_reset_subfrequency = %s\n", cur_obj.limit_reset_subfrequency.c_str());
+                }
+                if(cur_obj.limit_reset_count != "")
+                {
+                    fprintf(fp, "  limit_reset_count = %s\n", cur_obj.limit_reset_count.c_str());
+                }
                 if(cur_obj.inequality_allowable_feasiblity_lower != "")
                 {
                     fprintf(fp, "  stress_ineq_lower = %s\n", cur_obj.inequality_allowable_feasiblity_lower.c_str());
@@ -1120,9 +1131,37 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  stress_ineq_upper = %s\n", cur_obj.inequality_allowable_feasiblity_upper.c_str());
                 }
+                if(cur_obj.inequality_feasibility_scale != "")
+                {
+                    fprintf(fp, "  inequality_feasiblity_scale = %s\n", cur_obj.inequality_feasibility_scale.c_str());
+                }
+                if(cur_obj.inequality_infeasibility_scale != "")
+                {
+                    fprintf(fp, "  inequality_infeasiblity_scale = %s\n", cur_obj.inequality_infeasibility_scale.c_str());
+                }
                 if(cur_obj.stress_inequality_power != "")
                 {
                     fprintf(fp, "  stress_inequality_power = %s\n", cur_obj.stress_inequality_power.c_str());
+                }
+                if(cur_obj.stress_favor_final != "")
+                {
+                    fprintf(fp, "  stress_favor_final = %s\n", cur_obj.stress_favor_final.c_str());
+                }
+                if(cur_obj.stress_favor_updates != "")
+                {
+                    fprintf(fp, "  stress_favor_updates = %s\n", cur_obj.stress_favor_updates.c_str());
+                }
+                if(cur_obj.volume_penalty_power != "")
+                {
+                    fprintf(fp, "  volume_penalty_power = %s\n", cur_obj.volume_penalty_power.c_str());
+                }
+                if(cur_obj.volume_penalty_divisor != "")
+                {
+                    fprintf(fp, "  volume_penalty_divisor = %s\n", cur_obj.volume_penalty_divisor.c_str());
+                }
+                if(cur_obj.volume_penalty_bias != "")
+                {
+                    fprintf(fp, "  volume_penalty_bias = %s\n", cur_obj.volume_penalty_bias.c_str());
                 }
                 if(frf)
                 {
@@ -2164,6 +2203,24 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.limit_power_infeasible_slope = tokens[4];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","reset","subfrequency"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit reset subfrequency\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_reset_subfrequency = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"limit","reset","count"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"limit reset count\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.limit_reset_count = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"inequality","allowable","feasibility","lower"}, tStringValue))
                         {
                             if(tokens.size() < 5)
@@ -2182,6 +2239,24 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.inequality_allowable_feasiblity_upper = tokens[4];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","feasibility","scale"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality feasibility scale\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_feasibility_scale = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"inequality","infeasibility","scale"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"inequality infeasibility scale\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.inequality_infeasibility_scale = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","inequality","power"}, tStringValue))
                         {
                             if(tokens.size() < 4)
@@ -2191,7 +2266,51 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.stress_inequality_power = tokens[3];
                         }
-
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","favor","final"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress favor final\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_favor_final = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"stress","favor","updates"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"stress favor updates\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.stress_favor_updates = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","power"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty power\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_power = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","divisor"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty divisor\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_divisor = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"volume","penalty","bias"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"volume penalty bias\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.volume_penalty_bias = tokens[3];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)
@@ -3174,10 +3293,8 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
-/******************************************************************************/
+void XMLGenerator::initializePlatoProblemOptions()
 {
-    // Initialize variables
     m_InputData.output_frequency="5";
     m_InputData.discretization="density";
     m_InputData.initial_density_value="0.5";
@@ -3185,31 +3302,50 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     m_InputData.output_method="epu";
     m_InputData.check_gradient = "false";
     m_InputData.check_hessian = "false";
-    m_InputData.hessian_type = "disabled";
-    m_InputData.limited_memory_storage = "8";
-    m_InputData.GCMMA_inner_kkt_tolerance = "";
-    m_InputData.GCMMA_outer_kkt_tolerance = "";
-    m_InputData.GCMMA_inner_control_stagnation_tolerance = "";
-    m_InputData.GCMMA_outer_control_stagnation_tolerance = "";
-    m_InputData.GCMMA_outer_objective_stagnation_tolerance = "";
-    m_InputData.GCMMA_max_inner_iterations = "";
-    m_InputData.GCMMA_outer_stationarity_tolerance = "";
-    m_InputData.GCMMA_initial_moving_asymptotes_scale_factor = "";
-    m_InputData.KS_max_trust_region_iterations = "";
-    m_InputData.KS_trust_region_expansion_factor = "";
-    m_InputData.KS_trust_region_contraction_factor = "";
-    m_InputData.KS_outer_gradient_tolerance = "";
-    m_InputData.KS_outer_stationarity_tolerance = "";
-    m_InputData.KS_outer_stagnation_tolerance = "";
-    m_InputData.KS_outer_control_stagnation_tolerance = "";
-    m_InputData.KS_outer_actual_reduction_tolerance = "";
-    m_InputData.KS_initial_radius_scale = "";
-    m_InputData.KS_max_radius_scale = "";
-    m_InputData.KS_disable_post_smoothing = "";
-    m_InputData.problem_update_frequency = "";
+
+    m_InputData.mInnerKKTtoleranceGCMMA = "";
+    m_InputData.mOuterKKTtoleranceGCMMA = "";
+    m_InputData.mInnerControlStagnationToleranceGCMMA = "";
+    m_InputData.mOuterControlStagnationToleranceGCMMA = "";
+    m_InputData.mOuterObjectiveStagnationToleranceGCMMA = "";
+    m_InputData.mMaxInnerIterationsGCMMA = "";
+    m_InputData.mOuterStationarityToleranceGCMMA = "";
+    m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA = "";
+
+    m_InputData.mMaxRadiusScale = "";
+    m_InputData.mInitialRadiusScale = "";
+    m_InputData.mMaxTrustRegionRadius = "";
+    m_InputData.mMinTrustRegionRadius = "";
+    m_InputData.mMaxTrustRegionIterations = "";
+    m_InputData.mTrustRegionExpansionFactor = "";
+    m_InputData.mTrustRegionContractionFactor = "";
+
+    m_InputData.mUseMeanNorm = "";
+    m_InputData.mAugLagPenaltyParam = "";
+    m_InputData.mFeasibilityTolerance = "";
+    m_InputData.mAugLagPenaltyParamScale = "";
+    m_InputData.mMaxNumAugLagSubProbIter = "";
+
+    m_InputData.mHessianType = "disabled";
+    m_InputData.mLimitedMemoryStorage = "8";
+    m_InputData.mDisablePostSmoothingKS = "";
+    m_InputData.mProblemUpdateFrequency = "";
+    m_InputData.mOuterGradientToleranceKS = "";
+    m_InputData.mOuterStationarityToleranceKS = "";
+    m_InputData.mOuterStagnationToleranceKS = "";
+    m_InputData.mOuterControlStagnationToleranceKS = "";
+    m_InputData.mOuterActualReductionToleranceKS = "";
+
     m_InputData.filter_heaviside_min = "";
     m_InputData.filter_heaviside_update = "";
     m_InputData.filter_heaviside_max = "";
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
+{
+    // Initialize variables
+    this->initializePlatoProblemOptions();
 
     std::string tStringValue;
     std::vector<std::string> tInputStringList;
@@ -3408,7 +3544,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks max trust region iterations\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_max_trust_region_iterations = tStringValue;
+                            m_InputData.mMaxTrustRegionIterations = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","expansion","factor"}, tStringValue))
                         {
@@ -3417,7 +3553,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region expansion factor\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_trust_region_expansion_factor = tStringValue;
+                            m_InputData.mTrustRegionExpansionFactor = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","contraction","factor"}, tStringValue))
                         {
@@ -3426,7 +3562,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region contraction factor\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_trust_region_contraction_factor = tStringValue;
+                            m_InputData.mTrustRegionContractionFactor = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","gradient","tolerance"}, tStringValue))
                         {
@@ -3435,7 +3571,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks outer gradient tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_outer_gradient_tolerance = tStringValue;
+                            m_InputData.mOuterGradientToleranceKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","stationarity","tolerance"}, tStringValue))
                         {
@@ -3444,7 +3580,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks outer stationarity tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_outer_stationarity_tolerance = tStringValue;
+                            m_InputData.mOuterStationarityToleranceKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","stagnation","tolerance"}, tStringValue))
                         {
@@ -3453,7 +3589,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks outer stagnation tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_outer_stagnation_tolerance = tStringValue;
+                            m_InputData.mOuterStagnationToleranceKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","control","stagnation","tolerance"}, tStringValue))
                         {
@@ -3462,7 +3598,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks outer control stagnation tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_outer_control_stagnation_tolerance = tStringValue;
+                            m_InputData.mOuterControlStagnationToleranceKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","disable","post","smoothing"}, tStringValue))
                         {
@@ -3471,7 +3607,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks disable post smoothing\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_disable_post_smoothing = tStringValue;
+                            m_InputData.mDisablePostSmoothingKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","outer","actual","reduction","tolerance"}, tStringValue))
                         {
@@ -3480,7 +3616,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks outer actual reduction tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_outer_actual_reduction_tolerance = tStringValue;
+                            m_InputData.mOuterActualReductionToleranceKS = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","initial","radius","scale"}, tStringValue))
                         {
@@ -3489,7 +3625,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks initial radius scale\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_initial_radius_scale = tStringValue;
+                            m_InputData.mInitialRadiusScale = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","max","radius","scale"}, tStringValue))
                         {
@@ -3498,7 +3634,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks max radius scale\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.KS_max_radius_scale = tStringValue;
+                            m_InputData.mMaxRadiusScale = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"problem","update","frequency"}, tStringValue))
                         {
@@ -3507,7 +3643,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"problem update frequency\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.problem_update_frequency = tStringValue;
+                            m_InputData.mProblemUpdateFrequency = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","max","inner","iterations"}, tStringValue))
                         {
@@ -3516,7 +3652,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma max inner iterations\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_max_inner_iterations = tStringValue;
+                            m_InputData.mMaxInnerIterationsGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","inner","kkt","tolerance"}, tStringValue))
                         {
@@ -3525,7 +3661,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma inner kkt tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_inner_kkt_tolerance = tStringValue;
+                            m_InputData.mInnerKKTtoleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","inner","control","stagnation","tolerance"}, tStringValue))
                         {
@@ -3534,7 +3670,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma inner control stagnation tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_inner_control_stagnation_tolerance = tStringValue;
+                            m_InputData.mInnerControlStagnationToleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","outer","kkt","tolerance"}, tStringValue))
                         {
@@ -3543,7 +3679,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma outer kkt tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_outer_kkt_tolerance = tStringValue;
+                            m_InputData.mOuterKKTtoleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","outer","control","stagnation","tolerance"}, tStringValue))
                         {
@@ -3552,7 +3688,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma control stagnation tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_outer_control_stagnation_tolerance = tStringValue;
+                            m_InputData.mOuterControlStagnationToleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","outer","objective","stagnation","tolerance"}, tStringValue))
                         {
@@ -3561,7 +3697,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma outer objective stagnation tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_outer_objective_stagnation_tolerance = tStringValue;
+                            m_InputData.mOuterObjectiveStagnationToleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","outer","stationarity","tolerance"}, tStringValue))
                         {
@@ -3570,7 +3706,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma outer stationarity tolerance\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_outer_stationarity_tolerance = tStringValue;
+                            m_InputData.mOuterStationarityToleranceGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"gcmma","initial","moving","asymptotes","scale","factor"}, tStringValue))
                         {
@@ -3579,7 +3715,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"gcmma initial moving asymptotes scale factor\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.GCMMA_initial_moving_asymptotes_scale_factor = tStringValue;
+                            m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"levelset","sphere","packing", "factor"}, tStringValue))
                         {
@@ -3836,7 +3972,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"hessian type\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.hessian_type = tStringValue;
+                            m_InputData.mHessianType = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"limited","memory","storage"}, tStringValue))
                         {
@@ -3845,7 +3981,70 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"limited memory storage\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.limited_memory_storage = tStringValue;
+                            m_InputData.mLimitedMemoryStorage = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"use","mean","norm"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"use mean norm\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mUseMeanNorm = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","penalty","parameter"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al penalty parameter\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mAugLagPenaltyParam = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"feasibility","tolerance"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"feasibility tolerance\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mFeasibilityTolerance = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","penalty","scale","factor"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al penalty scale factor\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mAugLagPenaltyParamScale = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"al","max","subproblem","iterations"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"al max subproblem iterations\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMaxNumAugLagSubProbIter = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"max","trust","region","radius"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"max trust region radius\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMaxTrustRegionRadius = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"min","trust","region","radius"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"min trust region radius\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMinTrustRegionRadius = tStringValue;
                         }
                         else
                         {
@@ -5907,9 +6106,9 @@ bool XMLGenerator::generateInterfaceXML()
     pugi::xml_document doc;
 
     // Version entry
-    pugi::xml_node tmp_node = doc.append_child(pugi::node_declaration);
-    tmp_node.set_name("xml");
-    pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+    pugi::xml_node tTmpNode = doc.append_child(pugi::node_declaration);
+    tTmpNode.set_name("xml");
+    pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
     tmp_att.set_value("1.0");
 
     //////////////////////////////////////////////////
@@ -6407,177 +6606,97 @@ bool XMLGenerator::generateInterfaceXML()
     // Misc.
     ////////////////////////////////////////////////
 
+    pugi::xml_node tMiscNode = doc.append_child("Optimizer");
+    this->setOptimizerMethod(tMiscNode);
+    this->setOptimalityCriteriaOptions(tMiscNode);
+    tTmpNode = tMiscNode.append_child("Options");
+    this->setGCMMAoptions(tTmpNode);
+    this->setAugmentedLagrangianOptions(tTmpNode);
+    this->setTrustRegionAlgorithmOptions(tTmpNode);
+    this->setKelleySachsAlgorithmOptions(tTmpNode);
 
-    // Optimizer
-    pugi::xml_node misc_node = doc.append_child("Optimizer");
-    if(m_InputData.optimization_algorithm.compare("oc") == 0)
-    {
-        addChild(misc_node, "Package", "OC");
-    }
-    else if(m_InputData.optimization_algorithm.compare("gcmma") == 0)
-    {
-        addChild(misc_node, "Package", "GCMMA");
-    }
-    else if(m_InputData.optimization_algorithm.compare("mma") == 0)
-    {
-        addChild(misc_node, "Package", "MMA");
-    }
-    else if(m_InputData.optimization_algorithm.compare("ksbc") == 0)
-    {
-        addChild(misc_node, "Package", "KSBC");
-    }
-    else if(m_InputData.optimization_algorithm.compare("ksal") == 0)
-    {
-        addChild(misc_node, "Package", "KSAL");
-    }
-    else if(m_InputData.optimization_algorithm.compare("derivativechecker") == 0)
-    {
-        addChild(misc_node, "Package", "DerivativeChecker");
-        addChild(misc_node, "CheckGradient", m_InputData.check_gradient);
-        addChild(misc_node, "CheckHessian", m_InputData.check_hessian);
-        addChild(misc_node, "UseUserInitialGuess", "True");
-    }
+    tTmpNode = tMiscNode.append_child("Output");
+    addChild(tTmpNode, "OutputStage", "Output To File");
 
-    tmp_node = misc_node.append_child("Options");
-    addChild(tmp_node, "DerivativeCheckerInitialSuperscript", "1");
-    addChild(tmp_node, "DerivativeCheckerFinalSuperscript", "8");
-    if(m_InputData.hessian_type.size() > 0)
-        addChild(tmp_node, "HessianType", m_InputData.hessian_type);
-    if(m_InputData.limited_memory_storage.size() > 0)
-        addChild(tmp_node, "LimitedMemoryStorage", m_InputData.limited_memory_storage);
-    if(m_InputData.GCMMA_inner_kkt_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAInnerKKTTolerance", m_InputData.GCMMA_inner_kkt_tolerance);
-    if(m_InputData.GCMMA_outer_kkt_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAOuterKKTTolerance", m_InputData.GCMMA_outer_kkt_tolerance);
-    if(m_InputData.GCMMA_inner_control_stagnation_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAInnerControlStagnationTolerance", m_InputData.GCMMA_inner_control_stagnation_tolerance);
-    if(m_InputData.GCMMA_outer_control_stagnation_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAOuterControlStagnationTolerance", m_InputData.GCMMA_outer_control_stagnation_tolerance);
-    if(m_InputData.GCMMA_outer_objective_stagnation_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAOuterObjectiveStagnationTolerance", m_InputData.GCMMA_outer_objective_stagnation_tolerance);
-    if(m_InputData.GCMMA_max_inner_iterations.size() > 0)
-        addChild(tmp_node, "GCMMAMaxInnerIterations", m_InputData.GCMMA_max_inner_iterations);
-    if(m_InputData.GCMMA_outer_stationarity_tolerance.size() > 0)
-        addChild(tmp_node, "GCMMAOuterStationarityTolerance", m_InputData.GCMMA_outer_stationarity_tolerance);
-    if(m_InputData.GCMMA_initial_moving_asymptotes_scale_factor.size() > 0)
-        addChild(tmp_node, "GCMMAInitialMovingAsymptoteScaleFactor", m_InputData.GCMMA_initial_moving_asymptotes_scale_factor);
-    if(m_InputData.KS_trust_region_expansion_factor.size() > 0)
-        addChild(tmp_node, "KSTrustRegionExpansionFactor", m_InputData.KS_trust_region_expansion_factor);
-    if(m_InputData.KS_trust_region_contraction_factor.size() > 0)
-        addChild(tmp_node, "KSTrustRegionContractionFactor", m_InputData.KS_trust_region_contraction_factor);
-    if(m_InputData.KS_max_trust_region_iterations.size() > 0)
-        addChild(tmp_node, "KSMaxTrustRegionIterations", m_InputData.KS_max_trust_region_iterations);
-    if(m_InputData.KS_outer_gradient_tolerance.size() > 0)
-        addChild(tmp_node, "KSOuterGradientTolerance", m_InputData.KS_outer_gradient_tolerance);
-    if(m_InputData.KS_outer_stationarity_tolerance.size() > 0)
-        addChild(tmp_node, "KSOuterStationarityTolerance", m_InputData.KS_outer_stationarity_tolerance);
-    if(m_InputData.KS_outer_stagnation_tolerance.size() > 0)
-        addChild(tmp_node, "KSOuterStagnationTolerance", m_InputData.KS_outer_stagnation_tolerance);
-    if(m_InputData.KS_outer_control_stagnation_tolerance.size() > 0)
-        addChild(tmp_node, "KSOuterControlStagnationTolerance", m_InputData.KS_outer_control_stagnation_tolerance);
-    if(m_InputData.KS_outer_actual_reduction_tolerance.size() > 0)
-        addChild(tmp_node, "KSOuterActualReductionTolerance", m_InputData.KS_outer_actual_reduction_tolerance);
-    if(m_InputData.KS_initial_radius_scale.size() > 0) {
-            addChild(tmp_node, "KSInitialRadiusScale", m_InputData.KS_initial_radius_scale);
-    }
-    if(m_InputData.KS_max_radius_scale.size() > 0) {
-            addChild(tmp_node, "KSMaxRadiusScale", m_InputData.KS_max_radius_scale);
-    }
-    if(m_InputData.problem_update_frequency.size() > 0) {
-        addChild(tmp_node, "ProblemUpdateFrequency", m_InputData.problem_update_frequency);
-    }
-    if(m_InputData.KS_disable_post_smoothing.size() > 0) {
-        addChild(tmp_node, "DisablePostSmoothing", m_InputData.KS_disable_post_smoothing);
-    }
+    tTmpNode = tMiscNode.append_child("CacheStage");
+    addChild(tTmpNode, "Name", "Cache State");
 
-    tmp_node = misc_node.append_child("Output");
-    addChild(tmp_node, "OutputStage", "Output To File");
+    tTmpNode = tMiscNode.append_child("UpdateProblemStage");
+    addChild(tTmpNode, "Name", "Update Problem");
 
-    tmp_node = misc_node.append_child("CacheStage");
-    addChild(tmp_node, "Name", "Cache State");
-
-    tmp_node = misc_node.append_child("UpdateProblemStage");
-    addChild(tmp_node, "Name", "Update Problem");
-
-    tmp_node = misc_node.append_child("OC");
-    addChild(tmp_node, "MoveLimiter", "1.0");
-    addChild(tmp_node, "StabilizationParameter", "0.5");
-    addChild(tmp_node, "UseNewtonSearch", "True");
-    addChild(tmp_node, "ConstraintMaxIterations", "25");
-
-    tmp_node = misc_node.append_child("OptimizationVariables");
-    addChild(tmp_node, "ValueName", "Optimization DOFs");
-    addChild(tmp_node, "InitializationStage", "Initialize Optimization DOFs");
-    addChild(tmp_node, "FilteredName", "Topology");
-    addChild(tmp_node, "LowerBoundValueName", "Lower Bound Value");
-    addChild(tmp_node, "LowerBoundVectorName", "Lower Bound Vector");
-    addChild(tmp_node, "UpperBoundValueName", "Upper Bound Value");
-    addChild(tmp_node, "UpperBoundVectorName", "Upper Bound Vector");
-    addChild(tmp_node, "SetLowerBoundsStage", "Set Lower Bounds");
-    addChild(tmp_node, "SetUpperBoundsStage", "Set Upper Bounds");
+    tTmpNode = tMiscNode.append_child("OptimizationVariables");
+    addChild(tTmpNode, "ValueName", "Optimization DOFs");
+    addChild(tTmpNode, "InitializationStage", "Initialize Optimization DOFs");
+    addChild(tTmpNode, "FilteredName", "Topology");
+    addChild(tTmpNode, "LowerBoundValueName", "Lower Bound Value");
+    addChild(tTmpNode, "LowerBoundVectorName", "Lower Bound Vector");
+    addChild(tTmpNode, "UpperBoundValueName", "Upper Bound Value");
+    addChild(tTmpNode, "UpperBoundVectorName", "Upper Bound Vector");
+    addChild(tTmpNode, "SetLowerBoundsStage", "Set Lower Bounds");
+    addChild(tTmpNode, "SetUpperBoundsStage", "Set Upper Bounds");
     if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
        m_InputData.optimization_algorithm.compare("ksal") == 0)
     {
-        addChild(tmp_node, "DescentDirectionName", "Descent Direction");
+        addChild(tTmpNode, "DescentDirectionName", "Descent Direction");
     }
     
-    tmp_node = misc_node.append_child("Objective");
-    addChild(tmp_node, "ValueName", "Internal Energy");
-    addChild(tmp_node, "GradientName", "Internal Energy Gradient");
-    addChild(tmp_node, "ValueStageName", "Internal Energy");
-    addChild(tmp_node, "GradientStageName", "Internal Energy Gradient");
+    tTmpNode = tMiscNode.append_child("Objective");
+    addChild(tTmpNode, "ValueName", "Internal Energy");
+    addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
+    addChild(tTmpNode, "ValueStageName", "Internal Energy");
+    addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
     if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
        m_InputData.optimization_algorithm.compare("ksal") == 0)
     {
-        addChild(tmp_node, "HessianName", "Internal Energy Hessian");
+        addChild(tTmpNode, "HessianName", "Internal Energy Hessian");
     }
 
-    tmp_node = misc_node.append_child("BoundConstraint");
+    tTmpNode = tMiscNode.append_child("BoundConstraint");
     if(m_InputData.discretization == "density")
     {
-        addChild(tmp_node, "Upper", "1.0");
-        addChild(tmp_node, "Lower", "0.0");
+        addChild(tTmpNode, "Upper", "1.0");
+        addChild(tTmpNode, "Lower", "0.0");
     }
     else
     {
-        addChild(tmp_node, "Upper", "10.0");
-        addChild(tmp_node, "Lower", "-10.0");
+        addChild(tTmpNode, "Upper", "10.0");
+        addChild(tTmpNode, "Lower", "-10.0");
     }
 
     for(size_t b=0; b<m_InputData.constraints.size(); ++b)
     {
-        tmp_node = misc_node.append_child("Constraint");
+        tTmpNode = tMiscNode.append_child("Constraint");
         if(m_InputData.constraints[b].type == "volume")
         {
-            addChild(tmp_node, "Equality", "True");
-            addChild(tmp_node, "Linear", "True");
-            addChild(tmp_node, "ValueName", "Volume");
-            addChild(tmp_node, "ReferenceValueName", "Design Volume");
-            addChild(tmp_node, "GradientName", "Volume Gradient");
-            addChild(tmp_node, "ValueStageName", "Volume");
-            addChild(tmp_node, "GradientStageName", "Volume Gradient");
+            addChild(tTmpNode, "Equality", "True");
+            addChild(tTmpNode, "Linear", "True");
+            addChild(tTmpNode, "ValueName", "Volume");
+            addChild(tTmpNode, "ReferenceValueName", "Design Volume");
+            addChild(tTmpNode, "GradientName", "Volume Gradient");
+            addChild(tTmpNode, "ValueStageName", "Volume");
+            addChild(tTmpNode, "GradientStageName", "Volume Gradient");
             if(m_InputData.constraints[b].volume_fraction != "")
-                addChild(tmp_node, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
+                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
             if(m_InputData.constraints[b].volume_absolute != "")
-                addChild(tmp_node, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
-            addChild(tmp_node, "Tolerance", "1e-3");
+                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
+            addChild(tTmpNode, "Tolerance", "1e-3");
         }
         else if(m_InputData.constraints[b].type == "surface area")
         {
-            addChild(tmp_node, "Equality", "True");
-            addChild(tmp_node, "Linear", "True");
-            addChild(tmp_node, "ValueName", "Surface Area");
-            addChild(tmp_node, "ReferenceValue", m_InputData.constraints[b].surface_area);
-            addChild(tmp_node, "GradientName", "Surface Area Gradient");
-            addChild(tmp_node, "NormalizedTargetValue", "1.0");
-            addChild(tmp_node, "Tolerance", "1e-3");
-            addChild(tmp_node, "ValueStageName", "Surface Area");
-            addChild(tmp_node, "GradientStageName", "Surface Area Gradient");
+            addChild(tTmpNode, "Equality", "True");
+            addChild(tTmpNode, "Linear", "True");
+            addChild(tTmpNode, "ValueName", "Surface Area");
+            addChild(tTmpNode, "ReferenceValue", m_InputData.constraints[b].surface_area);
+            addChild(tTmpNode, "GradientName", "Surface Area Gradient");
+            addChild(tTmpNode, "NormalizedTargetValue", "1.0");
+            addChild(tTmpNode, "Tolerance", "1e-3");
+            addChild(tTmpNode, "ValueStageName", "Surface Area");
+            addChild(tTmpNode, "GradientStageName", "Surface Area Gradient");
         }
     }
 
-    tmp_node = misc_node.append_child("Convergence");
-    addChild(tmp_node, "MaxIterations", m_InputData.max_iterations);
+    tTmpNode = tMiscNode.append_child("Convergence");
+    addChild(tTmpNode, "MaxIterations", m_InputData.max_iterations);
 
     // mesh
     pugi::xml_node mesh_node = doc.append_child("mesh");
@@ -6586,18 +6705,18 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(mesh_node, "mesh", m_InputData.run_mesh_name);
     for(size_t n=0; n<m_InputData.blocks.size(); ++n)
     {
-        tmp_node = mesh_node.append_child("block");
-        addChild(tmp_node, "index", m_InputData.blocks[n].block_id);
-        pugi::xml_node tmp_node1 = tmp_node.append_child("integration");
+        tTmpNode = mesh_node.append_child("block");
+        addChild(tTmpNode, "index", m_InputData.blocks[n].block_id);
+        pugi::xml_node tmp_node1 = tTmpNode.append_child("integration");
         addChild(tmp_node1, "type", "gauss");
         addChild(tmp_node1, "order", "2");
-        addChild(tmp_node, "material", m_InputData.blocks[n].material_id);
+        addChild(tTmpNode, "material", m_InputData.blocks[n].material_id);
     }
 
     // output
-    tmp_node = doc.append_child("output");
-    addChild(tmp_node, "file", "plato");
-    addChild(tmp_node, "format", "exodus");
+    tTmpNode = doc.append_child("output");
+    addChild(tTmpNode, "file", "plato");
+    addChild(tTmpNode, "format", "exodus");
 
     // Write the file to disk
     doc.save_file("interface.xml", "  ");
@@ -6605,5 +6724,199 @@ bool XMLGenerator::generateInterfaceXML()
     return true;
 }
 
+/**********************************************************************************/
+bool XMLGenerator::setOptimizerMethod(pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.optimization_algorithm.compare("oc") == 0)
+    {
+        addChild(aXMLnode, "Package", "OC");
+    }
+    else if(m_InputData.optimization_algorithm.compare("gcmma") == 0)
+    {
+        addChild(aXMLnode, "Package", "GCMMA");
+    }
+    else if(m_InputData.optimization_algorithm.compare("mma") == 0)
+    {
+        addChild(aXMLnode, "Package", "MMA");
+    }
+    else if(m_InputData.optimization_algorithm.compare("ksbc") == 0)
+    {
+        addChild(aXMLnode, "Package", "KSBC");
+    }
+    else if(m_InputData.optimization_algorithm.compare("ksal") == 0)
+    {
+        addChild(aXMLnode, "Package", "KSAL");
+    }
+    else if(m_InputData.optimization_algorithm.compare("derivativechecker") == 0)
+    {
+        addChild(aXMLnode, "Package", "DerivativeChecker");
+        addChild(aXMLnode, "CheckGradient", m_InputData.check_gradient);
+        addChild(aXMLnode, "CheckHessian", m_InputData.check_hessian);
+        addChild(aXMLnode, "UseUserInitialGuess", "True");
+        pugi::xml_node tTmpNode = aXMLnode.append_child("Options");
+        addChild(tTmpNode, "DerivativeCheckerInitialSuperscript", "1");
+        addChild(tTmpNode, "DerivativeCheckerFinalSuperscript", "8");
+    }
 
+    return true;
+}
 
+/**********************************************************************************/
+bool XMLGenerator::setOptimalityCriteriaOptions(pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.optimization_algorithm.compare("oc") == 0)
+    {
+        addChild(aXMLnode, "Package", "OC");
+        pugi::xml_node tTmpNode = aXMLnode.append_child("OC");
+        addChild(tTmpNode, "MoveLimiter", "1.0");
+        addChild(tTmpNode, "StabilizationParameter", "0.5");
+        addChild(tTmpNode, "UseNewtonSearch", "True");
+        addChild(tTmpNode, "ConstraintMaxIterations", "25");
+    }
+
+    return true;
+}
+
+/**********************************************************************************/
+bool XMLGenerator::setTrustRegionAlgorithmOptions(const pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.mMaxTrustRegionRadius.size() > 0)
+    {
+        this->addChild(aXMLnode, "MaxTrustRegionRadius", m_InputData.mMaxTrustRegionRadius);
+    }
+    if(m_InputData.mMinTrustRegionRadius.size() > 0)
+    {
+        this->addChild(aXMLnode, "MinTrustRegionRadius", m_InputData.mMinTrustRegionRadius);
+    }
+    if(m_InputData.mTrustRegionExpansionFactor.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSTrustRegionExpansionFactor", m_InputData.mTrustRegionExpansionFactor);
+    }
+    if(m_InputData.mTrustRegionContractionFactor.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSTrustRegionContractionFactor", m_InputData.mTrustRegionContractionFactor);
+    }
+    if(m_InputData.mMaxTrustRegionIterations.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSMaxTrustRegionIterations", m_InputData.mMaxTrustRegionIterations);
+    }
+    if(m_InputData.mInitialRadiusScale.size() > 0)
+    {
+        addChild(aXMLnode, "KSInitialRadiusScale", m_InputData.mInitialRadiusScale);
+    }
+    if(m_InputData.mMaxRadiusScale.size() > 0)
+    {
+        addChild(aXMLnode, "KSMaxRadiusScale", m_InputData.mMaxRadiusScale);
+    }
+
+    return (true);
+}
+
+/**********************************************************************************/
+bool XMLGenerator::setAugmentedLagrangianOptions(const pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.mUseMeanNorm.size() > 0)
+    {
+        this->addChild(aXMLnode, "UseMeanNorm", m_InputData.mUseMeanNorm);
+    }
+    if(m_InputData.mAugLagPenaltyParam.size() > 0)
+    {
+        this->addChild(aXMLnode, "AugLagPenaltyParam", m_InputData.mAugLagPenaltyParam);
+    }
+    if(m_InputData.mAugLagPenaltyParamScale.size() > 0)
+    {
+        this->addChild(aXMLnode, "AugLagPenaltyParamScaleFactor", m_InputData.mAugLagPenaltyParamScale);
+    }
+    if(m_InputData.mMaxNumAugLagSubProbIter.size() > 0)
+    {
+        this->addChild(aXMLnode, "MaxNumAugLagSubProbIter", m_InputData.mMaxNumAugLagSubProbIter);
+    }
+    if(m_InputData.mFeasibilityTolerance.size() > 0)
+    {
+        this->addChild(aXMLnode, "FeasibilityTolerance", m_InputData.mFeasibilityTolerance);
+    }
+
+    return (true);
+}
+
+/**********************************************************************************/
+bool XMLGenerator::setKelleySachsAlgorithmOptions(const pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.mHessianType.size() > 0)
+    {
+        addChild(aXMLnode, "HessianType", m_InputData.mHessianType);
+    }
+    if(m_InputData.mLimitedMemoryStorage.size() > 0)
+    {
+        addChild(aXMLnode, "LimitedMemoryStorage", m_InputData.mLimitedMemoryStorage);
+    }
+    if(m_InputData.mOuterGradientToleranceKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSOuterGradientTolerance", m_InputData.mOuterGradientToleranceKS);
+    }
+    if(m_InputData.mOuterStationarityToleranceKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSOuterStationarityTolerance", m_InputData.mOuterStationarityToleranceKS);
+    }
+    if(m_InputData.mOuterStagnationToleranceKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSOuterStagnationTolerance", m_InputData.mOuterStagnationToleranceKS);
+    }
+    if(m_InputData.mOuterControlStagnationToleranceKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSOuterControlStagnationTolerance", m_InputData.mOuterControlStagnationToleranceKS);
+    }
+    if(m_InputData.mOuterActualReductionToleranceKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "KSOuterActualReductionTolerance", m_InputData.mOuterActualReductionToleranceKS);
+    }
+    if(m_InputData.mProblemUpdateFrequency.size() > 0)
+    {
+        this->addChild(aXMLnode, "ProblemUpdateFrequency", m_InputData.mProblemUpdateFrequency);
+    }
+    if(m_InputData.mDisablePostSmoothingKS.size() > 0)
+    {
+        this->addChild(aXMLnode, "DisablePostSmoothing", m_InputData.mDisablePostSmoothingKS);
+    }
+
+    return (true);
+}
+
+/**********************************************************************************/
+bool XMLGenerator::setGCMMAoptions(const pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.mInnerKKTtoleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAInnerKKTTolerance", m_InputData.mInnerKKTtoleranceGCMMA);
+    }
+    if(m_InputData.mOuterKKTtoleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAOuterKKTTolerance", m_InputData.mOuterKKTtoleranceGCMMA);
+    }
+    if(m_InputData.mInnerControlStagnationToleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAInnerControlStagnationTolerance", m_InputData.mInnerControlStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mOuterControlStagnationToleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAOuterControlStagnationTolerance", m_InputData.mOuterControlStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mOuterObjectiveStagnationToleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAOuterObjectiveStagnationTolerance", m_InputData.mOuterObjectiveStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mMaxInnerIterationsGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAMaxInnerIterations", m_InputData.mMaxInnerIterationsGCMMA);
+    }
+    if(m_InputData.mOuterStationarityToleranceGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAOuterStationarityTolerance", m_InputData.mOuterStationarityToleranceGCMMA);
+    }
+    if(m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA.size() > 0)
+    {
+        this->addChild(aXMLnode, "GCMMAInitialMovingAsymptoteScaleFactor", m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA);
+    }
+
+    return (true);
+}
