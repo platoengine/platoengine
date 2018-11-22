@@ -14,6 +14,94 @@ using Cogent::RealType;
 
 static RealType tolerance = 1e-6;
 
+TEST(BodyConformalTest, Parameterized_Tet4)
+{
+
+  // define TET4 element topology and basis
+
+  const CellTopologyData& celldata = *shards::getCellTopologyData< shards::Tetrahedron<4> >();
+  Teuchos::RCP<shards::CellTopology> celltype = Teuchos::rcp(new shards::CellTopology( &celldata ) );
+
+  Teuchos::RCP<Intrepid2::Basis<Kokkos::Serial, RealType> >
+    intrepidBasis = Teuchos::rcp(new Intrepid2::Basis_HGRAD_TET_C1_FEM<Kokkos::Serial, RealType, RealType >() );
+  
+
+  //-- specify geometry
+
+  Teuchos::RCP<Teuchos::ParameterList> geomSpec = 
+    Teuchos::getParametersFromXmlString(
+    "<ParameterList name='Geometry Construction'>                                        \n"
+    "  <Parameter name='Geometry Type' type='string' value='Body'/>                      \n"
+    "  <Parameter name='Model Type' type='string' value='Parameterized'/>                \n"
+    "  <Parameter name='Error Checking' type='int' value='5'/>                           \n"
+    "  <Parameter name='Number of Subdomains' type='int' value='1'/>                     \n"
+    "  <Parameter name='Shape Parameters' type='Array(string)' value='{P0,P1,P2}'/>      \n"
+    "  <ParameterList name='Subdomain 0'>                                                \n"
+    "    <Parameter name='Type' type='string' value='Primitive'/>                        \n"
+    "    <ParameterList name='Primitive'>                                                \n"
+    "      <Parameter name='Type' type='string' value='Brick'/>                          \n"
+    "      <Parameter name='X Dimension' type='string' value='P0'/>                      \n"
+    "      <Parameter name='Y Dimension' type='string' value='P1'/>                      \n"
+    "      <Parameter name='Z Dimension' type='string' value='P2'/>                      \n"
+    "    </ParameterList>                                                                \n"
+    "    <Parameter name='Operation' type='string' value='Add'/>                         \n"
+    "  </ParameterList>                                                                  \n"
+    "</ParameterList>                                                                    \n"
+    );
+
+
+  // create integrator
+
+  Cogent::IntegratorFactory integratorFactory;
+  Teuchos::RCP<Cogent::Integrator> integrator = integratorFactory.create(celltype, intrepidBasis, *geomSpec);
+
+
+  // create element coordinates
+
+  int numNodes = celltype->getVertexCount();
+  int numDims = celltype->getDimension();
+  Cogent::FContainer<RealType> coordCon("coordCon", numNodes, numDims);
+  coordCon(0,0) =  0.0; coordCon(0,1) =  0.0; coordCon(0,2) =  0.0;
+  coordCon(1,0) =  1.0; coordCon(1,1) =  0.0; coordCon(1,2) =  0.0;
+  coordCon(2,0) =  0.0; coordCon(2,1) =  1.0; coordCon(2,2) =  0.0;
+  coordCon(3,0) =  0.0; coordCon(3,1) =  0.0; coordCon(3,2) =  1.0;
+
+
+  // specify shape parameter values
+
+  int numGeomVals = 3;
+  Cogent::FContainer<RealType> geomVals("geomVals",numGeomVals), cweights, cpoints, cdwdgeom;
+  geomVals(0) = 0.4;    // Brick dim in X
+  geomVals(1) = 0.4;    // Brick dim in Y
+  geomVals(2) = 0.4;    // Brick dim in Z
+
+
+  // compute conformal GPs
+
+  const Cogent::FContainer<RealType>& constGeomVals = geomVals;
+  integrator->getCubature(cweights, cdwdgeom, cpoints, constGeomVals, coordCon);
+
+
+  // compute total weight of conformal GPs
+
+  double conformalWeight = 0.0;
+  std::vector<RealType> dWeightdGeomConf(numGeomVals,0.0);
+  int ncQPs = cweights.dimension(0);
+  for(int q=0; q<ncQPs; ++q){
+    conformalWeight += cweights(q);
+    for(int m=0; m<numGeomVals; m++)
+      dWeightdGeomConf[m] += cdwdgeom(q,m);
+  }
+  std::cout << "Conformal: " << conformalWeight;
+  for(int m=0; m<numGeomVals; m++)
+    std::cout << ", " << dWeightdGeomConf[m];
+  std::cout << std::endl;
+
+
+  // compare conformal vs actual
+
+  EXPECT_NEAR(conformalWeight, 0.008, tolerance);
+}
 TEST(BodyConformalTest, Parameterized)
 {
 
