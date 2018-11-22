@@ -303,7 +303,7 @@ private:
         // Check termination criteria for trust region subproblem
         ScalarType tCurrentTrustRegionRadius = this->getTrustRegionRadius();
         tCurrentTrustRegionRadius = std::min(tMaxTrustRegionRadius, tCurrentTrustRegionRadius);
-        bool tIsTurstRegionRadiusEqualMaxRadius = tCurrentTrustRegionRadius == tMaxTrustRegionRadius;
+        bool tIsTrustRegionRadiusEqualMaxRadius = tCurrentTrustRegionRadius == tMaxTrustRegionRadius;
 
         bool tStopTrustRegionSubProblem = false;
         if(tIsRatioBelowLowerBound || tIsActualReductionAboveSufficientDecreaseCondition)
@@ -316,7 +316,7 @@ private:
             tCurrentTrustRegionRadius = tTrustRegionContraction * tCurrentTrustRegionRadius;
             tStopTrustRegionSubProblem = true;
         }
-        else if(tIsRatioAboveMidBound && tIsTurstRegionRadiusEqualMaxRadius)
+        else if(tIsRatioAboveMidBound && tIsTrustRegionRadiusEqualMaxRadius)
         {
             tStopTrustRegionSubProblem = true;
         }

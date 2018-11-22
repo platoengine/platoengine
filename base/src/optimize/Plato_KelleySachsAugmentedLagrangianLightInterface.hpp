@@ -107,8 +107,9 @@ struct AlgorithmInputsKSAL
             mFeasibilityTolerance(1e-4),
             mStationarityTolerance(1e-4),
             mActualReductionTolerance(1e-8),
-            mControlStagnationTolerance(1e-16),
+            mControlStagnationTolerance(std::numeric_limits<ScalarType>::epsilon()),
             mObjectiveStagnationTolerance(1e-8),
+            mAugLagActualReductionTolerance(std::numeric_limits<ScalarType>::epsilon()),
             mActualOverPredictedReductionMidBound(0.25),
             mActualOverPredictedReductionLowerBound(0.10),
             mActualOverPredictedReductionUpperBound(0.75),
@@ -155,6 +156,7 @@ struct AlgorithmInputsKSAL
     ScalarType mActualReductionTolerance; /*!< actual reduction tolerance */
     ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
     ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mAugLagActualReductionTolerance; /*!< augmented Lagrangian actual reduction tolerance */
     ScalarType mActualOverPredictedReductionMidBound; /*!< actual over predicted reduction middle bound */
     ScalarType mActualOverPredictedReductionLowerBound; /*!< actual over predicted reduction lower bound */
     ScalarType mActualOverPredictedReductionUpperBound; /*!< actual over predicted reduction upper bound */
@@ -211,6 +213,7 @@ inline void set_ksal_algorithm_inputs(const Plato::AlgorithmInputsKSAL<ScalarTyp
     aAlgorithm.setActualReductionTolerance(aInputs.mActualReductionTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
     aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setAugLagActualReductionTolerance(aInputs.mAugLagActualReductionTolerance);
 }
 // function set_ksal_algorithm_inputs
 
