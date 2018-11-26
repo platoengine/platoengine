@@ -235,6 +235,7 @@ private:
         aAlgorithm.setGradientTolerance(mInputData.getKSOuterGradientTolerance());
         aAlgorithm.setStationarityTolerance(mInputData.getKSOuterStationarityTolerance());
         aAlgorithm.setActualReductionTolerance(mInputData.getKSOuterActualReductionTolerance());
+        aAlgorithm.setAugLagActualReductionTolerance(mInputData.getKSOuterStagnationTolerance());
         aAlgorithm.setControlStagnationTolerance(mInputData.getKSOuterControlStagnationTolerance());
     }
 

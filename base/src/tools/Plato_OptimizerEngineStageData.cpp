@@ -75,7 +75,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mKSTrustRegionContractionFactor(0.75),
         mKSOuterGradientTolerance(1e-4),
         mKSOuterStationarityTolerance(1e-4),
-        mKSOuterStagnationTolerance(1e-8),
+        mKSOuterStagnationTolerance(1e-6),
         mKSOuterControlStagnationTolerance(1e-8),
         mKSOuterActualReductionTolerance(1e-8),
         mKSInitialRadiusScale(.1),

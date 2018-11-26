@@ -100,7 +100,7 @@ public:
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
-            mPenaltyParameterLowerBound(1e-6),
+            mPenaltyParameterLowerBound(1e-5),
             mPenaltyParameterScaleFactor(2),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -730,7 +730,7 @@ public:
     void updatePenaltyParameter()
     {
         mPenaltyParameter = mPenaltyParameter / mPenaltyParameterScaleFactor;
-        std::max(mPenaltyParameter, mPenaltyParameterLowerBound);
+        mPenaltyParameter = std::max(mPenaltyParameter, mPenaltyParameterLowerBound);
     }
 
     /******************************************************************************//**

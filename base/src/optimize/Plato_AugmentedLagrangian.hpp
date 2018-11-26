@@ -74,7 +74,8 @@ public:
             mMaxNumAugLagIter(100),
             mMaxNumAugLagSubProbIter(5),
             mOptimalityTolerance(1e-4),
-            mControlStagnationTol(1e-16),
+            mControlStagnationTol(std::numeric_limits<ScalarType>::epsilon()),
+            mActualReductionTol(std::numeric_limits<ScalarType>::epsilon()),
             mFeasibilityTolerance(1e-4),
             mDynamicAugLagProbTolerance(5e-2),
             mDynamicFeasibilityTolerance(1e-1),
@@ -101,7 +102,8 @@ public:
             mMaxNumAugLagIter(100),
             mMaxNumAugLagSubProbIter(5),
             mOptimalityTolerance(1e-4),
-            mControlStagnationTol(1e-16),
+            mControlStagnationTol(std::numeric_limits<ScalarType>::epsilon()),
+            mActualReductionTol(std::numeric_limits<ScalarType>::epsilon()),
             mFeasibilityTolerance(1e-4),
             mDynamicAugLagProbTolerance(5e-2),
             mDynamicFeasibilityTolerance(1e-1),
@@ -242,6 +244,15 @@ public:
     void setControlStagnationTolerance(const ScalarType & aInput)
     {
         mControlStagnationTol = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set stopping tolerance based on the augmented Lagrangian actual reduction metric
+     * @param [in] aInput stopping tolerance based on the augmented Lagrangian actual reduction metric
+    **********************************************************************************/
+    void setAugLagActualReductionTolerance(const ScalarType & aInput)
+    {
+        mActualReductionTol = aInput;
     }
 
     /******************************************************************************//**
@@ -556,6 +567,7 @@ private:
     {
         bool tStop = false;
 
+        const ScalarType tActualReduction = mDataMng->getObjectiveStagnationMeasure();
         const ScalarType tControlStagnation = mDataMng->getControlStagnationMeasure();
 
         if(mNumAugLagIter == mMaxNumAugLagIter)
@@ -566,6 +578,11 @@ private:
         else if(std::abs(tControlStagnation) <= mControlStagnationTol)
         {
             mStoppingCriterion = Plato::algorithm::CONTROL_STAGNATION;
+            tStop = true;
+        }
+        else if(std::abs(tActualReduction) <= mActualReductionTol)
+        {
+            mStoppingCriterion = Plato::algorithm::ACTUAL_REDUCTION_TOLERANCE;
             tStop = true;
         }
 
@@ -672,6 +689,7 @@ private:
 
     ScalarType mOptimalityTolerance; /*!< optimality tolerance - primary stopping tolerance */
     ScalarType mControlStagnationTol; /*!< control stagnation tolerance - secondary stopping tolerance */
+    ScalarType mActualReductionTol; /*!< objective stagnation tolerance - secondary stopping tolerance */
     ScalarType mFeasibilityTolerance; /*!< feasibility tolerance - primary stopping tolerance */
     ScalarType mDynamicAugLagProbTolerance; /*!< dynamic optimality tolerance for augmented Lagrangian subproblem */
     ScalarType mDynamicFeasibilityTolerance; /*!< dynamic feasibility tolerance for augmented Lagrangian problem */

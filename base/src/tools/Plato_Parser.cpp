@@ -1498,11 +1498,23 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
         if( tOptionsNode.size<std::string>("KSTrustRegionExpansionFactor") )
         {
             double tKSTrustRegionExpansionFactor = Plato::Get::Double(tOptionsNode, "KSTrustRegionExpansionFactor");
+            if( tKSTrustRegionExpansionFactor <= 1.0 )
+            {
+                throw Plato::ParsingException("KSTrustRegionExpansionFactor <= 1.0. Please select a value that is greater than 1.0");
+            }
             aOptimizerEngineStageData.setKSTrustRegionExpansionFactor(tKSTrustRegionExpansionFactor);
         }
         if( tOptionsNode.size<std::string>("KSTrustRegionContractionFactor") )
         {
             double tKSTrustRegionContractionFactor = Plato::Get::Double(tOptionsNode, "KSTrustRegionContractionFactor");
+            if( tKSTrustRegionContractionFactor >= 1.0 )
+            {
+                throw Plato::ParsingException("KSTrustRegionContractionFactor >= 1.0. Please select a value greater than 0 and less than one");
+            }
+            if( tKSTrustRegionContractionFactor <= 0.0 )
+            {
+                throw Plato::ParsingException("KSTrustRegionContractionFactor <= 0.0. Please select a value greater than 0 and less than one");
+            }
             aOptimizerEngineStageData.setKSTrustRegionContractionFactor(tKSTrustRegionContractionFactor);
         }
         if( tOptionsNode.size<std::string>("KSMaxTrustRegionIterations") )
