@@ -191,6 +191,7 @@
     <HessianType>disabled</HessianType>
     <OutputControlToFile>false</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+    <KSOuterStagnationTolerance>1e-8</KSOuterStagnationTolerance>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
   </Options>
   <OptimizationVariables>

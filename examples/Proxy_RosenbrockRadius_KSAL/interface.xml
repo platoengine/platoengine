@@ -253,6 +253,7 @@
     <HessianType>analytical</HessianType>
     <OutputControlToFile>true</OutputControlToFile>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+    <KSOuterStagnationTolerance>1e-10</KSOuterStagnationTolerance>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
   </Options>
   <OptimizationVariables>
