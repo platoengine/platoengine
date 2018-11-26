@@ -155,12 +155,19 @@ CogentIntegration::CogentIntegration( pugi::xml_node& node,
     throw ParsingException("'Shape Parameter Values' missing from geometry definition." );
   }
 
-  // currently only works for hex8 elements
-  mNumNodes = 8;
+  mNumNodes = blockTopology->getNodeCount();
 
-  // define basis
-  Teuchos::RCP<Intrepid2::Basis<Kokkos::Serial, Real> >
+  Teuchos::RCP<Intrepid2::Basis<Kokkos::Serial, Real> > intrepidBasis;
+  if( blockTopology->getBaseName() == shards::getCellTopologyData< shards::Hexahedron<8> >()->name ){
     intrepidBasis = Teuchos::rcp(new Intrepid2::Basis_HGRAD_HEX_C1_FEM<Kokkos::Serial, Real, Real>() );
+  } else 
+  if( blockTopology->getBaseName() == shards::getCellTopologyData< shards::Tetrahedron<4> >()->name ){
+    intrepidBasis = Teuchos::rcp(new Intrepid2::Basis_HGRAD_TET_C1_FEM<Kokkos::Serial, Real, Real>() );
+  } else {
+    std::stringstream err;
+    err << "Cogent doesn't support requested cell topology: " << blockTopology->getBaseName();
+    throw ParsingException(err.str());
+  }
 
   Cogent::IntegratorFactory iFactory;
   mCubature = iFactory.create(blockTopology, intrepidBasis, geomSpec);

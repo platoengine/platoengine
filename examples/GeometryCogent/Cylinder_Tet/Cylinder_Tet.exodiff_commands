@@ -1,0 +1,15 @@
+COORDINATES relative 1.e-5    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               0 @ t1
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-3 floor 1e-6
+	Volgrad # min:               0 @ t1,n1585	max:              10 @ t1,n4403
+
+# No ELEMENT VARIABLES
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+

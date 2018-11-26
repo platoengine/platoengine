@@ -1,0 +1,642 @@
+<ParameterList name="Geometry Construction">
+  <ParameterList name="Background Grid">
+    <ParameterList name="Limits">
+      <Parameter name="X" type="Array(double)" value="{0.0, 2.0}"/>
+      <Parameter name="Y" type="Array(double)" value="{0.0, 2.0}"/>
+      <Parameter name="Z" type="Array(double)" value="{0.0, 2.0}"/>
+    </ParameterList>
+    <Parameter name="Grid Size" type="double" value="0.20"/>
+    <Parameter name="Grid Type" type="string" value="Tet4"/>
+  </ParameterList>
+
+  <Parameter name="Geometry Type" type="string" value="Body"/>
+  <Parameter name="Model Type" type="string" value="Parameterized"/>
+  <Parameter name="Maximum Refinement" type="int" value="2"/>
+  <Parameter name="Maximum Error" type="double" value="1e-9"/>
+  <Parameter name="Interface Value" type="double" value="0.0"/>
+  <Parameter name="Uniform Quadrature" type="bool" value="false"/>
+  <Parameter name="Number of Subdomains" type="int" value="25"/>
+  <Parameter name="Shape Parameters" type="Array(string)" value="{P0,P1,P2,P3,P4,P5,P6,P7,P8,P9}"/>
+  <Parameter name="Shape Parameter Values" type="Array(double)" value="{0.1,0.2,0.15,0.12,0.18,0.175,0.55,0.16,2.0,0.25}"/>
+  <!--
+  P0 : radius at node (-,-,-)
+  P1 : radius at node (+,-,-)
+  P2 : radius at node (+,+,-)
+  P3 : radius at node (-,+,-)
+  P0 : radius at node (-,-,+)
+  P1 : radius at node (+,-,+)
+  P2 : radius at node (+,+,+)
+  P3 : radius at node (-,+,+)
+  -->
+
+  <ParameterList name="Local Coordinate System">
+    <ParameterList name="Origin">
+      <Parameter name="X" type="string" value="P8/2.0"/>
+      <Parameter name="Y" type="string" value="P8/2.0"/>
+      <Parameter name="Z" type="string" value="P8/2.0"/>
+    </ParameterList>
+    <ParameterList name="Basis">
+      <Parameter name="X Axis" type="Array(string)" value="{1.0,  0.0,  0.0}"/>
+      <Parameter name="Y Axis" type="Array(string)" value="{0.0,  1.0,  0.0}"/>
+      <Parameter name="Z Axis" type="Array(string)" value="{0.0,  0.0,  1.0}"/>
+    </ParameterList>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 0">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/2.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0, -1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P0"/>
+      <Parameter name="Radius1" type="string" value="P7"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 1">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/2.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),  -1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P4"/>
+      <Parameter name="Radius1" type="string" value="P3"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 2">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/2.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0, -1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P1"/>
+      <Parameter name="Radius1" type="string" value="P6"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 3">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/2.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),  -1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P5"/>
+      <Parameter name="Radius1" type="string" value="P2"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 4">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value="-P8/2.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0, -1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P4"/>
+      <Parameter name="Radius1" type="string" value="P1"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 5">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value="-P8/2.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{-1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P0"/>
+      <Parameter name="Radius1" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 6">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" P8/2.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0, -1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P4"/>
+      <Parameter name="Radius1" type="string" value="P1"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 7">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" P8/2.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{-1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P3"/>
+      <Parameter name="Radius1" type="string" value="P6"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 8">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value="-P8/2.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ -1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P0"/>
+      <Parameter name="Radius1" type="string" value="P2"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 9">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value="-P8/2.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0), -1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P3"/>
+      <Parameter name="Radius1" type="string" value="P1"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 10">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" P8/2.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ -1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P4"/>
+      <Parameter name="Radius1" type="string" value="P6"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 11">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" P8/2.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0), -1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="P7"/>
+      <Parameter name="Radius1" type="string" value="P5"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 12">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value="-P8/4.0"/>
+        <Parameter name="Z" type="string" value=" P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0, -1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P1+P4+P5)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P4+P5+P6+P7)/4.0"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 13">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" P8/4.0"/>
+        <Parameter name="Z" type="string" value=" P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),  -1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P4+P5+P6+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P2+P3+P6+P7)/4.0"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 14">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value="-P8/4.0"/>
+        <Parameter name="Z" type="string" value="-P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),  -1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P1+P4+P5)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P0+P1+P2+P3)/4.0"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 15">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" 0.0"/>
+        <Parameter name="Y" type="string" value=" P8/4.0"/>
+        <Parameter name="Z" type="string" value="-P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,            0.0,             0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,  1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0, -1.0/sqrt(2.0),   1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P1+P2+P3)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P2+P3+P6+P7)/4.0"/>
+      <Parameter name="Axis" type="string" value="Y"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 16">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/4.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{-1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P3+P4+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P4+P5+P6+P7)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 17">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/4.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value=" P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0, -1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P4+P5+P6+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P1+P2+P5+P6)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 18">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/4.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value="-P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0, -1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P3+P4+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P0+P1+P2+P3)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 19">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/4.0"/>
+        <Parameter name="Y" type="string" value=" 0.0"/>
+        <Parameter name="Z" type="string" value="-P8/4.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{ 1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ 0.0,            1.0,            0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{-1.0/sqrt(2.0),  0.0,  1.0/sqrt(2.0)}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P1+P2+P3)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P1+P2+P5+P6)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 20">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/4.0"/>
+        <Parameter name="Y" type="string" value=" P8/4.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ -1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P3+P4+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P2+P3+P6+P7)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 21">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/4.0"/>
+        <Parameter name="Y" type="string" value=" P8/4.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0), -1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P2+P3+P6+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P1+P2+P5+P6)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 22">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="-P8/4.0"/>
+        <Parameter name="Y" type="string" value="-P8/4.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0), -1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P3+P4+P7)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P1+P2+P4+P5)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 23">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value=" P8/4.0"/>
+        <Parameter name="Y" type="string" value="-P8/4.0"/>
+        <Parameter name="Z" type="string" value=" 0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{ -1.0/sqrt(2.0),  1.0/sqrt(2.0),   0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,            0.0,             1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Frustum"/>
+      <Parameter name="Height" type="string" value="P8/2.0*sqrt(2.0)"/>
+      <Parameter name="Radius0" type="string" value="(P0+P1+P4+P5)/4.0"/>
+      <Parameter name="Radius1" type="string" value="(P1+P2+P5+P6)/4.0"/>
+      <Parameter name="Axis" type="string" value="X"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+  <ParameterList name="Subdomain 24">
+    <Parameter name="Type" type="string" value="Primitive"/>
+    <ParameterList name="Local Coordinate System">
+      <ParameterList name="Origin">
+        <Parameter name="X" type="string" value="0.0"/>
+        <Parameter name="Y" type="string" value="0.0"/>
+        <Parameter name="Z" type="string" value="0.0"/>
+      </ParameterList>
+      <ParameterList name="Basis">
+        <Parameter name="X Axis" type="Array(string)" value="{  1.0,       0.0,        0.0}"/>
+        <Parameter name="Y Axis" type="Array(string)" value="{  0.0,       1.0,        0.0}"/>
+        <Parameter name="Z Axis" type="Array(string)" value="{  0.0,       0.0,        1.0}"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Primitive">
+      <Parameter name="Type" type="string" value="Sphere"/>
+      <Parameter name="Radius" type="string" value="P9"/>
+    </ParameterList>
+    <Parameter name="Operation" type="string" value="Add"/>
+  </ParameterList>
+
+</ParameterList>
