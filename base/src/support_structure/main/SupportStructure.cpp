@@ -54,6 +54,7 @@ bool SupportStructure::createMeshAPIsStandAlone(int argc, char **argv)
     mDesignFieldThresholdValue = 0.5;
     mConcatenateResults = 0;
     mOverhangAngle = 45.0;
+    mCellSizeMultiplier = 1.0;
     mReadSpreadFile = 0;
     mTimeStep = 1;
     mAlgorithm=0; // node based
@@ -61,6 +62,7 @@ bool SupportStructure::createMeshAPIsStandAlone(int argc, char **argv)
     mBuildPlateNormal[1] = 0.0;
     mBuildPlateNormal[2] = 1.1;
     mOutputFields = "";
+    mNeighborSearchRadius=2;
 
     stk::ParallelMachine *comm = new stk::ParallelMachine(stk::parallel_machine_init(&argc, &argv));
     if(!comm)
@@ -108,8 +110,10 @@ bool SupportStructure::run()
             return_val = runPrivateProjectTriangle();
         else if(mAlgorithm == 3)
             return_val = runPrivateNodeBasedMaxDensityAbove();
-        else
+        else if(mAlgorithm == 4)
             return_val = runPrivateNodeBasedMaxDensityAboveTopDown();
+        else
+            return_val = runPrivateVoxelBasedInefficientMemory();
     }
     catch (std::exception exc)
     {
@@ -1355,6 +1359,7 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
         std::cout << "Calculating an average edge length. " << std::endl;
     double averageEdgeLength = 0.0;
     double numOverall = 0.0;
+    bool tetsExist = false;
     for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
             bucketIter != elementBuckets.end(); ++bucketIter )
     {
@@ -1389,6 +1394,7 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
                 curAverage += p0.distance(p2);
                 curAverage += p2.distance(p3);
                 curAverage /= 3.0;
+                tetsExist = true;
             }
             averageEdgeLength += curAverage;
             numOverall += 1.0;
@@ -1413,6 +1419,11 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
         std::cout << "Calculating support structure value for every node. " << std::endl;
     double coarseSearchRadiusSquared = 1.5*1.5*averageEdgeLength*averageEdgeLength;
     double fineSearchRadiusSquared = .5*.5*averageEdgeLength*averageEdgeLength;
+    if(tetsExist)
+    {
+        coarseSearchRadiusSquared = 3.5*3.5*averageEdgeLength*averageEdgeLength;
+        fineSearchRadiusSquared = 1.0*1.0*averageEdgeLength*averageEdgeLength;
+    }
     for ( stk::mesh::BucketVector::const_iterator nodeBucketIter = nodeBuckets.begin();
             nodeBucketIter != nodeBuckets.end();
             ++nodeBucketIter )
@@ -1534,6 +1545,1653 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
 
     mSTKMeshIn->write_exodus_mesh(mMeshOut, mConcatenateResults);
 
+    return true;
+}
+
+bool SupportStructure::getBuildPlateCoordinateSystem(Vector3D &aX, Vector3D &aY, Vector3D &aZ, Vector3D &origin)
+{
+    stk::mesh::Selector myNodeSelector = mSTKMeshIn->meta_data()->universal_part();
+    stk::mesh::BucketVector const &nodeBuckets = mSTKMeshIn->bulk_data()->get_buckets(
+            stk::topology::NODE_RANK, myNodeSelector );
+
+    bool haveOrigin = false;
+    bool haveAxes = false;
+
+    aZ = mBuildPlateNormal;
+
+    // Loop until we have enough info to create the cooridnate axes
+    std::vector<std::pair<stk::mesh::Entity, double> > nodeDotPairs;
+    for ( stk::mesh::BucketVector::const_iterator nodeBucketIter = nodeBuckets.begin();
+            nodeBucketIter != nodeBuckets.end() && (!haveOrigin || !haveAxes);
+            ++nodeBucketIter )
+    {
+        stk::mesh::Bucket &tmpBucket = **nodeBucketIter;
+        size_t numBucketNodes = tmpBucket.size();
+        for (size_t i=0; i<numBucketNodes && (!haveOrigin || !haveAxes); ++i)
+        {
+            stk::mesh::Entity curNode = tmpBucket[i];
+            Vector3D curNodeCoords;
+            mSTKMeshIn->nodeCoordinates(curNode, curNodeCoords.data());
+            if(!haveOrigin)
+            {
+                origin = curNodeCoords;
+                haveOrigin = true;
+            }
+            else
+            {
+                Vector3D vec = curNodeCoords-origin;
+                // Subtract off the z direction and see if we still have a non-zero vector
+                double zComponent = vec % aZ;
+                vec = vec - zComponent * aZ;
+                if(vec.mag() > 1e-4)
+                {
+                    aX = vec;
+                    aX.normalize();
+                    aY = aZ * aX;
+                    haveAxes = true;
+                }
+            }
+        }
+    }
+
+    return (haveOrigin && haveAxes);
+}
+
+void SupportStructure::getNodesSortedInZDirection(Vector3D &aOrigin,
+                                                  Vector3D &aAxis,
+                                                  std::vector<std::pair<stk::mesh::Entity, double> > &aSortedNodeDistancePairs,
+                                                  double &zMin, double &zMax)
+{
+    stk::mesh::Selector myNodeSelector = mSTKMeshIn->meta_data()->universal_part();
+    stk::mesh::BucketVector const &nodeBuckets = mSTKMeshIn->bulk_data()->get_buckets(
+            stk::topology::NODE_RANK, myNodeSelector );
+    for ( stk::mesh::BucketVector::const_iterator nodeBucketIter = nodeBuckets.begin();
+            nodeBucketIter != nodeBuckets.end();
+            ++nodeBucketIter )
+    {
+        stk::mesh::Bucket &tmpBucket = **nodeBucketIter;
+        size_t numBucketNodes = tmpBucket.size();
+        for (size_t i=0; i<numBucketNodes; ++i)
+        {
+            bool foundDesignNode = false;
+            stk::mesh::Entity curNode = tmpBucket[i];
+            Vector3D curNodeCoords;
+            mSTKMeshIn->nodeCoordinates(curNode, curNodeCoords.data());
+            Vector3D curVec = curNodeCoords - aOrigin;
+            double dot = curVec % aAxis;
+            aSortedNodeDistancePairs.push_back(std::make_pair(curNode, dot));
+        }
+    }
+    std::sort(aSortedNodeDistancePairs.begin(), aSortedNodeDistancePairs.end(), comparePairs);
+    zMin = aSortedNodeDistancePairs[0].second;
+    zMax = aSortedNodeDistancePairs[aSortedNodeDistancePairs.size()-1].second;
+}
+
+void SupportStructure::getAverageEdgeLength(double &averageEdgeLength)
+{
+    averageEdgeLength = 0.0;
+
+    double numOverall = 0.0;
+    stk::mesh::Selector myElemSelector = mSTKMeshIn->meta_data()->universal_part();
+    stk::mesh::BucketVector const &elementBuckets = mSTKMeshIn->bulk_data()->get_buckets(
+            stk::topology::ELEMENT_RANK, myElemSelector );
+    for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
+            bucketIter != elementBuckets.end(); ++bucketIter )
+    {
+        stk::mesh::Bucket &tmpBucket = **bucketIter;
+        size_t numElems = tmpBucket.size();
+        for (size_t i=0; i<numElems; ++i)
+        {
+            double curAverage = 0.0;
+            stk::mesh::Entity curElem = tmpBucket[i];
+            stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
+            int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
+            if(numNodes == 8)
+            {
+                Vector3D p0, p1, p3, p4;
+                mSTKMeshIn->nodeCoordinates(elemNodes[0], p0.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[1], p1.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[3], p3.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[4], p4.data());
+                curAverage += p0.distance(p1);
+                curAverage += p0.distance(p3);
+                curAverage += p0.distance(p4);
+                curAverage /= 3.0;
+            }
+            else if(numNodes == 4)
+            {
+                Vector3D p0, p1, p2, p3;
+                mSTKMeshIn->nodeCoordinates(elemNodes[0], p0.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[1], p1.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[2], p2.data());
+                mSTKMeshIn->nodeCoordinates(elemNodes[3], p3.data());
+                curAverage += p0.distance(p1);
+                curAverage += p0.distance(p2);
+                curAverage += p2.distance(p3);
+                curAverage /= 3.0;
+            }
+            averageEdgeLength += curAverage;
+            numOverall += 1.0;
+        }
+    }
+    averageEdgeLength /= numOverall;
+}
+
+void SupportStructure::getGridDimensions(double &aAverageEdgeLength, Vector3D &aOrigin,
+                                         Vector3D &aXAxis, Vector3D &aYAxis, int &aNumGridX, int &aNumGridY,
+                                         Vector3D &aMinCoords, Vector3D &aMaxCoords,
+                                         double &aGridSizeX, double &aGridSizeY)
+{
+    stk::mesh::Selector myNodeSelector = mSTKMeshIn->meta_data()->universal_part();
+    stk::mesh::BucketVector const &nodeBuckets = mSTKMeshIn->bulk_data()->get_buckets(
+            stk::topology::NODE_RANK, myNodeSelector );
+
+    double maxX, maxY, minX, minY;
+    bool firstNode = true;
+
+    std::vector<std::pair<stk::mesh::Entity, double> > nodeDotPairs;
+    for ( stk::mesh::BucketVector::const_iterator nodeBucketIter = nodeBuckets.begin();
+            nodeBucketIter != nodeBuckets.end();
+            ++nodeBucketIter )
+    {
+        stk::mesh::Bucket &tmpBucket = **nodeBucketIter;
+        size_t numBucketNodes = tmpBucket.size();
+        for (size_t i=0; i<numBucketNodes; ++i)
+        {
+            stk::mesh::Entity curNode = tmpBucket[i];
+            Vector3D curNodeCoords;
+            mSTKMeshIn->nodeCoordinates(curNode, curNodeCoords.data());
+            Vector3D vec = curNodeCoords - aOrigin;
+            double dotX = vec % aXAxis;
+            double dotY = vec % aYAxis;
+            if(firstNode)
+            {
+                maxX = minX = dotX;
+                maxY = minY = dotY;
+                firstNode = false;
+            }
+            else
+            {
+                if(dotX > maxX)
+                    maxX = dotX;
+                if(dotX < minX)
+                    minX = dotX;
+                if(dotY > maxY)
+                    maxY = dotY;
+                if(dotY < minY)
+                    minY = dotY;
+            }
+        }
+    }
+    aMinCoords[0] = minX;
+    aMinCoords[1] = minY;
+    aMinCoords[2] = 0.0;
+    aMaxCoords[0] = maxX;
+    aMaxCoords[1] = maxY;
+    aMaxCoords[2] = 0.0;
+    double xRange = maxX - minX;
+    double yRange = maxY - minY;
+    aNumGridX = (int)((xRange / aAverageEdgeLength) + 1.0);
+    aNumGridY = (int)((yRange / aAverageEdgeLength) + 1.0);
+    aGridSizeX = xRange / (double)aNumGridX;
+    aGridSizeY = yRange / (double)aNumGridY;
+}
+
+void SupportStructure::getNodeInterfaceData(std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles)
+{
+    // Calculate the interface angle for all interface elements and store in a map
+    stk::mesh::Selector myElemSelector = mSTKMeshIn->meta_data()->universal_part();
+    stk::mesh::BucketVector const &elementBuckets = mSTKMeshIn->bulk_data()->get_buckets(
+            stk::topology::ELEMENT_RANK, myElemSelector );
+
+    double tolerance = 1e-12;
+    double angleCosine = cos(mOverhangAngle*platoPI/180.0);
+    std::set<stk::mesh::Entity> designInterfaceElements;
+    std::map<stk::mesh::Entity, Vector3D> interfaceMap;
+    for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
+            bucketIter != elementBuckets.end(); ++bucketIter )
+    {
+        stk::mesh::Bucket &tmpBucket = **bucketIter;
+        size_t numElems = tmpBucket.size();
+        for (size_t i=0; i<numElems; ++i)
+        {
+            bool allNodesInside = true;
+            bool allNodesOutside = true;
+            stk::mesh::Entity curElem = tmpBucket[i];
+            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
+            stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
+            int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
+            for(int j=0; j<numNodes; ++j)
+            {
+                stk::mesh::Entity curNode = elemNodes[j];
+                double designVariableValue = mSTKMeshIn->getMaxNodalIsoFieldVariable(curNode.m_value);
+                if((designVariableValue + tolerance) >= mDesignFieldThresholdValue)
+                    allNodesOutside = false;
+                else
+                    allNodesInside = false;
+            }
+            if(!allNodesInside && !allNodesOutside)
+            {
+                Vector3D interfaceNormal;
+                Vector3D interfaceOrigin;
+                std::vector<Vector3D> triPoints;
+                if(getIntersectionInfo(curElem, FIELD_DENSITY, interfaceNormal, interfaceOrigin, triPoints))
+                {
+                    // See if the interface is pointing toward the build plate
+                    double dot=interfaceNormal % mBuildPlateNormal;
+                    // Just add elements to the map that will actually affect things later on.
+                    if(dot < 0.0)
+                    {
+                        interfaceMap[curElem] = interfaceNormal;
+                    }
+                }
+            }
+        }
+    }
+
+    // For all nodes in interface elements calculate an average interface angle
+    // from all of the attached interface elements.
+    std::map<stk::mesh::Entity, Vector3D>::iterator interfaceMapIter = interfaceMap.begin();
+    while(interfaceMapIter != interfaceMap.end())
+    {
+        stk::mesh::Entity curElem = interfaceMapIter->first;
+        stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
+        int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
+        for(int j=0; j<numNodes; ++j)
+        {
+            stk::mesh::Entity curNode = elemNodes[j];
+            if(aNodeInterfaceAngles.count(curNode) == 0)
+            {
+                Vector3D p0;
+                mSTKMeshIn->nodeCoordinates(curNode, p0.data());
+                stk::mesh::Entity const *nodeElements = mSTKMeshIn->bulk_data()->begin_elements(curNode);
+                int numElems = mSTKMeshIn->bulk_data()->num_elements(curNode);
+                double averageDot = 0.0;
+                Vector3D averageNormal;
+                averageNormal[0] = averageNormal[1] = averageNormal[2] = 0.0;
+                double numInterfaceNeighbors = 0.0;
+                for(int q=0; q<numElems; ++q)
+                {
+                    stk::mesh::Entity curNeighborElem = nodeElements[q];
+                    std::map<stk::mesh::Entity, Vector3D>::iterator curNeighborIter = interfaceMap.find(curNeighborElem);
+                    if(curNeighborIter != interfaceMap.end())
+                    {
+                        numInterfaceNeighbors += 1.0;
+                        averageNormal += curNeighborIter->second;
+                    }
+                }
+                if(numInterfaceNeighbors > 0.1)
+                {
+                    averageNormal.normalize();
+                    averageDot = averageNormal % mBuildPlateNormal;
+                    aNodeInterfaceAngles[curNode] = averageDot;
+                }
+            }
+        }
+        interfaceMapIter++;
+    }
+}
+
+void SupportStructure::getNodeXY(stk::mesh::Entity &aNode, Vector3D &aOrigin, Vector3D &aXAxis,
+                                 Vector3D &aYAxis, Vector3D &aMinCoords, double &aGridSizeX,
+                                 double &aGridSizeY, int &aNumGridX, int &aNumGridY, int &aNodeX,
+                                 int &aNodeY)
+{
+    Vector3D nodeCoords;
+    mSTKMeshIn->nodeCoordinates(aNode, nodeCoords.data());
+    /*
+    if(fabs(nodeCoords[0]+.158569) < .0001 && fabs(nodeCoords[1]+.604976) < .0001 && fabs(nodeCoords[2]+.143273) < .0001)
+    {
+        int hh=0;
+        hh++;
+    }
+    */
+    Vector3D vec = nodeCoords - aOrigin;
+    double dotX = vec % aXAxis;
+    double dotY = vec % aYAxis;
+    double xDistanceFromMin = dotX - aMinCoords[0];
+    double yDistanceFromMin = dotY - aMinCoords[1];
+    aNodeX = (int)(xDistanceFromMin/aGridSizeX);
+    aNodeY = (int)(yDistanceFromMin/aGridSizeY);
+    if(aNodeX > (aNumGridX-1))
+        aNodeX = aNumGridX-1;
+    if(aNodeY > (aNumGridY-1))
+        aNodeY = aNumGridY-1;
+}
+
+void SupportStructure::getValsForSettingVoxel(stk::mesh::Entity aNode,
+                                              int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                                              std::vector<std::vector<VoxelData> > &aVoxelData,
+                                              std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                              double &aDensity,
+                                              double &aDot,
+                                              bool &aHasInterface)
+{
+    if(aNode.m_value != 0)
+    {
+        if(aNodeInterfaceAngles.count(aNode))
+        {
+            aDot = aNodeInterfaceAngles[aNode];
+            aHasInterface = true;
+        }
+        else
+            aHasInterface = false;
+        aDensity = mSTKMeshIn->getMaxNodalIsoFieldVariable(aNode.m_value);
+    }
+    else
+    {
+        int imin=aXIndex-mNeighborSearchRadius;
+        if(imin<0)
+            imin=0;
+        int jmin=aYIndex-mNeighborSearchRadius;
+        if(jmin<0)
+            jmin=0;
+        int imax = aXIndex+mNeighborSearchRadius;
+        if(imax > (aNumGridX-1))
+            imax = aNumGridX-1;
+        int jmax = aYIndex+mNeighborSearchRadius;
+        if(jmax > (aNumGridY-1))
+            jmax = aNumGridY-1;
+        double weightedAverageDensity = 0.0;
+        double weightedAverageDot = 0.0;
+        double sumDensityWeights = 0.0;
+        double sumDotWeights = 0.0;
+        int numFound=0;
+        aHasInterface = false;
+        for(int i=imin; i<=imax; i++)
+        {
+            for(int j=jmin; j<=jmax; j++)
+            {
+                if(i!=aXIndex || j!=aYIndex)
+                {
+                    if(aVoxelData[i][j].setByNode) // was set by a node being there
+                    {
+                        numFound++;
+                        double distance = abs(i-aXIndex) + abs(j-aYIndex);
+                        double weight=1.0/distance;
+                        weightedAverageDensity += (aVoxelData[i][j].maxDensity * weight);
+                        if(aVoxelData[i][j].hasInterface || aVoxelData[i][j].maxIsDesign)
+                        {
+                            weightedAverageDot += (aVoxelData[i][j].maxDot * weight);
+                            sumDotWeights += weight;
+                            aHasInterface = true;
+                        }
+                        sumDensityWeights += weight;
+                    }
+                }
+            }
+        }
+        if(numFound > .1)
+        {
+            aDensity = weightedAverageDensity/sumDensityWeights;
+            if(aHasInterface)
+                aDot = weightedAverageDot/sumDotWeights;
+        }
+        std::cout << "Number of neighbors found: " << numFound << std::endl;
+    }
+}
+
+void SupportStructure::setVoxelData(stk::mesh::Entity aNode,
+                                    int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                                    std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                    std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                    int aZLayer,
+                                    int aNumZLayers,
+                                    int aLayerIndex)
+{
+    double tolerance = 1e-12;
+    double curDensity=0.0;
+    double curDot=0.0;
+    bool hasInterface = false;
+    bool curVoxelHasNode = (aNode.m_value != 0);
+    int curLayerIndex = mNeighborSearchRadius;
+    if(aLayerIndex != -1)
+        curLayerIndex = aLayerIndex;
+    int aboveLayerIndex = curLayerIndex-1;
+    VoxelData aboveVoxelData = aVoxelData[aboveLayerIndex][aXIndex][aYIndex];
+    VoxelData &curVoxelData = aVoxelData[curLayerIndex][aXIndex][aYIndex];
+
+    if(aXIndex == 32 && aYIndex == 29)
+    {
+        int ff=0;
+        ff++;
+    }
+
+    if(curVoxelHasNode)
+    {
+        if(aNodeInterfaceAngles.count(aNode))
+        {
+            curDot = aNodeInterfaceAngles[aNode];
+            hasInterface = true;
+        }
+        else
+            hasInterface = false;
+        curDensity = mSTKMeshIn->getMaxNodalIsoFieldVariable(aNode.m_value);
+        if(aboveVoxelData.dataExists)
+        {
+            // Compare against above data to determine what to do.
+            if(aboveVoxelData.inDesignRegion)
+            {
+                if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                    curVoxelData.maxDensity = curDensity;
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.inDesignRegion = true;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = true;
+                }
+                else
+                {
+                    double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                    curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                    curVoxelData.maxDot = aboveVoxelData.maxDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = true;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = true;
+                    curVoxelData.inDesignRegion = false;
+                }
+            }
+            else
+            {
+                if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                    curVoxelData.maxDensity = curDensity;
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = true;
+                    curVoxelData.inDesignRegion = true;
+                }
+                else
+                {
+                    if(aboveVoxelData.maxIsDesign)
+                    {
+                        double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
+                        mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                        curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                        curVoxelData.maxDot = aboveVoxelData.maxDot;
+                        curVoxelData.dataExists = true;
+                        curVoxelData.hasInterface = false;
+                        curVoxelData.maxIsDesign = true;
+                        curVoxelData.setByNode = true;
+                        curVoxelData.inDesignRegion = false;
+                    }
+                    else
+                    {
+                        if(curDensity > aboveVoxelData.maxDensity)
+                            curVoxelData.maxDensity = curDensity;
+                        else
+                            curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+
+                        double supportStructureValue = calculateSupportStructureValue(curDensity, curVoxelData.maxDensity, curDot, false);
+                        mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                        curVoxelData.maxDot = curDot;
+                        curVoxelData.dataExists = true;
+                        curVoxelData.hasInterface = false;
+                        curVoxelData.maxIsDesign = false;
+                        curVoxelData.setByNode = true;
+                        curVoxelData.inDesignRegion = false;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Just set the current voxel data.
+            curVoxelData.dataExists = true;
+            curVoxelData.hasInterface = hasInterface;
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                curVoxelData.inDesignRegion = true;
+                curVoxelData.maxIsDesign = true;
+            }
+            else
+            {
+                curVoxelData.inDesignRegion = false;
+                curVoxelData.maxIsDesign = false;
+            }
+            curVoxelData.maxDensity = curDensity;
+            curVoxelData.maxDot = curDot;
+            curVoxelData.setByNode = true;
+        }
+    }
+    else
+    {
+        // Get values for density, dot, and has interface from neighbors
+        int imin=aXIndex-mNeighborSearchRadius;
+        if(imin<0)
+            imin=0;
+        int jmin=aYIndex-mNeighborSearchRadius;
+        if(jmin<0)
+            jmin=0;
+        int kmin=0;
+        if(aZLayer < mNeighborSearchRadius)
+            kmin = mNeighborSearchRadius-aZLayer;
+        int imax = aXIndex+mNeighborSearchRadius;
+        if(imax > (aNumGridX-1))
+            imax = aNumGridX-1;
+        int jmax = aYIndex+mNeighborSearchRadius;
+        if(jmax > (aNumGridY-1))
+            jmax = aNumGridY-1;
+        int kmax=2*mNeighborSearchRadius;
+        if(aZLayer + mNeighborSearchRadius > aNumZLayers - 1)
+            kmax = aNumZLayers - (aZLayer - 1);
+        double weightedAverageDensity = 0.0;
+        double weightedAverageHasInterface = 0.0;
+        double weightedAverageDot = 0.0;
+        double sumDensityWeights = 0.0;
+        double sumDotWeights = 0.0;
+        int numFound=0;
+        for(int k=kmin; k<=kmax; k++)
+        {
+            for(int i=imin; i<=imax; i++)
+            {
+                for(int j=jmin; j<=jmax; j++)
+                {
+                    if(i!=aXIndex || j!=aYIndex || k!=mNeighborSearchRadius)
+                    {
+                        if(aVoxelData[k][i][j].dataExists && aVoxelData[k][i][j].setByNode) // was set by a node being there
+                        {
+                            numFound++;
+                            double distance = abs(i-aXIndex) + abs(j-aYIndex) + abs(k-mNeighborSearchRadius);
+                            double weight=1.0/distance;
+                            weightedAverageDensity += (aVoxelData[k][i][j].maxDensity * weight);
+                            if(aVoxelData[k][i][j].hasInterface || aVoxelData[k][i][j].maxIsDesign)
+                            {
+                                weightedAverageDot += (aVoxelData[k][i][j].maxDot * weight);
+                                weightedAverageHasInterface += (double)(aVoxelData[k][i][j].hasInterface);
+                                sumDotWeights += weight;
+                            }
+                            sumDensityWeights += weight;
+                        }
+                    }
+                }
+            }
+        }
+        if(numFound > .1)
+        {
+            curDensity = weightedAverageDensity/sumDensityWeights;
+            if(sumDotWeights > .00001 && (weightedAverageHasInterface/sumDotWeights) > 0.5)
+                hasInterface = true;
+            if(sumDotWeights > .00001)
+                curDot = weightedAverageDot/sumDotWeights;
+        }
+        else
+            std::cout << "****** Didn't find any voxel neighbors for interpolating density values! *********" << std::endl;
+
+        // Now set values based on current and above values
+        if(aboveVoxelData.dataExists)
+        {
+            // Compare against above data to determine what to do.
+            if(aboveVoxelData.inDesignRegion)
+            {
+                if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+                {
+                    curVoxelData.maxDensity = curDensity;
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.inDesignRegion = true;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = false;
+                }
+                else
+                {
+                    curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                    curVoxelData.maxDot = aboveVoxelData.maxDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = true;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = false;
+                    curVoxelData.inDesignRegion = false;
+                }
+            }
+            else
+            {
+                if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+                {
+                    curVoxelData.maxDensity = curDensity;
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = false;
+                    curVoxelData.inDesignRegion = true;
+                }
+                else
+                {
+                    if(aboveVoxelData.maxIsDesign)
+                    {
+                        curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                        curVoxelData.maxDot = aboveVoxelData.maxDot;
+                        curVoxelData.dataExists = true;
+                        curVoxelData.hasInterface = false;
+                        curVoxelData.maxIsDesign = true;
+                        curVoxelData.setByNode = false;
+                        curVoxelData.inDesignRegion = false;
+                    }
+                    else
+                    {
+                        if(curDensity > aboveVoxelData.maxDensity)
+                            curVoxelData.maxDensity = curDensity;
+                        else
+                            curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+
+                        curVoxelData.maxDot = curDot;
+                        curVoxelData.dataExists = true;
+                        curVoxelData.hasInterface = false;
+                        curVoxelData.maxIsDesign = false;
+                        curVoxelData.setByNode = false;
+                        curVoxelData.inDesignRegion = false;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Just set the current voxel data.
+            curVoxelData.dataExists = true;
+            curVoxelData.hasInterface = hasInterface;
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                curVoxelData.inDesignRegion = true;
+                curVoxelData.maxIsDesign = true;
+            }
+            else
+            {
+                curVoxelData.inDesignRegion = false;
+                curVoxelData.maxIsDesign = false;
+            }
+            curVoxelData.maxDensity = curDensity;
+            curVoxelData.maxDot = curDot;
+            curVoxelData.setByNode = false;
+        }
+    }
+}
+
+void SupportStructure::setVoxelDataByNeighbor(int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                                    std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                    int aZLayer,
+                                    int aNumZLayers)
+{
+    double tolerance = 1e-12;
+    double curDensity=0.0;
+    double curDot=0.0;
+    bool hasInterface = false;
+    int aboveLayerIndex = aZLayer-1;
+    VoxelData aboveVoxelData;
+    if(aboveLayerIndex >= 0)
+        aboveVoxelData = aVoxelData[aboveLayerIndex][aXIndex][aYIndex];
+    VoxelData &curVoxelData = aVoxelData[aZLayer][aXIndex][aYIndex];
+
+    if(aXIndex == 32 && aYIndex == 29)
+    {
+        int ff=0;
+        ff++;
+    }
+
+    // Get values for density, dot, and has interface from neighbors
+    int imin=aXIndex-mNeighborSearchRadius;
+    if(imin<0)
+        imin=0;
+    int jmin=aYIndex-mNeighborSearchRadius;
+    if(jmin<0)
+        jmin=0;
+    int kmin=aZLayer - mNeighborSearchRadius;
+    if(kmin < 0)
+        kmin = 0;
+    int imax = aXIndex+mNeighborSearchRadius;
+    if(imax > (aNumGridX-1))
+        imax = aNumGridX-1;
+    int jmax = aYIndex+mNeighborSearchRadius;
+    if(jmax > (aNumGridY-1))
+        jmax = aNumGridY-1;
+    int kmax=aZLayer + mNeighborSearchRadius;
+    if(kmax > (aNumZLayers-1))
+        kmax = aNumZLayers-1;
+    double weightedAverageDensity = 0.0;
+    double weightedAverageHasInterface = 0.0;
+    double weightedAverageDot = 0.0;
+    double sumDensityWeights = 0.0;
+    double sumDotWeights = 0.0;
+    int numFound=0;
+    for(int k=kmin; k<=kmax; k++)
+    {
+        for(int i=imin; i<=imax; i++)
+        {
+            for(int j=jmin; j<=jmax; j++)
+            {
+                if(i!=aXIndex || j!=aYIndex || k!=aZLayer)
+                {
+                    if(aVoxelData[k][i][j].setByNode) // was set by a node being there
+                    {
+                        numFound++;
+                        double distance = abs(i-aXIndex) + abs(j-aYIndex) + abs(k-aZLayer);
+                        double weight=1.0/distance;
+                        weightedAverageDensity += (aVoxelData[k][i][j].maxDensity * weight);
+                        if(aVoxelData[k][i][j].hasInterface)
+//                            if(aVoxelData[k][i][j].hasInterface || aVoxelData[k][i][j].maxIsDesign)
+                        {
+                            weightedAverageDot += (aVoxelData[k][i][j].maxDot * weight);
+                            weightedAverageHasInterface += (double)(aVoxelData[k][i][j].hasInterface);
+                            sumDotWeights += weight;
+                        }
+                        sumDensityWeights += weight;
+                    }
+                }
+            }
+        }
+    }
+    if(numFound > .1)
+    {
+        curDensity = weightedAverageDensity/sumDensityWeights;
+        if(sumDotWeights > .00001 && (weightedAverageHasInterface/sumDotWeights) > 0.5)
+            hasInterface = true;
+        if(sumDotWeights > .00001)
+            curDot = weightedAverageDot/sumDotWeights;
+    }
+    else
+        std::cout << "****** Didn't find any voxel neighbors for interpolating density values! *********" << std::endl;
+
+    // Now set values based on current and above values
+    if(aboveLayerIndex >= 0)
+    {
+        // Compare against above data to determine what to do.
+        if(aboveVoxelData.inDesignRegion)
+        {
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                curVoxelData.maxDensity = curDensity;
+                curVoxelData.maxDot = curDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = false;
+                curVoxelData.inDesignRegion = true;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = false;
+            }
+            else
+            {
+                curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                curVoxelData.maxDot = aboveVoxelData.maxDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = true;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = false;
+                curVoxelData.inDesignRegion = false;
+            }
+        }
+        else
+        {
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                curVoxelData.maxDensity = curDensity;
+                curVoxelData.maxDot = curDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = false;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = false;
+                curVoxelData.inDesignRegion = true;
+            }
+            else
+            {
+                if(aboveVoxelData.maxIsDesign)
+                {
+                    curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                    curVoxelData.maxDot = aboveVoxelData.maxDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = false;
+                    curVoxelData.inDesignRegion = false;
+                }
+                else
+                {
+                    if(curDensity > aboveVoxelData.maxDensity)
+                        curVoxelData.maxDensity = curDensity;
+                    else
+                        curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = false;
+                    curVoxelData.setByNode = false;
+                    curVoxelData.inDesignRegion = false;
+                }
+            }
+        }
+    }
+    else
+    {
+        // Just set the current voxel data.
+        curVoxelData.dataExists = true;
+        curVoxelData.hasInterface = hasInterface;
+        if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+        {
+            curVoxelData.inDesignRegion = true;
+            curVoxelData.maxIsDesign = true;
+        }
+        else
+        {
+            curVoxelData.inDesignRegion = false;
+            curVoxelData.maxIsDesign = false;
+        }
+        curVoxelData.maxDensity = curDensity;
+        curVoxelData.maxDot = curDot;
+        curVoxelData.setByNode = false;
+    }
+}
+
+void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
+                                    std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                    int aZLayer)
+{
+    double tolerance = 1e-12;
+    int aboveLayerIndex = aZLayer-1;
+    VoxelData aboveVoxelData;
+    if(aboveLayerIndex >= 0)
+        aboveVoxelData = aVoxelData[aboveLayerIndex][aXIndex][aYIndex];
+    VoxelData &curVoxelData = aVoxelData[aZLayer][aXIndex][aYIndex];
+    double curDensity=curVoxelData.maxDensity;
+    double curDot=curVoxelData.maxDot;
+    bool hasInterface=curVoxelData.hasInterface;
+//    stk::mesh::Entity aNode = curVoxelData.node;
+
+    if(aXIndex == 32 && aYIndex == 29)
+    {
+        int ff=0;
+        ff++;
+    }
+
+    if(aboveLayerIndex >= 0)
+    {
+        // Compare against above data to determine what to do.
+        if(aboveVoxelData.inDesignRegion)
+        {
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
+                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                    mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+                curVoxelData.maxDensity = curDensity;
+                curVoxelData.maxDot = curDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = false;
+                curVoxelData.inDesignRegion = true;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = true;
+            }
+            else
+            {
+                double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
+                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                    mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+                curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                curVoxelData.maxDot = aboveVoxelData.maxDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = true;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = true;
+                curVoxelData.inDesignRegion = false;
+            }
+        }
+        else
+        {
+            if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
+                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                    mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+                curVoxelData.maxDensity = curDensity;
+                curVoxelData.maxDot = curDot;
+                curVoxelData.dataExists = true;
+                curVoxelData.hasInterface = false;
+                curVoxelData.maxIsDesign = true;
+                curVoxelData.setByNode = true;
+                curVoxelData.inDesignRegion = true;
+            }
+            else
+            {
+                if(aboveVoxelData.maxIsDesign)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
+                    for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                        mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+                    curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+                    curVoxelData.maxDot = aboveVoxelData.maxDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = true;
+                    curVoxelData.setByNode = true;
+                    curVoxelData.inDesignRegion = false;
+                }
+                else
+                {
+                    if(curDensity > aboveVoxelData.maxDensity)
+                        curVoxelData.maxDensity = curDensity;
+                    else
+                        curVoxelData.maxDensity = aboveVoxelData.maxDensity;
+
+                    double supportStructureValue = calculateSupportStructureValue(curDensity, curVoxelData.maxDensity, curDot, false);
+                    for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                        mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+                    curVoxelData.maxDot = curDot;
+                    curVoxelData.dataExists = true;
+                    curVoxelData.hasInterface = false;
+                    curVoxelData.maxIsDesign = false;
+                    curVoxelData.setByNode = true;
+                    curVoxelData.inDesignRegion = false;
+                }
+            }
+        }
+    }
+    else
+    {
+        // Just set the current voxel data.
+        curVoxelData.dataExists = true;
+        curVoxelData.hasInterface = hasInterface;
+        if((curDensity + tolerance) >= mDesignFieldThresholdValue)
+        {
+            curVoxelData.inDesignRegion = true;
+            curVoxelData.maxIsDesign = true;
+        }
+        else
+        {
+            curVoxelData.inDesignRegion = false;
+            curVoxelData.maxIsDesign = false;
+        }
+        curVoxelData.maxDensity = curDensity;
+        curVoxelData.maxDot = curDot;
+        curVoxelData.setByNode = true;
+        double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
+        for(int j=0; j<curVoxelData.nodes.size(); ++j)
+            mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
+    }
+}
+
+void SupportStructure::setVoxelNodeData(stk::mesh::Entity aNode,
+                                    int aXIndex, int aYIndex,
+                                    std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                    std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                    int aZLayer)
+{
+    double curDensity=0.0;
+    double curDot=0.0;
+    bool hasInterface = false;
+    VoxelData &curVoxelData = aVoxelData[aZLayer][aXIndex][aYIndex];
+
+    if(aXIndex == 32 && aYIndex == 29)
+    {
+        int ff=0;
+        ff++;
+    }
+
+    if(aNodeInterfaceAngles.count(aNode))
+    {
+        curDot = aNodeInterfaceAngles[aNode];
+        hasInterface = true;
+    }
+    else
+        hasInterface = false;
+
+    curDensity = mSTKMeshIn->getMaxNodalIsoFieldVariable(aNode.m_value);
+
+    // Just set the current voxel data.
+    curVoxelData.hasInterface = hasInterface;
+    curVoxelData.maxDensity = curDensity;
+    curVoxelData.maxDot = curDot;
+    curVoxelData.setByNode = true;
+    curVoxelData.nodes.push_back(aNode);
+}
+
+void SupportStructure::getValsForSettingVoxel3D(stk::mesh::Entity aNode,
+                                              int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                                              std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                              std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                              double &aDensity,
+                                              double &aDot,
+                                              bool &aHasInterface,
+                                              int aZLayer,
+                                              int aNumZLayers)
+{
+    if(aNode.m_value != 0)
+    {
+        if(aNodeInterfaceAngles.count(aNode))
+        {
+            aDot = aNodeInterfaceAngles[aNode];
+            aHasInterface = true;
+        }
+        else
+            aHasInterface = false;
+        aDensity = mSTKMeshIn->getMaxNodalIsoFieldVariable(aNode.m_value);
+    }
+    else
+    {
+        int imin=aXIndex-mNeighborSearchRadius;
+        if(imin<0)
+            imin=0;
+        int jmin=aYIndex-mNeighborSearchRadius;
+        if(jmin<0)
+            jmin=0;
+        int kmin=0;
+        if(aZLayer < mNeighborSearchRadius)
+            kmin = mNeighborSearchRadius-aZLayer;
+        int imax = aXIndex+mNeighborSearchRadius;
+        if(imax > (aNumGridX-1))
+            imax = aNumGridX-1;
+        int jmax = aYIndex+mNeighborSearchRadius;
+        if(jmax > (aNumGridY-1))
+            jmax = aNumGridY-1;
+        int kmax=2*mNeighborSearchRadius;
+        if(aZLayer + mNeighborSearchRadius > aNumZLayers - 1)
+            kmax = aNumZLayers - (aZLayer - 1);
+        double weightedAverageDensity = 0.0;
+        double weightedAverageDot = 0.0;
+        double sumDensityWeights = 0.0;
+        double sumDotWeights = 0.0;
+        int numFound=0;
+        aHasInterface = false;
+        for(int k=kmin; k<=kmax; k++)
+        {
+            for(int i=imin; i<=imax; i++)
+            {
+                for(int j=jmin; j<=jmax; j++)
+                {
+                    if(i!=aXIndex || j!=aYIndex || k!=mNeighborSearchRadius)
+                    {
+                        if(aVoxelData[k][i][j].setByNode) // was set by a node being there
+                        {
+                            numFound++;
+                            double distance = abs(i-aXIndex) + abs(j-aYIndex) + abs(k-mNeighborSearchRadius);
+                            double weight=1.0/distance;
+                            weightedAverageDensity += (aVoxelData[k][i][j].maxDensity * weight);
+                            if(aVoxelData[k][i][j].hasInterface || aVoxelData[k][i][j].maxIsDesign)
+                            {
+                                weightedAverageDot += (aVoxelData[k][i][j].maxDot * weight);
+                                sumDotWeights += weight;
+                                aHasInterface = true;
+                            }
+                            sumDensityWeights += weight;
+                        }
+                    }
+                }
+            }
+        }
+        if(numFound > .1)
+        {
+            aDensity = weightedAverageDensity/sumDensityWeights;
+            if(aHasInterface)
+                aDot = weightedAverageDot/sumDotWeights;
+        }
+        else
+            std::cout << "****** Didn't find any voxel neighbors for interpolating density values! *********" << std::endl;
+//        std::cout << "Number of neighbors found: " << numFound << std::endl;
+    }
+}
+
+void SupportStructure::setVoxelDataAndSupportStructure(stk::mesh::Entity aNode,
+                                                       int nodeX, int nodeY,
+                                                       std::vector<std::vector<VoxelData> > &aVoxelData,
+                                                       double &aDensity,
+                                                       double &aDot,
+                                                       bool &aHasInterface)
+{
+    double tolerance = 1e-12;
+
+    aVoxelData[nodeX][nodeY].hasInterface = aHasInterface;
+    if(aVoxelData[nodeX][nodeY].maxDensity < 0.0)
+    {
+        // nothing set yet
+        aVoxelData[nodeX][nodeY].maxDensity = aDensity;
+        if((aDensity + tolerance) >= mDesignFieldThresholdValue)
+        {
+            aVoxelData[nodeX][nodeY].inDesignRegion = true;
+            aVoxelData[nodeX][nodeY].maxIsDesign = true;
+            aVoxelData[nodeX][nodeY].maxDot = aDot;
+        }
+        if(aNode.m_value != 0)
+        {
+            double supportStructureValue = calculateSupportStructureValue(aVoxelData[nodeX][nodeY].maxDensity,
+                                                                          aVoxelData[nodeX][nodeY].maxDensity,
+                                                                          aDot, false);
+            mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+        }
+    }
+    else
+    {
+        if(aVoxelData[nodeX][nodeY].inDesignRegion)
+        {
+            if((aDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                aVoxelData[nodeX][nodeY].maxDensity = aDensity;
+                aVoxelData[nodeX][nodeY].maxDot = aDot;
+                if(aNode.m_value != 0)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(aDensity,
+                                                                                  aDensity,
+                                                                                  aDot, false);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                }
+            }
+            else
+            {
+                aVoxelData[nodeX][nodeY].inDesignRegion = false;
+                if(aNode.m_value != 0)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(aDensity,
+                                                                                  aVoxelData[nodeX][nodeY].maxDensity,
+                                                                                  aVoxelData[nodeX][nodeY].maxDot, true);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                }
+            }
+        }
+        else
+        {
+            if((aDensity + tolerance) >= mDesignFieldThresholdValue)
+            {
+                aVoxelData[nodeX][nodeY].inDesignRegion = true;
+                aVoxelData[nodeX][nodeY].maxIsDesign = true;
+                aVoxelData[nodeX][nodeY].maxDensity = aDensity;
+                aVoxelData[nodeX][nodeY].maxDot = aDot;
+                if(aNode.m_value != 0)
+                {
+                    double supportStructureValue = calculateSupportStructureValue(aDensity,
+                                                                                  aDensity,
+                                                                                  aDot, false);
+                    mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                }
+            }
+            else
+            {
+                if(aVoxelData[nodeX][nodeY].maxIsDesign)
+                {
+
+                    if(aNode.m_value != 0)
+                    {
+                        double supportStructureValue = calculateSupportStructureValue(aDensity,
+                                                                                      aVoxelData[nodeX][nodeY].maxDensity,
+                                                                                      aVoxelData[nodeX][nodeY].maxDot, true);
+                        mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                    }
+                }
+                else
+                {
+                    if(aDensity > aVoxelData[nodeX][nodeY].maxDensity)
+                        aVoxelData[nodeX][nodeY].maxDensity = aDensity;
+                    if(aNode.m_value != 0)
+                    {
+                        double supportStructureValue = calculateSupportStructureValue(aDensity,
+                                                                                      aVoxelData[nodeX][nodeY].maxDensity,
+                                                                                      aVoxelData[nodeX][nodeY].maxDot, false);
+                        mSTKMeshIn->setSupportStructureFieldValue(aNode.m_value, supportStructureValue);
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool SupportStructure::runPrivateVoxelBased()
+{
+    // Get the build direction.
+    std::string workingString = mBuildPlateNormalString;
+    size_t spacePos = workingString.find(' ');
+    int cntr = 0;
+    while(spacePos != std::string::npos)
+    {
+        std::string cur_string = workingString.substr(0,spacePos);
+        workingString = workingString.substr(spacePos+1);
+        mBuildPlateNormal[cntr] = std::atof(cur_string.c_str());
+        cntr++;
+        spacePos = workingString.find(' ');
+    }
+    mBuildPlateNormal[cntr] = std::atof(workingString.c_str());
+    mBuildPlateNormal.normalize();
+
+    // Define a coordinate system with z axis being the
+    // build plate normal and x and y defined arbitrarily.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating coordinate system based on build plate normal. " << std::endl;
+    Vector3D xAxis, yAxis, zAxis, origin;
+    if(!getBuildPlateCoordinateSystem(xAxis, yAxis, zAxis, origin))
+    {
+        // error message
+        return false;
+    }
+
+    // Sort nodes in z direction.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Sorting nodes by distance in build plate direction. " << std::endl;
+    std::vector<std::pair<stk::mesh::Entity, double> > sortedNodeDistancePairs;
+    double zMin, zMax;
+    getNodesSortedInZDirection(origin, zAxis, sortedNodeDistancePairs, zMin, zMax);
+
+    // Get the average edge size
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating average edge length. " << std::endl;
+    double averageEdgeLength;
+    getAverageEdgeLength(averageEdgeLength);
+    averageEdgeLength *= mCellSizeMultiplier;
+
+    // Setup up voxel layer based on the average mesh size.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Set up voxel dimensions for traversal. " << std::endl;
+    int numGridX, numGridY;
+    double gridSizeX, gridSizeY;
+    Vector3D minCoords, maxCoords;
+    getGridDimensions(averageEdgeLength, origin, xAxis, yAxis, numGridX, numGridY, minCoords, maxCoords,
+                      gridSizeX, gridSizeY);
+    /*
+    std::vector<std::vector<VoxelData> > voxelData(numGridX, std::vector<VoxelData>(numGridY));
+    for(int i=0; i<numGridX; ++i)
+    {
+        for(int j=0; j<numGridY; ++j)
+        {
+            voxelData[i][j].inDesignRegion = false;
+            voxelData[i][j].maxDensity = -1.0;
+            voxelData[i][j].maxDot = 0.0;
+            voxelData[i][j].maxIsDesign = false;
+            voxelData[i][j].setByNode = false;
+        }
+    }
+    */
+
+    // For nodes that are in elements that contain the design/void interface
+    // going through them calculate an interface angle to be used to
+    // compare against the critical overhang angle.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating interface angles for all nodes. " << std::endl;
+    std::map<stk::mesh::Entity, double> nodeInterfaceAngles;
+    getNodeInterfaceData(nodeInterfaceAngles);
+
+    // Bump the z extents a bit to avoid tolerance issues.
+    zMax += 1e-4;
+    zMin -= 1e-4;
+    double tolerance = 1e-12;
+    int numZLayers = (int)(((zMax-zMin)/averageEdgeLength) + 1.0);
+    double zStep = (zMax - zMin) / (double)numZLayers;
+    double curZ = zMax - zStep;
+    std::cout << "Number grid x: " << numGridX << std::endl;
+    std::cout << "Number grid y: " << numGridY << std::endl;
+    std::cout << "Number grid z: " << numZLayers << std::endl;
+
+    // New approach with 3D vector
+    // 3D vector: 1st index is the z layer, 2nd is x, and 3rd is y
+    int voxelNumLayers = 2*mNeighborSearchRadius + 1;
+    std::vector<std::vector<std::vector<VoxelData> > > voxelData3D(voxelNumLayers,
+                         std::vector<std::vector<VoxelData> >(numGridX,
+                         std::vector<VoxelData>(numGridY)));
+    for(int i=0; i<voxelNumLayers; ++i)
+    {
+        for(int j=0; j<numGridX; ++j)
+        {
+            for(int k=0; k<numGridY; ++k)
+            {
+                voxelData3D[i][j][k].dataExists = false;
+            }
+        }
+    }
+
+    int voxelMin = -mNeighborSearchRadius;
+    int voxelMax = mNeighborSearchRadius;
+    int voxelMemoryOffset = mNeighborSearchRadius;
+    for(int zLayer=0; zLayer < numZLayers; ++zLayer)
+    {
+        std::cout << "Processing Layer: " << zLayer << std::endl;
+        if(zLayer == 0)
+        {
+            curZ = zMax - zStep;
+            for(int g=0; g <= voxelMax; ++g)
+            {
+                for(int i=0; i<numGridX; ++i)
+                    for(int j=0; j<numGridY; ++j)
+                        voxelData3D[voxelMemoryOffset+g][i][j].setByNode = false;
+
+                bool done = false;
+                while(!done)
+                {
+                    if(sortedNodeDistancePairs.size() > 0)
+                    {
+                        stk::mesh::Entity curNode = sortedNodeDistancePairs.back().first;
+                        double nodeZValue = sortedNodeDistancePairs.back().second;
+                        if(nodeZValue > curZ)
+                        {
+                            sortedNodeDistancePairs.pop_back();
+                            int nodeX, nodeY;
+                            getNodeXY(curNode, origin, xAxis, yAxis, minCoords, gridSizeX, gridSizeY,
+                                      numGridX, numGridY, nodeX, nodeY);
+                            setVoxelData(curNode, nodeX, nodeY, numGridX, numGridY, voxelData3D, nodeInterfaceAngles, 0, 0, voxelMemoryOffset+g);
+                            /*
+                            double curNodeDensity, curNodeDot=0.0;
+                            bool hasInterface;
+                            getValsForSettingVoxel(curNode, nodeX, nodeY, numGridX, numGridY, voxelData3D[voxelMemoryOffset+g],
+                                                   nodeInterfaceAngles,
+                                                   curNodeDensity, curNodeDot, hasInterface);
+                            setVoxelDataAndSupportStructure(curNode, nodeX, nodeY, voxelData3D[voxelMemoryOffset+g],
+                                                            curNodeDensity, curNodeDot, hasInterface);
+                            voxelData3D[voxelMemoryOffset+g][nodeX][nodeY].setByNode = true;
+                            voxelData3D[voxelMemoryOffset+g][nodeX][nodeY].dataExists = true;
+                            */
+                        }
+                        else
+                            done = true;
+                    }
+                    else
+                        done = true;
+                }
+                curZ -= zStep;
+            }
+        }
+        else
+        {
+            int curZLayer = zLayer + mNeighborSearchRadius;
+            if(curZLayer < numZLayers)
+            {
+                curZ = zMax - (curZLayer+1)*zStep;
+
+                // Shift voxel memory by 1
+                for(int h=0; h<(voxelNumLayers-1); ++h)
+                    voxelData3D[h] = voxelData3D[h+1];
+
+                int voxelLayer = voxelNumLayers-1;
+
+                for(int i=0; i<numGridX; ++i)
+                    for(int j=0; j<numGridY; ++j)
+                        voxelData3D[voxelLayer][i][j].setByNode = false;
+
+                bool done = false;
+                while(!done)
+                {
+                    if(sortedNodeDistancePairs.size() > 0)
+                    {
+                        stk::mesh::Entity curNode = sortedNodeDistancePairs.back().first;
+                        double nodeZValue = sortedNodeDistancePairs.back().second;
+                        if(nodeZValue > curZ)
+                        {
+                            Vector3D p0;
+                            mSTKMeshIn->nodeCoordinates(curNode, p0.data());
+                            if(fabs(p0[0]+.135930) < .0001 && fabs(p0[1]+.545187) < .0001 && fabs(p0[2]+.013294) < .0001)
+                            {
+                                int tr=0;
+                                tr++;
+                            }
+                            sortedNodeDistancePairs.pop_back();
+                            int nodeX, nodeY;
+                            getNodeXY(curNode, origin, xAxis, yAxis, minCoords, gridSizeX, gridSizeY,
+                                      numGridX, numGridY, nodeX, nodeY);
+                            if(nodeX == 32 && nodeY == 29)
+                            {
+                                int gh=0;
+                                gh++;
+                            }
+                            setVoxelData(curNode, nodeX, nodeY, numGridX, numGridY, voxelData3D, nodeInterfaceAngles, 0, 0, voxelLayer);
+                            /*
+                            double curNodeDensity, curNodeDot=0.0;
+                            bool hasInterface;
+                            getValsForSettingVoxel(curNode, nodeX, nodeY, numGridX, numGridY, voxelData3D[voxelLayer], nodeInterfaceAngles,
+                                                   curNodeDensity, curNodeDot, hasInterface);
+                            setVoxelDataAndSupportStructure(curNode, nodeX, nodeY, voxelData3D[voxelLayer],
+                                                            curNodeDensity, curNodeDot, hasInterface);
+                            voxelData3D[voxelLayer][nodeX][nodeY].setByNode = true;
+                            voxelData3D[voxelLayer][nodeX][nodeY].dataExists = true;
+                            */
+                        }
+                        else
+                            done = true;
+                    }
+                    else
+                        done = true;
+                }
+            }
+        }
+        int numNotSet=0;
+        int voxelLayer = mNeighborSearchRadius;
+        for(int i=0; i<numGridX; ++i)
+        {
+            for(int j=0; j<numGridY; ++j)
+            {
+                if(voxelData3D[voxelLayer][i][j].setByNode == false)
+                {
+                    if(i == 32 && j == 29)
+                    {
+                        int gh=0;
+                        gh++;
+                    }
+                    stk::mesh::Entity dummyNode;
+                    dummyNode.m_value = 0;
+                    setVoxelData(dummyNode, i, j, numGridX, numGridY, voxelData3D, nodeInterfaceAngles, zLayer, numZLayers, -1);
+                    /*
+                    double curDensity;
+                    double curDot = 0.0;
+                    bool hasInterface;
+                    getValsForSettingVoxel3D(dummyNode, i, j, numGridX, numGridY, voxelData3D, nodeInterfaceAngles,
+                                           curDensity, curDot, hasInterface, zLayer, numZLayers);
+                    setVoxelDataAndSupportStructure(dummyNode, i, j, voxelData3D[voxelLayer],
+                                                    curDensity, curDot, hasInterface);
+                                                    */
+                    numNotSet++;
+                }
+            }
+        }
+        std::cout << "Num voxels not set: " << numNotSet << std::endl;
+    }
+
+#if 0
+    bool firstLayer = true;
+    while(curZ > zMin)
+    {
+        for(int i=0; i<numGridX; ++i)
+            for(int j=0; j<numGridY; ++j)
+                voxelData[i][j].setByNode = false;
+
+        bool done = false;
+        while(!done)
+        {
+            if(sortedNodeDistancePairs.size() > 0)
+            {
+                stk::mesh::Entity curNode = sortedNodeDistancePairs.back().first;
+                double nodeZValue = sortedNodeDistancePairs.back().second;
+                if(nodeZValue > curZ)
+                {
+                    sortedNodeDistancePairs.pop_back();
+                    int nodeX, nodeY;
+                    getNodeXY(curNode, origin, xAxis, yAxis, minCoords, gridSizeX, gridSizeY,
+                              numGridX, numGridY, nodeX, nodeY);
+                    double curNodeDensity, curNodeDot=0.0;
+                    bool hasInterface;
+                    getValsForSettingVoxel(curNode, nodeX, nodeY, numGridX, numGridY, voxelData, nodeInterfaceAngles,
+                                           curNodeDensity, curNodeDot, hasInterface);
+                    setVoxelDataAndSupportStructure(curNode, nodeX, nodeY, voxelData,
+                                                    curNodeDensity, curNodeDot, hasInterface);
+                    voxelData[nodeX][nodeY].setByNode = true;
+                }
+                else
+                    done = true;
+            }
+            else
+                done = true;
+        }
+        for(int i=0; i<numGridX; ++i)
+        {
+            for(int j=0; j<numGridY; ++j)
+            {
+                if(voxelData[i][j].setByNode == false)
+                {
+                    stk::mesh::Entity dummyNode;
+                    dummyNode.m_value = 0;
+                    double curDensity;
+                    double curDot = 0.0;
+                    bool hasInterface;
+                    getValsForSettingVoxel(dummyNode, i, j, numGridX, numGridY, voxelData, nodeInterfaceAngles,
+                                           curDensity, curDot, hasInterface);
+                    setVoxelDataAndSupportStructure(dummyNode, i, j, voxelData,
+                                                    curDensity, curDot, hasInterface);
+                }
+            }
+        }
+        curZ -= zStep;
+        firstLayer = false;
+        // Communicate boundary node info if running in parallel
+    }
+#endif
+    mSTKMeshIn->write_exodus_mesh(mMeshOut, mConcatenateResults);
+    return true;
+}
+
+bool SupportStructure::runPrivateVoxelBasedInefficientMemory()
+{
+    // Get the build direction.
+    std::string workingString = mBuildPlateNormalString;
+    size_t spacePos = workingString.find(' ');
+    int cntr = 0;
+    while(spacePos != std::string::npos)
+    {
+        std::string cur_string = workingString.substr(0,spacePos);
+        workingString = workingString.substr(spacePos+1);
+        mBuildPlateNormal[cntr] = std::atof(cur_string.c_str());
+        cntr++;
+        spacePos = workingString.find(' ');
+    }
+    mBuildPlateNormal[cntr] = std::atof(workingString.c_str());
+    mBuildPlateNormal.normalize();
+
+    // Define a coordinate system with z axis being the
+    // build plate normal and x and y defined arbitrarily.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating coordinate system based on build plate normal. " << std::endl;
+    Vector3D xAxis, yAxis, zAxis, origin;
+    if(!getBuildPlateCoordinateSystem(xAxis, yAxis, zAxis, origin))
+    {
+        // error message
+        return false;
+    }
+
+    // Sort nodes in z direction.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Sorting nodes by distance in build plate direction. " << std::endl;
+    std::vector<std::pair<stk::mesh::Entity, double> > sortedNodeDistancePairs;
+    double zMin, zMax;
+    getNodesSortedInZDirection(origin, zAxis, sortedNodeDistancePairs, zMin, zMax);
+
+    // Get the average edge size
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating average edge length. " << std::endl;
+    double averageEdgeLength;
+    getAverageEdgeLength(averageEdgeLength);
+    averageEdgeLength *= mCellSizeMultiplier;
+
+    // Setup up voxel layer based on the average mesh size.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Set up voxel dimensions for traversal. " << std::endl;
+    int numGridX, numGridY;
+    double gridSizeX, gridSizeY;
+    Vector3D minCoords, maxCoords;
+    getGridDimensions(averageEdgeLength, origin, xAxis, yAxis, numGridX, numGridY, minCoords, maxCoords,
+                      gridSizeX, gridSizeY);
+
+    // For nodes that are in elements that contain the design/void interface
+    // going through them calculate an interface angle to be used to
+    // compare against the critical overhang angle.
+    if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
+        std::cout << "Calculating interface angles for all nodes. " << std::endl;
+    std::map<stk::mesh::Entity, double> nodeInterfaceAngles;
+    getNodeInterfaceData(nodeInterfaceAngles);
+
+    // Bump the z extents a bit to avoid tolerance issues.
+    zMax += 1e-4;
+    zMin -= 1e-4;
+    double tolerance = 1e-12;
+    int numZLayers = (int)(((zMax-zMin)/averageEdgeLength) + 1.0);
+    double zStep = (zMax - zMin) / (double)numZLayers;
+    double curZ = zMax - zStep;
+    std::cout << "Number grid x: " << numGridX << std::endl;
+    std::cout << "Number grid y: " << numGridY << std::endl;
+    std::cout << "Number grid z: " << numZLayers << std::endl;
+
+    // New approach with 3D vector
+    // 3D vector: 1st index is the z layer, 2nd is x, and 3rd is y
+    int voxelNumLayers = 2*mNeighborSearchRadius + 1;
+    std::vector<std::vector<std::vector<VoxelData> > > voxelData3D(numZLayers,
+                         std::vector<std::vector<VoxelData> >(numGridX,
+                         std::vector<VoxelData>(numGridY)));
+
+    for(int i=0; i<numZLayers; ++i)
+    {
+        for(int j=0; j<numGridX; ++j)
+        {
+            for(int k=0; k<numGridY; ++k)
+            {
+                voxelData3D[i][j][k].dataExists = false;
+            }
+        }
+    }
+
+    // First get all the node data and store it in the voxel data
+    std::vector<std::pair<stk::mesh::Entity, double> >::reverse_iterator riter = sortedNodeDistancePairs.rbegin();
+
+    for(int zLayer=0; zLayer < numZLayers; ++zLayer)
+    {
+        curZ = zMax - (zLayer+1)*zStep;
+        bool done = false;
+        while(!done)
+        {
+            if(riter != sortedNodeDistancePairs.rend())
+            {
+                stk::mesh::Entity curNode = riter->first;
+                double nodeZValue = riter->second;
+                if(nodeZValue > curZ)
+                {
+                    riter++;
+                    int nodeX, nodeY;
+                    getNodeXY(curNode, origin, xAxis, yAxis, minCoords, gridSizeX, gridSizeY,
+                              numGridX, numGridY, nodeX, nodeY);
+                    setVoxelNodeData(curNode, nodeX, nodeY, voxelData3D, nodeInterfaceAngles, zLayer);
+                }
+                else
+                    done = true;
+            }
+            else
+                done = true;
+        }
+    }
+
+    for(int zLayer=0; zLayer < numZLayers; ++zLayer)
+    {
+        std::cout << "Layer: " << zLayer << std::endl;
+        int numNotSetByNodes=0;
+        for(int i=0; i<numGridX; ++i)
+        {
+            for(int j=0; j<numGridY; ++j)
+            {
+                if(i==16 && j==13)
+                {
+                    int hh=0;
+                    ++hh;
+                }
+                if(voxelData3D[zLayer][i][j].setByNode == true)
+                {
+                    setVoxelDataByNode(i, j, voxelData3D, zLayer);
+                }
+                else
+                {
+                    setVoxelDataByNeighbor(i, j, numGridX, numGridY, voxelData3D, zLayer, numZLayers);
+                    numNotSetByNodes++;
+                }
+            }
+        }
+        std::cout << "Num voxels without nodes: " << numNotSetByNodes << std::endl;
+    }
+
+    mSTKMeshIn->write_exodus_mesh(mMeshOut, mConcatenateResults);
     return true;
 }
 
@@ -1673,6 +3331,7 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
         std::cout << "Calculating an average edge length. " << std::endl;
     double averageEdgeLength = 0.0;
     double numOverall = 0.0;
+    bool tetsExist = false;
     for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
             bucketIter != elementBuckets.end(); ++bucketIter )
     {
@@ -1707,6 +3366,7 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
                 curAverage += p0.distance(p2);
                 curAverage += p2.distance(p3);
                 curAverage /= 3.0;
+                tetsExist = true;
             }
             averageEdgeLength += curAverage;
             numOverall += 1.0;
@@ -1759,6 +3419,11 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
         std::cout << "Calculating support structure value for every node. " << std::endl;
     double coarseSearchRadiusSquared = 1.5*1.5*averageEdgeLength*averageEdgeLength;
     double fineSearchRadiusSquared = .5*.5*averageEdgeLength*averageEdgeLength;
+    if(tetsExist)
+    {
+        coarseSearchRadiusSquared = 5*5*averageEdgeLength*averageEdgeLength;
+        fineSearchRadiusSquared = 0.5*0.5*averageEdgeLength*averageEdgeLength;
+    }
     std::set<stk::mesh::Entity> processedNodes;
     for(int e=nodeDotPairs.size()-1; e>-1; --e)
     {
@@ -1833,9 +3498,9 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
                                     ++p;
 
                                 }
-                                if(fabs(curNeighborCoords[0]) < 1e-6 &&
-                                        fabs(curNeighborCoords[1]+.6) < 1e-6 &&
-                                        fabs(curNeighborCoords[2]) < 1e-6)
+                                if(fabs(curNeighborCoords[0]+0.161868) < 1e-6 &&
+                                        fabs(curNeighborCoords[1]+0.508902) < 1e-6 &&
+                                        fabs(curNeighborCoords[2]+0.110684) < 1e-6)
 
                                 {
                                     int p=0;
@@ -2739,12 +4404,14 @@ bool SupportStructure::readCommandLine( int argc, char *argv[])
     clp.setOption("design_field_name",  &mDesignFieldName, "field defining level set data.", false );
     clp.setOption("design_field_value",  &mDesignFieldThresholdValue, "specify the design variable threshold value.", false );
     clp.setOption("overhang_angle",  &mOverhangAngle, "specify the allowable overhang angle. (default=45)", false );
+    clp.setOption("cell_size_multiplier",  &mCellSizeMultiplier, "specify the multiplier to be used on the average mesh edge length to get a cell/voxel size. (default=1.0)", false );
     clp.setOption("concatenate_results",  &mConcatenateResults, "specify whether to concatenate resulting mesh files.", false );
     clp.setOption("read_spread_file",  &mReadSpreadFile, "specify whether input is already decomposed.", false );
     clp.setOption("time_step",  &mTimeStep, "specify the time step to be read from the file.", false );
     clp.setOption("output_fields",  &mOutputFields, "specify the fields (commma separated, no spaces) to output in the output mesh.", false );
     clp.setOption("build_plate_normal",  &mBuildPlateNormalString, "specify the normal of the build plate (values separated by spaces)", false );
     clp.setOption("algorithm",  &mAlgorithm, "specify the algorithm to use (0=nodal based (default), 1=element based, 2=project triangles)", false );
+    clp.setOption("neighbor_search_radius",  &mNeighborSearchRadius, "specify the number of layers to expand search for voxel neighbors (default=2)", false );
 
     Teuchos::CommandLineProcessor::EParseCommandLineReturn parseReturn =
             Teuchos::CommandLineProcessor::PARSE_SUCCESSFUL;

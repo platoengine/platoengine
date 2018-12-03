@@ -124,6 +124,18 @@ struct proc_node_map
     std::vector<uint64_t> nodes;
 };
 
+struct VoxelData
+{
+    double maxDensity;
+    double maxDot;
+    bool inDesignRegion;
+    bool maxIsDesign;
+    bool setByNode;
+    bool hasInterface;
+    bool dataExists;
+    std::vector<stk::mesh::Entity> nodes;
+};
+
 class SupportStructure
 {
 public:
@@ -133,6 +145,66 @@ public:
     bool run();
 
 private:
+
+    void setVoxelDataByNeighbor(int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                                std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                int aZLayer,
+                                int aNumZLayers);
+    void setVoxelDataByNode(int aXIndex, int aYIndex,
+                            std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                            int aZLayer);
+    void setVoxelNodeData(stk::mesh::Entity aNode,
+                          int aXIndex, int aYIndex,
+                          std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                          std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                          int aZLayer);
+    void setVoxelData(stk::mesh::Entity aNode,
+                      int aXIndex, int aYIndex, int aNumGridX, int aNumGridY,
+                      std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                      std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                      int aZLayer,
+                      int aNumZLayers,
+                      int aLayerIndex);
+
+    void setVoxelDataAndSupportStructure(stk::mesh::Entity aNode,
+                                         int nodeX, int nodeY,
+                                         std::vector<std::vector<VoxelData> > &aVoxelData,
+                                         double &aDensity,
+                                         double &aDot,
+                                         bool &aHasInterface);
+    void getValsForSettingVoxel(stk::mesh::Entity aNode,
+                                int i, int j, int numGridX, int numGridY,
+                                std::vector<std::vector<VoxelData> > &aVoxelData,
+                                std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                double &aDensity,
+                                double &aDot,
+                                bool &aHasInterface);
+    void getValsForSettingVoxel3D(stk::mesh::Entity aNode,
+                                int i, int j, int numGridX, int numGridY,
+                                std::vector<std::vector<std::vector<VoxelData> > > &aVoxelData,
+                                std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles,
+                                double &aDensity,
+                                double &aDot,
+                                bool &aHasInterface,
+                                int aZLayer,
+                                int aNumZLayers);
+    void getNodeXY(stk::mesh::Entity &aNode, Vector3D &aOrigin, Vector3D &aXAxis,
+                   Vector3D &aYAxis, Vector3D &aMinCoords, double &aGridSizeX,
+                   double &aGridSizeY, int &aNumGridX, int &aNumGridY, int &aNodeX,
+                   int &aNodeY);
+    void getNodeInterfaceData(std::map<stk::mesh::Entity, double> &aNodeInterfaceAngles);
+    void getGridDimensions(double &aAverageEdgeLength, Vector3D &aOrigin,
+                           Vector3D &aXAxis, Vector3D &aYAxis, int &aNumGridX, int &aNumGridY,
+                           Vector3D &aMinCoords, Vector3D &aMaxCoords,
+                           double &aGridSizeX, double &aGridSizeY);
+    void getAverageEdgeLength(double &averageEdgeLength);
+    void getNodesSortedInZDirection(Vector3D &aOrigin,
+                                    Vector3D &aAxis,
+                                    std::vector<std::pair<stk::mesh::Entity, double> > &aSortedNodeDistancePairs,
+                                    double &zMin, double &zMax);
+    bool getBuildPlateCoordinateSystem(Vector3D &aX, Vector3D &aY, Vector3D &aZ, Vector3D &origin);
+    bool runPrivateVoxelBased();
+    bool runPrivateVoxelBasedInefficientMemory();
     bool runPrivateNodeBased();
     bool runPrivateElementBased();
     bool runPrivateProjectTriangle();
@@ -192,11 +264,13 @@ private:
     std::string mBuildPlateNormalString;
     double mDesignFieldThresholdValue;
     double mOverhangAngle;
+    double mCellSizeMultiplier;
     Vector3D mBuildPlateNormal;
     int mReadSpreadFile;
     int mConcatenateResults;
     int mTimeStep;
     int mAlgorithm;
+    int mNeighborSearchRadius;
     MeshWrapper *mSTKMeshIn;
     MeshWrapper *mSTKMeshOut;
 };
