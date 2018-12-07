@@ -112,7 +112,7 @@ public:
         // RESIDUAL = CONSTRAINT_VALUE - CONSTRAINT_TARGET. THE USER IS JUST PROVIDING THE
         // CONSTRAINT_VALUE.  THE OPTIMALITY CRITERIA OPTIMIZER IS EXPECTING THE CONSTRAINT
         // RESIDUAL AND THUS WE NEED TO DO THE FOLLOWING CALCULATION:
-        const ScalarType tConstraintTarget = mEngineInputData.getConstraintTargetValue(tMY_CONSTRAINT_INDEX);
+        const ScalarType tConstraintTarget = mEngineInputData.getConstraintNormalizedTargetValue(tMY_CONSTRAINT_INDEX);
         const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
         const ScalarType tOutput = (tConstraintValue / tConstraintReferenceValue) - tConstraintTarget;
         Plato::SerialVectorROL<ScalarType> & tConstraints = dynamic_cast<Plato::SerialVectorROL<ScalarType>&>(aConstraints);

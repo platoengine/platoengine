@@ -113,7 +113,7 @@ public:
 
         // ********* Set view to objective function value ********* //
         ScalarType tObjectiveValue = 0;
-        std::string tObjectiveValueName = mEngineInputData.getObjectiveValueName();
+        std::string tObjectiveValueName = mEngineInputData.getObjectiveValueOutputName();
         mParameterList->set(tObjectiveValueName, &tObjectiveValue);
 
         // ********* Compute objective function value ********* //
@@ -140,7 +140,7 @@ public:
         mParameterList->set(tControlName, mControl.data());
 
         // ********* Set view to gradient vector ********* //
-        std::string tObjectiveGradientName = mEngineInputData.getObjectiveGradientName();
+        std::string tObjectiveGradientName = mEngineInputData.getObjectiveGradientOutputName();
         std::fill(mGradient.begin(), mGradient.end(), static_cast<ScalarType>(0));
         mParameterList->set(tObjectiveGradientName, mGradient.data());
 
