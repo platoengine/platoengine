@@ -175,6 +175,36 @@ public:
     /******************************************************************************/
     {
         ScalarType tOutput = 0;
+#ifdef BUILD_IN_SIERRA // Handle different versions of Teuchos
+        ROL::Elementwise::EReductionType tReductionType = aReductionOperations.reductionType();
+        switch(tReductionType)
+        {
+            case ROL::Elementwise::EReductionType::REDUCE_SUM:
+            {
+                tOutput = this->sum();
+                break;
+            }
+            case ROL::Elementwise::EReductionType::REDUCE_MAX:
+            {
+                tOutput = this->max();
+                break;
+            }
+            case ROL::Elementwise::EReductionType::REDUCE_MIN:
+            {
+                tOutput = this->min();
+                break;
+            }
+            default:
+            case ROL::Elementwise::EReductionType::REDUCE_AND:
+            {
+                std::ostringstream tErrorMsg;
+                tErrorMsg << "****** ERROR IN " << __FILE__ << ", FUNCTION: " << __FUNCTION__ << ", LINE: " << __LINE__
+                          << ", LOGICAL REDUCE AND IS NOT IMPLEMENTED ******\n" << std::flush;
+                std::runtime_error(tErrorMsg.str().c_str());
+                break;
+            }
+        }
+#else
         Teuchos::EReductionType tReductionType = aReductionOperations.reductionType();
         switch(tReductionType)
         {
@@ -203,6 +233,7 @@ public:
                 break;
             }
         }
+#endif
         return (tOutput);
     }
 
