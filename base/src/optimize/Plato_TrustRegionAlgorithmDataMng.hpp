@@ -617,7 +617,7 @@ public:
     void computeControlStagnationMeasure()
     {
         OrdinalType tNumVectors = mCurrentControl->getNumVectors();
-        std::vector<ScalarType> storage(tNumVectors, std::numeric_limits<ScalarType>::min());
+        std::vector<ScalarType> tStorage(tNumVectors, std::numeric_limits<ScalarType>::min());
         for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyCurrentControl = mCurrentControl->operator[](tIndex);
@@ -625,9 +625,9 @@ public:
             const Plato::Vector<ScalarType, OrdinalType> & tMyPreviousControl = mPreviousControl->operator[](tIndex);
             mControlWorkVector->update(-1., tMyPreviousControl, 1.);
             mControlWorkVector->modulus();
-            storage[tIndex] = mControlReductionOperations->max(*mControlWorkVector);
+            tStorage[tIndex] = mControlReductionOperations->max(*mControlWorkVector);
         }
-        mControlStagnationMeasure = *std::max_element(storage.begin(), storage.end());
+        mControlStagnationMeasure = *std::max_element(tStorage.begin(), tStorage.end());
     }
     ScalarType getControlStagnationMeasure() const
     {
