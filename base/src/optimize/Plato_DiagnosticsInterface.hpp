@@ -215,7 +215,7 @@ private:
 
             // ********* Print Output Message ********* //
             const Plato::CommWrapper& tMyCommWrapper = aDataFactory.getCommWrapper();
-            assert(tMyCommWrapper.myProcID() == 0 >= static_cast<int>(0));
+            assert(tMyCommWrapper.myProcID() >= static_cast<int>(0));
             if(tMyCommWrapper.myProcID() == static_cast<int>(0))
             {
                 std::cout << tOutputMsg.str().c_str() << std::flush;
@@ -253,7 +253,7 @@ private:
 
         // ********* Print Output Message ********* //
         const Plato::CommWrapper& tMyCommWrapper = aDataFactory.getCommWrapper();
-        assert(tMyCommWrapper.myProcID() == 0 >= static_cast<int>(0));
+        assert(tMyCommWrapper.myProcID() >= static_cast<int>(0));
         if(tMyCommWrapper.myProcID() == static_cast<int>(0))
         {
             std::cout << tOutputMsg.str().c_str() << std::flush;
