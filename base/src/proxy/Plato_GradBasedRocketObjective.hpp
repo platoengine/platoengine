@@ -302,7 +302,6 @@ private:
         std::map<std::string, ScalarType> tSimParam;
         tSimParam.insert(std::pair<std::string, ScalarType>("RefBurnRate", tRefBurnRate));
         mRocketModel.updateSimulation(tSimParam);
-
     }
 
     /******************************************************************************//**

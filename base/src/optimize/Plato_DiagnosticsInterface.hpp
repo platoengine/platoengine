@@ -58,13 +58,14 @@
 #include "Plato_Parser.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_Diagnostics.hpp"
+#include "Plato_CommWrapper.hpp"
 #include "Plato_AlgebraFactory.hpp"
 #include "Plato_EngineObjective.hpp"
 #include "Plato_EngineConstraint.hpp"
 #include "Plato_OptimizerInterface.hpp"
 #include "Plato_StandardMultiVector.hpp"
-#include "Plato_OptimizerEngineStageData.hpp"
 #include "Plato_OptimizerUtilities.hpp"
+#include "Plato_OptimizerEngineStageData.hpp"
 
 namespace Plato
 {
@@ -108,9 +109,6 @@ public:
         // ********* ALLOCATE LINEAR ALGEBRA FACTORY ********* //
         Plato::AlgebraFactory<ScalarType, OrdinalType> tAlgebraFactory;
 
-        // ********* ALLOCATE DIAGNOSTICS TOOL ********* //
-        Plato::Diagnostics<ScalarType, OrdinalType> tDiagnostics;
-
         // ********* ALLOCATE DERIVATIVE CHECKER BASELINE DATA STRUCTURES *********
         Plato::DataFactory<ScalarType, OrdinalType> tDataFactory;
         this->allocateBaselineDataStructures(tAlgebraFactory, tDataFactory);
@@ -126,6 +124,8 @@ public:
             this->setIntialGuess(tAlgebraFactory, *tInitialGuess);
         }
 
+        // ********* ALLOCATE DIAGNOSTICS TOOL ********* //
+        Plato::Diagnostics<ScalarType, OrdinalType> tDiagnostics;
         int tFinalSuperscript = mInputData.getDerivativeCheckerFinalSuperscript();
         tDiagnostics.setFinalSuperscript(tFinalSuperscript);
         int tInitialSuperscript = mInputData.getDerivativeCheckerInitialSuperscript();
@@ -214,10 +214,9 @@ private:
             }
 
             // ********* Print Output Message ********* //
-            int tMyRank = -1;
-            MPI_Comm_rank(mComm, &tMyRank);
-            assert(tMyRank >= static_cast<int>(0));
-            if(tMyRank == static_cast<int>(0))
+            const Plato::CommWrapper& tMyCommWrapper = aDataFactory.getCommWrapper();
+            assert(tMyCommWrapper.myProcID() == 0 >= static_cast<int>(0));
+            if(tMyCommWrapper.myProcID() == static_cast<int>(0))
             {
                 std::cout << tOutputMsg.str().c_str() << std::flush;
             }
@@ -253,10 +252,9 @@ private:
         }
 
         // ********* Print Output Message ********* //
-        int tMyRank = -1;
-        MPI_Comm_rank(mComm, &tMyRank);
-        assert(tMyRank >= static_cast<int>(0));
-        if(tMyRank == static_cast<int>(0))
+        const Plato::CommWrapper& tMyCommWrapper = aDataFactory.getCommWrapper();
+        assert(tMyCommWrapper.myProcID() == 0 >= static_cast<int>(0));
+        if(tMyCommWrapper.myProcID() == static_cast<int>(0))
         {
             std::cout << tOutputMsg.str().c_str() << std::flush;
         }
@@ -301,6 +299,9 @@ private:
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
                 aAlgebraFactory.createReduction(mComm, mInterface);
         aDataFactory.allocateControlReductionOperations(*tReductionOperations);
+
+        Plato::CommWrapper tCommWrapper(mComm);
+        aDataFactory.setCommWrapper(tCommWrapper);
     }
 
 private:

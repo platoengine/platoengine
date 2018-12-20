@@ -139,6 +139,11 @@ private:
     void performOperation(const std::string & aOperationName);
 
     /******************************************************************************//**
+    * @brief update parameters (e.g. design variables) for simulation.
+    **********************************************************************************/
+    void updateModel();
+
+    /******************************************************************************//**
      * @brief Define valid application-based operations
     **********************************************************************************/
     void defineOperations();
