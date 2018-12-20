@@ -960,6 +960,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     isDifficultForSolver = true;
                 }
+                else if(cur_obj.type == "stress constrained volume minimization")
+                {
+                    isDifficultForSolver = true;
+                }
                 fprintf(fp, "GDSW\n");
                 const bool haveSolverTolerance = (cur_obj.analysis_solver_tolerance.length() > 0);
                 if(haveSolverTolerance)
@@ -1065,6 +1069,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                     else if(cur_obj.type == "limit stress")
                     {
                         fprintf(fp, "  case = stress_limit\n");
+                    }
+                    else if(cur_obj.type == "stress constrained volume minimization")
+                    {
+                        fprintf(fp, "  case = stress_constrained_volume_minimization\n");
                     }
                     else if(cur_obj.type == "stress p norm")
                     {

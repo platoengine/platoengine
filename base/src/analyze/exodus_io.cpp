@@ -723,6 +723,14 @@ ExodusIO::readConn()
 	loconn+=NNPE;
         ++global_element_count;
       }
+    } else if (!strncasecmp(elemtype, "BEAM",  4)) {
+      const int NNPE = 2;
+      int* loconn = connect;
+      for( int k=0; k<num_elem_in_block[i]; ++k ) {
+        eb->connectNodes(k, global_element_count, loconn);
+        loconn+=NNPE;
+        ++global_element_count;
+      }
     } else if (!strncasecmp(elemtype, "TRI",  3)) {
       const int NNPE = 3;
       int* loconn = connect;

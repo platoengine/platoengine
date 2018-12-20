@@ -75,12 +75,13 @@ public:
         mDidGradientTestPassed(false),
         mFinalSuperscript(8),
         mInitialSuperscript(1),
-        mHessianTestBound(1e-6),
-        mGradientTestBound(1e-6),
         mRandomNumLowerBound(0.05),
-        mRandomNumUpperBound(0.1)
+        mRandomNumUpperBound(0.1),
+        mHessianTestAccuracyBound(1e-5),
+        mGradientTestAccuracyBound(1e-5)
     {
     }
+
     ~Diagnostics()
     {
     }
@@ -97,12 +98,12 @@ public:
 
     void setHessianTestBound(const ScalarType & aInput)
     {
-        mHessianTestBound = aInput;
+        mHessianTestAccuracyBound = aInput;
     }
 
     void setGradientTestBound(const ScalarType & aInput)
     {
-        mGradientTestBound = aInput;
+        mGradientTestAccuracyBound = aInput;
     }
 
     void setRandomNumberLowerBound(const ScalarType & aInput)
@@ -196,14 +197,14 @@ public:
         }
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
-        mDidGradientTestPassed = tMinError < mGradientTestBound ? true : false;
+        mDidGradientTestPassed = tMinError < mGradientTestAccuracyBound ? true : false;
         if(mDidGradientTestPassed)
         {
-            aOutputMsg << "The checker believes it passed.\n";
+            aOutputMsg << "Derivative checker believes it passed.\n";
         }
         else
         {
-            aOutputMsg << "The checker believes it failed.\n";
+            aOutputMsg << "Derivative checker believes it failed.\n";
         }
     }
 
@@ -289,14 +290,14 @@ public:
         }
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
-        mDidHessianTestPassed = tMinError < mHessianTestBound ? true : false;
+        mDidHessianTestPassed = tMinError < mHessianTestAccuracyBound ? true : false;
         if(mDidHessianTestPassed)
         {
-            aOutputMsg << "The checker believes it passed.\n";
+            aOutputMsg << "Derivative checker believes it passed.\n";
         }
         else
         {
-            aOutputMsg << "The checker believes it failed.\n";
+            aOutputMsg << "Derivative checker believes it failed.\n";
         }
     }
 
@@ -317,6 +318,7 @@ private:
             }
         }
     }
+
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aGradient,
                   Plato::Criterion<ScalarType, OrdinalType> & aCriterion)
@@ -334,10 +336,10 @@ private:
     int mFinalSuperscript;
     int mInitialSuperscript;
 
-    ScalarType mHessianTestBound;
-    ScalarType mGradientTestBound;
     ScalarType mRandomNumLowerBound;
     ScalarType mRandomNumUpperBound;
+    ScalarType mHessianTestAccuracyBound;
+    ScalarType mGradientTestAccuracyBound;
 
 private:
     Diagnostics(const Plato::Diagnostics<ScalarType, OrdinalType> & aRhs);
