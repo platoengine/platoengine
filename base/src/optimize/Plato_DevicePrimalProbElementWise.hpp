@@ -105,16 +105,24 @@ public:
             ScalarType tValue = (tCurrentControlData[aIndex] - tPreviousControlData[aIndex])
                     * (tPreviousControlData[aIndex] - tAntepenultimateControlsData[aIndex]);
 
-            ScalarType tConditionOne = tExpansionFactor * tPreviousSigmaData[aIndex];
-            ScalarType tConditionTwo = tContractionFactor * tPreviousSigmaData[aIndex];
-            tCurrentSigmaData[aIndex] = tValue > static_cast<ScalarType>(0) ? tConditionOne : tConditionTwo;
+            if(tValue > static_cast<ScalarType>(0))
+            {
+                tCurrentSigmaData[aIndex] = tExpansionFactor * tPreviousSigmaData[aIndex];
+            }
+            else if(tValue < static_cast<ScalarType>(0))
+            {
+                tCurrentSigmaData[aIndex] = tContractionFactor * tPreviousSigmaData[aIndex];
+            }
 
             // check that lower bound is satisfied
-            tValue = tLowerBoundScaleFactor * (tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex]);
+            const ScalarType tBoundsMisfit = tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex];
+            ScalarType tSlopeValue = tLowerBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tLowerBoundScaleFactor : tSlopeValue;
             tCurrentSigmaData[aIndex] = fmax(tValue, tCurrentSigmaData[aIndex]);
 
             // check that upper bound is satisfied
-            tValue = tUpperBoundScaleFactor * (tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex]);
+            tSlopeValue = tUpperBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tUpperBoundScaleFactor : tSlopeValue;
             tCurrentSigmaData[aIndex] = fmin(tValue, tCurrentSigmaData[aIndex]);
         }, "DevicePrimalProbElementWise::updateSigmaCoeff");
     }

@@ -625,18 +625,26 @@ private:
         const OrdinalType tNumIterationsDone = this->getNumIterationsDone();
         if(tNumIterationsDone < static_cast<OrdinalType>(2))
         {
-            const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-            Plato::update(static_cast<ScalarType>(1), tUpperBounds, static_cast<ScalarType>(0), *mControlWork);
-            const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-            Plato::update(static_cast<ScalarType>(-1), tLowerBounds, static_cast<ScalarType>(1), *mControlWork);
-            const ScalarType tInitialMovingAsymptoteScaleFactor = this->getInitialMovingAsymptoteScaleFactor();
-            Plato::scale(tInitialMovingAsymptoteScaleFactor, mControlWork.operator*());
-            mDataMng->setCurrentSigma(mControlWork.operator*());
+            this->computeInitialSigmaCoefficients();
         }
         else
         {
             this->computeSigmaCoefficients();
         }
+    }
+
+    /******************************************************************************//**
+     * @brief Compute initial sigma coefficients (i.e. first optimization iteration).
+    **********************************************************************************/
+    void computeInitialSigmaCoefficients()
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
+        Plato::update(static_cast<ScalarType>(1), tUpperBounds, static_cast<ScalarType>(0), *mControlWork);
+        const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
+        Plato::update(static_cast<ScalarType>(-1), tLowerBounds, static_cast<ScalarType>(1), *mControlWork);
+        const ScalarType tInitialMovingAsymptoteScaleFactor = this->getInitialMovingAsymptoteScaleFactor();
+        Plato::scale(tInitialMovingAsymptoteScaleFactor, mControlWork.operator*());
+        mDataMng->setCurrentSigma(mControlWork.operator*());
     }
 
     /******************************************************************************//**

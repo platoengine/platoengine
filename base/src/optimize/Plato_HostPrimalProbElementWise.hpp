@@ -107,11 +107,14 @@ public:
             }
 
             // check that lower bound is satisfied
-            tValue = tLowerBoundScaleFactor * (aUpperBounds[tIndex] - aLowerBounds[tIndex]);
+            const ScalarType tBoundsMisfit = aUpperBounds[tIndex] - aLowerBounds[tIndex];
+            ScalarType tSlopeValue = tLowerBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tLowerBoundScaleFactor : tSlopeValue;
             aCurrentSigma[tIndex] = std::max(tValue, aCurrentSigma[tIndex]);
 
             // check that upper bound is satisfied
-            tValue = tUpperBoundScaleFactor * (aUpperBounds[tIndex] - aLowerBounds[tIndex]);
+            tSlopeValue = tUpperBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tUpperBoundScaleFactor : tSlopeValue;
             aCurrentSigma[tIndex] = std::min(tValue, aCurrentSigma[tIndex]);
         }
     }
