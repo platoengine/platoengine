@@ -635,41 +635,49 @@ private:
         }
         else
         {
-            const ScalarType tExpansionFactor = this->getMovingAsymptoteExpansionFactor();
-            const ScalarType tContractionFactor = this->getMovingAsymptoteContractionFactor();
-            const ScalarType tLowerBoundScaleFactor = this->getMovingAsymptoteLowerBoundScaleFactor();
-            const ScalarType tUpperBoundScaleFactor = this->getMovingAsymptoteUpperBoundScaleFactor();
-            std::map<Plato::element_wise::constant_t, ScalarType> tConstants;
-            tConstants[Plato::element_wise::ExpansionFactor] = tExpansionFactor;
-            tConstants[Plato::element_wise::ContractionFactor] = tContractionFactor;
-            tConstants[Plato::element_wise::LowerBoundScaleFactor] = tLowerBoundScaleFactor;
-            tConstants[Plato::element_wise::UpperBoundScaleFactor] = tUpperBoundScaleFactor;
-            
-            const OrdinalType tNumVectors = mControlWork->getNumVectors();
-            Plato::fill(static_cast<ScalarType>(0), mControlWork.operator*());
-            for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
-            {
-                const Plato::Vector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl(tVectorIndex);
-                const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds(tVectorIndex);
-                const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds(tVectorIndex);
-                const Plato::Vector<ScalarType, OrdinalType> & tPreviousControl = mDataMng->getPreviousControl(tVectorIndex);
-                const Plato::Vector<ScalarType, OrdinalType> & tPreviousSigma = mPreviousSigma->operator[](tVectorIndex);
-                const Plato::Vector<ScalarType, OrdinalType> & tAntepenultimateControl = mAntepenultimateControl->operator[](tVectorIndex);
-
-                Plato::Vector<ScalarType, OrdinalType> & tCurrentSigma = mControlWork->operator[](tVectorIndex);
-                tCurrentSigma.update(static_cast<ScalarType>(1), tPreviousSigma, static_cast<ScalarType>(0));
-
-                mDataMng->elementWiseFunctions().updateSigmaCoeff(tConstants,
-                                                                  tCurrentControl,
-                                                                  tPreviousControl,
-                                                                  tAntepenultimateControl,
-                                                                  tUpperBounds,
-                                                                  tLowerBounds,
-                                                                  tPreviousSigma,
-                                                                  tCurrentSigma);
-            }
-            mDataMng->setCurrentSigma(mControlWork.operator*());
+            this->computeSigmaCoefficients();
         }
+    }
+
+    /******************************************************************************//**
+     * @brief Compute sigma coefficients if optimization iteration is greater than two.
+    **********************************************************************************/
+    void computeSigmaCoefficients()
+    {
+        const ScalarType tExpansionFactor = this->getMovingAsymptoteExpansionFactor();
+        const ScalarType tContractionFactor = this->getMovingAsymptoteContractionFactor();
+        const ScalarType tLowerBoundScaleFactor = this->getMovingAsymptoteLowerBoundScaleFactor();
+        const ScalarType tUpperBoundScaleFactor = this->getMovingAsymptoteUpperBoundScaleFactor();
+        std::map<Plato::element_wise::constant_t, ScalarType> tConstants;
+        tConstants[Plato::element_wise::ExpansionFactor] = tExpansionFactor;
+        tConstants[Plato::element_wise::ContractionFactor] = tContractionFactor;
+        tConstants[Plato::element_wise::LowerBoundScaleFactor] = tLowerBoundScaleFactor;
+        tConstants[Plato::element_wise::UpperBoundScaleFactor] = tUpperBoundScaleFactor;
+
+        const OrdinalType tNumVectors = mControlWork->getNumVectors();
+        Plato::fill(static_cast<ScalarType>(0), mControlWork.operator*());
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl(tVectorIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds(tVectorIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds(tVectorIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tPreviousControl = mDataMng->getPreviousControl(tVectorIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tPreviousSigma = mPreviousSigma->operator[](tVectorIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tAntepenultimateControl = mAntepenultimateControl->operator[](tVectorIndex);
+
+            Plato::Vector<ScalarType, OrdinalType> & tCurrentSigma = mControlWork->operator[](tVectorIndex);
+            tCurrentSigma.update(static_cast<ScalarType>(1), tPreviousSigma, static_cast<ScalarType>(0));
+
+            mDataMng->elementWiseFunctions().updateSigmaCoeff(tConstants,
+                                                              tCurrentControl,
+                                                              tPreviousControl,
+                                                              tAntepenultimateControl,
+                                                              tUpperBounds,
+                                                              tLowerBounds,
+                                                              tPreviousSigma,
+                                                              tCurrentSigma);
+        }
+        mDataMng->setCurrentSigma(mControlWork.operator*());
     }
 
 private:
