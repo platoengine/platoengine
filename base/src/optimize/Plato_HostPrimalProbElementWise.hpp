@@ -69,6 +69,23 @@ public:
     {
     }
 
+    void updateInitialSigmaCoeff(const ScalarType & aInitialMovingAsymptoteMultiplier,
+                                 const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds,
+                                 const Plato::Vector<ScalarType, OrdinalType> & aLowerBounds,
+                                 Plato::Vector<ScalarType, OrdinalType> & aCurrentSigma) const
+    {
+        assert(aCurrentSigma.size() == aUpperBounds.size());
+        assert(aCurrentSigma.size() == aLowerBounds.size());
+
+        const OrdinalType tNumberElements = aCurrentSigma.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumberElements; tIndex++)
+        {
+            const ScalarType tBoundsMisfit = aUpperBounds[tIndex] - aLowerBounds[tIndex];
+            const ScalarType tValue = aInitialMovingAsymptoteMultiplier * tBoundsMisfit;
+            aCurrentSigma[tIndex] = tBoundsMisfit <= static_cast<ScalarType>(0) ? aInitialMovingAsymptoteMultiplier : tValue;
+        }
+    }
+
     void updateSigmaCoeff(const std::map<Plato::element_wise::constant_t, ScalarType> & aConstants,
                           const Plato::Vector<ScalarType, OrdinalType> & aCurrentControls,
                           const Plato::Vector<ScalarType, OrdinalType> & aPreviousControls,
@@ -80,7 +97,6 @@ public:
     {
         assert(aCurrentSigma.size() == aUpperBounds.size());
         assert(aCurrentSigma.size() == aLowerBounds.size());
-        assert(aCurrentSigma.size() == aCurrentSigma.size());
         assert(aCurrentSigma.size() == aPreviousSigma.size());
         assert(aCurrentSigma.size() == aCurrentControls.size());
         assert(aCurrentSigma.size() == aPreviousControls.size());

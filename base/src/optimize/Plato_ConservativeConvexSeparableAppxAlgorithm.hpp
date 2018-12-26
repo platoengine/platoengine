@@ -614,6 +614,9 @@ private:
         return (tStop);
     }
 
+    /******************************************************************************//**
+     * @brief Update sigma coefficients
+    **********************************************************************************/
     void updateSigmaParameters()
     {
         assert(mControlWork.get() != nullptr);
@@ -638,13 +641,18 @@ private:
     **********************************************************************************/
     void computeInitialSigmaCoefficients()
     {
-        const Plato::MultiVector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds();
-        Plato::update(static_cast<ScalarType>(1), tUpperBounds, static_cast<ScalarType>(0), *mControlWork);
-        const Plato::MultiVector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds();
-        Plato::update(static_cast<ScalarType>(-1), tLowerBounds, static_cast<ScalarType>(1), *mControlWork);
-        const ScalarType tInitialMovingAsymptoteScaleFactor = this->getInitialMovingAsymptoteScaleFactor();
-        Plato::scale(tInitialMovingAsymptoteScaleFactor, mControlWork.operator*());
-        mDataMng->setCurrentSigma(mControlWork.operator*());
+        const OrdinalType tNumVectors = mControlWork->getNumVectors();
+        const ScalarType tMultiplier = this->getInitialMovingAsymptoteScaleFactor();
+
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            Plato::Vector<ScalarType, OrdinalType> & tCurrentSigma = mControlWork->operator[](tIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = mDataMng->getControlUpperBounds(tIndex);
+            const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = mDataMng->getControlLowerBounds(tIndex);
+            mDataMng->elementWiseFunctions().updateInitialSigmaCoeff(tMultiplier, tUpperBounds, tLowerBounds, tCurrentSigma);
+        }
+
+        mDataMng->setCurrentSigma(*mControlWork);
     }
 
     /******************************************************************************//**
