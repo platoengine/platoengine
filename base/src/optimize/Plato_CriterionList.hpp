@@ -58,26 +58,47 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Generic interface to access list of criterion
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class CriterionList
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     CriterionList() :
             mWeights(),
             mCriterionList()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~CriterionList()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return size of list
+     * @return size
+    **********************************************************************************/
     OrdinalType size() const
     {
         return (mCriterionList.size());
     }
+
+    /******************************************************************************//**
+     * @brief Initializes criterion list.
+     * @param [in] aCriteria list of Plato criterion
+    **********************************************************************************/
     void add(const std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> & aCriteria)
     {
         assert(aCriteria.empty() == false);
+
+        mCriterionList.clear();
         const OrdinalType tNumCriteria = aCriteria.size();
         for(OrdinalType tIndex = 0; tIndex < tNumCriteria; tIndex++)
         {
@@ -86,15 +107,29 @@ public:
             mWeights.push_back(static_cast<ScalarType>(1));
         }
     }
+
+    /******************************************************************************//**
+     * @brief Adds a new element at the end of the vector, after its current last element.
+     * @param [in] aCriterion Plato criterion
+     * @param [in] aMyWeight weight for input Plato criterion
+    **********************************************************************************/
     void add(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aCriterion, ScalarType aMyWeight = 1)
     {
         assert(aCriterion != nullptr);
         mCriterionList.push_back(aCriterion);
         mWeights.push_back(aMyWeight);
     }
+
+    /******************************************************************************//**
+     * @brief Initializes criterion list and corresponding weights.
+     * @param [in] aCriteria list of Plato criteria
+     * @param [in] aWeights list of weights
+    **********************************************************************************/
     void add(const std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> & aCriteria, const std::vector<ScalarType> & aWeights)
     {
         assert(aCriteria.empty() == false);
+
+        mCriterionList.clear();
         const OrdinalType tNumCriteria = aCriteria.size();
         for(OrdinalType tIndex = 0; tIndex < tNumCriteria; tIndex++)
         {
@@ -105,24 +140,47 @@ public:
         assert(aWeights.size() == aCriteria.size());
         mWeights = aWeights;
     }
+
+    /******************************************************************************//**
+     * @brief Returns weight at position aIndex in the list.
+     * @param [in] aIndex  Position of an element in the list.
+     * @return weight
+    **********************************************************************************/
     ScalarType weight(const OrdinalType & aIndex) const
     {
         assert(mWeights.empty() == false);
         assert(aIndex < mWeights.size());
         return (mWeights[aIndex]);
     }
+
+    /******************************************************************************//**
+     * @brief Returns a reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
     Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
         assert(aIndex < mCriterionList.size());
         assert(mCriterionList[aIndex].get() != nullptr);
         return (mCriterionList[aIndex].operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Returns a const reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
     const Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
         assert(aIndex < mCriterionList.size());
         assert(mCriterionList[aIndex].get() != nullptr);
         return (mCriterionList[aIndex].operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Returns a copy of the list of criteria.
+     * @return Copy of the list of criteria.
+    **********************************************************************************/
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> create() const
     {
         assert(this->size() > static_cast<OrdinalType>(0));
@@ -138,6 +196,12 @@ public:
         }
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Returns a const shared pointer reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
     const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
         assert(aIndex < mCriterionList.size());
@@ -146,14 +210,16 @@ public:
     }
 
 private:
-    std::vector<ScalarType> mWeights;
-    std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> mCriterionList;
+    std::vector<ScalarType> mWeights; /*!< list of weights */
+    std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> mCriterionList; /*!< list of criteria */
 
 private:
     CriterionList(const Plato::CriterionList<ScalarType, OrdinalType>&);
     Plato::CriterionList<ScalarType, OrdinalType> & operator=(const Plato::CriterionList<ScalarType, OrdinalType>&);
 };
+// class CriterionList
 
 }
+// namespace Plato
 
 #endif /* PLATO_CRITERIONLIST_HPP_ */

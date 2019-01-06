@@ -274,6 +274,167 @@ private:
     }
 };
 
+/******************************************************************************//**
+ * @brief Generic interface that gives access to the list of criteria
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeCriteriaList
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    GradFreeCriteriaList() :
+            mWeights(),
+            mList()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~GradFreeCriteriaList()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Return size of list
+     * @return size
+    **********************************************************************************/
+    OrdinalType size() const
+    {
+        return (mList.size());
+    }
+
+    /******************************************************************************//**
+     * @brief Initializes criterion list.
+     * @param [in] aCriteria list of Plato criterion
+    **********************************************************************************/
+    void add(const std::vector<std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>>> & aCriteria)
+    {
+        assert(aCriteria.empty() == false);
+
+        mList.clear();
+        const OrdinalType tNumCriteria = aCriteria.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumCriteria; tIndex++)
+        {
+            assert(aCriteria[tIndex] != nullptr);
+            mList.push_back(aCriteria[tIndex]);
+            mWeights.push_back(static_cast<ScalarType>(1));
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Adds a new element at the end of the vector, after its current last element.
+     * @param [in] aCriterion Plato criterion
+     * @param [in] aMyWeight weight for input Plato criterion
+    **********************************************************************************/
+    void add(const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aCriterion, ScalarType aMyWeight = 1)
+    {
+        assert(aCriterion != nullptr);
+        mList.push_back(aCriterion);
+        mWeights.push_back(aMyWeight);
+    }
+
+    /******************************************************************************//**
+     * @brief Initializes criterion list and corresponding weights.
+     * @param [in] aCriteria list of Plato criteria
+     * @param [in] aWeights list of weights
+    **********************************************************************************/
+    void add(const std::vector<std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>>> & aCriteria, const std::vector<ScalarType> & aWeights)
+    {
+        assert(aCriteria.empty() == false);
+
+        mList.clear();
+        const OrdinalType tNumCriteria = aCriteria.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumCriteria; tIndex++)
+        {
+            assert(aCriteria[tIndex] != nullptr);
+            mList.push_back(aCriteria[tIndex]);
+        }
+        assert(aWeights.empty() == false);
+        assert(aWeights.size() == aCriteria.size());
+        mWeights = aWeights;
+    }
+
+    /******************************************************************************//**
+     * @brief Returns weight at position aIndex in the list.
+     * @param [in] aIndex  Position of an element in the list.
+     * @return weight
+    **********************************************************************************/
+    ScalarType weight(const OrdinalType & aIndex) const
+    {
+        assert(mWeights.empty() == false);
+        assert(aIndex < mWeights.size());
+        return (mWeights[aIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
+    Plato::GradFreeCriteria<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
+    {
+        assert(aIndex < mList.size());
+        assert(mList[aIndex].get() != nullptr);
+        return (mList[aIndex].operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a const reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
+    const Plato::GradFreeCriteria<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
+    {
+        assert(aIndex < mList.size());
+        assert(mList[aIndex].get() != nullptr);
+        return (mList[aIndex].operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a copy of the list of criteria.
+     * @return Copy of the list of criteria.
+    **********************************************************************************/
+    std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> create() const
+    {
+        assert(this->size() > static_cast<OrdinalType>(0));
+        std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> tOutput =
+                std::make_shared<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>>();
+        const OrdinalType tNumCriterion = this->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumCriterion; tIndex++)
+        {
+            assert(mList[tIndex].get() != nullptr);
+            const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & tCriterion = mList[tIndex];
+            ScalarType tMyWeight = mWeights[tIndex];
+            tOutput->add(tCriterion, tMyWeight);
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a const shared pointer reference to the element at position aIndex in the list.
+     * @param [in] aIndex Position of an element in the list.
+     * @return The criterion at the specified position in the list.
+    **********************************************************************************/
+    const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
+    {
+        assert(aIndex < mList.size());
+        assert(mList[aIndex].get() != nullptr);
+        return(mList[aIndex]);
+    }
+
+private:
+    std::vector<ScalarType> mWeights; /*!< list of weights */
+    std::vector<std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>>> mList; /*!< list of grad-free criteria */
+
+private:
+    GradFreeCriteriaList(const Plato::GradFreeCriteriaList<ScalarType, OrdinalType>&);
+    Plato::GradFreeCriteriaList<ScalarType, OrdinalType> & operator=(const Plato::GradFreeCriteriaList<ScalarType, OrdinalType>&);
+};
+// class GradFreeCriteriaList
+
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarmDataMng
 {
@@ -541,14 +702,253 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mBestParticlePositions;
 
     std::shared_ptr<Plato::CommWrapper> mCommWrapper;
+
+private:
+    ParticleSwarmDataMng(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
+    Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & operator=(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
 };
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class ParticleSwarmStageMng
+{
+public:
+    virtual ~ParticleSwarmStageMng()
+    {
+    }
+
+    virtual void evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                                   Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
+};
+// class ParticleSwarmStageMng
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class BoundConstrainedStageMngPSO : public Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>
+{
+public:
+    explicit BoundConstrainedStageMngPSO(const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective) :
+            mObjective(aObjective)
+    {
+    }
+
+    virtual ~BoundConstrainedStageMngPSO()
+    {
+    }
+
+    void evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                           Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        mObjective->value(aControl, aOutput);
+    }
+
+private:
+    std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> mObjective;
+
+private:
+    BoundConstrainedStageMngPSO(const Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>&);
+    Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType> & operator=(const Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>&);
+};
+// class BoundConstrainedStageMngPSO
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class AugmentedLagrangianStageMngPSO : public Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>
+{
+public:
+    explicit AugmentedLagrangianStageMngPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
+                                            const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective,
+                                            const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
+            mPenaltyExpansionMultiplier(2),
+            mPenaltyContractionMultiplier(0.5),
+            mFeasibilityInexactnessTolerance(1e-4),
+            mCurrentObjFuncValues(aFactory->objective().create()),
+            mPreviousObjFuncValues(aFactory->objective().create()),
+            mPenaltyMultipliers(aFactory->dual().create()),
+            mLagrangeMultipliers(aFactory->dual().create()),
+            mCurrentConstraintValues(aFactory->dual().create()),
+            mPreviousConstraintValues(aFactory->dual().create()),
+            mObjective(aObjective),
+            mConstraints(aConstraints)
+    {
+        this->initialize();
+    }
+
+    virtual ~AugmentedLagrangianStageMngPSO()
+    {
+    }
+
+    void setPenaltyExpansionMultiplier(const ScalarType & aInput)
+    {
+        mPenaltyExpansionMultiplier = aInput;
+    }
+
+    void setPenaltyContractionMultiplier(const ScalarType & aInput)
+    {
+        mPenaltyContractionMultiplier = aInput;
+    }
+
+    void setFeasibilityInexactnessTolerance(const ScalarType & aInput)
+    {
+        mFeasibilityInexactnessTolerance = aInput;
+    }
+
+    void evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                           Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        // Evaluate objective function
+        mPreviousObjFuncValues->update(static_cast<ScalarType>(1), *mCurrentObjFuncValues, static_cast<ScalarType>(0));
+        mCurrentObjFuncValues->fill(static_cast<ScalarType>(0));
+        mObjective->value(aControl, *mCurrentObjFuncValues);
+        aOutput.update(static_cast<ScalarType>(1), *mCurrentObjFuncValues, static_cast<ScalarType>(0));
+        // Evaluate constraints
+        this->evaluateConstraints(aControl);
+        // Evaluate augmented Lagrangian
+        this->evaluateAugmentedLagrangian(aOutput);
+    }
+
+    void updateLagrangeMultipliers()
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyValues = (*mPenaltyMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = (*mCurrentConstraintValues)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
+
+            const OrdinalType tNumParticles = tConstraintValues.size();
+            for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+            {
+                const ScalarType tLagMultiplierOverPenalty = -tLagrangeMultipliers[tParticleIndex]
+                        / (static_cast<ScalarType>(2) * tPenaltyValues[tParticleIndex]);
+                const ScalarType tConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
+                const ScalarType tNewLagMultiplier = tLagrangeMultipliers[tParticleIndex] +
+                        (static_cast<ScalarType>(2) * tPenaltyValues[tParticleIndex] * tConstraintValue);
+                tLagrangeMultipliers[tParticleIndex] = tNewLagMultiplier;
+            }
+        }
+    }
+
+    void updatePenaltyMultipliers()
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tCurrentConstraint = (*mCurrentConstraintValues)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tPreviousConstraint = (*mPreviousConstraintValues)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tPenaltyValues = (*mPenaltyMultipliers)[tConstraintIndex];
+
+            const OrdinalType tNumParticles = tPenaltyValues.size();
+            for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+            {
+                const bool tIsConstraintGreaterThanPrevious = tCurrentConstraint[tParticleIndex] > tPreviousConstraint[tParticleIndex];
+                tPenaltyValues[tParticleIndex] = tIsConstraintGreaterThanPrevious ? mPenaltyExpansionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
+                const bool tIsConstraintGreaterThanFeasibilityTol = tCurrentConstraint[tParticleIndex] > mFeasibilityInexactnessTolerance;
+                tPenaltyValues[tParticleIndex] = tIsConstraintGreaterThanFeasibilityTol ? mPenaltyExpansionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
+                const bool tIsConstraintLessThanFeasibilityTol = tCurrentConstraint[tParticleIndex] <= mFeasibilityInexactnessTolerance;
+                tPenaltyValues[tParticleIndex] = tIsConstraintLessThanFeasibilityTol ? mPenaltyContractionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
+            }
+        }
+    }
+
+private:
+    void initialize()
+    {
+        Plato::fill(static_cast<ScalarType>(1), *mPenaltyMultipliers);
+        Plato::fill(static_cast<ScalarType>(0), *mLagrangeMultipliers);
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate inequality constraints
+     * @param [in] aControl control multi-vector
+    **********************************************************************************/
+    void evaluateConstraints(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    {
+        Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mPreviousConstraintValues);
+
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            Plato::GradFreeCriteria<ScalarType, OrdinalType> & tConstraint = (*mConstraints)[tIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tMyValues = (*mCurrentConstraintValues)[tIndex];
+            tMyValues.fill(static_cast<ScalarType>(0));
+            tConstraint.value(aControl, tMyValues);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate augmented Lagrangian criterion:
+     * \f$ \ell(z, \lambda, \mu) = f(z) + sum_{i=1}^{N}\lambda_i \theta_i(z) + sum_{i=1}^{N}\mu_i \theta_i^2(z) \f$,
+     * where \f$ \theta_i = \max( h_i(x), \frac{-\lambda_i}{2\mu_i} ) \f$
+     * @param [in,out] aOutput augmented Lagrangian values
+    **********************************************************************************/
+    void evaluateAugmentedLagrangian(Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mPenaltyMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = (*mCurrentConstraintValues)[tConstraintIndex];
+
+            const OrdinalType tNumParticles = tConstraintValues.size();
+            for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+            {
+                const ScalarType tLagMultiplierOverPenalty = -tLagrangeMultipliers[tParticleIndex]
+                        / (static_cast<ScalarType>(2) * tPenaltyMultipliers[tParticleIndex]);
+                const ScalarType tConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
+                const ScalarType tLagrangeMultipliersTimesConstraint = tLagrangeMultipliers[tParticleIndex] * tConstraintValue;
+                const ScalarType tConstraintTimesConstraint = tConstraintValue * tConstraintValue;
+                const ScalarType tMyConstraintContribution = tLagrangeMultipliersTimesConstraint
+                        + tPenaltyMultipliers[tParticleIndex] * tConstraintTimesConstraint;
+                aOutput[tParticleIndex] += tMyConstraintContribution;
+            }
+        }
+    }
+
+private:
+    ScalarType mPenaltyExpansionMultiplier;
+    ScalarType mPenaltyContractionMultiplier;
+    ScalarType mFeasibilityInexactnessTolerance;
+
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousObjFuncValues;
+
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPenaltyMultipliers;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLagrangeMultipliers;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousConstraintValues;
+
+    std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> mObjective;
+    std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> mConstraints;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
+
+private:
+    AugmentedLagrangianStageMngPSO(const Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>&);
+    Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType> & operator=(const Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>&);
+};
+// class AugmentedLagrangianStageMngPSO
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarm
 {
 public:
-    ParticleSwarm(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
-                  const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective) :
+    ParticleSwarm()
+    {
+    }
+
+    virtual ~ParticleSwarm()
+    {
+    }
+
+private:
+    ParticleSwarm(const Plato::ParticleSwarm<ScalarType, OrdinalType>&);
+    Plato::ParticleSwarm<ScalarType, OrdinalType> & operator=(const Plato::ParticleSwarm<ScalarType, OrdinalType>&);
+};
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class BoundConstrainedPSO : public Plato::ParticleSwarm<ScalarType, OrdinalType>
+{
+public:
+    BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
+                        const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective) :
             mPrintDiagnostics(false),
             mNumIterations(0),
             mMaxNumIterations(1000),
@@ -575,8 +975,8 @@ public:
             mWorkVectorTwo(),
             mBestObjFuncValues(),
             mCurrentObjFuncValues(),
-            mObjective(aObjective),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
+            mStageMng(std::make_shared<Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>>(aObjective)),
             mReductions(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
     {
     }
@@ -584,7 +984,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    ~ParticleSwarm()
+    ~BoundConstrainedPSO()
     {
     }
 
@@ -667,7 +1067,7 @@ public:
     void solve()
     {
         assert(mDataMng.use_count() > static_cast<OrdinalType>(0));
-        assert(mObjective.use_count() > static_cast<OrdinalType>(0));
+        assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
 
         this->openOutputFile();
         this->initialize();
@@ -678,7 +1078,7 @@ public:
         while(1)
         {
             mNumIterations++;
-            mObjective->value(mDataMng->getCurrentParticles(), *mCurrentObjFuncValues);
+            mStageMng->evaluateObjective(mDataMng->getCurrentParticles(), *mCurrentObjFuncValues);
             this->findBestParticlePositions();
             this->updateParticleVelocities();
             this->updateParticlePositions();
@@ -1080,11 +1480,15 @@ private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mBestObjFuncValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
 
-    std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> mObjective;
     std::shared_ptr<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>> mDataMng;
+    std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> mStageMng;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReductions;
+
+private:
+    BoundConstrainedPSO(const Plato::BoundConstrainedPSO<ScalarType, OrdinalType>&);
+    Plato::BoundConstrainedPSO<ScalarType, OrdinalType> & operator=(const Plato::BoundConstrainedPSO<ScalarType, OrdinalType>&);
 };
-// class ParticleSwarm
+// class BoundConstrainedPSO
 
 }// namespace Plato
 
@@ -1212,6 +1616,21 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
+TEST(PlatoTest, PSO_BoundConstrainedStageMng)
+{
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 1;
+    Plato::StandardVector<double> tObjFuncValues(tNumParticles);
+    Plato::StandardMultiVector<double> tControl(tNumParticles, tNumControls, 2.0 /* initial guess */);
+
+    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+    Plato::BoundConstrainedStageMngPSO<double> tStageMng(tObjective);
+    tStageMng.evaluateObjective(tControl, tObjFuncValues);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(401, tObjFuncValues[0], tTolerance);
+}
+
 TEST(PlatoTest, PSO_Solve)
 {
     // ********* Allocate Core Optimization Data Templates *********
@@ -1222,7 +1641,7 @@ TEST(PlatoTest, PSO_Solve)
 
     // TEST ALGORITHM
     std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
-    Plato::ParticleSwarm<double> tAlgorithm(tFactory, tObjective);
+    Plato::BoundConstrainedPSO<double> tAlgorithm(tFactory, tObjective);
     tAlgorithm.setLowerBounds(-6);
     tAlgorithm.setUpperBounds(6);
     tAlgorithm.solve();

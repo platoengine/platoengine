@@ -70,10 +70,10 @@ public:
             mNumDuals(1),
             mNumStates(1),
             mNumControls(0),
-            mNumLowerBounds(0),
-            mNumUpperBounds(0),
+            mNumObjFuncValues(0),
             mMemorySpace(aMemorySpace),
             mCommWrapper(std::make_shared<Plato::CommWrapper>()),
+            mObjFuncValues(),
             mDual(),
             mState(),
             mControl(),
@@ -81,7 +81,8 @@ public:
             mUpperBoundVector(),
             mDualReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
             mStateReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
-            mControlReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
+            mControlReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
+            mObjFuncReductionOperations(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
     {
         mCommWrapper->useDefaultComm();
         this->allocateDual(mNumDuals);
@@ -106,23 +107,13 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return number of control lower bound entries
-     * @return number of control lower bound entries
-    **********************************************************************************/
-    OrdinalType getNumLowerBounds() const
-    {
-        assert(mNumLowerBounds > static_cast<ScalarType>(0));
-        return (mNumLowerBounds);
-    }
-
-    /******************************************************************************//**
      * @brief Return number of control upper bound entries
      * @return number of control upper bound entries
     **********************************************************************************/
-    OrdinalType getNumUpperBounds() const
+    OrdinalType getNumCriterionValues() const
     {
-        assert(mNumUpperBounds > static_cast<ScalarType>(0));
-        return (mNumUpperBounds);
+        assert(mNumObjFuncValues > static_cast<ScalarType>(0));
+        return (mNumObjFuncValues);
     }
 
     /******************************************************************************//**
@@ -151,6 +142,53 @@ public:
     const Plato::CommWrapper& getCommWrapper() const
     {
         return (mCommWrapper.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Allocate a Plato vector of objective function values.
+     * @param [in] aNumElements number of elements
+    **********************************************************************************/
+    void allocateObjFuncValues(const OrdinalType & aNumElements)
+    {
+        assert(aNumElements > static_cast<OrdinalType>(0));
+
+        if(mObjFuncValues.use_count() != 0)
+        {
+            mObjFuncValues.reset();
+        }
+        mNumObjFuncValues = aNumElements;
+        mObjFuncValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aNumElements);
+    }
+
+    /******************************************************************************//**
+     * @brief Allocate objective function values vector
+     * @param [in] aInput template vector of objective function values
+    **********************************************************************************/
+    void allocateObjFuncValues(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+    {
+        assert(aInput.size() > static_cast<OrdinalType>(0));
+
+        if(mObjFuncValues.use_count() != 0)
+        {
+            mObjFuncValues.reset();
+        }
+        mNumObjFuncValues = aInput.size();
+        mObjFuncValues = aInput.create();
+    }
+
+    /******************************************************************************//**
+     * @brief Allocates template for the objective function values reduction operations.
+     * @param [in] aInput reduction operations wrapper.
+    **********************************************************************************/
+    void allocateObjFuncReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
+    {
+        assert(aInput.get() != nullptr);
+
+        if(mObjFuncReductionOperations.use_count() != 0)
+        {
+            mObjFuncReductionOperations.reset();
+        }
+        mObjFuncReductionOperations = aInput.create();
     }
 
     /******************************************************************************//**
@@ -185,7 +223,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Allocate dual multi-vector
+     * @brief Allocates dual multi-vector.
      * @param [in] aInput Plato standard multi-vector
     **********************************************************************************/
     void allocateDual(const Plato::Vector<ScalarType, OrdinalType> & aInput, OrdinalType aNumVectors = 1)
@@ -195,10 +233,18 @@ public:
         mDual = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, aInput);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Allocates template for dual reduction operations.
+     * @param [in] aInput reduction operations wrapper.
+    **********************************************************************************/
     void allocateDualReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
-    /********************************************************************************/
     {
+        assert(aInput.get() != nullptr);
+
+        if(mDualReductionOperations.use_count() != 0)
+        {
+            mDualReductionOperations.reset();
+        }
         mDualReductionOperations = aInput.create();
     }
 
@@ -232,10 +278,18 @@ public:
         mState = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, aInput);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Allocates template for state reduction operations.
+     * @param [in] aInput reduction operations wrapper.
+    **********************************************************************************/
     void allocateStateReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
-    /********************************************************************************/
     {
+        assert(aInput.get() != nullptr);
+
+        if(mStateReductionOperations.use_count() != 0)
+        {
+            mStateReductionOperations.reset();
+        }
         mStateReductionOperations = aInput.create();
     }
 
@@ -269,10 +323,18 @@ public:
         mControl = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, aInput);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Allocates template for control reduction operations.
+     * @param [in] aInput reduction operations wrapper.
+    **********************************************************************************/
     void allocateControlReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
-    /********************************************************************************/
     {
+        assert(aInput.get() != nullptr);
+
+        if(mControlReductionOperations.use_count() != 0)
+        {
+            mControlReductionOperations.reset();
+        }
         mControlReductionOperations = aInput.create();
     }
 
@@ -281,7 +343,6 @@ public:
     /********************************************************************************/
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        mNumLowerBounds = aInput.size();
         mLowerBoundVector = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, aInput);
     }
 
@@ -290,21 +351,25 @@ public:
     /********************************************************************************/
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        mNumUpperBounds = aInput.size();
         mUpperBoundVector = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, aInput);
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to dual multi-vector template.
+     * @return const reference to multi-vector of dual values.
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & dual() const
-    /********************************************************************************/
     {
         assert(mDual.get() != nullptr);
         return (mDual.operator*());
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to dual vector template.
+     * @param [in] aVectorIndex Position of an element in the multi-vector.
+     * @return const reference to dual vector.
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & dual(const OrdinalType & aVectorIndex) const
-    /********************************************************************************/
     {
         assert(mDual.get() != nullptr);
         assert(aVectorIndex < mDual->getNumVectors());
@@ -312,25 +377,32 @@ public:
         return (mDual.operator *().operator [](aVectorIndex));
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to reduction operations wrapper for duals.
+     * @return const reference to reduction operations wrapper.
+    **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getDualReductionOperations() const
-    /********************************************************************************/
     {
         assert(mDualReductionOperations.get() != nullptr);
         return (mDualReductionOperations.operator *());
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to state multi-vector template
+     * @return const reference to multi-vector of dual values
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & state() const
-    /********************************************************************************/
     {
         assert(mState.get() != nullptr);
         return (mState.operator *());
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to state vector template.
+     * @param [in] aVectorIndex Position of an element in the multi-vector.
+     * @return const reference to state vector.
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & state(const OrdinalType & aVectorIndex) const
-    /********************************************************************************/
     {
         assert(mState.get() != nullptr);
         assert(aVectorIndex < mState->getNumVectors());
@@ -338,25 +410,32 @@ public:
         return (mState.operator *().operator [](aVectorIndex));
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to reduction operations wrapper for states.
+     * @return const reference to reduction operations wrapper.
+    **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getStateReductionOperations() const
-    /********************************************************************************/
     {
         assert(mStateReductionOperations.get() != nullptr);
         return (mStateReductionOperations.operator *());
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to control multi-vector template
+     * @return const reference to multi-vector of dual values
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & control() const
-    /********************************************************************************/
     {
         assert(mControl.get() != nullptr);
         return (mControl.operator *());
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to control vector template.
+     * @param [in] aVectorIndex Position of an element in the multi-vector.
+     * @return const reference to state vector.
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & control(const OrdinalType & aVectorIndex) const
-    /********************************************************************************/
     {
         assert(mControl.get() != nullptr);
         assert(aVectorIndex < mControl->getNumVectors());
@@ -364,24 +443,48 @@ public:
         return (mControl.operator *().operator [](aVectorIndex));
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * @brief Returns const reference to reduction operations wrapper for controls.
+     * @return const reference to reduction operations wrapper.
+    **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getControlReductionOperations() const
-    /********************************************************************************/
     {
         assert(mControlReductionOperations.get() != nullptr);
         return (mControlReductionOperations.operator *());
+    }
+
+    /******************************************************************************//**
+     * @brief Returns const reference to vector template of objective function values.
+     * @return const reference to vector of objective function values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & objective() const
+    {
+        assert(mObjFuncValues.get() != nullptr);
+        return (mObjFuncValues.operator*());
+    }
+
+    /******************************************************************************//**
+     * @brief Returns const reference to reduction operations wrapper for objective function values.
+     * @return const reference to reduction operations wrapper.
+    **********************************************************************************/
+    const Plato::ReductionOperations<ScalarType, OrdinalType> & getObjFuncReductionOperations() const
+    {
+        assert(mObjFuncReductionOperations.get() != nullptr);
+        return (mObjFuncReductionOperations.operator *());
     }
 
 private:
     OrdinalType mNumDuals;
     OrdinalType mNumStates;
     OrdinalType mNumControls;
-    OrdinalType mNumLowerBounds;
-    OrdinalType mNumUpperBounds;
+    OrdinalType mNumObjFuncValues;
 
     Plato::MemorySpace::type_t mMemorySpace;
 
     std::shared_ptr<Plato::CommWrapper> mCommWrapper;
+
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mObjFuncValues;
+
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDual;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mState;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControl;
@@ -391,6 +494,7 @@ private:
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mStateReductionOperations;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mObjFuncReductionOperations;
 
 private:
     DataFactory(const Plato::DataFactory<ScalarType, OrdinalType>&);
