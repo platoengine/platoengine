@@ -539,7 +539,6 @@ TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauOne_LBFGS)
     const size_t tNumVectors = 1;
     const size_t tNumControls = 2;
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mPrintDiagnostics = true;
     tInputs.mHessianMethod = Plato::Hessian::LBFGS;
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
@@ -574,7 +573,6 @@ TEST(PlatoTest, KelleySachsBoundConstrainedHimmelblauOne_NoHessian)
     const size_t tNumVectors = 1;
     const size_t tNumControls = 2;
     Plato::AlgorithmInputsKSBC<double> tInputs;
-    tInputs.mPrintDiagnostics = true;
     tInputs.mHessianMethod = Plato::Hessian::DISABLED;
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 6 /* base value */);
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -6 /* base value */);
