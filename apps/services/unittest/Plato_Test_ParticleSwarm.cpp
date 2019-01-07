@@ -1008,6 +1008,16 @@ public:
         mTrustRegionContractionMultiplier = aInput;
     }
 
+    void setMaxNumConsecutiveFailures(const OrdinalType & aInput)
+    {
+        mMaxNumConsecutiveFailures = aInput;
+    }
+
+    void setMaxNumConsecutiveSuccesses(const OrdinalType & aInput)
+    {
+        mMaxNumConsecutiveSuccesses = aInput;
+    }
+
     void setCurrentObjFuncValues(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mCurrentObjFuncValues->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
@@ -1321,6 +1331,21 @@ public:
         mPrintDiagnostics = true;
     }
 
+    void setMaxNumIterations(const OrdinalType & aInput)
+    {
+        mMaxNumIterations = aInput;
+    }
+
+    void setMaxNumConsecutiveFailures(const OrdinalType & aInput)
+    {
+        mOperations->setMaxNumConsecutiveFailures(aInput);
+    }
+
+    void setMaxNumConsecutiveSuccesses(const OrdinalType & aInput)
+    {
+        mOperations->setMaxNumConsecutiveSuccesses(aInput);
+    }
+
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mOperations->setInertiaMultiplier(aInput);
@@ -1334,31 +1359,6 @@ public:
     void setSocialBehaviorMultiplier(const ScalarType & aInput)
     {
         mOperations->setSocialBehaviorMultiplier(aInput);
-    }
-
-    OrdinalType getNumIterations() const
-    {
-        return (mNumIterations);
-    }
-
-    void setMaxNumIterations(const OrdinalType & aInput)
-    {
-        mMaxNumIterations = aInput;
-    }
-
-    ScalarType getBestObjFuncValueMean() const
-    {
-        return (mOperations->getBestObjFuncValueMean());
-    }
-
-    ScalarType getBestObjFuncValueStdDev() const
-    {
-        return (mOperations->getBestObjFuncValueStdDev());
-    }
-
-    ScalarType getBestObjFuncValue() const
-    {
-        return (mOperations->getCurrentGlobalBestObjFunValue());
     }
 
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
@@ -1379,6 +1379,26 @@ public:
     void setLowerBounds(const ScalarType & aInput)
     {
         mDataMng->setLowerBounds(aInput);
+    }
+
+    OrdinalType getNumIterations() const
+    {
+        return (mNumIterations);
+    }
+
+    ScalarType getBestObjFuncValueMean() const
+    {
+        return (mOperations->getBestObjFuncValueMean());
+    }
+
+    ScalarType getBestObjFuncValueStdDev() const
+    {
+        return (mOperations->getBestObjFuncValueStdDev());
+    }
+
+    ScalarType getBestObjFuncValue() const
+    {
+        return (mOperations->getCurrentGlobalBestObjFunValue());
     }
 
     const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
