@@ -182,8 +182,6 @@ public:
     **********************************************************************************/
     void allocateObjFuncReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.get() != nullptr);
-
         if(mObjFuncReductionOperations.use_count() != 0)
         {
             mObjFuncReductionOperations.reset();
@@ -239,8 +237,6 @@ public:
     **********************************************************************************/
     void allocateDualReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.get() != nullptr);
-
         if(mDualReductionOperations.use_count() != 0)
         {
             mDualReductionOperations.reset();
@@ -284,8 +280,6 @@ public:
     **********************************************************************************/
     void allocateStateReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.get() != nullptr);
-
         if(mStateReductionOperations.use_count() != 0)
         {
             mStateReductionOperations.reset();
@@ -329,8 +323,6 @@ public:
     **********************************************************************************/
     void allocateControlReductionOperations(const Plato::ReductionOperations<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.get() != nullptr);
-
         if(mControlReductionOperations.use_count() != 0)
         {
             mControlReductionOperations.reset();
