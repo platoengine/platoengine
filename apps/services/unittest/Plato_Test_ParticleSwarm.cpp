@@ -504,14 +504,14 @@ inline ScalarType standard_deviation(const ScalarType & aMean, const Plato::Vect
 
 template<typename ScalarType, typename OrdinalType>
 void find_best_criterion_values(const Plato::Vector<ScalarType, OrdinalType> & aCurrentValues,
-                                Plato::Vector<ScalarType, OrdinalType> & aCurrentBestCriterionValues)
+                                Plato::Vector<ScalarType, OrdinalType> & aCurrentBestValues)
 {
     const OrdinalType tNumParticles = aCurrentValues.size();
     for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
     {
-        if(aCurrentValues[tIndex] < aCurrentBestCriterionValues[tIndex])
+        if(aCurrentValues[tIndex] < aCurrentBestValues[tIndex])
         {
-            aCurrentBestCriterionValues[tIndex] = aCurrentValues[tIndex];
+            aCurrentBestValues[tIndex] = aCurrentValues[tIndex];
         }
     }
 }
@@ -2936,6 +2936,24 @@ TEST(PlatoTest, PSO_computeBestObjFunStatistics)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(0.00010692, tOperations.getBestObjFuncValueMean(), tTolerance);
     EXPECT_NEAR(0.000354175, tOperations.getBestObjFuncValueStdDev(), tTolerance);
+}
+
+TEST(PlatoTest, PSO_find_best_criterion_values)
+{
+    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 };
+    Plato::StandardVector<double> tCurrentObjFuncValues(tData);
+
+    tData = { 0.000423009, 0.0008654, 0.00174032, 0.000871822, 0.000426448 };
+    Plato::StandardVector<double> tCurrentBestObjFuncValues(tData);
+
+    Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.000423009, tCurrentBestObjFuncValues[0], tTolerance);
+    EXPECT_NEAR(0.0008654, tCurrentBestObjFuncValues[1], tTolerance);
+    EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
+    EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
+    EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
 }
 
 TEST(PlatoTest, PSO_findBestParticlePositions)
