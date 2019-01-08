@@ -2946,9 +2946,21 @@ TEST(PlatoTest, PSO_find_best_criterion_values)
     tData = { 0.000423009, 0.0008654, 0.00174032, 0.000871822, 0.000426448 };
     Plato::StandardVector<double> tCurrentBestObjFuncValues(tData);
 
+    // TEST 1: FOUND TWO NEW BEST VALUES
     Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
 
     const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.000423009, tCurrentBestObjFuncValues[0], tTolerance);
+    EXPECT_NEAR(0.0008654, tCurrentBestObjFuncValues[1], tTolerance);
+    EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
+    EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
+    EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
+
+    // TEST 2: FOUND NO NEW BEST VALUES - CURRENT BEST STAYS THE SAME AS PREVIOUS
+    tCurrentObjFuncValues[2] = 4.9283e-05;
+    tCurrentObjFuncValues[4] = 0.000430515;
+    Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
+
     EXPECT_NEAR(0.000423009, tCurrentBestObjFuncValues[0], tTolerance);
     EXPECT_NEAR(0.0008654, tCurrentBestObjFuncValues[1], tTolerance);
     EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
