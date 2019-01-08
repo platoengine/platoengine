@@ -80,6 +80,7 @@ struct OutputDataPSO
 {
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
+    OrdinalType mNumConstraints;  /*!< number of constraints - only needed for ALPSO output */
 
     ScalarType mBestObjFuncValue;  /*!< best - objective function value */
     ScalarType mMeanObjFuncValue;  /*!< mean - objective function value */
@@ -87,6 +88,73 @@ struct OutputDataPSO
     ScalarType mTrustRegionMultiplier;  /*!< trust region multiplier */
 };
 // struct OutputDataPSO
+
+/******************************************************************************//**
+ * @brief Diagnostic data for the augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct OutputDataALPSO
+{
+    OutputDataALPSO() :
+        mNumIter(0),
+        mAugLagFuncCount(0),
+        mBestObjFuncValue(0),
+        mMeanObjFuncValue(0),
+        mStdDevObjFuncValue(0),
+        mBestAugLagFuncValue(0),
+        mMeanAugLagFuncValue(0),
+        mStdDevAugLagFuncValue(0),
+        mTrustRegionMultiplier(0),
+        mBestConstraintValues(),
+        mMeanConstraintValues(),
+        mStdDevConstraintValues(),
+        mMeanPenaltyMultipliers(),
+        mStdDevPenaltyMultipliers(),
+        mMeanLagrangeMultipliers(),
+        mStdDevLagrangeMultipliers()
+    {
+    }
+
+    explicit OutputDataALPSO(const OrdinalType & aNumConstraints) :
+        mNumIter(0),
+        mAugLagFuncCount(0),
+        mBestObjFuncValue(0),
+        mMeanObjFuncValue(0),
+        mStdDevObjFuncValue(0),
+        mBestAugLagFuncValue(0),
+        mMeanAugLagFuncValue(0),
+        mStdDevAugLagFuncValue(0),
+        mTrustRegionMultiplier(0),
+        mBestConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mMeanConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mMeanPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mMeanLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0))
+    {
+    }
+
+    OrdinalType mNumIter;  /*!< number of outer iterations */
+    OrdinalType mAugLagFuncCount;  /*!< number of augmented Lagrangian function evaluations */
+
+    ScalarType mBestObjFuncValue;  /*!< best objective function value */
+    ScalarType mMeanObjFuncValue;  /*!< mean objective function value */
+    ScalarType mStdDevObjFuncValue;  /*!< standard deviation for objective function value */
+    ScalarType mBestAugLagFuncValue;  /*!< best augmented Lagrangian function */
+    ScalarType mMeanAugLagFuncValue;  /*!< mean augmented Lagrangian function */
+    ScalarType mStdDevAugLagFuncValue;  /*!< standard deviation for augmented Lagrangian function */
+    ScalarType mTrustRegionMultiplier;  /*!< trust region multiplier */
+
+    std::vector<ScalarType> mBestConstraintValues;  /*!< constraint values at global best particle location */
+    std::vector<ScalarType> mMeanConstraintValues;  /*!< mean constraint values */
+    std::vector<ScalarType> mStdDevConstraintValues;  /*!< standard deviation for constraint values */
+    std::vector<ScalarType> mMeanPenaltyMultipliers;  /*!< mean penalty multipliers */
+    std::vector<ScalarType> mStdDevPenaltyMultipliers;  /*!< standard deviation for penalty multipliers */
+    std::vector<ScalarType> mMeanLagrangeMultipliers;  /*!< mean Lagrange multipliers */
+    std::vector<ScalarType> mStdDevLagrangeMultipliers;  /*!< standard deviation for Lagrange multipliers */
+};
+// struct OutputDataALPSO
 
 namespace pso
 {
@@ -96,13 +164,33 @@ namespace pso
  * @param [in] aOutputFile output file
 **********************************************************************************/
 template<typename Type>
-void is_file_open(const Type & aOutputFile)
+inline void is_file_open(const Type & aOutputFile)
 {
     try
     {
         if(aOutputFile.is_open() == false)
         {
             throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
+        }
+    }
+    catch(const std::invalid_argument & tError)
+    {
+        throw tError;
+    }
+}
+
+/******************************************************************************//**
+ * @brief Check if the input vector is empty. If empty, thrown exception.
+ * @param [in] aInput vector/container
+**********************************************************************************/
+template<typename ScalarType>
+inline void is_vector_empty(const std::vector<ScalarType>& aInput)
+{
+    try
+    {
+        if(aInput.empty() == true)
+        {
+            throw std::invalid_argument("\n\n ******** MESSAGE: CONTAINER SIZE IS 0. ABORT! ******** \n\n");;
         }
     }
     catch(const std::invalid_argument & tError)
@@ -178,8 +266,8 @@ inline void print_pso_diagnostics_header(const Plato::OutputDataPSO<ScalarType, 
 }
 
 /******************************************************************************//**
- * @brief Print diagnostics for Kelley-Sachs-Bound-Constrained (KSBC) algorithm
- * @param [in] aData diagnostic data for Kelley-Sachs-Bound-Constrained algorithm
+ * @brief Print diagnostics for bound constrained Particle Swarm Optimization (PSO) algorithm.
+ * @param [in] aData diagnostic data PSO algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
@@ -211,6 +299,185 @@ inline void print_pso_diagnostics(const Plato::OutputDataPSO<ScalarType, Ordinal
             << aData.mTrustRegionMultiplier << "\n" << std::flush;
 }
 
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_constraint_headers(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
+                                           std::ofstream& aOutputFile)
+{
+    const OrdinalType tNumConstraints = aData.mBestConstraintValues.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        const OrdinalType tConstraintIndex = tIndex + static_cast<OrdinalType>(1);
+        const OrdinalType tWidth = tIndex == static_cast<OrdinalType>(0) ? 13 : 12;
+//        if(tIndex != static_cast<OrdinalType>(0))
+//        {
+        aOutputFile << std::setw(tWidth) << "Best(H" << tConstraintIndex << ")" << std::setw(13)
+                << "Mean(H" << tConstraintIndex << ")" << std::setw(14) << "StdDev(H" << tConstraintIndex << ")"
+                << std::setw(12) << "Mean(P" << tConstraintIndex << ")" << std::setw(14) << "StdDev(P"
+                << tConstraintIndex << ")" << std::setw(12) << "Mean(l" << tConstraintIndex << ")" << std::setw(14)
+                << "StdDev(l" << tConstraintIndex << ")";
+//        }
+//        else
+//        {
+//            const OrdinalType tWidth = tNumConstraints > static_cast<OrdinalType>(1) ? 10 : 13;
+//            aOutputFile << std::scientific << std::setprecision(6) << "Mean(H" << tIndex + static_cast<OrdinalType>(1)
+//                    << ")" << std::setw(tWidth);
+//        }
+    }
+}
+
+/******************************************************************************//**
+ * @brief Print header in augmented Lagrangian Particle Swarm Optimization (ALPSO)
+ *        algorithm's diagnostic file.
+ * @param [in] aData diagnostic data for ALPSO algorithm
+ * @param [in,out] aOutputFile output/diagnostics file
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_diagnostics_header(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
+                                           std::ofstream& aOutputFile,
+                                           bool aPrint = false)
+{
+    try
+    {
+        Plato::pso::is_file_open(aOutputFile);
+        Plato::pso::is_vector_empty(aData.mBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanConstraintValues);
+        Plato::pso::is_vector_empty(aData.mStdDevConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mMeanLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevLagrangeMultipliers);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+        << "\n LINE: " << __LINE__ << "\n ********";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
+            << std::setw(15) << "Best(L)" << std::setw(15) << "Mean(L)" << std::setw(15) << "StdDev(L)" << std::setw(15)
+            << "Best(F)" << std::setw(15) << "Mean(F)" << std::setw(15) << "StdDev(F)" << std::setw(15) << "TR-Radius";
+    Plato::pso::print_alpso_constraint_headers(aData, aOutputFile);
+    aOutputFile << "\n" << std::flush;
+}
+
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_outer_constraint_diagnostics(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
+                                                     std::ofstream& aOutputFile)
+{
+    const OrdinalType tNumConstraints = aData.mBestConstraintValues.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        aOutputFile << std::setw(15) << aData.mBestConstraintValues[tIndex] << std::setw(15)
+                << aData.mMeanConstraintValues[tIndex] << std::setw(15) << aData.mStdDevConstraintValues[tIndex]
+                << std::setw(15) << aData.mMeanPenaltyMultipliers[tIndex] << std::setw(15)
+                << aData.mStdDevPenaltyMultipliers[tIndex] << std::setw(15) << aData.mMeanLagrangeMultipliers[tIndex]
+                << std::setw(15) << aData.mStdDevLagrangeMultipliers[tIndex];
+    }
+}
+
+/******************************************************************************//**
+ * @brief Print diagnostics for augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm.
+ * @param [in] aData diagnostics data for ALPSO algorithm
+ * @param [in,out] aOutputFile output file
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_outer_diagnostics(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
+                                          std::ofstream& aOutputFile,
+                                          bool aPrint = false)
+{
+    try
+    {
+        Plato::pso::is_file_open(aOutputFile);
+        Plato::pso::is_vector_empty(aData.mBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanConstraintValues);
+        Plato::pso::is_vector_empty(aData.mStdDevConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mMeanLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevLagrangeMultipliers);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+                << "\n LINE: " << __LINE__ << "\n ********";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    // ******** PRINT DIAGNOSTICS ********
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
+            << aData.mAugLagFuncCount << std::setw(20) << aData.mBestAugLagFuncValue << std::setw(15)
+            << aData.mMeanAugLagFuncValue << std::setw(15) << aData.mStdDevAugLagFuncValue << std::setw(15)
+            << aData.mBestObjFuncValue << std::setw(15) << aData.mMeanObjFuncValue << std::setw(15)
+            << aData.mStdDevObjFuncValue << std::setw(15) << "*";
+    Plato::pso::print_alpso_outer_constraint_diagnostics(aData, aOutputFile);
+    aOutputFile << "\n" << std::flush;
+}
+
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_inner_constraint_diagnostics(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
+                                                     std::ofstream& aOutputFile)
+{
+    const OrdinalType tNumConstraints = aData.mNumConstraints;
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        aOutputFile << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << "*"
+                << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << "*";
+    }
+}
+
+/******************************************************************************//**
+ * @brief Print inner-loop diagnostics for for augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm.
+ * @param [in] aData diagnostics data for bound constrained PSO algorithm
+ * @param [in,out] aOutputFile output/diagnostics file
+ * @param [in] aPrint flag use to enable/disable output (default = disabled)
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_alpso_inner_diagnostics(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
+                                          std::ofstream& aOutputFile,
+                                          bool aPrint = false)
+{
+    try
+    {
+        Plato::pso::is_file_open(aOutputFile);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        std::ostringstream tMessage;
+        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
+        << "\n LINE: " << __LINE__ << "\n ********";
+        tMessage << tErrorMsg.what();
+        if(aPrint == true)
+        {
+            std::cout << tMessage.str().c_str() << std::flush;
+        }
+        throw std::invalid_argument(tMessage.str().c_str());
+    }
+
+    // ******** DIAGNOSTICS FOR CONSTRAINTS ********
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
+            << "*" << std::setw(20) << aData.mBestObjFuncValue << std::setw(15)
+            << aData.mMeanObjFuncValue << std::setw(15) << aData.mStdDevObjFuncValue << std::setw(15) << "*"
+            << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << aData.mTrustRegionMultiplier;
+    Plato::pso::print_alpso_inner_constraint_diagnostics(aData, aOutputFile);
+    aOutputFile << "\n" << std::flush;
+}
+
 } // namespace pso
 
 template<typename ScalarType, typename OrdinalType = size_t>
@@ -229,21 +496,28 @@ public:
     virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                        Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
 };
+// class GradFreeCriteria
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRosenbrock : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     GradFreeRosenbrock()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~GradFreeRosenbrock()
     {
     }
 
     /******************************************************************************//**
-     * @brief Evaluate Rosenbrock criterion
+     * @brief Evaluate criterion at each particle.
      * @param [in] aControl multi-vector of control variables (i.e. optimization variables)
      * @param [out] aOutput criterion value for each control vector
      **********************************************************************************/
@@ -261,7 +535,8 @@ public:
 
 private:
     /******************************************************************************//**
-     * @brief Evaluate function: 100 * \left(x_2 - x_1^2\right)^2 + \left(1 - x_1\right)^2
+     * @brief Evaluate function:
+     * \f$ 100 * \left(x_2 - x_1^2\right)^2 + \left(1 - x_1\right)^2 \f$
      * @param [in] aControl vector of control variables (i.e. optimization variables)
      * @return Rosenbrock function evaluation
      **********************************************************************************/
@@ -272,7 +547,84 @@ private:
                 + std::pow(static_cast<ScalarType>(1) - aControl[0], static_cast<ScalarType>(2));
         return (tOutput);
     }
+
+private:
+    GradFreeRosenbrock(const Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & operator=(const Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & aRhs);
 };
+// class GradFreeRosenbrock
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeRadius : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    GradFreeRadius() :
+        mLimit(1)
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeRadius()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate Rosenbrock criterion
+     * @param [in] aInput radius upper bound
+     **********************************************************************************/
+    void setLimit(const ScalarType & aInput)
+    {
+        mLimit = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate criterion
+     * @param [in] aControl multi-vector of control variables (i.e. optimization variables)
+     * @param [out] aOutput criterion value for each control vector
+     **********************************************************************************/
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate function:
+     * \f$ \left(\mathbf{z}(0)\right)^2 + \left(\mathbf{z}(1)\right)^2 - limit \f$
+     * @param [in] aControl vector of control variables (i.e. optimization variables)
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        assert(aControl.size() > static_cast<OrdinalType>(0));
+
+        ScalarType tOutput = std::pow(aControl[0], static_cast<ScalarType>(2.))
+                + std::pow(aControl[1], static_cast<ScalarType>(2.));
+        tOutput = tOutput - mLimit;
+
+        return (tOutput);
+    }
+
+private:
+    ScalarType mLimit; /*!< radius upper bound */
+
+private:
+    GradFreeRadius(const Plato::GradFreeRadius<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeRadius<ScalarType, OrdinalType> & operator=(const Plato::GradFreeRadius<ScalarType, OrdinalType> & aRhs);
+};
+// class GradFreeRadius
 
 /******************************************************************************//**
  * @brief Generic interface that gives access to the list of criteria
@@ -785,6 +1137,7 @@ public:
     explicit AugmentedLagrangianStageMngPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                             const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective,
                                             const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
+            mNumAugLagFuncEval(0),
             mPenaltyExpansionMultiplier(2),
             mPenaltyContractionMultiplier(0.5),
             mFeasibilityInexactnessTolerance(1e-4),
@@ -819,9 +1172,72 @@ public:
         mFeasibilityInexactnessTolerance = aInput;
     }
 
+    OrdinalType getNumConstraints() const
+    {
+        return (mConstraints->size());
+    }
+
+    OrdinalType getNumAugLagFuncEvaluations() const
+    {
+        return (mNumAugLagFuncEval);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentObjFuncValues() const
+    {
+        assert(mCurrentObjFuncValues.get() != nullptr);
+        return(*mCurrentObjFuncValues);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getPreviousObjFuncValues() const
+    {
+        assert(mPreviousObjFuncValues.get() != nullptr);
+        return(*mPreviousObjFuncValues);
+    }
+
+    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentConstraintValues() const
+    {
+        assert(mCurrentConstraintValues.get() != nullptr);
+        return(*mCurrentConstraintValues);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValue(const OrdinalType & aIndex) const
+    {
+        assert(mCurrentConstraintValues.get() != nullptr);
+        assert(aIndex < mCurrentConstraintValues->getNumVectors());
+        return((*mCurrentConstraintValues)[aIndex]);
+    }
+
+    const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousConstraintValues() const
+    {
+        assert(mPreviousConstraintValues.get() != nullptr);
+        return(*mPreviousConstraintValues);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getPreviousConstraintValue(const OrdinalType & aIndex) const
+    {
+        assert(mPreviousConstraintValues.get() != nullptr);
+        assert(aIndex < mPreviousConstraintValues->getNumVectors());
+        return((*mPreviousConstraintValues)[aIndex]);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getPenaltyMultipliers(const OrdinalType & aIndex) const
+    {
+        assert(mPenaltyMultipliers.get() != nullptr);
+        assert(aIndex < mPenaltyMultipliers->getNumVectors());
+        return((*mPenaltyMultipliers)[aIndex]);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getLagrangeMultipliers(const OrdinalType & aIndex) const
+    {
+        assert(mLagrangeMultipliers.get() != nullptr);
+        assert(aIndex < mLagrangeMultipliers->getNumVectors());
+        return((*mLagrangeMultipliers)[aIndex]);
+    }
+
     void evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                            Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
+        mNumAugLagFuncEval += aOutput.size();
         // Evaluate objective function
         mPreviousObjFuncValues->update(static_cast<ScalarType>(1), *mCurrentObjFuncValues, static_cast<ScalarType>(0));
         mCurrentObjFuncValues->fill(static_cast<ScalarType>(0));
@@ -847,9 +1263,10 @@ public:
             {
                 const ScalarType tLagMultiplierOverPenalty = -tLagrangeMultipliers[tParticleIndex]
                         / (static_cast<ScalarType>(2) * tPenaltyValues[tParticleIndex]);
-                const ScalarType tConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
-                const ScalarType tNewLagMultiplier = tLagrangeMultipliers[tParticleIndex] +
-                        (static_cast<ScalarType>(2) * tPenaltyValues[tParticleIndex] * tConstraintValue);
+                const ScalarType tSuggestedConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
+                ScalarType tNewLagMultiplier = tLagrangeMultipliers[tParticleIndex] +
+                        (static_cast<ScalarType>(2) * tPenaltyValues[tParticleIndex] * tSuggestedConstraintValue);
+                tNewLagMultiplier = std::max(tNewLagMultiplier, static_cast<ScalarType>(0));
                 tLagrangeMultipliers[tParticleIndex] = tNewLagMultiplier;
             }
         }
@@ -862,17 +1279,19 @@ public:
         {
             const Plato::Vector<ScalarType, OrdinalType> & tCurrentConstraint = (*mCurrentConstraintValues)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tPreviousConstraint = (*mPreviousConstraintValues)[tConstraintIndex];
-            Plato::Vector<ScalarType, OrdinalType> & tPenaltyValues = (*mPenaltyMultipliers)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mPenaltyMultipliers)[tConstraintIndex];
 
-            const OrdinalType tNumParticles = tPenaltyValues.size();
+            const OrdinalType tNumParticles = tPenaltyMultipliers.size();
             for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
             {
                 const bool tIsConstraintGreaterThanPrevious = tCurrentConstraint[tParticleIndex] > tPreviousConstraint[tParticleIndex];
-                tPenaltyValues[tParticleIndex] = tIsConstraintGreaterThanPrevious ? mPenaltyExpansionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
                 const bool tIsConstraintGreaterThanFeasibilityTol = tCurrentConstraint[tParticleIndex] > mFeasibilityInexactnessTolerance;
-                tPenaltyValues[tParticleIndex] = tIsConstraintGreaterThanFeasibilityTol ? mPenaltyExpansionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
+                tPenaltyMultipliers[tParticleIndex] = tIsConstraintGreaterThanPrevious || tIsConstraintGreaterThanFeasibilityTol ?
+                        mPenaltyExpansionMultiplier * tPenaltyMultipliers[tParticleIndex] : tPenaltyMultipliers[tParticleIndex];
+
                 const bool tIsConstraintLessThanFeasibilityTol = tCurrentConstraint[tParticleIndex] <= mFeasibilityInexactnessTolerance;
-                tPenaltyValues[tParticleIndex] = tIsConstraintLessThanFeasibilityTol ? mPenaltyContractionMultiplier * tPenaltyValues[tParticleIndex] : tPenaltyValues[tParticleIndex];
+                tPenaltyMultipliers[tParticleIndex] = tIsConstraintLessThanFeasibilityTol ?
+                        mPenaltyContractionMultiplier * tPenaltyMultipliers[tParticleIndex] : tPenaltyMultipliers[tParticleIndex];
             }
         }
     }
@@ -917,14 +1336,14 @@ private:
             const Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = (*mCurrentConstraintValues)[tConstraintIndex];
 
-            const OrdinalType tNumParticles = tConstraintValues.size();
+            const OrdinalType tNumParticles = mCurrentObjFuncValues->size();
             for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
             {
                 const ScalarType tLagMultiplierOverPenalty = -tLagrangeMultipliers[tParticleIndex]
                         / (static_cast<ScalarType>(2) * tPenaltyMultipliers[tParticleIndex]);
-                const ScalarType tConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
-                const ScalarType tLagrangeMultipliersTimesConstraint = tLagrangeMultipliers[tParticleIndex] * tConstraintValue;
-                const ScalarType tConstraintTimesConstraint = tConstraintValue * tConstraintValue;
+                const ScalarType tSuggestedConstraintValue = std::max(tConstraintValues[tParticleIndex], tLagMultiplierOverPenalty);
+                const ScalarType tLagrangeMultipliersTimesConstraint = tLagrangeMultipliers[tParticleIndex] * tSuggestedConstraintValue;
+                const ScalarType tConstraintTimesConstraint = tSuggestedConstraintValue * tSuggestedConstraintValue;
                 const ScalarType tMyConstraintContribution = tLagrangeMultipliersTimesConstraint
                         + tPenaltyMultipliers[tParticleIndex] * tConstraintTimesConstraint;
                 aOutput[tParticleIndex] += tMyConstraintContribution;
@@ -933,6 +1352,7 @@ private:
     }
 
 private:
+    OrdinalType mNumAugLagFuncEval;
     ScalarType mPenaltyExpansionMultiplier;
     ScalarType mPenaltyContractionMultiplier;
     ScalarType mFeasibilityInexactnessTolerance;
@@ -1367,13 +1787,14 @@ private:
     ParticleSwarmOperations(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
     Plato::ParticleSwarmOperations<ScalarType, OrdinalType> & operator=(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
 };
+// class ParticleSwarmOperations
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class BoundConstrainedPSO
 {
 public:
-    BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
-                        const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective) :
+    explicit BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
+                                 const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective) :
             mPrintDiagnostics(false),
             mNumIterations(0),
             mMaxNumIterations(1000),
@@ -1383,6 +1804,21 @@ public:
             mWorkVector(aFactory->objective().create()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mStageMng(std::make_shared<Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>>(aObjective)),
+            mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory))
+    {
+    }
+
+    explicit BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
+                                 const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
+            mPrintDiagnostics(false),
+            mNumIterations(0),
+            mMaxNumIterations(1000),
+            mBestObjFuncTolerance(1e-10),
+            mMeanObjFuncTolerance(5e-4),
+            mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+            mWorkVector(aFactory->objective().create()),
+            mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
+            mStageMng(aStageMng),
             mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory))
     {
     }
@@ -1452,6 +1888,15 @@ public:
         mDataMng->setLowerBounds(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set number of constraints. Required for ALPSO diagnostics output.
+     * @param [in] aInput number of constraints
+    **********************************************************************************/
+    void setNumConstraints(const OrdinalType & aInput)
+    {
+        mOutputData.mNumConstraints = aInput;
+    }
+
     OrdinalType getNumIterations() const
     {
         return (mNumIterations);
@@ -1478,7 +1923,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Solve particle swarm optimization problem
+     * @brief Solve particle swarm bound constrained optimization problem
     **********************************************************************************/
     void solve()
     {
@@ -1486,8 +1931,7 @@ public:
         assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
 
         this->openOutputFile();
-        mOperations->checkInertiaMultiplier();
-        mDataMng->setInitialParticles();
+        this->initialize();
 
         mNumIterations = 0;
         while(1)
@@ -1510,6 +1954,39 @@ public:
                 break;
             }
         }
+    }
+
+    /******************************************************************************//**
+     * @brief Solve constrained optimization problem
+     * @param [in,out] aOutputStream output/diagnostics file
+    **********************************************************************************/
+    void solve(std::ofstream & aOutputStream)
+    {
+        mNumIterations = 0;
+
+        while(1)
+        {
+            mNumIterations++;
+            mStageMng->evaluateObjective(mDataMng->getCurrentParticles(), *mWorkVector);
+            mOperations->setCurrentObjFuncValues(*mWorkVector);
+            mOperations->findBestParticlePositions(*mDataMng);
+            mOperations->updateParticleVelocities(*mDataMng);
+            mOperations->updateParticlePositions(*mDataMng);
+            mOperations->updateTrustRegionMultiplier();
+            mOperations->computeBestObjFuncStatistics();
+            this->outputDiagnostics(aOutputStream);
+
+            if(this->checkStoppingCriteria())
+            {
+                break;
+            }
+        }
+    }
+
+    void initialize()
+    {
+        mOperations->checkInertiaMultiplier();
+        mDataMng->setInitialParticles();
     }
 
 private:
@@ -1587,7 +2064,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics for Kelley-Sachs bound constrained optimization algorithm
+     * @brief Print diagnostics particle swarm bound constrained optimization algorithm.
     **********************************************************************************/
     void outputDiagnostics()
     {
@@ -1599,15 +2076,40 @@ private:
         const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
-            mOutputData.mNumIter = mNumIterations;
-            mOutputData.mObjFuncCount = mNumIterations * mDataMng->getNumParticles();
-            mOutputData.mBestObjFuncValue = mOperations->getCurrentGlobalBestObjFunValue();
-            mOutputData.mMeanObjFuncValue = mOperations->getBestObjFuncValueMean();
-            mOutputData.mStdDevObjFuncValue = mOperations->getBestObjFuncValueStdDev();
-            mOutputData.mTrustRegionMultiplier = mOperations->getTrustRegionMultiplier();
-
+            this->cacheOutputData();
             Plato::pso::print_pso_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
         }
+    }
+
+    /******************************************************************************//**
+     * @brief Print diagnostics particle swarm constrained optimization algorithm.
+    **********************************************************************************/
+    void outputDiagnostics(std::ofstream & aOutputStream)
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            this->cacheOutputData();
+            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Cache output/diagnostics data.
+    **********************************************************************************/
+    void cacheOutputData()
+    {
+        mOutputData.mNumIter = mNumIterations;
+        mOutputData.mObjFuncCount = mNumIterations * mDataMng->getNumParticles();
+        mOutputData.mBestObjFuncValue = mOperations->getCurrentGlobalBestObjFunValue();
+        mOutputData.mMeanObjFuncValue = mOperations->getBestObjFuncValueMean();
+        mOutputData.mStdDevObjFuncValue = mOperations->getBestObjFuncValueStdDev();
+        mOutputData.mTrustRegionMultiplier = mOperations->getTrustRegionMultiplier();
     }
 
 private:
@@ -1632,6 +2134,274 @@ private:
     Plato::BoundConstrainedPSO<ScalarType, OrdinalType> & operator=(const Plato::BoundConstrainedPSO<ScalarType, OrdinalType>&);
 };
 // class BoundConstrainedPSO
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class AugmentedLagrangianPSO
+{
+public:
+    AugmentedLagrangianPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
+                           const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective,
+                           const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
+            mPrintDiagnostics(false),
+            mNumIterations(0),
+            mMaxNumIterations(1000),
+            mBestObjFuncTolerance(1e-10),
+            mMeanObjFuncTolerance(5e-4),
+            mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+            mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
+            mOptimizer(std::make_shared<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~AugmentedLagrangianPSO()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Enable output of diagnostics (i.e. optimization problem status)
+    **********************************************************************************/
+    void enableDiagnostics()
+    {
+        mPrintDiagnostics = true;
+    }
+
+    void setMaxNumIterations(const OrdinalType & aInput)
+    {
+        mMaxNumIterations = aInput;
+    }
+
+    void setMaxNumConsecutiveFailures(const OrdinalType & aInput)
+    {
+        mOptimizer->setMaxNumConsecutiveFailures(aInput);
+    }
+
+    void setMaxNumConsecutiveSuccesses(const OrdinalType & aInput)
+    {
+        mOptimizer->setMaxNumConsecutiveSuccesses(aInput);
+    }
+
+    void setInertiaMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setInertiaMultiplier(aInput);
+    }
+
+    void setCognitiveMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setCognitiveMultiplier(aInput);
+    }
+
+    void setSocialBehaviorMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setSocialBehaviorMultiplier(aInput);
+    }
+
+    void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+    {
+        mOptimizer->setUpperBounds(aInput);
+    }
+
+    void setLowerBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+    {
+        mOptimizer->setLowerBounds(aInput);
+    }
+
+    void setUpperBounds(const ScalarType & aInput)
+    {
+        mOptimizer->setUpperBounds(aInput);
+    }
+
+    void setLowerBounds(const ScalarType & aInput)
+    {
+        mOptimizer->setLowerBounds(aInput);
+    }
+
+    OrdinalType getNumIterations() const
+    {
+        return (mNumIterations);
+    }
+
+    ScalarType getBestObjFuncValueMean() const
+    {
+        return (mOptimizer->getBestObjFuncValueMean());
+    }
+
+    ScalarType getBestObjFuncValueStdDev() const
+    {
+        return (mOptimizer->getBestObjFuncValueStdDev());
+    }
+
+    ScalarType getBestObjFuncValue() const
+    {
+        return (mOptimizer->getCurrentGlobalBestObjFunValue());
+    }
+
+    const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
+    {
+        return (mOptimizer->getDataMng());
+    }
+
+    /******************************************************************************//**
+     * @brief Solve particle swarm optimization problem
+    **********************************************************************************/
+    void solve()
+    {
+        assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
+        assert(mOptimizer.use_count() > static_cast<OrdinalType>(0));
+
+        mNumIterations = 0;
+        this->openOutputFile();
+        this->initialize();
+
+        while(1)
+        {
+            mNumIterations++;
+            mOptimizer->solve();
+            mStageMng->updatePenaltyMultipliers();
+            mStageMng->updateLagrangeMultipliers();
+
+            this->outputDiagnostics();
+            if(this->checkStoppingCriteria())
+            {
+                this->outputStoppingCriterion();
+                this->closeOutputFile();
+                break;
+            }
+        }
+    }
+
+private:
+    void initialize()
+    {
+        mOptimizer->initialize();
+        const OrdinalType tNumConstraints = mStageMng->getNumConstraints();
+        mOptimizer->setNumConstraints(tNumConstraints);
+    }
+
+    bool checkStoppingCriteria()
+    {
+        bool tStop = false;
+        const ScalarType tBestObjFunValueMean = mOptimizer->getBestObjFuncValueMean();
+        const ScalarType tCurrentGlobalBestObjFunValue = mOptimizer->getCurrentGlobalBestObjFunValue();
+
+        if(mNumIterations >= mMaxNumIterations)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::MAX_NUMBER_ITERATIONS;
+        }
+        else if(tCurrentGlobalBestObjFunValue < mBestObjFuncTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::TRUE_OBJECTIVE_TOLERANCE;
+        }
+        else if(tBestObjFunValueMean < mMeanObjFuncTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
+        }
+
+        return (tStop);
+    }
+
+    /******************************************************************************//**
+     * @brief Open output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
+                Plato::pso::print_alpso_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion into diagnostics file.
+    **********************************************************************************/
+    void outputStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::pso::get_stop_criterion(mStopCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print diagnostics for Kelley-Sachs bound constrained optimization algorithm
+    **********************************************************************************/
+    void outputDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = mNumIterations;
+            mOutputData.mAugLagFuncEval = mStageMng->getNumAugLagFuncEvaluations();
+            mOutputData.mBestObjFuncValue = mOptimizer->getCurrentGlobalBestObjFunValue();
+            mOutputData.mMeanObjFuncValue = mOptimizer->getBestObjFuncValueMean();
+            mOutputData.mStdDevObjFuncValue = mOptimizer->getBestObjFuncValueStdDev();
+            mOutputData.mTrustRegionMultiplier = mOptimizer->getTrustRegionMultiplier();
+
+            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+private:
+    bool mPrintDiagnostics;
+    std::ofstream mOutputStream;
+
+    OrdinalType mNumIterations;
+    OrdinalType mMaxNumIterations;
+
+    ScalarType mBestObjFuncTolerance;
+    ScalarType mMeanObjFuncTolerance;
+
+    Plato::particle_swarm::stop_t mStopCriterion;
+    Plato::OutputDataALPSO<ScalarType, OrdinalType> mOutputData;
+
+    std::shared_ptr<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>> mStageMng;
+    std::shared_ptr<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>> mOptimizer;
+
+private:
+    AugmentedLagrangianPSO(const Plato::AugmentedLagrangianPSO<ScalarType, OrdinalType>&);
+    Plato::AugmentedLagrangianPSO<ScalarType, OrdinalType> & operator=(const Plato::AugmentedLagrangianPSO<ScalarType, OrdinalType>&);
+};
+// class AugmentedLagrangianPSO
 
 }// namespace Plato
 
@@ -1662,6 +2432,27 @@ TEST(PlatoTest, PSO_DataMng)
     PlatoTest::checkMultiVectorData(tDataMng.getCurrentVelocities(), tDataMng.getPreviousVelocities());
 }
 
+TEST(PlatoTest, GradFreeRadius)
+{
+    // ********* Allocate Core Optimization Data Templates *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 3;
+    Plato::StandardMultiVector<double> tControls(tNumParticles, tNumControls);
+    tControls[0].fill(0.705);
+    tControls[1].fill(0.695);
+    tControls[2].fill(0.725);
+
+    // TEST OBJECTIVE
+    Plato::StandardVector<double> tObjVals(tNumParticles);
+    Plato::GradFreeRadius<double> tCriterion;
+    tCriterion.value(tControls, tObjVals);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(-0.00595, tObjVals[0], tTolerance);
+    EXPECT_NEAR(-0.03395, tObjVals[1], tTolerance);
+    EXPECT_NEAR(0.05125, tObjVals[2], tTolerance);
+}
+
 TEST(PlatoTest, GradFreeRosenbrock)
 {
     // ********* Allocate Core Optimization Data Templates *********
@@ -1674,8 +2465,8 @@ TEST(PlatoTest, GradFreeRosenbrock)
 
     // TEST OBJECTIVE
     Plato::StandardVector<double> tObjVals(tNumParticles);
-    Plato::GradFreeRosenbrock<double> tObjective;
-    tObjective.value(tControls, tObjVals);
+    Plato::GradFreeRosenbrock<double> tCriterion;
+    tCriterion.value(tControls, tObjVals);
 
     const double tTolerance = 1e-6;
     EXPECT_NEAR(401, tObjVals[0], tTolerance);
@@ -1692,6 +2483,16 @@ TEST(PlatoTest, PSO_IsFileOpenExeption)
     ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
     tFile.close();
     std::system("rm -f MyFile.txt");
+}
+
+TEST(PlatoTest, PSO_IsVectorEmpty)
+{
+    std::vector<double> tVector;
+    ASSERT_THROW(Plato::pso::is_vector_empty(tVector), std::invalid_argument);
+
+    const size_t tLength = 1;
+    tVector.resize(tLength);
+    ASSERT_NO_THROW(Plato::pso::is_vector_empty(tVector));
 }
 
 TEST(PlatoTest, PSO_PrintStoppingCriterion)
@@ -1716,6 +2517,16 @@ TEST(PlatoTest, PSO_PrintStoppingCriterion)
     Plato::pso::get_stop_criterion(tFlag, tDescription);
     tGold = "\n\n****** Optimization stopping due to mean objective function tolerance being met. ******\n\n";
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+}
+
+TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
+{
+    std::ofstream tFile1;
+    Plato::OutputDataPSO<double> tData;
+    ASSERT_THROW(Plato::pso::print_pso_diagnostics_header(tData, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_pso_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_pso_diagnostics(tData, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_pso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
 }
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
@@ -1756,6 +2567,122 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
     tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
     tGold << "1204.232100e+008.232100e+002.232100e+001.000000e+00";
     tGold << "2402.232100e+007.232100e+002.432100e+001.000000e+00";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
+{
+    std::ofstream tFile1;
+    Plato::OutputDataALPSO<double> tDataALPSO;
+    ASSERT_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tFile1, true /* print message */), std::invalid_argument);
+
+    Plato::OutputDataPSO<double> tDataPSO;
+    ASSERT_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tFile1, true /* print message */), std::invalid_argument);
+}
+
+TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)
+{
+    std::ofstream tWriteFile;
+    tWriteFile.open("MyFile1.txt");
+    Plato::OutputDataPSO<double> tDataPSO;
+    const size_t tNumConstraints = 2;
+    Plato::OutputDataALPSO<double> tDataALPSO(tNumConstraints);
+    tDataPSO.mNumConstraints = tNumConstraints;
+
+    // **** AUGMENTED LAGRANGIAN OUTPUT ****
+    tDataPSO.mNumIter = 0;
+    tDataPSO.mObjFuncCount = 1;
+    tDataPSO.mBestObjFuncValue = 1;
+    tDataPSO.mMeanObjFuncValue = 1.5;
+    tDataPSO.mStdDevObjFuncValue = 2.34e-2;
+    tDataPSO.mTrustRegionMultiplier = 0.5;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
+    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+
+    tDataPSO.mNumIter = 1;
+    tDataPSO.mObjFuncCount = 10;
+    tDataPSO.mBestObjFuncValue = 0.1435;
+    tDataPSO.mMeanObjFuncValue = 0.78;
+    tDataPSO.mStdDevObjFuncValue = 0.298736;
+    tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+
+    // **** AUGMENTED LAGRANGIAN OUTPUT ****
+    tDataALPSO.mNumIter = 1;
+    tDataALPSO.mAugLagFuncCount = 10;
+    tDataALPSO.mBestAugLagFuncValue = 1.2359e-1;
+    tDataALPSO.mMeanAugLagFuncValue = 3.2359e-1;
+    tDataALPSO.mStdDevAugLagFuncValue = 3.2359e-2;
+    tDataALPSO.mBestObjFuncValue = 8.2359e-2;
+    tDataALPSO.mMeanObjFuncValue = 9.2359e-2;
+    tDataALPSO.mStdDevObjFuncValue = 2.2359e-2;
+    tDataALPSO.mBestConstraintValues[0] = 1.23e-5;
+    tDataALPSO.mBestConstraintValues[1] = 3.65e-3;
+    tDataALPSO.mMeanConstraintValues[0] = 4.23e-5;
+    tDataALPSO.mMeanConstraintValues[1] = 6.65e-3;
+    tDataALPSO.mStdDevConstraintValues[0] = 1.23e-5;
+    tDataALPSO.mStdDevConstraintValues[1] = 8.65e-4;
+    tDataALPSO.mMeanPenaltyMultipliers[0] = 1;
+    tDataALPSO.mMeanPenaltyMultipliers[1] = 2;
+    tDataALPSO.mStdDevPenaltyMultipliers[0] = 0.25;
+    tDataALPSO.mStdDevPenaltyMultipliers[1] = 0.1;
+    tDataALPSO.mMeanLagrangeMultipliers[0] = 1.23e-2;
+    tDataALPSO.mMeanLagrangeMultipliers[1] = 8.65e-1;
+    tDataALPSO.mStdDevLagrangeMultipliers[0] = 9.23e-3;
+    tDataALPSO.mStdDevLagrangeMultipliers[1] = 5.65e-1;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+    tDataPSO.mNumIter = 1;
+    tDataPSO.mObjFuncCount = 10;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+    tDataPSO.mNumIter = 2;
+    tDataPSO.mObjFuncCount = 20;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+    tDataPSO.mNumIter = 3;
+    tDataPSO.mObjFuncCount = 30;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+    tDataALPSO.mNumIter = 2;
+    tDataALPSO.mAugLagFuncCount = 40;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+    tDataPSO.mNumIter = 1;
+    tDataPSO.mObjFuncCount = 10;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+    tDataALPSO.mNumIter = 3;
+    tDataALPSO.mAugLagFuncCount = 50;
+    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+    tWriteFile.close();
+
+    std::ifstream tReadFile;
+    tReadFile.open("MyFile1.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f MyFile1.txt");
+
+    std::stringstream tGold;
+    tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
+    tGold << "Best(H2)Mean(H2)StdDev(H2)Mean(P2)StdDev(P2)Mean(l2)StdDev(l2)";
+    tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+00";
+    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+    tGold << "1101.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+    tGold << "2*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+    tGold << "3*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+    tGold << "2401.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+    tGold << "3501.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
@@ -1904,6 +2831,68 @@ TEST(PlatoTest, PSO_BoundConstrainedStageMng)
 
     const double tTolerance = 1e-6;
     EXPECT_NEAR(401, tObjFuncValues[0], tTolerance);
+}
+
+TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
+{
+    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 2;
+    const size_t tNumConstraints = 1;
+    tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateDual(tNumParticles, tNumConstraints);
+    tFactory->allocateControl(tNumControls, tNumParticles);
+
+    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+    std::shared_ptr<Plato::GradFreeRadius<double>> tConstraint = std::make_shared<Plato::GradFreeRadius<double>>();
+    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraintList = std::make_shared<Plato::GradFreeCriteriaList<double>>();
+    tConstraintList->add(tConstraint);
+
+    Plato::AugmentedLagrangianStageMngPSO<double> tStageMng(tFactory, tObjective, tConstraintList);
+
+    // FIRST CALL
+    Plato::StandardVector<double> tLagrangianValues(tNumParticles);
+    Plato::StandardMultiVector<double> tControl(tNumParticles, tNumControls);
+    tControl[0].fill(0.725);
+    tControl[1].fill(0.705);
+    tStageMng.evaluateObjective(tControl, tLagrangianValues);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(4.053290625, tLagrangianValues[0], tTolerance);
+    EXPECT_NEAR(4.4123850625, tLagrangianValues[1], tTolerance);
+    EXPECT_NEAR(4.0506640625, tStageMng.getCurrentObjFuncValues()[0], tTolerance);
+    EXPECT_NEAR(4.4123850625, tStageMng.getCurrentObjFuncValues()[1], tTolerance);
+
+    tStageMng.updatePenaltyMultipliers();
+    EXPECT_NEAR(2, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(0.5, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[1], tTolerance);
+
+    tStageMng.updateLagrangeMultipliers();
+    EXPECT_NEAR(0.205, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(0, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[1], tTolerance);
+
+    // SECOND CALL
+    tControl[0].fill(0.715);
+    tControl[1].fill(0.695);
+    tStageMng.evaluateObjective(tControl, tLagrangianValues);
+    EXPECT_NEAR(4.2392603175, tLagrangianValues[0], tTolerance);
+    EXPECT_NEAR(4.5863650625, tLagrangianValues[1], tTolerance);
+    EXPECT_NEAR(4.2336500625, tStageMng.getCurrentObjFuncValues()[0], tTolerance);
+    EXPECT_NEAR(4.5863650625, tStageMng.getCurrentObjFuncValues()[1], tTolerance);
+    EXPECT_NEAR(4.0506640625, tStageMng.getPreviousObjFuncValues()[0], tTolerance);
+    EXPECT_NEAR(4.4123850625, tStageMng.getPreviousObjFuncValues()[1], tTolerance);
+    EXPECT_NEAR(0.02245, tStageMng.getCurrentConstraintValue(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(-0.03395, tStageMng.getCurrentConstraintValue(0 /* constraint index */)[1], tTolerance);
+    EXPECT_NEAR(0.05125, tStageMng.getPreviousConstraintValue(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(-0.00595, tStageMng.getPreviousConstraintValue(0 /* constraint index */)[1], tTolerance);
+
+    tStageMng.updatePenaltyMultipliers();
+    EXPECT_NEAR(4, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(0.25, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[1], tTolerance);
+
+    tStageMng.updateLagrangeMultipliers();
+    EXPECT_NEAR(0.3846, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(0, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[1], tTolerance);
 }
 
 TEST(PlatoTest, PSO_Solve)
