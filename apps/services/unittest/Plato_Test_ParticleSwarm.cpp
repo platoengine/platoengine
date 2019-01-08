@@ -2956,7 +2956,7 @@ TEST(PlatoTest, PSO_find_best_criterion_values)
     EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
     EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
 
-    // TEST 2: FOUND NO NEW BEST VALUES - CURRENT BEST STAYS THE SAME AS PREVIOUS
+    // TEST 2: FOUND NO NEW BEST VALUES - CURRENT BEST VALUES ARE NOT UNCHANGED
     tCurrentObjFuncValues[2] = 4.9283e-05;
     tCurrentObjFuncValues[4] = 0.000430515;
     Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
@@ -2966,6 +2966,33 @@ TEST(PlatoTest, PSO_find_best_criterion_values)
     EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
     EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
     EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
+}
+
+TEST(PlatoTest, PSO_find_global_best_criterion_value_location)
+{
+    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 };
+    Plato::StandardVector<double> tCurrentBestObjFuncValues(tData);
+
+    // TEST 1: FOUND NEW GLOBAL BEST VALUE
+    size_t tNewGlobalBestObjFuncValueLocation = 0;
+    double tCurrentGlobalBestObjFuncValue = std::numeric_limits<double>::max();
+    EXPECT_TRUE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
+    EXPECT_EQ(2u, tNewGlobalBestObjFuncValueLocation);
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(3.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
+
+    // TEST 2: DID NO FIND NEW GLOBAL BEST VALUES - CURRENT GLOBAL BEST IS NOT UNCHANGED
+    tNewGlobalBestObjFuncValueLocation = 0;
+    EXPECT_FALSE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
+    EXPECT_EQ(0u, tNewGlobalBestObjFuncValueLocation);
+    EXPECT_NEAR(3.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
+
+    // TEST 3: FOUND NEW GLOBAL BEST VALUES - CURRENT GLOBAL BEST IS CHANGED
+    tNewGlobalBestObjFuncValueLocation = 0;
+    tCurrentBestObjFuncValues[1] = 2.9283e-05;
+    EXPECT_TRUE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
+    EXPECT_EQ(1u, tNewGlobalBestObjFuncValueLocation);
+    EXPECT_NEAR(2.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
 }
 
 TEST(PlatoTest, PSO_findBestParticlePositions)
