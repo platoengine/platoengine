@@ -1375,6 +1375,31 @@ private:
 };
 // class AugmentedLagrangianStageMngPSO
 
+template<typename ScalarType, typename OrdinalType>
+inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions,
+                       const Plato::Vector<ScalarType, OrdinalType> & aInput)
+{
+    ScalarType tOutput = aReductions.sum(aInput);
+    const OrdinalType tNumElements = aInput.size();
+    tOutput = tOutput / tNumElements;
+    return (tOutput);
+}
+
+template<typename ScalarType, typename OrdinalType>
+inline ScalarType standard_deviation(const ScalarType & aMean, const Plato::Vector<ScalarType, OrdinalType> & aInput)
+{
+    ScalarType tOutput = 0;
+    const OrdinalType tNumParticles = aInput.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+    {
+        const ScalarType tMisfit = aInput[tIndex] - aMean;
+        tOutput += tMisfit * tMisfit;
+    }
+    tOutput = tOutput / (tNumParticles - static_cast<OrdinalType>(1));
+    tOutput = std::pow(tOutput, static_cast<ScalarType>(0.5));
+    return (tOutput);
+}
+
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarmOperations
 {
@@ -1542,8 +1567,8 @@ public:
 
     void computeBestObjFuncStatistics()
     {
-        this->computeBestObjFuncMean();
-        this->computeBestObjFuncStdDev();
+        mBestObjFunValueMean = Plato::mean(*mReductions, *mCurrentBestObjFuncValues);
+        mBestObjFunValueStdDev = Plato::standard_deviation(mBestObjFunValueMean, *mCurrentBestObjFuncValues);
     }
 
     void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
@@ -1600,26 +1625,6 @@ private:
     {
         mCurrentBestObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
         mCurrentObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
-    }
-
-    void computeBestObjFuncMean()
-    {
-        mBestObjFunValueMean = mReductions->sum(*mCurrentBestObjFuncValues);
-        const OrdinalType tNumParticles = mCurrentBestObjFuncValues->size();
-        mBestObjFunValueMean = mBestObjFunValueMean / tNumParticles;
-    }
-
-    void computeBestObjFuncStdDev()
-    {
-        mBestObjFunValueStdDev = 0;
-        const OrdinalType tNumParticles = mCurrentBestObjFuncValues->size();
-        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
-        {
-            const ScalarType tMisfit = (*mCurrentBestObjFuncValues)[tIndex] - mBestObjFunValueMean;
-            mBestObjFunValueStdDev += tMisfit * tMisfit;
-        }
-        mBestObjFunValueStdDev = mBestObjFunValueStdDev / (tNumParticles - static_cast<OrdinalType>(1));
-        mBestObjFunValueStdDev = std::pow(mBestObjFunValueStdDev, static_cast<ScalarType>(0.5));
     }
 
     void checkGlobalBestParticleUpdateSuccessRate()
