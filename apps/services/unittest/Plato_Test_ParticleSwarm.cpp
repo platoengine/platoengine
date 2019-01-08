@@ -1394,6 +1394,7 @@ public:
             const Plato::Vector<ScalarType, OrdinalType> & tCurrentConstraint = (*mCurrentConstraintValues)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tPreviousConstraint = (*mPreviousConstraintValues)[tConstraintIndex];
             Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mPenaltyMultipliers)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
 
             const OrdinalType tNumParticles = tPenaltyMultipliers.size();
             for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
@@ -1406,6 +1407,14 @@ public:
                 const bool tIsConstraintLessThanFeasibilityTol = tCurrentConstraint[tParticleIndex] <= mFeasibilityInexactnessTolerance;
                 tPenaltyMultipliers[tParticleIndex] = tIsConstraintLessThanFeasibilityTol ?
                         mPenaltyContractionMultiplier * tPenaltyMultipliers[tParticleIndex] : tPenaltyMultipliers[tParticleIndex];
+
+                const ScalarType tLagrangeMultiplierOverFeasibilityTolerance =
+                        tLagrangeMultipliers[tParticleIndex] / mFeasibilityInexactnessTolerance;
+                const ScalarType tLowerBound = static_cast<ScalarType>(0.5) *
+                        std::pow(tLagrangeMultiplierOverFeasibilityTolerance, static_cast<ScalarType>(0.5));
+                std::cout << "tPenaltyMultipliers[tParticleIndex] = " << tPenaltyMultipliers[tParticleIndex] << "\n";
+                std::cout << "tLowerBound = " << tLowerBound << "\n";
+                tPenaltyMultipliers[tParticleIndex] = std::max(tPenaltyMultipliers[tParticleIndex], tLowerBound);
             }
         }
     }
@@ -2319,9 +2328,9 @@ public:
                            const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
             mPrintDiagnostics(false),
             mNumIterations(0),
-            mMaxNumIterations(1000),
-            mBestObjFuncTolerance(1e-10),
-            mMeanObjFuncTolerance(5e-4),
+            mMaxNumIterations(200),
+            mBestAugLagFuncTolerance(1e-10),
+            mMeanAugLagFuncTolerance(5e-4),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
@@ -2342,6 +2351,7 @@ public:
     void enableDiagnostics()
     {
         mPrintDiagnostics = true;
+        mOptimizer->enableDiagnostics();
     }
 
     void setMaxNumIterations(const OrdinalType & aInput)
@@ -2473,12 +2483,12 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MAX_NUMBER_ITERATIONS;
         }
-        else if(tCurrentGlobalBestAugLagFuncValue < mBestObjFuncTolerance)
+        else if(tCurrentGlobalBestAugLagFuncValue < mBestAugLagFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::TRUE_OBJECTIVE_TOLERANCE;
         }
-        else if(tBestObjFunValueMean < mMeanObjFuncTolerance)
+        else if(tBestObjFunValueMean < mMeanAugLagFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
@@ -2569,8 +2579,8 @@ private:
     OrdinalType mNumIterations;
     OrdinalType mMaxNumIterations;
 
-    ScalarType mBestObjFuncTolerance;
-    ScalarType mMeanObjFuncTolerance;
+    ScalarType mBestAugLagFuncTolerance;
+    ScalarType mMeanAugLagFuncTolerance;
 
     Plato::particle_swarm::stop_t mStopCriterion;
     Plato::OutputDataALPSO<double> mOutputData;
@@ -3133,11 +3143,11 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(-0.00595, tStageMng.getPreviousConstraintValue(0 /* constraint index */)[1], tTolerance);
 
     tStageMng.updatePenaltyMultipliers();
-    EXPECT_NEAR(4, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(22.63846284534, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[0], tTolerance);
     EXPECT_NEAR(0.25, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[1], tTolerance);
 
     tStageMng.updateLagrangeMultipliers();
-    EXPECT_NEAR(0.3846, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(1.221466981756, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[0], tTolerance);
     EXPECT_NEAR(0, tStageMng.getLagrangeMultipliers(0 /* constraint index */)[1], tTolerance);
 
     tStageMng.computeCriteriaStatistics();
