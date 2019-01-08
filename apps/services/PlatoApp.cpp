@@ -625,7 +625,7 @@ void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(Distribut
     stk::mesh::Field<double> &tTempField = meta_data->declare_field<stk::mesh::Field<double>>(stk::topology::NODE_RANK, "swiss", 1);
 
     std::vector<double> tTempFieldVals(2541, 0);
-    stk::mesh::put_field(tTempField, meta_data->universal_part(), tTempFieldVals.data());
+    stk::mesh::put_field_on_mesh(tTempField, meta_data->universal_part(), tTempFieldVals.data());
 
     broker->populate_bulk_data();
 

@@ -1114,20 +1114,20 @@ void IVEMeshAPISTK::prepare_to_create_tris()
 
 
   mFixedTriMap = &mMetaData->declare_field<stk::mesh::Field<double> >(stk::topology::ELEMENT_RANK, "FixedTriMap", 1);
-  stk::mesh::put_field(*mFixedTriMap, *mFixedTriPart);
+  stk::mesh::put_field_on_mesh(*mFixedTriMap, *mFixedTriPart, nullptr);
   stk::io::set_field_role(*mFixedTriMap, Ioss::Field::ATTRIBUTE);
 
   mOptimizedTriPart = &mMetaData->declare_part_with_topology( "OptimizedTriangles", stk::topology::SHELL_TRI_3 );
   stk::io::put_io_part_attribute(*mOptimizedTriPart);
 
   mOptimizedTriMap = &mMetaData->declare_field<stk::mesh::Field<double> >(stk::topology::ELEMENT_RANK, "OptimizedTriMap", 1);
-  stk::mesh::put_field(*mOptimizedTriMap, *mOptimizedTriPart);
+  stk::mesh::put_field_on_mesh(*mOptimizedTriMap, *mOptimizedTriPart, nullptr);
   stk::io::set_field_role(*mOptimizedTriMap, Ioss::Field::ATTRIBUTE);
 
   for(size_t i=0; i<mElementFields.size(); ++i)
   {
-    stk::mesh::put_field(*mElementFields[i], *mFixedTriPart);
-    stk::mesh::put_field(*mElementFields[i], *mOptimizedTriPart);
+    stk::mesh::put_field_on_mesh(*mElementFields[i], *mFixedTriPart, nullptr);
+    stk::mesh::put_field_on_mesh(*mElementFields[i], *mOptimizedTriPart, nullptr);
   }
 }
 
