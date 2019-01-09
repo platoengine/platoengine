@@ -63,6 +63,58 @@
 namespace PlatoTest
 {
 
+TEST(PlatoTest, DistributedReductions_minloc)
+{
+    const int tLocalNumElems = 10;
+    Plato::DistributedVector<double, int> tVector(MPI_COMM_WORLD, tLocalNumElems);
+
+    int tNumRanks = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tNumRanks);
+
+    int tMyRank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &tMyRank);
+    for(int tIndex = 0; tIndex < tLocalNumElems; tIndex++)
+    {
+        tVector[tIndex] = tMyRank + tIndex;
+    }
+    tVector[tLocalNumElems - 2] = -(tMyRank + 1);
+
+    Plato::ReductionOutputs<double, int> tOutput;
+    Plato::DistributedReductionOperations<double, int> tReductions;
+    tReductions.minloc(tVector, tOutput);
+
+    const double tTolerance = 1e-6;
+    const double tGoldValue = -tNumRanks;
+    EXPECT_EQ(tGoldValue, tOutput.mOutputValue);
+    const int tGoldRank = tNumRanks - 1;
+    EXPECT_EQ(tGoldRank, tOutput.mOutputRank);
+    const int tGoldIndex = tLocalNumElems - 2;
+    EXPECT_EQ(tGoldIndex, tOutput.mOutputIndex);
+}
+
+TEST(PlatoTest, StandardVectorReductions_minloc)
+{
+    const int tLocalNumElems = 10;
+    Plato::DistributedVector<double, int> tVector(MPI_COMM_WORLD, tLocalNumElems);
+    for(int tIndex = 0; tIndex < tLocalNumElems; tIndex++)
+    {
+        tVector[tIndex] = tIndex + 1;
+    }
+    tVector[tLocalNumElems - 2] = -10;
+
+    Plato::ReductionOutputs<double, int> tOutput;
+    Plato::StandardVectorReductionOperations<double, int> tReductions;
+    tReductions.minloc(tVector, tOutput);
+
+    const double tGoldValue = -10;
+    const double tTolerance = 1e-6;
+    EXPECT_EQ(tGoldValue, tOutput.mOutputValue);
+    const int tGoldRank = 0;
+    EXPECT_EQ(tGoldRank, tOutput.mOutputRank);
+    const int tGoldIndex = tLocalNumElems - 2;
+    EXPECT_EQ(tGoldIndex, tOutput.mOutputIndex);
+}
+
 TEST(PlatoTest, CommWrapperIsInit)
 {
     Plato::CommWrapper tDefaultCommWrap;

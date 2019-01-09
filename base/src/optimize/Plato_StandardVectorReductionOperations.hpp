@@ -58,18 +58,32 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Operations used to reduce the elements of an array into a single result.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class StandardVectorReductionOperations : public Plato::ReductionOperations<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     StandardVectorReductionOperations()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~StandardVectorReductionOperations()
     {
     }
 
-    //! Returns the maximum element in range
+    /******************************************************************************//**
+     * @brief Returns the maximum element in range.
+     * @param [in] aInput array of elements
+     * @return maximum value
+    **********************************************************************************/
     ScalarType max(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -85,7 +99,12 @@ public:
         ScalarType aMaxValue = *std::max_element(tCopy.begin(), tCopy.end());
         return (aMaxValue);
     }
-    //! Returns the minimum element in range
+
+    /******************************************************************************//**
+     * @brief Returns the minimum element in range.
+     * @param [in] aInput array of elements
+     * @return minimum value
+    **********************************************************************************/
     ScalarType min(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -101,7 +120,12 @@ public:
         ScalarType aMinValue = *std::min_element(tCopy.begin(), tCopy.end());
         return (aMinValue);
     }
-    //! Returns the sum of all the elements in container.
+
+    /******************************************************************************//**
+     * @brief Returns the sum of all the elements in the container.
+     * @param [in] aInput array of elements
+     * @return sum
+    **********************************************************************************/
     ScalarType sum(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -118,7 +142,33 @@ public:
         ScalarType tSum = std::accumulate(tCopy.begin(), tCopy.end(), tBaseValue);
         return (tSum);
     }
-    //! Creates an instance of type Plato::ReductionOperations
+
+    /******************************************************************************//**
+     * @brief Computes minimum value and also the index attached to the minimum value.
+     * @param [in] aInput array of elements
+     * @param [out] aOutput struct with minimum value and the index attached to the minimum
+    **********************************************************************************/
+    void minloc(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                Plato::ReductionOutputs<ScalarType, OrdinalType> & aOutput) const
+    {
+        aOutput.mOutputIndex = 0;
+        aOutput.mOutputValue = aInput[0];
+        const OrdinalType tMyNumElements = aInput.size();
+        for(OrdinalType tIndex = 0; tIndex < tMyNumElements; tIndex++)
+        {
+            if(aInput[tIndex] < aOutput.mOutputValue)
+            {
+                aOutput.mOutputValue = aInput[tIndex];
+                aOutput.mOutputIndex = tIndex;
+            }
+        }
+        aOutput.mOutputRank = 0;
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a copy of a ReductionOperations instance
+     * @return copy of this instance
+    **********************************************************************************/
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> create() const
     {
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tCopy =
@@ -130,7 +180,8 @@ private:
     StandardVectorReductionOperations(const Plato::StandardVectorReductionOperations<ScalarType, OrdinalType> &);
     Plato::StandardVectorReductionOperations<ScalarType, OrdinalType> & operator=(const Plato::StandardVectorReductionOperations<ScalarType, OrdinalType> &);
 };
+// class StandardVectorReductionOperations
 
-}
+} //namespace Plato
 
 #endif /* PLATO_STANDARDVECTORREDUCTIONOPERATIONS_HPP_ */
