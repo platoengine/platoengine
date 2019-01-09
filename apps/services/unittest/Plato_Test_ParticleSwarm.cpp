@@ -478,24 +478,39 @@ template<typename ScalarType, typename OrdinalType>
 inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions,
                        const Plato::Vector<ScalarType, OrdinalType> & aInput)
 {
+    const OrdinalType tSize = 1;
+    const OrdinalType tELEMENT_INDEX = 0;
+    Plato::StandardVector<ScalarType, OrdinalType> tWork(tSize);
+
+    tWork[tELEMENT_INDEX] = aInput.size(); /* local number of elements */
+    const OrdinalType tGlobalNumElements = aReductions.sum(tWork);
     ScalarType tOutput = aReductions.sum(aInput);
-    const OrdinalType tNumElements = aInput.size();
-    tOutput = tOutput / tNumElements;
+    tOutput = tOutput / tGlobalNumElements;
     return (tOutput);
 }
 
 template<typename ScalarType, typename OrdinalType>
-inline ScalarType standard_deviation(const ScalarType & aMean, const Plato::Vector<ScalarType, OrdinalType> & aInput)
+inline ScalarType standard_deviation(const ScalarType & aMean,
+                                     const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                                     const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions)
 {
-    ScalarType tOutput = 0;
-    const OrdinalType tNumParticles = aInput.size();
-    for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+    const OrdinalType tSize = 1;
+    const OrdinalType tELEMENT_INDEX = 0;
+    Plato::StandardVector<ScalarType, OrdinalType> tWork(tSize);
+
+    const OrdinalType tLocalNumElements = aInput.size();
+    for(OrdinalType tIndex = 0; tIndex < tLocalNumElements; tIndex++)
     {
         const ScalarType tMisfit = aInput[tIndex] - aMean;
-        tOutput += tMisfit * tMisfit;
+        tWork[tELEMENT_INDEX] += tMisfit * tMisfit;
     }
-    tOutput = tOutput / (tNumParticles - static_cast<OrdinalType>(1));
+
+    ScalarType tOutput = aReductions.sum(tWork);
+    tWork[tELEMENT_INDEX] = tLocalNumElements;
+    const ScalarType tGlobalNumElements = aReductions.sum(tWork);
+    tOutput = tOutput / (tGlobalNumElements - static_cast<OrdinalType>(1));
     tOutput = std::pow(tOutput, static_cast<ScalarType>(0.5));
+
     return (tOutput);
 }
 
@@ -1210,7 +1225,7 @@ public:
             mCurrentBestConstraintValues(aFactory->dual().create()),
             mObjective(aObjective),
             mConstraints(aConstraints),
-            mCriteriaReductionOperations(aFactory->getObjFuncReductionOperations().create())
+            mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
         this->initialize();
     }
@@ -1477,8 +1492,8 @@ private:
     void computeObjFuncStatistics()
     {
         Plato::find_best_criterion_values(*mCurrentObjFuncValues, *mCurrentBestObjFuncValues);
-        mMeanCurrentBestObjFuncValue = Plato::mean(*mCriteriaReductionOperations, *mCurrentBestObjFuncValues);
-        mStdDevCurrentBestObjFuncValue = Plato::standard_deviation(mMeanCurrentBestObjFuncValue, *mCurrentBestObjFuncValues);
+        mMeanCurrentBestObjFuncValue = Plato::mean(*mCriteriaReductions, *mCurrentBestObjFuncValues);
+        mStdDevCurrentBestObjFuncValue = Plato::standard_deviation(mMeanCurrentBestObjFuncValue, *mCurrentBestObjFuncValues, *mCriteriaReductions);
 
         OrdinalType tMyGlobalBestLocation = 0;
         ScalarType tMyNewGlobalBestValue = mCurrentGlobalBestObjFuncValue;
@@ -1497,15 +1512,15 @@ private:
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyPenaltyMultipliers = (*mCurrentPenaltyMultipliers)[tIndex];
-            ScalarType tMean = Plato::mean(*mCriteriaReductionOperations, tMyPenaltyMultipliers);
+            ScalarType tMean = Plato::mean(*mCriteriaReductions, tMyPenaltyMultipliers);
             (*mMeanCurrentPenaltyMultipliers)[tIndex] = tMean;
-            ScalarType tStdDev = Plato::standard_deviation(tMean, tMyPenaltyMultipliers);
+            ScalarType tStdDev = Plato::standard_deviation(tMean, tMyPenaltyMultipliers, *mCriteriaReductions);
             (*mStdDevCurrentPenaltyMultipliers)[tIndex] = tStdDev;
 
             const Plato::Vector<ScalarType, OrdinalType> & tMyLagrangeMultipliers = (*mCurrentPenaltyMultipliers)[tIndex];
-            tMean = Plato::mean(*mCriteriaReductionOperations, tMyLagrangeMultipliers);
+            tMean = Plato::mean(*mCriteriaReductions, tMyLagrangeMultipliers);
             (*mMeanCurrentLagrangeMultipliers)[tIndex] = tMean;
-            tStdDev = Plato::standard_deviation(tMean, tMyLagrangeMultipliers);
+            tStdDev = Plato::standard_deviation(tMean, tMyLagrangeMultipliers, *mCriteriaReductions);
             (*mStdDevCurrentLagrangeMultipliers)[tIndex] = tStdDev;
         }
     }
@@ -1517,9 +1532,9 @@ private:
         {
             Plato::Vector<ScalarType, OrdinalType> & tMyBestConstraintValues = (*mCurrentBestConstraintValues)[tIndex];
             Plato::find_best_criterion_values((*mCurrentConstraintValues)[tIndex], tMyBestConstraintValues);
-            const ScalarType tMean = Plato::mean(*mCriteriaReductionOperations, tMyBestConstraintValues);
+            const ScalarType tMean = Plato::mean(*mCriteriaReductions, tMyBestConstraintValues);
             (*mMeanBestConstraintValues)[tIndex] = tMean;
-            const ScalarType tStdDev = Plato::standard_deviation(tMean, tMyBestConstraintValues);
+            const ScalarType tStdDev = Plato::standard_deviation(tMean, tMyBestConstraintValues, *mCriteriaReductions);
             (*mStdDevBestConstraintValues)[tIndex] = tStdDev;
 
             OrdinalType tMyNewGlobalBestLocation = 0;
@@ -1618,7 +1633,7 @@ private:
 
     std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> mObjective;
     std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> mConstraints;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductionOperations;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
 
 private:
     AugmentedLagrangianStageMngPSO(const Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>&);
@@ -1794,7 +1809,7 @@ public:
     void computeBestObjFuncStatistics()
     {
         mBestObjFunValueMean = Plato::mean(*mReductions, *mCurrentBestObjFuncValues);
-        mBestObjFunValueStdDev = Plato::standard_deviation(mBestObjFunValueMean, *mCurrentBestObjFuncValues);
+        mBestObjFunValueStdDev = Plato::standard_deviation(mBestObjFunValueMean, *mCurrentBestObjFuncValues, *mReductions);
     }
 
     void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)

@@ -155,7 +155,8 @@ private:
     DistributedReductionOperations(const Plato::DistributedReductionOperations<ScalarType, OrdinalType> &);
     Plato::DistributedReductionOperations<ScalarType, OrdinalType> & operator=(const Plato::DistributedReductionOperations<ScalarType, OrdinalType> &);
 };
+// class DistributedReductionOperations
 
-}
+} // namespace Plato
 
 #endif /* PLATO_DISTRIBUTEDREDUCTIONOPERATIONS_HPP_ */
