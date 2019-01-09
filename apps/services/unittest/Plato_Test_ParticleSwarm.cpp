@@ -99,14 +99,14 @@ struct OutputDataALPSO
         mNumIter(0),
         mNumConstraints(0),
         mAugLagFuncCount(0),
-        mCurrentGlobalBestObjFuncValue(0),
         mMeanCurrentBestObjFuncValues(0),
+        mCurrentGlobalBestObjFuncValue(0),
         mStdDevCurrentBestObjFuncValues(0),
-        mCurrentGlobalBestAugLagValue(0),
         mMeanCurrentBestAugLagValues(0),
+        mCurrentGlobalBestAugLagValue(0),
         mStdDevCurrentBestAugLagValues(0),
-        mCurrentGlobalBestConstraintValues(),
         mMeanCurrentBestConstraintValues(),
+        mCurrentGlobalBestConstraintValues(),
         mStdDevCurrentBestConstraintValues(),
         mMeanCurrentPenaltyMultipliers(),
         mStdDevCurrentPenaltyMultipliers(),
@@ -1983,8 +1983,6 @@ private:
 
     void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getLowerBounds();
-        const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(mGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
 
