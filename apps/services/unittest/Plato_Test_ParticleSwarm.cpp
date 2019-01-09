@@ -82,10 +82,10 @@ struct OutputDataPSO
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
     OrdinalType mNumConstraints;  /*!< number of constraints - only needed for ALPSO output */
 
-    ScalarType mBestObjFuncValue;  /*!< best - objective function value */
-    ScalarType mMeanObjFuncValue;  /*!< mean - objective function value */
-    ScalarType mStdDevObjFuncValue;  /*!< standard deviation - objective function value */
     ScalarType mTrustRegionMultiplier;  /*!< trust region multiplier */
+    ScalarType mMeanCurrentBestObjFuncValues;  /*!< mean - objective function value */
+    ScalarType mCurrentGlobalBestObjFuncValue;  /*!< best - objective function value */
+    ScalarType mStdDevCurrentBestObjFuncValues;  /*!< standard deviation - objective function value */
 };
 // struct OutputDataPSO
 
@@ -97,59 +97,65 @@ struct OutputDataALPSO
 {
     OutputDataALPSO() :
         mNumIter(0),
+        mNumConstraints(0),
         mAugLagFuncCount(0),
-        mBestObjFuncValue(0),
-        mMeanObjFuncValue(0),
-        mStdDevObjFuncValue(0),
-        mBestAugLagFuncValue(0),
-        mMeanAugLagFuncValue(0),
-        mStdDevAugLagFuncValue(0),
-        mBestConstraintValues(),
-        mMeanConstraintValues(),
-        mStdDevConstraintValues(),
-        mMeanPenaltyMultipliers(),
-        mStdDevPenaltyMultipliers(),
-        mMeanLagrangeMultipliers(),
-        mStdDevLagrangeMultipliers()
+        mCurrentGlobalBestObjFuncValue(0),
+        mMeanCurrentBestObjFuncValues(0),
+        mStdDevCurrentBestObjFuncValues(0),
+        mCurrentGlobalBestAugLagValue(0),
+        mMeanCurrentBestAugLagValues(0),
+        mStdDevCurrentBestAugLagValues(0),
+        mCurrentGlobalBestConstraintValues(),
+        mMeanCurrentBestConstraintValues(),
+        mStdDevCurrentBestConstraintValues(),
+        mMeanCurrentPenaltyMultipliers(),
+        mStdDevCurrentPenaltyMultipliers(),
+        mMeanCurrentLagrangeMultipliers(),
+        mStdDevCurrentLagrangeMultipliers()
     {
     }
 
     explicit OutputDataALPSO(const OrdinalType & aNumConstraints) :
         mNumIter(0),
+        mNumConstraints(aNumConstraints),
         mAugLagFuncCount(0),
-        mBestObjFuncValue(0),
-        mMeanObjFuncValue(0),
-        mStdDevObjFuncValue(0),
-        mBestAugLagFuncValue(0),
-        mMeanAugLagFuncValue(0),
-        mStdDevAugLagFuncValue(0),
-        mBestConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
-        mMeanConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
-        mStdDevConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
-        mMeanPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
-        mStdDevPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
-        mMeanLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
-        mStdDevLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0))
+        mMeanCurrentBestObjFuncValues(0),
+        mCurrentGlobalBestObjFuncValue(0),
+        mStdDevCurrentBestObjFuncValues(0),
+        mMeanCurrentBestAugLagValues(0),
+        mCurrentGlobalBestAugLagValue(0),
+        mStdDevCurrentBestAugLagValues(0),
+        mMeanCurrentBestConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mCurrentGlobalBestConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevCurrentBestConstraintValues(std::vector<ScalarType>(aNumConstraints, 0)),
+        mMeanCurrentPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevCurrentPenaltyMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mMeanCurrentLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0)),
+        mStdDevCurrentLagrangeMultipliers(std::vector<ScalarType>(aNumConstraints, 0))
     {
     }
 
     OrdinalType mNumIter;  /*!< number of outer iterations */
+    OrdinalType mNumConstraints;  /*!< number of constraints */
     OrdinalType mAugLagFuncCount;  /*!< number of augmented Lagrangian function evaluations */
 
-    ScalarType mBestObjFuncValue;  /*!< best objective function value */
-    ScalarType mMeanObjFuncValue;  /*!< mean objective function value */
-    ScalarType mStdDevObjFuncValue;  /*!< standard deviation for objective function value */
-    ScalarType mBestAugLagFuncValue;  /*!< best augmented Lagrangian function */
-    ScalarType mMeanAugLagFuncValue;  /*!< mean augmented Lagrangian function */
-    ScalarType mStdDevAugLagFuncValue;  /*!< standard deviation for augmented Lagrangian function */
+    ScalarType mMeanCurrentBestObjFuncValues;  /*!< mean objective function value */
+    ScalarType mCurrentGlobalBestObjFuncValue;  /*!< best objective function value */
+    ScalarType mStdDevCurrentBestObjFuncValues;  /*!< standard deviation for objective function value */
 
-    std::vector<ScalarType> mBestConstraintValues;  /*!< constraint values at global best particle location */
-    std::vector<ScalarType> mMeanConstraintValues;  /*!< mean constraint values */
-    std::vector<ScalarType> mStdDevConstraintValues;  /*!< standard deviation for constraint values */
-    std::vector<ScalarType> mMeanPenaltyMultipliers;  /*!< mean penalty multipliers */
-    std::vector<ScalarType> mStdDevPenaltyMultipliers;  /*!< standard deviation for penalty multipliers */
-    std::vector<ScalarType> mMeanLagrangeMultipliers;  /*!< mean Lagrange multipliers */
-    std::vector<ScalarType> mStdDevLagrangeMultipliers;  /*!< standard deviation for Lagrange multipliers */
+    ScalarType mMeanCurrentBestAugLagValues;  /*!< mean augmented Lagrangian function */
+    ScalarType mCurrentGlobalBestAugLagValue;  /*!< best augmented Lagrangian function */
+    ScalarType mStdDevCurrentBestAugLagValues;  /*!< standard deviation for augmented Lagrangian function */
+
+    std::vector<ScalarType> mMeanCurrentBestConstraintValues;  /*!< mean constraint values */
+    std::vector<ScalarType> mCurrentGlobalBestConstraintValues;  /*!< constraint values at global best particle location */
+    std::vector<ScalarType> mStdDevCurrentBestConstraintValues;  /*!< standard deviation for constraint values */
+
+    std::vector<ScalarType> mMeanCurrentPenaltyMultipliers;  /*!< mean penalty multipliers */
+    std::vector<ScalarType> mStdDevCurrentPenaltyMultipliers;  /*!< standard deviation for penalty multipliers */
+
+    std::vector<ScalarType> mMeanCurrentLagrangeMultipliers;  /*!< mean Lagrange multipliers */
+    std::vector<ScalarType> mStdDevCurrentLagrangeMultipliers;  /*!< standard deviation for Lagrange multipliers */
 };
 // struct OutputDataALPSO
 
@@ -291,8 +297,8 @@ inline void print_pso_diagnostics(const Plato::OutputDataPSO<ScalarType, Ordinal
     }
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
-            << aData.mObjFuncCount << std::setw(20) << aData.mBestObjFuncValue << std::setw(15)
-            << aData.mMeanObjFuncValue << std::setw(15) << aData.mStdDevObjFuncValue << std::setw(15)
+            << aData.mObjFuncCount << std::setw(20) << aData.mCurrentGlobalBestObjFuncValue << std::setw(15)
+            << aData.mMeanCurrentBestObjFuncValues << std::setw(15) << aData.mStdDevCurrentBestObjFuncValues << std::setw(15)
             << aData.mTrustRegionMultiplier << "\n" << std::flush;
 }
 
@@ -300,25 +306,17 @@ template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_constraint_headers(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
                                            std::ofstream& aOutputFile)
 {
-    const OrdinalType tNumConstraints = aData.mBestConstraintValues.size();
+    const OrdinalType tNumConstraints = aData.mCurrentGlobalBestConstraintValues.size();
     for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
     {
         const OrdinalType tConstraintIndex = tIndex + static_cast<OrdinalType>(1);
         const OrdinalType tWidth = tIndex == static_cast<OrdinalType>(0) ? 13 : 12;
-//        if(tIndex != static_cast<OrdinalType>(0))
-//        {
+
         aOutputFile << std::setw(tWidth) << "Best(H" << tConstraintIndex << ")" << std::setw(13)
                 << "Mean(H" << tConstraintIndex << ")" << std::setw(14) << "StdDev(H" << tConstraintIndex << ")"
                 << std::setw(12) << "Mean(P" << tConstraintIndex << ")" << std::setw(14) << "StdDev(P"
                 << tConstraintIndex << ")" << std::setw(12) << "Mean(l" << tConstraintIndex << ")" << std::setw(14)
                 << "StdDev(l" << tConstraintIndex << ")";
-//        }
-//        else
-//        {
-//            const OrdinalType tWidth = tNumConstraints > static_cast<OrdinalType>(1) ? 10 : 13;
-//            aOutputFile << std::scientific << std::setprecision(6) << "Mean(H" << tIndex + static_cast<OrdinalType>(1)
-//                    << ")" << std::setw(tWidth);
-//        }
     }
 }
 
@@ -337,13 +335,13 @@ inline void print_alpso_diagnostics_header(const Plato::OutputDataALPSO<ScalarTy
     try
     {
         Plato::pso::is_file_open(aOutputFile);
-        Plato::pso::is_vector_empty(aData.mBestConstraintValues);
-        Plato::pso::is_vector_empty(aData.mMeanConstraintValues);
-        Plato::pso::is_vector_empty(aData.mStdDevConstraintValues);
-        Plato::pso::is_vector_empty(aData.mMeanPenaltyMultipliers);
-        Plato::pso::is_vector_empty(aData.mStdDevPenaltyMultipliers);
-        Plato::pso::is_vector_empty(aData.mMeanLagrangeMultipliers);
-        Plato::pso::is_vector_empty(aData.mStdDevLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mCurrentGlobalBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentLagrangeMultipliers);
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
@@ -370,14 +368,14 @@ template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_outer_constraint_diagnostics(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
                                                      std::ofstream& aOutputFile)
 {
-    const OrdinalType tNumConstraints = aData.mBestConstraintValues.size();
+    const OrdinalType tNumConstraints = aData.mCurrentGlobalBestConstraintValues.size();
     for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
     {
-        aOutputFile << std::setw(15) << aData.mBestConstraintValues[tIndex] << std::setw(15)
-                << aData.mMeanConstraintValues[tIndex] << std::setw(15) << aData.mStdDevConstraintValues[tIndex]
-                << std::setw(15) << aData.mMeanPenaltyMultipliers[tIndex] << std::setw(15)
-                << aData.mStdDevPenaltyMultipliers[tIndex] << std::setw(15) << aData.mMeanLagrangeMultipliers[tIndex]
-                << std::setw(15) << aData.mStdDevLagrangeMultipliers[tIndex];
+        aOutputFile << std::setw(15) << aData.mCurrentGlobalBestConstraintValues[tIndex] << std::setw(15)
+                << aData.mMeanCurrentBestConstraintValues[tIndex] << std::setw(15) << aData.mStdDevCurrentBestConstraintValues[tIndex]
+                << std::setw(15) << aData.mMeanCurrentPenaltyMultipliers[tIndex] << std::setw(15)
+                << aData.mStdDevCurrentPenaltyMultipliers[tIndex] << std::setw(15) << aData.mMeanCurrentLagrangeMultipliers[tIndex]
+                << std::setw(15) << aData.mStdDevCurrentLagrangeMultipliers[tIndex];
     }
 }
 
@@ -395,13 +393,13 @@ inline void print_alpso_outer_diagnostics(const Plato::OutputDataALPSO<ScalarTyp
     try
     {
         Plato::pso::is_file_open(aOutputFile);
-        Plato::pso::is_vector_empty(aData.mBestConstraintValues);
-        Plato::pso::is_vector_empty(aData.mMeanConstraintValues);
-        Plato::pso::is_vector_empty(aData.mStdDevConstraintValues);
-        Plato::pso::is_vector_empty(aData.mMeanPenaltyMultipliers);
-        Plato::pso::is_vector_empty(aData.mStdDevPenaltyMultipliers);
-        Plato::pso::is_vector_empty(aData.mMeanLagrangeMultipliers);
-        Plato::pso::is_vector_empty(aData.mStdDevLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mCurrentGlobalBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentBestConstraintValues);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentPenaltyMultipliers);
+        Plato::pso::is_vector_empty(aData.mMeanCurrentLagrangeMultipliers);
+        Plato::pso::is_vector_empty(aData.mStdDevCurrentLagrangeMultipliers);
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
@@ -418,10 +416,10 @@ inline void print_alpso_outer_diagnostics(const Plato::OutputDataALPSO<ScalarTyp
 
     // ******** PRINT DIAGNOSTICS ********
     aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
-            << aData.mAugLagFuncCount << std::setw(20) << aData.mBestAugLagFuncValue << std::setw(15)
-            << aData.mMeanAugLagFuncValue << std::setw(15) << aData.mStdDevAugLagFuncValue << std::setw(15)
-            << aData.mBestObjFuncValue << std::setw(15) << aData.mMeanObjFuncValue << std::setw(15)
-            << aData.mStdDevObjFuncValue << std::setw(15) << "*";
+            << aData.mAugLagFuncCount << std::setw(20) << aData.mCurrentGlobalBestAugLagValue << std::setw(15)
+            << aData.mMeanCurrentBestAugLagValues << std::setw(15) << aData.mStdDevCurrentBestAugLagValues << std::setw(15)
+            << aData.mCurrentGlobalBestObjFuncValue << std::setw(15) << aData.mMeanCurrentBestObjFuncValues << std::setw(15)
+            << aData.mStdDevCurrentBestObjFuncValues << std::setw(15) << "*";
     Plato::pso::print_alpso_outer_constraint_diagnostics(aData, aOutputFile);
     aOutputFile << "\n" << std::flush;
 }
@@ -468,8 +466,8 @@ inline void print_alpso_inner_diagnostics(const Plato::OutputDataPSO<ScalarType,
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********
     aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
-            << "*" << std::setw(20) << aData.mBestObjFuncValue << std::setw(15)
-            << aData.mMeanObjFuncValue << std::setw(15) << aData.mStdDevObjFuncValue << std::setw(15) << "*"
+            << "*" << std::setw(20) << aData.mCurrentGlobalBestObjFuncValue << std::setw(15)
+            << aData.mMeanCurrentBestObjFuncValues << std::setw(15) << aData.mStdDevCurrentBestObjFuncValues << std::setw(15) << "*"
             << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << aData.mTrustRegionMultiplier;
     Plato::pso::print_alpso_inner_constraint_diagnostics(aData, aOutputFile);
     aOutputFile << "\n" << std::flush;
@@ -1247,12 +1245,12 @@ public:
         return (mNumAugLagFuncEval);
     }
 
-    ScalarType getMeanCurrentBestObjFuncValue() const
+    ScalarType getMeanCurrentBestObjFuncValues() const
     {
         return (mMeanCurrentBestObjFuncValue);
     }
 
-    ScalarType getStdDevCurrentBestObjFuncValue() const
+    ScalarType getStdDevCurrentBestObjFuncValues() const
     {
         return (mStdDevCurrentBestObjFuncValue);
     }
@@ -1262,13 +1260,13 @@ public:
         return (mCurrentGlobalBestObjFuncValue);
     }
 
-    ScalarType getMeanCurrentBestConstraintValue(const OrdinalType & aInput) const
+    ScalarType getMeanCurrentBestConstraintValues(const OrdinalType & aInput) const
     {
         assert(aInput < mMeanBestConstraintValues->size());
         return ((*mMeanBestConstraintValues)[aInput]);
     }
 
-    ScalarType getStdDevCurrentBestConstraintValue(const OrdinalType & aInput) const
+    ScalarType getStdDevCurrentBestConstraintValues(const OrdinalType & aInput) const
     {
         assert(aInput < mStdDevBestConstraintValues->size());
         return ((*mStdDevBestConstraintValues)[aInput]);
@@ -1280,12 +1278,12 @@ public:
         return ((*mCurrentGlobalBestConstraintValues)[aInput]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getMeanBestConstraintValues() const
+    const Plato::Vector<ScalarType, OrdinalType> & getMeanCurrentBestConstraintValues() const
     {
         return (mMeanBestConstraintValues);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getStdDevBestObjFuncValues() const
+    const Plato::Vector<ScalarType, OrdinalType> & getStdDevCurrentBestConstraintValues() const
     {
         return (mStdDevBestConstraintValues);
     }
@@ -1314,7 +1312,7 @@ public:
         return(*mCurrentConstraintValues);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValue(const OrdinalType & aIndex) const
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValues(const OrdinalType & aIndex) const
     {
         assert(mCurrentConstraintValues.get() != nullptr);
         assert(aIndex < mCurrentConstraintValues->getNumVectors());
@@ -1327,7 +1325,7 @@ public:
         return(*mPreviousConstraintValues);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getPreviousConstraintValue(const OrdinalType & aIndex) const
+    const Plato::Vector<ScalarType, OrdinalType> & getPreviousConstraintValues(const OrdinalType & aIndex) const
     {
         assert(mPreviousConstraintValues.get() != nullptr);
         assert(aIndex < mPreviousConstraintValues->getNumVectors());
@@ -1613,12 +1611,12 @@ public:
         return (mInertiaMultiplier);
     }
 
-    ScalarType getBestObjFuncValueMean() const
+    ScalarType getMeanCurrentBestObjFuncValues() const
     {
         return (mBestObjFunValueMean);
     }
 
-    ScalarType getBestObjFuncValueStdDev() const
+    ScalarType getStdDevCurrentBestObjFuncValues() const
     {
         return (mBestObjFunValueStdDev);
     }
@@ -2052,6 +2050,21 @@ public:
         mOperations->setSocialBehaviorMultiplier(aInput);
     }
 
+    void setTrustRegionMultiplier(const ScalarType & aInput)
+    {
+        mOperations->setTrustRegionMultiplier(aInput);
+    }
+
+    void setTrustRegionExpansionMultiplier(const ScalarType & aInput)
+    {
+        mOperations->setTrustRegionExpansionMultiplier(aInput);
+    }
+
+    void setTrustRegionContractionMultiplier(const ScalarType & aInput)
+    {
+        mOperations->setTrustRegionContractionMultiplier(aInput);
+    }
+
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mDataMng->setUpperBounds(aInput);
@@ -2086,14 +2099,14 @@ public:
         return (mNumIterations);
     }
 
-    ScalarType getBestObjFuncValueMean() const
+    ScalarType getMeanCurrentBestObjFuncValues() const
     {
-        return (mOperations->getBestObjFuncValueMean());
+        return (mOperations->getMeanCurrentBestObjFuncValues());
     }
 
-    ScalarType getBestObjFuncValueStdDev() const
+    ScalarType getStdDevCurrentBestObjFuncValues() const
     {
-        return (mOperations->getBestObjFuncValueStdDev());
+        return (mOperations->getStdDevCurrentBestObjFuncValues());
     }
 
     ScalarType getCurrentGlobalBestObjFuncValue() const
@@ -2177,7 +2190,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
-        const ScalarType tBestObjFunValueMean = mOperations->getBestObjFuncValueMean();
+        const ScalarType tBestObjFunValueMean = mOperations->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestObjFunValue = mOperations->getCurrentGlobalBestObjFunValue();
 
         if(mNumIterations >= mMaxNumIterations)
@@ -2290,9 +2303,9 @@ private:
     {
         mOutputData.mNumIter = mNumIterations;
         mOutputData.mObjFuncCount = mNumIterations * mDataMng->getNumParticles();
-        mOutputData.mBestObjFuncValue = mOperations->getCurrentGlobalBestObjFunValue();
-        mOutputData.mMeanObjFuncValue = mOperations->getBestObjFuncValueMean();
-        mOutputData.mStdDevObjFuncValue = mOperations->getBestObjFuncValueStdDev();
+        mOutputData.mCurrentGlobalBestObjFuncValue = mOperations->getCurrentGlobalBestObjFunValue();
+        mOutputData.mMeanCurrentBestObjFuncValues = mOperations->getMeanCurrentBestObjFuncValues();
+        mOutputData.mStdDevCurrentBestObjFuncValues = mOperations->getStdDevCurrentBestObjFuncValues();
         mOutputData.mTrustRegionMultiplier = mOperations->getTrustRegionMultiplier();
     }
 
@@ -2332,6 +2345,7 @@ public:
             mBestAugLagFuncTolerance(1e-10),
             mMeanAugLagFuncTolerance(5e-4),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+            mOutputData(aConstraints->size()),
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
     {
@@ -2389,6 +2403,21 @@ public:
         mOptimizer->setSocialBehaviorMultiplier(aInput);
     }
 
+    void setTrustRegionMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setTrustRegionMultiplier(aInput);
+    }
+
+    void setTrustRegionExpansionMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setTrustRegionExpansionMultiplier(aInput);
+    }
+
+    void setTrustRegionContractionMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setTrustRegionContractionMultiplier(aInput);
+    }
+
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mOptimizer->setUpperBounds(aInput);
@@ -2414,17 +2443,17 @@ public:
         return (mNumIterations);
     }
 
-    ScalarType getBestObjFuncValueMean() const
+    ScalarType getMeanCurrentBestAugLagValues() const
     {
-        return (mOptimizer->getBestObjFuncValueMean());
+        return (mOptimizer->getMeanCurrentBestObjFuncValues());
     }
 
-    ScalarType getBestObjFuncValueStdDev() const
+    ScalarType getStdDevCurrentBestAugLagValues() const
     {
-        return (mOptimizer->getBestObjFuncValueStdDev());
+        return (mOptimizer->getStdDevCurrentBestObjFuncValues());
     }
 
-    ScalarType getCurrentGlobalBestObjFuncValue() const
+    ScalarType getCurrentGlobalBestAugLagValue() const
     {
         return (mOptimizer->getCurrentGlobalBestObjFuncValue());
     }
@@ -2435,7 +2464,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Solve particle swarm optimization problem
+     * @brief Solve bound constrained particle swarm optimization problem
     **********************************************************************************/
     void solve()
     {
@@ -2449,7 +2478,7 @@ public:
         while(1)
         {
             mNumIterations++;
-            mOptimizer->solve();
+            mOptimizer->solve(mOutputStream);
             mStageMng->updatePenaltyMultipliers();
             mStageMng->updateLagrangeMultipliers();
             mStageMng->computeCriteriaStatistics();
@@ -2475,7 +2504,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
-        const ScalarType tBestObjFunValueMean = mOptimizer->getBestObjFuncValueMean();
+        const ScalarType tBestObjFunValueMean = mOptimizer->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestAugLagFuncValue = mOptimizer->getCurrentGlobalBestObjFuncValue();
 
         if(mNumIterations >= mMaxNumIterations)
@@ -2562,13 +2591,34 @@ private:
         const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
-            mOutputData.mNumIter = mNumIterations;
-            mOutputData.mAugLagFuncCount = mStageMng->getNumAugLagFuncEvaluations();
-            mOutputData.mMeanAugLagFuncValue = mOptimizer->getBestObjFuncValueMean();
-            mOutputData.mStdDevAugLagFuncValue = mOptimizer->getBestObjFuncValueStdDev();
-            mOutputData.mBestAugLagFuncValue = mOptimizer->getCurrentGlobalBestObjFuncValue();
-
+            this->cacheObjFuncOutputData();
+            this->cacheConstraintOutputData();
             Plato::pso::print_alpso_outer_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+        }
+    }
+
+    void cacheObjFuncOutputData()
+    {
+        mOutputData.mNumIter = mNumIterations;
+        mOutputData.mAugLagFuncCount = mStageMng->getNumAugLagFuncEvaluations();
+        mOutputData.mMeanCurrentBestAugLagValues = mOptimizer->getMeanCurrentBestObjFuncValues();
+        mOutputData.mCurrentGlobalBestAugLagValue = mOptimizer->getCurrentGlobalBestObjFuncValue();
+        mOutputData.mStdDevCurrentBestAugLagValues = mOptimizer->getStdDevCurrentBestObjFuncValues();
+
+        mOutputData.mMeanCurrentBestObjFuncValues = mStageMng->getMeanCurrentBestObjFuncValues();
+        mOutputData.mCurrentGlobalBestObjFuncValue = mStageMng->getCurrentGlobalBestObjFuncValue();
+        mOutputData.mStdDevCurrentBestObjFuncValues = mStageMng->getStdDevCurrentBestObjFuncValues();
+    }
+
+    void cacheConstraintOutputData()
+    {
+        for(OrdinalType tIndex = 0; tIndex < mOutputData.mNumConstraints; tIndex++)
+        {
+            mOutputData.mMeanCurrentBestConstraintValues[tIndex] = mStageMng->getMeanCurrentBestConstraintValues(tIndex);
+            mOutputData.mStdDevCurrentBestConstraintValues[tIndex] = mStageMng->getStdDevCurrentBestConstraintValues(tIndex);
+            mOutputData.mCurrentGlobalBestConstraintValues[tIndex] = mStageMng->getCurrentGlobalBestConstraintValue(tIndex);
+
+            //mOutputData.mMeanCurrentPenaltyMultipliers[tIndex] = mStageMng->getMeanCurrentPenaltyMultipliers(tIndex);
         }
     }
 
@@ -2727,18 +2777,18 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
     Plato::OutputDataPSO<double> tData;
     tData.mNumIter = 1;
     tData.mObjFuncCount = 20;
-    tData.mBestObjFuncValue = 4.2321;
-    tData.mMeanObjFuncValue = 8.2321;
-    tData.mStdDevObjFuncValue = 2.2321;
+    tData.mCurrentGlobalBestObjFuncValue = 4.2321;
+    tData.mMeanCurrentBestObjFuncValues = 8.2321;
+    tData.mStdDevCurrentBestObjFuncValues = 2.2321;
     tData.mTrustRegionMultiplier = 1.0;
     ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
     ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
 
     tData.mNumIter = 2;
     tData.mObjFuncCount = 40;
-    tData.mBestObjFuncValue = 2.2321;
-    tData.mMeanObjFuncValue = 7.2321;
-    tData.mStdDevObjFuncValue = 2.4321;
+    tData.mCurrentGlobalBestObjFuncValue = 2.2321;
+    tData.mMeanCurrentBestObjFuncValues = 7.2321;
+    tData.mStdDevCurrentBestObjFuncValues = 2.4321;
     tData.mTrustRegionMultiplier = 1.0;
     ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
     tWriteFile.close();
@@ -2787,44 +2837,44 @@ TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)
     // **** AUGMENTED LAGRANGIAN OUTPUT ****
     tDataPSO.mNumIter = 0;
     tDataPSO.mObjFuncCount = 1;
-    tDataPSO.mBestObjFuncValue = 1;
-    tDataPSO.mMeanObjFuncValue = 1.5;
-    tDataPSO.mStdDevObjFuncValue = 2.34e-2;
+    tDataPSO.mCurrentGlobalBestObjFuncValue = 1;
+    tDataPSO.mMeanCurrentBestObjFuncValues = 1.5;
+    tDataPSO.mStdDevCurrentBestObjFuncValues = 2.34e-2;
     tDataPSO.mTrustRegionMultiplier = 0.5;
     ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
     ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
 
     tDataPSO.mNumIter = 1;
     tDataPSO.mObjFuncCount = 10;
-    tDataPSO.mBestObjFuncValue = 0.1435;
-    tDataPSO.mMeanObjFuncValue = 0.78;
-    tDataPSO.mStdDevObjFuncValue = 0.298736;
+    tDataPSO.mCurrentGlobalBestObjFuncValue = 0.1435;
+    tDataPSO.mMeanCurrentBestObjFuncValues = 0.78;
+    tDataPSO.mStdDevCurrentBestObjFuncValues = 0.298736;
     tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
     ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
 
     // **** AUGMENTED LAGRANGIAN OUTPUT ****
     tDataALPSO.mNumIter = 1;
     tDataALPSO.mAugLagFuncCount = 10;
-    tDataALPSO.mBestAugLagFuncValue = 1.2359e-1;
-    tDataALPSO.mMeanAugLagFuncValue = 3.2359e-1;
-    tDataALPSO.mStdDevAugLagFuncValue = 3.2359e-2;
-    tDataALPSO.mBestObjFuncValue = 8.2359e-2;
-    tDataALPSO.mMeanObjFuncValue = 9.2359e-2;
-    tDataALPSO.mStdDevObjFuncValue = 2.2359e-2;
-    tDataALPSO.mBestConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mBestConstraintValues[1] = 3.65e-3;
-    tDataALPSO.mMeanConstraintValues[0] = 4.23e-5;
-    tDataALPSO.mMeanConstraintValues[1] = 6.65e-3;
-    tDataALPSO.mStdDevConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mStdDevConstraintValues[1] = 8.65e-4;
-    tDataALPSO.mMeanPenaltyMultipliers[0] = 1;
-    tDataALPSO.mMeanPenaltyMultipliers[1] = 2;
-    tDataALPSO.mStdDevPenaltyMultipliers[0] = 0.25;
-    tDataALPSO.mStdDevPenaltyMultipliers[1] = 0.1;
-    tDataALPSO.mMeanLagrangeMultipliers[0] = 1.23e-2;
-    tDataALPSO.mMeanLagrangeMultipliers[1] = 8.65e-1;
-    tDataALPSO.mStdDevLagrangeMultipliers[0] = 9.23e-3;
-    tDataALPSO.mStdDevLagrangeMultipliers[1] = 5.65e-1;
+    tDataALPSO.mCurrentGlobalBestAugLagValue = 1.2359e-1;
+    tDataALPSO.mMeanCurrentBestAugLagValues = 3.2359e-1;
+    tDataALPSO.mStdDevCurrentBestAugLagValues = 3.2359e-2;
+    tDataALPSO.mCurrentGlobalBestObjFuncValue = 8.2359e-2;
+    tDataALPSO.mMeanCurrentBestObjFuncValues = 9.2359e-2;
+    tDataALPSO.mStdDevCurrentBestObjFuncValues = 2.2359e-2;
+    tDataALPSO.mCurrentGlobalBestConstraintValues[0] = 1.23e-5;
+    tDataALPSO.mCurrentGlobalBestConstraintValues[1] = 3.65e-3;
+    tDataALPSO.mMeanCurrentBestConstraintValues[0] = 4.23e-5;
+    tDataALPSO.mMeanCurrentBestConstraintValues[1] = 6.65e-3;
+    tDataALPSO.mStdDevCurrentBestConstraintValues[0] = 1.23e-5;
+    tDataALPSO.mStdDevCurrentBestConstraintValues[1] = 8.65e-4;
+    tDataALPSO.mMeanCurrentPenaltyMultipliers[0] = 1;
+    tDataALPSO.mMeanCurrentPenaltyMultipliers[1] = 2;
+    tDataALPSO.mStdDevCurrentPenaltyMultipliers[0] = 0.25;
+    tDataALPSO.mStdDevCurrentPenaltyMultipliers[1] = 0.1;
+    tDataALPSO.mMeanCurrentLagrangeMultipliers[0] = 1.23e-2;
+    tDataALPSO.mMeanCurrentLagrangeMultipliers[1] = 8.65e-1;
+    tDataALPSO.mStdDevCurrentLagrangeMultipliers[0] = 9.23e-3;
+    tDataALPSO.mStdDevCurrentLagrangeMultipliers[1] = 5.65e-1;
     ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
     tDataPSO.mNumIter = 1;
     tDataPSO.mObjFuncCount = 10;
@@ -2944,8 +2994,8 @@ TEST(PlatoTest, PSO_computeBestObjFunStatistics)
     tOperations.computeBestObjFuncStatistics();
 
     const double tTolerance = 1e-6;
-    EXPECT_NEAR(0.00010692, tOperations.getBestObjFuncValueMean(), tTolerance);
-    EXPECT_NEAR(0.000354175, tOperations.getBestObjFuncValueStdDev(), tTolerance);
+    EXPECT_NEAR(0.00010692, tOperations.getMeanCurrentBestObjFuncValues(), tTolerance);
+    EXPECT_NEAR(0.000354175, tOperations.getStdDevCurrentBestObjFuncValues(), tTolerance);
 }
 
 TEST(PlatoTest, PSO_find_best_criterion_values)
@@ -3121,10 +3171,10 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
 
     tStageMng.computeCriteriaStatistics();
     EXPECT_NEAR(4.0506640625, tStageMng.getCurrentGlobalBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(4.2315245625, tStageMng.getMeanCurrentBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(0.255775372, tStageMng.getStdDevCurrentBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(0.02265, tStageMng.getMeanCurrentBestConstraintValue(0 /* constraint index */), tTolerance);
-    EXPECT_NEAR(0.04044650788, tStageMng.getStdDevCurrentBestConstraintValue(0 /* constraint index */), tTolerance);
+    EXPECT_NEAR(4.2315245625, tStageMng.getMeanCurrentBestObjFuncValues(), tTolerance);
+    EXPECT_NEAR(0.255775372, tStageMng.getStdDevCurrentBestObjFuncValues(), tTolerance);
+    EXPECT_NEAR(0.02265, tStageMng.getMeanCurrentBestConstraintValues(0 /* constraint index */), tTolerance);
+    EXPECT_NEAR(0.04044650788, tStageMng.getStdDevCurrentBestConstraintValues(0 /* constraint index */), tTolerance);
     EXPECT_NEAR(-0.00595, tStageMng.getCurrentGlobalBestConstraintValue(0 /* constraint index */), tTolerance);
 
     // SECOND CALL
@@ -3137,10 +3187,10 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(4.5863650625, tStageMng.getCurrentObjFuncValues()[1], tTolerance);
     EXPECT_NEAR(4.0506640625, tStageMng.getPreviousObjFuncValues()[0], tTolerance);
     EXPECT_NEAR(4.4123850625, tStageMng.getPreviousObjFuncValues()[1], tTolerance);
-    EXPECT_NEAR(0.02245, tStageMng.getCurrentConstraintValue(0 /* constraint index */)[0], tTolerance);
-    EXPECT_NEAR(-0.03395, tStageMng.getCurrentConstraintValue(0 /* constraint index */)[1], tTolerance);
-    EXPECT_NEAR(0.05125, tStageMng.getPreviousConstraintValue(0 /* constraint index */)[0], tTolerance);
-    EXPECT_NEAR(-0.00595, tStageMng.getPreviousConstraintValue(0 /* constraint index */)[1], tTolerance);
+    EXPECT_NEAR(0.02245, tStageMng.getCurrentConstraintValues(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(-0.03395, tStageMng.getCurrentConstraintValues(0 /* constraint index */)[1], tTolerance);
+    EXPECT_NEAR(0.05125, tStageMng.getPreviousConstraintValues(0 /* constraint index */)[0], tTolerance);
+    EXPECT_NEAR(-0.00595, tStageMng.getPreviousConstraintValues(0 /* constraint index */)[1], tTolerance);
 
     tStageMng.updatePenaltyMultipliers();
     EXPECT_NEAR(22.63846284534, tStageMng.getPenaltyMultipliers(0 /* constraint index */)[0], tTolerance);
@@ -3152,10 +3202,10 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
 
     tStageMng.computeCriteriaStatistics();
     EXPECT_NEAR(4.0506640625, tStageMng.getCurrentGlobalBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(4.2315245625, tStageMng.getMeanCurrentBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(0.255775372, tStageMng.getStdDevCurrentBestObjFuncValue(), tTolerance);
-    EXPECT_NEAR(-0.00575, tStageMng.getMeanCurrentBestConstraintValue(0 /* constraint index */), tTolerance);
-    EXPECT_NEAR(0.0398808, tStageMng.getStdDevCurrentBestConstraintValue(0 /* constraint index */), tTolerance);
+    EXPECT_NEAR(4.2315245625, tStageMng.getMeanCurrentBestObjFuncValues(), tTolerance);
+    EXPECT_NEAR(0.255775372, tStageMng.getStdDevCurrentBestObjFuncValues(), tTolerance);
+    EXPECT_NEAR(-0.00575, tStageMng.getMeanCurrentBestConstraintValues(0 /* constraint index */), tTolerance);
+    EXPECT_NEAR(0.0398808, tStageMng.getStdDevCurrentBestConstraintValues(0 /* constraint index */), tTolerance);
     EXPECT_NEAR(-0.03395, tStageMng.getCurrentGlobalBestConstraintValue(0 /* constraint index */), tTolerance);
 }
 
@@ -3180,7 +3230,8 @@ TEST(PlatoTest, PSO_Solve)
 
     std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
     std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
-            << tAlgorithm.getBestObjFuncValueMean() << ", STDDEV = " << tAlgorithm.getBestObjFuncValueStdDev() << "\n";
+            << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
+            << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
         std::cout << "CONTROL[" << tIndex << "]: BEST = "
