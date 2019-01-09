@@ -83,7 +83,6 @@ TEST(PlatoTest, DistributedReductions_minloc)
     Plato::DistributedReductionOperations<double, int> tReductions;
     tReductions.minloc(tVector, tOutput);
 
-    const double tTolerance = 1e-6;
     const double tGoldValue = -tNumRanks;
     EXPECT_EQ(tGoldValue, tOutput.mOutputValue);
     const int tGoldRank = tNumRanks - 1;
@@ -107,7 +106,6 @@ TEST(PlatoTest, StandardVectorReductions_minloc)
     tReductions.minloc(tVector, tOutput);
 
     const double tGoldValue = -10;
-    const double tTolerance = 1e-6;
     EXPECT_EQ(tGoldValue, tOutput.mOutputValue);
     const int tGoldRank = 0;
     EXPECT_EQ(tGoldRank, tOutput.mOutputRank);
