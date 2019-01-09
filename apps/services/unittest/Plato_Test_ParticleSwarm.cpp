@@ -78,6 +78,27 @@ struct particle_swarm
 template<typename ScalarType, typename OrdinalType = size_t>
 struct OutputDataPSO
 {
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    OutputDataPSO() :
+            mNumIter(0),
+            mObjFuncCount(0),
+            mNumConstraints(0),
+            mTrustRegionMultiplier(0),
+            mMeanCurrentBestObjFuncValues(0),
+            mCurrentGlobalBestObjFuncValue(0),
+            mStdDevCurrentBestObjFuncValues(0)
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~OutputDataPSO()
+    {
+    }
+
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
     OrdinalType mNumConstraints;  /*!< number of constraints - only needed for ALPSO output */
@@ -518,6 +539,8 @@ template<typename ScalarType, typename OrdinalType>
 void find_best_criterion_values(const Plato::Vector<ScalarType, OrdinalType> & aCurrentValues,
                                 Plato::Vector<ScalarType, OrdinalType> & aCurrentBestValues)
 {
+    assert(aCurrentValues.size() == aCurrentBestValues.size());
+
     const OrdinalType tNumParticles = aCurrentValues.size();
     for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
     {
@@ -1637,27 +1660,26 @@ class ParticleSwarmOperations
 {
 public:
     explicit ParticleSwarmOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
-        mNumConsecutiveFailures(0),
-        mNumConsecutiveSuccesses(0),
-        mMaxNumConsecutiveFailures(10),
-        mMaxNumConsecutiveSuccesses(10),
-        mCurrentGlobalBestParticleRank(0),
-        mCurrentGlobalBestParticleIndex(0),
-        mInertiaMultiplier(0.9),
-        mSocialBehaviorMultiplier(0.8),
-        mCognitiveBehaviorMultiplier(0.8),
-        mBestObjFunValueMean(std::numeric_limits<ScalarType>::max()),
-        mBestObjFunValueStdDev(std::numeric_limits<ScalarType>::max()),
-        mCurrentGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
-        mPreviousGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
-        mTrustRegionMultiplier(1),
-        mTrustRegionExpansionMultiplier(4.0),
-        mTrustRegionContractionMultiplier(0.75),
-        mControlWorkVector(),
-        mCriteriaWorkVector(aFactory->objective().create()),
-        mCurrentObjFuncValues(aFactory->objective().create()),
-        mCurrentBestObjFuncValues(aFactory->objective().create()),
-        mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
+            mNumConsecutiveFailures(0),
+            mNumConsecutiveSuccesses(0),
+            mMaxNumConsecutiveFailures(10),
+            mMaxNumConsecutiveSuccesses(10),
+            mCurrentGlobalBestParticleRank(0),
+            mCurrentGlobalBestParticleIndex(0),
+            mInertiaMultiplier(0.9),
+            mSocialBehaviorMultiplier(0.8),
+            mCognitiveBehaviorMultiplier(0.8),
+            mBestObjFunValueMean(std::numeric_limits<ScalarType>::max()),
+            mBestObjFunValueStdDev(std::numeric_limits<ScalarType>::max()),
+            mCurrentGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
+            mPreviousGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
+            mTrustRegionMultiplier(1),
+            mTrustRegionExpansionMultiplier(4.0),
+            mTrustRegionContractionMultiplier(0.75),
+            mControlWorkVector(),
+            mCurrentObjFuncValues(aFactory->objective().create()),
+            mCurrentBestObjFuncValues(aFactory->objective().create()),
+            mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
         this->initialize(*aFactory);
     }
@@ -1820,19 +1842,18 @@ public:
     void updateParticleVelocities(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         aDataMng.cachePreviousVelocities();
-        std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
             if(tIndex != mCurrentGlobalBestParticleIndex)
             {
-                this->updateParticleVelocity(tIndex, tGenerator, tDistribution, aDataMng);
+                this->updateParticleVelocity(tIndex, tDistribution, aDataMng);
             }
-            else
-            {
-                assert(tIndex == mCurrentGlobalBestParticleIndex);
-                this->updateGlobalBestParticleVelocity(tGenerator, tDistribution, aDataMng);
+                else
+                {
+                    assert(tIndex == mCurrentGlobalBestParticleIndex);
+                    this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
             }
         }
     }
@@ -1890,6 +1911,7 @@ private:
 
     void findGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        // TODO: THINK PARALLEL IMPLEMENTATION
         Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
         mCriteriaReductions->minloc(*mCurrentObjFuncValues, tOutput);
         const bool tFoundNewGlobalBest = tOutput.mOutputValue < mCurrentGlobalBestObjFunValue;
@@ -1900,13 +1922,11 @@ private:
             mCurrentGlobalBestParticleIndex = tOutput.mOutputIndex;
             const Plato::CommWrapper & tCommWrapper = aDataMng.getCommWrapper();
             const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(tOutput.mOutputIndex);
-            tCommWrapper.broadcast(tOutput.mOutputRank, tCurrentParticle, *mControlWorkVector);
-            aDataMng.setGlobalBestParticlePosition(*mControlWorkVector);
+            aDataMng.setGlobalBestParticlePosition(tCurrentParticle);
         }
     }
 
     void updateParticleVelocity(const OrdinalType & aParticleIndex,
-                                std::default_random_engine & aGenerator,
                                 std::uniform_real_distribution<ScalarType> & aDistribution,
                                 Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -1921,24 +1941,24 @@ private:
             // inertia contribution
             const ScalarType tInertiaValue = mInertiaMultiplier * tPreviousVel[tIndex];
             // cognitive behavior contribution
-            const ScalarType tRandomNumOne = aDistribution(aGenerator);
+            const ScalarType tRandomNumOne = aDistribution(mGenerator);
             const ScalarType tCognitiveMultiplier = tRandomNumOne * mCognitiveBehaviorMultiplier;
             const ScalarType tCognitiveValue = tCognitiveMultiplier * (tBestParticlePosition[tIndex] - tCurrentParticle[tIndex]);
             // social behavior contribution
-            const ScalarType tRandomNumTwo = aDistribution(aGenerator);
+            const ScalarType tRandomNumTwo = aDistribution(mGenerator);
             const ScalarType tSocialMultiplier = tRandomNumTwo * mSocialBehaviorMultiplier;
             const ScalarType tSocialValue = tSocialMultiplier * (tGlobalBestParticlePosition[tIndex] - tCurrentParticle[tIndex]);
             // set new velocity
-            (*mCriteriaWorkVector)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
+            (*mControlWorkVector)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
         }
 
-        aDataMng.setCurrentVelocity(aParticleIndex, *mCriteriaWorkVector);
+        aDataMng.setCurrentVelocity(aParticleIndex, *mControlWorkVector);
     }
 
-    void updateGlobalBestParticleVelocity(std::default_random_engine & aGenerator,
-                                          std::uniform_real_distribution<ScalarType> & aDistribution,
+    void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> & aDistribution,
                                           Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        // TODO: THINK PARALLEL IMPLEMENTATION
         const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(mCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
         const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticlePosition = aDataMng.getCurrentParticle(mCurrentGlobalBestParticleIndex);
@@ -1946,14 +1966,14 @@ private:
         const OrdinalType tNumControls = tPreviousVel.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            const ScalarType tRandomNum = aDistribution(aGenerator);
+            const ScalarType tRandomNum = aDistribution(mGenerator);
             const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
                     * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
-            (*mCriteriaWorkVector)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
+            (*mControlWorkVector)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
                     + (mInertiaMultiplier * tPreviousVel[tIndex]) + tStochasticTrustRegionMultiplier;
         }
 
-        aDataMng.setCurrentVelocity(mCurrentGlobalBestParticleIndex, *mCriteriaWorkVector);
+        aDataMng.setCurrentVelocity(mCurrentGlobalBestParticleIndex, *mControlWorkVector);
     }
 
     void updateParticlePosition(const OrdinalType & aParticleIndex,
@@ -1964,41 +1984,44 @@ private:
         const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
         const Plato::Vector<ScalarType, OrdinalType> & tParticleVel = aDataMng.getCurrentVelocity(aParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tParticlePosition = aDataMng.getCurrentParticle(aParticleIndex);
-        mCriteriaWorkVector->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
+        mControlWorkVector->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
 
         const OrdinalType tNumControls = tParticleVel.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mCriteriaWorkVector)[tIndex] = (*mCriteriaWorkVector)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
-            (*mCriteriaWorkVector)[tIndex] = std::max((*mCriteriaWorkVector)[tIndex], tLowerBounds[tIndex]);
-            (*mCriteriaWorkVector)[tIndex] = std::min((*mCriteriaWorkVector)[tIndex], tUpperBounds[tIndex]);
+            (*mControlWorkVector)[tIndex] = (*mControlWorkVector)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
+            (*mControlWorkVector)[tIndex] = std::max((*mControlWorkVector)[tIndex], tLowerBounds[tIndex]);
+            (*mControlWorkVector)[tIndex] = std::min((*mControlWorkVector)[tIndex], tUpperBounds[tIndex]);
         }
 
-        aDataMng.setCurrentParticle(aParticleIndex, *mCriteriaWorkVector);
+        aDataMng.setCurrentParticle(aParticleIndex, *mControlWorkVector);
     }
 
     void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        // TODO: THINK PARALLEL IMPLEMENTATION
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(mCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
 
-        std::default_random_engine tGenerator;
+        //std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
-        const ScalarType tRandomNum = tDistribution(tGenerator);
+        const ScalarType tRandomNum = tDistribution(mGenerator);
         const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
                 * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
 
         const OrdinalType tNumControls = tGlobalBestParticlePosition.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mCriteriaWorkVector)[tIndex] = tGlobalBestParticlePosition[tIndex]
+            (*mControlWorkVector)[tIndex] = tGlobalBestParticlePosition[tIndex]
                     + (mInertiaMultiplier * tGlobalBestParticleVel[tIndex]) + tStochasticTrustRegionMultiplier;
         }
 
-        aDataMng.setCurrentParticle(mCurrentGlobalBestParticleIndex, *mCriteriaWorkVector);
+        aDataMng.setCurrentParticle(mCurrentGlobalBestParticleIndex, *mControlWorkVector);
     }
 
 private:
+    std::default_random_engine mGenerator;
+
     OrdinalType mNumConsecutiveFailures;
     OrdinalType mNumConsecutiveSuccesses;
     OrdinalType mMaxNumConsecutiveFailures;
@@ -2022,7 +2045,6 @@ private:
     ScalarType mTrustRegionContractionMultiplier;
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaWorkVector;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues;
 
@@ -2783,13 +2805,18 @@ TEST(PlatoTest, GradFreeRosenbrock)
 
 TEST(PlatoTest, PSO_IsFileOpenExeption)
 {
-    std::ofstream tFile;
-    ASSERT_THROW(Plato::pso::is_file_open(tFile), std::invalid_argument);
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
+    {
+        std::ofstream tFile;
+        ASSERT_THROW(Plato::pso::is_file_open(tFile), std::invalid_argument);
 
-    tFile.open("MyFile.txt");
-    ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
-    tFile.close();
-    std::system("rm -f MyFile.txt");
+        tFile.open("MyFile.txt");
+        ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
+        tFile.close();
+        std::system("rm -f MyFile.txt");
+    }
 }
 
 TEST(PlatoTest, PSO_IsVectorEmpty)
@@ -2838,43 +2865,49 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
 {
-    std::ofstream tWriteFile;
-    tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataPSO<double> tData;
-    tData.mNumIter = 1;
-    tData.mObjFuncCount = 20;
-    tData.mCurrentGlobalBestObjFuncValue = 4.2321;
-    tData.mMeanCurrentBestObjFuncValues = 8.2321;
-    tData.mStdDevCurrentBestObjFuncValues = 2.2321;
-    tData.mTrustRegionMultiplier = 1.0;
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
-
-    tData.mNumIter = 2;
-    tData.mObjFuncCount = 40;
-    tData.mCurrentGlobalBestObjFuncValue = 2.2321;
-    tData.mMeanCurrentBestObjFuncValues = 7.2321;
-    tData.mStdDevCurrentBestObjFuncValues = 2.4321;
-    tData.mTrustRegionMultiplier = 1.0;
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
-    tWriteFile.close();
-
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile1.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile1.txt");
+        Plato::OutputDataPSO<double> tData;
+        tData.mNumIter = 1;
+        tData.mObjFuncCount = 20;
+        tData.mNumConstraints = 0;
+        tData.mCurrentGlobalBestObjFuncValue = 4.2321;
+        tData.mMeanCurrentBestObjFuncValues = 8.2321;
+        tData.mStdDevCurrentBestObjFuncValues = 2.2321;
+        tData.mTrustRegionMultiplier = 1.0;
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
 
-    std::stringstream tGold;
-    tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
-    tGold << "1204.232100e+008.232100e+002.232100e+001.000000e+00";
-    tGold << "2402.232100e+007.232100e+002.432100e+001.000000e+00";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        tData.mNumIter = 2;
+        tData.mObjFuncCount = 40;
+        tData.mCurrentGlobalBestObjFuncValue = 2.2321;
+        tData.mMeanCurrentBestObjFuncValues = 7.2321;
+        tData.mStdDevCurrentBestObjFuncValues = 2.4321;
+        tData.mTrustRegionMultiplier = 1.0;
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
+        tWriteFile.close();
+
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile1.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile1.txt");
+
+        std::stringstream tGold;
+        tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
+        tGold << "1204.232100e+008.232100e+002.232100e+001.000000e+00";
+        tGold << "2402.232100e+007.232100e+002.432100e+001.000000e+00";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
@@ -2893,104 +2926,109 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
 
 TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)
 {
-    std::ofstream tWriteFile;
-    tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataPSO<double> tDataPSO;
-    const size_t tNumConstraints = 2;
-    Plato::OutputDataALPSO<double> tDataALPSO(tNumConstraints);
-    tDataPSO.mNumConstraints = tNumConstraints;
-
-    // **** AUGMENTED LAGRANGIAN OUTPUT ****
-    tDataPSO.mNumIter = 0;
-    tDataPSO.mObjFuncCount = 1;
-    tDataPSO.mCurrentGlobalBestObjFuncValue = 1;
-    tDataPSO.mMeanCurrentBestObjFuncValues = 1.5;
-    tDataPSO.mStdDevCurrentBestObjFuncValues = 2.34e-2;
-    tDataPSO.mTrustRegionMultiplier = 0.5;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    tDataPSO.mCurrentGlobalBestObjFuncValue = 0.1435;
-    tDataPSO.mMeanCurrentBestObjFuncValues = 0.78;
-    tDataPSO.mStdDevCurrentBestObjFuncValues = 0.298736;
-    tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-
-    // **** AUGMENTED LAGRANGIAN OUTPUT ****
-    tDataALPSO.mNumIter = 1;
-    tDataALPSO.mAugLagFuncCount = 10;
-    tDataALPSO.mCurrentGlobalBestAugLagValue = 1.2359e-1;
-    tDataALPSO.mMeanCurrentBestAugLagValues = 3.2359e-1;
-    tDataALPSO.mStdDevCurrentBestAugLagValues = 3.2359e-2;
-    tDataALPSO.mCurrentGlobalBestObjFuncValue = 8.2359e-2;
-    tDataALPSO.mMeanCurrentBestObjFuncValues = 9.2359e-2;
-    tDataALPSO.mStdDevCurrentBestObjFuncValues = 2.2359e-2;
-    tDataALPSO.mCurrentGlobalBestConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mCurrentGlobalBestConstraintValues[1] = 3.65e-3;
-    tDataALPSO.mMeanCurrentBestConstraintValues[0] = 4.23e-5;
-    tDataALPSO.mMeanCurrentBestConstraintValues[1] = 6.65e-3;
-    tDataALPSO.mStdDevCurrentBestConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mStdDevCurrentBestConstraintValues[1] = 8.65e-4;
-    tDataALPSO.mMeanCurrentPenaltyMultipliers[0] = 1;
-    tDataALPSO.mMeanCurrentPenaltyMultipliers[1] = 2;
-    tDataALPSO.mStdDevCurrentPenaltyMultipliers[0] = 0.25;
-    tDataALPSO.mStdDevCurrentPenaltyMultipliers[1] = 0.1;
-    tDataALPSO.mMeanCurrentLagrangeMultipliers[0] = 1.23e-2;
-    tDataALPSO.mMeanCurrentLagrangeMultipliers[1] = 8.65e-1;
-    tDataALPSO.mStdDevCurrentLagrangeMultipliers[0] = 9.23e-3;
-    tDataALPSO.mStdDevCurrentLagrangeMultipliers[1] = 5.65e-1;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataPSO.mNumIter = 2;
-    tDataPSO.mObjFuncCount = 20;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataPSO.mNumIter = 3;
-    tDataPSO.mObjFuncCount = 30;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataALPSO.mNumIter = 2;
-    tDataALPSO.mAugLagFuncCount = 40;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataALPSO.mNumIter = 3;
-    tDataALPSO.mAugLagFuncCount = 50;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tWriteFile.close();
-
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile1.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile.txt");
+        Plato::OutputDataPSO<double> tDataPSO;
+        const size_t tNumConstraints = 2;
+        Plato::OutputDataALPSO<double> tDataALPSO(tNumConstraints);
+        tDataPSO.mNumConstraints = tNumConstraints;
 
-    std::stringstream tGold;
-    tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
-    tGold << "Best(H2)Mean(H2)StdDev(H2)Mean(P2)StdDev(P2)Mean(l2)StdDev(l2)";
-    tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+00";
-    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
-    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "1101.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "2*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "3*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "2401.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "3501.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        // **** AUGMENTED LAGRANGIAN OUTPUT ****
+        tDataPSO.mNumIter = 0;
+        tDataPSO.mObjFuncCount = 1;
+        tDataPSO.mCurrentGlobalBestObjFuncValue = 1;
+        tDataPSO.mMeanCurrentBestObjFuncValues = 1.5;
+        tDataPSO.mStdDevCurrentBestObjFuncValues = 2.34e-2;
+        tDataPSO.mTrustRegionMultiplier = 0.5;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        tDataPSO.mCurrentGlobalBestObjFuncValue = 0.1435;
+        tDataPSO.mMeanCurrentBestObjFuncValues = 0.78;
+        tDataPSO.mStdDevCurrentBestObjFuncValues = 0.298736;
+        tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+
+        // **** AUGMENTED LAGRANGIAN OUTPUT ****
+        tDataALPSO.mNumIter = 1;
+        tDataALPSO.mAugLagFuncCount = 10;
+        tDataALPSO.mCurrentGlobalBestAugLagValue = 1.2359e-1;
+        tDataALPSO.mMeanCurrentBestAugLagValues = 3.2359e-1;
+        tDataALPSO.mStdDevCurrentBestAugLagValues = 3.2359e-2;
+        tDataALPSO.mCurrentGlobalBestObjFuncValue = 8.2359e-2;
+        tDataALPSO.mMeanCurrentBestObjFuncValues = 9.2359e-2;
+        tDataALPSO.mStdDevCurrentBestObjFuncValues = 2.2359e-2;
+        tDataALPSO.mCurrentGlobalBestConstraintValues[0] = 1.23e-5;
+        tDataALPSO.mCurrentGlobalBestConstraintValues[1] = 3.65e-3;
+        tDataALPSO.mMeanCurrentBestConstraintValues[0] = 4.23e-5;
+        tDataALPSO.mMeanCurrentBestConstraintValues[1] = 6.65e-3;
+        tDataALPSO.mStdDevCurrentBestConstraintValues[0] = 1.23e-5;
+        tDataALPSO.mStdDevCurrentBestConstraintValues[1] = 8.65e-4;
+        tDataALPSO.mMeanCurrentPenaltyMultipliers[0] = 1;
+        tDataALPSO.mMeanCurrentPenaltyMultipliers[1] = 2;
+        tDataALPSO.mStdDevCurrentPenaltyMultipliers[0] = 0.25;
+        tDataALPSO.mStdDevCurrentPenaltyMultipliers[1] = 0.1;
+        tDataALPSO.mMeanCurrentLagrangeMultipliers[0] = 1.23e-2;
+        tDataALPSO.mMeanCurrentLagrangeMultipliers[1] = 8.65e-1;
+        tDataALPSO.mStdDevCurrentLagrangeMultipliers[0] = 9.23e-3;
+        tDataALPSO.mStdDevCurrentLagrangeMultipliers[1] = 5.65e-1;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataPSO.mNumIter = 2;
+        tDataPSO.mObjFuncCount = 20;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataPSO.mNumIter = 3;
+        tDataPSO.mObjFuncCount = 30;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataALPSO.mNumIter = 2;
+        tDataALPSO.mAugLagFuncCount = 40;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataALPSO.mNumIter = 3;
+        tDataALPSO.mAugLagFuncCount = 50;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tWriteFile.close();
+
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold;
+        tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
+        tGold << "Best(H2)Mean(H2)StdDev(H2)Mean(P2)StdDev(P2)Mean(l2)StdDev(l2)";
+        tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+00";
+        tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+        tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "1101.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "2*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "3*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "2401.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "3501.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_checkInertiaMultiplier)
@@ -3260,8 +3298,8 @@ TEST(PlatoTest, PSO_Solve)
     // TEST ALGORITHM
     std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
     Plato::BoundConstrainedPSO<double> tAlgorithm(tFactory, tObjective);
-    tAlgorithm.setLowerBounds(-6);
-    tAlgorithm.setUpperBounds(6);
+    tAlgorithm.setLowerBounds(-5);
+    tAlgorithm.setUpperBounds(5);
     tAlgorithm.solve();
 
     const double tTolerance = 1e-4;
