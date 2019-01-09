@@ -53,6 +53,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "Plato_Vector.hpp"
+
 namespace Plato
 {
 
@@ -114,6 +116,36 @@ public:
     {
         mComm = aInput;
         mIsCommSet = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Blocks until all processes in the communicator have reached this routine.
+     * @brief @param [in] aRootProc root/source processor that owns the data
+     * @brief @param [in] aInput input buffer own by root/source processor
+     * @brief @param [out] aOutput output buffer own by all processors
+     **********************************************************************************/
+    template<typename ScalarType, typename OrdinalType>
+    void broadcast(const OrdinalType & aRootProc,
+                   const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                   Plato::Vector<ScalarType, OrdinalType> & aOutput) const
+    {
+        assert(aInput.size() == aOutput.size());
+
+        const int tRootProc = aRootProc;
+        const int tCount = aInput.size();
+        std::vector<double> tBuffer(tCount);
+
+        for(int tIndex = 0; tIndex < tCount; tIndex++)
+        {
+            tBuffer[tIndex] = aInput[tIndex];
+        }
+
+        MPI_Bcast(tBuffer.data(), tCount, MPI_DOUBLE, tRootProc, mComm);
+
+        for(int tIndex= 0; tIndex < tCount; tIndex++)
+        {
+            aOutput[tIndex] = tBuffer[tIndex];
+        }
     }
 
     /******************************************************************************//**
