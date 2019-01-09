@@ -57,6 +57,22 @@ namespace Plato
 template<typename ScalarType, typename OrdinalType>
 class Vector;
 
+/******************************************************************************//**
+ * @brief Output struct specialized for min_loc reduction operations.
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct ReductionOutputs
+{
+    ScalarType mOutputValue; /*!< output value, e.g. global minimum */
+    OrdinalType mOutputRank; /*!< rank ID that owns output value  */
+    OrdinalType mOutputIndex; /*!< local element index associated with the rank ID that owns the output value  */
+};
+// struct ReductionOutputs
+
+/******************************************************************************//**
+ * @brief Interface to common parallel programming operations used to reduce the
+ *        elements of an array into a single result.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ReductionOperations
 {
@@ -65,16 +81,44 @@ public:
     {
     }
 
-    //! Returns the maximum element in range
+    /******************************************************************************//**
+     * @brief Returns the global maximum element in range.
+     * @param [in] aInput array of elements
+     * @return global maximum
+    **********************************************************************************/
     virtual ScalarType max(const Plato::Vector<ScalarType, OrdinalType> & aInput) const = 0;
-    //! Returns the minimum element in range
+
+    /******************************************************************************//**
+     * @brief Returns the global minimum element in range.
+     * @param [in] aInput array of elements
+     * @return global minimum
+    **********************************************************************************/
     virtual ScalarType min(const Plato::Vector<ScalarType, OrdinalType> & aInput) const = 0;
-    //! Returns the sum of all the elements in container.
+
+    /******************************************************************************//**
+     * @brief Returns the global sum of all the elements in the container.
+     * @param [in] aInput array of elements
+     * @return global sum
+    **********************************************************************************/
     virtual ScalarType sum(const Plato::Vector<ScalarType, OrdinalType> & aInput) const = 0;
+
+    /******************************************************************************//**
+     * @brief Computes a global minimum and also the index attached to the minimum value.
+     * @param [in] aInput array of elements
+     * @param [out] aOutput struct with global minimum and the rank and index attached to the minimum
+    **********************************************************************************/
+    virtual void minloc(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                        Plato::ReductionOutputs<ScalarType, OrdinalType> & aOutput) const = 0;
+
+    /******************************************************************************//**
+     * @brief Returns a copy of a ReductionOperations instance
+     * @return copy of this instance
+    **********************************************************************************/
     //! Creates object of type Plato::ReductionOperations
     virtual std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> create() const = 0;
 };
+// class ReductionOperations
 
-}
+} // namespace Plato
 
 #endif /* PLATO_REDUCTIONOPERATIONS_HPP_ */

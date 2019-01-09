@@ -61,19 +61,35 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Common parallel programming operations used to reduce the elements
+ *        of an array into a single result.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class DistributedReductionOperations : public Plato::ReductionOperations<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] MPI communicator (default = MPI_COMM_WORLD)
+    **********************************************************************************/
     DistributedReductionOperations(MPI_Comm aComm = MPI_COMM_WORLD) :
             mComm(aComm)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~DistributedReductionOperations()
     {
     }
 
-    //! Returns the maximum element in range
+    /******************************************************************************//**
+     * @brief Returns the global maximum element in range.
+     * @param [in] aInput array of elements
+     * @return global maximum value
+    **********************************************************************************/
     ScalarType max(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -92,7 +108,12 @@ public:
 
         return (aGlobalMaxValue);
     }
-    //! Returns the minimum element in range
+
+    /******************************************************************************//**
+     * @brief Returns the global minimum element in range.
+     * @param [in] aInput array of elements
+     * @return global minimum value
+    **********************************************************************************/
     ScalarType min(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -111,7 +132,12 @@ public:
 
         return (aGlobalMinValue);
     }
-    //! Returns the sum of all the elements in container.
+
+    /******************************************************************************//**
+     * @brief Returns the global sum of all the elements in the container.
+     * @param [in] aInput array of elements
+     * @return global sum
+    **********************************************************************************/
     ScalarType sum(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > 0);
@@ -132,14 +158,60 @@ public:
 
         return (tGlobalSum);
     }
-    //! Creates an instance of type Plato::ReductionOperations
+
+    /******************************************************************************//**
+     * @brief Computes a global minimum and also the index attached to the minimum value.
+     * @param [in] aInput array of elements
+     * @param [out] aOutput struct with global minimum and the rank and index attached to the minimum
+    **********************************************************************************/
+    void minloc(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                Plato::ReductionOutputs<ScalarType, OrdinalType> & aOutput) const
+    {
+        struct
+        {
+            ScalarType mValue;
+            int mIndex;
+        } tInput, tOutput;
+
+        /* local minloc */
+        tInput.mIndex = 0;
+        tInput.mValue = aInput[0];
+        const OrdinalType tMyNumElements = aInput.size(); /* local num elements */
+        for(OrdinalType tIndex = 0; tIndex < tMyNumElements; tIndex++)
+        {
+            if(aInput[tIndex] < tInput.mValue)
+            {
+                tInput.mValue = aInput[tIndex];
+                tInput.mIndex = tIndex;
+            }
+        }
+
+        /* global minloc */
+        int tMyRank = 0;
+        MPI_Comm_rank(mComm, &tMyRank);
+        tInput.mIndex = tMyRank * tMyNumElements + tInput.mIndex;
+        MPI_Allreduce(&tInput, &tOutput, 1, MPI_DOUBLE_INT, MPI_MINLOC, mComm);
+
+        aOutput.mOutputValue = tOutput.mValue;
+        aOutput.mOutputRank = tOutput.mIndex / tMyNumElements;
+        aOutput.mOutputIndex = tOutput.mIndex % tMyNumElements;
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a copy of a ReductionOperations instance
+     * @return copy of this instance
+    **********************************************************************************/
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> create() const
     {
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tCopy =
                 std::make_shared<DistributedReductionOperations<ScalarType, OrdinalType>>(mComm);
         return (tCopy);
     }
-    //! Return number of ranks (i.e. processes)
+
+    /******************************************************************************//**
+     * @brief Return total number of ranks (i.e. processes)
+     * @return total number of ranks
+    **********************************************************************************/
     OrdinalType getNumRanks() const
     {
         int tNumRanks = 0;
@@ -149,13 +221,14 @@ public:
     }
 
 private:
-    MPI_Comm mComm;
+    MPI_Comm mComm; /*!< MPI communicator */
 
 private:
     DistributedReductionOperations(const Plato::DistributedReductionOperations<ScalarType, OrdinalType> &);
     Plato::DistributedReductionOperations<ScalarType, OrdinalType> & operator=(const Plato::DistributedReductionOperations<ScalarType, OrdinalType> &);
 };
+// class DistributedReductionOperations
 
-}
+} // namespace Plato
 
 #endif /* PLATO_DISTRIBUTEDREDUCTIONOPERATIONS_HPP_ */

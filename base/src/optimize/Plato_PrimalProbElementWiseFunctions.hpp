@@ -75,6 +75,11 @@ public:
     {
     }
 
+    virtual void updateInitialSigmaCoeff(const ScalarType & aInitialMovingAsymptoteMultiplier,
+                                         const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds,
+                                         const Plato::Vector<ScalarType, OrdinalType> & aLowerBounds,
+                                         Plato::Vector<ScalarType, OrdinalType> & aCurrentSigma) const = 0;
+
     virtual void updateSigmaCoeff(const std::map<Plato::element_wise::constant_t, ScalarType> & aConstants,
                                   const Plato::Vector<ScalarType, OrdinalType> & aCurrentControls,
                                   const Plato::Vector<ScalarType, OrdinalType> & aPreviousControls,

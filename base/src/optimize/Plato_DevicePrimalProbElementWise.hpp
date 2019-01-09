@@ -69,6 +69,28 @@ public:
     {
     }
 
+    void updateInitialSigmaCoeff(const ScalarType & aInitialMovingAsymptoteMultiplier,
+                                 const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds,
+                                 const Plato::Vector<ScalarType, OrdinalType> & aLowerBounds,
+                                 Plato::Vector<ScalarType, OrdinalType> & aCurrentSigma) const
+    {
+        assert(aCurrentSigma.size() == aUpperBounds.size());
+        assert(aCurrentSigma.size() == aLowerBounds.size());
+
+        ScalarType* tCurrentSigmaData = aCurrentSigma.data();
+        const ScalarType* tUpperBoundsData = aUpperBounds.data();
+        const ScalarType* tLowerBoundsData = aLowerBounds.data();
+        const ScalarType tInitialMovingAsymptoteMultiplier = aInitialMovingAsymptoteMultiplier;
+
+        const OrdinalType tNumElements = aCurrentSigma.size();
+        Kokkos::parallel_for(Kokkos::RangePolicy<>(0, tNumElements), KOKKOS_LAMBDA(const OrdinalType & aIndex)
+        {
+            const ScalarType tBoundsMisfit = tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex];
+            const ScalarType tValue = tInitialMovingAsymptoteMultiplier * tBoundsMisfit;
+            tCurrentSigmaData[aIndex] = tBoundsMisfit <= static_cast<ScalarType>(0) ? tInitialMovingAsymptoteMultiplier : tValue;
+        }, "DevicePrimalProbElementWise::updateInitialSigmaCoeff");
+    }
+
     void updateSigmaCoeff(const std::map<Plato::element_wise::constant_t, ScalarType> & aConstants,
                           const Plato::Vector<ScalarType, OrdinalType> & aCurrentControls,
                           const Plato::Vector<ScalarType, OrdinalType> & aPreviousControls,
@@ -105,16 +127,24 @@ public:
             ScalarType tValue = (tCurrentControlData[aIndex] - tPreviousControlData[aIndex])
                     * (tPreviousControlData[aIndex] - tAntepenultimateControlsData[aIndex]);
 
-            ScalarType tConditionOne = tExpansionFactor * tPreviousSigmaData[aIndex];
-            ScalarType tConditionTwo = tContractionFactor * tPreviousSigmaData[aIndex];
-            tCurrentSigmaData[aIndex] = tValue > static_cast<ScalarType>(0) ? tConditionOne : tConditionTwo;
+            if(tValue > static_cast<ScalarType>(0))
+            {
+                tCurrentSigmaData[aIndex] = tExpansionFactor * tPreviousSigmaData[aIndex];
+            }
+            else if(tValue < static_cast<ScalarType>(0))
+            {
+                tCurrentSigmaData[aIndex] = tContractionFactor * tPreviousSigmaData[aIndex];
+            }
 
             // check that lower bound is satisfied
-            tValue = tLowerBoundScaleFactor * (tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex]);
+            const ScalarType tBoundsMisfit = tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex];
+            ScalarType tSlopeValue = tLowerBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tLowerBoundScaleFactor : tSlopeValue;
             tCurrentSigmaData[aIndex] = fmax(tValue, tCurrentSigmaData[aIndex]);
 
             // check that upper bound is satisfied
-            tValue = tUpperBoundScaleFactor * (tUpperBoundsData[aIndex] - tLowerBoundsData[aIndex]);
+            tSlopeValue = tUpperBoundScaleFactor * tBoundsMisfit;
+            tValue = tBoundsMisfit <= static_cast<ScalarType>(0) ? tUpperBoundScaleFactor : tSlopeValue;
             tCurrentSigmaData[aIndex] = fmin(tValue, tCurrentSigmaData[aIndex]);
         }, "DevicePrimalProbElementWise::updateSigmaCoeff");
     }

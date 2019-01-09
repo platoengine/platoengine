@@ -522,7 +522,8 @@ void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>
 }
 
 /******************************************************************************//**
- * @brief Print diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
+ * @brief Print header in Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm's
+ *        diagnostic file.
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)

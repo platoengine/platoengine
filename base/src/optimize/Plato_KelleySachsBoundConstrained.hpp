@@ -277,6 +277,7 @@ public:
 
     /******************************************************************************//**
      * @brief Solve constrained optimization problem
+     * @param [in,out] aOutputStream output/diagnostics file
     **********************************************************************************/
     void solve(std::ofstream & aOutputStream)
     {
@@ -355,27 +356,14 @@ private:
         const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
-            mOutputData.mNumIter = this->getNumIterationsDone();
-            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
-            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
-            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
-            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
-            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
-
-            mOutputData.mActualRed = mStepMng->getActualReduction();
-            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
-            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
-            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
-            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
-            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
-
+            this->cacheOutputData();
             Plato::print_ksbc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
         }
     }
 
     /******************************************************************************//**
      * @brief Print diagnostics for Kelley-Sachs constrained optimization algorithm
+     * @param [in,out] aOutputStream output/diagnostics file
     **********************************************************************************/
     void outputDiagnostics(std::ofstream & aOutputStream)
     {
@@ -387,23 +375,30 @@ private:
         const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
-            mOutputData.mNumIter = this->getNumIterationsDone();
-            mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
-            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
-            mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
-            mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
-            mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
-
-            mOutputData.mActualRed = mStepMng->getActualReduction();
-            mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
-            mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
-            mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
-            mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
-            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
-
+            this->cacheOutputData();
             Plato::print_ksal_inner_diagnostics(mOutputData, aOutputStream, mPrintDiagnostics);
         }
+    }
+
+    /******************************************************************************//**
+     * @brief Cache output/diagnostics data.
+    **********************************************************************************/
+    void cacheOutputData()
+    {
+        mOutputData.mNumIter = this->getNumIterationsDone();
+        mOutputData.mNumIterPCG = mSolver->getNumIterationsDone();
+        mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveFunctionValue();
+        mOutputData.mObjFuncCount = mDataMng->getNumObjectiveFunctionEvaluations();
+        mOutputData.mNumLineSearchIter = this->getNumLineSearchItrDone();
+        mOutputData.mNumTrustRegionIter = mStepMng->getNumTrustRegionSubProblemItrDone();
+
+        mOutputData.mActualRed = mStepMng->getActualReduction();
+        mOutputData.mAredOverPred = mStepMng->getActualOverPredictedReduction();
+        mOutputData.mNormObjFuncGrad = mDataMng->getNormProjectedGradient();
+        mOutputData.mTrustRegionRadius = mStepMng->getTrustRegionRadius();
+        mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
+        mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+        mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
     }
 
     /******************************************************************************//**

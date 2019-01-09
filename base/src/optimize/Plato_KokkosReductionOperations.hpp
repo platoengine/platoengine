@@ -59,20 +59,32 @@
 namespace Plato
 {
 
-/******************************************************************************/
+/******************************************************************************//**
+ * @brief Operations used to reduce the elements of an array into a single result.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class KokkosReductionOperations : public Plato::ReductionOperations<ScalarType, OrdinalType>
-/******************************************************************************/
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     KokkosReductionOperations()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~KokkosReductionOperations()
     {
     }
 
-    //! Returns the maximum element in range
+    /******************************************************************************//**
+     * @brief Returns the global maximum element in range.
+     * @param [in] aInput array of elements
+     * @return global maximum value
+    **********************************************************************************/
     ScalarType max(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
@@ -97,7 +109,12 @@ public:
 
         return (tOutput);
     }
-    //! Returns the minimum element in range
+
+    /******************************************************************************//**
+     * @brief Returns the global minimum element in range.
+     * @param [in] aInput array of elements
+     * @return global minimum value
+    **********************************************************************************/
     ScalarType min(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
@@ -122,7 +139,12 @@ public:
 
         return (tOutput);
     }
-    //! Returns the sum of all the elements in container.
+
+    /******************************************************************************//**
+     * @brief Returns the global sum of all the elements in the container.
+     * @param [in] aInput array of elements
+     * @return global sum
+    **********************************************************************************/
     ScalarType sum(const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
@@ -138,7 +160,55 @@ public:
 
         return (tOutput);
     }
-    //! Creates object of type Plato::ReductionOperations
+
+    /******************************************************************************//**
+     * @brief Computes minimum value and also the index attached to the minimum value.
+     * @param [in] aInput array of elements
+     * @param [out] aOutput struct with minimum value and the index attached to the minimum
+    **********************************************************************************/
+    void minloc(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                Plato::ReductionOutputs<ScalarType, OrdinalType> & aOutput) const
+    {
+        // TODO: FINISH: KOKKOS CODE IS NOT BUILDING
+        aOutput.mOutputIndex = 0;
+        aOutput.mOutputValue = aInput[0];
+        const OrdinalType tMyNumElements = aInput.size();
+        for(OrdinalType tIndex = 0; tIndex < tMyNumElements; tIndex++)
+        {
+            if(aInput[tIndex] < aOutput.mOutputValue)
+            {
+                aOutput.mOutputValue = aInput[tIndex];
+                aOutput.mOutputIndex = tIndex;
+            }
+        }
+        aOutput.mOutputRank = 0;
+
+/*        typedef Kokkos::MinLoc<ScalarType, OrdinalType>::value_type minloc_type;
+        minloc_type tGlobalMinLoc;
+        Kokkos::MinLoc<ScalarType, OrdinalType> tMinLocReducer(tGlobalMinLoc);
+
+        const OrdinalType tSize = aInput.size();
+        const ScalarType* tInputData = aInput.data();
+        Kokkos::parallel_reduce( "MinLocReduce",
+            Kokkos::RangePolicy<>(0, tSize),
+            KOKKOS_LAMBDA (const OrdinalType & aIndex, Kokkos::Experimental::MinLoc<ScalarType, OrdinalType>& aLocalMinLoc)
+        {
+            if( tInputData[aIndex] < aLocalMinLoc.val )
+            {
+                aLocalMinLoc.loc = aIndex;
+                aLocalMinLoc.val = tInputData[aIndex];
+            }
+        }, tMinLocReducer);
+
+        aOutput.mOutputRank = 0;
+        aOutput.mOutputValue = tMinLocReducer.val;
+        aOutput.mOutputIndex = tMinLocReducer.loc;*/
+    }
+
+    /******************************************************************************//**
+     * @brief Returns a copy of a ReductionOperations instance
+     * @return copy of this instance
+    **********************************************************************************/
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> create() const
     {
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tCopy =
