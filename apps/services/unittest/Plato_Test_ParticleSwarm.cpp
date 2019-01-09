@@ -2199,6 +2199,13 @@ public:
         return (mOperations->getCurrentGlobalBestObjFunValue());
     }
 
+    std::string getStoppingCriterion() const
+    {
+        std::string tReason;
+        Plato::pso::get_stop_criterion(mStopCriterion, tReason);
+        return (tReason);
+    }
+
     const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
     {
         return (*mDataMng);
@@ -2541,6 +2548,13 @@ public:
     ScalarType getCurrentGlobalBestAugLagValue() const
     {
         return (mOptimizer->getCurrentGlobalBestObjFuncValue());
+    }
+
+    std::string getStoppingCriterion() const
+    {
+        std::string tReason;
+        Plato::pso::get_stop_criterion(mStopCriterion, tReason);
+        return (tReason);
     }
 
     const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
@@ -3291,7 +3305,7 @@ TEST(PlatoTest, PSO_Solve)
     // ********* Allocate Core Optimization Data Templates *********
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumControls = 2;
-    const size_t tNumParticles = 20;
+    const size_t tNumParticles = 10;
     tFactory->allocateObjFuncValues(tNumParticles);
     tFactory->allocateControl(tNumControls, tNumParticles);
 
@@ -3302,13 +3316,15 @@ TEST(PlatoTest, PSO_Solve)
     tAlgorithm.setUpperBounds(5);
     tAlgorithm.solve();
 
-    const double tTolerance = 1e-4;
+    const double tTolerance = 1e-2;
     EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestObjFuncValue(), tTolerance);
 
     std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
     std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
             << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
             << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
+    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
         std::cout << "CONTROL[" << tIndex << "]: BEST = "
