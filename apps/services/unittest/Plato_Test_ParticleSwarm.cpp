@@ -860,6 +860,7 @@ class ParticleSwarmDataMng
 public:
     explicit ParticleSwarmDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
             mTimeStep(1),
+            mGlobalNumParticles(0),
             mLowerBounds(),
             mUpperBounds(),
             mMeanParticlePosition(),
@@ -869,7 +870,8 @@ public:
             mCurrentVelocities(aFactory->control().create()),
             mPreviousVelocities(aFactory->control().create()),
             mBestParticlePositions(aFactory->control().create()),
-            mCommWrapper(aFactory->getCommWrapper().create())
+            mCommWrapper(aFactory->getCommWrapper().create()),
+            mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
         this->initialize();
     }
@@ -1095,47 +1097,73 @@ private:
         mGlobalBestParticlePosition = tMyParticle.create();
         mGlobalBestParticlePosition->fill(std::numeric_limits<ScalarType>::max());
         Plato::fill(std::numeric_limits<ScalarType>::max(), *mBestParticlePositions);
+
+        const OrdinalType tLength = 1;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength, this->getNumParticles());
+        mGlobalNumParticles = mCriteriaReductions->sum(tWork);
     }
 
     void computeBestParticlePositionMean()
     {
-        mMeanParticlePosition->fill(static_cast<ScalarType>(0));
-        const OrdinalType tNumParticles = this->getNumParticles();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        /* local sum */
+        mWorkVector->fill(static_cast<ScalarType>(0));
+        const OrdinalType tLocalNumParticles = this->getNumParticles();
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyParticle = (*mBestParticlePositions)[tParticleIndex];
             const OrdinalType tMyParticleDims = tMyParticle.size();
             for(OrdinalType tDim = 0; tDim < tMyParticleDims; tDim++)
             {
-                (*mMeanParticlePosition)[tDim] += tMyParticle[tDim] / static_cast<ScalarType>(tNumParticles);
+                (*mWorkVector)[tDim] += tMyParticle[tDim];
             }
         }
+
+        /* global sum */
+        const OrdinalType tLength = 1;
+        const OrdinalType tVECTOR_INDEX = 0;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength);
+        const OrdinalType tNumDims = mWorkVector->size();
+        for(OrdinalType tDim = 0; tDim < tNumDims; tDim++)
+        {
+            tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
+            (*mMeanParticlePosition)[tDim] = mCriteriaReductions->sum(tWork);
+        }
+        const ScalarType tMultiplier = static_cast<ScalarType>(1) / mGlobalNumParticles;
+        mMeanParticlePosition->scale(tMultiplier);
     }
 
     void computeBestParticlePositionStdDev()
     {
-        mStdDevParticlePosition->fill(static_cast<ScalarType>(0));
-        const OrdinalType tNumParticles = this->getNumParticles();
+        /* local operations */
+        mWorkVector->fill(static_cast<ScalarType>(0));
+        const OrdinalType tLocalNumParticles = this->getNumParticles();
         const OrdinalType tNumControls = mStdDevParticlePosition->size();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyBestParticlePosition = (*mBestParticlePositions)[tParticleIndex];
             for(OrdinalType tDim = 0; tDim < tNumControls; tDim++)
             {
                 const ScalarType tMisfit = tMyBestParticlePosition[tDim] - (*mMeanParticlePosition)[tDim];
-                (*mStdDevParticlePosition)[tDim] += tMisfit * tMisfit;
+                (*mWorkVector)[tDim] += tMisfit * tMisfit;
             }
         }
 
+        /* global operations */
+        const OrdinalType tLength = 1;
+        const OrdinalType tVECTOR_INDEX = 0;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength);
         for(OrdinalType tDim = 0; tDim < tNumControls; tDim++)
         {
-            const ScalarType tValue = (*mStdDevParticlePosition)[tDim] / static_cast<ScalarType>(tNumParticles - 1);
+            tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
+            const ScalarType tGlobalBestParticlePositionMinusMean = mCriteriaReductions->sum(tWork);
+            const ScalarType tValue = tGlobalBestParticlePositionMinusMean / static_cast<ScalarType>(mGlobalNumParticles - 1);
             (*mStdDevParticlePosition)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
         }
     }
 
 private:
     ScalarType mTimeStep;
+    ScalarType mGlobalNumParticles;
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mWorkVector;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mLowerBounds;
@@ -1150,6 +1178,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mBestParticlePositions;
 
     std::shared_ptr<Plato::CommWrapper> mCommWrapper;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
 
 private:
     ParticleSwarmDataMng(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
