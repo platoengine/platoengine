@@ -368,8 +368,7 @@ template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_outer_constraint_diagnostics(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
                                                      std::ofstream& aOutputFile)
 {
-    const OrdinalType tNumConstraints = aData.mCurrentGlobalBestConstraintValues.size();
-    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    for(OrdinalType tIndex = 0; tIndex < aData.mNumConstraints; tIndex++)
     {
         aOutputFile << std::setw(15) << aData.mCurrentGlobalBestConstraintValues[tIndex] << std::setw(15)
                 << aData.mMeanCurrentBestConstraintValues[tIndex] << std::setw(15) << aData.mStdDevCurrentBestConstraintValues[tIndex]
@@ -1204,8 +1203,8 @@ public:
             mMeanBestConstraintValues(),
             mStdDevBestConstraintValues(),
             mCurrentGlobalBestConstraintValues(),
-            mPenaltyMultipliers(aFactory->dual().create()),
-            mLagrangeMultipliers(aFactory->dual().create()),
+            mCurrentPenaltyMultipliers(aFactory->dual().create()),
+            mCurrentLagrangeMultipliers(aFactory->dual().create()),
             mCurrentConstraintValues(aFactory->dual().create()),
             mPreviousConstraintValues(aFactory->dual().create()),
             mCurrentBestConstraintValues(aFactory->dual().create()),
@@ -1258,6 +1257,30 @@ public:
     ScalarType getCurrentGlobalBestObjFuncValue() const
     {
         return (mCurrentGlobalBestObjFuncValue);
+    }
+
+    ScalarType getMeanCurrentPenaltyMultipliers(const OrdinalType & aInput) const
+    {
+        assert(aInput < mMeanCurrentPenaltyMultipliers->size());
+        return ((*mMeanCurrentPenaltyMultipliers)[aInput]);
+    }
+
+    ScalarType getStdDevCurrentPenaltyMultipliers(const OrdinalType & aInput) const
+    {
+        assert(aInput < mStdDevCurrentPenaltyMultipliers->size());
+        return ((*mStdDevCurrentPenaltyMultipliers)[aInput]);
+    }
+
+    ScalarType getMeanCurrentLagrangeMultipliers(const OrdinalType & aInput) const
+    {
+        assert(aInput < mMeanCurrentLagrangeMultipliers->size());
+        return ((*mMeanCurrentLagrangeMultipliers)[aInput]);
+    }
+
+    ScalarType getStdDevCurrentLagrangeMultipliers(const OrdinalType & aInput) const
+    {
+        assert(aInput < mStdDevCurrentLagrangeMultipliers->size());
+        return ((*mStdDevCurrentLagrangeMultipliers)[aInput]);
     }
 
     ScalarType getMeanCurrentBestConstraintValues(const OrdinalType & aInput) const
@@ -1334,16 +1357,16 @@ public:
 
     const Plato::Vector<ScalarType, OrdinalType> & getPenaltyMultipliers(const OrdinalType & aIndex) const
     {
-        assert(mPenaltyMultipliers.get() != nullptr);
-        assert(aIndex < mPenaltyMultipliers->getNumVectors());
-        return((*mPenaltyMultipliers)[aIndex]);
+        assert(mCurrentPenaltyMultipliers.get() != nullptr);
+        assert(aIndex < mCurrentPenaltyMultipliers->getNumVectors());
+        return((*mCurrentPenaltyMultipliers)[aIndex]);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getLagrangeMultipliers(const OrdinalType & aIndex) const
     {
-        assert(mLagrangeMultipliers.get() != nullptr);
-        assert(aIndex < mLagrangeMultipliers->getNumVectors());
-        return((*mLagrangeMultipliers)[aIndex]);
+        assert(mCurrentLagrangeMultipliers.get() != nullptr);
+        assert(aIndex < mCurrentLagrangeMultipliers->getNumVectors());
+        return((*mCurrentLagrangeMultipliers)[aIndex]);
     }
 
     void evaluateObjective(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
@@ -1366,9 +1389,9 @@ public:
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
         {
-            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyValues = (*mPenaltyMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyValues = (*mCurrentPenaltyMultipliers)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = (*mCurrentConstraintValues)[tConstraintIndex];
-            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mCurrentLagrangeMultipliers)[tConstraintIndex];
 
             const OrdinalType tNumParticles = tConstraintValues.size();
             for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
@@ -1391,8 +1414,8 @@ public:
         {
             const Plato::Vector<ScalarType, OrdinalType> & tCurrentConstraint = (*mCurrentConstraintValues)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tPreviousConstraint = (*mPreviousConstraintValues)[tConstraintIndex];
-            Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mPenaltyMultipliers)[tConstraintIndex];
-            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mCurrentPenaltyMultipliers)[tConstraintIndex];
+            Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mCurrentLagrangeMultipliers)[tConstraintIndex];
 
             const OrdinalType tNumParticles = tPenaltyMultipliers.size();
             for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
@@ -1420,14 +1443,15 @@ public:
     void computeCriteriaStatistics()
     {
         this->computeObjFuncStatistics();
+        this->computeDualDataStatistics();
         this->computeConstraintStatistics();
     }
 
 private:
     void initialize()
     {
-        Plato::fill(static_cast<ScalarType>(1), *mPenaltyMultipliers);
-        Plato::fill(static_cast<ScalarType>(0), *mLagrangeMultipliers);
+        Plato::fill(static_cast<ScalarType>(1), *mCurrentPenaltyMultipliers);
+        Plato::fill(static_cast<ScalarType>(0), *mCurrentLagrangeMultipliers);
 
         mCurrentObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
         mCurrentBestObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
@@ -1435,6 +1459,10 @@ private:
         const OrdinalType tNumConstraints = mConstraints->size();
         mMeanBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
         mStdDevBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
+        mMeanCurrentPenaltyMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
+        mStdDevCurrentPenaltyMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
+        mMeanCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
+        mStdDevCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
         mCurrentGlobalBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
         mCurrentGlobalBestConstraintValuesLocations = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
 
@@ -1463,31 +1491,50 @@ private:
         mCurrentGlobalBestObjFuncValue = tFoundNewGlobalBest == true ? tMyNewGlobalBestValue : mCurrentGlobalBestObjFuncValue;
     }
 
+    void computeDualDataStatistics()
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tMyPenaltyMultipliers = (*mCurrentPenaltyMultipliers)[tIndex];
+            ScalarType tMean = Plato::mean(*mCriteriaReductionOperations, tMyPenaltyMultipliers);
+            (*mMeanCurrentPenaltyMultipliers)[tIndex] = tMean;
+            ScalarType tStdDev = Plato::standard_deviation(tMean, tMyPenaltyMultipliers);
+            (*mStdDevCurrentPenaltyMultipliers)[tIndex] = tStdDev;
+
+            const Plato::Vector<ScalarType, OrdinalType> & tMyLagrangeMultipliers = (*mCurrentPenaltyMultipliers)[tIndex];
+            tMean = Plato::mean(*mCriteriaReductionOperations, tMyLagrangeMultipliers);
+            (*mMeanCurrentLagrangeMultipliers)[tIndex] = tMean;
+            tStdDev = Plato::standard_deviation(tMean, tMyLagrangeMultipliers);
+            (*mStdDevCurrentLagrangeMultipliers)[tIndex] = tStdDev;
+        }
+    }
+
     void computeConstraintStatistics()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            Plato::find_best_criterion_values((*mCurrentConstraintValues)[tIndex], (*mCurrentBestConstraintValues)[tIndex]);
-            (*mMeanBestConstraintValues)[tIndex] =
-                    Plato::mean(*mCriteriaReductionOperations, (*mCurrentBestConstraintValues)[tIndex]);
-            (*mStdDevBestConstraintValues)[tIndex] =
-                    Plato::standard_deviation((*mMeanBestConstraintValues)[tIndex], (*mCurrentBestConstraintValues)[tIndex]);
+            Plato::Vector<ScalarType, OrdinalType> & tMyBestConstraintValues = (*mCurrentBestConstraintValues)[tIndex];
+            Plato::find_best_criterion_values((*mCurrentConstraintValues)[tIndex], tMyBestConstraintValues);
+            const ScalarType tMean = Plato::mean(*mCriteriaReductionOperations, tMyBestConstraintValues);
+            (*mMeanBestConstraintValues)[tIndex] = tMean;
+            const ScalarType tStdDev = Plato::standard_deviation(tMean, tMyBestConstraintValues);
+            (*mStdDevBestConstraintValues)[tIndex] = tStdDev;
 
             OrdinalType tMyNewGlobalBestLocation = 0;
             ScalarType tMyNewGlobalBestValue = (*mCurrentGlobalBestConstraintValues)[tIndex];
             const bool tFoundNewGlobalBestValue =
-                    Plato::find_global_best_criterion_value_location((*mCurrentBestConstraintValues)[tIndex], tMyNewGlobalBestValue, tMyNewGlobalBestLocation);
+                    Plato::find_global_best_criterion_value_location(tMyBestConstraintValues, tMyNewGlobalBestValue, tMyNewGlobalBestLocation);
 
             // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL LOCATION IF tFoundNewGlobalBestValue = TRUE;
             const OrdinalType tMyCurrentBestLocation = (*mCurrentGlobalBestConstraintValuesLocations)[tIndex];
             (*mCurrentGlobalBestConstraintValuesLocations)[tIndex] = tFoundNewGlobalBestValue == true ?
                     tMyNewGlobalBestLocation : tMyCurrentBestLocation;
 
-            const Plato::Vector<ScalarType, OrdinalType> & tMyCurrentBestConstraintValues = (*mCurrentBestConstraintValues)[tIndex];
             // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL BEST VALUE IF tFoundNewGlobalBestValue = TRUE;
             (*mCurrentGlobalBestConstraintValues)[tIndex] = tFoundNewGlobalBestValue == true ?
-                    tMyNewGlobalBestValue : tMyCurrentBestConstraintValues[tMyCurrentBestLocation];
+                    tMyNewGlobalBestValue : tMyBestConstraintValues[tMyCurrentBestLocation];
         }
     }
 
@@ -1520,8 +1567,8 @@ private:
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
         {
-            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mPenaltyMultipliers)[tConstraintIndex];
-            const Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mLagrangeMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tPenaltyMultipliers = (*mCurrentPenaltyMultipliers)[tConstraintIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tLagrangeMultipliers = (*mCurrentLagrangeMultipliers)[tConstraintIndex];
             const Plato::Vector<ScalarType, OrdinalType> & tConstraintValues = (*mCurrentConstraintValues)[tConstraintIndex];
 
             const OrdinalType tNumParticles = mCurrentObjFuncValues->size();
@@ -1546,6 +1593,7 @@ private:
     ScalarType mMeanCurrentBestObjFuncValue;
     ScalarType mStdDevCurrentBestObjFuncValue;
     ScalarType mCurrentGlobalBestObjFuncValue;
+
     ScalarType mPenaltyExpansionMultiplier;
     ScalarType mPenaltyContractionMultiplier;
     ScalarType mFeasibilityInexactnessTolerance;
@@ -1555,11 +1603,15 @@ private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanBestConstraintValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevBestConstraintValues;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentPenaltyMultipliers;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentPenaltyMultipliers;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentLagrangeMultipliers;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentLagrangeMultipliers;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValuesLocations;
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPenaltyMultipliers;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLagrangeMultipliers;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentPenaltyMultipliers;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentLagrangeMultipliers;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousConstraintValues;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentBestConstraintValues;
@@ -2618,7 +2670,10 @@ private:
             mOutputData.mStdDevCurrentBestConstraintValues[tIndex] = mStageMng->getStdDevCurrentBestConstraintValues(tIndex);
             mOutputData.mCurrentGlobalBestConstraintValues[tIndex] = mStageMng->getCurrentGlobalBestConstraintValue(tIndex);
 
-            //mOutputData.mMeanCurrentPenaltyMultipliers[tIndex] = mStageMng->getMeanCurrentPenaltyMultipliers(tIndex);
+            mOutputData.mMeanCurrentPenaltyMultipliers[tIndex] = mStageMng->getMeanCurrentPenaltyMultipliers(tIndex);
+            mOutputData.mStdDevCurrentPenaltyMultipliers[tIndex] = mStageMng->getStdDevCurrentPenaltyMultipliers(tIndex);
+            mOutputData.mMeanCurrentLagrangeMultipliers[tIndex] = mStageMng->getMeanCurrentLagrangeMultipliers(tIndex);
+            mOutputData.mStdDevCurrentLagrangeMultipliers[tIndex] = mStageMng->getStdDevCurrentLagrangeMultipliers(tIndex);
         }
     }
 
