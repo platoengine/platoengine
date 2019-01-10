@@ -1921,7 +1921,6 @@ private:
             mCurrentGlobalBestObjFunValue = tOutput.mOutputValue;
             mCurrentGlobalBestParticleRank = tOutput.mOutputRank;
             mCurrentGlobalBestParticleIndex = tOutput.mOutputIndex;
-            const Plato::CommWrapper & tCommWrapper = aDataMng.getCommWrapper();
             const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(tOutput.mOutputIndex);
             aDataMng.setGlobalBestParticlePosition(tCurrentParticle);
         }
