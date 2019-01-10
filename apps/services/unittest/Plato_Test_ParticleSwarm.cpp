@@ -631,9 +631,10 @@ class GradFreeRadius : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
 public:
     /******************************************************************************//**
      * @brief Constructor
+     * @param [in] aInput upper bound (i.e. limit) on constraint
     **********************************************************************************/
-    GradFreeRadius() :
-        mLimit(1)
+    explicit GradFreeRadius(ScalarType aInput = 1.0) :
+        mLimit(aInput)
     {
     }
 
@@ -2441,7 +2442,7 @@ public:
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
     {
-        mOptimizer->setMaxNumIterations(5);
+        mOptimizer->setMaxNumIterations(5); /* augmented Lagrangian subproblem iterations */
     }
 
     /******************************************************************************//**
@@ -2633,7 +2634,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
@@ -2650,7 +2651,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.close();
@@ -2666,7 +2667,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 std::string tReason;
@@ -2687,7 +2688,7 @@ private:
         }
 
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-        const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheObjFuncOutputData();
@@ -3300,7 +3301,7 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(-0.03395, tStageMng.getCurrentGlobalBestConstraintValue(0 /* constraint index */), tTolerance);
 }
 
-TEST(PlatoTest, PSO_Solve)
+TEST(PlatoTest, PSO_SolveBCPSO)
 {
     // ********* Allocate Core Optimization Data Templates *********
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
@@ -3333,5 +3334,43 @@ TEST(PlatoTest, PSO_Solve)
                 << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex] << "\n";
     }
 }
+
+/*TEST(PlatoTest, PSO_SolveALPSO)
+{
+    // ********* Allocate Core Optimization Data Templates *********
+    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateControl(tNumControls, tNumParticles);
+
+    // TEST ALGORITHM
+    const double tBound = 2;
+    std::shared_ptr<Plato::GradFreeRadius<double>> tConstraintOne = std::make_shared<Plato::GradFreeRadius<double>>(tBound);
+    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints = std::make_shared<Plato::GradFreeCriteriaList<double>>();
+    tConstraints->add(tConstraintOne);
+    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+    Plato::AugmentedLagrangianPSO<double> tAlgorithm(tFactory, tObjective, tConstraints);
+    tAlgorithm.setLowerBounds(-5);
+    tAlgorithm.setUpperBounds(5);
+    tAlgorithm.solve();
+
+    const double tTolerance = 1e-2;
+    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestAugLagValue(), tTolerance);
+
+    std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
+    std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestAugLagValue() << ", MEAN = "
+            << tAlgorithm.getMeanCurrentBestAugLagValues() << ", STDDEV = "
+            << tAlgorithm.getStdDevCurrentBestAugLagValues() << "\n";
+    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = "
+                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
+                << tAlgorithm.getDataMng().getParticlePositionMean()[tIndex] << ", STDDEV = "
+                << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex] << "\n";
+    }
+}*/
 
 } // ParticleSwarmTest
