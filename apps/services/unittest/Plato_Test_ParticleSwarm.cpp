@@ -887,7 +887,7 @@ public:
 
     OrdinalType getNumParticles() const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return (mCurrentParticles->getNumVectors());
     }
 
@@ -898,19 +898,19 @@ public:
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentParticles() const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return (*mCurrentParticles);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentParticle(const OrdinalType & aIndex) const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return ((*mCurrentParticles)[aIndex]);
     }
 
     void setCurrentParticle(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticle)
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         assert(aParticle.size() > static_cast<OrdinalType>(0));
         (*mCurrentParticles)[aIndex].update(static_cast<ScalarType>(1), aParticle, static_cast<ScalarType>(0));
     }
@@ -918,25 +918,25 @@ public:
     void setCurrentParticles(const Plato::MultiVector<ScalarType, OrdinalType> & aParticles)
     {
         assert(aParticles.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aParticles, static_cast<ScalarType>(0), *mCurrentParticles);
     }
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentVelocities() const
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         return (*mCurrentVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentVelocity(const OrdinalType & aIndex) const
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         return ((*mCurrentVelocities)[aIndex]);
     }
 
     void setCurrentVelocity(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticleVel)
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         assert(aParticleVel.size() > static_cast<OrdinalType>(0));
         (*mCurrentVelocities)[aIndex].update(static_cast<ScalarType>(1), aParticleVel, static_cast<ScalarType>(0));
     }
@@ -944,109 +944,109 @@ public:
     void setCurrentVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentVelocities);
     }
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousVelocities() const
     {
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         return (*mPreviousVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getPreviousVelocity(const OrdinalType & aIndex) const
     {
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         return ((*mPreviousVelocities)[aIndex]);
     }
 
     void setPreviousVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mPreviousVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getLowerBounds() const
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         return (*mLowerBounds);
     }
 
     void setLowerBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         assert(aInput.size() > static_cast<OrdinalType>(0));
         mLowerBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setLowerBounds(const ScalarType & aInput)
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         mLowerBounds->fill(aInput);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getUpperBounds() const
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         return (*mUpperBounds);
     }
 
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         assert(aInput.size() > static_cast<OrdinalType>(0));
         mUpperBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setUpperBounds(const ScalarType & aInput)
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         mUpperBounds->fill(aInput);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getParticlePositionMean() const
     {
-        assert(mMeanParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mMeanParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mMeanParticlePosition);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getParticlePositionStdDev() const
     {
-        assert(mStdDevParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mStdDevParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mStdDevParticlePosition);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getGlobalBestParticlePosition() const
     {
-        assert(mGlobalBestParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mGlobalBestParticlePosition);
     }
 
     void setGlobalBestParticlePosition(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(mGlobalBestParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         mGlobalBestParticlePosition->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getBestParticlePosition(const OrdinalType & aIndex) const
     {
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         return ((*mBestParticlePositions)[aIndex]);
     }
 
     void setBestParticlePosition(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         (*mBestParticlePositions)[aIndex].update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setBestParticlePositions(const Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mBestParticlePositions);
     }
 
@@ -2217,8 +2217,8 @@ public:
     **********************************************************************************/
     void solve()
     {
-        assert(mDataMng.use_count() > static_cast<OrdinalType>(0));
-        assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mDataMng.use_count()) > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mStageMng.use_count()) > static_cast<OrdinalType>(0));
 
         this->openOutputFile();
         this->initialize();
