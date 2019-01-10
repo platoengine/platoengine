@@ -169,7 +169,7 @@ public:
     void minloc(const Plato::Vector<ScalarType, OrdinalType> & aInput,
                 Plato::ReductionOutputs<ScalarType, OrdinalType> & aOutput) const
     {
-        // TODO: FINISH: KOKKOS CODE IS NOT BUILDING
+        // TODO: FINISH: KOKKOS CODE BELOW IS NOT BUILDING
         aOutput.mOutputIndex = 0;
         aOutput.mOutputValue = aInput[0];
         const OrdinalType tMyNumElements = aInput.size();

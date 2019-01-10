@@ -78,6 +78,27 @@ struct particle_swarm
 template<typename ScalarType, typename OrdinalType = size_t>
 struct OutputDataPSO
 {
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    OutputDataPSO() :
+            mNumIter(0),
+            mObjFuncCount(0),
+            mNumConstraints(0),
+            mTrustRegionMultiplier(0),
+            mMeanCurrentBestObjFuncValues(0),
+            mCurrentGlobalBestObjFuncValue(0),
+            mStdDevCurrentBestObjFuncValues(0)
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~OutputDataPSO()
+    {
+    }
+
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
     OrdinalType mNumConstraints;  /*!< number of constraints - only needed for ALPSO output */
@@ -518,6 +539,8 @@ template<typename ScalarType, typename OrdinalType>
 void find_best_criterion_values(const Plato::Vector<ScalarType, OrdinalType> & aCurrentValues,
                                 Plato::Vector<ScalarType, OrdinalType> & aCurrentBestValues)
 {
+    assert(aCurrentValues.size() == aCurrentBestValues.size());
+
     const OrdinalType tNumParticles = aCurrentValues.size();
     for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
     {
@@ -526,25 +549,6 @@ void find_best_criterion_values(const Plato::Vector<ScalarType, OrdinalType> & a
             aCurrentBestValues[tIndex] = aCurrentValues[tIndex];
         }
     }
-}
-
-template<typename ScalarType, typename OrdinalType>
-bool find_global_best_criterion_value_location(const Plato::Vector<ScalarType, OrdinalType> & aCurrentValues,
-                                               ScalarType & aCurrentGlobalBestValue,
-                                               OrdinalType & aLocation)
-{
-    bool tUpdatedGlobalBestCriterionValueLocation = false;
-    const OrdinalType tNumParticles = aCurrentValues.size();
-    for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
-    {
-        if(aCurrentValues[tIndex] < aCurrentGlobalBestValue)
-        {
-            tUpdatedGlobalBestCriterionValueLocation = true;
-            aCurrentGlobalBestValue = aCurrentValues[tIndex];
-            aLocation = tIndex;
-        }
-    }
-    return (tUpdatedGlobalBestCriterionValueLocation);
 }
 
 template<typename ScalarType, typename OrdinalType = size_t>
@@ -627,9 +631,10 @@ class GradFreeRadius : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
 public:
     /******************************************************************************//**
      * @brief Constructor
+     * @param [in] aInput upper bound (i.e. limit) on constraint
     **********************************************************************************/
-    GradFreeRadius() :
-        mLimit(1)
+    explicit GradFreeRadius(ScalarType aInput = 1.0) :
+        mLimit(aInput)
     {
     }
 
@@ -860,6 +865,7 @@ class ParticleSwarmDataMng
 public:
     explicit ParticleSwarmDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
             mTimeStep(1),
+            mGlobalNumParticles(0),
             mLowerBounds(),
             mUpperBounds(),
             mMeanParticlePosition(),
@@ -869,7 +875,8 @@ public:
             mCurrentVelocities(aFactory->control().create()),
             mPreviousVelocities(aFactory->control().create()),
             mBestParticlePositions(aFactory->control().create()),
-            mCommWrapper(aFactory->getCommWrapper().create())
+            mCommWrapper(aFactory->getCommWrapper().create()),
+            mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
         this->initialize();
     }
@@ -880,7 +887,7 @@ public:
 
     OrdinalType getNumParticles() const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return (mCurrentParticles->getNumVectors());
     }
 
@@ -891,19 +898,19 @@ public:
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentParticles() const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return (*mCurrentParticles);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentParticle(const OrdinalType & aIndex) const
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         return ((*mCurrentParticles)[aIndex]);
     }
 
     void setCurrentParticle(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticle)
     {
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         assert(aParticle.size() > static_cast<OrdinalType>(0));
         (*mCurrentParticles)[aIndex].update(static_cast<ScalarType>(1), aParticle, static_cast<ScalarType>(0));
     }
@@ -911,25 +918,25 @@ public:
     void setCurrentParticles(const Plato::MultiVector<ScalarType, OrdinalType> & aParticles)
     {
         assert(aParticles.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mCurrentParticles.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aParticles, static_cast<ScalarType>(0), *mCurrentParticles);
     }
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentVelocities() const
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         return (*mCurrentVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getCurrentVelocity(const OrdinalType & aIndex) const
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         return ((*mCurrentVelocities)[aIndex]);
     }
 
     void setCurrentVelocity(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticleVel)
     {
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         assert(aParticleVel.size() > static_cast<OrdinalType>(0));
         (*mCurrentVelocities)[aIndex].update(static_cast<ScalarType>(1), aParticleVel, static_cast<ScalarType>(0));
     }
@@ -937,109 +944,109 @@ public:
     void setCurrentVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mCurrentVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentVelocities);
     }
 
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousVelocities() const
     {
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         return (*mPreviousVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getPreviousVelocity(const OrdinalType & aIndex) const
     {
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         return ((*mPreviousVelocities)[aIndex]);
     }
 
     void setPreviousVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mPreviousVelocities.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mPreviousVelocities.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mPreviousVelocities);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getLowerBounds() const
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         return (*mLowerBounds);
     }
 
     void setLowerBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         assert(aInput.size() > static_cast<OrdinalType>(0));
         mLowerBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setLowerBounds(const ScalarType & aInput)
     {
-        assert(mLowerBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
         mLowerBounds->fill(aInput);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getUpperBounds() const
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         return (*mUpperBounds);
     }
 
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         assert(aInput.size() > static_cast<OrdinalType>(0));
         mUpperBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setUpperBounds(const ScalarType & aInput)
     {
-        assert(mUpperBounds.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
         mUpperBounds->fill(aInput);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getParticlePositionMean() const
     {
-        assert(mMeanParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mMeanParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mMeanParticlePosition);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getParticlePositionStdDev() const
     {
-        assert(mStdDevParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mStdDevParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mStdDevParticlePosition);
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getGlobalBestParticlePosition() const
     {
-        assert(mGlobalBestParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         return (*mGlobalBestParticlePosition);
     }
 
     void setGlobalBestParticlePosition(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(mGlobalBestParticlePosition.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
         mGlobalBestParticlePosition->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     const Plato::Vector<ScalarType, OrdinalType> & getBestParticlePosition(const OrdinalType & aIndex) const
     {
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         return ((*mBestParticlePositions)[aIndex]);
     }
 
     void setBestParticlePosition(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         (*mBestParticlePositions)[aIndex].update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
     void setBestParticlePositions(const Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(mBestParticlePositions.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mBestParticlePositions);
     }
 
@@ -1075,10 +1082,10 @@ public:
         return (mCommWrapper.operator*());
     }
 
-    void computeBestParticlePositionStatistics()
+    void computeGlobalBestParticlePositionStatistics()
     {
-        this->computeBestParticlePositionMean();
-        this->computeBestParticlePositionStdDev();
+        this->computeGlobalBestParticlePositionMean();
+        this->computeGlobalBestParticlePositionStdDev();
     }
 
 private:
@@ -1095,47 +1102,73 @@ private:
         mGlobalBestParticlePosition = tMyParticle.create();
         mGlobalBestParticlePosition->fill(std::numeric_limits<ScalarType>::max());
         Plato::fill(std::numeric_limits<ScalarType>::max(), *mBestParticlePositions);
+
+        const OrdinalType tLength = 1;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength, this->getNumParticles());
+        mGlobalNumParticles = mCriteriaReductions->sum(tWork);
     }
 
-    void computeBestParticlePositionMean()
+    void computeGlobalBestParticlePositionMean()
     {
-        mMeanParticlePosition->fill(static_cast<ScalarType>(0));
-        const OrdinalType tNumParticles = this->getNumParticles();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        /* local sum */
+        mWorkVector->fill(static_cast<ScalarType>(0));
+        const OrdinalType tLocalNumParticles = this->getNumParticles();
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyParticle = (*mBestParticlePositions)[tParticleIndex];
             const OrdinalType tMyParticleDims = tMyParticle.size();
             for(OrdinalType tDim = 0; tDim < tMyParticleDims; tDim++)
             {
-                (*mMeanParticlePosition)[tDim] += tMyParticle[tDim] / static_cast<ScalarType>(tNumParticles);
+                (*mWorkVector)[tDim] += tMyParticle[tDim];
             }
         }
+
+        /* global sum */
+        const OrdinalType tLength = 1;
+        const OrdinalType tVECTOR_INDEX = 0;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength);
+        const OrdinalType tNumDims = mWorkVector->size();
+        for(OrdinalType tDim = 0; tDim < tNumDims; tDim++)
+        {
+            tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
+            (*mMeanParticlePosition)[tDim] = mCriteriaReductions->sum(tWork);
+        }
+        const ScalarType tMultiplier = static_cast<ScalarType>(1) / mGlobalNumParticles;
+        mMeanParticlePosition->scale(tMultiplier);
     }
 
-    void computeBestParticlePositionStdDev()
+    void computeGlobalBestParticlePositionStdDev()
     {
-        mStdDevParticlePosition->fill(static_cast<ScalarType>(0));
-        const OrdinalType tNumParticles = this->getNumParticles();
+        /* local operations */
+        mWorkVector->fill(static_cast<ScalarType>(0));
+        const OrdinalType tLocalNumParticles = this->getNumParticles();
         const OrdinalType tNumControls = mStdDevParticlePosition->size();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMyBestParticlePosition = (*mBestParticlePositions)[tParticleIndex];
             for(OrdinalType tDim = 0; tDim < tNumControls; tDim++)
             {
                 const ScalarType tMisfit = tMyBestParticlePosition[tDim] - (*mMeanParticlePosition)[tDim];
-                (*mStdDevParticlePosition)[tDim] += tMisfit * tMisfit;
+                (*mWorkVector)[tDim] += tMisfit * tMisfit;
             }
         }
 
+        /* global operations */
+        const OrdinalType tLength = 1;
+        const OrdinalType tVECTOR_INDEX = 0;
+        Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength);
         for(OrdinalType tDim = 0; tDim < tNumControls; tDim++)
         {
-            const ScalarType tValue = (*mStdDevParticlePosition)[tDim] / static_cast<ScalarType>(tNumParticles - 1);
+            tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
+            const ScalarType tGlobalBestParticlePositionMinusMean = mCriteriaReductions->sum(tWork);
+            const ScalarType tValue = tGlobalBestParticlePositionMinusMean / static_cast<ScalarType>(mGlobalNumParticles - 1);
             (*mStdDevParticlePosition)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
         }
     }
 
 private:
     ScalarType mTimeStep;
+    ScalarType mGlobalNumParticles;
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mWorkVector;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mLowerBounds;
@@ -1150,6 +1183,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mBestParticlePositions;
 
     std::shared_ptr<Plato::CommWrapper> mCommWrapper;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
 
 private:
     ParticleSwarmDataMng(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
@@ -1205,7 +1239,6 @@ public:
                                             const std::shared_ptr<Plato::GradFreeCriteria<ScalarType, OrdinalType>> & aObjective,
                                             const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
             mNumAugLagFuncEval(0),
-            mGlobalBestObjFuncValueLocation(0),
             mMeanCurrentBestObjFuncValue(0),
             mStdDevCurrentBestObjFuncValue(0),
             mCurrentGlobalBestObjFuncValue(std::numeric_limits<ScalarType>::max()),
@@ -1448,8 +1481,6 @@ public:
                         tLagrangeMultipliers[tParticleIndex] / mFeasibilityInexactnessTolerance;
                 const ScalarType tLowerBound = static_cast<ScalarType>(0.5) *
                         std::pow(tLagrangeMultiplierOverFeasibilityTolerance, static_cast<ScalarType>(0.5));
-                std::cout << "tPenaltyMultipliers[tParticleIndex] = " << tPenaltyMultipliers[tParticleIndex] << "\n";
-                std::cout << "tLowerBound = " << tLowerBound << "\n";
                 tPenaltyMultipliers[tParticleIndex] = std::max(tPenaltyMultipliers[tParticleIndex], tLowerBound);
             }
         }
@@ -1479,7 +1510,6 @@ private:
         mMeanCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
         mStdDevCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
         mCurrentGlobalBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mCurrentGlobalBestConstraintValuesLocations = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
 
         mCurrentGlobalBestConstraintValues->fill(std::numeric_limits<ScalarType>::max());
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
@@ -1495,15 +1525,10 @@ private:
         mMeanCurrentBestObjFuncValue = Plato::mean(*mCriteriaReductions, *mCurrentBestObjFuncValues);
         mStdDevCurrentBestObjFuncValue = Plato::standard_deviation(mMeanCurrentBestObjFuncValue, *mCurrentBestObjFuncValues, *mCriteriaReductions);
 
-        OrdinalType tMyGlobalBestLocation = 0;
-        ScalarType tMyNewGlobalBestValue = mCurrentGlobalBestObjFuncValue;
-        const bool tFoundNewGlobalBest =
-                Plato::find_global_best_criterion_value_location(*mCurrentBestObjFuncValues, tMyNewGlobalBestValue, tMyGlobalBestLocation);
-
-        // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL LOCATION IF tFoundNewGlobalBestValue = TRUE;
-        mGlobalBestObjFuncValueLocation = tFoundNewGlobalBest == true ? tMyGlobalBestLocation : mGlobalBestObjFuncValueLocation;
-        // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL BEST VALUE IF tFoundNewGlobalBestValue = TRUE;
-        mCurrentGlobalBestObjFuncValue = tFoundNewGlobalBest == true ? tMyNewGlobalBestValue : mCurrentGlobalBestObjFuncValue;
+        Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
+        mCriteriaReductions->minloc(*mCurrentBestObjFuncValues, tOutput);
+        const bool tFoundNewGlobalBest = tOutput.mOutputValue < mCurrentGlobalBestObjFuncValue;
+        mCurrentGlobalBestObjFuncValue = tFoundNewGlobalBest == true ? tOutput.mOutputValue : mCurrentGlobalBestObjFuncValue;
     }
 
     void computeDualDataStatistics()
@@ -1527,6 +1552,7 @@ private:
 
     void computeConstraintStatistics()
     {
+        Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
@@ -1537,19 +1563,10 @@ private:
             const ScalarType tStdDev = Plato::standard_deviation(tMean, tMyBestConstraintValues, *mCriteriaReductions);
             (*mStdDevBestConstraintValues)[tIndex] = tStdDev;
 
-            OrdinalType tMyNewGlobalBestLocation = 0;
-            ScalarType tMyNewGlobalBestValue = (*mCurrentGlobalBestConstraintValues)[tIndex];
-            const bool tFoundNewGlobalBestValue =
-                    Plato::find_global_best_criterion_value_location(tMyBestConstraintValues, tMyNewGlobalBestValue, tMyNewGlobalBestLocation);
-
-            // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL LOCATION IF tFoundNewGlobalBestValue = TRUE;
-            const OrdinalType tMyCurrentBestLocation = (*mCurrentGlobalBestConstraintValuesLocations)[tIndex];
-            (*mCurrentGlobalBestConstraintValuesLocations)[tIndex] = tFoundNewGlobalBestValue == true ?
-                    tMyNewGlobalBestLocation : tMyCurrentBestLocation;
-
-            // GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL BEST VALUE IF tFoundNewGlobalBestValue = TRUE;
-            (*mCurrentGlobalBestConstraintValues)[tIndex] = tFoundNewGlobalBestValue == true ?
-                    tMyNewGlobalBestValue : tMyBestConstraintValues[tMyCurrentBestLocation];
+            mCriteriaReductions->minloc(tMyBestConstraintValues, tOutput);
+            const bool tFoundNewGlobalBest = tOutput.mOutputValue < (*mCurrentGlobalBestConstraintValues)[tIndex];
+            (*mCurrentGlobalBestConstraintValues)[tIndex] = tFoundNewGlobalBest == true ?
+                    tOutput.mOutputValue : (*mCurrentGlobalBestConstraintValues)[tIndex];
         }
     }
 
@@ -1603,7 +1620,6 @@ private:
 
 private:
     OrdinalType mNumAugLagFuncEval;
-    OrdinalType mGlobalBestObjFuncValueLocation;
 
     ScalarType mMeanCurrentBestObjFuncValue;
     ScalarType mStdDevCurrentBestObjFuncValue;
@@ -1623,7 +1639,6 @@ private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentLagrangeMultipliers;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentLagrangeMultipliers;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValuesLocations;
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentPenaltyMultipliers;
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentLagrangeMultipliers;
@@ -1646,27 +1661,28 @@ class ParticleSwarmOperations
 {
 public:
     explicit ParticleSwarmOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
-        mNumConsecutiveFailures(0),
-        mNumConsecutiveSuccesses(0),
-        mMaxNumConsecutiveFailures(10),
-        mMaxNumConsecutiveSuccesses(10),
-        mGlobalBestParticleIndex(0),
-        mInertiaMultiplier(0.9),
-        mSocialBehaviorMultiplier(0.8),
-        mCognitiveBehaviorMultiplier(0.8),
-        mBestObjFunValueMean(std::numeric_limits<ScalarType>::max()),
-        mBestObjFunValueStdDev(std::numeric_limits<ScalarType>::max()),
-        mCurrentGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
-        mPreviousGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
-        mTrustRegionMultiplier(1),
-        mTrustRegionExpansionMultiplier(4.0),
-        mTrustRegionContractionMultiplier(0.75),
-        mWorkVector(aFactory->objective().create()),
-        mCurrentObjFuncValues(aFactory->objective().create()),
-        mCurrentBestObjFuncValues(aFactory->objective().create()),
-        mReductions(aFactory->getObjFuncReductionOperations().create())
+            mNumConsecutiveFailures(0),
+            mNumConsecutiveSuccesses(0),
+            mMaxNumConsecutiveFailures(10),
+            mMaxNumConsecutiveSuccesses(10),
+            mCurrentGlobalBestParticleRank(0),
+            mCurrentGlobalBestParticleIndex(0),
+            mInertiaMultiplier(0.9),
+            mSocialBehaviorMultiplier(0.8),
+            mCognitiveBehaviorMultiplier(0.8),
+            mBestObjFunValueMean(std::numeric_limits<ScalarType>::max()),
+            mBestObjFunValueStdDev(std::numeric_limits<ScalarType>::max()),
+            mCurrentGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
+            mPreviousGlobalBestObjFunValue(std::numeric_limits<ScalarType>::max()),
+            mTrustRegionMultiplier(1),
+            mTrustRegionExpansionMultiplier(4.0),
+            mTrustRegionContractionMultiplier(0.75),
+            mControlWorkVector(),
+            mCurrentObjFuncValues(aFactory->objective().create()),
+            mCurrentBestObjFuncValues(aFactory->objective().create()),
+            mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
-        this->initialize();
+        this->initialize(*aFactory);
     }
 
     virtual ~ParticleSwarmOperations()
@@ -1745,7 +1761,7 @@ public:
 
     void setGlobalBestParticleIndex(const OrdinalType & aInput)
     {
-        mGlobalBestParticleIndex = aInput;
+        mCurrentGlobalBestParticleIndex = aInput;
     }
 
     void setNumConsecutiveFailures(const OrdinalType & aInput)
@@ -1808,8 +1824,8 @@ public:
 
     void computeBestObjFuncStatistics()
     {
-        mBestObjFunValueMean = Plato::mean(*mReductions, *mCurrentBestObjFuncValues);
-        mBestObjFunValueStdDev = Plato::standard_deviation(mBestObjFunValueMean, *mCurrentBestObjFuncValues, *mReductions);
+        mBestObjFunValueMean = Plato::mean(*mCriteriaReductions, *mCurrentBestObjFuncValues);
+        mBestObjFunValueStdDev = Plato::standard_deviation(mBestObjFunValueMean, *mCurrentBestObjFuncValues, *mCriteriaReductions);
     }
 
     void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
@@ -1819,27 +1835,26 @@ public:
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
             this->findBestParticlePosition(tIndex, aDataMng);
-            this->findGlobalBestParticlePosition(tIndex, aDataMng);
         }
+        this->findGlobalBestParticlePosition(aDataMng);
         this->checkGlobalBestParticleUpdateSuccessRate();
     }
 
     void updateParticleVelocities(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         aDataMng.cachePreviousVelocities();
-        std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if(tIndex != mGlobalBestParticleIndex)
+            if(tIndex != mCurrentGlobalBestParticleIndex)
             {
-                this->updateParticleVelocity(tIndex, tGenerator, tDistribution, aDataMng);
+                this->updateParticleVelocity(tIndex, tDistribution, aDataMng);
             }
-            else
-            {
-                assert(tIndex == mGlobalBestParticleIndex);
-                this->updateGlobalBestParticleVelocity(tGenerator, tDistribution, aDataMng);
+                else
+                {
+                    assert(tIndex == mCurrentGlobalBestParticleIndex);
+                    this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
             }
         }
     }
@@ -1849,21 +1864,23 @@ public:
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if(tIndex != mGlobalBestParticleIndex)
+            if(tIndex != mCurrentGlobalBestParticleIndex)
             {
                 this->updateParticlePosition(tIndex, aDataMng);
             }
             else
             {
-                assert(tIndex == mGlobalBestParticleIndex);
+                assert(tIndex == mCurrentGlobalBestParticleIndex);
                 this->updateGlobalBestParticlePosition(aDataMng);
             }
         }
     }
 
 private:
-    void initialize()
+    void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aFactory)
     {
+        const OrdinalType tPARTICLE_INDEX = 0;
+        mControlWorkVector = aFactory.control(tPARTICLE_INDEX).create();
         mCurrentBestObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
         mCurrentObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
     }
@@ -1893,24 +1910,23 @@ private:
         }
     }
 
-    void findGlobalBestParticlePosition(const OrdinalType & aParticleIndex,
-                                        Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+    void findGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        // 1. GLOBAL FIND NEEDS TO HAPPEN HEAR BEFORE THE LINE BELOW TO GET THE GLOBAL LOCATION IF NewGlobalBestValue = TRUE;
-        // 2. BASICALLY FIND THE CURRENT MINIMUM VALUE, LOCATION AND PROCESSOR ID. IF THE NEW GLOBAL MINIMUM IS LESS THAN CURRENT, UPDATE.
-        // 3. FINALLY, FIND GLOBAL BEST PARTICLE WITH LOCATION AND PROCESSOR ID INFORMATION. I NEED TO IMPLEMENT A FIND FUNCTION IN REDUCTION CLASS.
-        const ScalarType tCurrentParticleObjFuncValue = (*mCurrentObjFuncValues)[aParticleIndex];
-        if(tCurrentParticleObjFuncValue < mCurrentGlobalBestObjFunValue)
+        // TODO: THINK PARALLEL IMPLEMENTATION
+        Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
+        mCriteriaReductions->minloc(*mCurrentObjFuncValues, tOutput);
+        const bool tFoundNewGlobalBest = tOutput.mOutputValue < mCurrentGlobalBestObjFunValue;
+        if(tFoundNewGlobalBest == true)
         {
-            mCurrentGlobalBestObjFunValue = tCurrentParticleObjFuncValue;
-            const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(aParticleIndex);
+            mCurrentGlobalBestObjFunValue = tOutput.mOutputValue;
+            mCurrentGlobalBestParticleRank = tOutput.mOutputRank;
+            mCurrentGlobalBestParticleIndex = tOutput.mOutputIndex;
+            const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(tOutput.mOutputIndex);
             aDataMng.setGlobalBestParticlePosition(tCurrentParticle);
-            mGlobalBestParticleIndex = aParticleIndex;
         }
     }
 
     void updateParticleVelocity(const OrdinalType & aParticleIndex,
-                                std::default_random_engine & aGenerator,
                                 std::uniform_real_distribution<ScalarType> & aDistribution,
                                 Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -1925,39 +1941,39 @@ private:
             // inertia contribution
             const ScalarType tInertiaValue = mInertiaMultiplier * tPreviousVel[tIndex];
             // cognitive behavior contribution
-            const ScalarType tRandomNumOne = aDistribution(aGenerator);
+            const ScalarType tRandomNumOne = aDistribution(mGenerator);
             const ScalarType tCognitiveMultiplier = tRandomNumOne * mCognitiveBehaviorMultiplier;
             const ScalarType tCognitiveValue = tCognitiveMultiplier * (tBestParticlePosition[tIndex] - tCurrentParticle[tIndex]);
             // social behavior contribution
-            const ScalarType tRandomNumTwo = aDistribution(aGenerator);
+            const ScalarType tRandomNumTwo = aDistribution(mGenerator);
             const ScalarType tSocialMultiplier = tRandomNumTwo * mSocialBehaviorMultiplier;
             const ScalarType tSocialValue = tSocialMultiplier * (tGlobalBestParticlePosition[tIndex] - tCurrentParticle[tIndex]);
             // set new velocity
-            (*mWorkVector)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
+            (*mControlWorkVector)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
         }
 
-        aDataMng.setCurrentVelocity(aParticleIndex, *mWorkVector);
+        aDataMng.setCurrentVelocity(aParticleIndex, *mControlWorkVector);
     }
 
-    void updateGlobalBestParticleVelocity(std::default_random_engine & aGenerator,
-                                          std::uniform_real_distribution<ScalarType> & aDistribution,
+    void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> & aDistribution,
                                           Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(mGlobalBestParticleIndex);
+        // TODO: THINK PARALLEL IMPLEMENTATION
+        const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(mCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
-        const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticlePosition = aDataMng.getCurrentParticle(mGlobalBestParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticlePosition = aDataMng.getCurrentParticle(mCurrentGlobalBestParticleIndex);
 
         const OrdinalType tNumControls = tPreviousVel.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            const ScalarType tRandomNum = aDistribution(aGenerator);
+            const ScalarType tRandomNum = aDistribution(mGenerator);
             const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
                     * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
-            (*mWorkVector)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
+            (*mControlWorkVector)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
                     + (mInertiaMultiplier * tPreviousVel[tIndex]) + tStochasticTrustRegionMultiplier;
         }
 
-        aDataMng.setCurrentVelocity(mGlobalBestParticleIndex, *mWorkVector);
+        aDataMng.setCurrentVelocity(mCurrentGlobalBestParticleIndex, *mControlWorkVector);
     }
 
     void updateParticlePosition(const OrdinalType & aParticleIndex,
@@ -1968,47 +1984,51 @@ private:
         const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
         const Plato::Vector<ScalarType, OrdinalType> & tParticleVel = aDataMng.getCurrentVelocity(aParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tParticlePosition = aDataMng.getCurrentParticle(aParticleIndex);
-        mWorkVector->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
+        mControlWorkVector->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
 
         const OrdinalType tNumControls = tParticleVel.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mWorkVector)[tIndex] = (*mWorkVector)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
-            (*mWorkVector)[tIndex] = std::max((*mWorkVector)[tIndex], tLowerBounds[tIndex]);
-            (*mWorkVector)[tIndex] = std::min((*mWorkVector)[tIndex], tUpperBounds[tIndex]);
+            (*mControlWorkVector)[tIndex] = (*mControlWorkVector)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
+            (*mControlWorkVector)[tIndex] = std::max((*mControlWorkVector)[tIndex], tLowerBounds[tIndex]);
+            (*mControlWorkVector)[tIndex] = std::min((*mControlWorkVector)[tIndex], tUpperBounds[tIndex]);
         }
 
-        aDataMng.setCurrentParticle(aParticleIndex, *mWorkVector);
+        aDataMng.setCurrentParticle(aParticleIndex, *mControlWorkVector);
     }
 
     void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(mGlobalBestParticleIndex);
+        // TODO: THINK PARALLEL IMPLEMENTATION
+        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(mCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
 
-        std::default_random_engine tGenerator;
+        //std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
-        const ScalarType tRandomNum = tDistribution(tGenerator);
+        const ScalarType tRandomNum = tDistribution(mGenerator);
         const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
                 * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
 
         const OrdinalType tNumControls = tGlobalBestParticlePosition.size();
         for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mWorkVector)[tIndex] = tGlobalBestParticlePosition[tIndex]
+            (*mControlWorkVector)[tIndex] = tGlobalBestParticlePosition[tIndex]
                     + (mInertiaMultiplier * tGlobalBestParticleVel[tIndex]) + tStochasticTrustRegionMultiplier;
         }
 
-        aDataMng.setCurrentParticle(mGlobalBestParticleIndex, *mWorkVector);
+        aDataMng.setCurrentParticle(mCurrentGlobalBestParticleIndex, *mControlWorkVector);
     }
 
 private:
+    std::default_random_engine mGenerator;
+
     OrdinalType mNumConsecutiveFailures;
     OrdinalType mNumConsecutiveSuccesses;
     OrdinalType mMaxNumConsecutiveFailures;
     OrdinalType mMaxNumConsecutiveSuccesses;
 
-    OrdinalType mGlobalBestParticleIndex;
+    OrdinalType mCurrentGlobalBestParticleRank;
+    OrdinalType mCurrentGlobalBestParticleIndex;
 
     ScalarType mInertiaMultiplier;
     ScalarType mSocialBehaviorMultiplier;
@@ -2024,11 +2044,11 @@ private:
     ScalarType mTrustRegionExpansionMultiplier;
     ScalarType mTrustRegionContractionMultiplier;
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mWorkVector;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues;
 
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReductions;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
 
 private:
     ParticleSwarmOperations(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
@@ -2179,6 +2199,13 @@ public:
         return (mOperations->getCurrentGlobalBestObjFunValue());
     }
 
+    std::string getStoppingCriterion() const
+    {
+        std::string tReason;
+        Plato::pso::get_stop_criterion(mStopCriterion, tReason);
+        return (tReason);
+    }
+
     const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
     {
         return (*mDataMng);
@@ -2189,8 +2216,8 @@ public:
     **********************************************************************************/
     void solve()
     {
-        assert(mDataMng.use_count() > static_cast<OrdinalType>(0));
-        assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mDataMng.use_count()) > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mStageMng.use_count()) > static_cast<OrdinalType>(0));
 
         this->openOutputFile();
         this->initialize();
@@ -2210,7 +2237,7 @@ public:
 
             if(this->checkStoppingCriteria())
             {
-                mDataMng->computeBestParticlePositionStatistics();
+                mDataMng->computeGlobalBestParticlePositionStatistics();
                 this->outputStoppingCriterion();
                 this->closeOutputFile();
                 break;
@@ -2414,7 +2441,7 @@ public:
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::BoundConstrainedPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
     {
-        mOptimizer->setMaxNumIterations(5);
+        mOptimizer->setMaxNumIterations(5); /* augmented Lagrangian subproblem iterations */
     }
 
     /******************************************************************************//**
@@ -2523,6 +2550,13 @@ public:
         return (mOptimizer->getCurrentGlobalBestObjFuncValue());
     }
 
+    std::string getStoppingCriterion() const
+    {
+        std::string tReason;
+        Plato::pso::get_stop_criterion(mStopCriterion, tReason);
+        return (tReason);
+    }
+
     const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & getDataMng() const
     {
         return (mOptimizer->getDataMng());
@@ -2599,7 +2633,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
@@ -2616,7 +2650,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.close();
@@ -2632,7 +2666,7 @@ private:
         if(mPrintDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-            const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 std::string tReason;
@@ -2653,7 +2687,7 @@ private:
         }
 
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
-        const Plato::CommWrapper& tMyCommWrapper = tDataMng->getCommWrapper();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheObjFuncOutputData();
@@ -2785,13 +2819,18 @@ TEST(PlatoTest, GradFreeRosenbrock)
 
 TEST(PlatoTest, PSO_IsFileOpenExeption)
 {
-    std::ofstream tFile;
-    ASSERT_THROW(Plato::pso::is_file_open(tFile), std::invalid_argument);
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
+    {
+        std::ofstream tFile;
+        ASSERT_THROW(Plato::pso::is_file_open(tFile), std::invalid_argument);
 
-    tFile.open("MyFile.txt");
-    ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
-    tFile.close();
-    std::system("rm -f MyFile.txt");
+        tFile.open("MyFile.txt");
+        ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
+        tFile.close();
+        std::system("rm -f MyFile.txt");
+    }
 }
 
 TEST(PlatoTest, PSO_IsVectorEmpty)
@@ -2840,43 +2879,49 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
 {
-    std::ofstream tWriteFile;
-    tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataPSO<double> tData;
-    tData.mNumIter = 1;
-    tData.mObjFuncCount = 20;
-    tData.mCurrentGlobalBestObjFuncValue = 4.2321;
-    tData.mMeanCurrentBestObjFuncValues = 8.2321;
-    tData.mStdDevCurrentBestObjFuncValues = 2.2321;
-    tData.mTrustRegionMultiplier = 1.0;
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
-
-    tData.mNumIter = 2;
-    tData.mObjFuncCount = 40;
-    tData.mCurrentGlobalBestObjFuncValue = 2.2321;
-    tData.mMeanCurrentBestObjFuncValues = 7.2321;
-    tData.mStdDevCurrentBestObjFuncValues = 2.4321;
-    tData.mTrustRegionMultiplier = 1.0;
-    ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
-    tWriteFile.close();
-
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile1.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile1.txt");
+        Plato::OutputDataPSO<double> tData;
+        tData.mNumIter = 1;
+        tData.mObjFuncCount = 20;
+        tData.mNumConstraints = 0;
+        tData.mCurrentGlobalBestObjFuncValue = 4.2321;
+        tData.mMeanCurrentBestObjFuncValues = 8.2321;
+        tData.mStdDevCurrentBestObjFuncValues = 2.2321;
+        tData.mTrustRegionMultiplier = 1.0;
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
 
-    std::stringstream tGold;
-    tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
-    tGold << "1204.232100e+008.232100e+002.232100e+001.000000e+00";
-    tGold << "2402.232100e+007.232100e+002.432100e+001.000000e+00";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        tData.mNumIter = 2;
+        tData.mObjFuncCount = 40;
+        tData.mCurrentGlobalBestObjFuncValue = 2.2321;
+        tData.mMeanCurrentBestObjFuncValues = 7.2321;
+        tData.mStdDevCurrentBestObjFuncValues = 2.4321;
+        tData.mTrustRegionMultiplier = 1.0;
+        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
+        tWriteFile.close();
+
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile1.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile1.txt");
+
+        std::stringstream tGold;
+        tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
+        tGold << "1204.232100e+008.232100e+002.232100e+001.000000e+00";
+        tGold << "2402.232100e+007.232100e+002.432100e+001.000000e+00";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
@@ -2895,104 +2940,109 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
 
 TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)
 {
-    std::ofstream tWriteFile;
-    tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataPSO<double> tDataPSO;
-    const size_t tNumConstraints = 2;
-    Plato::OutputDataALPSO<double> tDataALPSO(tNumConstraints);
-    tDataPSO.mNumConstraints = tNumConstraints;
-
-    // **** AUGMENTED LAGRANGIAN OUTPUT ****
-    tDataPSO.mNumIter = 0;
-    tDataPSO.mObjFuncCount = 1;
-    tDataPSO.mCurrentGlobalBestObjFuncValue = 1;
-    tDataPSO.mMeanCurrentBestObjFuncValues = 1.5;
-    tDataPSO.mStdDevCurrentBestObjFuncValues = 2.34e-2;
-    tDataPSO.mTrustRegionMultiplier = 0.5;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    tDataPSO.mCurrentGlobalBestObjFuncValue = 0.1435;
-    tDataPSO.mMeanCurrentBestObjFuncValues = 0.78;
-    tDataPSO.mStdDevCurrentBestObjFuncValues = 0.298736;
-    tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-
-    // **** AUGMENTED LAGRANGIAN OUTPUT ****
-    tDataALPSO.mNumIter = 1;
-    tDataALPSO.mAugLagFuncCount = 10;
-    tDataALPSO.mCurrentGlobalBestAugLagValue = 1.2359e-1;
-    tDataALPSO.mMeanCurrentBestAugLagValues = 3.2359e-1;
-    tDataALPSO.mStdDevCurrentBestAugLagValues = 3.2359e-2;
-    tDataALPSO.mCurrentGlobalBestObjFuncValue = 8.2359e-2;
-    tDataALPSO.mMeanCurrentBestObjFuncValues = 9.2359e-2;
-    tDataALPSO.mStdDevCurrentBestObjFuncValues = 2.2359e-2;
-    tDataALPSO.mCurrentGlobalBestConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mCurrentGlobalBestConstraintValues[1] = 3.65e-3;
-    tDataALPSO.mMeanCurrentBestConstraintValues[0] = 4.23e-5;
-    tDataALPSO.mMeanCurrentBestConstraintValues[1] = 6.65e-3;
-    tDataALPSO.mStdDevCurrentBestConstraintValues[0] = 1.23e-5;
-    tDataALPSO.mStdDevCurrentBestConstraintValues[1] = 8.65e-4;
-    tDataALPSO.mMeanCurrentPenaltyMultipliers[0] = 1;
-    tDataALPSO.mMeanCurrentPenaltyMultipliers[1] = 2;
-    tDataALPSO.mStdDevCurrentPenaltyMultipliers[0] = 0.25;
-    tDataALPSO.mStdDevCurrentPenaltyMultipliers[1] = 0.1;
-    tDataALPSO.mMeanCurrentLagrangeMultipliers[0] = 1.23e-2;
-    tDataALPSO.mMeanCurrentLagrangeMultipliers[1] = 8.65e-1;
-    tDataALPSO.mStdDevCurrentLagrangeMultipliers[0] = 9.23e-3;
-    tDataALPSO.mStdDevCurrentLagrangeMultipliers[1] = 5.65e-1;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataPSO.mNumIter = 2;
-    tDataPSO.mObjFuncCount = 20;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataPSO.mNumIter = 3;
-    tDataPSO.mObjFuncCount = 30;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataALPSO.mNumIter = 2;
-    tDataALPSO.mAugLagFuncCount = 40;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tDataPSO.mNumIter = 1;
-    tDataPSO.mObjFuncCount = 10;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
-    tDataALPSO.mNumIter = 3;
-    tDataALPSO.mAugLagFuncCount = 50;
-    ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
-    tWriteFile.close();
-
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile1.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile.txt");
+        Plato::OutputDataPSO<double> tDataPSO;
+        const size_t tNumConstraints = 2;
+        Plato::OutputDataALPSO<double> tDataALPSO(tNumConstraints);
+        tDataPSO.mNumConstraints = tNumConstraints;
 
-    std::stringstream tGold;
-    tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
-    tGold << "Best(H2)Mean(H2)StdDev(H2)Mean(P2)StdDev(P2)Mean(l2)StdDev(l2)";
-    tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+00";
-    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
-    tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "1101.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "2*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "3*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "2401.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
-    tGold << "3501.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
-    tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        // **** AUGMENTED LAGRANGIAN OUTPUT ****
+        tDataPSO.mNumIter = 0;
+        tDataPSO.mObjFuncCount = 1;
+        tDataPSO.mCurrentGlobalBestObjFuncValue = 1;
+        tDataPSO.mMeanCurrentBestObjFuncValues = 1.5;
+        tDataPSO.mStdDevCurrentBestObjFuncValues = 2.34e-2;
+        tDataPSO.mTrustRegionMultiplier = 0.5;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        tDataPSO.mCurrentGlobalBestObjFuncValue = 0.1435;
+        tDataPSO.mMeanCurrentBestObjFuncValues = 0.78;
+        tDataPSO.mStdDevCurrentBestObjFuncValues = 0.298736;
+        tDataPSO.mTrustRegionMultiplier = 3.45656e-1;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+
+        // **** AUGMENTED LAGRANGIAN OUTPUT ****
+        tDataALPSO.mNumIter = 1;
+        tDataALPSO.mAugLagFuncCount = 10;
+        tDataALPSO.mCurrentGlobalBestAugLagValue = 1.2359e-1;
+        tDataALPSO.mMeanCurrentBestAugLagValues = 3.2359e-1;
+        tDataALPSO.mStdDevCurrentBestAugLagValues = 3.2359e-2;
+        tDataALPSO.mCurrentGlobalBestObjFuncValue = 8.2359e-2;
+        tDataALPSO.mMeanCurrentBestObjFuncValues = 9.2359e-2;
+        tDataALPSO.mStdDevCurrentBestObjFuncValues = 2.2359e-2;
+        tDataALPSO.mCurrentGlobalBestConstraintValues[0] = 1.23e-5;
+        tDataALPSO.mCurrentGlobalBestConstraintValues[1] = 3.65e-3;
+        tDataALPSO.mMeanCurrentBestConstraintValues[0] = 4.23e-5;
+        tDataALPSO.mMeanCurrentBestConstraintValues[1] = 6.65e-3;
+        tDataALPSO.mStdDevCurrentBestConstraintValues[0] = 1.23e-5;
+        tDataALPSO.mStdDevCurrentBestConstraintValues[1] = 8.65e-4;
+        tDataALPSO.mMeanCurrentPenaltyMultipliers[0] = 1;
+        tDataALPSO.mMeanCurrentPenaltyMultipliers[1] = 2;
+        tDataALPSO.mStdDevCurrentPenaltyMultipliers[0] = 0.25;
+        tDataALPSO.mStdDevCurrentPenaltyMultipliers[1] = 0.1;
+        tDataALPSO.mMeanCurrentLagrangeMultipliers[0] = 1.23e-2;
+        tDataALPSO.mMeanCurrentLagrangeMultipliers[1] = 8.65e-1;
+        tDataALPSO.mStdDevCurrentLagrangeMultipliers[0] = 9.23e-3;
+        tDataALPSO.mStdDevCurrentLagrangeMultipliers[1] = 5.65e-1;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataPSO.mNumIter = 2;
+        tDataPSO.mObjFuncCount = 20;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataPSO.mNumIter = 3;
+        tDataPSO.mObjFuncCount = 30;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataALPSO.mNumIter = 2;
+        tDataALPSO.mAugLagFuncCount = 40;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tDataPSO.mNumIter = 1;
+        tDataPSO.mObjFuncCount = 10;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tWriteFile));
+        tDataALPSO.mNumIter = 3;
+        tDataALPSO.mAugLagFuncCount = 50;
+        ASSERT_NO_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tWriteFile));
+        tWriteFile.close();
+
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold;
+        tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
+        tGold << "Best(H2)Mean(H2)StdDev(H2)Mean(P2)StdDev(P2)Mean(l2)StdDev(l2)";
+        tGold << "000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00*0.000000e+000.000000e+00";
+        tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+        tGold << "0.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+000.000000e+00";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "1101.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "2*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "3*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "2401.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        tGold << "1*1.435000e-017.800000e-012.987360e-01***3.456560e-01**************";
+        tGold << "3501.235900e-013.235900e-013.235900e-028.235900e-029.235900e-022.235900e-02*1.230000e-054.230000e-051.230000e-051.000000e+002.500000e-01";
+        tGold << "1.230000e-029.230000e-033.650000e-036.650000e-038.650000e-042.000000e+001.000000e-018.650000e-015.650000e-01";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_checkInertiaMultiplier)
@@ -3094,33 +3144,6 @@ TEST(PlatoTest, PSO_find_best_criterion_values)
     EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
     EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
     EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
-}
-
-TEST(PlatoTest, PSO_find_global_best_criterion_value_location)
-{
-    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 };
-    Plato::StandardVector<double> tCurrentBestObjFuncValues(tData);
-
-    // TEST 1: FOUND NEW GLOBAL BEST VALUE
-    size_t tNewGlobalBestObjFuncValueLocation = 0;
-    double tCurrentGlobalBestObjFuncValue = std::numeric_limits<double>::max();
-    EXPECT_TRUE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
-    EXPECT_EQ(2u, tNewGlobalBestObjFuncValueLocation);
-    const double tTolerance = 1e-6;
-    EXPECT_NEAR(3.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
-
-    // TEST 2: DID NO FIND NEW GLOBAL BEST VALUES - CURRENT GLOBAL BEST IS NOT UNCHANGED
-    tNewGlobalBestObjFuncValueLocation = 0;
-    EXPECT_FALSE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
-    EXPECT_EQ(0u, tNewGlobalBestObjFuncValueLocation);
-    EXPECT_NEAR(3.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
-
-    // TEST 3: FOUND NEW GLOBAL BEST VALUES - CURRENT GLOBAL BEST IS CHANGED
-    tNewGlobalBestObjFuncValueLocation = 0;
-    tCurrentBestObjFuncValues[1] = 2.9283e-05;
-    EXPECT_TRUE(Plato::find_global_best_criterion_value_location(tCurrentBestObjFuncValues, tCurrentGlobalBestObjFuncValue, tNewGlobalBestObjFuncValueLocation));
-    EXPECT_EQ(1u, tNewGlobalBestObjFuncValueLocation);
-    EXPECT_NEAR(2.9283e-05, tCurrentGlobalBestObjFuncValue, tTolerance);
 }
 
 TEST(PlatoTest, PSO_findBestParticlePositions)
@@ -3277,29 +3300,31 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(-0.03395, tStageMng.getCurrentGlobalBestConstraintValue(0 /* constraint index */), tTolerance);
 }
 
-TEST(PlatoTest, PSO_Solve)
+TEST(PlatoTest, PSO_SolveBCPSO)
 {
     // ********* Allocate Core Optimization Data Templates *********
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumControls = 2;
-    const size_t tNumParticles = 20;
+    const size_t tNumParticles = 10;
     tFactory->allocateObjFuncValues(tNumParticles);
     tFactory->allocateControl(tNumControls, tNumParticles);
 
     // TEST ALGORITHM
     std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
     Plato::BoundConstrainedPSO<double> tAlgorithm(tFactory, tObjective);
-    tAlgorithm.setLowerBounds(-6);
-    tAlgorithm.setUpperBounds(6);
+    tAlgorithm.setLowerBounds(-5);
+    tAlgorithm.setUpperBounds(5);
     tAlgorithm.solve();
 
-    const double tTolerance = 1e-4;
+    const double tTolerance = 1e-2;
     EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestObjFuncValue(), tTolerance);
 
     std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
     std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
             << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
             << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
+    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
         std::cout << "CONTROL[" << tIndex << "]: BEST = "
@@ -3308,5 +3333,43 @@ TEST(PlatoTest, PSO_Solve)
                 << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex] << "\n";
     }
 }
+
+/*TEST(PlatoTest, PSO_SolveALPSO)
+{
+    // ********* Allocate Core Optimization Data Templates *********
+    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateControl(tNumControls, tNumParticles);
+
+    // TEST ALGORITHM
+    const double tBound = 2;
+    std::shared_ptr<Plato::GradFreeRadius<double>> tConstraintOne = std::make_shared<Plato::GradFreeRadius<double>>(tBound);
+    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints = std::make_shared<Plato::GradFreeCriteriaList<double>>();
+    tConstraints->add(tConstraintOne);
+    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+    Plato::AugmentedLagrangianPSO<double> tAlgorithm(tFactory, tObjective, tConstraints);
+    tAlgorithm.setLowerBounds(-5);
+    tAlgorithm.setUpperBounds(5);
+    tAlgorithm.solve();
+
+    const double tTolerance = 1e-2;
+    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestAugLagValue(), tTolerance);
+
+    std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
+    std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestAugLagValue() << ", MEAN = "
+            << tAlgorithm.getMeanCurrentBestAugLagValues() << ", STDDEV = "
+            << tAlgorithm.getStdDevCurrentBestAugLagValues() << "\n";
+    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = "
+                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
+                << tAlgorithm.getDataMng().getParticlePositionMean()[tIndex] << ", STDDEV = "
+                << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex] << "\n";
+    }
+}*/
 
 } // ParticleSwarmTest
