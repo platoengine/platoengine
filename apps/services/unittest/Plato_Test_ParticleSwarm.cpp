@@ -57,9 +57,41 @@
 #include "Plato_DataFactory.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_UnitTestUtils.hpp"
+#include "Plato_AlgebraicRocketModel.hpp"
 
 namespace Plato
 {
+
+/******************************************************************************//**
+ * @brief Return target thrust profile for gradient-based unit test
+ * @return standard vector with target thrust profile
+**********************************************************************************/
+std::vector<double> get_target_thrust_profile()
+{
+    std::vector<double> tTargetThrustProfile =
+        { 0, 1656714.377766964, 1684717.520617273, 1713123.001583093, 1741935.586049868, 1771160.083875437,
+                1800801.349693849, 1830864.28322051, 1861353.829558637, 1892274.979507048, 1923632.769869272,
+                1955432.283763989, 1987678.650936801, 2020377.048073344, 2053532.699113719, 2087150.875568287,
+                2121236.896834771, 2155796.130516737, 2190833.992743404, 2226355.948490792, 2262367.511904243,
+                2298874.246622283, 2335881.766101836, 2373395.733944806, 2411421.864226017, 2449965.921822503,
+                2489033.722744186, 2528631.134465915, 2568764.076260844, 2609438.519535244, 2650660.488164633,
+                2692436.058831303, 2734771.361363255, 2777672.579074459, 2821145.949106557, 2865197.762771913,
+                2909834.365898075, 2955062.159173611, 3000887.598495364, 3047317.195317072, 3094357.516999425,
+                3142015.18716148, 3190296.886033527, 3239209.350811319, 3288759.376011737, 3338953.813829865,
+                3389799.574497465, 3441303.626642879, 3493472.997652346, 3546314.774032734, 3599836.101775718,
+                3654044.186723352, 3708946.294935087, 3764549.753056224, 3820861.948687783, 3877890.330757833,
+                3935642.409894215, 3994125.758798767, 4053348.012622938, 4113316.869344868, 4174040.090147917,
+                4235525.499800648, 4297780.987038235, 4360814.504945371, 4424634.071340578, 4489247.76916203,
+                4554663.746854796, 4620890.218759571, 4687935.465502855, 4755807.834388626, 4824515.739791448,
+                4894067.663551098, 4964472.155368621, 5035737.83320389, 5107873.383674653, 5180887.562457044,
+                5254789.194687578, 5329587.175366664, 5405290.469763565, 5481908.11382287, 5559449.214572486,
+                5637922.950533082, 5717338.572129052, 5797705.402100981, 5879032.835919643, 5961330.342201422,
+                6044607.46312535, 6128873.814851565, 6214139.087941348, 6300413.047778608, 6387705.534992979,
+                6476026.465884338, 6565385.832848894, 6655793.704806847, 6747260.227631442, 6839795.624579719,
+                6933410.196724654, 7028114.32338894, 7123918.462580209, 7220833.151427887 };
+
+    return (tTargetThrustProfile);
+}
 
 struct particle_swarm
 {
@@ -568,6 +600,165 @@ public:
                        Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
 };
 // class GradFreeCriteria
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeRocketObjFunc : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
+{
+public:
+    GradFreeRocketObjFunc(const Plato::Vector<ScalarType, OrdinalType>& aUpperBounds,
+                          const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
+                          const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
+            mTargetThrustProfileSet(false),
+            mNormTargetThrustProfile(0),
+            mAlgebraicRocketModel(aRocketInputs, aChamberGeom),
+            mTargetThrustProfile(),
+            mNormalizationConstants(aUpperBounds.create())
+    {
+        this->initialize(aUpperBounds);
+    }
+
+    virtual ~GradFreeRocketObjFunc()
+    {
+    }
+
+    ScalarType getNormTargetThrustProfile() const
+    {
+        return (mNormTargetThrustProfile);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getNormalizationConstants() const
+    {
+        return (*mNormalizationConstants);
+    }
+
+    /******************************************************************************//**
+     * @brief Disables output to console from algebraic rocket model.
+    **********************************************************************************/
+    void disableOutput()
+    {
+        mAlgebraicRocketModel.disableOutput();
+    }
+
+    void setTargetThrustProfile(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+    {
+        if(mTargetThrustProfile.get() == nullptr)
+        {
+            mTargetThrustProfile = aInput.create();
+        }
+        assert(mTargetThrustProfile->size() == aInput.size());
+        mTargetThrustProfile->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
+        mNormTargetThrustProfile = mTargetThrustProfile->dot(*mTargetThrustProfile);
+        //mNormTargetValues = std::pow(mNormTargetValues, 0.5);
+        mTargetThrustProfileSet = true;
+    }
+
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControls,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        try
+        {
+            this->isTargetThrustProfileSet();
+        }
+        catch(const std::invalid_argument& tErrorMsg)
+        {
+
+            std::ostringstream tMessage;
+            tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
+            << ", LINE: " << __LINE__ << " ******** \n\n";
+            tMessage << tErrorMsg.what();
+            throw std::invalid_argument(tMessage.str().c_str());
+        }
+
+        const OrdinalType tNumParticles = aControls.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControls[tIndex]);
+        }
+    }
+
+    void solve(const Plato::Vector<ScalarType, OrdinalType> & aControls,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        this->update(aControls);
+        mAlgebraicRocketModel.solve();
+        std::vector<ScalarType> tTrialThrustProfile = mAlgebraicRocketModel.getThrustProfile();
+        assert(aOutput.size() == tTrialThrustProfile.size());
+        for(OrdinalType tIndex = 0; tIndex < aOutput.size(); tIndex++)
+        {
+            aOutput[tIndex] = tTrialThrustProfile[tIndex];
+        }
+    }
+
+private:
+    void initialize(const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds)
+    {
+        assert(aUpperBounds.size() > static_cast<OrdinalType>(0));
+        std::vector<ScalarType> tNormalizationConstants(aUpperBounds.size());
+        for(OrdinalType tIndex = 0; tIndex < aUpperBounds.size(); tIndex++)
+        {
+            (*mNormalizationConstants)[tIndex] = aUpperBounds[tIndex];
+        }
+    }
+
+    void update(const Plato::Vector<ScalarType, OrdinalType> & aControls)
+    {
+        std::map<std::string, ScalarType> tChamberGeomParam;
+        const ScalarType tRadius = aControls[0] * (*mNormalizationConstants)[0];
+        tChamberGeomParam.insert(std::pair<std::string, ScalarType>("Radius", tRadius));
+        tChamberGeomParam.insert(std::pair<std::string, ScalarType>("Configuration", Plato::Configuration::INITIAL));
+        mAlgebraicRocketModel.updateInitialChamberGeometry(tChamberGeomParam);
+
+        const ScalarType tRefBurnRate = aControls[1] * (*mNormalizationConstants)[1];
+        std::map<std::string, ScalarType> tSimParam;
+        tSimParam.insert(std::pair<std::string, ScalarType>("RefBurnRate", tRefBurnRate));
+        mAlgebraicRocketModel.updateSimulation(tSimParam);
+    }
+
+    void isTargetThrustProfileSet()
+    {
+        try
+        {
+            if(mTargetThrustProfileSet == false)
+            {
+                throw std::invalid_argument("\n\n ******** MESSAGE: TARGET THRUST PROFILE IS NOT SET. ABORT! ******** \n\n");
+            }
+        }
+        catch(const std::invalid_argument & tError)
+        {
+            throw tError;
+        }
+    }
+
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControls)
+    {
+        this->update(aControls);
+
+        mAlgebraicRocketModel.solve();
+        std::vector<ScalarType> tTrialThrustProfile = mAlgebraicRocketModel.getThrustProfile();
+        assert(tTrialThrustProfile.size() == mTargetThrustProfile.size());
+
+        ScalarType tObjFuncValue = 0;
+        const OrdinalType tNumThrustEvalPoints = mTargetThrustProfile->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumThrustEvalPoints; tIndex++)
+        {
+            ScalarType tMisfit = tTrialThrustProfile[tIndex] - (*mTargetThrustProfile)[tIndex];
+            tObjFuncValue += tMisfit * tMisfit;
+        }
+        tObjFuncValue = static_cast<ScalarType>(1.0 / (2.0 * tNumThrustEvalPoints * mNormTargetThrustProfile)) * tObjFuncValue;
+
+        return tObjFuncValue;
+    }
+
+private:
+    bool mTargetThrustProfileSet;
+    ScalarType mNormTargetThrustProfile;
+    Plato::AlgebraicRocketModel<ScalarType> mAlgebraicRocketModel;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTargetThrustProfile;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mNormalizationConstants;
+};
+// class GradFreeAlgebraicRocketObjFunc
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRosenbrock : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
@@ -2120,6 +2311,16 @@ public:
         mOperations->setMaxNumConsecutiveSuccesses(aInput);
     }
 
+    void setMeanObjFuncTolerance(const ScalarType & aInput)
+    {
+        mMeanObjFuncTolerance = aInput;
+    }
+
+    void setBestObjFuncTolerance(const ScalarType & aInput)
+    {
+        mBestObjFuncTolerance = aInput;
+    }
+
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mOperations->setInertiaMultiplier(aInput);
@@ -3332,6 +3533,73 @@ TEST(PlatoTest, PSO_SolveBCPSO)
                 << tAlgorithm.getDataMng().getParticlePositionMean()[tIndex] << ", STDDEV = "
                 << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex] << "\n";
     }
+}
+
+TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
+{
+    // ********* Allocate Core Optimization Data Templates *********
+    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 15;
+    tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateControl(tNumControls, tNumParticles);
+
+    // ********* ALLOCATE NORMALIZATION CONSTANTS *********
+    Plato::StandardVector<double> tVector(tNumControls);
+    tVector[0] = 0.08; tVector[1] = 0.006;
+
+    // ********* ALLOCATE OBJECTIVE FUNCTION *********
+    Plato::AlgebraicRocketInputs<double> tRocketInputs;
+    std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
+            std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
+    std::shared_ptr<Plato::GradFreeRocketObjFunc<double>> tObjective =
+            std::make_shared<Plato::GradFreeRocketObjFunc<double>>(tVector, tRocketInputs, tGeomModel);
+    tObjective->disableOutput();
+
+    // ********* SET TARGET THRUST PROFILE *********
+    std::vector<double> tData = Plato::get_target_thrust_profile();
+    Plato::StandardVector<double> tTargetThrustProfile(tData);
+    tObjective->setTargetThrustProfile(tTargetThrustProfile);
+
+    // ********* TEST ALGORITHM *********
+    Plato::BoundConstrainedPSO<double> tAlgorithm(tFactory, tObjective);
+    tVector[0] = 1; tVector[1] = 1;
+    tAlgorithm.setUpperBounds(tVector);  /* bounds are normalized */
+    tVector[0] = 0.06 / tVector[0]; tVector[1] = 0.003 / tVector[1];
+    tAlgorithm.setLowerBounds(tVector);  /* bounds are normalized */
+    tAlgorithm.setMeanObjFuncTolerance(1e-6);
+    tAlgorithm.solve();
+
+    const double tTolerance = 1e-2;
+    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestObjFuncValue(), tTolerance);
+
+    // ********* OUTPUT DIAGNOSTICS *********
+    std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
+    std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
+            << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
+            << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
+    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = "
+                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex]
+                        * tObjective->getNormalizationConstants()[tIndex]
+                << ", MEAN = "
+                << tAlgorithm.getDataMng().getParticlePositionMean()[tIndex]
+                        * tObjective->getNormalizationConstants()[tIndex]
+                << ", STDDEV = "
+                << tAlgorithm.getDataMng().getParticlePositionStdDev()[tIndex]
+                        * tObjective->getNormalizationConstants()[tIndex] << "\n";
+    }
+
+    // ********* TEST THRUST PROFILE SOLUTION *********
+    Plato::StandardVector<double> tBestThrustProfileSolution(tData.size());
+    tObjective->solve(tAlgorithm.getDataMng().getGlobalBestParticlePosition(), tBestThrustProfileSolution);
+    const double tMultiplier = 1.0 / tObjective->getNormTargetThrustProfile();
+    tTargetThrustProfile.scale(tMultiplier);
+    tBestThrustProfileSolution.scale(tMultiplier);
+    PlatoTest::checkVectorData(tTargetThrustProfile, tBestThrustProfileSolution);
 }
 
 /*TEST(PlatoTest, PSO_SolveALPSO)

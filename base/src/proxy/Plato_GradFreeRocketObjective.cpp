@@ -15,7 +15,7 @@ namespace Plato
 {
 
 GradFreeRocketObjective::GradFreeRocketObjective(const Plato::AlgebraicRocketInputs<double>& aRocketInputs,
-                                                             const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom) :
+                                                 const std::shared_ptr<Plato::GeometryModel<double>>& aChamberGeom) :
         PlatoSubproblemLibrary::DiscreteObjective(),
         mNormTargetValues(0),
         mTargetThrustProfile(),
@@ -31,7 +31,7 @@ GradFreeRocketObjective::~GradFreeRocketObjective()
 }
 
 void GradFreeRocketObjective::setOptimizationInputs(const std::vector<int>& aNumEvaluationsPerDim,
-                                                          const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */)
+                                                    const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */)
 {
     mBounds = aBounds;
     mNumEvaluationsPerDim = aNumEvaluationsPerDim;
@@ -43,8 +43,8 @@ std::vector<double> GradFreeRocketObjective::getThrustProfile() const
 }
 
 void GradFreeRocketObjective::get_domain(std::vector<double>& aLowerBounds,
-                                               std::vector<double>& aUpperBounds,
-                                               std::vector<int>& aNumEvaluationsPerDim)
+                                         std::vector<double>& aUpperBounds,
+                                         std::vector<int>& aNumEvaluationsPerDim)
 {
     aLowerBounds = mBounds.first;
     aUpperBounds = mBounds.second;
