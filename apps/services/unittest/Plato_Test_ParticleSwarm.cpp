@@ -737,7 +737,7 @@ private:
 
         mAlgebraicRocketModel.solve();
         std::vector<ScalarType> tTrialThrustProfile = mAlgebraicRocketModel.getThrustProfile();
-        assert(tTrialThrustProfile.size() == mTargetThrustProfile.size());
+        assert(tTrialThrustProfile.size() == mTargetThrustProfile->size());
 
         ScalarType tObjFuncValue = 0;
         const OrdinalType tNumThrustEvalPoints = mTargetThrustProfile->size();
