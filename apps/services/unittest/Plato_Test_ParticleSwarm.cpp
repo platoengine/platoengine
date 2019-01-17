@@ -2194,7 +2194,6 @@ private:
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(mCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
 
-        //std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
         const ScalarType tRandomNum = tDistribution(mGenerator);
         const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
@@ -3608,7 +3607,9 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumControls = 2;
     const size_t tNumParticles = 10;
+    const size_t tNumConstraints = 1;
     tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateDual(tNumParticles, tNumConstraints);
     tFactory->allocateControl(tNumControls, tNumParticles);
 
     // TEST ALGORITHM
