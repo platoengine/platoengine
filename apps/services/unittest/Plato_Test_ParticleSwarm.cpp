@@ -889,6 +889,65 @@ private:
 };
 // class GradFreeRadius
 
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeHimmelblau : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    explicit GradFreeHimmelblau()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeHimmelblau()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate criterion
+     * @param [in] aControl multi-vector of optimization variables
+     * @param [out] aOutput criterion value for each control vector
+     **********************************************************************************/
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate Himmelblau function:
+     * \f$ \left( x^2 + y-11 \right)^2 + \left( y^2 + x-7 \right)^2 \f$
+     * @param [in] aControl vector of optimization variables
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        assert(aControl.size() == static_cast<OrdinalType>(0));
+
+        ScalarType tFirstTerm = (aControl[0] * aControl[0]) + aControl[1] - static_cast<ScalarType>(11);
+        ScalarType tSecondTerm = aControl[0] + (aControl[1] * aControl[1]) - static_cast<ScalarType>(7);
+        ScalarType tOutput = tFirstTerm * tFirstTerm + tSecondTerm * tSecondTerm;
+
+        return (tOutput);
+    }
+
+private:
+    GradFreeHimmelblau(const Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & operator=(const Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & aRhs);
+};
+// class GradFreeHimmelblau
+
 /******************************************************************************//**
  * @brief Generic interface that gives access to the list of criteria
 **********************************************************************************/
@@ -1369,7 +1428,6 @@ public:
 
     void findGlobalBestParticle()
     {
-        // TODO: THINK PARALLEL IMPLEMENTATION
         Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
         mCriteriaReductions->minloc(*mCurrentObjFuncValues, tOutput);
         const bool tFoundNewGlobalBest = tOutput.mOutputValue < mCurrentGlobalBestObjFuncValue;
@@ -2785,7 +2843,7 @@ public:
                            const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
             mPrintDiagnostics(false),
             mNumIterations(0),
-            mMaxNumIterations(200),
+            mMaxNumIterations(1e4),
             mBestAugLagFuncTolerance(1e-10),
             mMeanAugLagFuncTolerance(5e-4),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
@@ -3199,6 +3257,42 @@ TEST(PlatoTest, GradFreeRosenbrock)
     EXPECT_NEAR(401, tObjVals[0], tTolerance);
     EXPECT_NEAR(0.228125, tObjVals[1], tTolerance);
     EXPECT_NEAR(0, tObjVals[2], tTolerance);
+}
+
+TEST(PlatoTest, GradFreeHimmelblau)
+{
+    // working vector
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 6;
+    Plato::StandardVector<double> tCriterionValues(tNumParticles);
+    Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
+
+    // define criterion
+    tParticles(0 /*particle index*/, 0 /*control index*/) = 3;
+    tParticles(0 /*particle index*/, 1 /*control index*/) = 2;
+    tParticles(1 /*particle index*/, 0 /*control index*/) = -2.805118;
+    tParticles(1 /*particle index*/, 1 /*control index*/) = 3.131312;
+    tParticles(2 /*particle index*/, 0 /*control index*/) = -3.779310;
+    tParticles(2 /*particle index*/, 1 /*control index*/) = -3.283186;
+    tParticles(3 /*particle index*/, 0 /*control index*/) = 3.584428;
+    tParticles(3 /*particle index*/, 1 /*control index*/) = -1.848126;
+    tParticles(4 /*particle index*/, 0 /*control index*/) = 0;
+    tParticles(4 /*particle index*/, 1 /*control index*/) = 0;
+    tParticles(5 /*particle index*/, 0 /*control index*/) = 1;
+    tParticles(5 /*particle index*/, 1 /*control index*/) = 2;
+
+    Plato::GradFreeHimmelblau<double> tHimmelblau;
+    tHimmelblau.value(tParticles, tCriterionValues);
+
+    // evaluate at minimums
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(0., tCriterionValues[0 /*particle index*/], tTolerance);
+    EXPECT_NEAR(0., tCriterionValues[1 /*particle index*/], tTolerance);
+    EXPECT_NEAR(0., tCriterionValues[2 /*particle index*/], tTolerance);
+    EXPECT_NEAR(0., tCriterionValues[3 /*particle index*/], tTolerance);
+    // evaluate at non-minimums
+    EXPECT_NEAR(170., tCriterionValues[4 /*particle index*/], tTolerance);
+    EXPECT_NEAR(68., tCriterionValues[5 /*particle index*/], tTolerance);
 }
 
 TEST(PlatoTest, PSO_IsFileOpenExeption)
@@ -3802,7 +3896,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     PlatoTest::checkVectorData(tTargetThrustProfile, tBestThrustProfileSolution);
 }
 
-TEST(PlatoTest, PSO_SolveALPSO)
+TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
 {
     // ********* Allocate Core Optimization Data Templates *********
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
