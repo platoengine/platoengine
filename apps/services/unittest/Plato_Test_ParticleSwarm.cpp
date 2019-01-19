@@ -948,6 +948,95 @@ private:
 };
 // class GradFreeHimmelblau
 
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeShiftedEllipse : public Plato::GradFreeCriteria<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    explicit GradFreeShiftedEllipse() :
+            mXCenter(0.),
+            mXRadius(1.),
+            mYCenter(0.),
+            mYRadius(1.)
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeShiftedEllipse()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Sets parameters that define shifted ellipse
+     * @param [in] aXCenter ellipse's center x-coord
+     * @param [in] aXRadius ellipse's x-radius
+     * @param [in] aYCenter ellipse's center y-coord
+     * @param [in] aYRadius ellipse's y-radius
+    **********************************************************************************/
+    void define(const ScalarType & aXCenter,
+                const ScalarType & aXRadius,
+                const ScalarType & aYCenter,
+                const ScalarType & aYRadius)
+    {
+        mXCenter = aXCenter;
+        mXRadius = aXRadius;
+        mYCenter = aYCenter;
+        mYRadius = aYRadius;
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate criterion
+     * @param [in] aControl multi-vector of optimization variables
+     * @param [out] aOutput criterion value for each control vector
+     **********************************************************************************/
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate Shifted-Ellipse function:
+     * \f$ \frac{\left( \mathbf{x} - \hat{x} \right)^2}{r_x^2} +
+     *     \frac{\left( \mathbf{y} + \hat{y} \right)^2}{r_y^2} - 1
+     * \f$
+     * @param [in] aControl vector of optimization variables
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        assert(aControl.size() > static_cast<OrdinalType>(0));
+
+        const ScalarType tOutput = ((aControl[0] - mXCenter) * (aControl[0] - mXCenter) / (mXRadius * mXRadius))
+                + ((aControl[1] - mYCenter) * (aControl[1] - mYCenter) / (mYRadius * mYRadius))
+                - static_cast<ScalarType>(1);
+
+        return (tOutput);
+    }
+
+private:
+    ScalarType mXCenter; /*!< ellipse's center x-coord */
+    ScalarType mXRadius; /*!< ellipse's x-radius */
+    ScalarType mYCenter; /*!< ellipse's center y-coord */
+    ScalarType mYRadius; /*!< ellipse's y-radius */
+
+private:
+    GradFreeShiftedEllipse(const Plato::GradFreeShiftedEllipse<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeShiftedEllipse<ScalarType, OrdinalType> & operator=(const Plato::GradFreeShiftedEllipse<ScalarType, OrdinalType> & aRhs);
+};
+// class GradShiftedEllipse
+
 /******************************************************************************//**
  * @brief Generic interface that gives access to the list of criteria
 **********************************************************************************/
@@ -3267,7 +3356,7 @@ TEST(PlatoTest, GradFreeHimmelblau)
     Plato::StandardVector<double> tCriterionValues(tNumParticles);
     Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
 
-    // define criterion
+    // define particles
     tParticles(0 /*particle index*/, 0 /*control index*/) = 3;
     tParticles(0 /*particle index*/, 1 /*control index*/) = 2;
     tParticles(1 /*particle index*/, 0 /*control index*/) = -2.805118;
@@ -3293,6 +3382,31 @@ TEST(PlatoTest, GradFreeHimmelblau)
     // evaluate at non-minimums
     EXPECT_NEAR(170., tCriterionValues[4 /*particle index*/], tTolerance);
     EXPECT_NEAR(68., tCriterionValues[5 /*particle index*/], tTolerance);
+}
+
+TEST(PlatoTest, GradFreeShiftedEllipse)
+{
+    // working vector
+    const size_t tNumParticles = 2;
+    const size_t tNumControls = 2;
+    Plato::StandardVector<double> tCriterionValues(tNumParticles);
+    Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
+    const double tTolerance = 1e-4;
+
+    // define particles
+    tParticles(0 /*particle index*/, 0 /*control index*/) = 1.3;
+    tParticles(0 /*particle index*/, 1 /*control index*/) = -2.1;
+    tParticles(1 /*particle index*/, 0 /*control index*/) = -1.3;
+    tParticles(1 /*particle index*/, 1 /*control index*/) = -2.1;
+
+    // define criterion
+    Plato::GradFreeShiftedEllipse<double> tShiftedEllipse;
+    tShiftedEllipse.define(0.1 /*center x-coord*/, 1.2 /*center y-coord*/, -.5 /*x-radius*/, 0.7 /*y-radius*/);
+
+    // evaluate criterion
+    tShiftedEllipse.value(tParticles, tCriterionValues);
+    EXPECT_NEAR(5.224489796, tCriterionValues[0 /*particle index*/], tTolerance);
+    EXPECT_NEAR(5.585600907, tCriterionValues[1 /*particle index*/], tTolerance);
 }
 
 TEST(PlatoTest, PSO_IsFileOpenExeption)
