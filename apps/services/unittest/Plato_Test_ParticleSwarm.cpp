@@ -1430,13 +1430,13 @@ public:
             mCurrentBestObjFuncValues(aFactory->objective().create()),
             mLowerBounds(),
             mUpperBounds(),
-            mMeanParticlePosition(),
-            mStdDevParticlePosition(),
-            mGlobalBestParticlePosition(),
+            mMeanCurrentBestParticlePositions(),
+            mStdDevCurrentBestParticlePositions(),
+            mGlobalBestParticlePositions(),
             mCurrentParticles(aFactory->control().create()),
             mCurrentVelocities(aFactory->control().create()),
             mPreviousVelocities(aFactory->control().create()),
-            mBestParticlePositions(aFactory->control().create()),
+            mCurrentBestParticlePositions(aFactory->control().create()),
             mCommWrapper(aFactory->getCommWrapper().create()),
             mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
     {
@@ -1589,8 +1589,8 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getMeanParticlePositions() const
     {
-        assert(static_cast<OrdinalType>(mMeanParticlePosition.use_count()) > static_cast<OrdinalType>(0));
-        return (*mMeanParticlePosition);
+        assert(static_cast<OrdinalType>(mMeanCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        return (*mMeanCurrentBestParticlePositions);
     }
 
     /******************************************************************************//**
@@ -1599,8 +1599,8 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getStdDevParticlePositions() const
     {
-        assert(static_cast<OrdinalType>(mStdDevParticlePosition.use_count()) > static_cast<OrdinalType>(0));
-        return (*mStdDevParticlePosition);
+        assert(static_cast<OrdinalType>(mStdDevCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        return (*mStdDevCurrentBestParticlePositions);
     }
 
     /******************************************************************************//**
@@ -1609,8 +1609,8 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getGlobalBestParticlePosition() const
     {
-        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
-        return (*mGlobalBestParticlePosition);
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        return (*mGlobalBestParticlePositions);
     }
 
     /******************************************************************************//**
@@ -1647,6 +1647,17 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Returns 1D container with the current best particle positions at this particle index
+     * @param [in] aIndex particle index
+     * @return const reference to 1D container of current best particle positions
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getBestParticlePosition(const OrdinalType & aIndex) const
+    {
+        assert(static_cast<OrdinalType>(mCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        return ((*mCurrentBestParticlePositions)[aIndex]);
+    }
+
+    /******************************************************************************//**
      * @brief Returns 2D container of current particle positions
      * @return const reference of the 2D container of current particle positions
     **********************************************************************************/
@@ -1678,7 +1689,7 @@ public:
 
     /******************************************************************************//**
      * @brief Set rank that owns the current global best particle
-     * @param [in] rank that owns the current global best particle
+     * @param [in] aInput rank that owns the current global best particle
     **********************************************************************************/
     void setCurrentGlobalBestParticleRank(const OrdinalType & aInput)
     {
@@ -1687,55 +1698,85 @@ public:
 
     /******************************************************************************//**
      * @brief Sets particle index associated with the current global best particle
-     * @param [in] particle index
+     * @param [in] aInput particle index
     **********************************************************************************/
     void setCurrentGlobalBestParticleIndex(const OrdinalType & aInput)
     {
         mCurrentGlobalBestParticleIndex = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Sets time step used to update particle velocities
+     * @param [in] aInput time step
+    **********************************************************************************/
     void setTimeStep(const ScalarType & aInput)
     {
         mTimeStep = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set current global best objective function value
+     * @param [in] aInput objective function value
+    **********************************************************************************/
     void setCurrentGlobalBestObjFunValue(const ScalarType & aInput)
     {
         mCurrentGlobalBestObjFuncValue = aInput;
     }
 
-    void cacheGlobalBestObjFunValue()
-    {
-        mPreviousGlobalBestObjFuncValue = mCurrentGlobalBestObjFuncValue;
-    }
-
+    /******************************************************************************//**
+     * @brief Set current objective function values
+     * @param [in] aInput 1D container of current objective function values
+    **********************************************************************************/
     void setCurrentObjFuncValues(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mCurrentObjFuncValues->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
+    /******************************************************************************//**
+     * @brief Set current best objective function value for this particle
+     * @param [in] aIndex particle index
+     * @param [in] aInput current best objective function values
+    **********************************************************************************/
     void setCurrentBestObjFuncValue(const OrdinalType & aIndex, const ScalarType & aInput)
     {
         (*mCurrentBestObjFuncValues)[aIndex] = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set current best objective function values
+     * @param [in] aInput 1D container of current best objective function values
+    **********************************************************************************/
     void setCurrentBestObjFuncValues(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mCurrentBestObjFuncValues->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
+    /******************************************************************************//**
+     * @brief Set all the elements in the 2D container of current particles to this scalar value
+     * @param [in] aInput scalar value
+    **********************************************************************************/
     void setCurrentParticle(const ScalarType & aInput)
     {
         assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         Plato::fill(aInput, *mCurrentParticles);
     }
 
+    /******************************************************************************//**
+     * @brief Set all the elements in the 1D container of this current particle to this scalar value.
+     * @param [in] aIndex this particle index
+     * @param [in] aInput this scalar value
+    **********************************************************************************/
     void setCurrentParticle(const OrdinalType & aIndex, const ScalarType & aInput)
     {
         assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
         (*mCurrentParticles)[aIndex].fill(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set this current particle to input 1D container
+     * @param [in] aIndex this particle index
+     * @param [in] aParticle 1D container of current particles
+    **********************************************************************************/
     void setCurrentParticle(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticle)
     {
         assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
@@ -1743,6 +1784,10 @@ public:
         (*mCurrentParticles)[aIndex].update(static_cast<ScalarType>(1), aParticle, static_cast<ScalarType>(0));
     }
 
+    /******************************************************************************//**
+     * @brief Set Set 2D container of current particles to input 2D container
+     * @param [in] aParticles 2D container of current particles
+    **********************************************************************************/
     void setCurrentParticles(const Plato::MultiVector<ScalarType, OrdinalType> & aParticles)
     {
         assert(aParticles.getNumVectors() > static_cast<OrdinalType>(0));
@@ -1750,6 +1795,11 @@ public:
         Plato::update(static_cast<ScalarType>(1), aParticles, static_cast<ScalarType>(0), *mCurrentParticles);
     }
 
+    /******************************************************************************//**
+     * @brief Set this current particle velocities to input 1D container
+     * @param [in] aIndex this particle index
+     * @param [in] aParticleVel 1D container of current particle velocities
+    **********************************************************************************/
     void setCurrentVelocity(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aParticleVel)
     {
         assert(static_cast<OrdinalType>(mCurrentVelocities.use_count()) > static_cast<OrdinalType>(0));
@@ -1757,6 +1807,10 @@ public:
         (*mCurrentVelocities)[aIndex].update(static_cast<ScalarType>(1), aParticleVel, static_cast<ScalarType>(0));
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of current particle velocities to input 2D container
+     * @param [in] aInput 2D container of current particle velocities
+    **********************************************************************************/
     void setCurrentVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
@@ -1764,6 +1818,10 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentVelocities);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of previous particle velocities to input 2D container
+     * @param [in] aInput 2D container of previous particle velocities
+    **********************************************************************************/
     void setPreviousVelocities(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
@@ -1771,6 +1829,20 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mPreviousVelocities);
     }
 
+    /******************************************************************************//**
+     * @brief Set all the elements in the 1D container of lower bounds to input scalar
+     * @param [in] aInput input scalar
+    **********************************************************************************/
+    void setLowerBounds(const ScalarType & aInput)
+    {
+        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
+        mLowerBounds->fill(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set 1D container of particles' lower bounds
+     * @param [in] aInput 1D container of particles' lower bounds
+    **********************************************************************************/
     void setLowerBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
@@ -1778,12 +1850,20 @@ public:
         mLowerBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
-    void setLowerBounds(const ScalarType & aInput)
+    /******************************************************************************//**
+     * @brief Set all the elements in the 1D container of upper bounds to input scalar
+     * @param [in] aInput input scalar
+    **********************************************************************************/
+    void setUpperBounds(const ScalarType & aInput)
     {
-        assert(static_cast<OrdinalType>(mLowerBounds.use_count()) > static_cast<OrdinalType>(0));
-        mLowerBounds->fill(aInput);
+        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
+        mUpperBounds->fill(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set 1D container of particles' upper bounds
+     * @param [in] aInput 1D container of particles' upper bounds
+    **********************************************************************************/
     void setUpperBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
@@ -1791,39 +1871,51 @@ public:
         mUpperBounds->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
-    void setUpperBounds(const ScalarType & aInput)
-    {
-        assert(static_cast<OrdinalType>(mUpperBounds.use_count()) > static_cast<OrdinalType>(0));
-        mUpperBounds->fill(aInput);
-    }
-
+    /******************************************************************************//**
+     * @brief Set 1D container of global best particle positions
+     * @param [in] aInput 1D container of global best particle positions
+    **********************************************************************************/
     void setGlobalBestParticlePosition(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(static_cast<OrdinalType>(mGlobalBestParticlePosition.use_count()) > static_cast<OrdinalType>(0));
-        mGlobalBestParticlePosition->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
+        assert(static_cast<OrdinalType>(mGlobalBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        mGlobalBestParticlePositions->update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getBestParticlePosition(const OrdinalType & aIndex) const
-    {
-        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
-        return ((*mBestParticlePositions)[aIndex]);
-    }
-
+    /******************************************************************************//**
+     * @brief Set 1D container of current best positions for this particle
+     * @param [in] aIndex particle index
+     * @param [in] aInput 1D container of best particle positions
+    **********************************************************************************/
     void setBestParticlePosition(const OrdinalType & aIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.size() > static_cast<OrdinalType>(0));
-        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
-        (*mBestParticlePositions)[aIndex].update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
+        assert(static_cast<OrdinalType>(mCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        (*mCurrentBestParticlePositions)[aIndex].update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of current best particle positions
+     * @param [in] aInput 2D container of current best particle positions
+    **********************************************************************************/
     void setBestParticlePositions(const Plato::MultiVector<ScalarType, OrdinalType> & aInput) const
     {
         assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
-        assert(static_cast<OrdinalType>(mBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
-        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mBestParticlePositions);
+        assert(static_cast<OrdinalType>(mCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentBestParticlePositions);
     }
 
+    /******************************************************************************//**
+     * @brief Cache current global best objective function value
+    **********************************************************************************/
+    void cacheGlobalBestObjFunValue()
+    {
+        mPreviousGlobalBestObjFuncValue = mCurrentGlobalBestObjFuncValue;
+    }
+
+    /******************************************************************************//**
+     * @brief Set initial particle positions (i.e. initial guess)
+    **********************************************************************************/
     void setInitialParticles()
     {
         std::default_random_engine tGenerator;
@@ -1842,11 +1934,17 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Cache current particle velocities
+    **********************************************************************************/
     void cachePreviousVelocities()
     {
         Plato::update(static_cast<ScalarType>(1), *mCurrentVelocities, static_cast<ScalarType>(0), *mPreviousVelocities);
     }
 
+    /******************************************************************************//**
+     * @brief Find global best particle positions
+    **********************************************************************************/
     void findGlobalBestParticle()
     {
         Plato::ReductionOutputs<ScalarType, OrdinalType> tOutput;
@@ -1862,6 +1960,9 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update current best particle positions and objective function values
+    **********************************************************************************/
     void updateBestParticlesData()
     {
         const OrdinalType tNumParticles = this->getNumParticles();
@@ -1879,12 +1980,18 @@ public:
         }
     }
 
-    void computeGlobalBestParticlePositionStatistics()
+    /******************************************************************************//**
+     * @brief Compute current best particle positions statistics
+    **********************************************************************************/
+    void computeCurrentBestParticlesStatistics()
     {
-        this->computeGlobalBestParticlePositionMean();
-        this->computeGlobalBestParticlePositionStdDev();
+        this->computeMeanBestParticlePositions();
+        this->computeStdDevBestParticlePositions();
     }
 
+    /******************************************************************************//**
+     * @brief Compute current best objective function values statistics
+    **********************************************************************************/
     void computeCurrentBestObjFuncStatistics()
     {
         mMeanPreviousBestObjFunValue = mMeanCurrentBestObjFunValue;
@@ -1902,6 +2009,9 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize/Allocate class member data
+    **********************************************************************************/
     void initialize()
     {
         const OrdinalType tPARTICLE_INDEX = 0;
@@ -1909,29 +2019,32 @@ private:
         mWorkVector = tMyParticle.create();
         mLowerBounds = tMyParticle.create();
         mUpperBounds = tMyParticle.create();
-        mMeanParticlePosition = tMyParticle.create();
-        mStdDevParticlePosition = tMyParticle.create();
+        mMeanCurrentBestParticlePositions = tMyParticle.create();
+        mStdDevCurrentBestParticlePositions = tMyParticle.create();
 
         mCurrentObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
         mCurrentBestObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
 
-        mGlobalBestParticlePosition = tMyParticle.create();
-        mGlobalBestParticlePosition->fill(std::numeric_limits<ScalarType>::max());
-        Plato::fill(std::numeric_limits<ScalarType>::max(), *mBestParticlePositions);
+        mGlobalBestParticlePositions = tMyParticle.create();
+        mGlobalBestParticlePositions->fill(std::numeric_limits<ScalarType>::max());
+        Plato::fill(std::numeric_limits<ScalarType>::max(), *mCurrentBestParticlePositions);
 
         const OrdinalType tLength = 1;
         Plato::StandardVector<ScalarType, OrdinalType> tWork(tLength, this->getNumParticles());
         mGlobalNumParticles = mCriteriaReductions->sum(tWork);
     }
 
-    void computeGlobalBestParticlePositionMean()
+    /******************************************************************************//**
+     * @brief Compute the mean of the current best particle positions
+    **********************************************************************************/
+    void computeMeanBestParticlePositions()
     {
         /* local sum */
         mWorkVector->fill(static_cast<ScalarType>(0));
         const OrdinalType tLocalNumParticles = this->getNumParticles();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
-            const Plato::Vector<ScalarType, OrdinalType> & tMyParticle = (*mBestParticlePositions)[tParticleIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tMyParticle = (*mCurrentBestParticlePositions)[tParticleIndex];
             const OrdinalType tMyParticleDims = tMyParticle.size();
             for(OrdinalType tDim = 0; tDim < tMyParticleDims; tDim++)
             {
@@ -1947,24 +2060,27 @@ private:
         for(OrdinalType tDim = 0; tDim < tNumDims; tDim++)
         {
             tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
-            (*mMeanParticlePosition)[tDim] = mCriteriaReductions->sum(tWork);
+            (*mMeanCurrentBestParticlePositions)[tDim] = mCriteriaReductions->sum(tWork);
         }
         const ScalarType tMultiplier = static_cast<ScalarType>(1) / mGlobalNumParticles;
-        mMeanParticlePosition->scale(tMultiplier);
+        mMeanCurrentBestParticlePositions->scale(tMultiplier);
     }
 
-    void computeGlobalBestParticlePositionStdDev()
+    /******************************************************************************//**
+     * @brief Compute the standard deviation of the current best particle positions
+    **********************************************************************************/
+    void computeStdDevBestParticlePositions()
     {
         /* local operations */
         mWorkVector->fill(static_cast<ScalarType>(0));
         const OrdinalType tLocalNumParticles = this->getNumParticles();
-        const OrdinalType tNumControls = mStdDevParticlePosition->size();
+        const OrdinalType tNumControls = mStdDevCurrentBestParticlePositions->size();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < tLocalNumParticles; tParticleIndex++)
         {
-            const Plato::Vector<ScalarType, OrdinalType> & tMyBestParticlePosition = (*mBestParticlePositions)[tParticleIndex];
+            const Plato::Vector<ScalarType, OrdinalType> & tMyBestParticlePosition = (*mCurrentBestParticlePositions)[tParticleIndex];
             for(OrdinalType tDim = 0; tDim < tNumControls; tDim++)
             {
-                const ScalarType tMisfit = tMyBestParticlePosition[tDim] - (*mMeanParticlePosition)[tDim];
+                const ScalarType tMisfit = tMyBestParticlePosition[tDim] - (*mMeanCurrentBestParticlePositions)[tDim];
                 (*mWorkVector)[tDim] += tMisfit * tMisfit;
             }
         }
@@ -1978,45 +2094,50 @@ private:
             tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
             const ScalarType tGlobalBestParticlePositionMinusMean = mCriteriaReductions->sum(tWork);
             const ScalarType tValue = tGlobalBestParticlePositionMinusMean / static_cast<ScalarType>(mGlobalNumParticles - 1);
-            (*mStdDevParticlePosition)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
+            (*mStdDevCurrentBestParticlePositions)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
         }
     }
 
 private:
-    OrdinalType mGlobalNumParticles;
-    OrdinalType mCurrentGlobalBestParticleRank;
-    OrdinalType mCurrentGlobalBestParticleIndex;
+    OrdinalType mGlobalNumParticles; /*!< global number of particles */
+    OrdinalType mCurrentGlobalBestParticleRank; /*!< rank associated with global best particle */
+    OrdinalType mCurrentGlobalBestParticleIndex; /*!< particle index associated with global best particle */
 
-    ScalarType mTimeStep;
-    ScalarType mMeanCurrentBestObjFunValue;
-    ScalarType mMeanPreviousBestObjFunValue;
-    ScalarType mStdDevCurrentBestObjFunValue;
-    ScalarType mCurrentGlobalBestObjFuncValue;
-    ScalarType mPreviousGlobalBestObjFuncValue;
+    ScalarType mTimeStep; /*!< time step needed to compute particle velocities */
+    ScalarType mMeanCurrentBestObjFunValue; /*!< mean of current best objective function values */
+    ScalarType mMeanPreviousBestObjFunValue; /*!< mean of previous best objective function values */
+    ScalarType mStdDevCurrentBestObjFunValue; /*!< standard deviation of current best objective function values */
+    ScalarType mCurrentGlobalBestObjFuncValue; /*!< current global best objective function value */
+    ScalarType mPreviousGlobalBestObjFuncValue; /*!< previous global best objective function value */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues; /*!< current objective function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues; /*!< current best objective function values */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mWorkVector;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mLowerBounds;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mUpperBounds;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanParticlePosition;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevParticlePosition;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mGlobalBestParticlePosition;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mWorkVector; /*!< particle work vector */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mLowerBounds; /*!< particle lower bounds */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mUpperBounds; /*!< particle upper bounds */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentBestParticlePositions; /*!< mean of current best particle positions */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentBestParticlePositions; /*!< standard deviation of current best particle positions */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mGlobalBestParticlePositions; /*!< global best particle positions */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentParticles;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentVelocities;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousVelocities;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mBestParticlePositions;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentParticles; /*!< current particle positions */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentVelocities; /*!< current particle velocities */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousVelocities; /*!< previous particle velocities */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentBestParticlePositions; /*!< current best particle positions */
 
-    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper; /*!< parallel communicator wrapper */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions; /*!< reduction operations for criteria (e.g. objective function) containers */
 
 private:
     ParticleSwarmDataMng(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
     Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & operator=(const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>&);
 };
+// class ParticleSwarmDataMng
 
+/******************************************************************************//**
+ * @brief Abstract interface for Particle Swarm Optimization (PSO) algorithm stage
+ *        managers. The PSO stage manages calls to criteria (e.g. objective functions).
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarmStageMng
 {
@@ -2025,7 +2146,16 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     virtual void evaluateObjective(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
+
+    /******************************************************************************//**
+     * @brief Find current best particle postions
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     virtual void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 };
 // class ParticleSwarmStageMng
@@ -3092,9 +3222,9 @@ public:
         mOutputData.mNumConstraints = aInput;
     }
 
-    void computeGlobalBestParticlePositionStatistics()
+    void computeCurrentBestParticlesStatistics()
     {
-        mDataMng->computeGlobalBestParticlePositionStatistics();
+        mDataMng->computeCurrentBestParticlesStatistics();
     }
 
     OrdinalType getNumIterations() const
@@ -3203,7 +3333,7 @@ public:
 
             if(this->checkStoppingCriteria())
             {
-                mDataMng->computeGlobalBestParticlePositionStatistics();
+                mDataMng->computeCurrentBestParticlesStatistics();
                 this->outputStoppingCriterion();
                 this->closeOutputFile();
                 break;
@@ -3696,7 +3826,7 @@ public:
             this->outputDiagnostics();
             if(this->checkStoppingCriteria())
             {
-                mOptimizer->computeGlobalBestParticlePositionStatistics();
+                mOptimizer->computeCurrentBestParticlesStatistics();
                 this->outputStoppingCriterion();
                 this->closeOutputFile();
                 break;
