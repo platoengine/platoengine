@@ -101,7 +101,7 @@ struct particle_swarm
         MAX_NUMBER_ITERATIONS = 2,
         TRUE_OBJECTIVE_TOLERANCE = 3,
         MEAN_OBJECTIVE_TOLERANCE = 4,
-        MEAN_OBJECTIVE_STAGNATION_TOLERANCE = 5,
+        STDDEV_OBJECTIVE_TOLERANCE = 5,
     };
 };
 
@@ -286,9 +286,9 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
             aOutput = "\n\n****** Optimization stopping due to mean objective function tolerance being met. ******\n\n";
             break;
         }
-        case Plato::particle_swarm::stop_t::MEAN_OBJECTIVE_STAGNATION_TOLERANCE:
+        case Plato::particle_swarm::stop_t::STDDEV_OBJECTIVE_TOLERANCE:
         {
-            aOutput = "\n\n****** Optimization stopping due to mean objective function stagnation tolerance being met. ******\n\n";
+            aOutput = "\n\n****** Optimization stopping due to standard deviation tolerance being met. ******\n\n";
             break;
         }
     }
@@ -821,6 +821,67 @@ private:
     Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & operator=(const Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & aRhs);
 };
 // class GradFreeRosenbrock
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeGoldsteinPrice : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    GradFreeGoldsteinPrice()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeGoldsteinPrice()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate criterion at each particle.
+     * @param [in] aControl multi-vector of control variables (i.e. optimization variables)
+     * @param [out] aOutput criterion value for each control vector
+     **********************************************************************************/
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate function:
+     * \f$ 100 * (1+(x+y+1)^2*(3*x^2+6*x*y+3*y^2-14*x-14*y+19)) *
+     *           (30+(2*x-3*y)^2*(12*x^2-36*x*y+27*y^2-32*x+48*y+18)) \f$
+     * @param [in] aControl vector of control variables (i.e. optimization variables)
+     * @return Rosenbrock function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        const ScalarType x = aControl[0];
+        const ScalarType y = aControl[1];
+        const ScalarType tFirstTerm = (1 + (x + y + 1) * (x + y + 1) * (3 * x * x + 6 * x * y + 3 * y * y - 14 * x - 14 * y + 19));
+        const ScalarType tSecondTerm = (30 + (2 * x - 3 * y) * (2 * x - 3 * y)
+                                    * (12 * x * x - 36 * x * y + 27 * y * y - 32 * x + 48 * y + 18));
+        const ScalarType tOutput = tFirstTerm * tSecondTerm;
+
+        return (tOutput);
+    }
+
+private:
+    GradFreeGoldsteinPrice(const Plato::GradFreeGoldsteinPrice<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeGoldsteinPrice<ScalarType, OrdinalType> & operator=(const Plato::GradFreeGoldsteinPrice<ScalarType, OrdinalType> & aRhs);
+};
+// class GradFreeGoldsteinPrice
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRadius : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
@@ -2709,6 +2770,7 @@ public:
             mMaxNumIterations(1000),
             mBestObjFuncTolerance(1e-10),
             mMeanObjFuncTolerance(5e-4),
+            mStdDevObjFuncTolerance(1e-6),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mStageMng(std::make_shared<Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective)),
@@ -2724,6 +2786,7 @@ public:
             mMaxNumIterations(1000),
             mBestObjFuncTolerance(1e-10),
             mMeanObjFuncTolerance(5e-4),
+            mStdDevObjFuncTolerance(1e-6),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mStageMng(aStageMng),
@@ -2769,6 +2832,11 @@ public:
     void setMeanObjFuncTolerance(const ScalarType & aInput)
     {
         mMeanObjFuncTolerance = aInput;
+    }
+
+    void setStdDevObjFuncTolerance(const ScalarType & aInput)
+    {
+        mStdDevObjFuncTolerance = aInput;
     }
 
     void setBestObjFuncTolerance(const ScalarType & aInput)
@@ -2990,6 +3058,7 @@ private:
         bool tStop = false;
         const ScalarType tMeanCurrentBestObjFunValue = mDataMng->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestObjFunValue = mDataMng->getCurrentGlobalBestObjFuncValue();
+        const ScalarType tStdDevCurrentBestObjFunValue = mDataMng->getStdDevCurrentBestObjFuncValues();
 
         if(mNumIterations >= mMaxNumIterations)
         {
@@ -3005,6 +3074,11 @@ private:
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
+        }
+        else if(tStdDevCurrentBestObjFunValue < mStdDevObjFuncTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
         }
 
         return (tStop);
@@ -3118,6 +3192,7 @@ private:
 
     ScalarType mBestObjFuncTolerance;
     ScalarType mMeanObjFuncTolerance;
+    ScalarType mStdDevObjFuncTolerance;
 
     Plato::particle_swarm::stop_t mStopCriterion;
     Plato::OutputDataPSO<ScalarType, OrdinalType> mOutputData;
@@ -3143,6 +3218,7 @@ public:
             mMaxNumAugLagOuterIterations(1e3),
             mBestAugLagFuncTolerance(1e-10),
             mMeanAugLagFuncTolerance(5e-4),
+            mStdDevAugLagFuncTolerance(1e-6),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mOutputData(aConstraints->size()),
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
@@ -3230,6 +3306,11 @@ public:
     void setMeanAugLagFuncTolerance(const ScalarType & aInput)
     {
         mMeanAugLagFuncTolerance = aInput;
+    }
+
+    void setStdDevAugLagFuncTolerance(const ScalarType & aInput)
+    {
+        mStdDevAugLagFuncTolerance = aInput;
     }
 
     void setBestAugLagFuncTolerance(const ScalarType & aInput)
@@ -3441,8 +3522,9 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
-        const ScalarType tMeanCurrentBestObjFunValue = mOptimizer->getMeanCurrentBestObjFuncValues();
+        const ScalarType tMeanCurrentBestObjFuncValue = mOptimizer->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestAugLagFuncValue = mOptimizer->getCurrentGlobalBestObjFuncValue();
+        const ScalarType tStdDevCurrentBestAugLagFuncValue = mOptimizer->getStdDevCurrentBestObjFuncValues();
 
         if(mNumIterations >= mMaxNumAugLagOuterIterations)
         {
@@ -3454,10 +3536,15 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::TRUE_OBJECTIVE_TOLERANCE;
         }
-        else if(tMeanCurrentBestObjFunValue < mMeanAugLagFuncTolerance)
+        else if(tMeanCurrentBestObjFuncValue < mMeanAugLagFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
+        }
+        else if(tStdDevCurrentBestAugLagFuncValue < mStdDevAugLagFuncTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
         }
 
         return (tStop);
@@ -3571,6 +3658,7 @@ private:
 
     ScalarType mBestAugLagFuncTolerance;
     ScalarType mMeanAugLagFuncTolerance;
+    ScalarType mStdDevAugLagFuncTolerance;
 
     Plato::particle_swarm::stop_t mStopCriterion;
     Plato::OutputDataALPSO<ScalarType, OrdinalType> mOutputData;
@@ -3627,6 +3715,7 @@ struct AlgorithmInputsALPSO
             mTimeStep(1),
             mBestAugLagFuncTolerance(1e-10),
             mMeanAugLagFuncTolerance(5e-4),
+            mStdDevAugLagFuncTolerance(1e-6),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -3665,6 +3754,7 @@ struct AlgorithmInputsALPSO
     ScalarType mTimeStep; /*!< time step \Delta{t} */
     ScalarType mBestAugLagFuncTolerance; /*!< best augmented Lagrangian function stopping tolerance */
     ScalarType mMeanAugLagFuncTolerance; /*!< mean augmented Lagrangian function stopping tolerance */
+    ScalarType mStdDevAugLagFuncTolerance; /*!< standard deviation stopping tolerance */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
@@ -3716,6 +3806,7 @@ inline void set_alpso_algorithm_inputs(const Plato::AlgorithmInputsALPSO<ScalarT
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
     aAlgorithm.setMeanAugLagFuncTolerance(aInputs.mMeanAugLagFuncTolerance);
     aAlgorithm.setBestAugLagFuncTolerance(aInputs.mBestAugLagFuncTolerance);
+    aAlgorithm.setStdDevAugLagFuncTolerance(aInputs.mStdDevAugLagFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
     aAlgorithm.setPenaltyExpansionMultiplier(aInputs.mPenaltyExpansionMultiplier);
     aAlgorithm.setPenaltyMultiplierUpperBound(aInputs.mPenaltyMultiplierUpperBound);
@@ -3829,6 +3920,7 @@ struct AlgorithmInputsBCPSO
             mTimeStep(1),
             mBestObjFuncTolerance(1e-10),
             mMeanObjFuncTolerance(5e-4),
+            mStdDevObjFuncTolerance(1e-6),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -3861,6 +3953,7 @@ struct AlgorithmInputsBCPSO
     ScalarType mTimeStep; /*!< time step \Delta{t} */
     ScalarType mBestObjFuncTolerance; /*!< best objective function stopping tolerance */
     ScalarType mMeanObjFuncTolerance; /*!< mean objective function stopping tolerance */
+    ScalarType mStdDevObjFuncTolerance; /*!< standard deviation stopping tolerance */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
@@ -3905,6 +3998,7 @@ inline void set_bcpso_algorithm_inputs(const Plato::AlgorithmInputsBCPSO<ScalarT
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
     aAlgorithm.setMeanObjFuncTolerance(aInputs.mMeanObjFuncTolerance);
     aAlgorithm.setBestObjFuncTolerance(aInputs.mBestObjFuncTolerance);
+    aAlgorithm.setStdDevObjFuncTolerance(aInputs.mStdDevObjFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
     aAlgorithm.setCognitiveBehaviorMultiplier(aInputs.mCognitiveBehaviorMultiplier);
     aAlgorithm.setTrustRegionExpansionMultiplier(aInputs.mTrustRegionExpansionMultiplier);
@@ -4040,6 +4134,31 @@ TEST(PlatoTest, GradFreeRosenbrock)
     EXPECT_NEAR(0, tObjVals[2], tTolerance);
 }
 
+TEST(PlatoTest, GradFreeGoldsteinPrice)
+{
+    // establish criterion
+    Plato::GradFreeGoldsteinPrice<double> tCriterion;
+
+    // working vector
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 2;
+    Plato::StandardVector<double> tObjVals(tNumParticles);
+    Plato::StandardMultiVector<double> tControls(tNumParticles, tNumControls);
+    tControls(0, 0) = 0.; tControls(1, 0) = 1.5;
+    tControls(0, 1) = -1; tControls(1, 1) = 0.5;
+
+    // evaluate
+    tCriterion.value(tControls, tObjVals);
+
+    // evaluate at minimum
+    const double tTolerance = 5e-3;
+    EXPECT_NEAR(3., tObjVals[0], tTolerance);
+
+    // evaluate at non-minimums
+    EXPECT_NEAR(887.25, tObjVals[1], tTolerance);
+}
+
+
 TEST(PlatoTest, GradFreeHimmelblau)
 {
     // working vector
@@ -4173,9 +4292,9 @@ TEST(PlatoTest, PSO_PrintStoppingCriterion)
     tGold = "\n\n****** Optimization stopping due to mean objective function tolerance being met. ******\n\n";
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 
-    tFlag = Plato::particle_swarm::MEAN_OBJECTIVE_STAGNATION_TOLERANCE;
+    tFlag = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
     Plato::pso::get_stop_criterion(tFlag, tDescription);
-    tGold = "\n\n****** Optimization stopping due to mean objective function stagnation tolerance being met. ******\n\n";
+    tGold = "\n\n****** Optimization stopping due to standard deviation tolerance being met. ******\n\n";
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
@@ -4629,7 +4748,7 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(-0.00595, tStageMng.getCurrentGlobalBestConstraintValue(0  /* constraint index */), tTolerance);
 }
 
-TEST(PlatoTest, PSO_SolveBCPSO)
+TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)
 {
     // ********* ALLOCATE CRITERION *********
     std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
@@ -4652,6 +4771,46 @@ TEST(PlatoTest, PSO_SolveBCPSO)
     // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
     EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+}
+
+TEST(PlatoTest, PSO_SolveBCPSO_GoldsteinPrice)
+{
+    // ********* ALLOCATE CRITERION *********
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
+            std::make_shared<Plato::GradFreeGoldsteinPrice<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 20;
+    Plato::AlgorithmInputsBCPSO<double> tInputs;
+    tInputs.mStdDevObjFuncTolerance = 1e-4;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-2);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(2);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsBCPSO<double> tOutputs;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
+    const double tTolerance = 1e-2;
+    EXPECT_NEAR(3, tOutputs.mGlobalBestObjFuncValue, tTolerance);
 
     std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
     std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
