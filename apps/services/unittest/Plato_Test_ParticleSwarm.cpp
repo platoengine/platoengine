@@ -1932,16 +1932,34 @@ public:
         return ((*mMeanBestConstraintValues)[aInput]);
     }
 
+    const Plato::Vector<ScalarType, OrdinalType> & getMeanCurrentBestConstraintValues() const
+    {
+        assert(mMeanBestConstraintValues.get() != nullptr);
+        return(*mMeanBestConstraintValues);
+    }
+
     ScalarType getStdDevCurrentBestConstraintValues(const OrdinalType & aInput) const
     {
         assert(aInput < mStdDevBestConstraintValues->size());
         return ((*mStdDevBestConstraintValues)[aInput]);
     }
 
+    const Plato::Vector<ScalarType, OrdinalType> & getStdDevCurrentBestConstraintValues() const
+    {
+        assert(mStdDevBestConstraintValues.get() != nullptr);
+        return(*mStdDevBestConstraintValues);
+    }
+
     ScalarType getCurrentGlobalBestConstraintValue(const OrdinalType & aInput) const
     {
         assert(aInput < mCurrentGlobalBestConstraintValues->size());
         return ((*mCurrentGlobalBestConstraintValues)[aInput]);
+    }
+
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentGlobalBestConstraintValues() const
+    {
+        assert(mCurrentGlobalBestConstraintValues.get() != nullptr);
+        return(*mCurrentGlobalBestConstraintValues);
     }
 
     ScalarType getCurrentObjFuncValue(const OrdinalType & aIndex) const
@@ -3249,7 +3267,7 @@ public:
         return (mStageMng->getCurrentGlobalBestConstraintValue(aIndex));
     }
 
-    void getMeanParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    void getMeanCurrentBestParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
     {
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
         const Plato::Vector<ScalarType, OrdinalType> & tMeanParticlePositions = tDataMng.getMeanParticlePositions();
@@ -3261,7 +3279,7 @@ public:
         aInput->update(static_cast<ScalarType>(1), tMeanParticlePositions, static_cast<ScalarType>(0));
     }
 
-    void getStdDevParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    void getStdDevCurrentBestParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
     {
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
         const Plato::Vector<ScalarType, OrdinalType> & tStdDevParticlePositions = tDataMng.getStdDevParticlePositions();
@@ -3273,7 +3291,7 @@ public:
         aInput->update(static_cast<ScalarType>(1), tStdDevParticlePositions, static_cast<ScalarType>(0));
     }
 
-    void getGlobalBestParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    void getCurrentGlobalBestParticlePosition(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
     {
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = tDataMng.getGlobalBestParticlePosition();
@@ -3283,6 +3301,39 @@ public:
         }
         assert(aInput->size() == tGlobalBestParticlePosition.size());
         aInput->update(static_cast<ScalarType>(1), tGlobalBestParticlePosition, static_cast<ScalarType>(0));
+    }
+
+    void getMeanCurrentBestConstraintValues(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::Vector<ScalarType, OrdinalType> & tMeanConstraintValues = mStageMng->getMeanCurrentBestConstraintValues();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tMeanConstraintValues.create();
+        }
+        assert(aInput->size() == tMeanConstraintValues.size());
+        aInput->update(static_cast<ScalarType>(1), tMeanConstraintValues, static_cast<ScalarType>(0));
+    }
+
+    void getStdDevCurrentBestConstraintValues(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::Vector<ScalarType, OrdinalType> & tStdDevConstraintValues = mStageMng->getStdDevCurrentBestConstraintValues();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tStdDevConstraintValues.create();
+        }
+        assert(aInput->size() == tStdDevConstraintValues.size());
+        aInput->update(static_cast<ScalarType>(1), tStdDevConstraintValues, static_cast<ScalarType>(0));
+    }
+
+    void getCurrentGlobalBestConstraintValues(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestConstraintValues = mStageMng->getCurrentGlobalBestConstraintValues();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tGlobalBestConstraintValues.create();
+        }
+        assert(aInput->size() == tGlobalBestConstraintValues.size());
+        aInput->update(static_cast<ScalarType>(1), tGlobalBestConstraintValues, static_cast<ScalarType>(0));
     }
 
     std::string getStoppingCriterion() const
@@ -3637,8 +3688,8 @@ inline void set_alpso_algorithm_inputs(const Plato::AlgorithmInputsALPSO<ScalarT
  * @param [in,out] aOutputs outputs from ALPSO algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_alpso_algorithm_outputs(const Plato::AugmentedLagrangianPSO<double> & aAlgorithm,
-                                        Plato::AlgorithmOutputsALPSO<double> & aOutputs)
+inline void set_alpso_algorithm_outputs(const Plato::AugmentedLagrangianPSO<ScalarType, OrdinalType> & aAlgorithm,
+                                        Plato::AlgorithmOutputsALPSO<ScalarType, OrdinalType> & aOutputs)
 {
     aOutputs.mStopCriterion = aAlgorithm.getStoppingCriterion();
 
@@ -3651,9 +3702,14 @@ inline void set_alpso_algorithm_outputs(const Plato::AugmentedLagrangianPSO<doub
     aOutputs.mStdDevBestAugLagFuncValue = aAlgorithm.getStdDevCurrentBestAugLagValues();
 
     // PARTILCES DIAGNOSTICS
-    aAlgorithm.getMeanParticlePositions(aOutputs.mMeanBestParticles);
-    aAlgorithm.getStdDevParticlePositions(aOutputs.mStdDevBestParticles);
-    aAlgorithm.getGlobalBestParticlePositions(aOutputs.mGlobalBestParticles);
+    aAlgorithm.getMeanCurrentBestParticlePositions(aOutputs.mMeanBestParticles);
+    aAlgorithm.getStdDevCurrentBestParticlePositions(aOutputs.mStdDevBestParticles);
+    aAlgorithm.getCurrentGlobalBestParticlePosition(aOutputs.mGlobalBestParticles);
+
+    // CONSTRAINTS DIAGNOSTICS
+    aAlgorithm.getMeanCurrentBestConstraintValues(aOutputs.mMeanBestConstraintValues);
+    aAlgorithm.getStdDevCurrentBestConstraintValues(aOutputs.mStdDevBestConstraintValues);
+    aAlgorithm.getCurrentGlobalBestConstraintValues(aOutputs.mGlobalBestConstraintValues);
 }
 // function set_alpso_algorithm_outputs
 
@@ -3681,7 +3737,7 @@ inline void solve_alpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
     tFactory->allocateObjFuncReductionOperations(*aInputs.mCriteriaReductions);
 
     // ********* ALLOCATE AUGMENTED LAGRANGIAN ALGORITHM *********
-    Plato::AugmentedLagrangianPSO<double> tAlgorithm(aObjective, aConstraints, tFactory);
+    Plato::AugmentedLagrangianPSO<ScalarType, OrdinalType> tAlgorithm(tFactory, aObjective, aConstraints);
 
     // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
     Plato::set_alpso_algorithm_inputs(aInputs, tAlgorithm);
@@ -4452,63 +4508,57 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     PlatoTest::checkVectorData(tTargetThrustProfile, tBestThrustProfileSolution);
 }
 
-TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
+TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr_LI)
 {
-    // ********* Allocate Core Optimization Data Templates *********
-    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    // ********* DEFINE CRITERIA *********
+    const double tBound = 2;
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tConstraintOne = std::make_shared<Plato::GradFreeRadius<double>>(tBound);
+    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints = std::make_shared<Plato::GradFreeCriteriaList<double>>();
+    tConstraints->add(tConstraintOne);
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
     const size_t tNumControls = 2;
     const size_t tNumParticles = 20;
     const size_t tNumConstraints = 1;
-    tFactory->allocateObjFuncValues(tNumParticles);
-    tFactory->allocateDual(tNumParticles, tNumConstraints);
-    tFactory->allocateControl(tNumControls, tNumParticles);
+    Plato::AlgorithmInputsALPSO<double> tInputs;
+    tInputs.mMeanAugLagFuncTolerance = 1e-6;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-5);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(5);
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, tNumParticles);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
-    // TEST ALGORITHM
-    const double tBound = 2;
-    std::shared_ptr<Plato::GradFreeRadius<double>> tConstraintOne = std::make_shared<Plato::GradFreeRadius<double>>(tBound);
-    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints = std::make_shared<Plato::GradFreeCriteriaList<double>>();
-    tConstraints->add(tConstraintOne);
-    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
-    Plato::AugmentedLagrangianPSO<double> tAlgorithm(tFactory, tObjective, tConstraints);
-    tAlgorithm.setMeanAugLagFuncTolerance(1e-6);
-    tAlgorithm.setLowerBounds(-5);
-    tAlgorithm.setUpperBounds(5);
-    tAlgorithm.solve();
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsALPSO<double> tOutputs;
+    Plato::solve_alpso<double>(tObjective, tConstraints, tInputs, tOutputs);
 
+    // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
-    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestAugLagValue(), tTolerance);
+    EXPECT_NEAR(0, tOutputs.mGlobalBestAugLagFuncValue, tTolerance);
 
-    std::cout << "\nNUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
-    std::cout << "\nOBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestAugLagValue() << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestAugLagValues() << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestAugLagValues() << "\n";
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestAugLagFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestAugLagFuncValue << ", STDDEV = " << tOutputs.mStdDevBestAugLagFuncValue << "\n";
 
-    std::cout << "\nCONSTRAINT #0: BEST = " << tAlgorithm.getCurrentGlobalBestConstraintValue(0) << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestConstraintValues(0) << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestConstraintValues(0) << "\n";
+    std::cout << "\nCONSTRAINT #0: BEST = " << (*tOutputs.mGlobalBestConstraintValues)[0] << ", MEAN = "
+            << (*tOutputs.mMeanBestConstraintValues)[0] << ", STDDEV = " << (*tOutputs.mStdDevBestConstraintValues)[0]
+            << "\n";
 
-    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+    std::cout << tOutputs.mStopCriterion << "\n";
 
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = "
-                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
-                << tAlgorithm.getDataMng().getMeanParticlePositions()[tIndex] << ", STDDEV = "
-                << tAlgorithm.getDataMng().getStdDevParticlePositions()[tIndex] << "\n";
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
     }
 }
 
 TEST(PlatoTest, PSO_SolveALPSO_HimmelblauObj_ShiftedEllipseConstr)
 {
-    // ********* Allocate Core Optimization Data Templates *********
-    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    const size_t tNumParticles = 20;
-    const size_t tNumConstraints = 1;
-    tFactory->allocateObjFuncValues(tNumParticles);
-    tFactory->allocateDual(tNumParticles, tNumConstraints);
-    tFactory->allocateControl(tNumControls, tNumParticles);
-
     // ********* DEFINE CRITERIA *********
     std::shared_ptr<Plato::GradFreeShiftedEllipse<double>> tMyConstraint =
             std::make_shared<Plato::GradFreeShiftedEllipse<double>>();
@@ -4516,82 +4566,95 @@ TEST(PlatoTest, PSO_SolveALPSO_HimmelblauObj_ShiftedEllipseConstr)
     std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints =
             std::make_shared<Plato::GradFreeCriteriaList<double>>();
     tConstraints->add(tMyConstraint);
-    std::shared_ptr<Plato::GradFreeHimmelblau<double>> tObjective =
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
             std::make_shared<Plato::GradFreeHimmelblau<double>>();
 
-    Plato::AugmentedLagrangianPSO<double> tAlgorithm(tFactory, tObjective, tConstraints);
-    tAlgorithm.setLowerBounds(-5);
-    tAlgorithm.setUpperBounds(5);
-    tAlgorithm.solve();
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 20;
+    const size_t tNumConstraints = 1;
+    Plato::AlgorithmInputsALPSO<double> tInputs;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-5);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(5);
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, tNumParticles);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsALPSO<double> tOutputs;
+    Plato::solve_alpso<double>(tObjective, tConstraints, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
-    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestAugLagValue(), tTolerance);
+    EXPECT_NEAR(0, tOutputs.mGlobalBestAugLagFuncValue, tTolerance);
 
-    std::cout << "\nNUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
-    std::cout << "\nOBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestAugLagValue() << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestAugLagValues() << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestAugLagValues() << "\n";
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestAugLagFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestAugLagFuncValue << ", STDDEV = " << tOutputs.mStdDevBestAugLagFuncValue << "\n";
 
-    std::cout << "\nCONSTRAINT #0: BEST = " << tAlgorithm.getCurrentGlobalBestConstraintValue(0) << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestConstraintValues(0) << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestConstraintValues(0) << "\n";
+    std::cout << "\nCONSTRAINT #0: BEST = " << (*tOutputs.mGlobalBestConstraintValues)[0] << ", MEAN = "
+            << (*tOutputs.mMeanBestConstraintValues)[0] << ", STDDEV = " << (*tOutputs.mStdDevBestConstraintValues)[0]
+            << "\n";
 
-    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+    std::cout << tOutputs.mStopCriterion << "\n";
 
     std::vector<double> tGold = { -3.77931, -3.28319 };
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = "
-                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
-                << tAlgorithm.getDataMng().getMeanParticlePositions()[tIndex] << ", STDDEV = "
-                << tAlgorithm.getDataMng().getStdDevParticlePositions()[tIndex] << "\n";
-        EXPECT_NEAR(tGold[tIndex], tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex], tTolerance);
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+        EXPECT_NEAR(tGold[tIndex], (*tOutputs.mGlobalBestParticles)[tIndex], tTolerance);
     }
 }
 
 TEST(PlatoTest, PSO_SolveALPSO_CircleObj_RadiusConstr)
 {
-    // ********* Allocate Core Optimization Data Templates *********
-    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
-    const size_t tNumControls = 2;
-    const size_t tNumParticles = 10;
-    const size_t tNumConstraints = 1;
-    tFactory->allocateObjFuncValues(tNumParticles);
-    tFactory->allocateDual(tNumParticles, tNumConstraints);
-    tFactory->allocateControl(tNumControls, tNumParticles);
-
     // ********* DEFINE CRITERIA *********
     std::shared_ptr<Plato::GradFreeRadius<double>> tMyConstraint = std::make_shared<Plato::GradFreeRadius<double>>();
     std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints =
             std::make_shared<Plato::GradFreeCriteriaList<double>>();
     tConstraints->add(tMyConstraint);
-    std::shared_ptr<Plato::GradFreeCircle<double>> tObjective = std::make_shared<Plato::GradFreeCircle<double>>();
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeCircle<double>>();
 
-    Plato::AugmentedLagrangianPSO<double> tAlgorithm(tFactory, tObjective, tConstraints);
-    tAlgorithm.setLowerBounds(0);
-    tAlgorithm.setUpperBounds(1);
-    tAlgorithm.solve();
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    const size_t tNumConstraints = 1;
+    Plato::AlgorithmInputsALPSO<double> tInputs;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(0);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(1);
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, tNumParticles);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsALPSO<double> tOutputs;
+    Plato::solve_alpso<double>(tObjective, tConstraints, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
-    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestAugLagValue(), tTolerance);
+    EXPECT_NEAR(0, tOutputs.mGlobalBestAugLagFuncValue, tTolerance);
 
-    std::cout << "\nNUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
-    std::cout << "\nOBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestAugLagValue() << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestAugLagValues() << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestAugLagValues() << "\n";
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestAugLagFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestAugLagFuncValue << ", STDDEV = " << tOutputs.mStdDevBestAugLagFuncValue << "\n";
 
-    std::cout << "\nCONSTRAINT #0: BEST = " << tAlgorithm.getCurrentGlobalBestConstraintValue(0) << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestConstraintValues(0) << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestConstraintValues(0) << "\n";
+    std::cout << "\nCONSTRAINT #0: BEST = " << (*tOutputs.mGlobalBestConstraintValues)[0] << ", MEAN = "
+            << (*tOutputs.mMeanBestConstraintValues)[0] << ", STDDEV = " << (*tOutputs.mStdDevBestConstraintValues)[0]
+            << "\n";
 
-    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+    std::cout << tOutputs.mStopCriterion << "\n";
 
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = "
-                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
-                << tAlgorithm.getDataMng().getMeanParticlePositions()[tIndex] << ", STDDEV = "
-                << tAlgorithm.getDataMng().getStdDevParticlePositions()[tIndex] << "\n";
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
     }
 }
 
