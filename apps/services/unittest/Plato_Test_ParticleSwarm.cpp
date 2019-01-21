@@ -1083,8 +1083,6 @@ private:
      **********************************************************************************/
     ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
     {
-        assert(aControl.size() == static_cast<OrdinalType>(0));
-
         ScalarType tFirstTerm = (aControl[0] * aControl[0]) + aControl[1] - static_cast<ScalarType>(11);
         ScalarType tSecondTerm = aControl[0] + (aControl[1] * aControl[1]) - static_cast<ScalarType>(7);
         ScalarType tOutput = tFirstTerm * tFirstTerm + tSecondTerm * tSecondTerm;
