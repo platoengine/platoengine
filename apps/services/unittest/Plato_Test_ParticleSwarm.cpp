@@ -4826,6 +4826,84 @@ TEST(PlatoTest, PSO_SolveBCPSO_GoldsteinPrice)
     }
 }
 
+TEST(PlatoTest, PSO_SolveBCPSO_Himmelblau)
+{
+    // ********* ALLOCATE CRITERION *********
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
+            std::make_shared<Plato::GradFreeHimmelblau<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    Plato::AlgorithmInputsBCPSO<double> tInputs;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-6);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(6);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsBCPSO<double> tOutputs;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
+    const double tTolerance = 1e-3;
+    EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+}
+
+TEST(PlatoTest, PSO_SolveBCPSO_Circle)
+{
+    // ********* ALLOCATE CRITERION *********
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
+            std::make_shared<Plato::GradFreeCircle<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    Plato::AlgorithmInputsBCPSO<double> tInputs;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-6);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(6);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsBCPSO<double> tOutputs;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
+    const double tTolerance = 1e-3;
+    EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+}
+
 TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
 {
     // ********* Allocate Core Optimization Data Templates *********
