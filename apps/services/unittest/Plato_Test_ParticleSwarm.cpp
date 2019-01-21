@@ -2705,6 +2705,7 @@ public:
                                  const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
             mPrintDiagnostics(false),
             mNumIterations(0),
+            mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
             mBestObjFuncTolerance(1e-10),
             mMeanObjFuncTolerance(5e-4),
@@ -2719,6 +2720,7 @@ public:
                                  const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
             mPrintDiagnostics(false),
             mNumIterations(0),
+            mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
             mBestObjFuncTolerance(1e-10),
             mMeanObjFuncTolerance(5e-4),
@@ -2838,6 +2840,11 @@ public:
         return (mNumIterations);
     }
 
+    OrdinalType getNumObjFuncEvals() const
+    {
+        return (mNumObjFuncEvals);
+    }
+
     ScalarType getMeanCurrentBestObjFuncValues() const
     {
         return (mDataMng->getMeanCurrentBestObjFuncValues());
@@ -2856,6 +2863,42 @@ public:
     ScalarType getCurrentGlobalBestObjFuncValue() const
     {
         return (mDataMng->getCurrentGlobalBestObjFuncValue());
+    }
+
+    void getMeanCurrentBestParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
+        const Plato::Vector<ScalarType, OrdinalType> & tMeanParticlePositions = tDataMng.getMeanParticlePositions();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tMeanParticlePositions.create();
+        }
+        assert(aInput->size() == tMeanParticlePositions.size());
+        aInput->update(static_cast<ScalarType>(1), tMeanParticlePositions, static_cast<ScalarType>(0));
+    }
+
+    void getStdDevCurrentBestParticlePositions(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
+        const Plato::Vector<ScalarType, OrdinalType> & tStdDevParticlePositions = tDataMng.getStdDevParticlePositions();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tStdDevParticlePositions.create();
+        }
+        assert(aInput->size() == tStdDevParticlePositions.size());
+        aInput->update(static_cast<ScalarType>(1), tStdDevParticlePositions, static_cast<ScalarType>(0));
+    }
+
+    void getCurrentGlobalBestParticlePosition(std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> & aInput) const
+    {
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = this->getDataMng();
+        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = tDataMng.getGlobalBestParticlePosition();
+        if(aInput.get() == nullptr)
+        {
+            aInput = tGlobalBestParticlePosition.create();
+        }
+        assert(aInput->size() == tGlobalBestParticlePosition.size());
+        aInput->update(static_cast<ScalarType>(1), tGlobalBestParticlePosition, static_cast<ScalarType>(0));
     }
 
     std::string getStoppingCriterion() const
@@ -3056,8 +3099,9 @@ private:
     **********************************************************************************/
     void cacheOutputData()
     {
+        mNumObjFuncEvals = mNumIterations * mDataMng->getNumParticles();
         mOutputData.mNumIter = mNumIterations;
-        mOutputData.mObjFuncCount = mNumIterations * mDataMng->getNumParticles();
+        mOutputData.mObjFuncCount = mNumObjFuncEvals;
         mOutputData.mCurrentGlobalBestObjFuncValue = mDataMng->getCurrentGlobalBestObjFuncValue();
         mOutputData.mMeanCurrentBestObjFuncValues = mDataMng->getMeanCurrentBestObjFuncValues();
         mOutputData.mStdDevCurrentBestObjFuncValues = mDataMng->getStdDevCurrentBestObjFuncValues();
@@ -3069,6 +3113,7 @@ private:
     std::ofstream mOutputStream;
 
     OrdinalType mNumIterations;
+    OrdinalType mNumObjFuncEvals;
     OrdinalType mMaxNumIterations;
 
     ScalarType mBestObjFuncTolerance;
@@ -3714,11 +3759,11 @@ inline void set_alpso_algorithm_outputs(const Plato::AugmentedLagrangianPSO<Scal
 // function set_alpso_algorithm_outputs
 
 /******************************************************************************//**
- * @brief Augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm interface
- * @param [in] aObjective user-defined objective function
- * @param [in] aConstraints user-defined list of constraints
- * @param [in] aInputs Kelley-Sachs Augmented Lagrangian trust region algorithm input structure
- * @param [in,out] aOutputs Kelley-Sachs Augmented Lagrangian trust region algorithm output structure
+ * @brief Augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm light interface
+ * @param [in] aObjective user-defined grad-free objective function
+ * @param [in] aConstraints user-defined list of grad-free constraints
+ * @param [in] aInputs ALPSO algorithm inputs
+ * @param [in,out] aOutputs ALPSO algorithm outputs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void solve_alpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
@@ -3745,6 +3790,183 @@ inline void solve_alpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
     Plato::set_alpso_algorithm_outputs(tAlgorithm, aOutputs);
 }
 // function solve_alpso
+
+/******************************************************************************//**
+ * @brief Inputs from Bound Constrained Particle Swarm Optimization (BCPSO) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmOutputsBCPSO
+{
+    std::string mStopCriterion; /*!< stopping criterion */
+
+    OrdinalType mNumOuterIter; /*!< number of outer iterations */
+    OrdinalType mNumObjFuncEval; /*!< number of objective function evaluations */
+
+    ScalarType mMeanBestObjFuncValue; /*!< objective function mean from best particle set */
+    ScalarType mStdDevBestObjFuncValue; /*!< objective function standard deviation from best particle set */
+    ScalarType mGlobalBestObjFuncValue; /*!< global best objective function value */
+
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mMeanBestParticles; /*!< particle dimension's standard deviation values from best particle set */
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mStdDevBestParticles; /*!< particle dimension's mean values from best particle set */
+    std::shared_ptr<Plato::Vector<ScalarType,OrdinalType>> mGlobalBestParticles; /*!< global best particle dimension's */
+};
+// struct AlgorithmOutputsBCPSO
+
+/******************************************************************************//**
+ * @brief Inputs for Bound Constrained Particle Swarm Optimization (BCPSO) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct AlgorithmInputsBCPSO
+{
+    /******************************************************************************//**
+     * @brief Default constructor
+     **********************************************************************************/
+    AlgorithmInputsBCPSO() :
+            mPrintDiagnostics(false),
+            mMaxNumIterations(1e3),
+            mMaxNumConsecutiveFailures(10),
+            mMaxNumConsecutiveSuccesses(10),
+            mTimeStep(1),
+            mBestObjFuncTolerance(1e-10),
+            mMeanObjFuncTolerance(5e-4),
+            mInertiaMultiplier(0.9),
+            mSocialBehaviorMultiplier(0.8),
+            mCognitiveBehaviorMultiplier(0.8),
+            mTrustRegionExpansionMultiplier(4.0),
+            mTrustRegionContractionMultiplier(0.75),
+            mMemorySpace(Plato::MemorySpace::HOST),
+            mCriteriaEvals(),
+            mParticlesLowerBounds(),
+            mParticlesUpperBounds(),
+            mParticles(),
+            mControlReductions(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
+            mCriteriaReductions(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
+    {
+        mCommWrapper.useDefaultComm();
+    }
+
+    /******************************************************************************//**
+     * @brief Default destructor
+     **********************************************************************************/
+    ~AlgorithmInputsBCPSO()
+    {
+    }
+
+    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+
+    OrdinalType mMaxNumIterations; /*!< maximum number of iterations */
+    OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, global best F(x_{i+1}) == F(x_{i}) */
+    OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, global best F(x_{i+1}) < F(x_{i}) */
+
+    ScalarType mTimeStep; /*!< time step \Delta{t} */
+    ScalarType mBestObjFuncTolerance; /*!< best objective function stopping tolerance */
+    ScalarType mMeanObjFuncTolerance; /*!< mean objective function stopping tolerance */
+    ScalarType mInertiaMultiplier; /*!< inertia multiplier */
+    ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
+    ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
+    ScalarType mTrustRegionExpansionMultiplier; /*!< trust region expansion multiplier */
+    ScalarType mTrustRegionContractionMultiplier; /*!< trust region contraction multiplier */
+
+    Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
+    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaEvals; /*!< criteria evaluations */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mParticlesLowerBounds; /*!< particles' lower bounds */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mParticlesUpperBounds; /*!< particles' upper bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mParticles; /*!< particles */
+
+    /*!< operations which require communication across processors, e.g. max, min, global sum */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mControlReductions;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mCriteriaReductions;
+};
+// struct AlgorithmInputsBCPSO
+
+/******************************************************************************//**
+ * @brief Set Bound Constrained Particle Swarm Optimization (BCPSO) algorithm inputs
+ * @param [in] aInputs inputs for BCPSO algorithm
+ * @param [in,out] aAlgorithm BCPSO algorithm interface
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_bcpso_algorithm_inputs(const Plato::AlgorithmInputsBCPSO<ScalarType,OrdinalType> & aInputs,
+                                       Plato::BoundConstrainedPSO<ScalarType,OrdinalType> & aAlgorithm)
+{
+    if(aInputs.mPrintDiagnostics == true)
+    {
+        aAlgorithm.enableDiagnostics();
+    }
+
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumIterations);
+    aAlgorithm.setMaxNumConsecutiveFailures(aInputs.mMaxNumConsecutiveFailures);
+    aAlgorithm.setMaxNumConsecutiveSuccesses(aInputs.mMaxNumConsecutiveSuccesses);
+
+    aAlgorithm.setTimeStep(aInputs.mTimeStep);
+    aAlgorithm.setLowerBounds(*aInputs.mParticlesLowerBounds);
+    aAlgorithm.setUpperBounds(*aInputs.mParticlesUpperBounds);
+    aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
+    aAlgorithm.setMeanObjFuncTolerance(aInputs.mMeanObjFuncTolerance);
+    aAlgorithm.setBestObjFuncTolerance(aInputs.mBestObjFuncTolerance);
+    aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
+    aAlgorithm.setCognitiveBehaviorMultiplier(aInputs.mCognitiveBehaviorMultiplier);
+    aAlgorithm.setTrustRegionExpansionMultiplier(aInputs.mTrustRegionExpansionMultiplier);
+    aAlgorithm.setTrustRegionContractionMultiplier(aInputs.mTrustRegionContractionMultiplier);
+}
+// function set_bcpso_algorithm_inputs
+
+/******************************************************************************//**
+ * @brief Set Bound Constrained Particle Swarm Optimization (BCPSO) algorithm outputs
+ * @param [in] aAlgorithm BCPSO algorithm interface
+ * @param [in,out] aOutputs outputs from BCPSO algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_bcpso_algorithm_outputs(const Plato::BoundConstrainedPSO<ScalarType, OrdinalType> & aAlgorithm,
+                                        Plato::AlgorithmOutputsBCPSO<ScalarType, OrdinalType> & aOutputs)
+{
+    aOutputs.mStopCriterion = aAlgorithm.getStoppingCriterion();
+
+    aOutputs.mNumOuterIter = aAlgorithm.getNumIterations();
+    aOutputs.mNumObjFuncEval = aAlgorithm.getNumObjFuncEvals();
+
+    // AUGMENTED LAGRANGIAN FUNCTION DIAGNOSTICS
+    aOutputs.mMeanBestObjFuncValue = aAlgorithm.getMeanCurrentBestObjFuncValues();
+    aOutputs.mGlobalBestObjFuncValue = aAlgorithm.getCurrentGlobalBestObjFuncValue();
+    aOutputs.mStdDevBestObjFuncValue = aAlgorithm.getStdDevCurrentBestObjFuncValues();
+
+    // PARTILCES DIAGNOSTICS
+    aAlgorithm.getMeanCurrentBestParticlePositions(aOutputs.mMeanBestParticles);
+    aAlgorithm.getStdDevCurrentBestParticlePositions(aOutputs.mStdDevBestParticles);
+    aAlgorithm.getCurrentGlobalBestParticlePosition(aOutputs.mGlobalBestParticles);
+}
+// function set_bcpso_algorithm_outputs
+
+/******************************************************************************//**
+ * @brief Bound Constrained Particle Swarm Optimization (BCPSO) algorithm light interface
+ * @param [in] aObjective user-defined grad-free objective function
+ * @param [in] aInputs BCPSO algorithm inputs
+ * @param [in,out] aOutputs BCPSO algorithm outputs
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void solve_bcpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
+                        const Plato::AlgorithmInputsBCPSO<ScalarType, OrdinalType> & aInputs,
+                        Plato::AlgorithmOutputsBCPSO<ScalarType, OrdinalType> & aOutputs)
+{
+    // ********* ALLOCATE DATA FACTORY *********
+    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tFactory;
+    tFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>(aInputs.mMemorySpace);
+    tFactory->setCommWrapper(aInputs.mCommWrapper);
+    tFactory->allocateControl(*aInputs.mParticles);
+    tFactory->allocateObjFuncValues(*aInputs.mCriteriaEvals);
+    tFactory->allocateControlReductionOperations(*aInputs.mControlReductions);
+    tFactory->allocateObjFuncReductionOperations(*aInputs.mCriteriaReductions);
+
+    // ********* ALLOCATE AUGMENTED LAGRANGIAN ALGORITHM *********
+    Plato::BoundConstrainedPSO<ScalarType, OrdinalType> tAlgorithm(tFactory, aObjective);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
+    Plato::set_bcpso_algorithm_inputs(aInputs, tAlgorithm);
+    tAlgorithm.solve();
+    Plato::set_bcpso_algorithm_outputs(tAlgorithm, aOutputs);
+}
+// function solve_bcpso
 
 }// namespace Plato
 
@@ -4409,35 +4631,39 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
 
 TEST(PlatoTest, PSO_SolveBCPSO)
 {
-    // ********* Allocate Core Optimization Data Templates *********
-    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    // ********* ALLOCATE CRITERION *********
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
     const size_t tNumControls = 2;
     const size_t tNumParticles = 10;
-    tFactory->allocateObjFuncValues(tNumParticles);
-    tFactory->allocateControl(tNumControls, tNumParticles);
+    Plato::AlgorithmInputsBCPSO<double> tInputs;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-5);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(5);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
-    // TEST ALGORITHM
-    std::shared_ptr<Plato::GradFreeRosenbrock<double>> tObjective = std::make_shared<Plato::GradFreeRosenbrock<double>>();
-    Plato::BoundConstrainedPSO<double> tAlgorithm(tFactory, tObjective);
-    tAlgorithm.setLowerBounds(-5);
-    tAlgorithm.setUpperBounds(5);
-    tAlgorithm.solve();
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::AlgorithmOutputsBCPSO<double> tOutputs;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
 
+    // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
-    EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestObjFuncValue(), tTolerance);
+    EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
 
-    std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
-    std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
-            << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
-            << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
-    std::cout << tAlgorithm.getStoppingCriterion() << "\n";
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
 
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = "
-                << tAlgorithm.getDataMng().getGlobalBestParticlePosition()[tIndex] << ", MEAN = "
-                << tAlgorithm.getDataMng().getMeanParticlePositions()[tIndex] << ", STDDEV = "
-                << tAlgorithm.getDataMng().getStdDevParticlePositions()[tIndex] << "\n";
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
     }
 }
 
@@ -4508,7 +4734,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     PlatoTest::checkVectorData(tTargetThrustProfile, tBestThrustProfileSolution);
 }
 
-TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr_LI)
+TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
 {
     // ********* DEFINE CRITERIA *********
     const double tBound = 2;
