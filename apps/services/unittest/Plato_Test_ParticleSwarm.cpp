@@ -235,6 +235,7 @@ inline void is_file_open(const Type & aOutputFile)
         throw tError;
     }
 }
+// function is_file_open
 
 /******************************************************************************//**
  * @brief Check if the input vector is empty. If empty, thrown exception.
@@ -255,9 +256,10 @@ inline void is_vector_empty(const std::vector<ScalarType>& aInput)
         throw tError;
     }
 }
+// function is_vector_empty
 
 /******************************************************************************//**
- * @brief Output a brief sentence explaining why the optimizer stopped.
+ * @brief Output a brief description of the stopping criterion.
  * @param [in] aStopCriterion stopping criterion flag
  * @param [in,out] aOutput string with brief description
  **********************************************************************************/
@@ -293,6 +295,7 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
         }
     }
 }
+// function print_bcpso_diagnostics_header
 
 /******************************************************************************//**
  * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
@@ -300,9 +303,9 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void print_pso_diagnostics_header(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
-                                         std::ofstream& aOutputFile,
-                                         bool aPrint = false)
+inline void print_bcpso_diagnostics_header(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
+                                           std::ofstream& aOutputFile,
+                                           bool aPrint = false)
 {
     try
     {
@@ -326,6 +329,7 @@ inline void print_pso_diagnostics_header(const Plato::OutputDataPSO<ScalarType, 
             << std::setw(15) << "Best(F)" << std::setw(15) << "Mean(F)" << std::setw(15) << "StdDev(F)" << std::setw(15)
             << "TR-Radius" << "\n" << std::flush;
 }
+// function print_bcpso_diagnostics_header
 
 /******************************************************************************//**
  * @brief Print diagnostics for bound constrained Particle Swarm Optimization (PSO) algorithm.
@@ -334,9 +338,9 @@ inline void print_pso_diagnostics_header(const Plato::OutputDataPSO<ScalarType, 
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void print_pso_diagnostics(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
-                                  std::ofstream& aOutputFile,
-                                  bool aPrint = false)
+inline void print_bcpso_diagnostics(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
+                                    std::ofstream& aOutputFile,
+                                    bool aPrint = false)
 {
     try
     {
@@ -360,7 +364,14 @@ inline void print_pso_diagnostics(const Plato::OutputDataPSO<ScalarType, Ordinal
             << aData.mMeanCurrentBestObjFuncValues << std::setw(15) << aData.mStdDevCurrentBestObjFuncValues << std::setw(15)
             << aData.mTrustRegionMultiplier << "\n" << std::flush;
 }
+// function print_bcpso_diagnostics
 
+/******************************************************************************//**
+ * @brief Print outer constraint headers in augmented Lagrangian Particle Swarm
+ *        Optimization (ALPSO) algorithm's diagnostic file.
+ * @param [in] aData diagnostic data for ALPSO algorithm
+ * @param [in,out] aOutputFile output/diagnostics file
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_constraint_headers(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
                                            std::ofstream& aOutputFile)
@@ -378,6 +389,7 @@ inline void print_alpso_constraint_headers(const Plato::OutputDataALPSO<ScalarTy
                 << "StdDev(l" << tConstraintIndex << ")";
     }
 }
+// function print_alpso_constraint_headers
 
 /******************************************************************************//**
  * @brief Print header in augmented Lagrangian Particle Swarm Optimization (ALPSO)
@@ -422,7 +434,14 @@ inline void print_alpso_diagnostics_header(const Plato::OutputDataALPSO<ScalarTy
     Plato::pso::print_alpso_constraint_headers(aData, aOutputFile);
     aOutputFile << "\n" << std::flush;
 }
+// function print_alpso_diagnostics_header
 
+/******************************************************************************//**
+ * @brief Print outer constraint diagnostics in augmented Lagrangian Particle Swarm
+ *        Optimization (ALPSO) algorithm
+ * @param [in] aData diagnostic data for ALPSO algorithm
+ * @param [in,out] aOutputFile output/diagnostics file
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_outer_constraint_diagnostics(const Plato::OutputDataALPSO<ScalarType, OrdinalType>& aData,
                                                      std::ofstream& aOutputFile)
@@ -436,6 +455,7 @@ inline void print_alpso_outer_constraint_diagnostics(const Plato::OutputDataALPS
                 << std::setw(15) << aData.mStdDevCurrentLagrangeMultipliers[tIndex];
     }
 }
+// function print_alpso_outer_constraint_diagnostics
 
 /******************************************************************************//**
  * @brief Print diagnostics for augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm.
@@ -481,7 +501,14 @@ inline void print_alpso_outer_diagnostics(const Plato::OutputDataALPSO<ScalarTyp
     Plato::pso::print_alpso_outer_constraint_diagnostics(aData, aOutputFile);
     aOutputFile << "\n" << std::flush;
 }
+// function print_alpso_outer_diagnostics
 
+/******************************************************************************//**
+ * @brief Print outer constraint diagnostics in augmented Lagrangian Particle Swarm
+ *        Optimization (ALPSO) algorithm
+ * @param [in] aData diagnostic data for ALPSO algorithm
+ * @param [in,out] aOutputFile output/diagnostics file
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_inner_constraint_diagnostics(const Plato::OutputDataPSO<ScalarType, OrdinalType>& aData,
                                                      std::ofstream& aOutputFile)
@@ -493,9 +520,11 @@ inline void print_alpso_inner_constraint_diagnostics(const Plato::OutputDataPSO<
                 << std::setw(15) << "*" << std::setw(15) << "*" << std::setw(15) << "*";
     }
 }
+// function print_alpso_inner_constraint_diagnostics
 
 /******************************************************************************//**
- * @brief Print inner-loop diagnostics for for augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm.
+ * @brief Print inner-loop diagnostics for the augmented Lagrangian Particle Swarm
+ *        Optimization (ALPSO) algorithm.
  * @param [in] aData diagnostics data for bound constrained PSO algorithm
  * @param [in,out] aOutputFile output/diagnostics file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
@@ -530,9 +559,15 @@ inline void print_alpso_inner_diagnostics(const Plato::OutputDataPSO<ScalarType,
     Plato::pso::print_alpso_inner_constraint_diagnostics(aData, aOutputFile);
     aOutputFile << "\n" << std::flush;
 }
+// function print_alpso_inner_diagnostics
 
 } // namespace pso
 
+/******************************************************************************//**
+ * @brief Compute mean of the elements in the input vector
+ * @param [in] aReductions common parallel programming operations (e.g. reductions)
+ * @param [in] aInput input container
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions,
                        const Plato::Vector<ScalarType, OrdinalType> & aInput)
@@ -547,7 +582,14 @@ inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType>
     tOutput = tOutput / tGlobalNumElements;
     return (tOutput);
 }
+// function mean
 
+/******************************************************************************//**
+ * @brief Compute standard deviation of the elements in the input vector
+ * @param [in] aMean mean of the elements in the input vector
+ * @param [in] aInput input container
+ * @param [in] aReductions common parallel programming operations (e.g. reductions)
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline ScalarType standard_deviation(const ScalarType & aMean,
                                      const Plato::Vector<ScalarType, OrdinalType> & aInput,
@@ -572,23 +614,11 @@ inline ScalarType standard_deviation(const ScalarType & aMean,
 
     return (tOutput);
 }
+// function standard_deviation
 
-template<typename ScalarType, typename OrdinalType>
-void find_best_criterion_values(const Plato::Vector<ScalarType, OrdinalType> & aCurrentValues,
-                                Plato::Vector<ScalarType, OrdinalType> & aCurrentBestValues)
-{
-    assert(aCurrentValues.size() == aCurrentBestValues.size());
-
-    const OrdinalType tNumParticles = aCurrentValues.size();
-    for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
-    {
-        if(aCurrentValues[tIndex] < aCurrentBestValues[tIndex])
-        {
-            aCurrentBestValues[tIndex] = aCurrentValues[tIndex];
-        }
-    }
-}
-
+/******************************************************************************//**
+ * @brief Interface for gradient free criteria
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeCriterion
 {
@@ -607,10 +637,19 @@ public:
 };
 // class GradFreeCriterion
 
+/******************************************************************************//**
+ * @brief Interface for gradient free algebraic rocket criterion
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRocketObjFunc : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aUpperBounds optimization vairbales' upper bounds
+     * @param [in] aRocketInputs algebraic rocket model's input data structure
+     * @param [in] aChamberGeom geometry interface
+    **********************************************************************************/
     GradFreeRocketObjFunc(const Plato::Vector<ScalarType, OrdinalType>& aUpperBounds,
                           const Plato::AlgebraicRocketInputs<ScalarType>& aRocketInputs,
                           const std::shared_ptr<Plato::GeometryModel<ScalarType>>& aChamberGeom) :
@@ -623,15 +662,26 @@ public:
         this->initialize(aUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Desturtor
+    **********************************************************************************/
     virtual ~GradFreeRocketObjFunc()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Returns the norm of the target thrust profile
+     * @return norm of the target thrust profile
+    **********************************************************************************/
     ScalarType getNormTargetThrustProfile() const
     {
         return (mNormTargetThrustProfile);
     }
 
+    /******************************************************************************//**
+     * @brief Returns the normalization constants used to normalized the optimization variables
+     * @return normalization constants
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getNormalizationConstants() const
     {
         return (*mNormalizationConstants);
@@ -645,6 +695,10 @@ public:
         mAlgebraicRocketModel.disableOutput();
     }
 
+    /******************************************************************************//**
+     * @brief Set target thrust profile
+     * @param [in] aInput target thrust profile
+    **********************************************************************************/
     void setTargetThrustProfile(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         if(mTargetThrustProfile.get() == nullptr)
@@ -658,6 +712,11 @@ public:
         mTargetThrustProfileSet = true;
     }
 
+    /******************************************************************************//**
+     * @brief Evaluates criterion at all particle positions
+     * @param [in] aControls particle positions
+     * @param [in] aOutput criterion values
+    **********************************************************************************/
     void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControls,
                Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
@@ -684,6 +743,11 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Solve quasi-static algebraic rocket simulation and evaluates criterion
+     * @param [in] aControls particle positions
+     * @param [in] aOutput criterion values
+    **********************************************************************************/
     void solve(const Plato::Vector<ScalarType, OrdinalType> & aControls,
                Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
@@ -698,6 +762,10 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize class members (i.e. native data structure)
+     * @param [in] aUpperBounds particles' upper bounds
+    **********************************************************************************/
     void initialize(const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds)
     {
         assert(aUpperBounds.size() > static_cast<OrdinalType>(0));
@@ -708,6 +776,10 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Updates geometry model and material properties
+     * @param [in] aControls particle positions
+    **********************************************************************************/
     void update(const Plato::Vector<ScalarType, OrdinalType> & aControls)
     {
         std::map<std::string, ScalarType> tChamberGeomParam;
@@ -722,6 +794,9 @@ private:
         mAlgebraicRocketModel.updateSimulation(tSimParam);
     }
 
+    /******************************************************************************//**
+     * @brief Checks that target profile has been initialized
+    **********************************************************************************/
     void isTargetThrustProfileSet()
     {
         try
@@ -737,6 +812,10 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Evaluates algebraic rocket criterion
+     * @param [in] aControls particle positions
+    **********************************************************************************/
     ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControls)
     {
         this->update(aControls);
@@ -758,13 +837,17 @@ private:
     }
 
 private:
-    bool mTargetThrustProfileSet;
-    ScalarType mNormTargetThrustProfile;
-    Plato::AlgebraicRocketModel<ScalarType> mAlgebraicRocketModel;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTargetThrustProfile;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mNormalizationConstants;
+    bool mTargetThrustProfileSet; /*!< flag : true or false */
+    ScalarType mNormTargetThrustProfile; /*!< norm of target thrust profile */
+    Plato::AlgebraicRocketModel<ScalarType> mAlgebraicRocketModel; /*!< algebraic rocket simulator */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTargetThrustProfile; /*!< target thrust profile */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mNormalizationConstants; /*!< normalization constants for optimization variables */
+
+private:
+    GradFreeRocketObjFunc(const Plato::GradFreeRocketObjFunc<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeRocketObjFunc<ScalarType, OrdinalType> & operator=(const Plato::GradFreeRocketObjFunc<ScalarType, OrdinalType> & aRhs);
 };
-// class GradFreeAlgebraicRocketObjFunc
+// class GradFreeRocketObjFunc
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRosenbrock : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
@@ -3095,7 +3178,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_pso_algorithm_diagnostics.txt");
-                Plato::pso::print_pso_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
             }
         }
     }
@@ -3146,7 +3229,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_pso_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
         }
     }
 
@@ -4302,10 +4385,10 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
 {
     std::ofstream tFile1;
     Plato::OutputDataPSO<double> tData;
-    ASSERT_THROW(Plato::pso::print_pso_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_pso_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_pso_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_pso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
 }
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
@@ -4324,8 +4407,8 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
         tData.mMeanCurrentBestObjFuncValues = 8.2321;
         tData.mStdDevCurrentBestObjFuncValues = 2.2321;
         tData.mTrustRegionMultiplier = 1.0;
-        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics_header(tData, tWriteFile));
-        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_bcpso_diagnostics(tData, tWriteFile));
 
         tData.mNumIter = 2;
         tData.mObjFuncCount = 40;
@@ -4333,7 +4416,7 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
         tData.mMeanCurrentBestObjFuncValues = 7.2321;
         tData.mStdDevCurrentBestObjFuncValues = 2.4321;
         tData.mTrustRegionMultiplier = 1.0;
-        ASSERT_NO_THROW(Plato::pso::print_pso_diagnostics(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::pso::print_bcpso_diagnostics(tData, tWriteFile));
         tWriteFile.close();
 
         std::ifstream tReadFile;
@@ -4545,36 +4628,6 @@ TEST(PlatoTest, PSO_computeBestObjFunStatistics)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(0.00010692, tDataMng.getMeanCurrentBestObjFuncValues(), tTolerance);
     EXPECT_NEAR(0.000354175, tDataMng.getStdDevCurrentBestObjFuncValues(), tTolerance);
-}
-
-TEST(PlatoTest, PSO_find_best_criterion_values)
-{
-    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 };
-    Plato::StandardVector<double> tCurrentObjFuncValues(tData);
-
-    tData = { 0.000423009, 0.0008654, 0.00174032, 0.000871822, 0.000426448 };
-    Plato::StandardVector<double> tCurrentBestObjFuncValues(tData);
-
-    // TEST 1: FOUND TWO NEW BEST VALUES
-    Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
-
-    const double tTolerance = 1e-6;
-    EXPECT_NEAR(0.000423009, tCurrentBestObjFuncValues[0], tTolerance);
-    EXPECT_NEAR(0.0008654, tCurrentBestObjFuncValues[1], tTolerance);
-    EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
-    EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
-    EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
-
-    // TEST 2: FOUND NO NEW BEST VALUES - CURRENT BEST VALUES ARE NOT UNCHANGED
-    tCurrentObjFuncValues[2] = 4.9283e-05;
-    tCurrentObjFuncValues[4] = 0.000430515;
-    Plato::find_best_criterion_values(tCurrentObjFuncValues, tCurrentBestObjFuncValues);
-
-    EXPECT_NEAR(0.000423009, tCurrentBestObjFuncValues[0], tTolerance);
-    EXPECT_NEAR(0.0008654, tCurrentBestObjFuncValues[1], tTolerance);
-    EXPECT_NEAR(3.9283e-05, tCurrentBestObjFuncValues[2], tTolerance);
-    EXPECT_NEAR(0.000871822, tCurrentBestObjFuncValues[3], tTolerance);
-    EXPECT_NEAR(0.000420515, tCurrentBestObjFuncValues[4], tTolerance);
 }
 
 TEST(PlatoTest, PSO_findBestParticlePositions_BoundConstrainedStageMng)
