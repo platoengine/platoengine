@@ -3404,22 +3404,22 @@ private:
     }
 
 private:
-    std::default_random_engine mGenerator;
+    std::default_random_engine mGenerator; /*!< random number generator */
 
-    OrdinalType mNumConsecutiveFailures;
-    OrdinalType mNumConsecutiveSuccesses;
-    OrdinalType mMaxNumConsecutiveFailures;
-    OrdinalType mMaxNumConsecutiveSuccesses;
+    OrdinalType mNumConsecutiveFailures; /*!< number of consecutive failures, \f$ F(x_i) = F(x_{i-1}) \f$ */
+    OrdinalType mNumConsecutiveSuccesses; /*!< number of consecutive successes, \f$ F(x_i) < F(x_{i-1}) \f$ */
+    OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, \f$ F(x_i) = F(x_{i-1}) \f$ */
+    OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, \f$ F(x_i) < F(x_{i-1}) \f$ */
 
-    ScalarType mInertiaMultiplier;
-    ScalarType mSocialBehaviorMultiplier;
-    ScalarType mCognitiveBehaviorMultiplier;
+    ScalarType mInertiaMultiplier; /*!< inertia multiplier */
+    ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
+    ScalarType mCognitiveBehaviorMultiplier; /*!< cognitive behavior multiplier */
 
-    ScalarType mTrustRegionMultiplier;
-    ScalarType mTrustRegionExpansionMultiplier;
-    ScalarType mTrustRegionContractionMultiplier;
+    ScalarType mTrustRegionMultiplier; /*!< trust region multiplier */
+    ScalarType mTrustRegionExpansionMultiplier; /*!< trust region expansion multiplier */
+    ScalarType mTrustRegionContractionMultiplier; /*!< trust region contraction multiplier */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector; /*!< controls/particles work vector */
 
 private:
     ParticleSwarmOperations(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
