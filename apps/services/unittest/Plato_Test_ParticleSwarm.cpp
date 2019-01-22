@@ -2842,6 +2842,7 @@ private:
 
     /******************************************************************************//**
      * @brief Update best particle positions and criteria values
+     * @param [in,out] aDataMng PSO algorithm data manager
     ***********************************************************************************/
     void updateBestParticlesData(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -2853,6 +2854,7 @@ private:
             const bool tFeasibilityImproved =
                     (*mCurrentFeasibilityMeasure)[tParticleIndex] < (*mPreviousFeasibilityMeasure)[tParticleIndex];
             if(tAugLagFuncReduced == true && tFeasibilityImproved == true)
+            //if(tAugLagFuncReduced == true)
             {
                 const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(tParticleIndex);
                 aDataMng.setBestParticlePosition(tParticleIndex, tCurrentParticle);
@@ -2863,6 +2865,8 @@ private:
 
     /******************************************************************************//**
      * @brief Update best particle objective and constraint value containers
+     * @param [in] aParticleIndex particle index
+     * @param [in] aDataMng PSO algorithm data manager
     ***********************************************************************************/
     void updateBestCriteriaValues(const OrdinalType & aParticleIndex,
                                   Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
@@ -5938,6 +5942,7 @@ TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
     const size_t tNumParticles = 20;
     const size_t tNumConstraints = 1;
     Plato::AlgorithmInputsALPSO<double> tInputs;
+    tInputs.mPenaltyMultiplierUpperBound = 1e3;
     tInputs.mMeanAugLagFuncTolerance = 1e-6;
     tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
     tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
