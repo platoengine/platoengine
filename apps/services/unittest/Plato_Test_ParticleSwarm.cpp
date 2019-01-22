@@ -2148,22 +2148,31 @@ public:
 
     /******************************************************************************//**
      * @brief Evaluate objective function
-     * @param [in] aDataMng PSO data manager
+     * @param [in,out] aDataMng PSO data manager
     **********************************************************************************/
     virtual void evaluateObjective(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 
     /******************************************************************************//**
-     * @brief Find current best particle postions
-     * @param [in] aDataMng PSO data manager
+     * @brief Find current best particle positions
+     * @param [in,out] aDataMng PSO data manager
     **********************************************************************************/
     virtual void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 };
 // class ParticleSwarmStageMng
 
+/******************************************************************************//**
+ * @brief Bound Constrained Particle Swarm Optimization (BCPSO) algorithm stage
+ *        managers. The BCPSO stage manages calls to criteria (e.g. objective functions).
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class BoundConstrainedStageMngPSO : public Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aFactory data factory
+     * @param [in] aObjective gradient free objective function interface
+    **********************************************************************************/
     explicit BoundConstrainedStageMngPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                          const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
             mCurrentObjFuncValues(aFactory->objective().create()),
@@ -2171,17 +2180,29 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~BoundConstrainedStageMngPSO()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+     * @param [in,out] aDataMng PSO data manager
+    **********************************************************************************/
     void evaluateObjective(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
+        mCurrentObjFuncValues->fill(static_cast<ScalarType>(0));
         const Plato::MultiVector<ScalarType, OrdinalType> & tParticles = aDataMng.getCurrentParticles();
         mObjective->value(tParticles, *mCurrentObjFuncValues);
         aDataMng.setCurrentObjFuncValues(*mCurrentObjFuncValues);
     }
 
+    /******************************************************************************//**
+     * @brief Find current best particle positions
+     * @param [in,out] aDataMng PSO data manager
+    **********************************************************************************/
     void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         aDataMng.cacheGlobalBestObjFunValue();
@@ -2190,8 +2211,8 @@ public:
     }
 
 private:
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
-    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues; /*!< current objective function values */
+    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective; /*!< grad-free objective function interface */
 
 private:
     BoundConstrainedStageMngPSO(const Plato::BoundConstrainedStageMngPSO<ScalarType, OrdinalType>&);
@@ -2199,10 +2220,21 @@ private:
 };
 // class BoundConstrainedStageMngPSO
 
+/******************************************************************************//**
+ * @brief Augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm stage
+ *        managers. The ALPSO stage coordinates calls to grad-free criteria (e.g.
+ *        objective functions).
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class AugmentedLagrangianStageMngPSO : public Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aFactory data factory
+     * @param [in] aObjective gradient free objective function interface
+     * @param [in] aConstraints list of gradient free constraint interfaces
+    **********************************************************************************/
     explicit AugmentedLagrangianStageMngPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                             const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
                                             const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
@@ -2223,9 +2255,9 @@ public:
             mPreviousBestObjFuncValues(aFactory->objective().create()),
             mCurrentAugLagFuncValues(aFactory->objective().create()),
             mCurrentBestAugLagFuncValues(aFactory->objective().create()),
-            mMeanBestConstraintValues(),
-            mStdDevBestConstraintValues(),
-            mCurrentGlobalBestConstraintValues(),
+            mMeanBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mStdDevBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mCurrentGlobalBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
             mCurrentConstraintValues(aFactory->dual().create()),
             mCurrentPenaltyMultipliers(aFactory->dual().create()),
             mCurrentLagrangeMultipliers(aFactory->dual().create()),
@@ -2238,193 +2270,199 @@ public:
         this->initialize();
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~AugmentedLagrangianStageMngPSO()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Set expansion multiplier for penalty multipliers
+     * @param [in] aInput expansion multiplier
+    **********************************************************************************/
     void setPenaltyExpansionMultiplier(const ScalarType & aInput)
     {
         mPenaltyExpansionMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set contraction multiplier for penalty multipliers
+     * @param [in] aInput contraction multiplier
+    **********************************************************************************/
     void setPenaltyContractionMultiplier(const ScalarType & aInput)
     {
         mPenaltyContractionMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set upper bound on penalty multipliers
+     * @param [in] aInput upper bound
+    **********************************************************************************/
     void setPenaltyMultiplierUpperBound(const ScalarType & aInput)
     {
         mPenaltyMultiplierUpperBound = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set feasibility inexactness tolerance
+     * @param [in] aInput tolerance
+    **********************************************************************************/
     void setFeasibilityInexactnessTolerance(const ScalarType & aInput)
     {
         mFeasibilityInexactnessTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Return number of constraints
+     * @return number of constraints
+    **********************************************************************************/
     OrdinalType getNumConstraints() const
     {
         return (mConstraints->size());
     }
 
+    /******************************************************************************//**
+     * @brief Return number of augmented Lagrangian function evaluations
+     * @return number of function evaluations
+    **********************************************************************************/
     OrdinalType getNumAugLagFuncEvaluations() const
     {
         return (mNumAugLagFuncEval);
     }
 
+    /******************************************************************************//**
+     * @brief Return mean of current best objective function values
+     * @return mean value
+    **********************************************************************************/
     ScalarType getMeanCurrentBestObjFuncValues() const
     {
         return (mMeanCurrentBestObjFuncValue);
     }
 
+    /******************************************************************************//**
+     * @brief Return standard deviation of current best objective function values
+     * @return standard deviation value
+    **********************************************************************************/
     ScalarType getStdDevCurrentBestObjFuncValues() const
     {
         return (mStdDevCurrentBestObjFuncValue);
     }
 
+    /******************************************************************************//**
+     * @brief Return current global best objective function value
+     * @return global best objective function value
+    **********************************************************************************/
     ScalarType getCurrentGlobalBestObjFuncValue() const
     {
         return (mCurrentGlobalBestObjFuncValue);
     }
 
-    ScalarType getMeanCurrentPenaltyMultipliers(const OrdinalType & aInput) const
-    {
-        assert(aInput < mMeanCurrentPenaltyMultipliers->size());
-        return ((*mMeanCurrentPenaltyMultipliers)[aInput]);
-    }
-
-    ScalarType getStdDevCurrentPenaltyMultipliers(const OrdinalType & aInput) const
-    {
-        assert(aInput < mStdDevCurrentPenaltyMultipliers->size());
-        return ((*mStdDevCurrentPenaltyMultipliers)[aInput]);
-    }
-
-    ScalarType getMeanCurrentLagrangeMultipliers(const OrdinalType & aInput) const
-    {
-        assert(aInput < mMeanCurrentLagrangeMultipliers->size());
-        return ((*mMeanCurrentLagrangeMultipliers)[aInput]);
-    }
-
-    ScalarType getStdDevCurrentLagrangeMultipliers(const OrdinalType & aInput) const
-    {
-        assert(aInput < mStdDevCurrentLagrangeMultipliers->size());
-        return ((*mStdDevCurrentLagrangeMultipliers)[aInput]);
-    }
-
-    ScalarType getMeanCurrentBestConstraintValues(const OrdinalType & aInput) const
-    {
-        assert(aInput < mMeanBestConstraintValues->size());
-        return ((*mMeanBestConstraintValues)[aInput]);
-    }
-
-    const Plato::Vector<ScalarType, OrdinalType> & getMeanCurrentBestConstraintValues() const
-    {
-        assert(mMeanBestConstraintValues.get() != nullptr);
-        return(*mMeanBestConstraintValues);
-    }
-
-    ScalarType getStdDevCurrentBestConstraintValues(const OrdinalType & aInput) const
-    {
-        assert(aInput < mStdDevBestConstraintValues->size());
-        return ((*mStdDevBestConstraintValues)[aInput]);
-    }
-
-    const Plato::Vector<ScalarType, OrdinalType> & getStdDevCurrentBestConstraintValues() const
-    {
-        assert(mStdDevBestConstraintValues.get() != nullptr);
-        return(*mStdDevBestConstraintValues);
-    }
-
-    ScalarType getCurrentGlobalBestConstraintValue(const OrdinalType & aInput) const
-    {
-        assert(aInput < mCurrentGlobalBestConstraintValues->size());
-        return ((*mCurrentGlobalBestConstraintValues)[aInput]);
-    }
-
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentGlobalBestConstraintValues() const
-    {
-        assert(mCurrentGlobalBestConstraintValues.get() != nullptr);
-        return(*mCurrentGlobalBestConstraintValues);
-    }
-
+    /******************************************************************************//**
+     * @brief Return current objective function value
+     * @param [in] aIndex particle index
+    **********************************************************************************/
     ScalarType getCurrentObjFuncValue(const OrdinalType & aIndex) const
     {
         assert(mCurrentObjFuncValues.get() != nullptr);
         return((*mCurrentObjFuncValues)[aIndex]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentObjFuncValues() const
-    {
-        assert(mCurrentObjFuncValues.get() != nullptr);
-        return(*mCurrentObjFuncValues);
-    }
-
-    ScalarType getPreviousBestObjFuncValue(const OrdinalType & aIndex) const
-    {
-        assert(mPreviousBestObjFuncValues.get() != nullptr);
-        return((*mPreviousBestObjFuncValues)[aIndex]);
-    }
-
-    const Plato::Vector<ScalarType, OrdinalType> & getPreviousBestObjFuncValues() const
-    {
-        assert(mPreviousBestObjFuncValues.get() != nullptr);
-        return(*mPreviousBestObjFuncValues);
-    }
-
+    /******************************************************************************//**
+     * @brief Return current best objective function value
+     * @param [in] aIndex particle index
+    **********************************************************************************/
     ScalarType getCurrentBestObjFuncValue(const OrdinalType & aIndex) const
     {
         assert(mCurrentBestObjFuncValues.get() != nullptr);
         return((*mCurrentBestObjFuncValues)[aIndex]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentBestObjFuncValues() const
+    /******************************************************************************//**
+     * @brief Return previous best objective function value
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getPreviousBestObjFuncValue(const OrdinalType & aIndex) const
     {
-        assert(mCurrentBestObjFuncValues.get() != nullptr);
-        return(*mCurrentBestObjFuncValues);
+        assert(mPreviousBestObjFuncValues.get() != nullptr);
+        return((*mPreviousBestObjFuncValues)[aIndex]);
     }
 
-    ScalarType getCurrentConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    /******************************************************************************//**
+     * @brief Return mean of current penalty multipliers
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getMeanCurrentPenaltyMultipliers(const OrdinalType & aInput) const
     {
-        assert(mCurrentConstraintValues.get() != nullptr);
-        assert(aConstraintIndex < mCurrentConstraintValues->getNumVectors());
-        return((*mCurrentConstraintValues)(aConstraintIndex, aParticleIndex));
+        assert(aInput < mMeanCurrentPenaltyMultipliers->size());
+        return ((*mMeanCurrentPenaltyMultipliers)[aInput]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValues(const OrdinalType & aIndex) const
+    /******************************************************************************//**
+     * @brief Return standard deviation of current penalty multipliers
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getStdDevCurrentPenaltyMultipliers(const OrdinalType & aInput) const
     {
-        assert(mCurrentConstraintValues.get() != nullptr);
-        assert(aIndex < mCurrentConstraintValues->getNumVectors());
-        return((*mCurrentConstraintValues)[aIndex]);
+        assert(aInput < mStdDevCurrentPenaltyMultipliers->size());
+        return ((*mStdDevCurrentPenaltyMultipliers)[aInput]);
     }
 
-    ScalarType getCurrentBestConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    /******************************************************************************//**
+     * @brief Return mean of current Lagrange multipliers
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getMeanCurrentLagrangeMultipliers(const OrdinalType & aInput) const
     {
-        assert(mCurrentBestConstraintValues.get() != nullptr);
-        assert(aConstraintIndex < mCurrentBestConstraintValues->getNumVectors());
-        return((*mCurrentBestConstraintValues)(aConstraintIndex, aParticleIndex));
+        assert(aInput < mMeanCurrentLagrangeMultipliers->size());
+        return ((*mMeanCurrentLagrangeMultipliers)[aInput]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getCurrentBestConstraintValues(const OrdinalType & aIndex) const
+    /******************************************************************************//**
+     * @brief Return standard deviation of current Lagrange multipliers
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getStdDevCurrentLagrangeMultipliers(const OrdinalType & aInput) const
     {
-        assert(mCurrentBestConstraintValues.get() != nullptr);
-        assert(aIndex < mCurrentBestConstraintValues->getNumVectors());
-        return((*mCurrentBestConstraintValues)[aIndex]);
+        assert(aInput < mStdDevCurrentLagrangeMultipliers->size());
+        return ((*mStdDevCurrentLagrangeMultipliers)[aInput]);
     }
 
-    ScalarType getPreviousBestConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    /******************************************************************************//**
+     * @brief Return mean of current best constraint values
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getMeanCurrentBestConstraintValues(const OrdinalType & aInput) const
     {
-        assert(mPreviousBestConstraintValues.get() != nullptr);
-        assert(aConstraintIndex < mPreviousBestConstraintValues->getNumVectors());
-        return((*mPreviousBestConstraintValues)(aConstraintIndex, aParticleIndex));
+        assert(aInput < mMeanBestConstraintValues->size());
+        return ((*mMeanBestConstraintValues)[aInput]);
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getPreviousBestConstraintValues(const OrdinalType & aIndex) const
+    /******************************************************************************//**
+     * @brief Return standard deviation of current cconstraint values
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getStdDevCurrentBestConstraintValues(const OrdinalType & aInput) const
     {
-        assert(mPreviousBestConstraintValues.get() != nullptr);
-        assert(aIndex < mPreviousBestConstraintValues->getNumVectors());
-        return((*mPreviousBestConstraintValues)[aIndex]);
+        assert(aInput < mStdDevBestConstraintValues->size());
+        return ((*mStdDevBestConstraintValues)[aInput]);
     }
 
+    /******************************************************************************//**
+     * @brief Return current global constraint values
+     * @param [in] aIndex particle index
+    **********************************************************************************/
+    ScalarType getCurrentGlobalBestConstraintValue(const OrdinalType & aInput) const
+    {
+        assert(aInput < mCurrentGlobalBestConstraintValues->size());
+        return ((*mCurrentGlobalBestConstraintValues)[aInput]);
+    }
+
+    /******************************************************************************//**
+     * @brief Return penalty multiplier
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aParticleIndex particle index
+    **********************************************************************************/
     ScalarType getPenaltyMultiplier(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
     {
         assert(mCurrentPenaltyMultipliers.get() != nullptr);
@@ -2432,13 +2470,11 @@ public:
         return((*mCurrentPenaltyMultipliers)(aConstraintIndex, aParticleIndex));
     }
 
-    const Plato::Vector<ScalarType, OrdinalType> & getPenaltyMultipliers(const OrdinalType & aIndex) const
-    {
-        assert(mCurrentPenaltyMultipliers.get() != nullptr);
-        assert(aIndex < mCurrentPenaltyMultipliers->getNumVectors());
-        return((*mCurrentPenaltyMultipliers)[aIndex]);
-    }
-
+    /******************************************************************************//**
+     * @brief Return Lagrange multiplier
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aParticleIndex particle index
+    **********************************************************************************/
     ScalarType getLagrangeMultiplier(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
     {
         assert(mCurrentLagrangeMultipliers.get() != nullptr);
@@ -2446,6 +2482,155 @@ public:
         return((*mCurrentLagrangeMultipliers)(aConstraintIndex, aParticleIndex));
     }
 
+    /******************************************************************************//**
+     * @brief Return current constraint value
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aParticleIndex particle index
+    **********************************************************************************/
+    ScalarType getCurrentConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    {
+        assert(mCurrentConstraintValues.get() != nullptr);
+        assert(aConstraintIndex < mCurrentConstraintValues->getNumVectors());
+        return((*mCurrentConstraintValues)(aConstraintIndex, aParticleIndex));
+    }
+
+    /******************************************************************************//**
+     * @brief Return current best constraint value
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aParticleIndex particle index
+    **********************************************************************************/
+    ScalarType getCurrentBestConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    {
+        assert(mCurrentBestConstraintValues.get() != nullptr);
+        assert(aConstraintIndex < mCurrentBestConstraintValues->getNumVectors());
+        return((*mCurrentBestConstraintValues)(aConstraintIndex, aParticleIndex));
+    }
+
+    /******************************************************************************//**
+     * @brief Return previous best constraint value
+     * @param [in] aConstraintIndex constraint index
+     * @param [in] aParticleIndex particle index
+    **********************************************************************************/
+    ScalarType getPreviousBestConstraintValue(const OrdinalType & aConstraintIndex, const OrdinalType & aParticleIndex) const
+    {
+        assert(mPreviousBestConstraintValues.get() != nullptr);
+        assert(aConstraintIndex < mPreviousBestConstraintValues->getNumVectors());
+        return((*mPreviousBestConstraintValues)(aConstraintIndex, aParticleIndex));
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current best constraint means
+     * @return const reference to the 1D container of current best constraint means
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getMeanCurrentBestConstraintValues() const
+    {
+        assert(mMeanBestConstraintValues.get() != nullptr);
+        return(*mMeanBestConstraintValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current best constraint standard deviations
+     * @return const reference of the 1D container of current best constraint standard deviations
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getStdDevCurrentBestConstraintValues() const
+    {
+        assert(mStdDevBestConstraintValues.get() != nullptr);
+        return(*mStdDevBestConstraintValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current global best constraint values
+     * @return const reference to the 1D container of current global best constraint values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentGlobalBestConstraintValues() const
+    {
+        assert(mCurrentGlobalBestConstraintValues.get() != nullptr);
+        return(*mCurrentGlobalBestConstraintValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current objective function values
+     * @return const reference to the 1D container of current objective function values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentObjFuncValues() const
+    {
+        assert(mCurrentObjFuncValues.get() != nullptr);
+        return(*mCurrentObjFuncValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of previous objective function values
+     * @return const reference to the 1D container of previous objective function values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getPreviousBestObjFuncValues() const
+    {
+        assert(mPreviousBestObjFuncValues.get() != nullptr);
+        return(*mPreviousBestObjFuncValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current best objective function values
+     * @return const reference to the 1D container of current best objective function values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentBestObjFuncValues() const
+    {
+        assert(mCurrentBestObjFuncValues.get() != nullptr);
+        return(*mCurrentBestObjFuncValues);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current constraint values
+     * @param [in] aIndex constraint index
+     * @return const reference to the 1D container of current constraint values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentConstraintValues(const OrdinalType & aIndex) const
+    {
+        assert(mCurrentConstraintValues.get() != nullptr);
+        assert(aIndex < mCurrentConstraintValues->getNumVectors());
+        return((*mCurrentConstraintValues)[aIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current best constraint values
+     * @param [in] aIndex constraint index
+     * @return const reference to the 1D container of current best constraint values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getCurrentBestConstraintValues(const OrdinalType & aIndex) const
+    {
+        assert(mCurrentBestConstraintValues.get() != nullptr);
+        assert(aIndex < mCurrentBestConstraintValues->getNumVectors());
+        return((*mCurrentBestConstraintValues)[aIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of previous best constraint values
+     * @param [in] aIndex constraint index
+     * @return const reference to the 1D container of previous best constraint values
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getPreviousBestConstraintValues(const OrdinalType & aIndex) const
+    {
+        assert(mPreviousBestConstraintValues.get() != nullptr);
+        assert(aIndex < mPreviousBestConstraintValues->getNumVectors());
+        return((*mPreviousBestConstraintValues)[aIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current penalty multipliers
+     * @param [in] aIndex constraint index
+     * @return const reference to the 1D container of current penalty multipliers
+    **********************************************************************************/
+    const Plato::Vector<ScalarType, OrdinalType> & getPenaltyMultipliers(const OrdinalType & aIndex) const
+    {
+        assert(mCurrentPenaltyMultipliers.get() != nullptr);
+        assert(aIndex < mCurrentPenaltyMultipliers->getNumVectors());
+        return((*mCurrentPenaltyMultipliers)[aIndex]);
+    }
+
+    /******************************************************************************//**
+     * @brief Return 1D container of current Lagrange multipliers
+     * @param [in] aIndex constraint index
+     * @return const reference to the 1D container of current Lagrange multipliers
+    **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & getLagrangeMultipliers(const OrdinalType & aIndex) const
     {
         assert(mCurrentLagrangeMultipliers.get() != nullptr);
@@ -2453,6 +2638,10 @@ public:
         return((*mCurrentLagrangeMultipliers)[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Find current best particle positions
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void findBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         aDataMng.cacheGlobalBestObjFunValue();
@@ -2461,6 +2650,10 @@ public:
         aDataMng.findGlobalBestParticle();
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate augmented Lagrangian objective function
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void evaluateObjective(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         this->cacheCriteriaValues();
@@ -2477,6 +2670,9 @@ public:
         aDataMng.setCurrentObjFuncValues(*mCurrentAugLagFuncValues);
     }
 
+    /******************************************************************************//**
+     * @brief Update current set of Lagrange multipliers
+    **********************************************************************************/
     void updateLagrangeMultipliers()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -2500,6 +2696,9 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update current set of penalty multipliers
+    **********************************************************************************/
     void updatePenaltyMultipliers()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -2532,6 +2731,9 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute objective and constraint statistics
+    **********************************************************************************/
     void computeCriteriaStatistics()
     {
         this->computeObjFuncStatistics();
@@ -2539,6 +2741,9 @@ public:
         this->computeConstraintStatistics();
     }
 
+    /******************************************************************************//**
+     * @brief Re-set elements in objective and constraint containers to initial guess
+    **********************************************************************************/
     void restart()
     {
         this->initializeObjFuncData();
@@ -2546,6 +2751,9 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize objective and constraint class member containers
+    **********************************************************************************/
     void initialize()
     {
         this->initializeObjFuncData();
@@ -2553,6 +2761,9 @@ private:
         this->initializeConstraintData();
     }
 
+    /******************************************************************************//**
+     * @brief Initialize elements in objective function containers to initial guess
+    **********************************************************************************/
     void initializeObjFuncData()
     {
         mCurrentObjFuncValues->fill(std::numeric_limits<ScalarType>::max());
@@ -2561,16 +2772,16 @@ private:
         mCurrentBestAugLagFuncValues->fill(std::numeric_limits<ScalarType>::max());
     }
 
+    /******************************************************************************//**
+     * @brief Initialize elements in constraint containers to initial guess
+    **********************************************************************************/
     void initializeConstraintData()
     {
-        const OrdinalType tNumConstraints = mConstraints->size();
-        mMeanBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mStdDevBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mCurrentGlobalBestConstraintValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-
         mCurrentFeasibilityMeasure->fill(std::numeric_limits<ScalarType>::max());
         mPreviousFeasibilityMeasure->fill(std::numeric_limits<ScalarType>::max());
         mCurrentGlobalBestConstraintValues->fill(std::numeric_limits<ScalarType>::max());
+
+        const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             (*mCurrentConstraintValues)[tIndex].fill(std::numeric_limits<ScalarType>::max());
@@ -2578,6 +2789,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Allocate penalty and Lagrange multipliers containers
+    ***********************************************************************************/
     void initializeMultipliersData()
     {
         Plato::fill(static_cast<ScalarType>(1), *mCurrentPenaltyMultipliers);
@@ -2590,12 +2804,21 @@ private:
         mStdDevCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
     }
 
+    /******************************************************************************//**
+     * @brief Cache current constraint and objective values
+    ***********************************************************************************/
     void cacheCriteriaValues()
     {
         mPreviousBestObjFuncValues->update(static_cast<ScalarType>(1), *mCurrentBestObjFuncValues, static_cast<ScalarType>(0));
         Plato::update(static_cast<ScalarType>(1), *mCurrentBestConstraintValues, static_cast<ScalarType>(0), *mPreviousBestConstraintValues);
     }
 
+    /******************************************************************************//**
+     * @brief Compute feasibility measure \f$ \max(h_i)\ \forall i=1,\dots,N_c\f$,
+     *        where \f$ h \f$ denotes the constraint and \f$ N_c \f$ is the total
+     *        number of constraints. The feasibility measure is computed for each
+     *        particle.
+    ***********************************************************************************/
     void computeFeasibilityMeasure()
     {
         mPreviousFeasibilityMeasure->update(static_cast<ScalarType>(1), *mCurrentFeasibilityMeasure, static_cast<ScalarType>(0));
@@ -2617,6 +2840,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update best particle positions and criteria values
+    ***********************************************************************************/
     void updateBestParticlesData(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
@@ -2635,6 +2861,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update best particle objective and constraint value containers
+    ***********************************************************************************/
     void updateBestCriteriaValues(const OrdinalType & aParticleIndex,
                                   Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -2649,6 +2878,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute current best objective function statistics
+    ***********************************************************************************/
     void computeObjFuncStatistics()
     {
         mMeanCurrentBestObjFuncValue = Plato::mean(*mCriteriaReductions, *mCurrentBestObjFuncValues);
@@ -2659,6 +2891,9 @@ private:
         mCurrentGlobalBestObjFuncValue = tFoundNewGlobalBest == true ? tValue : mCurrentGlobalBestObjFuncValue;
     }
 
+    /******************************************************************************//**
+     * @brief Compute current penalty and Lagrange multipliers statistics
+    ***********************************************************************************/
     void computeDualDataStatistics()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -2678,6 +2913,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute current best constraint statistics
+    ***********************************************************************************/
     void computeConstraintStatistics()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -2714,8 +2952,11 @@ private:
 
     /******************************************************************************//**
      * @brief Evaluate augmented Lagrangian criterion:
-     * \f$ \ell(z, \lambda, \mu) = f(z) + sum_{i=1}^{N}\lambda_i \theta_i(z) + sum_{i=1}^{N}\mu_i \theta_i^2(z) \f$,
-     * where \f$ \theta_i = \max( h_i(x), \frac{-\lambda_i}{2\mu_i} ) \f$
+     *
+     *        \f$ \ell(z, \lambda, \mu) = f(z) + sum_{i=1}^{N}\lambda_i \theta_i(z)
+     *        + sum_{i=1}^{N}\mu_i \theta_i^2(z) \f$, where \f$ \theta_i =
+     *        \max( h_i(x), \frac{-\lambda_i}{2\mu_i} ) \f$
+     *
      * @param [in,out] aOutput augmented Lagrangian values
     **********************************************************************************/
     void evaluateAugmentedLagrangian()
@@ -2745,43 +2986,43 @@ private:
     }
 
 private:
-    OrdinalType mNumAugLagFuncEval;
+    OrdinalType mNumAugLagFuncEval; /*!< number of augmented Lagrangian function evaluations */
 
-    ScalarType mMeanCurrentBestObjFuncValue;
-    ScalarType mStdDevCurrentBestObjFuncValue;
-    ScalarType mCurrentGlobalBestObjFuncValue;
-    ScalarType mCurrentGlobalBestAugLagFuncValue;
+    ScalarType mMeanCurrentBestObjFuncValue; /*!< mean of current best objective function values */
+    ScalarType mStdDevCurrentBestObjFuncValue; /*!< standard deviation of current best objective function values */
+    ScalarType mCurrentGlobalBestObjFuncValue; /*!< current global best objective function value */
+    ScalarType mCurrentGlobalBestAugLagFuncValue; /*!< current global best augmented Lagrangian function value */
 
-    ScalarType mPenaltyExpansionMultiplier;
-    ScalarType mPenaltyMultiplierUpperBound;
-    ScalarType mPenaltyContractionMultiplier;
-    ScalarType mFeasibilityInexactnessTolerance;
+    ScalarType mPenaltyExpansionMultiplier; /*!< expansion multiplier for penalty multipliers */
+    ScalarType mPenaltyMultiplierUpperBound; /*!< upper bound on penalty multipliers */
+    ScalarType mPenaltyContractionMultiplier; /*!< contraction multiplier for penalty multipliers */
+    ScalarType mFeasibilityInexactnessTolerance; /*!< feasibility inexactness tolerance */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaWorkVec;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousBestObjFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentAugLagFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestAugLagFuncValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanBestConstraintValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentFeasibilityMeasure;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousFeasibilityMeasure;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevBestConstraintValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentPenaltyMultipliers;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentPenaltyMultipliers;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentLagrangeMultipliers;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentLagrangeMultipliers;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaWorkVec; /*!< feasibility inexactness tolerance */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues; /*!< current objective function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestObjFuncValues; /*!< current best objective function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousBestObjFuncValues; /*!< previous best objective function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentAugLagFuncValues; /*!< current augmented Lagrangian function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentBestAugLagFuncValues; /*!< current best augmented Lagrangian function values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanBestConstraintValues; /*!< mean of current best constraint values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentFeasibilityMeasure; /*!< current feasibility measure */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousFeasibilityMeasure; /*!< previous feasibility measure */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevBestConstraintValues; /*!< standard deviation of current best constraint values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentPenaltyMultipliers; /*!< mean of current penalty multipliers */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentPenaltyMultipliers; /*!< standard deviation of current penalty multipliers */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentLagrangeMultipliers; /*!< mean of current Lagrange multipliers */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentLagrangeMultipliers; /*!< standard deviation of current Lagrange multipliers */
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValues;
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentPenaltyMultipliers;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentLagrangeMultipliers;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentBestConstraintValues;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousBestConstraintValues;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues; /*!< current constraint values */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentPenaltyMultipliers; /*!< current penalty multipliers */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentLagrangeMultipliers; /*!< current Lagrange multipliers */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentBestConstraintValues; /*!< current best constraint values */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousBestConstraintValues; /*!< previous best constraint values */
 
-    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective;
-    std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> mConstraints;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions;
+    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective; /*!< objective criterion interface */
+    std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> mConstraints; /*!< constraint criterion interface */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mCriteriaReductions; /*!< interface to parallel reduction operations associated with a criterion */
 
 private:
     AugmentedLagrangianStageMngPSO(const Plato::AugmentedLagrangianStageMngPSO<ScalarType, OrdinalType>&);
@@ -2789,10 +3030,17 @@ private:
 };
 // class AugmentedLagrangianStageMngPSO
 
+/******************************************************************************//**
+ * @brief Core operations for the Particle Swarm Optimization (PSO) algorithms
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarmOperations
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aFactory data factory for class member data
+    **********************************************************************************/
     explicit ParticleSwarmOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
             mNumConsecutiveFailures(0),
             mNumConsecutiveSuccesses(0),
@@ -2809,65 +3057,123 @@ public:
         this->initialize(*aFactory);
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~ParticleSwarmOperations()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Return inertia multiplier
+     * @return inertia multiplier
+    **********************************************************************************/
     ScalarType getInertiaMultiplier() const
     {
         return (mInertiaMultiplier);
     }
 
+    /******************************************************************************//**
+     * @brief Return trust region multiplier
+     * @return trust region multiplier
+    **********************************************************************************/
     ScalarType getTrustRegionMultiplier() const
     {
         return (mTrustRegionMultiplier);
     }
 
+    /******************************************************************************//**
+     * @brief Set inertia multiplier
+     * @param [in] aInput inertia multiplier
+    **********************************************************************************/
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mInertiaMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set cognitive behavior multiplier
+     * @param [in] aInput cognitive behavior multiplier
+    **********************************************************************************/
     void setCognitiveBehaviorMultiplier(const ScalarType & aInput)
     {
         mCognitiveBehaviorMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set social behavior multiplier
+     * @param [in] aInput social behavior multiplier
+    **********************************************************************************/
     void setSocialBehaviorMultiplier(const ScalarType & aInput)
     {
         mSocialBehaviorMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set trust region expansion multiplier
+     * @param [in] aInput trust region expansion multiplier
+    **********************************************************************************/
     void setTrustRegionExpansionMultiplier(const ScalarType & aInput)
     {
         mTrustRegionExpansionMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set trust region contraction multiplier
+     * @param [in] aInput trust region contraction multiplier
+    **********************************************************************************/
     void setTrustRegionContractionMultiplier(const ScalarType & aInput)
     {
         mTrustRegionContractionMultiplier = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set number of consecutive failures. A failure is defined as \f$ f(x_i)
+     *        = f(x_{i-1}) \f$, where i denotes the optimization iteration and \f$ f
+     *        \f$ is the objective function.
+     * @param [in] aInput number of consecutive failures
+    **********************************************************************************/
     void setNumConsecutiveFailures(const OrdinalType & aInput)
     {
         mNumConsecutiveFailures = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set number of consecutive successes. A failure is defined as \f$ f(x_i)
+     *        < f(x_{i-1}) \f$, where i denotes the optimization iteration and \f$ f
+     *        \f$ is the objective function.
+     * @param [in] aInput number of consecutive successes
+    **********************************************************************************/
     void setNumConsecutiveSuccesses(const OrdinalType & aInput)
     {
         mNumConsecutiveSuccesses = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of consecutive failures. A failure is defined as
+     *        \f$ f(x_i) = f(x_{i-1}) \f$, where i denotes the optimization iteration
+     *        and \f$ f \f$ is the objective function.
+     * @param [in] aInput maximum number of consecutive failures
+    **********************************************************************************/
     void setMaxNumConsecutiveFailures(const OrdinalType & aInput)
     {
         mMaxNumConsecutiveFailures = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of consecutive successes. A failure is defined as
+     *        \f$ f(x_i) = f(x_{i-1}) \f$, where i denotes the optimization iteration
+     *        and \f$ f \f$ is the objective function.
+     * @param [in] aInput maximum number of consecutive successes
+    **********************************************************************************/
     void setMaxNumConsecutiveSuccesses(const OrdinalType & aInput)
     {
         mMaxNumConsecutiveSuccesses = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Check if inertia multiplier is between theoretical bounds
+    **********************************************************************************/
     bool checkInertiaMultiplier()
     {
         const ScalarType tUpperBound = 1.0;
@@ -2884,6 +3190,9 @@ public:
         return(tMultiplierOutsideBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Update trust region multiplier
+    **********************************************************************************/
     void updateTrustRegionMultiplier()
     {
         if(mNumConsecutiveSuccesses >= mMaxNumConsecutiveSuccesses)
@@ -2896,6 +3205,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update particle velocities and find global best particle velocity
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateParticleVelocities(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         aDataMng.cachePreviousVelocities();
@@ -2917,6 +3230,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update particle positions and find global best particle position
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
@@ -2936,6 +3253,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Check success rate: Did the PSO algorithm find a new minimum in the last iteration?
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void checkGlobalBestParticleUpdateSuccessRate(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         const ScalarType tCurrentGlobalBestObjFunValue = aDataMng.getCurrentGlobalBestObjFuncValue();
@@ -2954,12 +3275,22 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Allocate class member containers
+     * @param [in] aFactory PSO data factory
+    **********************************************************************************/
     void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aFactory)
     {
         const OrdinalType tPARTICLE_INDEX = 0;
         mControlWorkVector = aFactory.control(tPARTICLE_INDEX).create();
     }
 
+    /******************************************************************************//**
+     * @brief Update particle velocity
+     * @param [in] aParticleIndex particle index
+     * @param [in] aDistribution uniform distribution sample generator
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateParticleVelocity(const OrdinalType & aParticleIndex,
                                 std::uniform_real_distribution<ScalarType> & aDistribution,
                                 Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
@@ -2989,6 +3320,11 @@ private:
         aDataMng.setCurrentVelocity(aParticleIndex, *mControlWorkVector);
     }
 
+    /******************************************************************************//**
+     * @brief Update global best particle velocity
+     * @param [in] aDistribution uniform distribution sample generator
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> & aDistribution,
                                           Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -3011,6 +3347,11 @@ private:
         aDataMng.setCurrentVelocity(tCurrentGlobalBestParticleIndex, *mControlWorkVector);
     }
 
+    /******************************************************************************//**
+     * @brief Update particle position
+     * @param [in] aParticleIndex particle index
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateParticlePosition(const OrdinalType & aParticleIndex,
                                 Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
@@ -3032,6 +3373,10 @@ private:
         aDataMng.setCurrentParticle(aParticleIndex, *mControlWorkVector);
     }
 
+    /******************************************************************************//**
+     * @brief Update global best particle position
+     * @param [in] aDataMng PSO data manager
+    **********************************************************************************/
     void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         // TODO: THINK PARALLEL IMPLEMENTATION
