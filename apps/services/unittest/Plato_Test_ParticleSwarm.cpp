@@ -54,6 +54,8 @@
 #include <iomanip>
 #include <fstream>
 
+#include "Plato_Parser.hpp"
+#include "Plato_InputData.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_LinearAlgebra.hpp"
 #include "Plato_UnitTestUtils.hpp"
@@ -3445,13 +3447,13 @@ public:
     **********************************************************************************/
     explicit BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
-            mPrintDiagnostics(false),
+            mOutputDiagnostics(false),
             mNumIterations(0),
             mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
+            mMeanBestObjFuncTolerance(5e-4),
+            mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
-            mMeanObjFuncTolerance(5e-4),
-            mStdDevObjFuncTolerance(1e-6),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
@@ -3466,12 +3468,12 @@ public:
     **********************************************************************************/
     explicit BoundConstrainedPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
-            mPrintDiagnostics(false),
+            mOutputDiagnostics(false),
             mNumIterations(0),
             mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
-            mMeanObjFuncTolerance(5e-4),
-            mStdDevObjFuncTolerance(1e-6),
+            mMeanBestObjFuncTolerance(5e-4),
+            mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -3492,7 +3494,7 @@ public:
     **********************************************************************************/
     void enableDiagnostics()
     {
-        mPrintDiagnostics = true;
+        mOutputDiagnostics = true;
     }
 
     /******************************************************************************//**
@@ -3543,25 +3545,25 @@ public:
      * @brief Set stopping tolerance based on the mean of the best objective function values
      * @param [in] aInput stopping tolerance
     **********************************************************************************/
-    void setMeanObjFuncTolerance(const ScalarType & aInput)
+    void setMeanBestObjFuncTolerance(const ScalarType & aInput)
     {
-        mMeanObjFuncTolerance = aInput;
+        mMeanBestObjFuncTolerance = aInput;
     }
 
     /******************************************************************************//**
      * @brief Set stopping tolerance based on the standard deviation of the best objective function values
      * @param [in] aInput stopping tolerance
     **********************************************************************************/
-    void setStdDevObjFuncTolerance(const ScalarType & aInput)
+    void setStdDevBestObjFuncTolerance(const ScalarType & aInput)
     {
-        mStdDevObjFuncTolerance = aInput;
+        mStdDevBestObjFuncTolerance = aInput;
     }
 
     /******************************************************************************//**
      * @brief Set stopping tolerance based on global best objective function value
      * @param [in] aInput stopping tolerance
     **********************************************************************************/
-    void setBestObjFuncTolerance(const ScalarType & aInput)
+    void setGlobalBestObjFuncTolerance(const ScalarType & aInput)
     {
         mGlobalBestObjFuncTolerance = aInput;
     }
@@ -3873,12 +3875,12 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::TRUE_OBJECTIVE_TOLERANCE;
         }
-        else if(tMeanCurrentBestObjFunValue < mMeanObjFuncTolerance)
+        else if(tMeanCurrentBestObjFunValue < mMeanBestObjFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
         }
-        else if(tStdDevCurrentBestObjFunValue < mStdDevObjFuncTolerance)
+        else if(tStdDevCurrentBestObjFunValue < mStdDevBestObjFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
@@ -3892,13 +3894,13 @@ private:
     **********************************************************************************/
     void openOutputFile()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_pso_algorithm_diagnostics.txt");
-                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mOutputStream, mOutputDiagnostics);
             }
         }
     }
@@ -3908,7 +3910,7 @@ private:
     **********************************************************************************/
     void closeOutputFile()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
@@ -3923,7 +3925,7 @@ private:
     **********************************************************************************/
     void outputStoppingCriterion()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
@@ -3940,7 +3942,7 @@ private:
     **********************************************************************************/
     void outputDiagnostics()
     {
-        if(mPrintDiagnostics == false)
+        if(mOutputDiagnostics == false)
         {
             return;
         }
@@ -3949,7 +3951,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_bcpso_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mOutputStream, mOutputDiagnostics);
         }
     }
 
@@ -3958,7 +3960,7 @@ private:
     **********************************************************************************/
     void outputDiagnostics(std::ofstream & aOutputStream)
     {
-        if(mPrintDiagnostics == false)
+        if(mOutputDiagnostics == false)
         {
             return;
         }
@@ -3967,7 +3969,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mPrintDiagnostics);
+            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mOutputDiagnostics);
         }
     }
 
@@ -3986,15 +3988,15 @@ private:
     }
 
 private:
-    bool mPrintDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
     std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
 
     OrdinalType mNumIterations; /*!< current number of iterations */
     OrdinalType mNumObjFuncEvals; /*!< current number of objective function values */
     OrdinalType mMaxNumIterations; /*!< maximum number of iterations */
 
-    ScalarType mMeanObjFuncTolerance; /*!< stopping tolerance on the mean of the best objective function values */
-    ScalarType mStdDevObjFuncTolerance; /*!< stopping tolerance on the standard deviation of the best objective function values */
+    ScalarType mMeanBestObjFuncTolerance; /*!< stopping tolerance on the mean of the best objective function values */
+    ScalarType mStdDevBestObjFuncTolerance; /*!< stopping tolerance on the standard deviation of the best objective function values */
     ScalarType mGlobalBestObjFuncTolerance; /*!< stopping tolerance on global best objective function value */
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
@@ -4025,11 +4027,11 @@ public:
     AugmentedLagrangianPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                            const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
                            const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
-            mPrintDiagnostics(false),
+            mOutputDiagnostics(false),
             mNumIterations(0),
             mMaxNumAugLagOuterIterations(1e3),
-            mMeanAugLagFuncTolerance(5e-4),
-            mStdDevAugLagFuncTolerance(1e-6),
+            mMeanBestAugLagFuncTolerance(5e-4),
+            mStdDevBestAugLagFuncTolerance(1e-6),
             mGlobalBestAugLagFuncTolerance(1e-10),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mOutputData(aConstraints->size()),
@@ -4051,7 +4053,7 @@ public:
     **********************************************************************************/
     void enableDiagnostics()
     {
-        mPrintDiagnostics = true;
+        mOutputDiagnostics = true;
         mOptimizer->enableDiagnostics();
     }
 
@@ -4169,7 +4171,7 @@ public:
     **********************************************************************************/
     void setMeanAugLagFuncTolerance(const ScalarType & aInput)
     {
-        mMeanAugLagFuncTolerance = aInput;
+        mMeanBestAugLagFuncTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -4178,7 +4180,7 @@ public:
     **********************************************************************************/
     void setStdDevAugLagFuncTolerance(const ScalarType & aInput)
     {
-        mStdDevAugLagFuncTolerance = aInput;
+        mStdDevBestAugLagFuncTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -4517,12 +4519,12 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::TRUE_OBJECTIVE_TOLERANCE;
         }
-        else if(tMeanCurrentBestObjFuncValue < mMeanAugLagFuncTolerance)
+        else if(tMeanCurrentBestObjFuncValue < mMeanBestAugLagFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
         }
-        else if(tStdDevCurrentBestAugLagFuncValue < mStdDevAugLagFuncTolerance)
+        else if(tStdDevCurrentBestAugLagFuncValue < mStdDevBestAugLagFuncTolerance)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
@@ -4536,14 +4538,14 @@ private:
     **********************************************************************************/
     void openOutputFile()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
-                Plato::pso::print_alpso_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::pso::print_alpso_diagnostics_header(mOutputData, mOutputStream, mOutputDiagnostics);
             }
         }
     }
@@ -4553,7 +4555,7 @@ private:
     **********************************************************************************/
     void closeOutputFile()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
@@ -4569,7 +4571,7 @@ private:
     **********************************************************************************/
     void outputStoppingCriterion()
     {
-        if(mPrintDiagnostics == true)
+        if(mOutputDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
@@ -4587,7 +4589,7 @@ private:
     **********************************************************************************/
     void outputDiagnostics()
     {
-        if(mPrintDiagnostics == false)
+        if(mOutputDiagnostics == false)
         {
             return;
         }
@@ -4598,7 +4600,7 @@ private:
         {
             this->cacheObjFuncOutputData();
             this->cacheConstraintOutputData();
-            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mOutputStream, mOutputDiagnostics);
         }
     }
 
@@ -4637,14 +4639,14 @@ private:
     }
 
 private:
-    bool mPrintDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
     std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
 
     OrdinalType mNumIterations; /*!< current number of iterations */
     OrdinalType mMaxNumAugLagOuterIterations; /*!< maximum number of outer iterations */
 
-    ScalarType mMeanAugLagFuncTolerance; /*!< stopping tolerance on the mean of the best augmented Lagrangian function values */
-    ScalarType mStdDevAugLagFuncTolerance; /*!< stopping tolerance on the standard deviation of the best augmented Lagrangian function values */
+    ScalarType mMeanBestAugLagFuncTolerance; /*!< stopping tolerance on the mean of the best augmented Lagrangian function values */
+    ScalarType mStdDevBestAugLagFuncTolerance; /*!< stopping tolerance on the standard deviation of the best augmented Lagrangian function values */
     ScalarType mGlobalBestAugLagFuncTolerance; /*!< stopping tolerance on global best augmented Lagrangian function value */
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
@@ -4694,15 +4696,15 @@ struct AlgorithmInputsALPSO
      * @brief Default constructor
      **********************************************************************************/
     AlgorithmInputsALPSO() :
-            mPrintDiagnostics(false),
+            mOutputDiagnostics(false),
             mMaxNumOuterIter(1e3),
             mMaxNumInnerIter(5),
             mMaxNumConsecutiveFailures(10),
             mMaxNumConsecutiveSuccesses(10),
             mTimeStep(1),
-            mBestAugLagFuncTolerance(1e-10),
-            mMeanAugLagFuncTolerance(5e-4),
-            mStdDevAugLagFuncTolerance(1e-6),
+            mMeanBestAugLagFuncTolerance(5e-4),
+            mStdDevBestAugLagFuncTolerance(1e-6),
+            mGlobalBestAugLagFuncTolerance(1e-10),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -4731,7 +4733,7 @@ struct AlgorithmInputsALPSO
     {
     }
 
-    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxNumInnerIter; /*!< maximum number of augmented Lagrangian subproblem iterations */
@@ -4739,9 +4741,9 @@ struct AlgorithmInputsALPSO
     OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, global best F(x_{i+1}) < F(x_{i}) */
 
     ScalarType mTimeStep; /*!< time step \Delta{t} */
-    ScalarType mBestAugLagFuncTolerance; /*!< best augmented Lagrangian function stopping tolerance */
-    ScalarType mMeanAugLagFuncTolerance; /*!< mean augmented Lagrangian function stopping tolerance */
-    ScalarType mStdDevAugLagFuncTolerance; /*!< standard deviation stopping tolerance */
+    ScalarType mMeanBestAugLagFuncTolerance; /*!< mean augmented Lagrangian function stopping tolerance */
+    ScalarType mStdDevBestAugLagFuncTolerance; /*!< standard deviation stopping tolerance */
+    ScalarType mGlobalBestAugLagFuncTolerance; /*!< best augmented Lagrangian function stopping tolerance */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
@@ -4777,7 +4779,7 @@ template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_alpso_algorithm_inputs(const Plato::AlgorithmInputsALPSO<ScalarType,OrdinalType> & aInputs,
                                        Plato::AugmentedLagrangianPSO<ScalarType,OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+    if(aInputs.mOutputDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
     }
@@ -4791,10 +4793,10 @@ inline void set_alpso_algorithm_inputs(const Plato::AlgorithmInputsALPSO<ScalarT
     aAlgorithm.setLowerBounds(*aInputs.mParticlesLowerBounds);
     aAlgorithm.setUpperBounds(*aInputs.mParticlesUpperBounds);
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
-    aAlgorithm.setMeanAugLagFuncTolerance(aInputs.mMeanAugLagFuncTolerance);
-    aAlgorithm.setBestAugLagFuncTolerance(aInputs.mBestAugLagFuncTolerance);
-    aAlgorithm.setStdDevAugLagFuncTolerance(aInputs.mStdDevAugLagFuncTolerance);
+    aAlgorithm.setMeanAugLagFuncTolerance(aInputs.mMeanBestAugLagFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
+    aAlgorithm.setStdDevAugLagFuncTolerance(aInputs.mStdDevBestAugLagFuncTolerance);
+    aAlgorithm.setBestAugLagFuncTolerance(aInputs.mGlobalBestAugLagFuncTolerance);
     aAlgorithm.setPenaltyExpansionMultiplier(aInputs.mPenaltyExpansionMultiplier);
     aAlgorithm.setPenaltyMultiplierUpperBound(aInputs.mPenaltyMultiplierUpperBound);
     aAlgorithm.setCognitiveBehaviorMultiplier(aInputs.mCognitiveBehaviorMultiplier);
@@ -4900,14 +4902,14 @@ struct AlgorithmInputsBCPSO
      * @brief Default constructor
      **********************************************************************************/
     AlgorithmInputsBCPSO() :
-            mPrintDiagnostics(false),
+            mOutputDiagnostics(false),
             mMaxNumIterations(1e3),
             mMaxNumConsecutiveFailures(10),
             mMaxNumConsecutiveSuccesses(10),
             mTimeStep(1),
-            mBestObjFuncTolerance(1e-10),
-            mMeanObjFuncTolerance(5e-4),
-            mStdDevObjFuncTolerance(1e-6),
+            mMeanBestObjFuncTolerance(5e-4),
+            mStdDevBestObjFuncTolerance(1e-6),
+            mGlobalBestObjFuncTolerance(1e-10),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -4931,16 +4933,16 @@ struct AlgorithmInputsBCPSO
     {
     }
 
-    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
     OrdinalType mMaxNumIterations; /*!< maximum number of iterations */
     OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, global best F(x_{i+1}) == F(x_{i}) */
     OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, global best F(x_{i+1}) < F(x_{i}) */
 
     ScalarType mTimeStep; /*!< time step \Delta{t} */
-    ScalarType mBestObjFuncTolerance; /*!< best objective function stopping tolerance */
-    ScalarType mMeanObjFuncTolerance; /*!< mean objective function stopping tolerance */
-    ScalarType mStdDevObjFuncTolerance; /*!< standard deviation stopping tolerance */
+    ScalarType mMeanBestObjFuncTolerance; /*!< mean objective function stopping tolerance */
+    ScalarType mGlobalBestObjFuncTolerance; /*!< best objective function stopping tolerance */
+    ScalarType mStdDevBestObjFuncTolerance; /*!< standard deviation stopping tolerance */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
@@ -4970,7 +4972,7 @@ template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_bcpso_algorithm_inputs(const Plato::AlgorithmInputsBCPSO<ScalarType,OrdinalType> & aInputs,
                                        Plato::BoundConstrainedPSO<ScalarType,OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+    if(aInputs.mOutputDiagnostics == true)
     {
         aAlgorithm.enableDiagnostics();
     }
@@ -4983,10 +4985,10 @@ inline void set_bcpso_algorithm_inputs(const Plato::AlgorithmInputsBCPSO<ScalarT
     aAlgorithm.setLowerBounds(*aInputs.mParticlesLowerBounds);
     aAlgorithm.setUpperBounds(*aInputs.mParticlesUpperBounds);
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
-    aAlgorithm.setMeanObjFuncTolerance(aInputs.mMeanObjFuncTolerance);
-    aAlgorithm.setBestObjFuncTolerance(aInputs.mBestObjFuncTolerance);
-    aAlgorithm.setStdDevObjFuncTolerance(aInputs.mStdDevObjFuncTolerance);
+    aAlgorithm.setMeanBestObjFuncTolerance(aInputs.mMeanBestObjFuncTolerance);
+    aAlgorithm.setStdDevBestObjFuncTolerance(aInputs.mStdDevBestObjFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
+    aAlgorithm.setGlobalBestObjFuncTolerance(aInputs.mGlobalBestObjFuncTolerance);
     aAlgorithm.setCognitiveBehaviorMultiplier(aInputs.mCognitiveBehaviorMultiplier);
     aAlgorithm.setTrustRegionExpansionMultiplier(aInputs.mTrustRegionExpansionMultiplier);
     aAlgorithm.setTrustRegionContractionMultiplier(aInputs.mTrustRegionContractionMultiplier);
@@ -5048,6 +5050,275 @@ inline void solve_bcpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
     Plato::set_bcpso_algorithm_outputs(tAlgorithm, aOutputs);
 }
 // function solve_bcpso
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class ParserPSO
+{
+public:
+    ParserPSO()
+    {
+    }
+
+    ~ParserPSO()
+    {
+    }
+
+    void parse(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsBCPSO<ScalarType, OrdinalType> & aData)
+    {
+        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        {
+            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+
+            aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
+            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
+            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
+
+            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
+            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
+            aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
+            aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
+            aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
+            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
+            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
+            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+        }
+    }
+
+    void parse(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsALPSO<ScalarType, OrdinalType> & aData)
+    {
+        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        {
+            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+
+            aData.mMaxNumOuterIter = this->maxNumOuterIterations(tOptionsNode);
+            aData.mMaxNumInnerIter = this->maxNumInnerIterations(tOptionsNode);
+            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
+            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
+
+            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
+            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
+            aData.mMeanBestAugLagFuncTolerance = this->meanAugLagFuncTolerance(tOptionsNode);
+            aData.mPenaltyExpansionMultiplier = this->penaltyExpansionMultiplier(tOptionsNode);
+            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
+            aData.mPenaltyContractionMultiplier = this->penaltyContractionMultiplier(tOptionsNode);
+            aData.mStdDevBestAugLagFuncTolerance = this->stdDevBestAugLagFuncTolerance(tOptionsNode);
+            aData.mGlobalBestAugLagFuncTolerance = this->globalBestAugLagFuncTolerance(tOptionsNode);
+            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
+            aData.mFeasibilityInexactnessTolerance = this->feasibilityInexactnessTolerance(tOptionsNode);
+            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+        }
+    }
+
+private:
+    bool outputDiagnostics(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    OrdinalType maxNumOuterIterations(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 1e3;
+        if(aOptionsNode.size<std::string>("MaxNumOuterIterations"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumOuterIterations");
+        }
+        return (tOutput);
+    }
+
+    OrdinalType maxNumInnerIterations(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 5;
+        if(aOptionsNode.size<std::string>("MaxNumInnerIterations"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumInnerIterations");
+        }
+        return (tOutput);
+    }
+
+    OrdinalType maxNumConsecutiveFailures(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 10;
+        if(aOptionsNode.size<std::string>("MaxNumConsecutiveFailures"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumConsecutiveFailures");
+        }
+        return (tOutput);
+    }
+
+    OrdinalType maxNumConsecutiveSuccesses(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 10;
+        if(aOptionsNode.size<std::string>("MaxNumConsecutiveSuccesses"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumConsecutiveSuccesses");
+        }
+        return (tOutput);
+    }
+
+    ScalarType particleVelocityTimeStep(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1.0;
+        if(aOptionsNode.size<std::string>("ParticleVelocityTimeStep"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "ParticleVelocityTimeStep");
+        }
+        return (tOutput);
+    }
+
+    ScalarType penaltyExpansionMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 2.0;
+        if(aOptionsNode.size<std::string>("PenaltyExpansionMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "PenaltyExpansionMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType penaltyContractionMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.5;
+        if(aOptionsNode.size<std::string>("PenaltyContractionMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "PenaltyContractionMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType globalBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-10;
+        if(aOptionsNode.size<std::string>("GlobalBestObjFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "GlobalBestObjFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType meanBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 5e-4;
+        if(aOptionsNode.size<std::string>("MeanBestObjFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "MeanBestObjFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType stdDevBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-6;
+        if(aOptionsNode.size<std::string>("StdDevBestObjFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "StdDevBestObjFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType meanAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 5e-4;
+        if(aOptionsNode.size<std::string>("MeanAugLagFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "MeanAugLagFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType stdDevBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-6;
+        if(aOptionsNode.size<std::string>("StdDevBestAugLagFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "StdDevBestAugLagFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType globalBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-10;
+        if(aOptionsNode.size<std::string>("GlobalBestAugLagFuncTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "GlobalBestAugLagFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    ScalarType inertiaMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.9;
+        if(aOptionsNode.size<std::string>("InertiaMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "InertiaMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType socialBehaviorMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.8;
+        if(aOptionsNode.size<std::string>("SocialBehaviorMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "SocialBehaviorMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType cognitiveBehaviorMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.8;
+        if(aOptionsNode.size<std::string>("CognitiveBehaviorMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "CognitiveBehaviorMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType trustRegionExpansionMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 4;
+        if(aOptionsNode.size<std::string>("TrustRegionExpansionMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "TrustRegionExpansionMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType trustRegionContractionMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.75;
+        if(aOptionsNode.size<std::string>("TrustRegionContractionMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "TrustRegionContractionMultiplier");
+        }
+        return (tOutput);
+    }
+
+    ScalarType feasibilityInexactnessTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-4;
+        if(aOptionsNode.size<std::string>("FeasibilityInexactnessTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "FeasibilityInexactnessTolerance");
+        }
+        return (tOutput);
+    }
+
+private:
+    ParserPSO(const Plato::ParserPSO<ScalarType, OrdinalType>&);
+    Plato::ParserPSO<ScalarType, OrdinalType> & operator=(const Plato::ParserPSO<ScalarType, OrdinalType>&);
+};
+// class ParserPSO
 
 }// namespace Plato
 
@@ -5705,6 +5976,86 @@ TEST(PlatoTest, PSO_AugmentedLagrangianStageMng)
     EXPECT_NEAR(-0.00595, tStageMng.getCurrentGlobalBestConstraintValue(0  /* constraint index */), tTolerance);
 }
 
+TEST(PlatoTest, PSO_ParserBCPSO)
+{
+    Plato::InputData tInputData;
+    EXPECT_TRUE(tInputData.empty());
+    ASSERT_STREQ("Input Data", tInputData.name().c_str());
+
+    Plato::ParserPSO<double> tParserPSO;
+    Plato::AlgorithmInputsBCPSO<double> tInputsPSO;
+    tParserPSO.parse(tInputData, tInputsPSO);
+
+    // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+
+    // ********* TEST: OPTIONS NODE DEFINED, BUT PARAMETERS NOT SPECIFIED -> USE DEFAULT PARAMETERS *********
+    Plato::InputData tOptions("Options");
+    EXPECT_TRUE(tOptions.empty());
+    tParserPSO.parse(tOptions, tInputsPSO);
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+
+    // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("MaxNumOuterIterations", "100");
+    tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
+    tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptions.add<std::string>("OutputDiagnosticsToFile", "true");
+    tOptions.add<std::string>("InertiaMultiplier", "0.55");
+    tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
+    tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
+    tOptions.add<std::string>("MeanBestObjFuncTolerance", "0.001");
+    tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
+    tOptions.add<std::string>("StdDevBestObjFuncTolerance", "0.0001");
+    tOptions.add<std::string>("GlobalBestObjFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
+    tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tOptimizerNode.add<Plato::InputData>("Options", tOptions);
+
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    EXPECT_TRUE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(100u, tInputsPSO.mMaxNumIterations);
+    EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.85, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+}
+
 TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)
 {
     // ********* ALLOCATE CRITERION *********
@@ -5753,7 +6104,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_GoldsteinPrice)
     const size_t tNumControls = 2;
     const size_t tNumParticles = 20;
     Plato::AlgorithmInputsBCPSO<double> tInputs;
-    tInputs.mStdDevObjFuncTolerance = 1e-4;
+    tInputs.mStdDevBestObjFuncTolerance = 1e-4;
     tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
     tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
     tInputs.mParticlesLowerBounds->fill(-2);
@@ -5893,7 +6244,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     tAlgorithm.setUpperBounds(tVector);  /* bounds are normalized */
     tVector[0] = 0.06 / tVector[0]; tVector[1] = 0.003 / tVector[1];
     tAlgorithm.setLowerBounds(tVector);  /* bounds are normalized */
-    tAlgorithm.setMeanObjFuncTolerance(1e-6);
+    tAlgorithm.setMeanBestObjFuncTolerance(1e-6);
     tAlgorithm.solve();
 
     const double tTolerance = 1e-2;
@@ -5943,7 +6294,7 @@ TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
     const size_t tNumConstraints = 1;
     Plato::AlgorithmInputsALPSO<double> tInputs;
     tInputs.mPenaltyMultiplierUpperBound = 1e3;
-    tInputs.mMeanAugLagFuncTolerance = 1e-6;
+    tInputs.mMeanBestAugLagFuncTolerance = 1e-6;
     tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
     tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
     tInputs.mParticlesLowerBounds->fill(-5);
