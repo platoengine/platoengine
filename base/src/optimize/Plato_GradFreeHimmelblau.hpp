@@ -41,41 +41,80 @@
  */
 
 /*
- * Plato_GradFreeCriterion.hpp
+ * Plato_GradFreeHimmelblau.hpp
  *
  *  Created on: Jan 23, 2019
  */
 
 #pragma once
 
+#include <cassert>
+
+#include "Plato_Vector.hpp"
+#include "Plato_MultiVector.hpp"
+#include "Plato_GradFreeCriterion.hpp"
+
 namespace Plato
 {
 
-template<typename ScalarType, typename OrdinalType>
-class Vector;
-
-template<typename ScalarType, typename OrdinalType>
-class MultiVector;
-
 /******************************************************************************//**
- * @brief Abstract interface to a gradient free criterion
+ * @brief Interface to gradient free Himmelblau criterion
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeCriterion
+class GradFreeHimmelblau : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
-    virtual ~GradFreeCriterion()
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    GradFreeHimmelblau()
     {
     }
 
     /******************************************************************************//**
-     * @brief Evaluates gradient free criterion
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeHimmelblau()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate criterion
      * @param [in] aControl 2D container of control variables (i.e. optimization variables)
-     * @param [out] aOutput 1D container criterion values
+     * @param [out] aOutput 1D container of criterion values
      **********************************************************************************/
-    virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                       Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate Himmelblau function:
+     * \f$ \left( x^2 + y-11 \right)^2 + \left( y^2 + x-7 \right)^2 \f$
+     * @param [in] aControl 1D container of control variables (i.e. optimization variables)
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        ScalarType tFirstTerm = (aControl[0] * aControl[0]) + aControl[1] - static_cast<ScalarType>(11);
+        ScalarType tSecondTerm = aControl[0] + (aControl[1] * aControl[1]) - static_cast<ScalarType>(7);
+        ScalarType tOutput = tFirstTerm * tFirstTerm + tSecondTerm * tSecondTerm;
+
+        return (tOutput);
+    }
+
+private:
+    GradFreeHimmelblau(const Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & operator=(const Plato::GradFreeHimmelblau<ScalarType, OrdinalType> & aRhs);
 };
-// class GradFreeCriterion
+// class GradFreeHimmelblau
 
 } // namespace Plato

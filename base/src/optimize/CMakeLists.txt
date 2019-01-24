@@ -5,8 +5,14 @@ set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
                         )
                         
-set(${LIB_NAME}_HEADERS Plato_GradFreeCriterion.hpp
+set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
+                        Plato_GradFreeRadius.hpp
+                        Plato_GradFreeCriterion.hpp
+                        Plato_GradFreeRosenbrock.hpp
+                        Plato_GradFreeHimmelblau.hpp
                         Plato_GradFreeRocketObjFunc.hpp
+                        Plato_GradFreeGoldsteinPrice.hpp
+                        Plato_GradFreeShiftedEllipse.hpp
                         Plato_OptimizerFactory.hpp
                         Plato_AugmentedLagrangian.hpp
                         Plato_TrustRegionUtilities.hpp

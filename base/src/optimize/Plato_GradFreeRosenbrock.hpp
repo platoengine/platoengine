@@ -41,41 +41,80 @@
  */
 
 /*
- * Plato_GradFreeCriterion.hpp
+ * Plato_GradFreeRosenbrock.hpp
  *
  *  Created on: Jan 23, 2019
  */
 
 #pragma once
 
+#include <cmath>
+#include <cassert>
+
+#include "Plato_Vector.hpp"
+#include "Plato_MultiVector.hpp"
+#include "Plato_GradFreeCriterion.hpp"
+
 namespace Plato
 {
 
-template<typename ScalarType, typename OrdinalType>
-class Vector;
-
-template<typename ScalarType, typename OrdinalType>
-class MultiVector;
-
 /******************************************************************************//**
- * @brief Abstract interface to a gradient free criterion
+ * @brief Interface to gradient free Rosenbrock criterion
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeCriterion
+class GradFreeRosenbrock : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
-    virtual ~GradFreeCriterion()
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    GradFreeRosenbrock()
     {
     }
 
     /******************************************************************************//**
-     * @brief Evaluates gradient free criterion
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeRosenbrock()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate objective function given a set of particles.
      * @param [in] aControl 2D container of control variables (i.e. optimization variables)
-     * @param [out] aOutput 1D container criterion values
+     * @param [out] aOutput 1D container of criterion values
      **********************************************************************************/
-    virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                       Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate function:
+     * \f$ 100 * \left(x_2 - x_1^2\right)^2 + \left(1 - x_1\right)^2 \f$
+     * @param [in] aControl 1D container of control variables (i.e. optimization variables)
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        const ScalarType tOutput = static_cast<ScalarType>(100.)
+                * std::pow((aControl[1] - aControl[0] * aControl[0]), static_cast<ScalarType>(2))
+                + std::pow(static_cast<ScalarType>(1) - aControl[0], static_cast<ScalarType>(2));
+        return (tOutput);
+    }
+
+private:
+    GradFreeRosenbrock(const Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & operator=(const Plato::GradFreeRosenbrock<ScalarType, OrdinalType> & aRhs);
 };
-// class GradFreeCriterion
+// class GradFreeRosenbrock
 
 } // namespace Plato

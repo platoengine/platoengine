@@ -41,41 +41,84 @@
  */
 
 /*
- * Plato_GradFreeCriterion.hpp
+ * Plato_GradFreeCircle.hpp
  *
  *  Created on: Jan 23, 2019
  */
 
 #pragma once
 
+#include <cmath>
+#include <cassert>
+
+#include "Plato_Vector.hpp"
+#include "Plato_MultiVector.hpp"
+#include "Plato_GradFreeCriterion.hpp"
+
 namespace Plato
 {
 
-template<typename ScalarType, typename OrdinalType>
-class Vector;
-
-template<typename ScalarType, typename OrdinalType>
-class MultiVector;
-
 /******************************************************************************//**
- * @brief Abstract interface to a gradient free criterion
+ * @brief Interface to gradient free Circle criterion
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeCriterion
+class GradFreeCircle : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
-    virtual ~GradFreeCriterion()
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    explicit GradFreeCircle()
     {
     }
 
     /******************************************************************************//**
-     * @brief Evaluates gradient free criterion
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeCircle()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluate gradient free criterion
      * @param [in] aControl 2D container of control variables (i.e. optimization variables)
-     * @param [out] aOutput 1D container criterion values
+     * @param [out] aOutput 1D container of criterion values
      **********************************************************************************/
-    virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                       Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
+    void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+               Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        assert(tNumParticles > static_cast<OrdinalType>(0));
+        assert(aOutput.size() == tNumParticles);
+        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        {
+            aOutput[tIndex] = this->evaluate(aControl[tIndex]);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Evaluate Circle function:
+     * \f$ \left( x - 1 \right)^2 + 2\left( y - 2 \right)^2 \f$
+     * @param [in] aControl 1D container of optimization variables
+     * @return function evaluation
+     **********************************************************************************/
+    ScalarType evaluate(const Plato::Vector<ScalarType, OrdinalType> & aControl)
+    {
+        assert(aControl.size() > static_cast<OrdinalType>(0));
+
+        const ScalarType tAlpha = aControl[0] - static_cast<ScalarType>(0.75);
+        ScalarType tBeta = aControl[1] - static_cast<ScalarType>(0.6);
+        tBeta = static_cast<ScalarType>(2.) * std::pow(tBeta, static_cast<ScalarType>(2));
+        const ScalarType tOutput = std::pow(tAlpha, static_cast<ScalarType>(2)) + tBeta;
+
+        return (tOutput);
+    }
+
+private:
+    GradFreeCircle(const Plato::GradFreeCircle<ScalarType, OrdinalType> & aRhs);
+    Plato::GradFreeCircle<ScalarType, OrdinalType> & operator=(const Plato::GradFreeCircle<ScalarType, OrdinalType> & aRhs);
 };
-// class GradFreeCriterion
+// class GradFreeCircle
 
 } // namespace Plato
