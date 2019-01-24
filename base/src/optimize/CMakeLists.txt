@@ -13,6 +13,8 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_GradFreeRocketObjFunc.hpp
                         Plato_GradFreeGoldsteinPrice.hpp
                         Plato_GradFreeShiftedEllipse.hpp
+                        Plato_ParticleSwarmDataMng.hpp
+                        Plato_GradFreeCriteriaList.hpp
                         Plato_OptimizerFactory.hpp
                         Plato_AugmentedLagrangian.hpp
                         Plato_TrustRegionUtilities.hpp

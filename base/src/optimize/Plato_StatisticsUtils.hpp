@@ -1,10 +1,4 @@
 /*
- * Plato_StatisticsUtils.hpp
- *
- *  Created on: Jan 31, 2018
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,15 +39,76 @@
 //@HEADER
 */
 
-#ifndef PLATO_STATISTICSUTILS_HPP_
-#define PLATO_STATISTICSUTILS_HPP_
+/*
+ * Plato_StatisticsUtils.hpp
+ *
+ *  Created on: Jan 31, 2018
+ */
+
+#pragma once
 
 #include <cmath>
+
+#include "Plato_StandardVector.hpp"
+#include "Plato_ReductionOperations.hpp"
 
 #define _MATH_DEFINES_DEFINED
 
 namespace Plato
 {
+
+/******************************************************************************//**
+ * @brief Compute mean of the elements in the input vector
+ * @param [in] aReductions common parallel programming operations (e.g. reductions)
+ * @param [in] aInput input container
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions,
+                       const Plato::Vector<ScalarType, OrdinalType> & aInput)
+{
+    const OrdinalType tSize = 1;
+    const OrdinalType tELEMENT_INDEX = 0;
+    Plato::StandardVector<ScalarType, OrdinalType> tWork(tSize);
+
+    tWork[tELEMENT_INDEX] = aInput.size(); /* local number of elements */
+    const OrdinalType tGlobalNumElements = aReductions.sum(tWork);
+    ScalarType tOutput = aReductions.sum(aInput);
+    tOutput = tOutput / tGlobalNumElements;
+    return (tOutput);
+}
+// function mean
+
+/******************************************************************************//**
+ * @brief Compute standard deviation of the elements in the input vector
+ * @param [in] aMean mean of the elements in the input vector
+ * @param [in] aInput input container
+ * @param [in] aReductions common parallel programming operations (e.g. reductions)
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline ScalarType standard_deviation(const ScalarType & aMean,
+                                     const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                                     const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions)
+{
+    const OrdinalType tSize = 1;
+    const OrdinalType tELEMENT_INDEX = 0;
+    Plato::StandardVector<ScalarType, OrdinalType> tWork(tSize);
+
+    const OrdinalType tLocalNumElements = aInput.size();
+    for(OrdinalType tIndex = 0; tIndex < tLocalNumElements; tIndex++)
+    {
+        const ScalarType tMisfit = aInput[tIndex] - aMean;
+        tWork[tELEMENT_INDEX] += tMisfit * tMisfit;
+    }
+
+    ScalarType tOutput = aReductions.sum(tWork);
+    tWork[tELEMENT_INDEX] = tLocalNumElements;
+    const ScalarType tGlobalNumElements = aReductions.sum(tWork);
+    tOutput = tOutput / (tGlobalNumElements - static_cast<OrdinalType>(1));
+    tOutput = std::pow(tOutput, static_cast<ScalarType>(0.5));
+
+    return (tOutput);
+}
+// function standard_deviation
 
 template<typename OrdinalType>
 inline OrdinalType factorial(const OrdinalType & aInput)
@@ -65,6 +120,7 @@ inline OrdinalType factorial(const OrdinalType & aInput)
     }
     return (tOutput);
 }
+// function factorial
 
 template<typename ScalarType>
 inline ScalarType pochhammer_symbol(const ScalarType & aX, const ScalarType & aN)
@@ -75,6 +131,7 @@ inline ScalarType pochhammer_symbol(const ScalarType & aX, const ScalarType & aN
     tOutput = std::isfinite(tOutput) ? tOutput : static_cast<ScalarType>(0);
     return (tOutput);
 }
+// function pochhammer_symbol
 
 template<typename ScalarType>
 inline void shape_parameters(const ScalarType & aMinValue,
@@ -93,6 +150,7 @@ inline void shape_parameters(const ScalarType & aMinValue,
             * (tMeanStd * (static_cast<ScalarType>(1) - tMeanStd) / tVarianceStd - static_cast<ScalarType>(1));
     aBeta = (tMeanStd * (static_cast<ScalarType>(1) - tMeanStd) / tVarianceStd - static_cast<ScalarType>(1)) - aAlpha;
 }
+// function shape_parameters
 
 template<typename ScalarType, typename OrdinalType>
 inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
@@ -105,7 +163,6 @@ inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitial
         aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
     }
 }
+// function make_uniform_sample
 
 } // namespace Plato
-
-#endif /* PLATO_STATISTICSUTILS_HPP_ */
