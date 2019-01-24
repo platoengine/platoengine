@@ -38,7 +38,7 @@
  //
  // *************************************************************************
  //@HEADER
- */
+*/
 
 /*
  * Plato_ParticleSwarmStageMngALPSO.hpp
@@ -851,7 +851,7 @@ private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentPenaltyMultipliers; /*!< standard deviation of current penalty multipliers */
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mMeanCurrentLagrangeMultipliers; /*!< mean of current Lagrange multipliers */
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mStdDevCurrentLagrangeMultipliers; /*!< standard deviation of current Lagrange multipliers */
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValues;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentGlobalBestConstraintValues; /*!< current global best constraint values */
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentConstraintValues; /*!< current constraint values */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentPenaltyMultipliers; /*!< current penalty multipliers */
