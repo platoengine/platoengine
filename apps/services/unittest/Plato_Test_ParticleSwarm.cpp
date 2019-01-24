@@ -3228,10 +3228,10 @@ public:
             {
                 this->updateParticleVelocity(tIndex, tDistribution, aDataMng);
             }
-                else
-                {
-                    assert(tIndex == tCurrentGlobalBestParticleIndex);
-                    this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
+            else
+            {
+                assert(tIndex == tCurrentGlobalBestParticleIndex);
+                this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
             }
         }
     }
