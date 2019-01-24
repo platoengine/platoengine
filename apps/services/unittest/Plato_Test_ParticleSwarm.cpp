@@ -5051,18 +5051,32 @@ inline void solve_bcpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
 }
 // function solve_bcpso
 
+/******************************************************************************//**
+ * @brief Parser for Particle Swarm Optimization (PSO) algorithm
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParserPSO
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     ParserPSO()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~ParserPSO()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Parse options for bound constrained PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with bound constrained PSO algorithm options
+    **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsBCPSO<ScalarType, OrdinalType> & aData)
     {
         if(aOptimizerNode.size<Plato::InputData>("Options"))
@@ -5086,6 +5100,11 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Parse options for augmented Lagrangian PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
+    **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsALPSO<ScalarType, OrdinalType> & aData)
     {
         if(aOptimizerNode.size<Plato::InputData>("Options"))
@@ -5115,6 +5134,10 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Parse output diagnostics keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     bool outputDiagnostics(const Plato::InputData & aOptionsNode)
     {
         bool tOuput = false;
@@ -5125,6 +5148,10 @@ private:
         return (tOuput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse maximum number of outer iterations keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     OrdinalType maxNumOuterIterations(const Plato::InputData & aOptionsNode)
     {
         OrdinalType tOutput = 1e3;
@@ -5135,6 +5162,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse maximum number of inner iterations keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     OrdinalType maxNumInnerIterations(const Plato::InputData & aOptionsNode)
     {
         OrdinalType tOutput = 5;
@@ -5145,6 +5176,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse maximum number of consecutive failures keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     OrdinalType maxNumConsecutiveFailures(const Plato::InputData & aOptionsNode)
     {
         OrdinalType tOutput = 10;
@@ -5155,6 +5190,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse maximum number of consecutive successes keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     OrdinalType maxNumConsecutiveSuccesses(const Plato::InputData & aOptionsNode)
     {
         OrdinalType tOutput = 10;
@@ -5165,6 +5204,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse particle's velocity time step keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType particleVelocityTimeStep(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1.0;
@@ -5175,6 +5218,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse upper bound on penalty multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType penaltyMultiplierUpperBound(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 100;
@@ -5185,6 +5232,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse expansion multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType penaltyExpansionMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 2.0;
@@ -5195,6 +5246,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse contraction multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType penaltyContractionMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.5;
@@ -5205,6 +5260,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the global best objective function
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType globalBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1e-10;
@@ -5215,6 +5274,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the mean of the best objective function values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType meanBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 5e-4;
@@ -5225,6 +5288,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the standard deviation of the best objective function values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType stdDevBestObjFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1e-6;
@@ -5235,6 +5302,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the mean of the best augmented Lagrangian function values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType meanBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 5e-4;
@@ -5245,6 +5316,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the standard deviation of the best augmented Lagrangian function values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType stdDevBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1e-6;
@@ -5255,6 +5330,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the global best augmented Lagrangian function
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType globalBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1e-10;
@@ -5265,6 +5344,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on the global best augmented Lagrangian function
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType inertiaMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.9;
@@ -5275,6 +5358,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse social behavior multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType socialBehaviorMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.8;
@@ -5285,6 +5372,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse cognitive behavior multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType cognitiveBehaviorMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.8;
@@ -5295,6 +5386,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse trust region expansion multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType trustRegionExpansionMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 4;
@@ -5305,6 +5400,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse trust region contraction multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType trustRegionContractionMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.75;
@@ -5315,6 +5414,10 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * @brief Parse tolerance on feasibility inexactness
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
     ScalarType feasibilityInexactnessTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1e-4;
