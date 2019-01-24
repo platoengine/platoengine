@@ -5101,9 +5101,10 @@ public:
             aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
             aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
             aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
-            aData.mMeanBestAugLagFuncTolerance = this->meanAugLagFuncTolerance(tOptionsNode);
+            aData.mMeanBestAugLagFuncTolerance = this->meanBestAugLagFuncTolerance(tOptionsNode);
             aData.mPenaltyExpansionMultiplier = this->penaltyExpansionMultiplier(tOptionsNode);
             aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
+            aData.mPenaltyMultiplierUpperBound = this->penaltyMultiplierUpperBound(tOptionsNode);
             aData.mPenaltyContractionMultiplier = this->penaltyContractionMultiplier(tOptionsNode);
             aData.mStdDevBestAugLagFuncTolerance = this->stdDevBestAugLagFuncTolerance(tOptionsNode);
             aData.mGlobalBestAugLagFuncTolerance = this->globalBestAugLagFuncTolerance(tOptionsNode);
@@ -5174,6 +5175,16 @@ private:
         return (tOutput);
     }
 
+    ScalarType penaltyMultiplierUpperBound(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 100;
+        if(aOptionsNode.size<std::string>("PenaltyMultiplierUpperBound"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "PenaltyMultiplierUpperBound");
+        }
+        return (tOutput);
+    }
+
     ScalarType penaltyExpansionMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 2.0;
@@ -5224,12 +5235,12 @@ private:
         return (tOutput);
     }
 
-    ScalarType meanAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
+    ScalarType meanBestAugLagFuncTolerance(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 5e-4;
-        if(aOptionsNode.size<std::string>("MeanAugLagFuncTolerance"))
+        if(aOptionsNode.size<std::string>("MeanBestAugLagFuncTolerance"))
         {
-            tOutput = Plato::Get::Double(aOptionsNode, "MeanAugLagFuncTolerance");
+            tOutput = Plato::Get::Double(aOptionsNode, "MeanBestAugLagFuncTolerance");
         }
         return (tOutput);
     }
@@ -6054,6 +6065,104 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+}
+
+TEST(PlatoTest, PSO_ParserALPSO)
+{
+    Plato::InputData tInputData;
+    EXPECT_TRUE(tInputData.empty());
+    ASSERT_STREQ("Input Data", tInputData.name().c_str());
+
+    Plato::ParserPSO<double> tParserPSO;
+    Plato::AlgorithmInputsALPSO<double> tInputsPSO;
+    tParserPSO.parse(tInputData, tInputsPSO);
+
+    // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(5, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(2.0, tInputsPSO.mPenaltyExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(100, tInputsPSO.mPenaltyMultiplierUpperBound, tTolerance);
+    EXPECT_NEAR(0.5, tInputsPSO.mPenaltyContractionMultiplier, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+
+    // ********* TEST: OPTIONS NODE DEFINED, BUT PARAMETERS NOT SPECIFIED -> USE DEFAULT PARAMETERS *********
+    Plato::InputData tOptions("Options");
+    EXPECT_TRUE(tOptions.empty());
+    tParserPSO.parse(tOptions, tInputsPSO);
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(5, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(2.0, tInputsPSO.mPenaltyExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(100, tInputsPSO.mPenaltyMultiplierUpperBound, tTolerance);
+    EXPECT_NEAR(0.5, tInputsPSO.mPenaltyContractionMultiplier, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+
+    // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("MaxNumOuterIterations", "100");
+    tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
+    tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptions.add<std::string>("OutputDiagnosticsToFile", "true");
+    tOptions.add<std::string>("InertiaMultiplier", "0.55");
+    tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
+    tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
+    tOptions.add<std::string>("MeanBestAugLagFuncTolerance", "0.001");
+    tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
+    tOptions.add<std::string>("StdDevBestAugLagFuncTolerance", "0.0001");
+    tOptions.add<std::string>("GlobalBestAugLagFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
+    tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
+    tOptions.add<std::string>("PenaltyExpansionMultiplier", "4");
+    tOptions.add<std::string>("PenaltyMultiplierUpperBound", "10");
+    tOptions.add<std::string>("PenaltyContractionMultiplier", "0.25");
+    tOptions.add<std::string>("FeasibilityInexactnessTolerance", "0.01");
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tOptimizerNode.add<Plato::InputData>("Options", tOptions);
+
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    EXPECT_TRUE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
+    EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.85, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+    EXPECT_NEAR(4.0, tInputsPSO.mPenaltyExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(10, tInputsPSO.mPenaltyMultiplierUpperBound, tTolerance);
+    EXPECT_NEAR(0.25, tInputsPSO.mPenaltyContractionMultiplier, tTolerance);
+    EXPECT_NEAR(1e-2, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
 }
 
 TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)
