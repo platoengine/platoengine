@@ -2097,8 +2097,8 @@ public:
     **********************************************************************************/
     void solve()
     {
-        assert(mStageMng.use_count() > static_cast<OrdinalType>(0));
-        assert(mOptimizer.use_count() > static_cast<OrdinalType>(0));
+        assert(mStageMng.get() != nullptr);
+        assert(mOptimizer.get() != nullptr);
 
         mNumIterations = 0;
         this->openOutputFile();
