@@ -44,7 +44,7 @@
  * Plato_GradFreeCriteriaList.hpp
  *
  *  Created on: Jan 23, 2019
- */
+*/
 
 #pragma once
 

@@ -13,10 +13,21 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_GradFreeRocketObjFunc.hpp
                         Plato_GradFreeGoldsteinPrice.hpp
                         Plato_GradFreeShiftedEllipse.hpp
+                        Plato_GradFreeEngineObjective.hpp
+                        Plato_ParticleSwarmTypes.hpp
+                        Plato_ParticleSwarmParser.hpp
                         Plato_ParticleSwarmDataMng.hpp
                         Plato_ParticleSwarmStageMng.hpp
+                        Plato_ParticleSwarmIO_BCPSO.hpp
+                        Plato_ParticleSwarmIO_ALPSO.hpp
+                        Plato_ParticleSwarmOperations.hpp
+                        Plato_ParticleSwarmIO_Utilities.hpp
                         Plato_ParticleSwarmStageMngBCPSO.hpp
                         Plato_ParticleSwarmStageMngALPSO.hpp
+                        Plato_ParticleSwarmAlgorithmBCPSO.hpp
+                        Plato_ParticleSwarmAlgorithmALPSO.hpp
+                        Plato_ParticleSwarmInterfaceBCPSO.hpp
+                        Plato_ParticleSwarmInterfaceALPSO.hpp
                         Plato_GradFreeCriteriaList.hpp
                         Plato_OptimizerFactory.hpp
                         Plato_AugmentedLagrangian.hpp
