@@ -3219,19 +3219,21 @@ public:
     {
         aDataMng.cachePreviousVelocities();
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
-        const OrdinalType tNumParticles = aDataMng.getNumParticles();
+
+        const OrdinalType tMyProcID = aDataMng.getCommWrapper().myProcID();
+        const OrdinalType tCurrentGlobalBestParticleRank = aDataMng.getCurrentGlobalBestParticleRank();
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
 
+        const OrdinalType tNumParticles = aDataMng.getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if(tIndex != tCurrentGlobalBestParticleIndex)
+            if( (tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank) )
             {
-                this->updateParticleVelocity(tIndex, tDistribution, aDataMng);
+                this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
             }
             else
             {
-                assert(tIndex == tCurrentGlobalBestParticleIndex);
-                this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
+                this->updateParticleVelocity(tIndex, tDistribution, aDataMng);
             }
         }
     }
@@ -3242,19 +3244,20 @@ public:
     **********************************************************************************/
     void updateParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        const OrdinalType tNumParticles = aDataMng.getNumParticles();
+        const OrdinalType tMyProcID = aDataMng.getCommWrapper().myProcID();
+        const OrdinalType tCurrentGlobalBestParticleRank = aDataMng.getCurrentGlobalBestParticleRank();
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
 
+        const OrdinalType tNumParticles = aDataMng.getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if(tIndex != tCurrentGlobalBestParticleIndex)
+            if( (tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank) )
             {
-                this->updateParticlePosition(tIndex, aDataMng);
+                this->updateGlobalBestParticlePosition(aDataMng);
             }
             else
             {
-                assert(tIndex == tCurrentGlobalBestParticleIndex);
-                this->updateGlobalBestParticlePosition(aDataMng);
+                this->updateParticlePosition(tIndex, aDataMng);
             }
         }
     }
@@ -3334,7 +3337,6 @@ private:
     void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> & aDistribution,
                                           Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        // TODO: THINK PARALLEL IMPLEMENTATION
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
         const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(tCurrentGlobalBestParticleIndex);
         const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
@@ -3385,7 +3387,6 @@ private:
     **********************************************************************************/
     void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
     {
-        // TODO: THINK PARALLEL IMPLEMENTATION
         const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getLowerBounds();
         const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
