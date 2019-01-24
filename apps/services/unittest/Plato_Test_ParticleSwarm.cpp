@@ -54,6 +54,8 @@
 #include <iomanip>
 #include <fstream>
 
+#include "Plato_GradFreeCriterion.hpp"
+
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
 #include "Plato_DataFactory.hpp"
@@ -621,26 +623,6 @@ inline ScalarType standard_deviation(const ScalarType & aMean,
 }
 // function standard_deviation
 
-/******************************************************************************//**
- * @brief Interface for gradient free criteria
-**********************************************************************************/
-template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeCriterion
-{
-public:
-    virtual ~GradFreeCriterion()
-    {
-    }
-
-    /******************************************************************************//**
-     * @brief Evaluates general criterion
-     * @param [in] aControl multi-vector of control variables (i.e. optimization variables)
-     * @param [out] aOutput criterion value for each control vector
-     **********************************************************************************/
-    virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                       Plato::Vector<ScalarType, OrdinalType> & aOutput) = 0;
-};
-// class GradFreeCriterion
 
 /******************************************************************************//**
  * @brief Interface for gradient free algebraic rocket criterion
