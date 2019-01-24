@@ -61,6 +61,9 @@
 #include "Plato_UnitTestUtils.hpp"
 #include "Plato_AlgebraicRocketModel.hpp"
 
+#include "Plato_Interface.hpp"
+#include "Plato_OptimizerEngineStageData.hpp"
+
 namespace Plato
 {
 
@@ -643,12 +646,78 @@ public:
  * @brief Interface for gradient free algebraic rocket criterion
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
+class GradFreeEngineObjective : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory data factory
+     * @param [in] aInputData data structure with engine's options and input keywords
+     * @param [in] aInterface interface to data motion coordinator
+    **********************************************************************************/
+    explicit GradFreeEngineObjective(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
+                                     const Plato::OptimizerEngineStageData & aInputData,
+                                     Plato::Interface* aInterface = nullptr) :
+            mControl(std::vector<ScalarType>(aDataFactory.getNumControls())),
+            mObjFuncValues(std::vector<ScalarType>(aDataFactory.getNumCriterionValues())),
+            mInterface(aInterface),
+            mEngineInputData(aInputData),
+            mParameterList(std::make_shared<Teuchos::ParameterList>())
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Set interface to data motion coordinator
+     * @param [in] aInterface interface to data motion coordinator
+    **********************************************************************************/
+    void set(Plato::Interface* aInterface)
+    {
+        assert(aInterface != nullptr);
+        mInterface = aInterface;
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~GradFreeEngineObjective()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Evaluates generic objective function through the Plato Engine
+     * @param [in] aControl set of particles, each particle denotes a set of optimization variables
+     * @param [out] aOutput criterion value for each particle
+     **********************************************************************************/
+    virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                       Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+
+    }
+
+private:
+    std::vector<ScalarType> mControl; /*!< set of particles */
+    std::vector<ScalarType> mObjFuncValues; /*!< set of objective function values */
+
+    Plato::Interface* mInterface; /*!< interface to data motion coordinator */
+    Plato::OptimizerEngineStageData mEngineInputData; /*!< holds Plato Engine's options and inputs */
+    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< Plato Engine parameter list */
+
+private:
+    GradFreeEngineObjective(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
+    Plato::GradFreeEngineObjective<ScalarType, OrdinalType> & operator=(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
+};
+// class GradFreeEngineObjective
+
+/******************************************************************************//**
+ * @brief Interface for gradient free algebraic rocket criterion
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
 class GradFreeRocketObjFunc : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
      * @brief Constructor
-     * @param [in] aUpperBounds optimization vairbales' upper bounds
+     * @param [in] aUpperBounds upper bounds on optimization variables
      * @param [in] aRocketInputs algebraic rocket model's input data structure
      * @param [in] aChamberGeom geometry interface
     **********************************************************************************/
