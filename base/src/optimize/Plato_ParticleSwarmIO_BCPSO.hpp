@@ -167,8 +167,8 @@ struct InputDataBCPSO
 
     ScalarType mTimeStep; /*!< time step \Delta{t} */
     ScalarType mMeanBestObjFuncTolerance; /*!< mean objective function stopping tolerance */
-    ScalarType mGlobalBestObjFuncTolerance; /*!< best objective function stopping tolerance */
     ScalarType mStdDevBestObjFuncTolerance; /*!< standard deviation stopping tolerance */
+    ScalarType mGlobalBestObjFuncTolerance; /*!< best objective function stopping tolerance */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
