@@ -70,7 +70,7 @@ public:
             mNumDuals(1),
             mNumStates(1),
             mNumControls(0),
-            mNumObjFuncValues(0),
+            mNumCriterionValues(0),
             mMemorySpace(aMemorySpace),
             mCommWrapper(std::make_shared<Plato::CommWrapper>()),
             mObjFuncValues(),
@@ -107,13 +107,13 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return number of control upper bound entries
-     * @return number of control upper bound entries
+     * @brief Return number of criterion values
+     * @return number of criterion values
     **********************************************************************************/
     OrdinalType getNumCriterionValues() const
     {
-        assert(mNumObjFuncValues > static_cast<ScalarType>(0));
-        return (mNumObjFuncValues);
+        assert(mNumCriterionValues > static_cast<ScalarType>(0));
+        return (mNumCriterionValues);
     }
 
     /******************************************************************************//**
@@ -156,7 +156,7 @@ public:
         {
             mObjFuncValues.reset();
         }
-        mNumObjFuncValues = aNumElements;
+        mNumCriterionValues = aNumElements;
         mObjFuncValues = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aNumElements);
     }
 
@@ -172,7 +172,7 @@ public:
         {
             mObjFuncValues.reset();
         }
-        mNumObjFuncValues = aInput.size();
+        mNumCriterionValues = aInput.size();
         mObjFuncValues = aInput.create();
     }
 
@@ -469,7 +469,7 @@ private:
     OrdinalType mNumDuals;
     OrdinalType mNumStates;
     OrdinalType mNumControls;
-    OrdinalType mNumObjFuncValues;
+    OrdinalType mNumCriterionValues;
 
     Plato::MemorySpace::type_t mMemorySpace;
 

@@ -57,9 +57,16 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class GoldsteinPrice : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     GoldsteinPrice()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~GoldsteinPrice()
     {
     }

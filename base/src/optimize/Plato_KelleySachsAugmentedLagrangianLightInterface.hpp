@@ -128,7 +128,7 @@ struct AlgorithmInputsKSAL
     /******************************************************************************//**
      * @brief Default destructor
     **********************************************************************************/
-    virtual ~AlgorithmInputsKSAL()
+    ~AlgorithmInputsKSAL()
     {
     }
 

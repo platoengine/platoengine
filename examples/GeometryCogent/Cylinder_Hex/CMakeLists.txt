@@ -1,4 +1,4 @@
-set( testFiles "Cylinder.exodiff_commands;computeCogentVolume.py;Cylinder.ref.exo;platoApp.xml;platoMain.xml;background.gen;background.jou;cyl.cogent")
+set( testFiles "Cylinder_Hex.exodiff_commands;computeCogentVolume.py;Cylinder_Hex.ref.exo;platoApp.xml;platoMain.xml;background.gen;background.jou;cyl.cogent")
 Plato_add_test_files( "${testFiles}" )
 
 Plato_new_test(TEST_NAME)

@@ -205,6 +205,8 @@ private:
         ScalarType tTrustRegionRatioLow = mInputData.getKSTrustRegionRatioLow();
         ScalarType tTrustRegionRatioMid = mInputData.getKSTrustRegionRatioMid();
         ScalarType tTrustRegionRatioUpper = mInputData.getKSTrustRegionRatioUpper();
+        ScalarType tMinTrustRegionRadius = mInputData.getMinTrustRegionRadius();
+        ScalarType tMaxTrustRegionRadius = mInputData.getMaxTrustRegionRadius();
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setTrustRegionContraction(tContractionScaleFactor);
@@ -218,6 +220,8 @@ private:
         aAlgorithm.setScaleOfUnitControlForInitialTrustRegionRadius(tInitialRadiusScale);
         aAlgorithm.setScaleOfUnitControlForMaxTrustRegionRadius(tMaxRadiusScale);
         aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
+        aAlgorithm.setMaxTrustRegionRadius(tMaxTrustRegionRadius);
+        aAlgorithm.setMinTrustRegionRadius(tMinTrustRegionRadius);
         if(tDisablePostSmoothing)
         {
             aAlgorithm.disablePostSmoothing();
