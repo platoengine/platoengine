@@ -2545,8 +2545,8 @@ struct AlgorithmInputsBCPSO
             mMaxNumConsecutiveSuccesses(10),
             mTimeStep(1),
             mMeanBestObjFuncTolerance(5e-4),
-            mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mStdDevBestObjFuncTolerance(1e-6),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -3668,7 +3668,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
-    EXPECT_EQ(5, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -3693,7 +3693,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
-    EXPECT_EQ(5, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
