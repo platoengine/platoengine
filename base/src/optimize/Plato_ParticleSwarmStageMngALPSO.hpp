@@ -85,21 +85,25 @@ public:
             mPenaltyContractionMultiplier(0.5),
             mFeasibilityInexactnessTolerance(1e-4),
             mCriteriaWorkVec(aFactory->objective().create()),
-            mCurrentFeasibilityMeasure(aFactory->objective().create()),
-            mPreviousFeasibilityMeasure(aFactory->objective().create()),
             mCurrentObjFuncValues(aFactory->objective().create()),
             mCurrentBestObjFuncValues(aFactory->objective().create()),
             mPreviousBestObjFuncValues(aFactory->objective().create()),
             mCurrentAugLagFuncValues(aFactory->objective().create()),
             mCurrentBestAugLagFuncValues(aFactory->objective().create()),
             mMeanBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mCurrentFeasibilityMeasure(aFactory->objective().create()),
+            mPreviousFeasibilityMeasure(aFactory->objective().create()),
             mStdDevBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mMeanCurrentPenaltyMultipliers(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mStdDevCurrentPenaltyMultipliers(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mMeanCurrentLagrangeMultipliers(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
+            mStdDevCurrentLagrangeMultipliers(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
             mCurrentGlobalBestConstraintValues(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aConstraints->size())),
             mCurrentConstraintValues(aFactory->dual().create()),
             mCurrentPenaltyMultipliers(aFactory->dual().create()),
             mCurrentLagrangeMultipliers(aFactory->dual().create()),
-            mPreviousBestConstraintValues(aFactory->dual().create()),
             mCurrentBestConstraintValues(aFactory->dual().create()),
+            mPreviousBestConstraintValues(aFactory->dual().create()),
             mObjective(aObjective),
             mConstraints(aConstraints),
             mCriteriaReductions(aFactory->getObjFuncReductionOperations().create())
@@ -633,12 +637,6 @@ private:
     {
         Plato::fill(static_cast<ScalarType>(1), *mCurrentPenaltyMultipliers);
         Plato::fill(static_cast<ScalarType>(0), *mCurrentLagrangeMultipliers);
-
-        const OrdinalType tNumConstraints = mConstraints->size();
-        mMeanCurrentPenaltyMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mStdDevCurrentPenaltyMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mMeanCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
-        mStdDevCurrentLagrangeMultipliers = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tNumConstraints);
     }
 
     /******************************************************************************//**
