@@ -6,6 +6,7 @@ set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_GradFreeCriterion.hpp
+                        Plato_GradFreeRocketObjFunc.hpp
                         Plato_OptimizerFactory.hpp
                         Plato_AugmentedLagrangian.hpp
                         Plato_TrustRegionUtilities.hpp
