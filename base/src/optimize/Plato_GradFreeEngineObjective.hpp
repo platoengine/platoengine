@@ -76,8 +76,8 @@ public:
     explicit GradFreeEngineObjective(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
                                      const Plato::OptimizerEngineStageData & aInputData,
                                      Plato::Interface* aInterface = nullptr) :
-            mControl(std::vector<ScalarType>(aDataFactory.getNumControls())),
             mObjFuncValues(std::vector<ScalarType>(aDataFactory.getNumCriterionValues())),
+            mParticles(),
             mInterface(aInterface),
             mEngineInputData(aInputData),
             mParameterList(std::make_shared<Teuchos::ParameterList>())
@@ -109,12 +109,68 @@ public:
     virtual void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                        Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
+        assert(mInterface != nullptr);
 
+        this->setParticlesSharedData(aControl);
+
+
+
+        // ********* Set view to objective function value ********* //
+        ScalarType tObjectiveValue = 0;
+        std::string tValueOutputName = mEngineInputData.getObjectiveValueOutputName();
+        mParameterList->set(tValueOutputName, &tObjectiveValue);
+
+        // ********* Compute objective function value ********* //
+        std::string tMyStageName = mEngineInputData.getObjectiveValueStageName();
+        assert(tMyStageName.empty() == false);
+        std::vector<std::string> tStageNames;
+        tStageNames.push_back(tMyStageName);
+        mInterface->compute(tStageNames, *mParameterList);
     }
 
 private:
-    std::vector<ScalarType> mControl; /*!< set of particles */
+    void setObjectiveSharedData(Plato::Vector<ScalarType, OrdinalType> & aObjFuncVals)
+    {
+        std::fill(mObjFuncValues)
+        const OrdinalType tNumParticles = aObjFuncVals.size();
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        {
+            const Plato::Vector<ScalarType> & tMyControls = aControl[tParticleIndex];
+            assert(tMyControls.size() == mParticles[tParticleIndex].size());
+
+            const OrdinalType tNumControls = tMyControls.size();
+            for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                mParticles[tParticleIndex][tControlIndex] = tMyControls[tControlIndex];
+            }
+
+            std::string tMyControlSharedDataName = mEngineInputData.getControlName(tParticleIndex);
+            mParameterList->set(tMyControlSharedDataName, mParticles[tParticleIndex].data());
+        }
+    }
+
+    void setParticlesSharedData(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    {
+        const OrdinalType tNumParticles = aControl.getNumVectors();
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        {
+            const Plato::Vector<ScalarType> & tMyControls = aControl[tParticleIndex];
+            assert(tMyControls.size() == mParticles[tParticleIndex].size());
+
+            const OrdinalType tNumControls = tMyControls.size();
+            for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                mParticles[tParticleIndex][tControlIndex] = tMyControls[tControlIndex];
+            }
+
+            std::string tMyControlSharedDataName = mEngineInputData.getControlName(tParticleIndex);
+            mParameterList->set(tMyControlSharedDataName, mParticles[tParticleIndex].data());
+        }
+    }
+
+private:
     std::vector<ScalarType> mObjFuncValues; /*!< set of objective function values */
+    std::vector<std::vector<ScalarType>> mParticles; /*!< set of particles */
 
     Plato::Interface* mInterface; /*!< interface to data motion coordinator */
     Plato::OptimizerEngineStageData mEngineInputData; /*!< holds Plato Engine's options and inputs */
