@@ -1,50 +1,8 @@
 /*
- //@HEADER
- // *************************************************************************
- //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
- //                    Solutions of Sandia, LLC (NTESS).
- //
- // Under the terms of Contract DE-NA0003525 with NTESS,
- // the U.S. Government retains certain rights in this software.
- //
- // Redistribution and use in source and binary forms, with or without
- // modification, are permitted provided that the following conditions are
- // met:
- //
- // 1. Redistributions of source code must retain the above copyright
- // notice, this list of conditions and the following disclaimer.
- //
- // 2. Redistributions in binary form must reproduce the above copyright
- // notice, this list of conditions and the following disclaimer in the
- // documentation and/or other materials provided with the distribution.
- //
- // 3. Neither the name of the Sandia Corporation nor the names of the
- // contributors may be used to endorse or promote products derived from
- // this software without specific prior written permission.
- //
- // THIS SOFTWARE IS PROVIDED BY SANDIA CORPORATION "AS IS" AND ANY
- // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SANDIA CORPORATION OR THE
- // CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- // PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- // LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- //
- // Questions? Contact the Plato team (plato3D-help@sandia.gov)
- //
- // *************************************************************************
- //@HEADER
-*/
-
-/*
- * Plato_GradFreeEngineObjective.hpp
+ * Plato_GradFreeEngineConstraint.hpp
  *
- *  Created on: Jan 24, 2019
-*/
+ *  Created on: Jan 25, 2019
+ */
 
 #pragma once
 
@@ -61,10 +19,10 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Interface for gradient free engine objective
+ * @brief Interface for gradient free engine constraint
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeEngineObjective : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
+class GradFreeEngineConstraint : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
@@ -73,11 +31,13 @@ public:
      * @param [in] aInputData data structure with engine's options and input keywords
      * @param [in] aInterface interface to data motion coordinator
     **********************************************************************************/
-    explicit GradFreeEngineObjective(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
-                                     const Plato::OptimizerEngineStageData & aInputData,
-                                     Plato::Interface* aInterface = nullptr) :
+    explicit GradFreeEngineConstraint(const OrdinalType & aConstraintID,
+                                      const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
+                                      const Plato::OptimizerEngineStageData & aInputData,
+                                      Plato::Interface* aInterface = nullptr) :
+            mMyConstraintID(aConstraintID),
             mParticles(),
-            mObjFuncValues(),
+            mConstraintValues(),
             mInterface(aInterface),
             mEngineInputData(aInputData),
             mParameterList(std::make_shared<Teuchos::ParameterList>())
@@ -88,7 +48,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    virtual ~GradFreeEngineObjective()
+    virtual ~GradFreeEngineConstraint()
     {
     }
 
@@ -112,9 +72,9 @@ public:
     {
         assert(mInterface != nullptr);
         this->exportParticlesSharedData(aControl);
-        this->exportObjFuncSharedData(aOutput);
+        this->exportConstraintSharedData(aOutput);
         this->compute();
-        this->importObjFuncSharedData(aOutput);
+        this->importConstraintSharedData(aOutput);
     }
 
 private:
@@ -126,8 +86,8 @@ private:
         const OrdinalType tNumControls = aDataFactory.getNumControls();
         const OrdinalType tNumParticles = aDataFactory.getNumCriterionValues();
         mParticles.resize(tNumParticles, std::vector<ScalarType>(tNumControls));
-        const OrdinalType tNumObjFuncVals = 1;
-        mObjFuncValues.resize(tNumParticles, std::vector<ScalarType>(tNumObjFuncVals));
+        const OrdinalType tNumCriterion = 1;
+        mConstraintValues.resize(tNumParticles, std::vector<ScalarType>(tNumCriterion));
     }
 
     /******************************************************************************//**
@@ -135,11 +95,11 @@ private:
     **********************************************************************************/
     void compute()
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
+        std::string tCriterionStageName = mEngineInputData.getConstraintValueStageName(mMyConstraintID);
         assert(tCriterionStageName.empty() == false);
-        std::vector<std::string> tStageNames;
-        tStageNames.push_back(tCriterionStageName);
-        mInterface->compute(tStageNames, *mParameterList);
+        std::vector<std::string> tConstraintStageName;
+        tConstraintStageName.push_back(tCriterionStageName);
+        mInterface->compute(tConstraintStageName, *mParameterList);
     }
 
     /******************************************************************************//**
@@ -148,9 +108,9 @@ private:
     **********************************************************************************/
     void exportParticlesSharedData(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
-        Plato::Stage* tObjFuncStage = mInterface->getStage(tCriterionStageName);
-        std::vector<std::string> tInputDataNames = tObjFuncStage->getInputDataNames();
+        std::string tCriterionStageName = mEngineInputData.getConstraintValueStageName(mMyConstraintID);
+        Plato::Stage* tConstraintStage = mInterface->getStage(tCriterionStageName);
+        std::vector<std::string> tInputDataNames = tConstraintStage->getInputDataNames();
 
         const OrdinalType tNumParticles = aControl.getNumVectors();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
@@ -173,18 +133,18 @@ private:
      * @brief Export objective function values to application (e.g. simulation software)
      * @param [in] aNumParticles number of particles
     **********************************************************************************/
-    void exportObjFuncSharedData(const OrdinalType & aNumParticles)
+    void exportConstraintSharedData(const OrdinalType & aNumParticles)
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
-        Plato::Stage* tObjFuncStage = mInterface->getStage(tCriterionStageName);
-        std::vector<std::string> tOutputDataNames = tObjFuncStage->getOutputDataNames();
+        std::string tCriterionStageName = mEngineInputData.getConstraintValueStageName(mMyConstraintID);
+        Plato::Stage* tConstraintStage = mInterface->getStage(tCriterionStageName);
+        std::vector<std::string> tOutputDataNames = tConstraintStage->getOutputDataNames();
 
         for(OrdinalType tParticleIndex = 0; tParticleIndex < aNumParticles; tParticleIndex++)
         {
-            assert(aNumParticles == mObjFuncValues.size());
-            std::fill(mObjFuncValues[tParticleIndex].begin(), mObjFuncValues[tParticleIndex].end(), 0.0);
-            std::string tObjFuncSharedDataName = tOutputDataNames[tParticleIndex];
-            mParameterList->set(tObjFuncSharedDataName, mObjFuncValues[tParticleIndex].data());
+            assert(aNumParticles == mConstraintValues.size());
+            std::fill(mConstraintValues[tParticleIndex].begin(), mConstraintValues[tParticleIndex].end(), 0.0);
+            std::string tConstraintSharedDataName = tOutputDataNames[tParticleIndex];
+            mParameterList->set(tConstraintSharedDataName, mConstraintValues[tParticleIndex].data());
         }
     }
 
@@ -192,28 +152,29 @@ private:
      * @brief Import objective function values from application (e.g. simulation software)
      * @param [in] aOutput 1D container of objective function values
     **********************************************************************************/
-    void importObjFuncSharedData(Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    void importConstraintSharedData(Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
-        const OrdinalType tOBJ_FUNC_VAL_INDEX = 0;
+        const OrdinalType tCONSTRAINT_VAL_INDEX = 0;
         const OrdinalType tNumParticles = aOutput.size();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
         {
-            assert(aOutput.size() == mObjFuncValues.size());
-            aOutput[tParticleIndex] = mObjFuncValues[tParticleIndex][tOBJ_FUNC_VAL_INDEX];
+            assert(aOutput.size() == mConstraintValues.size());
+            aOutput[tParticleIndex] = mConstraintValues[tParticleIndex][tCONSTRAINT_VAL_INDEX];
         }
     }
 
 private:
+    OrdinalType mMyConstraintID; /*!< constraint index */
     std::vector<std::vector<ScalarType>> mParticles; /*!< set of particles */
-    std::vector<std::vector<ScalarType>> mObjFuncValues; /*!< set of objective function values */
+    std::vector<std::vector<ScalarType>> mConstraintValues; /*!< set of objective function values */
 
     Plato::Interface* mInterface; /*!< interface to data motion coordinator */
     Plato::OptimizerEngineStageData mEngineInputData; /*!< holds Plato Engine's options and inputs */
     std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< Plato Engine parameter list */
 
 private:
-    GradFreeEngineObjective(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
-    Plato::GradFreeEngineObjective<ScalarType, OrdinalType> & operator=(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
+    GradFreeEngineConstraint(const Plato::GradFreeEngineConstraint<ScalarType, OrdinalType>&);
+    Plato::GradFreeEngineConstraint<ScalarType, OrdinalType> & operator=(const Plato::GradFreeEngineConstraint<ScalarType, OrdinalType>&);
 };
 // class GradFreeEngineObjective
 

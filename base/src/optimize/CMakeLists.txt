@@ -14,6 +14,7 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_GradFreeGoldsteinPrice.hpp
                         Plato_GradFreeShiftedEllipse.hpp
                         Plato_GradFreeEngineObjective.hpp
+                        Plato_GradFreeEngineConstraint.hpp
                         Plato_ParticleSwarmTypes.hpp
                         Plato_ParticleSwarmParser.hpp
                         Plato_ParticleSwarmDataMng.hpp
