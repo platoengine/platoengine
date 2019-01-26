@@ -608,6 +608,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -628,6 +629,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -643,10 +645,11 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
     // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("NumParticles", "20");
     tOptions.add<std::string>("MaxNumOuterIterations", "100");
     tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
-    tOptions.add<std::string>("OutputDiagnosticsToFile", "true");
+    tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
@@ -656,11 +659,12 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("GlobalBestObjFuncTolerance", "0.000001");
     tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
     tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
-    Plato::InputData tOptimizerNode("OptimizerNode");
-    tOptimizerNode.add<Plato::InputData>("Options", tOptions);
+    Plato::InputData tOptimizerNodeOne("OptimizerNode");
+    tOptimizerNodeOne.add<Plato::InputData>("Options", tOptions);
 
-    tParserPSO.parse(tOptimizerNode, tInputsPSO);
-    EXPECT_TRUE(tInputsPSO.mOutputDiagnostics);
+    tParserPSO.parse(tOptimizerNodeOne, tInputsPSO);
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -674,6 +678,37 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
+
+    // ********* TEST: SET A HANDFULL OF PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> A FEW DEFAULT VALUES ARE EXPECTED *********
+    Plato::InputData tOptionsTwo("Options");
+    tOptionsTwo.add<std::string>("NumParticles", "20");
+    tOptionsTwo.add<std::string>("MaxNumConsecutiveFailures", "7");
+    tOptionsTwo.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptionsTwo.add<std::string>("InertiaMultiplier", "0.55");
+    tOptionsTwo.add<std::string>("ParticleVelocityTimeStep", "0.75");
+    tOptionsTwo.add<std::string>("MeanBestObjFuncTolerance", "0.001");
+    tOptionsTwo.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
+    tOptionsTwo.add<std::string>("TrustRegionContractionMultiplier", "0.5");
+    Plato::InputData tOptimizerNodeTwo("OptimizerNode");
+    tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
+    Plato::InputDataBCPSO<double> tInputsTwoPSO;
+    tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
+
+    EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
+    EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumIterations);
+    EXPECT_EQ(7u, tInputsTwoPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(8u, tInputsTwoPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(0.75, tInputsTwoPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.55, tInputsTwoPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsTwoPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(0.001, tInputsTwoPSO.mMeanBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
 
 TEST(PlatoTest, PSO_ParserALPSO)
@@ -688,6 +723,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -713,6 +749,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -733,10 +770,11 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
     // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("NumParticles", "20");
     tOptions.add<std::string>("MaxNumOuterIterations", "100");
     tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
-    tOptions.add<std::string>("OutputDiagnosticsToFile", "true");
+    tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
@@ -754,7 +792,8 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptimizerNode.add<Plato::InputData>("Options", tOptions);
 
     tParserPSO.parse(tOptimizerNode, tInputsPSO);
-    EXPECT_TRUE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -772,6 +811,41 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(10, tInputsPSO.mPenaltyMultiplierUpperBound, tTolerance);
     EXPECT_NEAR(0.25, tInputsPSO.mPenaltyContractionMultiplier, tTolerance);
     EXPECT_NEAR(1e-2, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
+
+    // ********* TEST: SET A HANDFULL OF PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> A FEW DEFAULT VALUES ARE EXPECTED *********
+    Plato::InputData tOptionsTwo("Options");
+    tOptionsTwo.add<std::string>("NumParticles", "20");
+    tOptionsTwo.add<std::string>("MaxNumConsecutiveFailures", "7");
+    tOptionsTwo.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptionsTwo.add<std::string>("InertiaMultiplier", "0.55");
+    tOptionsTwo.add<std::string>("ParticleVelocityTimeStep", "0.75");
+    tOptionsTwo.add<std::string>("MeanBestAugLagFuncTolerance", "0.001");
+    tOptionsTwo.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
+    tOptionsTwo.add<std::string>("TrustRegionContractionMultiplier", "0.5");
+    Plato::InputData tOptimizerNodeTwo("OptimizerNode");
+    tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
+    Plato::InputDataALPSO<double> tInputsTwoPSO;
+    tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
+
+    EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
+    EXPECT_EQ(5u, tInputsTwoPSO.mMaxNumInnerIter);
+    EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumOuterIter);
+    EXPECT_EQ(7, tInputsTwoPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(8, tInputsTwoPSO.mMaxNumConsecutiveSuccesses);
+
+    EXPECT_NEAR(0.75, tInputsTwoPSO.mTimeStep, tTolerance);
+    EXPECT_NEAR(0.55, tInputsTwoPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.8, tInputsTwoPSO.mSocialBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsTwoPSO.mMeanBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(2.0, tInputsTwoPSO.mPenaltyExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(100, tInputsTwoPSO.mPenaltyMultiplierUpperBound, tTolerance);
+    EXPECT_NEAR(0.5, tInputsTwoPSO.mPenaltyContractionMultiplier, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsTwoPSO.mFeasibilityInexactnessTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
+    EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
 
 TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)

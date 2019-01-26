@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_GradFreeEngineObjective.hpp
+ * Plato_GradFreeEngineCriterion.hpp
  *
  *  Created on: Jan 24, 2019
 */
@@ -51,6 +51,7 @@
 #include <vector>
 #include <memory>
 
+#include "Plato_Stage.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_MultiVector.hpp"
@@ -61,34 +62,38 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Interface for gradient free engine objective
+ * @brief PLATO Engine interface for gradient free criterion
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class GradFreeEngineObjective : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
+class GradFreeEngineCriterion : public Plato::GradFreeCriterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
      * @brief Constructor
-     * @param [in] aDataFactory data factory
-     * @param [in] aInputData data structure with engine's options and input keywords
+     * @param [in] aStageName name of criterion stage
+     * @param [in] aNumControls local number of controls
+     * @param [in] aNumParticles local number of particles
      * @param [in] aInterface interface to data motion coordinator
     **********************************************************************************/
-    explicit GradFreeEngineObjective(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
-                                     const Plato::OptimizerEngineStageData & aInputData,
+    explicit GradFreeEngineCriterion(const std::string & aStageName,
+                                     const OrdinalType & aNumControls,
+                                     const OrdinalType & aNumParticles,
                                      Plato::Interface* aInterface = nullptr) :
+            mStageName(aStageName),
+            mNumControls(aNumControls),
+            mNumParticles(aNumParticles),
             mParticles(),
-            mObjFuncValues(),
+            mCriterionValues(),
             mInterface(aInterface),
-            mEngineInputData(aInputData),
             mParameterList(std::make_shared<Teuchos::ParameterList>())
     {
-        this->initialize(aDataFactory);
+        this->initialize();
     }
 
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    virtual ~GradFreeEngineObjective()
+    virtual ~GradFreeEngineCriterion()
     {
     }
 
@@ -103,59 +108,55 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Evaluates generic objective function through the Plato Engine
-     * @param [in] aControl set of particles, each particle denotes a set of optimization variables
-     * @param [out] aOutput criterion value for each particle
+     * @brief Evaluates generic criterion through the PLATO Engine interface
+     * @param [in] aControl set of particles
+     * @param [out] aOutput criterion values
      **********************************************************************************/
     void value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
         assert(mInterface != nullptr);
         this->exportParticlesSharedData(aControl);
-        this->exportObjFuncSharedData(aOutput);
+        this->exportCriteriaSharedData();
         this->compute();
-        this->importObjFuncSharedData(aOutput);
+        this->importCriterionSharedData(aOutput);
     }
 
 private:
     /******************************************************************************//**
      * @brief Allocate class member containers
     **********************************************************************************/
-    void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
+    void initialize()
     {
-        const OrdinalType tNumControls = aDataFactory.getNumControls();
-        const OrdinalType tNumParticles = aDataFactory.getNumCriterionValues();
-        mParticles.resize(tNumParticles, std::vector<ScalarType>(tNumControls));
-        const OrdinalType tNumObjFuncVals = 1;
-        mObjFuncValues.resize(tNumParticles, std::vector<ScalarType>(tNumObjFuncVals));
+        mParticles.resize(mNumParticles, std::vector<ScalarType>(mNumControls));
+        const OrdinalType tNumValues = 1;
+        mCriterionValues.resize(mNumParticles, std::vector<ScalarType>(tNumValues));
     }
 
     /******************************************************************************//**
-     * @brief Compute gradient free objective function
+     * @brief Compute gradient free criterion
     **********************************************************************************/
     void compute()
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
-        assert(tCriterionStageName.empty() == false);
+        assert(mStageName.empty() == false);
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tCriterionStageName);
+        tStageNames.push_back(mStageName);
         mInterface->compute(tStageNames, *mParameterList);
     }
 
     /******************************************************************************//**
-     * @brief Export particles to applications (e.g. simulation software)
+     * @brief Export particles to applications (e.g. simulation driver)
      * @param [in] aControl 2D container of optimization variables
     **********************************************************************************/
     void exportParticlesSharedData(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
-        Plato::Stage* tObjFuncStage = mInterface->getStage(tCriterionStageName);
-        std::vector<std::string> tInputDataNames = tObjFuncStage->getInputDataNames();
+        Plato::Stage* tCriterionStage = mInterface->getStage(mStageName);
+        std::vector<std::string> tNamesInputData = tCriterionStage->getInputDataNames();
 
-        const OrdinalType tNumParticles = aControl.getNumVectors();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType> & tMyControls = aControl[tParticleIndex];
+            assert(mNumParticles == mParticles[tParticleIndex].size());
             assert(tMyControls.size() == mParticles[tParticleIndex].size());
 
             const OrdinalType tNumControls = tMyControls.size();
@@ -164,57 +165,59 @@ private:
                 mParticles[tParticleIndex][tControlIndex] = tMyControls[tControlIndex];
             }
 
-            std::string tControlSharedDataName = tInputDataNames[tParticleIndex];
-            mParameterList->set(tControlSharedDataName, mParticles[tParticleIndex].data());
+            std::string tNameControlSharedData = tNamesInputData[tParticleIndex];
+            mParameterList->set(tNameControlSharedData, mParticles[tParticleIndex].data());
         }
     }
 
     /******************************************************************************//**
-     * @brief Export objective function values to application (e.g. simulation software)
-     * @param [in] aNumParticles number of particles
+     * @brief Export criterion values to application (e.g. simulation driver)
     **********************************************************************************/
-    void exportObjFuncSharedData(const OrdinalType & aNumParticles)
+    void exportCriteriaSharedData()
     {
-        std::string tCriterionStageName = mEngineInputData.getObjectiveValueStageName();
-        Plato::Stage* tObjFuncStage = mInterface->getStage(tCriterionStageName);
-        std::vector<std::string> tOutputDataNames = tObjFuncStage->getOutputDataNames();
+        Plato::Stage* tCriterionStage = mInterface->getStage(mStageName);
+        std::vector<std::string> tNamesOutputData = tCriterionStage->getOutputDataNames();
 
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < aNumParticles; tParticleIndex++)
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
-            assert(aNumParticles == mObjFuncValues.size());
-            std::fill(mObjFuncValues[tParticleIndex].begin(), mObjFuncValues[tParticleIndex].end(), 0.0);
-            std::string tObjFuncSharedDataName = tOutputDataNames[tParticleIndex];
-            mParameterList->set(tObjFuncSharedDataName, mObjFuncValues[tParticleIndex].data());
+            assert(mNumParticles == mCriterionValues.size());
+            std::fill(mCriterionValues[tParticleIndex].begin(), mCriterionValues[tParticleIndex].end(), 0.0);
+            std::string tNameCriterionSharedData = tNamesOutputData[tParticleIndex];
+            mParameterList->set(tNameCriterionSharedData, mCriterionValues[tParticleIndex].data());
         }
     }
 
     /******************************************************************************//**
-     * @brief Import objective function values from application (e.g. simulation software)
-     * @param [in] aOutput 1D container of objective function values
+     * @brief Import criteria values from application (e.g. simulation driver)
+     * @param [in] aOutput 1D container of criterion values
     **********************************************************************************/
-    void importObjFuncSharedData(Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    void importCriterionSharedData(Plato::Vector<ScalarType, OrdinalType> & aOutput)
     {
-        const OrdinalType tOBJ_FUNC_VAL_INDEX = 0;
-        const OrdinalType tNumParticles = aOutput.size();
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+        assert(mNumParticles == aOutput.size());
+        assert(aOutput.size() == mCriterionValues.size());
+
+        const OrdinalType tCRITERION_VALUES_INDEX = 0;
+        for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
-            assert(aOutput.size() == mObjFuncValues.size());
-            aOutput[tParticleIndex] = mObjFuncValues[tParticleIndex][tOBJ_FUNC_VAL_INDEX];
+            aOutput[tParticleIndex] = mCriterionValues[tParticleIndex][tCRITERION_VALUES_INDEX];
         }
     }
 
 private:
+    std::string mStageName; /*!< name of criterion stage */
+    OrdinalType mNumControls; /*!< local number of controls */
+    OrdinalType mNumParticles; /*!< local number of particles */
+
     std::vector<std::vector<ScalarType>> mParticles; /*!< set of particles */
-    std::vector<std::vector<ScalarType>> mObjFuncValues; /*!< set of objective function values */
+    std::vector<std::vector<ScalarType>> mCriterionValues; /*!< set of criterion values */
 
     Plato::Interface* mInterface; /*!< interface to data motion coordinator */
-    Plato::OptimizerEngineStageData mEngineInputData; /*!< holds Plato Engine's options and inputs */
-    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< Plato Engine parameter list */
+    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< PLATO Engine parameter list */
 
 private:
-    GradFreeEngineObjective(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
-    Plato::GradFreeEngineObjective<ScalarType, OrdinalType> & operator=(const Plato::GradFreeEngineObjective<ScalarType, OrdinalType>&);
+    GradFreeEngineCriterion(const Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>&);
+    Plato::GradFreeEngineCriterion<ScalarType, OrdinalType> & operator=(const Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>&);
 };
-// class GradFreeEngineObjective
+// class GradFreeEngineCriterion
 
 } // namespace Plato

@@ -66,10 +66,16 @@ struct optimizer
         DERIVATIVE_CHECKER = 7,
         RAPID_OPTIMIZATION_LIBRARY = 8,
         STOCHASTIC_REDUCED_ORDER_MODEL = 9,
-    };
+        PARTICLE_SWARM_OPTMIZATION_ALPSO = 10,
+        PARTICLE_SWARM_OPTMIZATION_BCPSO = 11,
+    }; // enum algorithm_t
 
 };
+// struct optimizer
 
+/******************************************************************************//**
+ * @brief Abstract interface to optimization algorithm
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class OptimizerInterface
 {
@@ -78,10 +84,22 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Interface to optimization algorithm - solves optimization problem
+    **********************************************************************************/
     virtual void optimize() = 0;
+
+    /******************************************************************************//**
+     * @brief Deallocate memory
+    **********************************************************************************/
     virtual void finalize() = 0;
+
+    /******************************************************************************//**
+     * @brief Allocate memory
+    **********************************************************************************/
     virtual void initialize() = 0;
 };
+// class OptimizerInterface
 
 } // namespace Plato
 

@@ -179,6 +179,7 @@ struct InputDataALPSO
     **********************************************************************************/
     InputDataALPSO() :
             mOutputDiagnostics(false),
+            mNumParticles(10),
             mMaxNumOuterIter(1e3),
             mMaxNumInnerIter(5),
             mMaxNumConsecutiveFailures(10),
@@ -217,6 +218,7 @@ struct InputDataALPSO
 
     bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
+    OrdinalType mNumParticles; /*!< number of particles */
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxNumInnerIter; /*!< maximum number of augmented Lagrangian subproblem iterations */
     OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, global best F(x_{i+1}) == F(x_{i}) */
