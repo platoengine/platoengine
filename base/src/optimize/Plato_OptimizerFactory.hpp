@@ -1,11 +1,4 @@
 /*
- * Plato_Optimizer.hpp
- *
- *  Created on: April 19, 2017
- *
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -47,9 +40,14 @@
 //@HEADER
 */
 
-#ifndef SRC_OPTIMIZERFACTORY_HPP_
+/*
+ * Plato_Optimizer.hpp
+ *
+ *  Created on: April 19, 2017
+ *
+ */
 
-#define SRC_OPTIMIZERFACTORY_HPP_
+#pragma once
 
 #include <mpi.h>
 
@@ -93,6 +91,8 @@ public:
 
     /******************************************************************************//**
      * @brief Construct interface to optimization algorithm
+     * @param [in] aInterface PLATO Engine interface
+     * @param [in] aLocalComm local MPI communicator
      * @return non-const pointer to the optimization algorithm's interface
     **********************************************************************************/
     Plato::OptimizerInterface<ScalarType, OrdinalType>* create(Plato::Interface* aInterface, MPI_Comm aLocalComm)
@@ -216,5 +216,3 @@ private:
 // class OptimizerFactory
 
 } // namespace Plato
-
-#endif 
