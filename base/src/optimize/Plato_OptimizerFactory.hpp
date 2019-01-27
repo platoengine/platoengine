@@ -47,10 +47,7 @@
  *
  */
 
-
-#ifndef SRC_OPTIMIZERFACTORY_HPP_
-
-#define SRC_OPTIMIZERFACTORY_HPP_
+#pragma once
 
 #include <mpi.h>
 
@@ -219,5 +216,3 @@ private:
 // class OptimizerFactory
 
 } // namespace Plato
-
-#endif 
