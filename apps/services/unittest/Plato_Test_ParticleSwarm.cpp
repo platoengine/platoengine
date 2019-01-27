@@ -830,8 +830,8 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsTwoPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumOuterIter);
-    EXPECT_EQ(7, tInputsTwoPSO.mMaxNumConsecutiveFailures);
-    EXPECT_EQ(8, tInputsTwoPSO.mMaxNumConsecutiveSuccesses);
+    EXPECT_EQ(7u, tInputsTwoPSO.mMaxNumConsecutiveFailures);
+    EXPECT_EQ(8u, tInputsTwoPSO.mMaxNumConsecutiveSuccesses);
 
     EXPECT_NEAR(0.75, tInputsTwoPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsTwoPSO.mInertiaMultiplier, tTolerance);
