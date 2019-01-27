@@ -1,11 +1,4 @@
 /*
- * Plato_Optimizer.hpp
- *
- *  Created on: April 19, 2017
- *
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,6 +39,14 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_Optimizer.hpp
+ *
+ *  Created on: April 19, 2017
+ *
+ */
+
 
 #ifndef SRC_OPTIMIZERFACTORY_HPP_
 
