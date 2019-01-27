@@ -55,6 +55,8 @@
 
 #include "Plato_OptimizerInterface.hpp"
 #include "Plato_DiagnosticsInterface.hpp"
+#include "Plato_ParticleSwarmEngineBCPSO.hpp"
+#include "Plato_ParticleSwarmEngineALPSO.hpp"
 #include "Plato_OptimalityCriteriaInterface.hpp"
 #include "Plato_MethodMovingAsymptotesInterface.hpp"
 #include "Plato_KelleySachsBoundConstrainedInterface.hpp"
@@ -68,20 +70,32 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Construct interface to optimization algorithm
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class OptimizerFactory
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     OptimizerFactory()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructuor
+    **********************************************************************************/
     ~OptimizerFactory()
     {
     }
 
-    /**********************************************************************/
+    /******************************************************************************//**
+     * @brief Construct interface to optimization algorithm
+     * @return non-const pointer to the optimization algorithm's interface
+    **********************************************************************************/
     Plato::OptimizerInterface<ScalarType, OrdinalType>* create(Plato::Interface* aInterface, MPI_Comm aLocalComm)
-    /**********************************************************************/
     {
      Plato::OptimizerInterface<ScalarType, OrdinalType>* tOptimizer = nullptr;
      try {
@@ -137,6 +151,18 @@ public:
            tOptimizer = new Plato::KelleySachsAugmentedLagrangianInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
+       else if( tOptPackage == "BCPSO" )
+       {
+         try {
+           tOptimizer = new Plato::ParticleSwarmEngineBCPSO<ScalarType, OrdinalType>(aInterface, aLocalComm);
+         } catch(...){aInterface->Catch();}
+       }
+       else if( tOptPackage == "ALPSO" )
+       {
+         try {
+           tOptimizer = new Plato::ParticleSwarmEngineALPSO<ScalarType, OrdinalType>(aInterface, aLocalComm);
+         } catch(...){aInterface->Catch();}
+       }
 #ifdef ENABLE_ROL
        else if( tOptPackage == "ROL" )
        {
@@ -162,6 +188,8 @@ public:
            << "\t KSUC ... Kelley Sachs Unconstrained\n"
            << "\t KSBC ... Kelley Sachs Bound Constrained\n"
            << "\t KSAL ... Kelley Sachs Augmented Lagrangian\n"
+           << "\t BCPSO ... Bound Constrained Particle Swarm Optimization\n"
+           << "\t ALPSO ... Augmented Lagrangian Particle Swarm Optimization\n"
            << "\t DerivativeChecker ... Derivative Checker Toolkit\n"
 #ifdef ENABLE_ROL
            << "\t ROL ... Rapid Optimization Library\n"
@@ -185,6 +213,7 @@ private:
     OptimizerFactory(const Plato::OptimizerFactory<ScalarType, OrdinalType>&);
     Plato::OptimizerFactory<ScalarType, OrdinalType> & operator=(const Plato::OptimizerFactory<ScalarType, OrdinalType>&);
 };
+// class OptimizerFactory
 
 } // namespace Plato
 

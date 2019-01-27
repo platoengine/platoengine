@@ -129,6 +129,7 @@ struct InputDataBCPSO
     **********************************************************************************/
     InputDataBCPSO() :
             mOutputDiagnostics(false),
+            mNumParticles(10),
             mMaxNumIterations(1e3),
             mMaxNumConsecutiveFailures(10),
             mMaxNumConsecutiveSuccesses(10),
@@ -161,6 +162,7 @@ struct InputDataBCPSO
 
     bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
+    OrdinalType mNumParticles; /*!< number of particles */
     OrdinalType mMaxNumIterations; /*!< maximum number of iterations */
     OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, global best F(x_{i+1}) == F(x_{i}) */
     OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, global best F(x_{i+1}) < F(x_{i}) */

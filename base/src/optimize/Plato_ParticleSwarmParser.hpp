@@ -89,6 +89,7 @@ public:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
 
+            aData.mNumParticles = this->numParticles(tOptionsNode);
             aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
             aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
             aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
@@ -117,6 +118,7 @@ public:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
 
+            aData.mNumParticles = this->numParticles(tOptionsNode);
             aData.mMaxNumOuterIter = this->maxNumOuterIterations(tOptionsNode);
             aData.mMaxNumInnerIter = this->maxNumInnerIterations(tOptionsNode);
             aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
@@ -145,12 +147,26 @@ private:
     **********************************************************************************/
     bool outputDiagnostics(const Plato::InputData & aOptionsNode)
     {
-        bool tOuput = false;
+        bool tOuput = true;
         if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
         }
         return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse number of particles
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    OrdinalType numParticles(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 10;
+        if(aOptionsNode.size<std::string>("NumParticles"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "NumParticles");
+        }
+        return (tOutput);
     }
 
     /******************************************************************************//**

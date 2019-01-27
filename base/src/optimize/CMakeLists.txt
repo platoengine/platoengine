@@ -13,7 +13,7 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_GradFreeRocketObjFunc.hpp
                         Plato_GradFreeGoldsteinPrice.hpp
                         Plato_GradFreeShiftedEllipse.hpp
-                        Plato_GradFreeEngineObjective.hpp
+                        Plato_GradFreeEngineCriterion.hpp
                         Plato_ParticleSwarmTypes.hpp
                         Plato_ParticleSwarmParser.hpp
                         Plato_ParticleSwarmDataMng.hpp
@@ -21,6 +21,8 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_ParticleSwarmIO_BCPSO.hpp
                         Plato_ParticleSwarmIO_ALPSO.hpp
                         Plato_ParticleSwarmOperations.hpp
+                        Plato_ParticleSwarmEngineBCPSO.hpp
+                        Plato_ParticleSwarmEngineALPSO.hpp
                         Plato_ParticleSwarmIO_Utilities.hpp
                         Plato_ParticleSwarmStageMngBCPSO.hpp
                         Plato_ParticleSwarmStageMngALPSO.hpp
