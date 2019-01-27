@@ -93,6 +93,8 @@ public:
 
     /******************************************************************************//**
      * @brief Construct interface to optimization algorithm
+     * @param [in] aInterface PLATO Engine interface
+     * @param [in] aLocalComm local MPI communicator
      * @return non-const pointer to the optimization algorithm's interface
     **********************************************************************************/
     Plato::OptimizerInterface<ScalarType, OrdinalType>* create(Plato::Interface* aInterface, MPI_Comm aLocalComm)
