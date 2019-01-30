@@ -73,8 +73,8 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
-            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
+            mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
@@ -95,8 +95,8 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
-            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
+            mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mNumObjFuncEvals(0),
             mMaxNumIterations(1000),
