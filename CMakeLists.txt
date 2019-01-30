@@ -198,6 +198,7 @@ if( PLATOPROXY )
   add_subdirectory(apps/rocket)
   add_subdirectory(apps/ksal_proxy)
   add_subdirectory(apps/rosenbrock)
+  add_subdirectory(apps/bcpso_proxy)
 endif()
 
 if( PLATOSTATICS )

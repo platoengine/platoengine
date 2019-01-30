@@ -73,6 +73,7 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
+            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
             mNumIterations(0),
             mNumObjFuncEvals(0),
@@ -94,6 +95,7 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
+            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
             mNumIterations(0),
             mNumObjFuncEvals(0),
@@ -121,6 +123,14 @@ public:
     void enableDiagnostics()
     {
         mOutputDiagnostics = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Disables stopping tolerance based on the standard deviation of the objective function
+    **********************************************************************************/
+    void disableStdDevStoppingTolerance()
+    {
+        mStdDevStoppingTolActive = false;
     }
 
     /******************************************************************************//**
@@ -506,7 +516,7 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
         }
-        else if(tStdDevCurrentBestObjFunValue < mStdDevBestObjFuncTolerance)
+        else if(tStdDevCurrentBestObjFunValue < mStdDevBestObjFuncTolerance && mStdDevStoppingTolActive)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
@@ -615,6 +625,7 @@ private:
 
 private:
     bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
     std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
 
     OrdinalType mNumIterations; /*!< current number of iterations */

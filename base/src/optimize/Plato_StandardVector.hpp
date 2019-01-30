@@ -58,18 +58,43 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief PLATO standard C++ vector interface
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class StandardVector : public Plato::Vector<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    StandardVector() :
+            mData()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aInput 1D standard C++ vector
+    **********************************************************************************/
     explicit StandardVector(const std::vector<ScalarType> & aInput) :
             mData(aInput)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aNumElements number of elements
+     * @param [in] aValue value to fill container with
+    **********************************************************************************/
     StandardVector(const OrdinalType & aNumElements, ScalarType aValue = 0) :
             mData(std::vector<ScalarType>(aNumElements, aValue))
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~StandardVector()
     {
     }

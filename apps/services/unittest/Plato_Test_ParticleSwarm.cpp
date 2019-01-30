@@ -233,6 +233,47 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
     }
 }
 
+TEST(PlatoTest, PSO_PrintSolution)
+{
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
+    {
+        // SOLUTION PRINTED
+        size_t tNumElem = 3;
+        Plato::StandardVector<double> tBest(tNumElem);
+        tBest[0] = 1; tBest[1] = 2; tBest[2] = 3;
+        Plato::StandardVector<double> tMean(tNumElem);
+        tMean[0] = 0.9; tMean[1] = 1.9; tMean[2] = 3.1;
+        Plato::StandardVector<double> tStdDev(tNumElem);
+        tStdDev[0] = 0.1; tStdDev[1] = 0.2; tStdDev[2] = 0.3;
+        EXPECT_TRUE(Plato::pso::print_solution(tBest, tMean, tStdDev));
+
+        std::ifstream tReadFile;
+        tReadFile.open("plato_pso_solution.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f plato_pso_solution.txt");
+
+        std::stringstream tGold;
+        tGold << "Best(X)Mean(X)StdDev(X)";
+        tGold << "1.000000e+009.000000e-011.000000e-01";
+        tGold << "2.000000e+001.900000e+002.000000e-01";
+        tGold << "3.000000e+003.100000e+003.000000e-01";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+
+        Plato::StandardVector<double> tEmptyBest;
+        Plato::StandardVector<double> tEmptyMean;
+        Plato::StandardVector<double> tEmptyStdDev;
+        EXPECT_FALSE(Plato::pso::print_solution(tEmptyBest, tEmptyMean, tEmptyStdDev));
+    }
+}
+
 TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
 {
     std::ofstream tFile1;
@@ -607,7 +648,9 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tInputData, tInputsPSO);
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
+    EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -628,7 +671,9 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     Plato::InputData tOptions("Options");
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
+    EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -649,7 +694,9 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("MaxNumOuterIterations", "100");
     tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
@@ -664,6 +711,8 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     tParserPSO.parse(tOptimizerNodeOne, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_TRUE(tInputsPSO.mOutputSolution);
+    EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumIterations);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -694,7 +743,9 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     Plato::InputDataBCPSO<double> tInputsTwoPSO;
     tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
 
+    EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumIterations);
     EXPECT_EQ(7u, tInputsTwoPSO.mMaxNumConsecutiveFailures);
@@ -722,7 +773,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tParserPSO.parse(tInputData, tInputsPSO);
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
+    EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
@@ -748,7 +801,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     Plato::InputData tOptions("Options");
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
+    EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
@@ -774,7 +829,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("MaxNumOuterIterations", "100");
     tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
+    tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
@@ -792,7 +849,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptimizerNode.add<Plato::InputData>("Options", tOptions);
 
     tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    EXPECT_TRUE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -826,6 +885,10 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
     Plato::InputDataALPSO<double> tInputsTwoPSO;
     tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
+
+    EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
+    EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
 
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsTwoPSO.mMaxNumInnerIter);

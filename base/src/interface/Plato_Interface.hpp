@@ -98,6 +98,7 @@ public:
     virtual ~Interface();
 
     // optimizer interface
+    void finalize();
     void compute(const std::string & stageName, Teuchos::ParameterList & aArguments);
     void compute(const std::vector<std::string> & stageNames, Teuchos::ParameterList & aArguments);
 

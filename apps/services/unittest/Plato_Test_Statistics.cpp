@@ -326,6 +326,44 @@ std::vector<double> get_gold_beta_cdf_values()
 
 // ********************************************** BEGIN UNIT TESTS **********************************************
 
+TEST(PlatoTest, stats_mean)
+{
+    size_t tNumSamples = 10;
+    Plato::StandardVector<double> tVector(tNumSamples, 1.0);
+    Plato::StandardVectorReductionOperations<double> tReduction;
+    double tOutput = Plato::mean(tReduction, tVector);
+    double tTolerance = 1e-6;
+    EXPECT_NEAR(1.0, tOutput, tTolerance);
+}
+
+TEST(PlatoTest, stats_stddev)
+{
+    std::vector<double> tData = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    Plato::StandardVector<double> tVector(tData);
+    Plato::StandardVectorReductionOperations<double> tReduction;
+
+    const double tMean = Plato::mean(tReduction, tVector);
+    const double tStdDev = Plato::standard_deviation(tMean, tVector, tReduction);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(5.5, tMean, tTolerance);
+    EXPECT_NEAR(3.0276503540974917, tStdDev, tTolerance);
+}
+
+TEST(PlatoTest, stats_stddev_one_value)
+{
+    std::vector<double> tData = { 1 };
+    Plato::StandardVector<double> tVector(tData);
+    Plato::StandardVectorReductionOperations<double> tReduction;
+
+    const double tMean = Plato::mean(tReduction, tVector);
+    const double tStdDev = Plato::standard_deviation(tMean, tVector, tReduction);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(1.0, tMean, tTolerance);
+    EXPECT_NEAR(0.0, tStdDev, tTolerance);
+}
+
 TEST(PlatoTest, ComputeMonteCarloDataErrors)
 {
     Plato::UncertaintyInputStruct<double> tStatsInputs;

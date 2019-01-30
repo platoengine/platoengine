@@ -748,8 +748,15 @@ private:
         {
             tWork[tVECTOR_INDEX] = (*mWorkVector)[tDim];
             const ScalarType tGlobalBestParticlePositionMinusMean = mCriteriaReductions->sum(tWork);
-            const ScalarType tValue = tGlobalBestParticlePositionMinusMean / static_cast<ScalarType>(mGlobalNumParticles - 1);
-            (*mStdDevCurrentBestParticlePositions)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
+            if(mGlobalNumParticles > static_cast<OrdinalType>(1))
+            {
+                const ScalarType tValue = tGlobalBestParticlePositionMinusMean / static_cast<ScalarType>(mGlobalNumParticles - 1);
+                (*mStdDevCurrentBestParticlePositions)[tDim] = std::pow(tValue, static_cast<ScalarType>(0.5));
+            }
+            else
+            {
+                (*mStdDevCurrentBestParticlePositions)[tDim] = 0.0;
+            }
         }
     }
 

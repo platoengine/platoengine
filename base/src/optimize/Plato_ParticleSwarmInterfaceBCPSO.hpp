@@ -67,6 +67,11 @@ inline void set_bcpso_algorithm_inputs(const Plato::InputDataBCPSO<ScalarType,Or
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mDisableStdDevStoppingTol == true)
+    {
+        aAlgorithm.disableStdDevStoppingTolerance();
+    }
+
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumIterations);
     aAlgorithm.setMaxNumConsecutiveFailures(aInputs.mMaxNumConsecutiveFailures);
     aAlgorithm.setMaxNumConsecutiveSuccesses(aInputs.mMaxNumConsecutiveSuccesses);
@@ -138,6 +143,12 @@ inline void solve_bcpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
     Plato::set_bcpso_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_bcpso_algorithm_outputs(tAlgorithm, aOutputs);
+
+    // ********* OUTPUT SOLUTION TO TEXT FILE *********
+    if(aInputs.mOutputSolution == true && aInputs.mCommWrapper.myProcID() == 0)
+    {
+        Plato::pso::print_solution(*aOutputs.mGlobalBestParticles, *aOutputs.mMeanBestParticles, *aOutputs.mStdDevBestParticles);
+    }
 }
 // function solve_bcpso
 
