@@ -75,8 +75,8 @@ public:
     ParticleSwarmAlgorithmALPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
                                 const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
-            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
+            mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mMaxNumAugLagOuterIterations(1e3),
             mMeanBestAugLagFuncTolerance(5e-4),
