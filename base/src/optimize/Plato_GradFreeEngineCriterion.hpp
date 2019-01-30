@@ -55,6 +55,7 @@
 #include "Plato_Vector.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_MultiVector.hpp"
+#include "Plato_StageInputDataMng.hpp"
 #include "Plato_GradFreeCriterion.hpp"
 #include "Plato_OptimizerEngineStageData.hpp"
 
@@ -70,21 +71,21 @@ class GradFreeEngineCriterion : public Plato::GradFreeCriterion<ScalarType, Ordi
 public:
     /******************************************************************************//**
      * @brief Constructor
-     * @param [in] aStageName name of criterion stage
      * @param [in] aNumControls local number of controls
      * @param [in] aNumParticles local number of particles
+     * @param [in] aStageDataMng criterion stage data manager
      * @param [in] aInterface interface to data motion coordinator
     **********************************************************************************/
-    explicit GradFreeEngineCriterion(const std::string & aStageName,
-                                     const OrdinalType & aNumControls,
+    explicit GradFreeEngineCriterion(const OrdinalType & aNumControls,
                                      const OrdinalType & aNumParticles,
+                                     const Plato::StageInputDataMng & aStageDataMng,
                                      Plato::Interface* aInterface = nullptr) :
-            mStageName(aStageName),
             mNumControls(aNumControls),
             mNumParticles(aNumParticles),
             mParticles(),
             mCriterionValues(),
             mInterface(aInterface),
+            mStageDataMng(aStageDataMng),
             mParameterList(std::make_shared<Teuchos::ParameterList>())
     {
         this->initialize();
@@ -128,9 +129,15 @@ private:
     **********************************************************************************/
     void initialize()
     {
-        mParticles.resize(mNumParticles, std::vector<ScalarType>(mNumControls));
+        mParticles.resize(mNumParticles);
+        mCriterionValues.resize(mNumParticles);
+
         const OrdinalType tNumValues = 1;
-        mCriterionValues.resize(mNumParticles, std::vector<ScalarType>(tNumValues));
+        for(OrdinalType tIndex = 0; tIndex < mNumParticles; tIndex++)
+        {
+            mParticles[tIndex].resize(mNumControls);
+            mCriterionValues[tIndex].resize(tNumValues);
+        }
     }
 
     /******************************************************************************//**
@@ -138,9 +145,9 @@ private:
     **********************************************************************************/
     void compute()
     {
-        assert(mStageName.empty() == false);
+        std::string tMyStageName = mStageDataMng.getStageName();
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(mStageName);
+        tStageNames.push_back(tMyStageName);
         mInterface->compute(tStageNames, *mParameterList);
     }
 
@@ -150,13 +157,11 @@ private:
     **********************************************************************************/
     void exportParticlesSharedData(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
-        Plato::Stage* tCriterionStage = mInterface->getStage(mStageName);
-        std::vector<std::string> tNamesInputData = tCriterionStage->getInputDataNames();
-
+        std::string tMyStageName = mStageDataMng.getStageName();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
             const Plato::Vector<ScalarType> & tMyControls = aControl[tParticleIndex];
-            assert(mNumParticles == mParticles[tParticleIndex].size());
+            assert(mNumParticles == mParticles.size());
             assert(tMyControls.size() == mParticles[tParticleIndex].size());
 
             const OrdinalType tNumControls = tMyControls.size();
@@ -165,8 +170,8 @@ private:
                 mParticles[tParticleIndex][tControlIndex] = tMyControls[tControlIndex];
             }
 
-            std::string tNameControlSharedData = tNamesInputData[tParticleIndex];
-            mParameterList->set(tNameControlSharedData, mParticles[tParticleIndex].data());
+            std::string tMySharedDataName = mStageDataMng.getInput(tMyStageName, tParticleIndex);
+            mParameterList->set(tMySharedDataName, mParticles[tParticleIndex].data());
         }
     }
 
@@ -175,15 +180,13 @@ private:
     **********************************************************************************/
     void exportCriteriaSharedData()
     {
-        Plato::Stage* tCriterionStage = mInterface->getStage(mStageName);
-        std::vector<std::string> tNamesOutputData = tCriterionStage->getOutputDataNames();
-
+        std::string tMyStageName = mStageDataMng.getStageName();
         for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
             assert(mNumParticles == mCriterionValues.size());
             std::fill(mCriterionValues[tParticleIndex].begin(), mCriterionValues[tParticleIndex].end(), 0.0);
-            std::string tNameCriterionSharedData = tNamesOutputData[tParticleIndex];
-            mParameterList->set(tNameCriterionSharedData, mCriterionValues[tParticleIndex].data());
+            std::string tMySharedDataName = mStageDataMng.getOutput(tMyStageName, tParticleIndex);
+            mParameterList->set(tMySharedDataName, mCriterionValues[tParticleIndex].data());
         }
     }
 
@@ -204,7 +207,6 @@ private:
     }
 
 private:
-    std::string mStageName; /*!< name of criterion stage */
     OrdinalType mNumControls; /*!< local number of controls */
     OrdinalType mNumParticles; /*!< local number of particles */
 
@@ -212,6 +214,7 @@ private:
     std::vector<std::vector<ScalarType>> mCriterionValues; /*!< set of criterion values */
 
     Plato::Interface* mInterface; /*!< interface to data motion coordinator */
+    Plato::StageInputDataMng mStageDataMng; /*!< criterion stage data manager */
     std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< PLATO Engine parameter list */
 
 private:

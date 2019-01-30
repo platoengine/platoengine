@@ -178,7 +178,9 @@ struct InputDataALPSO
      * @brief Default constructor
     **********************************************************************************/
     InputDataALPSO() :
+            mOutputSolution(false),
             mOutputDiagnostics(false),
+            mDisableStdDevStoppingTol(false),
             mNumParticles(10),
             mMaxNumOuterIter(1e3),
             mMaxNumInnerIter(5),
@@ -216,7 +218,9 @@ struct InputDataALPSO
     {
     }
 
+    bool mOutputSolution; /*!< flag to output solution (default=false) */
     bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mDisableStdDevStoppingTol; /*!< flag to disable the stopping tolerance based on the standard deviation (default=false) */
 
     OrdinalType mNumParticles; /*!< number of particles */
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */

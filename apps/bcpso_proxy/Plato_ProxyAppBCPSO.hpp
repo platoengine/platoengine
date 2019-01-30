@@ -69,9 +69,10 @@ class ProxyAppBCPSO : public Plato::Application
 public:
     /******************************************************************************//**
      * @brief Constructor for BCPSO Proxy application
-    **********************************************************************************/
+     **********************************************************************************/
     ProxyAppBCPSO() :
             mNumControls(2),
+            mNumParticles(1),
             mSharedDataNames(),
             mObjFuncVals(),
             mParticle(),
@@ -205,10 +206,8 @@ private:
     {
         mSharedDataNames.push_back("Particle");
         mSharedDataNames.push_back("ObjFuncVal");
-
-        const OrdinalType tMyAppNumParticles = 1;
-        mObjFuncVals =  std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(tMyAppNumParticles);
-        mParticle =  std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(tMyAppNumParticles, mNumControls);
+        mObjFuncVals =  std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mNumParticles);
+        mParticle =  std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumParticles, mNumControls);
     }
 
     /******************************************************************************//**
@@ -217,7 +216,7 @@ private:
     **********************************************************************************/
     void checkArgumentName(const std::string & aArgumentName)
     {
-        if(std::find(mSharedDataNames.begin(), mSharedDataNames.end(), aArgumentName) != mSharedDataNames.end())
+        if(std::find(mSharedDataNames.begin(), mSharedDataNames.end(), aArgumentName) == mSharedDataNames.end())
         {
             std::ostringstream tErrorMsg;
             tErrorMsg << "\n\n*********\n ERROR IN " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__ << "\n LINE: "
@@ -255,6 +254,7 @@ private:
 
 private:
     OrdinalType mNumControls; /*!< number of controls */
+    OrdinalType mNumParticles; /*!< number of particles */
     std::vector<std::string> mSharedDataNames; /*!< argument names defined by application */
     std::shared_ptr<Plato::StandardVector<ScalarType, OrdinalType>> mObjFuncVals; /*!< objective function value */
     std::shared_ptr<Plato::StandardMultiVector<ScalarType, OrdinalType>> mParticle; /*!< control container */
@@ -264,7 +264,7 @@ private:
     ProxyAppBCPSO(const Plato::ProxyAppBCPSO<ScalarType, OrdinalType> & aRhs);
     Plato::ProxyAppBCPSO<ScalarType, OrdinalType> & operator=(const Plato::ProxyAppBCPSO<ScalarType, OrdinalType> & aRhs);
 };
-// class KsalProxyApp
+// class ProxyAppBCPSO
 
 }
 // namespace Plato

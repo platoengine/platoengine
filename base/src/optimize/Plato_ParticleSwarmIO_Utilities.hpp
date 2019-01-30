@@ -406,6 +406,44 @@ inline void print_alpso_inner_diagnostics(const Plato::DiagnosticsBCPSO<ScalarTy
 }
 // function print_alpso_inner_diagnostics
 
+/******************************************************************************//**
+ * @brief Output solution (i.e. optimization variables) to file.
+ * @param [in] aBest 1D container with global best solution (i.e. optimization variables)
+ * @param [in] aMean 1D container with the mean of the best set of solutions
+ * @param [in] aStdDev 1D container with the standard deviation of the best set of solutions
+ * @return indicate if solution was print to file
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline bool print_solution(const Plato::Vector<ScalarType, OrdinalType> & aBest,
+                           const Plato::Vector<ScalarType, OrdinalType> & aMean,
+                           const Plato::Vector<ScalarType, OrdinalType> & aStdDev)
+{
+    bool tPrintSolution = false;
+    const OrdinalType tCheck = aBest.size() * aMean.size() * aStdDev.size();
+
+    if(tCheck > static_cast<OrdinalType>(0))
+    {
+        std::ofstream tOutputStream;
+        tOutputStream.open("plato_pso_solution.txt");
+
+        tOutputStream << std::scientific << std::setprecision(6) << std::right << "Best(X)" << std::setw(18) << "Mean(X)"
+                    << std::setw(15) << "StdDev(X)" << "\n" << std::flush;
+
+        const OrdinalType tNumControls = aBest.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        {
+            tOutputStream << std::scientific << std::setprecision(6) << std::right << aBest[tIndex] << std::setw(15)
+            << aMean[tIndex] << std::setw(15) << aStdDev[tIndex] << "\n" << std::flush;
+        }
+
+        tOutputStream.close();
+        tPrintSolution = true;
+    }
+
+    return (tPrintSolution);
+}
+// function print_solution
+
 } // namespace pso
 
 } // namespace Plato

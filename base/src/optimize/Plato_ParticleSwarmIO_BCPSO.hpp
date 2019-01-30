@@ -128,7 +128,9 @@ struct InputDataBCPSO
      * @brief Default constructor
     **********************************************************************************/
     InputDataBCPSO() :
+           mOutputSolution(false),
             mOutputDiagnostics(false),
+            mDisableStdDevStoppingTol(false),
             mNumParticles(10),
             mMaxNumIterations(1e3),
             mMaxNumConsecutiveFailures(10),
@@ -160,7 +162,9 @@ struct InputDataBCPSO
     {
     }
 
+    bool mOutputSolution; /*!< flag to output solution (default=false) */
     bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mDisableStdDevStoppingTol; /*!< flag to disable the stopping tolerance based on the standard deviation (default=false) */
 
     OrdinalType mNumParticles; /*!< number of particles */
     OrdinalType mMaxNumIterations; /*!< maximum number of iterations */

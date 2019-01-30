@@ -67,6 +67,11 @@ inline void set_alpso_algorithm_inputs(const Plato::InputDataALPSO<ScalarType,Or
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mDisableStdDevStoppingTol == true)
+    {
+        aAlgorithm.disableStdDevStoppingTolerance();
+    }
+
     aAlgorithm.setMaxNumOuterIterations(aInputs.mMaxNumOuterIter);
     aAlgorithm.setMaxNumInnerIterations(aInputs.mMaxNumInnerIter);
     aAlgorithm.setMaxNumConsecutiveFailures(aInputs.mMaxNumConsecutiveFailures);
@@ -151,6 +156,12 @@ inline void solve_alpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
     Plato::set_alpso_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
     Plato::set_alpso_algorithm_outputs(tAlgorithm, aOutputs);
+
+    // ********* OUTPUT SOLUTION TO TEXT FILE *********
+    if(aInputs.mOutputSolution == true && aInputs.mCommWrapper.myProcID() == 0)
+    {
+        Plato::pso::print_solution(*aOutputs.mGlobalBestParticles, *aOutputs.mMeanBestParticles, *aOutputs.mStdDevBestParticles);
+    }
 }
 // function solve_alpso
 

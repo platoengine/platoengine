@@ -317,6 +317,11 @@ void Interface::perform(Plato::Stage* aStage)
     aStage->end();
 }
 
+void Interface::finalize()
+{
+    this->getStage("Terminate");
+}
+
 /******************************************************************************/
 void Interface::compute(const std::vector<std::string> & aStageNames, Teuchos::ParameterList& aArguments)
 /******************************************************************************/

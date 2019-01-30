@@ -54,7 +54,7 @@
 #include <string>
 #include <utility>
 
-#include "Plato_Parser.hpp"
+#include "Plato_InputData.hpp"
 
 namespace Plato
 {

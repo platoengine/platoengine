@@ -48,6 +48,8 @@
 
 #pragma once
 
+#include <sstream>
+
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
 #include "Plato_ParticleSwarmIO_BCPSO.hpp"
@@ -78,6 +80,40 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return gradient free objective function stage name
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return gradient free objective function stage name
+    **********************************************************************************/
+    std::string getObjectiveStageName(const Plato::InputData & aOptimizerNode) const
+    {
+        std::string tOutput("ObjFuncEval");
+        if(aOptimizerNode.size<Plato::InputData>("Objective"))
+        {
+            Plato::InputData tObjectiveNode = aOptimizerNode.get<Plato::InputData>("Objective");
+            tOutput = Plato::Get::String(tObjectiveNode, "ValueStageName");
+        }
+        return (tOutput);
+    }
+
+
+    /******************************************************************************//**
+     * @brief Return list of gradient free constraint stage names
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return list of gradient free constraint stage names
+    **********************************************************************************/
+    std::vector<std::string> getConstraintStageNames(const Plato::InputData & aOptimizerNode) const
+    {
+        std::vector<std::string> tNames;
+        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
+        {
+            std::string tMyStageName = Plato::Get::String(*tNode, "ValueStageName");
+            tNames.push_back(tMyStageName);
+        }
+        return (tNames);
+    }
+
+    /******************************************************************************//**
      * @brief Parse options for bound constrained PSO algorithm
      * @param [in] aOptimizerNode data structure with optimization related input options
      * @param [out] aData data structure with bound constrained PSO algorithm options
@@ -87,7 +123,9 @@ public:
         if(aOptimizerNode.size<Plato::InputData>("Options"))
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
             aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
@@ -116,7 +154,9 @@ public:
         if(aOptimizerNode.size<Plato::InputData>("Options"))
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
             aData.mMaxNumOuterIter = this->maxNumOuterIterations(tOptionsNode);
@@ -151,6 +191,34 @@ private:
         if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output solution keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool outputSolution(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("OutputSolution"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputSolution");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse disable standard deviation stopping tolerance keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool disableStdDevStoppingTolerance(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("DisableStdDevStoppingTolerance"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "DisableStdDevStoppingTolerance");
         }
         return (tOuput);
     }

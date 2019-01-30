@@ -47,7 +47,6 @@
  *
  */
 
-#include "Plato_Parser.hpp"
 
 #include <cctype>
 #include <memory>
@@ -63,10 +62,8 @@
 #include <string.h>
 #include <cstddef>
 
+#include "Plato_Parser.hpp"
 #include "Plato_Exceptions.hpp"
-#include "Plato_OperationInputDataMng.hpp"
-#include "Plato_OptimizerEngineStageData.hpp"
-#include "Plato_StageInputDataMng.hpp"
 
 namespace Plato
 {
@@ -1142,7 +1139,11 @@ void parseStageData(const Plato::InputData & aStageNode, Plato::StageInputDataMn
 void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Plato::OptimizerEngineStageData & aOptimizerEngineStageData)
 /******************************************************************************/
 {
-    // TODO: parse multiple controls
+    if(aOptimizerNode.size<Plato::InputData>("OptimizationVariables") == 0)
+    {
+        return;
+    }
+
     Plato::InputData tOptimizationVariablesNode = aOptimizerNode.get<Plato::InputData>("OptimizationVariables");
     std::string tControlName = Plato::Get::String(tOptimizationVariablesNode, "ValueName");
     if(tControlName.empty() == false)

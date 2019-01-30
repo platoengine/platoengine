@@ -103,8 +103,16 @@ inline ScalarType standard_deviation(const ScalarType & aMean,
     ScalarType tOutput = aReductions.sum(tWork);
     tWork[tELEMENT_INDEX] = tLocalNumElements;
     const ScalarType tGlobalNumElements = aReductions.sum(tWork);
-    tOutput = tOutput / (tGlobalNumElements - static_cast<OrdinalType>(1));
-    tOutput = std::pow(tOutput, static_cast<ScalarType>(0.5));
+    assert(tGlobalNumElements > static_cast<OrdinalType>(0));
+    if(tGlobalNumElements > static_cast<OrdinalType>(1))
+    {
+        tOutput = tOutput / (tGlobalNumElements - static_cast<OrdinalType>(1));
+        tOutput = std::pow(tOutput, static_cast<ScalarType>(0.5));
+    }
+    else
+    {
+        tOutput = 0;
+    }
 
     return (tOutput);
 }

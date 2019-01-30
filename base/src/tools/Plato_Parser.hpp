@@ -54,14 +54,14 @@
 #include <vector>
 #include "math_parser/tinyexpr.h"
 #include "pugixml.hpp"
+
 #include "Plato_InputData.hpp"
+#include "Plato_StageInputDataMng.hpp"
+#include "Plato_OperationInputDataMng.hpp"
+#include "Plato_OptimizerEngineStageData.hpp"
 
 namespace Plato
 {
-
-class StageInputDataMng;
-class OperationInputDataMng;
-class OptimizerEngineStageData;
 
 class MathParser {
     std::vector<te_variable> mVariables;

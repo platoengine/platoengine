@@ -73,8 +73,9 @@ public:
      * @param [in] aConstraints list of gradient free constraint interface
     **********************************************************************************/
     ParticleSwarmAlgorithmALPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
-                           const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
-                           const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
+                                const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
+                                const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
+            mStdDevStoppingTolActive(true),
             mOutputDiagnostics(false),
             mNumIterations(0),
             mMaxNumAugLagOuterIterations(1e3),
@@ -103,6 +104,15 @@ public:
     {
         mOutputDiagnostics = true;
         mOptimizer->enableDiagnostics();
+    }
+
+    /******************************************************************************//**
+     * @brief Disables stopping tolerance based on the standard deviation of the augmented Lagrangian function
+    **********************************************************************************/
+    void disableStdDevStoppingTolerance()
+    {
+        mStdDevStoppingTolActive = false;
+        mOptimizer->disableStdDevStoppingTolerance();
     }
 
     /******************************************************************************//**
@@ -572,7 +582,7 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::MEAN_OBJECTIVE_TOLERANCE;
         }
-        else if(tStdDevCurrentBestAugLagFuncValue < mStdDevBestAugLagFuncTolerance)
+        else if(tStdDevCurrentBestAugLagFuncValue < mStdDevBestAugLagFuncTolerance && mStdDevStoppingTolActive)
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
@@ -688,6 +698,7 @@ private:
 
 private:
     bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
     std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
 
     OrdinalType mNumIterations; /*!< current number of iterations */
