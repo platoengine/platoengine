@@ -155,7 +155,7 @@ public:
     void finalize()
     /******************************************************************************/
     {
-        mInterface->getStage("Terminate");
+        mInterface->finalize();
     }
 
 private:

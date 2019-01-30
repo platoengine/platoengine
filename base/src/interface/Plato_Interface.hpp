@@ -116,10 +116,6 @@ public:
     void getLocalComm(MPI_Comm& aLocalComm);
 
     // accessors
-    Plato::Stage* getStage();
-    Plato::Stage* getStage(std::string aStageName);
-    std::string getLocalPerformerName(){return mLocalPerformerName;}
-    int getStageIndex(std::string aStageName) const;
     Plato::InputData getInputData() const;
 
     // error handling
@@ -135,6 +131,11 @@ public:
 private:
     void perform(Plato::Stage* aStage);
     void broadcastStageIndex(int & aStageIndex);
+
+    Plato::Stage* getStage();
+    Plato::Stage* getStage(std::string aStageName);
+    std::string getLocalPerformerName(){return mLocalPerformerName;}
+    int getStageIndex(std::string aStageName) const;
 
     void createStages();
     void createPerformers();
