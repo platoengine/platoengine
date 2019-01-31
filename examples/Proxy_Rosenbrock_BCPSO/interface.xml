@@ -92,7 +92,7 @@
 <Optimizer>
   <Package>BCPSO</Package>
   <Options>
-    <NumParticles>10</NumParticles>
+    <NumParticles>{NumParticles}</NumParticles>
     <OutputSolution>true</OutputSolution>
     <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
   </Options>
