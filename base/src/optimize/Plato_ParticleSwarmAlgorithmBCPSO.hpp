@@ -535,7 +535,7 @@ private:
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.open("plato_pso_algorithm_diagnostics.txt");
+                mOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
                 Plato::pso::print_bcpso_diagnostics_header(mOutputData, mOutputStream, mOutputDiagnostics);
             }
         }
