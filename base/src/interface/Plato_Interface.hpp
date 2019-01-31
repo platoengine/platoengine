@@ -117,6 +117,7 @@ public:
 
     // accessors
     Plato::InputData getInputData() const;
+    std::string getLocalPerformerName(){return mLocalPerformerName;}
 
     // error handling
     void Catch();
@@ -134,7 +135,6 @@ private:
 
     Plato::Stage* getStage();
     Plato::Stage* getStage(std::string aStageName);
-    std::string getLocalPerformerName(){return mLocalPerformerName;}
     int getStageIndex(std::string aStageName) const;
 
     void createStages();
