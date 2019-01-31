@@ -234,7 +234,8 @@ private:
         const OrdinalType tNumParticles = aInputs.mNumParticles;
         const OrdinalType tNumControls = aInputs.mParticlesLowerBounds->size();
 
-        std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> tConstraintList;
+        std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> tConstraintList =
+                std::make_shared<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>>();
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < mConstraintStageNames.size(); tConstraintIndex++)
         {
             std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tMyConstraint =
