@@ -100,9 +100,11 @@
     <ValueStageName>ObjFuncEvaluation</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
   </Objective>
   <BoundConstraint>
-    <Upper>5</Upper>
-    <Upper>5</Upper>
-    <Lower>-5</Lower>
-    <Lower>-5</Lower>
+    <For var="I" in="Dims">
+      <Upper>5</Upper>
+    </For>
+    <For var="I" in="Dims">
+      <Lower>-5</Lower>
+    </For>
   </BoundConstraint>
 </Optimizer>
