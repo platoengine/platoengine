@@ -217,8 +217,7 @@ private:
         const OrdinalType tNumParticles = aInputs.mNumParticles;
         const OrdinalType tNumControls = aInputs.mParticlesLowerBounds->size();
         std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tObjective =
-                std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(
-                        tNumControls, tNumParticles, mObjFuncStageDataMng);
+                std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>( tNumControls, tNumParticles, mObjFuncStageDataMng);
         tObjective->set(mInterface);
         aObjective = tObjective;
     }
@@ -239,8 +238,7 @@ private:
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < mConstraintStageNames.size(); tConstraintIndex++)
         {
             std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tMyConstraint =
-                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(
-                            tNumControls, tNumParticles, mConstraintStageDataMng[tConstraintIndex]);
+                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(tNumControls, tNumParticles, mConstraintStageDataMng[tConstraintIndex]);
             tMyConstraint->set(mInterface);
             tConstraintList->add(tMyConstraint);
         }
@@ -260,7 +258,7 @@ private:
         aOutput.mControlReductions = aFactory.createReduction(mComm, mInterface);
         aOutput.mCriteriaEvals = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aOutput.mNumParticles);
         const OrdinalType tNumConstraints = mConstraintStageNames.size();
-        aOutput.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, aOutput.mNumParticles);
+        aOutput.mDual = std::make_shared<Plato::StandardMultiVector<ScalarType>>(tNumConstraints, aOutput.mNumParticles);
     }
 
     /******************************************************************************//**
