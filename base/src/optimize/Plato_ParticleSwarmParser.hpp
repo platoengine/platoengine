@@ -95,7 +95,6 @@ public:
         return (tOutput);
     }
 
-
     /******************************************************************************//**
      * @brief Return list of gradient free constraint stage names
      * @param [in] aOptimizerNode data structure with optimization related input options
@@ -111,6 +110,41 @@ public:
             tNames.push_back(tMyStageName);
         }
         return (tNames);
+    }
+
+    /******************************************************************************//**
+     * @brief Return list of constraint reference values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return list of constraint reference values
+    **********************************************************************************/
+    std::vector<ScalarType> getConstraintReferenceValues(const Plato::InputData & aOptimizerNode) const
+    {
+        std::vector<ScalarType> tOutput;
+        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
+        {
+            ScalarType tMyReferenceValue = Plato::Get::Double(*tNode, "ReferenceValue");
+            tMyReferenceValue = tMyReferenceValue <= static_cast<ScalarType>(0.0) ? static_cast<ScalarType>(1.0) : tMyReferenceValue;
+            tOutput.push_back(tMyReferenceValue);
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Return list of constraint target values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return list of constraint target values
+    **********************************************************************************/
+    std::vector<ScalarType> getConstraintTargetValues(const Plato::InputData & aOptimizerNode) const
+    {
+        std::vector<ScalarType> tOutput;
+        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
+        {
+            const ScalarType tMyTargeteValue = Plato::Get::Double(*tNode, "TargetValue");
+            tOutput.push_back(tMyTargeteValue);
+        }
+        return (tOutput);
     }
 
     /******************************************************************************//**

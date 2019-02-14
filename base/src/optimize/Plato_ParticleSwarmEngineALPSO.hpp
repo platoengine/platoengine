@@ -74,6 +74,8 @@ public:
     explicit ParticleSwarmEngineALPSO(Plato::Interface* aInterface, const MPI_Comm & aComm) :
             mObjFuncStageName(),
             mConstraintStageNames(),
+            mConstraintTargetValues(),
+            mConstraintReferenceValues(),
             mComm(aComm),
             mInterface(aInterface),
             mObjFuncStageDataMng(),
@@ -203,6 +205,8 @@ private:
         Plato::ParticleSwarmParser<ScalarType, OrdinalType> tParserPSO;
         mObjFuncStageName = tParserPSO.getObjectiveStageName(tOptimizerNode);
         mConstraintStageNames = tParserPSO.getConstraintStageNames(tOptimizerNode);
+        mConstraintTargetValues = tParserPSO.getConstraintTargetValues(tOptimizerNode);
+        mConstraintReferenceValues = tParserPSO.getConstraintReferenceValues(tOptimizerNode);
         tParserPSO.parse(tOptimizerNode, aInputs);
     }
 
@@ -218,7 +222,7 @@ private:
         const OrdinalType tNumControls = aInputs.mParticlesLowerBounds->size();
         std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tObjective =
                 std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>( tNumControls, tNumParticles, mObjFuncStageDataMng);
-        tObjective->set(mInterface);
+        tObjective->setInterface(mInterface);
         aObjective = tObjective;
     }
 
@@ -239,7 +243,9 @@ private:
         {
             std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tMyConstraint =
                     std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(tNumControls, tNumParticles, mConstraintStageDataMng[tConstraintIndex]);
-            tMyConstraint->set(mInterface);
+            tMyConstraint->setInterface(mInterface);
+            tMyConstraint->setReferenceValue(mConstraintReferenceValues[tConstraintIndex]);
+            tMyConstraint->setTargetValue(mConstraintTargetValues[tConstraintIndex]);
             tConstraintList->add(tMyConstraint);
         }
 
@@ -312,6 +318,8 @@ private:
 private:
     std::string mObjFuncStageName; /*!< objective function stage name */
     std::vector<std::string> mConstraintStageNames; /*!< list of stage names for all constraints */
+    std::vector<ScalarType> mConstraintTargetValues; /*!< list of target values for all constraints */
+    std::vector<ScalarType> mConstraintReferenceValues; /*!< list of reference values for all constraints */
 
     MPI_Comm mComm; /*!< MPI communicator */
     Plato::Interface* mInterface; /*!< PLATO Engine interface */
