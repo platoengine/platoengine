@@ -84,6 +84,7 @@ public:
             mGlobalBestAugLagFuncTolerance(1e-10),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mOutputData(aConstraints->size()),
+            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mStageMng(std::make_shared<Plato::ParticleSwarmStageMngALPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::ParticleSwarmAlgorithmBCPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
     {
@@ -302,6 +303,15 @@ public:
     void setLowerBounds(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         mOptimizer->setLowerBounds(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set custom output interface
+     * @param [in] aInput output interface shared pointer
+    **********************************************************************************/
+    void setCustomOutput(const std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> & aInput)
+    {
+        mCustomOutput = aInput;
     }
 
     /******************************************************************************//**
@@ -652,6 +662,7 @@ private:
             return;
         }
 
+        mCustomOutput->output();
         const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
         const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
@@ -711,6 +722,7 @@ private:
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
     Plato::DiagnosticsALPSO<ScalarType, OrdinalType> mOutputData; /*!< ALPSO algorithm output/diagnostics data structure */
 
+    std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> mCustomOutput;  /*!< custom output interface */
     std::shared_ptr<Plato::ParticleSwarmStageMngALPSO<ScalarType, OrdinalType>> mStageMng; /*!< stage manager interface for ALPSO */
     std::shared_ptr<Plato::ParticleSwarmAlgorithmBCPSO<ScalarType, OrdinalType>> mOptimizer; /*!< interface to BCPSO algorithm */
 

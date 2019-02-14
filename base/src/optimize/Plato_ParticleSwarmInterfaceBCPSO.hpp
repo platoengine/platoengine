@@ -138,6 +138,7 @@ inline void solve_bcpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
 
     // ********* ALLOCATE AUGMENTED LAGRANGIAN ALGORITHM *********
     Plato::ParticleSwarmAlgorithmBCPSO<ScalarType, OrdinalType> tAlgorithm(tFactory, aObjective);
+    tAlgorithm.setCustomOutput(aInputs.mCustomOutput);
 
     // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
     Plato::set_bcpso_algorithm_inputs(aInputs, tAlgorithm);
