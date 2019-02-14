@@ -204,7 +204,7 @@ public:
 
     /******************************************************************************//**
      * @brief Create a copy of the distributed memory communication wrapper
-     * @return my processor rank
+     * @return shared pointer
     **********************************************************************************/
     std::shared_ptr<Plato::CommWrapper> create() const
     {
