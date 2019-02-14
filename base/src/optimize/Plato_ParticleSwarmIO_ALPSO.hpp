@@ -51,8 +51,9 @@
 #include <vector>
 #include <string>
 
-#include "Plato_CommWrapper.hpp"
 #include "Plato_MultiVector.hpp"
+#include "Plato_CustomOutput.hpp"
+#include "Plato_CommWrapper.hpp"
 #include "Plato_ParticleSwarmTypes.hpp"
 #include "Plato_ReductionOperations.hpp"
 
@@ -181,6 +182,7 @@ struct InputDataALPSO
             mOutputSolution(false),
             mOutputDiagnostics(false),
             mDisableStdDevStoppingTol(false),
+            mOutputStageName(),
             mNumParticles(10),
             mMaxNumOuterIter(1e3),
             mMaxNumInnerIter(5),
@@ -205,6 +207,7 @@ struct InputDataALPSO
             mParticlesUpperBounds(),
             mDual(),
             mParticles(),
+            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mControlReductions(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>()),
             mCriteriaReductions(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType, OrdinalType>>())
     {
@@ -221,6 +224,8 @@ struct InputDataALPSO
     bool mOutputSolution; /*!< flag to output solution (default=false) */
     bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
     bool mDisableStdDevStoppingTol; /*!< flag to disable the stopping tolerance based on the standard deviation (default=false) */
+
+    std::string mOutputStageName; /*!< output stage name */
 
     OrdinalType mNumParticles; /*!< number of particles */
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
@@ -252,9 +257,12 @@ struct InputDataALPSO
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDual; /*!< Lagrange multipliers */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mParticles; /*!< particles */
 
+    std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> mCustomOutput;  /*!< custom output interface */
+
     /*!< operations which require communication across processors, e.g. max, min, global sum */
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mControlReductions;
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mCriteriaReductions;
+
 };
 // InputDataALPSO
 

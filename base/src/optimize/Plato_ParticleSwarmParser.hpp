@@ -154,27 +154,11 @@ public:
     **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::InputDataBCPSO<ScalarType, OrdinalType> & aData)
     {
-        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        this->parseOptions(aOptimizerNode, aData);
+        if(aOptimizerNode.size<Plato::InputData>("Output"))
         {
-            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
-            aData.mOutputSolution = this->outputSolution(tOptionsNode);
-            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
-            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
-
-            aData.mNumParticles = this->numParticles(tOptionsNode);
-            aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
-            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
-            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
-
-            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
-            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
-            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
-            aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
-            aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
-            aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
-            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
-            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
-            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+            Plato::InputData tOutputNode = aOptimizerNode.get<Plato::InputData>("Output");
+            aData.mOutputStageName = this->outputStageName(tOutputNode);
         }
     }
 
@@ -184,6 +168,22 @@ public:
      * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
     **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
+    {
+        this->parseOptions(aOptimizerNode, aData);
+        if(aOptimizerNode.size<Plato::InputData>("Output"))
+        {
+            Plato::InputData tOutputNode = aOptimizerNode.get<Plato::InputData>("Output");
+            aData.mOutputStageName = this->outputStageName(tOutputNode);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Parse optimizer options for augmented Lagrangian PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
+    **********************************************************************************/
+    void parseOptions(const Plato::InputData & aOptimizerNode, Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
     {
         if(aOptimizerNode.size<Plato::InputData>("Options"))
         {
@@ -214,7 +214,37 @@ public:
         }
     }
 
-private:
+    /******************************************************************************//**
+     * @brief Parse optimizer options for bound constrained PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with bound constrained PSO algorithm options
+    **********************************************************************************/
+    void parseOptions(const Plato::InputData & aOptimizerNode, Plato::InputDataBCPSO<ScalarType, OrdinalType> & aData)
+    {
+        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        {
+            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputSolution = this->outputSolution(tOptionsNode);
+            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
+
+            aData.mNumParticles = this->numParticles(tOptionsNode);
+            aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
+            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
+            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
+
+            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
+            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
+            aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
+            aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
+            aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
+            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
+            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
+            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+        }
+    }
+
     /******************************************************************************//**
      * @brief Parse output diagnostics keyword
      * @param [in] aOptimizerNode data structure with optimization related input options
@@ -547,6 +577,20 @@ private:
         if(aOptionsNode.size<std::string>("FeasibilityInexactnessTolerance"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "FeasibilityInexactnessTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output stage name
+     * @param [in] aOutputNode output stage database
+    **********************************************************************************/
+    std::string outputStageName(const Plato::InputData & aOutputNode)
+    {
+        std::string tOutput;
+        if(aOutputNode.size<std::string>("OutputStage"))
+        {
+            tOutput = Plato::Get::String(aOutputNode, "OutputStage");
         }
         return (tOutput);
     }
