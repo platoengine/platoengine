@@ -911,6 +911,22 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
 
+TEST(PlatoTest, PSO_ParserOutputStageName)
+{
+    Plato::ParticleSwarmParser<double> tParserPSO;
+    Plato::InputDataALPSO<double> tInputsPSO;
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    EXPECT_TRUE(tInputsPSO.mOutputStageName.empty());
+
+    Plato::InputData tOutput("Output Data");
+    ASSERT_STREQ("Output Data", tOutput.name().c_str());
+    tOutput.add<std::string>("OutputStage", "Output To File");
+    tOptimizerNode.add<Plato::InputData>("Output", tOutput);
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    ASSERT_STREQ("Output To File", tInputsPSO.mOutputStageName.c_str());
+}
+
 TEST(PlatoTest, PSO_ParserCriteriaData)
 {
     Plato::InputData tObjective("Objective");
