@@ -911,6 +911,45 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
 
+TEST(PlatoTest, PSO_ParserCriteriaData)
+{
+    Plato::InputData tObjective("Objective");
+    tObjective.add<std::string>("ValueStageName", "Mass");
+
+    Plato::InputData tConstraintOne("Constraint");
+    tConstraintOne.add<std::string>("ValueStageName", "Volume");
+    tConstraintOne.add<std::string>("ReferenceValue", "2.0");
+    tConstraintOne.add<std::string>("TargetValue", "1.0");
+
+    Plato::InputData tConstraintTwo("Constraint");
+    tConstraintTwo.add<std::string>("ValueStageName", "Stress");
+
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tOptimizerNode.add<Plato::InputData>("Objective", tObjective);
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraintOne);
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraintTwo);
+
+    Plato::ParticleSwarmParser<double> Parser;
+    std::string tObjFuncName = Parser.getObjectiveStageName(tOptimizerNode);
+    ASSERT_STREQ("Mass", tObjFuncName.c_str());
+
+    std::vector<std::string> tConstraintStageNames = Parser.getConstraintStageNames(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintStageNames.size());
+    ASSERT_STREQ("Volume", tConstraintStageNames[0].c_str());
+    ASSERT_STREQ("Stress", tConstraintStageNames[1].c_str());
+
+    std::vector<double> tConstraintReferenceValues = Parser.getConstraintReferenceValues(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintReferenceValues.size());
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(2.0, tConstraintReferenceValues[0], tTolerance);
+    EXPECT_NEAR(1.0, tConstraintReferenceValues[1], tTolerance);
+
+    std::vector<double> tConstraintTargetValues = Parser.getConstraintTargetValues(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintTargetValues.size());
+    EXPECT_NEAR(1.0, tConstraintTargetValues[0], tTolerance);
+    EXPECT_NEAR(0.0, tConstraintTargetValues[1], tTolerance);
+}
+
 TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)
 {
     // ********* ALLOCATE CRITERION *********
