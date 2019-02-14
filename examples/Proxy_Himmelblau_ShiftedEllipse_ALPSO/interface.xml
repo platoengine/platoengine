@@ -161,6 +161,8 @@
   </Objective>
   <Constraint>
     <ValueStageName>ConstraintEvaluation</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT STAGE-->
+    <ReferenceValue>1.0</ReferenceValue> <!---THE REFERENCE VALUE IS DEFINED AS (H(X) / ALPHA) - BETA, WHERE ALPHA IS THE REFERENCE VALUE. DEFAULT = 1.0 IF NOT DEFINED-->
+    <TargetValue>0.0</TargetValue> <!---THE TARGET VALUE IS DEFINED AS (H(X) / ALPHA) - BETA, WHERE BETA IS THE TARGET VALUE. DEFAULT = 0.0 IF NOT DEFINED-->
   </Constraint>
   <BoundConstraint>
     <For var="I" in="Dims">
