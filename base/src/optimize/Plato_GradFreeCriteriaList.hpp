@@ -53,6 +53,7 @@
 #include <cassert>
 
 #include "Plato_GradFreeCriterion.hpp"
+#include "Plato_ParticleSwarmTypes.hpp"
 
 namespace Plato
 {
@@ -69,6 +70,7 @@ public:
     **********************************************************************************/
     GradFreeCriteriaList() :
             mWeights(),
+            mTypes(),
             mList()
     {
     }
@@ -81,6 +83,17 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return my constraint type
+     * @return constraint type, options: 1) equality or 2_ inequality
+    **********************************************************************************/
+    Plato::particle_swarm::constraint_t type(const OrdinalType & aIndex) const
+    {
+        assert(mTypes.empty() == false);
+        assert(aIndex < static_cast<OrdinalType>(mTypes.size()));
+        return (mTypes[aIndex]);
+    }
+
+    /******************************************************************************//**
      * @brief Return size of list
      * @return size
     **********************************************************************************/
@@ -90,7 +103,16 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Adds a new element at the end of the vector, after its current last element.
+     * @brief Adds a new element at the end of the criteria type list, after its current last element.
+     * @param [in] aInput constraint type, options: 1) equality or 2_ inequality
+    **********************************************************************************/
+    void type(const Plato::particle_swarm::constraint_t & aInput)
+    {
+        mTypes.push_back(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Adds a new element at the end of the criteria list, after its current last element.
      * @param [in] aCriterion Plato criterion
      * @param [in] aMyWeight weight for input Plato criterion
     **********************************************************************************/
@@ -171,6 +193,7 @@ public:
 
 private:
     std::vector<ScalarType> mWeights; /*!< list of weights */
+    std::vector<Plato::particle_swarm::constraint_t> mTypes; /*!< list of constraint type enums */
     std::vector<std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>>> mList; /*!< list of grad-free criteria */
 
 private:
