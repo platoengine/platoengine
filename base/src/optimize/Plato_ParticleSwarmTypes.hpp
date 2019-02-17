@@ -61,6 +61,12 @@ struct particle_swarm
         MEAN_OBJECTIVE_TOLERANCE = 4,
         STDDEV_OBJECTIVE_TOLERANCE = 5,
     };
+
+    enum constraint_t
+    {
+        EQUALITY = 1,
+        INEQUALITY = 2,
+    };
 };
 // struct particle_swarm
 

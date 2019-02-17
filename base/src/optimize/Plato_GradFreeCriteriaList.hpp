@@ -53,6 +53,7 @@
 #include <cassert>
 
 #include "Plato_GradFreeCriterion.hpp"
+#include "Plato_ParticleSwarmTypes.hpp"
 
 namespace Plato
 {
@@ -69,6 +70,7 @@ public:
     **********************************************************************************/
     GradFreeCriteriaList() :
             mWeights(),
+            mTypes(),
             mList()
     {
     }
@@ -81,6 +83,17 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return my constraint type
+     * @return constraint type, options: 1) equality or 2_ inequality
+    **********************************************************************************/
+    Plato::particle_swarm::constraint_t type(const OrdinalType & aIndex) const
+    {
+        assert(mTypes.empty() == false);
+        assert(aIndex < static_cast<OrdinalType>(mTypes.size()));
+        return (mTypes[aIndex]);
+    }
+
+    /******************************************************************************//**
      * @brief Return size of list
      * @return size
     **********************************************************************************/
@@ -90,14 +103,18 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Adds a new element at the end of the vector, after its current last element.
+     * @brief Adds a new element at the end of the criteria list, after its current last element.
      * @param [in] aCriterion Plato criterion
-     * @param [in] aMyWeight weight for input Plato criterion
+     * @param [in] aMyType criterion type, options 1) INEQUALITY or 2) EQUALITY (default = INEQUALITY)
+     * @param [in] aMyWeight criterion weight (default = 1)
     **********************************************************************************/
-    void add(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aCriterion, ScalarType aMyWeight = 1)
+    void add(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aCriterion,
+             Plato::particle_swarm::constraint_t aMyType = Plato::particle_swarm::INEQUALITY,
+             ScalarType aMyWeight = 1)
     {
         assert(aCriterion != nullptr);
         mList.push_back(aCriterion);
+        mTypes.push_back(aMyType);
         mWeights.push_back(aMyWeight);
     }
 
@@ -171,6 +188,7 @@ public:
 
 private:
     std::vector<ScalarType> mWeights; /*!< list of weights */
+    std::vector<Plato::particle_swarm::constraint_t> mTypes; /*!< list of constraint type enums */
     std::vector<std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>>> mList; /*!< list of grad-free criteria */
 
 private:
