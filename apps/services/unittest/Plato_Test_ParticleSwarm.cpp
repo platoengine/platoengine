@@ -46,7 +46,8 @@
  *  Created on: Dec 26, 2018
  */
 
-#include "gtest/gtest.h"
+#include <mpi.h>
+#include <gtest/gtest.h>
 
 #include "Plato_GradFreeCircle.hpp"
 #include "Plato_GradFreeRadius.hpp"
@@ -776,6 +777,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
@@ -804,6 +806,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
@@ -848,14 +851,24 @@ TEST(PlatoTest, PSO_ParserALPSO)
     Plato::InputData tOptimizerNode("OptimizerNode");
     tOptimizerNode.add<Plato::InputData>("Options", tOptions);
 
+    Plato::InputData tConstraint("Constraint");
+    tConstraint.add<std::string>("ValueStageName", "ConstraintEvaluation");
+    tConstraint.add<std::string>("ReferenceValue", "1.0");
+    tConstraint.add<std::string>("TargetValue", "0.0");
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraint);
+
     tParserPSO.parse(tOptimizerNode, tInputsPSO);
+
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+    EXPECT_EQ(1u, tInputsPSO.mConstraintTypes.size());
+    EXPECT_EQ(Plato::particle_swarm::INEQUALITY, tInputsPSO.mConstraintTypes[0]);
 
     EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
@@ -884,11 +897,28 @@ TEST(PlatoTest, PSO_ParserALPSO)
     Plato::InputData tOptimizerNodeTwo("OptimizerNode");
     tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
     Plato::InputDataALPSO<double> tInputsTwoPSO;
+
+    Plato::InputData tConstraint1("Constraint1");
+    tConstraint.add<std::string>("ValueStageName", "ConstraintEvaluation1");
+    tConstraint.add<std::string>("ReferenceValue", "1.0");
+    tConstraint.add<std::string>("TargetValue", "0.0");
+    tOptimizerNodeTwo.add<Plato::InputData>("Constraint", tConstraint1);
+    Plato::InputData tConstraint2("Constraint2");
+    tConstraint2.add<std::string>("ValueStageName", "ConstraintEvaluation2");
+    tConstraint2.add<std::string>("ReferenceValue", "1.0");
+    tConstraint2.add<std::string>("TargetValue", "0.0");
+    tConstraint2.add<std::string>("Type", "Equality");
+    tOptimizerNodeTwo.add<Plato::InputData>("Constraint", tConstraint2);
+
     tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
+
+    EXPECT_EQ(2u, tInputsTwoPSO.mConstraintTypes.size());
+    EXPECT_EQ(Plato::particle_swarm::INEQUALITY, tInputsTwoPSO.mConstraintTypes[0]);
+    EXPECT_EQ(Plato::particle_swarm::EQUALITY, tInputsTwoPSO.mConstraintTypes[1]);
 
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(5u, tInputsTwoPSO.mMaxNumInnerIter);

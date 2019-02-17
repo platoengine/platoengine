@@ -249,6 +249,7 @@ struct InputDataALPSO
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+    std::vector<Plato::particle_swarm::constraint_t> mConstraintTypes; /*!< list of constraint types */
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaEvals; /*!< criteria evaluations */
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mParticlesLowerBounds; /*!< particles' lower bounds */
