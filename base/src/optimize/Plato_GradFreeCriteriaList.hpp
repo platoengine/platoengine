@@ -103,23 +103,18 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Adds a new element at the end of the criteria type list, after its current last element.
-     * @param [in] aInput constraint type, options: 1) equality or 2_ inequality
-    **********************************************************************************/
-    void type(const Plato::particle_swarm::constraint_t & aInput)
-    {
-        mTypes.push_back(aInput);
-    }
-
-    /******************************************************************************//**
      * @brief Adds a new element at the end of the criteria list, after its current last element.
      * @param [in] aCriterion Plato criterion
-     * @param [in] aMyWeight weight for input Plato criterion
+     * @param [in] aMyType criterion type, options 1) INEQUALITY or 2) EQUALITY (default = INEQUALITY)
+     * @param [in] aMyWeight criterion weight (default = 1)
     **********************************************************************************/
-    void add(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aCriterion, ScalarType aMyWeight = 1)
+    void add(const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aCriterion,
+             Plato::particle_swarm::constraint_t aMyType = Plato::particle_swarm::INEQUALITY,
+             ScalarType aMyWeight = 1)
     {
         assert(aCriterion != nullptr);
         mList.push_back(aCriterion);
+        mTypes.push_back(aMyType);
         mWeights.push_back(aMyWeight);
     }
 
