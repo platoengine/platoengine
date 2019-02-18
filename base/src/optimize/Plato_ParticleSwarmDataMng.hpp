@@ -575,17 +575,19 @@ public:
     {
         std::default_random_engine tGenerator;
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
+        mWorkVector->update(static_cast<ScalarType>(1), *mUpperBounds, static_cast<ScalarType>(0));
+        mWorkVector->update(static_cast<ScalarType>(-1), *mLowerBounds, static_cast<ScalarType>(1));
 
+        const OrdinalType tNumControls = mWorkVector->size();
         const OrdinalType tNumParticles = this->getNumParticles();
         for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            mWorkVector->update(static_cast<ScalarType>(1), *mUpperBounds, static_cast<ScalarType>(0));
-            mWorkVector->update(static_cast<ScalarType>(-1), *mLowerBounds, static_cast<ScalarType>(1));
-
-            ScalarType tMyRandomNum = tDistribution(tGenerator);
-            (*mCurrentParticles)[tIndex].update(static_cast<ScalarType>(1), *mLowerBounds, static_cast<ScalarType>(0));
-            (*mCurrentParticles)[tIndex].update(tMyRandomNum, *mWorkVector, static_cast<ScalarType>(1));
-            (*mCurrentVelocities)[tIndex].update(static_cast<ScalarType>(1), (*mCurrentParticles)[tIndex], static_cast<ScalarType>(0));
+            for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                ScalarType tMyRandomNum = tDistribution(tGenerator);
+                (*mCurrentParticles)(tIndex, tControlIndex) = (*mLowerBounds)[tControlIndex] + tMyRandomNum * (*mWorkVector)[tControlIndex];
+                (*mCurrentVelocities)(tIndex, tControlIndex) = (*mCurrentParticles)(tIndex, tControlIndex);
+            }
         }
     }
 
