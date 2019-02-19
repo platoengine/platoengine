@@ -1382,7 +1382,6 @@ TEST(PlatoTest, PSO_SolveALPSO_CircleObj_RadiusEqConstr)
     const size_t tNumParticles = 20;
     const size_t tNumConstraints = 1;
     Plato::InputDataALPSO<double> tInputs;
-    tInputs.mOutputDiagnostics = true;
     tInputs.mPenaltyMultiplierUpperBound = 1e3;
     tInputs.mStdDevBestAugLagFuncTolerance = 5e-4;
     tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
