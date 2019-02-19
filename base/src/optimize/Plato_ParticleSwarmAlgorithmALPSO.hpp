@@ -88,7 +88,7 @@ public:
             mStageMng(std::make_shared<Plato::ParticleSwarmStageMngALPSO<ScalarType, OrdinalType>>(aFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::ParticleSwarmAlgorithmBCPSO<ScalarType, OrdinalType>>(aFactory, mStageMng))
     {
-        mOptimizer->setMaxNumIterations(5); /* augmented Lagrangian subproblem iterations */
+        mOptimizer->setMaxNumIterations(10); /* augmented Lagrangian subproblem iterations */
     }
 
     /******************************************************************************//**
@@ -539,8 +539,6 @@ public:
         {
             mNumIterations++;
             mOptimizer->solve(mOutputStream);
-            mStageMng->updatePenaltyMultipliers();
-            mStageMng->updateLagrangeMultipliers();
             mStageMng->computeCriteriaStatistics();
 
             this->outputDiagnostics();
@@ -551,6 +549,9 @@ public:
                 this->closeOutputFile();
                 break;
             }
+
+            mStageMng->updatePenaltyMultipliers();
+            mStageMng->updateLagrangeMultipliers();
             mStageMng->restart();
         }
     }

@@ -379,6 +379,15 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set previous global best objective function value
+     * @param [in] aInput objective function value
+    **********************************************************************************/
+    void setPreviousGlobalBestObjFunValue(const ScalarType & aInput)
+    {
+        mPreviousGlobalBestObjFuncValue = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Set current objective function values
      * @param [in] aInput 1D container of current objective function values
     **********************************************************************************/

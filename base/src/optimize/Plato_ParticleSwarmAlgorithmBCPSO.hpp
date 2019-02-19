@@ -444,15 +444,9 @@ public:
             mNumIterations++;
             mStageMng->evaluateObjective(*mDataMng);
             mStageMng->findBestParticlePositions(*mDataMng);
-
-            mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
-            mOperations->updateParticleVelocities(*mDataMng);
-            mOperations->updateParticlePositions(*mDataMng);
-            mOperations->updateTrustRegionMultiplier();
-
             mDataMng->computeCurrentBestObjFuncStatistics();
-            this->outputDiagnostics();
 
+            this->outputDiagnostics();
             if(this->checkStoppingCriteria())
             {
                 mDataMng->computeCurrentBestParticlesStatistics();
@@ -460,6 +454,11 @@ public:
                 this->closeOutputFile();
                 break;
             }
+
+            mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
+            mOperations->updateParticleVelocities(*mDataMng);
+            mOperations->updateParticlePositions(*mDataMng);
+            mOperations->updateTrustRegionMultiplier();
         }
     }
 
@@ -470,25 +469,23 @@ public:
     void solve(std::ofstream & aOutputStream)
     {
         mNumIterations = 0;
-
         while(1)
         {
             mNumIterations++;
             mStageMng->evaluateObjective(*mDataMng);
             mStageMng->findBestParticlePositions(*mDataMng);
+            mDataMng->computeCurrentBestObjFuncStatistics();
+
+            this->outputDiagnostics(aOutputStream);
+            if(this->checkStoppingCriteria())
+            {
+                break;
+            }
 
             mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
             mOperations->updateParticleVelocities(*mDataMng);
             mOperations->updateParticlePositions(*mDataMng);
             mOperations->updateTrustRegionMultiplier();
-
-            mDataMng->computeCurrentBestObjFuncStatistics();
-            this->outputDiagnostics(aOutputStream);
-
-            if(this->checkStoppingCriteria())
-            {
-                break;
-            }
         }
     }
 

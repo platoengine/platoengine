@@ -185,7 +185,7 @@ struct InputDataALPSO
             mOutputStageName(),
             mNumParticles(10),
             mMaxNumOuterIter(1e3),
-            mMaxNumInnerIter(5),
+            mMaxNumInnerIter(10),
             mMaxNumConsecutiveFailures(10),
             mMaxNumConsecutiveSuccesses(10),
             mTimeStep(1),
