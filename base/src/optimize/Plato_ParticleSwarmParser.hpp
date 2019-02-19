@@ -368,7 +368,7 @@ private:
     **********************************************************************************/
     OrdinalType maxNumInnerIterations(const Plato::InputData & aOptionsNode)
     {
-        OrdinalType tOutput = 5;
+        OrdinalType tOutput = 10;
         if(aOptionsNode.size<std::string>("MaxNumInnerIterations"))
         {
             tOutput = Plato::Get::Int(aOptionsNode, "MaxNumInnerIterations");
