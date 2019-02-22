@@ -49,6 +49,7 @@
 #pragma once
 
 #include <sstream>
+#include <algorithm>
 
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
@@ -170,6 +171,7 @@ public:
     void parse(const Plato::InputData & aOptimizerNode, Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
     {
         this->parseOptions(aOptimizerNode, aData);
+        this->parseConstraintTypes(aOptimizerNode, aData);
         if(aOptimizerNode.size<Plato::InputData>("Output"))
         {
             Plato::InputData tOutputNode = aOptimizerNode.get<Plato::InputData>("Output");
@@ -242,6 +244,51 @@ private:
             aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
             aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
             aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Transform string with constraint type into Plato::particle_swarm::constraint_t type
+     * @param [in] aType constraint type string
+     * @return constraint type, default = INEQUALITY
+    **********************************************************************************/
+    Plato::particle_swarm::constraint_t type(const std::string & aType)
+    {
+        std::string tCopy = aType;
+        std::transform(tCopy.begin(), tCopy.end(), tCopy.begin(), ::tolower);
+        Plato::particle_swarm::constraint_t tOutput;
+        if(tCopy.compare("equality") == 0)
+        {
+            tOutput = Plato::particle_swarm::EQUALITY;
+        }
+        else if(tCopy.compare("inequality") == 0)
+        {
+            tOutput = Plato::particle_swarm::INEQUALITY;
+        }
+        else
+        {
+            tOutput = Plato::particle_swarm::INEQUALITY;
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse constraint type, options 1) EQUALITY or 2) INEQUALITY
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
+    **********************************************************************************/
+    void parseConstraintTypes(const Plato::InputData & aOptimizerNode,
+                              Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
+    {
+        auto tConstraints = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tMyConstraint = tConstraints.begin(); tMyConstraint != tConstraints.end(); ++ tMyConstraint)
+        {
+            std::string tType;
+            Plato::particle_swarm::constraint_t tMyType;
+            try { tType = tMyConstraint->get<std::string>("Type"); }
+            catch(int aValue) { /* USE DEFAULT VALUE = INEQUALITY */ }
+            tMyType = this->type(tType);
+            aData.mConstraintTypes.push_back(tMyType);
         }
     }
 
@@ -321,7 +368,7 @@ private:
     **********************************************************************************/
     OrdinalType maxNumInnerIterations(const Plato::InputData & aOptionsNode)
     {
-        OrdinalType tOutput = 5;
+        OrdinalType tOutput = 10;
         if(aOptionsNode.size<std::string>("MaxNumInnerIterations"))
         {
             tOutput = Plato::Get::Int(aOptionsNode, "MaxNumInnerIterations");

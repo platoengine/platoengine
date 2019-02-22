@@ -222,12 +222,14 @@ private:
         const OrdinalType tCRITERION_VALUES_INDEX = 0;
         for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
-            aOutput[tParticleIndex] = mCriterionValues[tParticleIndex][tCRITERION_VALUES_INDEX];
+            const ScalarType tNormalizedValue = mCriterionValues[tParticleIndex][tCRITERION_VALUES_INDEX] / mReferenceValue;
+            aOutput[tParticleIndex] = tNormalizedValue - mTargetValue;
+
         }
     }
 
 private:
-    ScalarType mTargetValue; /*!< target value, i.e. normalization factor */
+    ScalarType mTargetValue; /*!< target value, i.e. bound */
     ScalarType mReferenceValue; /*!< reference value, i.e. normalization factor */
 
     OrdinalType mNumControls; /*!< local number of controls */

@@ -1940,7 +1940,7 @@ void PlatoApp::Aggregator::operator()()
       etaSum += m_weights[ival];
     }
     if(!m_weightNormals.empty()){
-      int nvals = m_weightNormals.size();
+      nvals = m_weightNormals.size();
       std::vector<double> N(nvals);
       for(int ival=0; ival<nvals; ival++){
         std::vector<double>* data = mPlatoApp->getValue(m_weightNormals[ival]);

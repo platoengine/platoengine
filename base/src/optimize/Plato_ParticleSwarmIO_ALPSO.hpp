@@ -185,7 +185,7 @@ struct InputDataALPSO
             mOutputStageName(),
             mNumParticles(10),
             mMaxNumOuterIter(1e3),
-            mMaxNumInnerIter(5),
+            mMaxNumInnerIter(10),
             mMaxNumConsecutiveFailures(10),
             mMaxNumConsecutiveSuccesses(10),
             mTimeStep(1),
@@ -249,6 +249,7 @@ struct InputDataALPSO
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+    std::vector<Plato::particle_swarm::constraint_t> mConstraintTypes; /*!< list of constraint types */
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCriteriaEvals; /*!< criteria evaluations */
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mParticlesLowerBounds; /*!< particles' lower bounds */

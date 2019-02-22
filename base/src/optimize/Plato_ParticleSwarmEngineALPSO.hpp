@@ -239,14 +239,14 @@ private:
 
         std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> tConstraintList =
                 std::make_shared<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>>();
-        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < mConstraintStageNames.size(); tConstraintIndex++)
+        for(OrdinalType tIndex = 0; tIndex < mConstraintStageNames.size(); tIndex++)
         {
             std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tMyConstraint =
-                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(tNumControls, tNumParticles, mConstraintStageDataMng[tConstraintIndex]);
+                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(tNumControls, tNumParticles, mConstraintStageDataMng[tIndex]);
             tMyConstraint->setInterface(mInterface);
-            tMyConstraint->setReferenceValue(mConstraintReferenceValues[tConstraintIndex]);
-            tMyConstraint->setTargetValue(mConstraintTargetValues[tConstraintIndex]);
-            tConstraintList->add(tMyConstraint);
+            tMyConstraint->setReferenceValue(mConstraintReferenceValues[tIndex]);
+            tMyConstraint->setTargetValue(mConstraintTargetValues[tIndex]);
+            tConstraintList->add(tMyConstraint, aInputs.mConstraintTypes[tIndex]);
         }
 
         aConstraints = tConstraintList;
