@@ -740,6 +740,8 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
   // create new meshIO object for input
   string meshformat = Plato::Parse::getString(meshspec,"format");
 
+  bool ignore_node_map = Plato::Parse::getBool(meshspec,"ignore_node_map");
+
   if( meshformat == "exodus") {
     if( WorldComm.GetSize() == 1 ) {
       myMeshInput = new ExodusIO();
@@ -779,6 +781,7 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
       filename = buffer.str();
     }
     myMeshInput->setName(filename.c_str());
+    myMeshInput->setIgnoreNodeMap(ignore_node_map);
     myMeshInput->setMode(MeshIO::READ);
   } else {
     stringstream msg;

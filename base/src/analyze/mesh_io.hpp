@@ -73,6 +73,7 @@ public:
                    Type type = READ ); 
 
   virtual void setName(const char* name) { myName = name; }
+  virtual void setIgnoreNodeMap(bool ignore_node_map) { myIgnoreNodeMap = ignore_node_map; }
   virtual void setMode(Type type) { myType = type; }
   virtual void setData(DataContainer *dc) { myData = dc; }
   virtual void setMesh(DataMesh *mesh) { myMesh = mesh; }
@@ -97,6 +98,7 @@ public:
 protected:
   int myType;
   string myName;
+  bool myIgnoreNodeMap;
   string myTitle;
   int myFileID;
   DataMesh* myMesh;
