@@ -49,6 +49,7 @@
 #pragma once
 
 #include <sstream>
+#include <algorithm>
 
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
@@ -95,7 +96,6 @@ public:
         return (tOutput);
     }
 
-
     /******************************************************************************//**
      * @brief Return list of gradient free constraint stage names
      * @param [in] aOptimizerNode data structure with optimization related input options
@@ -114,33 +114,52 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return list of constraint reference values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return list of constraint reference values
+    **********************************************************************************/
+    std::vector<ScalarType> getConstraintReferenceValues(const Plato::InputData & aOptimizerNode) const
+    {
+        std::vector<ScalarType> tOutput;
+        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
+        {
+            ScalarType tMyReferenceValue = Plato::Get::Double(*tNode, "ReferenceValue");
+            tMyReferenceValue = tMyReferenceValue <= static_cast<ScalarType>(0.0) ? static_cast<ScalarType>(1.0) : tMyReferenceValue;
+            tOutput.push_back(tMyReferenceValue);
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Return list of constraint target values
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return list of constraint target values
+    **********************************************************************************/
+    std::vector<ScalarType> getConstraintTargetValues(const Plato::InputData & aOptimizerNode) const
+    {
+        std::vector<ScalarType> tOutput;
+        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
+        {
+            const ScalarType tMyTargeteValue = Plato::Get::Double(*tNode, "TargetValue");
+            tOutput.push_back(tMyTargeteValue);
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
      * @brief Parse options for bound constrained PSO algorithm
      * @param [in] aOptimizerNode data structure with optimization related input options
      * @param [out] aData data structure with bound constrained PSO algorithm options
     **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::InputDataBCPSO<ScalarType, OrdinalType> & aData)
     {
-        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        this->parseOptions(aOptimizerNode, aData);
+        if(aOptimizerNode.size<Plato::InputData>("Output"))
         {
-            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
-            aData.mOutputSolution = this->outputSolution(tOptionsNode);
-            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
-            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
-
-            aData.mNumParticles = this->numParticles(tOptionsNode);
-            aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
-            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
-            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
-
-            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
-            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
-            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
-            aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
-            aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
-            aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
-            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
-            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
-            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+            Plato::InputData tOutputNode = aOptimizerNode.get<Plato::InputData>("Output");
+            aData.mOutputStageName = this->outputStageName(tOutputNode);
         }
     }
 
@@ -150,6 +169,23 @@ public:
      * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
     **********************************************************************************/
     void parse(const Plato::InputData & aOptimizerNode, Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
+    {
+        this->parseOptions(aOptimizerNode, aData);
+        this->parseConstraintTypes(aOptimizerNode, aData);
+        if(aOptimizerNode.size<Plato::InputData>("Output"))
+        {
+            Plato::InputData tOutputNode = aOptimizerNode.get<Plato::InputData>("Output");
+            aData.mOutputStageName = this->outputStageName(tOutputNode);
+        }
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Parse optimizer options for augmented Lagrangian PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
+    **********************************************************************************/
+    void parseOptions(const Plato::InputData & aOptimizerNode, Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
     {
         if(aOptimizerNode.size<Plato::InputData>("Options"))
         {
@@ -180,7 +216,82 @@ public:
         }
     }
 
-private:
+    /******************************************************************************//**
+     * @brief Parse optimizer options for bound constrained PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with bound constrained PSO algorithm options
+    **********************************************************************************/
+    void parseOptions(const Plato::InputData & aOptimizerNode, Plato::InputDataBCPSO<ScalarType, OrdinalType> & aData)
+    {
+        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        {
+            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mOutputSolution = this->outputSolution(tOptionsNode);
+            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
+
+            aData.mNumParticles = this->numParticles(tOptionsNode);
+            aData.mMaxNumIterations = this->maxNumOuterIterations(tOptionsNode);
+            aData.mMaxNumConsecutiveFailures = this->maxNumConsecutiveFailures(tOptionsNode);
+            aData.mMaxNumConsecutiveSuccesses = this->maxNumConsecutiveSuccesses(tOptionsNode);
+
+            aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
+            aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
+            aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
+            aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
+            aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
+            aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
+            aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
+            aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Transform string with constraint type into Plato::particle_swarm::constraint_t type
+     * @param [in] aType constraint type string
+     * @return constraint type, default = INEQUALITY
+    **********************************************************************************/
+    Plato::particle_swarm::constraint_t type(const std::string & aType)
+    {
+        std::string tCopy = aType;
+        std::transform(tCopy.begin(), tCopy.end(), tCopy.begin(), ::tolower);
+        Plato::particle_swarm::constraint_t tOutput;
+        if(tCopy.compare("equality") == 0)
+        {
+            tOutput = Plato::particle_swarm::EQUALITY;
+        }
+        else if(tCopy.compare("inequality") == 0)
+        {
+            tOutput = Plato::particle_swarm::INEQUALITY;
+        }
+        else
+        {
+            tOutput = Plato::particle_swarm::INEQUALITY;
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse constraint type, options 1) EQUALITY or 2) INEQUALITY
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with augmented Lagrangian PSO algorithm options
+    **********************************************************************************/
+    void parseConstraintTypes(const Plato::InputData & aOptimizerNode,
+                              Plato::InputDataALPSO<ScalarType, OrdinalType> & aData)
+    {
+        auto tConstraints = aOptimizerNode.getByName<Plato::InputData>("Constraint");
+        for(auto tMyConstraint = tConstraints.begin(); tMyConstraint != tConstraints.end(); ++ tMyConstraint)
+        {
+            std::string tType;
+            Plato::particle_swarm::constraint_t tMyType;
+            try { tType = tMyConstraint->get<std::string>("Type"); }
+            catch(int aValue) { /* USE DEFAULT VALUE = INEQUALITY */ }
+            tMyType = this->type(tType);
+            aData.mConstraintTypes.push_back(tMyType);
+        }
+    }
+
     /******************************************************************************//**
      * @brief Parse output diagnostics keyword
      * @param [in] aOptimizerNode data structure with optimization related input options
@@ -257,7 +368,7 @@ private:
     **********************************************************************************/
     OrdinalType maxNumInnerIterations(const Plato::InputData & aOptionsNode)
     {
-        OrdinalType tOutput = 5;
+        OrdinalType tOutput = 10;
         if(aOptionsNode.size<std::string>("MaxNumInnerIterations"))
         {
             tOutput = Plato::Get::Int(aOptionsNode, "MaxNumInnerIterations");
@@ -513,6 +624,20 @@ private:
         if(aOptionsNode.size<std::string>("FeasibilityInexactnessTolerance"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "FeasibilityInexactnessTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output stage name
+     * @param [in] aOutputNode output stage database
+    **********************************************************************************/
+    std::string outputStageName(const Plato::InputData & aOutputNode)
+    {
+        std::string tOutput;
+        if(aOutputNode.size<std::string>("OutputStage"))
+        {
+            tOutput = Plato::Get::String(aOutputNode, "OutputStage");
         }
         return (tOutput);
     }

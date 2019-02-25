@@ -68,7 +68,9 @@ public:
     /******************************************************************************//**
      * @brief Constructor
     **********************************************************************************/
-    explicit GradFreeCircle()
+    explicit GradFreeCircle(ScalarType aX = 0.75, ScalarType aY = 0.6) :
+            mX(aX),
+            mY(aY)
     {
     }
 
@@ -107,13 +109,16 @@ private:
     {
         assert(aControl.size() > static_cast<OrdinalType>(0));
 
-        const ScalarType tAlpha = aControl[0] - static_cast<ScalarType>(0.75);
-        ScalarType tBeta = aControl[1] - static_cast<ScalarType>(0.6);
+        ScalarType tBeta = aControl[1] - mY;
         tBeta = static_cast<ScalarType>(2.) * std::pow(tBeta, static_cast<ScalarType>(2));
-        const ScalarType tOutput = std::pow(tAlpha, static_cast<ScalarType>(2)) + tBeta;
-
+        const ScalarType tAlpha = aControl[0] - mX;
+        ScalarType tOutput = std::pow(tAlpha, static_cast<ScalarType>(2)) + tBeta;
         return (tOutput);
     }
+
+private:
+    ScalarType mX; /*!< X coordinate */
+    ScalarType mY; /*!< Y coordinate */
 
 private:
     GradFreeCircle(const Plato::GradFreeCircle<ScalarType, OrdinalType> & aRhs);

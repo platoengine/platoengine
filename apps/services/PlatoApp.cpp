@@ -1364,12 +1364,19 @@ PlatoApp::Aggregator::Aggregator(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     if(m_weightMethod == "FIXED")
     {
         m_limitWeight = Plato::Get::Double(tWeightNode, "Limit");
+        if(m_limitWeight == 0.0) m_limitWeight = 1e9;
         Plato::InputData tBasesNode = Plato::Get::InputData(tWeightNode,"Bases");
         for(auto tInputNode : tBasesNode.getByName<Plato::InputData>("Input"))
         {
-            std::string tWeightName = Plato::Get::String(tInputNode, "ArgumentName");
-            m_weightBases.push_back(tWeightName);
+            std::string tBasisName = Plato::Get::String(tInputNode, "ArgumentName");
+            m_weightBases.push_back(tBasisName);
         }
+    }
+    Plato::InputData tNormalsNode = Plato::Get::InputData(tWeightNode,"Normals");
+    for(auto tInputNode : tNormalsNode.getByName<Plato::InputData>("Input"))
+    {
+        std::string tNormalName = Plato::Get::String(tInputNode, "ArgumentName");
+        m_weightNormals.push_back(tNormalName);
     }
     // TODO check that number of weights == number of fields, etc.
 
@@ -1921,20 +1928,46 @@ void PlatoApp::Aggregator::operator()()
     }
 
   std::vector<double> weights(m_weights);
-  if(m_weightMethod == "FIXED"){
+  if(!m_weightBases.empty()){
     int nvals = m_weightBases.size();
-    std::vector<double> F(nvals);
+    std::vector<double> B(nvals);
     for(int ival=0; ival<nvals; ival++){
       std::vector<double>* data = mPlatoApp->getValue(m_weightBases[ival]);
-      F[ival] = *(data->data());
+      B[ival] = *(data->data());
     }
     double etaSum = 0.0;
     for(int ival=1; ival<nvals; ival++){
       etaSum += m_weights[ival];
     }
-    for(int ival=0; ival<nvals; ival++){
-      weights[ival] = F[0]*m_weights[ival]/(F[ival]*(1.0-etaSum));
-      if(weights[ival] > m_limitWeight) weights[ival] = m_limitWeight;
+    if(!m_weightNormals.empty()){
+      nvals = m_weightNormals.size();
+      std::vector<double> N(nvals);
+      for(int ival=0; ival<nvals; ival++){
+        std::vector<double>* data = mPlatoApp->getValue(m_weightNormals[ival]);
+        N[ival] = *(data->data());
+      }
+      for(int ival=0; ival<nvals; ival++){
+        weights[ival] = B[0]*m_weights[ival]/(B[ival]*(1.0-etaSum));
+        weights[ival] *= N[ival]/N[0];
+        if(weights[ival] > m_limitWeight) weights[ival] = m_limitWeight;
+      }
+    } else {
+      for(int ival=0; ival<nvals; ival++){
+        weights[ival] = B[0]*m_weights[ival]/(B[ival]*(1.0-etaSum));
+        if(weights[ival] > m_limitWeight) weights[ival] = m_limitWeight;
+      }
+    }
+  } else {
+    if(!m_weightNormals.empty()){
+      int nvals = m_weightNormals.size();
+      std::vector<double> N(nvals);
+      for(int ival=0; ival<nvals; ival++){
+        std::vector<double>* data = mPlatoApp->getValue(m_weightNormals[ival]);
+        N[ival] = *(data->data());
+      }
+      for(int ival=0; ival<nvals; ival++){
+        weights[ival] /= N[ival];
+      }
     }
   }
 
@@ -2062,6 +2095,14 @@ void PlatoApp::Aggregator::getArguments(std::vector<LocalArg> & aLocalArgs)
         {
             aLocalArgs.push_back(LocalArg {tArgument.layout, tInput});
         }
+    }
+    for(auto& tArgument : m_weightBases)
+    {
+        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, tArgument});
+    }
+    for(auto& tArgument : m_weightNormals)
+    {
+        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, tArgument});
     }
 }
 

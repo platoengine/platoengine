@@ -67,8 +67,9 @@ double MeshServices::getTotalVolume()
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
 
-      // don't process blocks that don't have volume
-      if( elblock.getDim() != 3 ) continue;
+      // don't process 1D blocks.  This prevents RBAR elements from having
+      // a 'volume'.
+      if( elblock.getDim() == 1 ) continue;
       
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();
@@ -166,8 +167,9 @@ MeshServices::getCurrentVolume(
       // not all blocks will be present on all processors
       if( elblock.getNumElem() == 0 ) continue;
 
-      // don't process blocks that don't have volume
-      if( elblock.getDim() != 3 ) continue;
+      // don't process 1D blocks.  This prevents RBAR elements from having
+      // a 'volume'.
+      if( elblock.getDim() == 1 ) continue;
 
       shards::CellTopology& topo = elblock.getTopology();
       int numNodesPerElem = elblock.getNnpe();

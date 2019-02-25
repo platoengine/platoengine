@@ -1,11 +1,7 @@
-<include filename="defines.xml"/>
-
-<include filename="pointarray.xml"/>
-
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>mitchell_tri.gen</mesh>
+  <mesh>bolted_bracket.gen</mesh>
   <block>
     <index>1</index>
     <integration>
@@ -20,3 +16,4 @@
   <file>platomain</file>
   <format>exodus</format>
 </output>
+

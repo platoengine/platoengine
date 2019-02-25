@@ -38,36 +38,38 @@
  //
  // *************************************************************************
  //@HEADER
-*/
+ */
 
 /*
- * Plato_ParticleSwarmTypes.hpp
+ * Plato_CustomOutput.hpp
  *
- *  Created on: Jan 24, 2019
+ *  Created on: Feb 13, 2019
  */
 
 #pragma once
 
+#include <memory>
+
 namespace Plato
 {
 
-struct particle_swarm
+/******************************************************************************//**
+ * @brief Interface to allow for custom output, i.e. user-specific output
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+class CustomOutput
 {
-    enum stop_t
-    {
-        DID_NOT_CONVERGE = 1,
-        MAX_NUMBER_ITERATIONS = 2,
-        TRUE_OBJECTIVE_TOLERANCE = 3,
-        MEAN_OBJECTIVE_TOLERANCE = 4,
-        STDDEV_OBJECTIVE_TOLERANCE = 5,
-    };
+public:
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~CustomOutput(){}
 
-    enum constraint_t
-    {
-        EQUALITY = 1,
-        INEQUALITY = 2,
-    };
+    /******************************************************************************//**
+     * @brief Base output is a null operation
+    **********************************************************************************/
+    virtual void output() {return;}
 };
-// struct particle_swarm
+// class CustomOutput
 
 } // namespace Plato

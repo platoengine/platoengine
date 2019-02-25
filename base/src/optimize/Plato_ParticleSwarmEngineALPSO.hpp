@@ -74,6 +74,8 @@ public:
     explicit ParticleSwarmEngineALPSO(Plato::Interface* aInterface, const MPI_Comm & aComm) :
             mObjFuncStageName(),
             mConstraintStageNames(),
+            mConstraintTargetValues(),
+            mConstraintReferenceValues(),
             mComm(aComm),
             mInterface(aInterface),
             mObjFuncStageDataMng(),
@@ -203,6 +205,8 @@ private:
         Plato::ParticleSwarmParser<ScalarType, OrdinalType> tParserPSO;
         mObjFuncStageName = tParserPSO.getObjectiveStageName(tOptimizerNode);
         mConstraintStageNames = tParserPSO.getConstraintStageNames(tOptimizerNode);
+        mConstraintTargetValues = tParserPSO.getConstraintTargetValues(tOptimizerNode);
+        mConstraintReferenceValues = tParserPSO.getConstraintReferenceValues(tOptimizerNode);
         tParserPSO.parse(tOptimizerNode, aInputs);
     }
 
@@ -217,9 +221,8 @@ private:
         const OrdinalType tNumParticles = aInputs.mNumParticles;
         const OrdinalType tNumControls = aInputs.mParticlesLowerBounds->size();
         std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tObjective =
-                std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(
-                        tNumControls, tNumParticles, mObjFuncStageDataMng);
-        tObjective->set(mInterface);
+                std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>( tNumControls, tNumParticles, mObjFuncStageDataMng);
+        tObjective->setInterface(mInterface);
         aObjective = tObjective;
     }
 
@@ -236,13 +239,14 @@ private:
 
         std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> tConstraintList =
                 std::make_shared<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>>();
-        for(OrdinalType tConstraintIndex = 0; tConstraintIndex < mConstraintStageNames.size(); tConstraintIndex++)
+        for(OrdinalType tIndex = 0; tIndex < mConstraintStageNames.size(); tIndex++)
         {
             std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tMyConstraint =
-                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(
-                            tNumControls, tNumParticles, mConstraintStageDataMng[tConstraintIndex]);
-            tMyConstraint->set(mInterface);
-            tConstraintList->add(tMyConstraint);
+                    std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(tNumControls, tNumParticles, mConstraintStageDataMng[tIndex]);
+            tMyConstraint->setInterface(mInterface);
+            tMyConstraint->setReferenceValue(mConstraintReferenceValues[tIndex]);
+            tMyConstraint->setTargetValue(mConstraintTargetValues[tIndex]);
+            tConstraintList->add(tMyConstraint, aInputs.mConstraintTypes[tIndex]);
         }
 
         aConstraints = tConstraintList;
@@ -260,7 +264,7 @@ private:
         aOutput.mControlReductions = aFactory.createReduction(mComm, mInterface);
         aOutput.mCriteriaEvals = std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(aOutput.mNumParticles);
         const OrdinalType tNumConstraints = mConstraintStageNames.size();
-        aOutput.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, aOutput.mNumParticles);
+        aOutput.mDual = std::make_shared<Plato::StandardMultiVector<ScalarType>>(tNumConstraints, aOutput.mNumParticles);
     }
 
     /******************************************************************************//**
@@ -314,6 +318,8 @@ private:
 private:
     std::string mObjFuncStageName; /*!< objective function stage name */
     std::vector<std::string> mConstraintStageNames; /*!< list of stage names for all constraints */
+    std::vector<ScalarType> mConstraintTargetValues; /*!< list of target values for all constraints */
+    std::vector<ScalarType> mConstraintReferenceValues; /*!< list of reference values for all constraints */
 
     MPI_Comm mComm; /*!< MPI communicator */
     Plato::Interface* mInterface; /*!< PLATO Engine interface */

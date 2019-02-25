@@ -309,6 +309,7 @@ private:
         };
         double m_limitWeight;
         std::vector<std::string> m_weightBases;
+        std::vector<std::string> m_weightNormals;
         std::string m_weightMethod;
         std::vector<double> m_weights;
         std::vector<AggStruct> m_aggStructs;
