@@ -1023,11 +1023,30 @@ bool XMLGenerator::generateSalinasInputDecks()
                     {
                         fprintf(fp, "  material %s\n", m_InputData.blocks[n].material_id.c_str());
                     }
-                    if(m_InputData.blocks[n].element_type.empty() == false)
+                    if(m_InputData.blocks[n].element_type == "hex8")
                     {
                         // pass through element type
-                        fprintf(fp, "  %s\n", m_InputData.blocks[n].element_type.c_str());
-                        // Note: in the future, we may need to map element types for each physics performer
+                        fprintf(fp, "  hex8u\n"); //user under integrated hexes.  Others seem to fail the derivative checker
+                    }
+                    else if(m_InputData.blocks[n].element_type == "tet4")
+                    {
+                        // pass through element type
+                        fprintf(fp, "  tet4\n");
+                    }
+                    else if(m_InputData.blocks[n].element_type == "tet10")
+                    {
+                        // pass through element type
+                        fprintf(fp, "  tet10\n");
+                    }
+                    else if(m_InputData.blocks[n].element_type == "rbar")
+                    {
+                        // pass through element type
+                        fprintf(fp, "  rbar\n");
+                    }
+                    else if(m_InputData.blocks[n].element_type == "rbe3")
+                    {
+                        // pass through element type
+                        fprintf(fp, "  rbe3\n");
                     }
                     if(frf)
                     {
@@ -1086,6 +1105,34 @@ bool XMLGenerator::generateSalinasInputDecks()
                 if(cur_obj.volume_misfit_target != "")
                 {
                     fprintf(fp, "  volume_misfit_target = %s\n", cur_obj.volume_misfit_target.c_str());
+                }
+                if(cur_obj.scmm_mass_to_stress_constraint_ratio != "")
+                {
+                    fprintf(fp, "  aug_lag_mass_to_constraint_ratio = %s\n", cur_obj.scmm_mass_to_stress_constraint_ratio.c_str());
+                }
+                if(cur_obj.scmm_initial_penalty_param != "")
+                {
+                    fprintf(fp, "  aug_lag_penalty_param_initial_value = %s\n", cur_obj.scmm_initial_penalty_param.c_str());
+                }
+                if(cur_obj.scmm_penalty_param_expansion_factor != "")
+                {
+                    fprintf(fp, "  aug_lag_penalty_param_expansion_factor = %s\n", cur_obj.scmm_penalty_param_expansion_factor.c_str());
+                }
+                if(cur_obj.scmm_initial_lagrange_multiplier != "")
+                {
+                    fprintf(fp, "  aug_lag_initial_lagrange_multiplier_value = %s\n", cur_obj.scmm_initial_lagrange_multiplier.c_str());
+                }
+                if(cur_obj.scmm_initial_mass_weight_factor != "")
+                {
+                    fprintf(fp, "  aug_lag_initial_stress_weight_factor_value = %s\n", cur_obj.scmm_initial_mass_weight_factor.c_str());
+                }
+                if(cur_obj.scmm_control_stagnation_tolerance != "")
+                {
+                    fprintf(fp, "  aug_lag_control_stagnation_tolerance = %s\n", cur_obj.scmm_control_stagnation_tolerance.c_str());
+                }
+                if(cur_obj.scmm_write_debug_output_files == "true")
+                {
+                    fprintf(fp, "  aug_lag_write_debug_output_files = 1\n");
                 }
                 if(cur_obj.stress_limit != "")
                 {
@@ -2094,6 +2141,12 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.type += " ";
                                 new_objective.type += tokens[j];
                             }
+                            if(new_objective.type == "stress constrained volume minimization" &&
+                               new_objective.analysis_solver_tolerance.length() == 0)
+                            {
+                                // Set a default in case one isn't set by user.
+                                new_objective.analysis_solver_tolerance = "1e-7";
+                            }
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
                         {
@@ -2148,6 +2201,69 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.relative_stress_limit = tokens[3];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "mass", "to", "stress", "constraint", "ratio"}, tStringValue))
+                        {
+                            if(tokens.size() < 7)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm mass to stress constraint ratio\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_mass_to_stress_constraint_ratio = tokens[6];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "penalty", "param", "expansion", "factor"}, tStringValue))
+                        {
+                            if(tokens.size() < 6)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm penalty param expansion factor\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_penalty_param_expansion_factor = tokens[5];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "lagrange", "multiplier"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial lagrange multiplier\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_initial_lagrange_multiplier = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "mass", "weight", "factor"}, tStringValue))
+                        {
+                            if(tokens.size() < 6)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial mass weight factor\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_initial_mass_weight_factor = tokens[5];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "control", "stagnation", "tolerance"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm control stagnation tolerance\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_control_stagnation_tolerance = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "penalty","param"}, tStringValue))
+                        {
+                            if(tokens.size() < 5)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial penalty param\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_initial_penalty_param = tokens[4];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm","write","debug","output","files"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm write debug output files\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_write_debug_output_files = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","p","norm","power"}, tStringValue))
                         {
@@ -3320,6 +3436,8 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.output_method="epu";
     m_InputData.check_gradient = "false";
     m_InputData.check_hessian = "false";
+    m_InputData.filter_type = "kernel";
+    m_InputData.filter_power = "1";
 
     m_InputData.mInnerKKTtoleranceGCMMA = "";
     m_InputData.mOuterKKTtoleranceGCMMA = "";
@@ -3334,9 +3452,12 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.mInitialRadiusScale = "";
     m_InputData.mMaxTrustRegionRadius = "";
     m_InputData.mMinTrustRegionRadius = "";
-    m_InputData.mMaxTrustRegionIterations = "";
+    m_InputData.mMaxTrustRegionIterations = "5";
     m_InputData.mTrustRegionExpansionFactor = "";
     m_InputData.mTrustRegionContractionFactor = "";
+    m_InputData.mTrustRegionRatioLowKS = "";
+    m_InputData.mTrustRegionRatioMidKS = "";
+    m_InputData.mTrustRegionRatioUpperKS = "";
 
     m_InputData.mUseMeanNorm = "";
     m_InputData.mAugLagPenaltyParam = "";
@@ -3346,8 +3467,8 @@ void XMLGenerator::initializePlatoProblemOptions()
 
     m_InputData.mHessianType = "disabled";
     m_InputData.mLimitedMemoryStorage = "8";
-    m_InputData.mDisablePostSmoothingKS = "";
-    m_InputData.mProblemUpdateFrequency = "";
+    m_InputData.mDisablePostSmoothingKS = "true";
+    m_InputData.mProblemUpdateFrequency = "5";
     m_InputData.mOuterGradientToleranceKS = "";
     m_InputData.mOuterStationarityToleranceKS = "";
     m_InputData.mOuterStagnationToleranceKS = "";
@@ -4082,11 +4203,11 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mMaxTrustRegionRadius = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"min","trust","region","radius"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks", "min","trust","region","radius"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"min trust region radius\" keyword(s).\n";
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks min trust region radius\" keyword(s).\n";
                                 return false;
                             }
                             m_InputData.mMinTrustRegionRadius = tStringValue;
