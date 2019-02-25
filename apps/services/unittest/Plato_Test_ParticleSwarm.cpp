@@ -46,7 +46,8 @@
  *  Created on: Dec 26, 2018
  */
 
-#include "gtest/gtest.h"
+#include <mpi.h>
+#include <gtest/gtest.h>
 
 #include "Plato_GradFreeCircle.hpp"
 #include "Plato_GradFreeRadius.hpp"
@@ -776,8 +777,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
-    EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -804,8 +806,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
-    EXPECT_EQ(5u, tInputsPSO.mMaxNumInnerIter);
+    EXPECT_EQ(10u, tInputsPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(10u, tInputsPSO.mMaxNumConsecutiveSuccesses);
@@ -848,14 +851,24 @@ TEST(PlatoTest, PSO_ParserALPSO)
     Plato::InputData tOptimizerNode("OptimizerNode");
     tOptimizerNode.add<Plato::InputData>("Options", tOptions);
 
+    Plato::InputData tConstraint("Constraint");
+    tConstraint.add<std::string>("ValueStageName", "ConstraintEvaluation");
+    tConstraint.add<std::string>("ReferenceValue", "1.0");
+    tConstraint.add<std::string>("TargetValue", "0.0");
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraint);
+
     tParserPSO.parse(tOptimizerNode, tInputsPSO);
+
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(8u, tInputsPSO.mMaxNumConsecutiveSuccesses);
+    EXPECT_EQ(1u, tInputsPSO.mConstraintTypes.size());
+    EXPECT_EQ(Plato::particle_swarm::INEQUALITY, tInputsPSO.mConstraintTypes[0]);
 
     EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
@@ -884,14 +897,31 @@ TEST(PlatoTest, PSO_ParserALPSO)
     Plato::InputData tOptimizerNodeTwo("OptimizerNode");
     tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
     Plato::InputDataALPSO<double> tInputsTwoPSO;
+
+    Plato::InputData tConstraint1("Constraint1");
+    tConstraint.add<std::string>("ValueStageName", "ConstraintEvaluation1");
+    tConstraint.add<std::string>("ReferenceValue", "1.0");
+    tConstraint.add<std::string>("TargetValue", "0.0");
+    tOptimizerNodeTwo.add<Plato::InputData>("Constraint", tConstraint1);
+    Plato::InputData tConstraint2("Constraint2");
+    tConstraint2.add<std::string>("ValueStageName", "ConstraintEvaluation2");
+    tConstraint2.add<std::string>("ReferenceValue", "1.0");
+    tConstraint2.add<std::string>("TargetValue", "0.0");
+    tConstraint2.add<std::string>("Type", "Equality");
+    tOptimizerNodeTwo.add<Plato::InputData>("Constraint", tConstraint2);
+
     tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
 
+    EXPECT_EQ(2u, tInputsTwoPSO.mConstraintTypes.size());
+    EXPECT_EQ(Plato::particle_swarm::INEQUALITY, tInputsTwoPSO.mConstraintTypes[0]);
+    EXPECT_EQ(Plato::particle_swarm::EQUALITY, tInputsTwoPSO.mConstraintTypes[1]);
+
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
-    EXPECT_EQ(5u, tInputsTwoPSO.mMaxNumInnerIter);
+    EXPECT_EQ(10u, tInputsTwoPSO.mMaxNumInnerIter);
     EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsTwoPSO.mMaxNumConsecutiveFailures);
     EXPECT_EQ(8u, tInputsTwoPSO.mMaxNumConsecutiveSuccesses);
@@ -909,6 +939,61 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
+}
+
+TEST(PlatoTest, PSO_ParserOutputStageName)
+{
+    Plato::ParticleSwarmParser<double> tParserPSO;
+    Plato::InputDataALPSO<double> tInputsPSO;
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    EXPECT_TRUE(tInputsPSO.mOutputStageName.empty());
+
+    Plato::InputData tOutput("Output Data");
+    ASSERT_STREQ("Output Data", tOutput.name().c_str());
+    tOutput.add<std::string>("OutputStage", "Output To File");
+    tOptimizerNode.add<Plato::InputData>("Output", tOutput);
+    tParserPSO.parse(tOptimizerNode, tInputsPSO);
+    ASSERT_STREQ("Output To File", tInputsPSO.mOutputStageName.c_str());
+}
+
+TEST(PlatoTest, PSO_ParserCriteriaData)
+{
+    Plato::InputData tObjective("Objective");
+    tObjective.add<std::string>("ValueStageName", "Mass");
+
+    Plato::InputData tConstraintOne("Constraint");
+    tConstraintOne.add<std::string>("ValueStageName", "Volume");
+    tConstraintOne.add<std::string>("ReferenceValue", "2.0");
+    tConstraintOne.add<std::string>("TargetValue", "1.0");
+
+    Plato::InputData tConstraintTwo("Constraint");
+    tConstraintTwo.add<std::string>("ValueStageName", "Stress");
+
+    Plato::InputData tOptimizerNode("OptimizerNode");
+    tOptimizerNode.add<Plato::InputData>("Objective", tObjective);
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraintOne);
+    tOptimizerNode.add<Plato::InputData>("Constraint", tConstraintTwo);
+
+    Plato::ParticleSwarmParser<double> Parser;
+    std::string tObjFuncName = Parser.getObjectiveStageName(tOptimizerNode);
+    ASSERT_STREQ("Mass", tObjFuncName.c_str());
+
+    std::vector<std::string> tConstraintStageNames = Parser.getConstraintStageNames(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintStageNames.size());
+    ASSERT_STREQ("Volume", tConstraintStageNames[0].c_str());
+    ASSERT_STREQ("Stress", tConstraintStageNames[1].c_str());
+
+    std::vector<double> tConstraintReferenceValues = Parser.getConstraintReferenceValues(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintReferenceValues.size());
+    const double tTolerance = 1e-4;
+    EXPECT_NEAR(2.0, tConstraintReferenceValues[0], tTolerance);
+    EXPECT_NEAR(1.0, tConstraintReferenceValues[1], tTolerance);
+
+    std::vector<double> tConstraintTargetValues = Parser.getConstraintTargetValues(tOptimizerNode);
+    EXPECT_EQ(2u, tConstraintTargetValues.size());
+    EXPECT_NEAR(1.0, tConstraintTargetValues[0], tTolerance);
+    EXPECT_NEAR(0.0, tConstraintTargetValues[1], tTolerance);
 }
 
 TEST(PlatoTest, PSO_SolveBCPSO_Rosenbrock)
@@ -1148,8 +1233,6 @@ TEST(PlatoTest, PSO_SolveALPSO_RosenbrockObj_RadiusConstr)
     const size_t tNumParticles = 20;
     const size_t tNumConstraints = 1;
     Plato::InputDataALPSO<double> tInputs;
-    tInputs.mPenaltyMultiplierUpperBound = 1e3;
-    tInputs.mMeanBestAugLagFuncTolerance = 1e-6;
     tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
     tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
     tInputs.mParticlesLowerBounds->fill(-5);
@@ -1266,6 +1349,56 @@ TEST(PlatoTest, PSO_SolveALPSO_CircleObj_RadiusConstr)
     // ********* DIAGNOSTICS *********
     const double tTolerance = 1e-2;
     EXPECT_NEAR(0, tOutputs.mGlobalBestAugLagFuncValue, tTolerance);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestAugLagFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestAugLagFuncValue << ", STDDEV = " << tOutputs.mStdDevBestAugLagFuncValue << "\n";
+
+    std::cout << "\nCONSTRAINT #0: BEST = " << (*tOutputs.mGlobalBestConstraintValues)[0] << ", MEAN = "
+            << (*tOutputs.mMeanBestConstraintValues)[0] << ", STDDEV = " << (*tOutputs.mStdDevBestConstraintValues)[0]
+            << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+}
+
+TEST(PlatoTest, PSO_SolveALPSO_CircleObj_RadiusEqConstr)
+{
+    // ********* DEFINE CRITERIA *********
+    std::shared_ptr<Plato::GradFreeRadius<double>> tMyConstraint = std::make_shared<Plato::GradFreeRadius<double>>();
+    std::shared_ptr<Plato::GradFreeCriteriaList<double>> tConstraints =
+            std::make_shared<Plato::GradFreeCriteriaList<double>>();
+    tConstraints->add(tMyConstraint, Plato::particle_swarm::EQUALITY);
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeCircle<double>>(1.0, 2.0);
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 20;
+    const size_t tNumConstraints = 1;
+    Plato::InputDataALPSO<double> tInputs;
+    tInputs.mPenaltyMultiplierUpperBound = 1e3;
+    tInputs.mStdDevBestAugLagFuncTolerance = 5e-4;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(0);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(2);
+    tInputs.mDual = std::make_shared<Plato::StandardMultiVector<double>>(tNumConstraints, tNumParticles);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::OutputDataALPSO<double> tOutputs;
+    Plato::solve_alpso<double>(tObjective, tConstraints, tInputs, tOutputs);
+
+    // ********* DIAGNOSTICS *********
+    const double tTolerance = 1e-2;
+    EXPECT_NEAR(2.67805, tOutputs.mGlobalBestAugLagFuncValue, tTolerance);
 
     std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
     std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestAugLagFuncValue << ", MEAN = "

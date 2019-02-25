@@ -186,7 +186,7 @@ private:
         std::shared_ptr<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>> tObjective =
                 std::make_shared<Plato::GradFreeEngineCriterion<ScalarType, OrdinalType>>(
                         tNumControls, tNumParticles, mStageDataMng);
-        tObjective->set(mInterface);
+        tObjective->setInterface(mInterface);
         aObjective = tObjective;
     }
 

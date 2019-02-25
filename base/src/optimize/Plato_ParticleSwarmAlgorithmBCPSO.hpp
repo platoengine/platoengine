@@ -82,6 +82,7 @@ public:
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
             mStageMng(std::make_shared<Plato::ParticleSwarmStageMngBCPSO<ScalarType, OrdinalType>>(aFactory, aObjective))
@@ -104,6 +105,7 @@ public:
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
             mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
             mStageMng(aStageMng)
@@ -295,6 +297,15 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set custom output interface
+     * @param [in] aInput output interface shared pointer
+    **********************************************************************************/
+    void setCustomOutput(const std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> & aInput)
+    {
+        mCustomOutput = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Return current number of iterations
      * @return current number of iterations
     **********************************************************************************/
@@ -433,15 +444,9 @@ public:
             mNumIterations++;
             mStageMng->evaluateObjective(*mDataMng);
             mStageMng->findBestParticlePositions(*mDataMng);
-
-            mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
-            mOperations->updateParticleVelocities(*mDataMng);
-            mOperations->updateParticlePositions(*mDataMng);
-            mOperations->updateTrustRegionMultiplier();
-
             mDataMng->computeCurrentBestObjFuncStatistics();
-            this->outputDiagnostics();
 
+            this->outputDiagnostics();
             if(this->checkStoppingCriteria())
             {
                 mDataMng->computeCurrentBestParticlesStatistics();
@@ -449,6 +454,11 @@ public:
                 this->closeOutputFile();
                 break;
             }
+
+            mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
+            mOperations->updateParticleVelocities(*mDataMng);
+            mOperations->updateParticlePositions(*mDataMng);
+            mOperations->updateTrustRegionMultiplier();
         }
     }
 
@@ -459,25 +469,23 @@ public:
     void solve(std::ofstream & aOutputStream)
     {
         mNumIterations = 0;
-
         while(1)
         {
             mNumIterations++;
             mStageMng->evaluateObjective(*mDataMng);
             mStageMng->findBestParticlePositions(*mDataMng);
+            mDataMng->computeCurrentBestObjFuncStatistics();
+
+            this->outputDiagnostics(aOutputStream);
+            if(this->checkStoppingCriteria())
+            {
+                break;
+            }
 
             mOperations->checkGlobalBestParticleUpdateSuccessRate(*mDataMng);
             mOperations->updateParticleVelocities(*mDataMng);
             mOperations->updateParticlePositions(*mDataMng);
             mOperations->updateTrustRegionMultiplier();
-
-            mDataMng->computeCurrentBestObjFuncStatistics();
-            this->outputDiagnostics(aOutputStream);
-
-            if(this->checkStoppingCriteria())
-            {
-                break;
-            }
         }
     }
 
@@ -583,6 +591,7 @@ private:
             return;
         }
 
+        mCustomOutput->output();
         const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
         if(tMyCommWrapper.myProcID() == 0)
         {
@@ -638,6 +647,8 @@ private:
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
     Plato::DiagnosticsBCPSO<ScalarType, OrdinalType> mOutputData; /*!< PSO algorithm output/diagnostics data structure */
+
+    std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> mCustomOutput;  /*!< custom output interface */
     std::shared_ptr<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>> mDataMng; /*!< PSO algorithm data manager */
     std::shared_ptr<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>> mOperations; /*!< interface to core PSO operations */
     std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> mStageMng; /*!< interface to criteria evaluations/calls */

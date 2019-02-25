@@ -80,6 +80,8 @@ public:
                                      const OrdinalType & aNumParticles,
                                      const Plato::StageInputDataMng & aStageDataMng,
                                      Plato::Interface* aInterface = nullptr) :
+            mTargetValue(0.0),
+            mReferenceValue(1.0),
             mNumControls(aNumControls),
             mNumParticles(aNumParticles),
             mParticles(),
@@ -99,13 +101,31 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Set interface to data motion coordinator
+     * @brief Set PLATO interface, coordinates data motion between applications
      * @param [in] aInterface interface to data motion coordinator
     **********************************************************************************/
-    void set(Plato::Interface* aInterface)
+    void setInterface(Plato::Interface* aInterface)
     {
         assert(aInterface != nullptr);
         mInterface = aInterface;
+    }
+
+    /******************************************************************************//**
+     * @brief Set reference value, i.e. /f$ f(x) / \alpha /f$ where /f$ \alpha /f$ is the reference value
+     * @param [in] aInput reference value
+    **********************************************************************************/
+    void setReferenceValue(const ScalarType & aInput)
+    {
+        mReferenceValue = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set target value, i.e. /f$ f(x) - \alpha /f$ where /f$ \alpha /f$ is the target value
+     * @param [in] aInput target value
+    **********************************************************************************/
+    void setTargetValue(const ScalarType & aInput)
+    {
+        mTargetValue = aInput;
     }
 
     /******************************************************************************//**
@@ -202,11 +222,16 @@ private:
         const OrdinalType tCRITERION_VALUES_INDEX = 0;
         for(OrdinalType tParticleIndex = 0; tParticleIndex < mNumParticles; tParticleIndex++)
         {
-            aOutput[tParticleIndex] = mCriterionValues[tParticleIndex][tCRITERION_VALUES_INDEX];
+            const ScalarType tNormalizedValue = mCriterionValues[tParticleIndex][tCRITERION_VALUES_INDEX] / mReferenceValue;
+            aOutput[tParticleIndex] = tNormalizedValue - mTargetValue;
+
         }
     }
 
 private:
+    ScalarType mTargetValue; /*!< target value, i.e. bound */
+    ScalarType mReferenceValue; /*!< reference value, i.e. normalization factor */
+
     OrdinalType mNumControls; /*!< local number of controls */
     OrdinalType mNumParticles; /*!< local number of particles */
 

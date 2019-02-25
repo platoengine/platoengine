@@ -151,6 +151,7 @@ inline void solve_alpso(const std::shared_ptr<Plato::GradFreeCriterion<ScalarTyp
 
     // ********* ALLOCATE AUGMENTED LAGRANGIAN ALGORITHM *********
     Plato::ParticleSwarmAlgorithmALPSO<ScalarType, OrdinalType> tAlgorithm(tFactory, aObjective, aConstraints);
+    tAlgorithm.setCustomOutput(aInputs.mCustomOutput);
 
     // ********* SOLVE OPTIMIZATION PROBLEM AND SAVE SOLUTION *********
     Plato::set_alpso_algorithm_inputs(aInputs, tAlgorithm);
