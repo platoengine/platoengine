@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code> <!---EXECUTABLE NAME-->
+  <PerformerID>0</PerformerID>
+</Performer> 
+
+<Performer> 
+  <For var="I" in="Comms">
+  <Name>Proxy_{I}</Name>
+  </For>
+  <Code>ROCKET_MPMD</Code> <!---EXECUTABLE NAME-->
+  <PerformerID>1</PerformerID>
+</Performer> 
+
+<!---DEFINE OWNERS AND USERS OF SHARED DATA-->
+
+<For var="I" in="Comms">
+<For var="J" in="Evals">
+<SharedData>
+  <Name>ObjFuncValue {I*NumEvals+J}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy_{I}</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+</For>
+</For>
+
+<For var="I" in="Comms">
+<For var="J" in="Evals">
+<SharedData>
+  <Name>Control {I*NumEvals+J}</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>2</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy_{I}</UserName>
+</SharedData>
+</For>
+</For>
+
+<!---OBJECTIVE FUNCTION STAGE-->
+<Stage>
+  
+  <Name>ObjFuncEvaluation</Name>
+  <For var="I" in="Comms">
+  <For var="J" in="Evals">
+  <Input>
+    <SharedDataName>Control {I*NumEvals+J}</SharedDataName>
+  </Input>
+  </For>
+  </For>
+
+  <For var="J" in="Evals">
+  <Operation>
+    
+    <For var="I" in="Comms">
+    <Operation>
+    <PerformerName>Proxy_{I}</PerformerName>
+    <Name>ObjFuncEval</Name>
+    <Input>
+      <ArgumentName>DesignVars</ArgumentName>
+      <SharedDataName>Control {I*NumEvals+J}</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>ObjFuncVal</ArgumentName>
+      <SharedDataName>ObjFuncValue {I*NumEvals+J}</SharedDataName>
+    </Output>
+    </Operation>
+    </For>
+
+  </Operation>
+  </For>
+  
+  <For var="I" in="Comms">
+  <For var="J" in="Evals">
+  <Output>
+    <SharedDataName>ObjFuncValue {I*NumEvals+J}</SharedDataName>
+  </Output>
+  </For>
+  </For>
+  
+</Stage>
+
+<!---SET OPTIMIZER'S OPTIONS-->
+<Optimizer>
+  <Package>BCPSO</Package>
+  <Options>
+    <NumParticles>{NumParticles}</NumParticles>
+    <MeanBestObjFuncTolerance>1e-6</MeanBestObjFuncTolerance>
+    <StdDevBestObjFuncTolerance>1e-6</StdDevBestObjFuncTolerance>
+    <OutputSolution>true</OutputSolution>
+    <OutputDiagnosticsToFile>true</OutputDiagnosticsToFile>
+  </Options>
+  <Objective>
+    <ValueStageName>ObjFuncEvaluation</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+  </Objective>
+  <BoundConstraint>
+    <Upper>1</Upper>
+    <Upper>1</Upper>
+    <Lower>0.1</Lower>
+    <Lower>0.1</Lower>
+  </BoundConstraint>
+</Optimizer>
