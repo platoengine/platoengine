@@ -58,8 +58,7 @@
   </For>
 
   <For var="J" in="Evals">
-  <Operation>
-    
+  <Operation>    
     <For var="I" in="Comms">
     <Operation>
     <PerformerName>Proxy_{I}</PerformerName>
@@ -74,7 +73,6 @@
     </Output>
     </Operation>
     </For>
-
   </Operation>
   </For>
   
