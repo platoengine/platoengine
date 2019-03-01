@@ -1881,7 +1881,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                             sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
                             addNTVParameter(n4, "Values", "Array(double)", tmp_buf);
                             sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
-                            addNTVParameter(n4, "Sides", "String", tmp_buf);
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
                         }
                     }
                 }
@@ -2013,7 +2013,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                             addNTVParameter(n4, "Type", "string", "Uniform");
                             addNTVParameter(n4, "Value", "double", cur_load.scale);
                             sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
-                            addNTVParameter(n4, "Sides", "String", tmp_buf);
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
                         }
                     }
                 }
