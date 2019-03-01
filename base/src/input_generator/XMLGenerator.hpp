@@ -210,6 +210,7 @@ struct InputData
   std::string lightmp_path;
   std::string sierra_sd_path;
   std::string albany_path;
+  std::string plato_analyze_path;
   std::string prune_and_refine_path;
   std::string number_prune_and_refine_processors;
   std::string optimization_algorithm;
@@ -295,9 +296,11 @@ protected:
   bool generatePerformerOperationsXML();
   bool generateSalinasOperationsXML();
   bool generateAlbanyOperationsXML();
+  bool generatePlatoAnalyzeOperationsXML();
   bool generateLightMPOperationsXML();
   bool generatePhysicsInputDecks();
   bool generateSalinasInputDecks();
+  bool generatePlatoAnalyzeInputDecks();
   bool generateLightMPInputDecks();
   bool generateAlbanyInputDecks();
   bool expandUncertaintiesForGenerate();
