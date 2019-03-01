@@ -434,7 +434,7 @@ ExodusIO::readHeader()
                 Nel_hex8 + Nel_hex20;
   if (Nel_tot == 0 || Nel_tot != Nel) filerr = true;
   if ( (Nel_quad4 + Nel_quad8 + Nel_tri3 + Nel_truss2 > 0) &&
-       (Nel_hex8 + Nel_hex20 == 0) && (Ndim == 3) ) filerr = true;
+       (Nel_hex8 + Nel_hex20 + Nel_tet4 == 0) && (Ndim == 3) ) filerr = true;
   if (filerr) {
     pXcout << "\n\n\t!!!!! Error reading exodus file !!!!!" << endl;
     pXcout << "\t  Ndim       = " << Ndim << endl;;
