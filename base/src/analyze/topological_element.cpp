@@ -351,7 +351,7 @@ void Beam::registerData()
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType,
-                                          "B2ATR",
+                                           strint("B2ATR",groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
