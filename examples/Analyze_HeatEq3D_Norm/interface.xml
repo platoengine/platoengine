@@ -532,7 +532,7 @@
     <Tolerance>1e-9</Tolerance>
   </Constraint>
   <Convergence>
-    <MaxIterations>10</MaxIterations>
+    <MaxIterations>5</MaxIterations>
   </Convergence>
 </Optimizer>
 
