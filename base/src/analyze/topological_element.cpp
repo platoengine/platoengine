@@ -339,12 +339,12 @@ void Beam::registerData()
   int number = myNel*myNnpe;
 
   NODECONNECT = myData->registerVariable( IntType,
-                                          "CONNB2",
+                                          strint("CONNB2",groupID),
                                           UNSET,
                                           number );
 
   GLOBALID    = myData->registerVariable( IntType,
-                                          "B2GID",
+                                          strint("B2GID",groupID),
                                           ELEM,
                                           myNel );
 
