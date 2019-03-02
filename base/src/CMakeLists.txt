@@ -34,4 +34,5 @@ set(PLATO_INCLUDES ${PLATO_INCLUDES}
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/SpatialSearching
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/SupervisedLearning
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/VectorKernel
-  PARENT_SCOPE )
+  ${CMAKE_SOURCE_DIR}/base/src/xtk
+    PARENT_SCOPE )
