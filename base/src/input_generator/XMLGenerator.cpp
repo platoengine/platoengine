@@ -5165,7 +5165,22 @@ bool XMLGenerator::generatePlatoMainInputDeckXML()
     pugi::xml_node mesh_node = doc.append_child("mesh");
     addChild(mesh_node, "type", "unstructured");
     addChild(mesh_node, "format", "exodus");
-    addChild(mesh_node, "ignore_node_map", "true");
+
+    // See if this is an Alexa (plato analyze) run and
+    // add the ignore_node_map entry if it is.
+    bool tAlexaRun = false;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.code_name == "plato_analyze")
+        {
+            tAlexaRun = true;
+            break;
+        }
+    }
+    if(tAlexaRun)
+        addChild(mesh_node, "ignore_node_map", "true");
+
     addChild(mesh_node, "mesh", m_InputData.run_mesh_name.c_str());
     // just need one block specified here
     if(m_InputData.blocks.size() > 0)
