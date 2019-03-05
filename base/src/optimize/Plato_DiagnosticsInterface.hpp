@@ -66,6 +66,7 @@
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_OptimizerUtilities.hpp"
 #include "Plato_OptimizerEngineStageData.hpp"
+#include "Plato_HostBounds.hpp"
 
 namespace Plato
 {
@@ -114,14 +115,22 @@ public:
         this->allocateBaselineDataStructures(tAlgebraFactory, tDataFactory);
 
         // ********* GET UPPER AND LOWER BOUNDS ********* //
-        this->getControlBounds();
+        std::vector<ScalarType> tLowerBoundsData;
+        std::vector<ScalarType> tUpperBoundsData;
+        this->getControlBounds(tLowerBoundsData,tUpperBoundsData);
+
+        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tLowerBounds = tDataFactory.control().create();
+        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tUpperBounds = tDataFactory.control().create();
+        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
+        Plato::copy(tLowerBoundsData, (*tLowerBounds)[tCONTROL_VECTOR_INDEX]);
+        Plato::copy(tUpperBoundsData, (*tUpperBounds)[tCONTROL_VECTOR_INDEX]);
 
         // ********* SET INITIAL GUESS AND DIAGNOSTICS OPTIONS ********* //
         bool tDidUserDefinedInitialGuess = mInputData.getUserInitialGuess();
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tInitialGuess = tDataFactory.control().create();
         if(tDidUserDefinedInitialGuess == true)
         {
-            this->setIntialGuess(tAlgebraFactory, *tInitialGuess);
+            this->setInitialGuess(tAlgebraFactory, *tInitialGuess);
         }
 
         // ********* ALLOCATE DIAGNOSTICS TOOL ********* //
@@ -130,6 +139,11 @@ public:
         tDiagnostics.setFinalSuperscript(tFinalSuperscript);
         int tInitialSuperscript = mInputData.getDerivativeCheckerInitialSuperscript();
         tDiagnostics.setInitialSuperscript(tInitialSuperscript);
+
+        // ********* ENFORCE BOUNDS ********* //
+        Plato::HostBounds<ScalarType, OrdinalType> tProjector;
+        tProjector.project(*tLowerBounds, *tUpperBounds, *tInitialGuess);
+
 
         // ********* CHECK OBJECTIVE FUNCTION ********* //
         this->checkObjectiveFunction(tDataFactory, *tInitialGuess, tDiagnostics);
@@ -147,20 +161,22 @@ public:
     }
 
 private:
-    void getControlBounds()
+    void getControlBounds(std::vector<ScalarType> & aLowerBoundsData,
+                          std::vector<ScalarType> & aUpperBoundsData)
     {
         // diagnostics does not currently need the control bounds, but if they are
         // not constructed here, then they are not used in other parts of the code.
         const OrdinalType tCONTROL_VECTOR_INDEX = 0;
         std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
         const OrdinalType tNumControls = mInterface->size(tControlName);
-        std::vector<ScalarType> tInputBoundsData(tNumControls);
-        Plato::getLowerBoundsInputData(mInputData, mInterface, tInputBoundsData);
-        Plato::getUpperBoundsInputData(mInputData, mInterface, tInputBoundsData);
+        aLowerBoundsData.resize(tNumControls);
+        aUpperBoundsData.resize(tNumControls);
+        Plato::getLowerBoundsInputData(mInputData, mInterface, aLowerBoundsData);
+        Plato::getUpperBoundsInputData(mInputData, mInterface, aUpperBoundsData);
     }
 
     /******************************************************************************/
-    void setIntialGuess(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
+    void setInitialGuess(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
                         Plato::MultiVector<ScalarType, OrdinalType> & aMultiVector)
     /******************************************************************************/
     {
