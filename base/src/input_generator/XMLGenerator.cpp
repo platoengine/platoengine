@@ -1844,6 +1844,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "3.0");
+                addNTVParameter(n4, "Minimum Value", "double", "1e-3");
                 // Material model
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Material Model";
@@ -1981,6 +1982,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "1.0");
+                addNTVParameter(n4, "Minimum Value", "double", "1e-3");
                 // Material Model
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Material Model";
@@ -5163,6 +5165,22 @@ bool XMLGenerator::generatePlatoMainInputDeckXML()
     pugi::xml_node mesh_node = doc.append_child("mesh");
     addChild(mesh_node, "type", "unstructured");
     addChild(mesh_node, "format", "exodus");
+
+    // See if this is an Alexa (plato analyze) run and
+    // add the ignore_node_map entry if it is.
+    bool tAlexaRun = false;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.code_name == "plato_analyze")
+        {
+            tAlexaRun = true;
+            break;
+        }
+    }
+    if(tAlexaRun)
+        addChild(mesh_node, "ignore_node_map", "true");
+
     addChild(mesh_node, "mesh", m_InputData.run_mesh_name.c_str());
     // just need one block specified here
     if(m_InputData.blocks.size() > 0)
@@ -6947,13 +6965,13 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(op_node, "PerformerName", tPerformerName.c_str());
         output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Solution X");
-        addChild(output_node, "SharedDataName", "Displacement X");
+        addChild(output_node, "SharedDataName", "plato_analyze_1_dispx");
         output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Solution Y");
-        addChild(output_node, "SharedDataName", "Displacement Y");
+        addChild(output_node, "SharedDataName", "plato_analyze_1_dispy");
         output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Solution Z");
-        addChild(output_node, "SharedDataName", "Displacement Z");
+        addChild(output_node, "SharedDataName", "plato_analyze_1_dispz");
     }
 
     op_node = stage_node.append_child("Operation");
@@ -7033,10 +7051,14 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(stage_node, "Name", "Update Problem");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        op_node = stage_node.append_child("Operation");
-        addChild(op_node, "Name", "Update Problem");
-        Objective cur_obj = m_InputData.objectives[i];
-        addChild(op_node, "PerformerName", cur_obj.performer_name);
+        // Hack
+        if(m_InputData.objectives[i].code_name != "plato_analyze")
+        {
+            op_node = stage_node.append_child("Operation");
+            addChild(op_node, "Name", "Update Problem");
+            Objective cur_obj = m_InputData.objectives[i];
+            addChild(op_node, "PerformerName", cur_obj.performer_name);
+        }
     }
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Update Problem");
@@ -7056,7 +7078,7 @@ bool XMLGenerator::generateInterfaceXML()
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         Objective cur_obj = m_InputData.objectives[i];
-        if(cur_obj.code_name.compare("albany")) // Albany doesn't handle Cache State correctly yet
+        if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze")) // Albany and analyzie don't handle Cache State correctly yet
         {
             op_node = cur_parent.append_child("Operation");
             addChild(op_node, "Name", "Cache State");
