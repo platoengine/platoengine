@@ -127,6 +127,13 @@ if( GEOMETRY )
   add_definitions( -DGEOMETRY )
 endif()
 
+if( XTK_ENABLED )
+    message( "\n-- Including XTK \n" )
+    add_definitions( -DXTK_ENABLED )
+    include(${CMAKE_SOURCE_DIR}/base/src/xtk/xtkinclude.cmake)
+endif()    
+#end XTK stuff
+
 if( REGRESSION OR UNIT_TESTING )
     enable_testing()
 endif()
@@ -173,6 +180,10 @@ add_subdirectory(base/src/PlatoSubproblemLibrary/SupervisedLearning)
 add_subdirectory(base/src/PlatoSubproblemLibrary/VectorKernel)
 add_subdirectory(base/src/input_checkers)
 add_subdirectory(base/src/input_generator)
+if(XTK_ENABLED)
+  add_subdirectory(base/src/xtk/)
+endif()   
+
 
 if( ENABLE_ISO )
   message( "-- Compiling PlatoIso " )
@@ -229,5 +240,14 @@ if( REGRESSION )
     message("-- !! -- PlatoMain is required for regression testing.")
     message("-- !! -- Regression has not been enabled.")
   endif()
+endif()
+
+
+if( XTK_ENABLED )
+   message( "\n-- Compiling with XTK \n" ) 
+    find_package(XTK REQUIRED NAMES)
+    find_library(XTK_COM_Libs NAMES libCOM.a HINTS $ENV{XTK_LIBS} PATH_SUFFIXES COM)
+    find_library(XTK_MTK_Libs NAMES libMTK.a HINTS $ENV{XTK_LIBS} PATH_SUFFIXES MTK)
+    set(XTK_Libs ${XTK_COM_Libs} ${XTK_MTK_Libs} CACHE FILEPATH "List of library paths." )
 endif()
 

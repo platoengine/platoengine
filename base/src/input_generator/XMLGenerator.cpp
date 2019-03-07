@@ -769,6 +769,13 @@ bool XMLGenerator::generateLaunchScript()
             else
                 fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
         }
+        else if(!cur_obj.code_name.compare("plato_analyze"))
+        {
+            if(m_InputData.plato_analyze_path.length() != 0)
+                fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
+            else
+                fprintf(fp, "LGR_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+        }
     }
 
     fclose(fp);
@@ -1788,6 +1795,262 @@ bool XMLGenerator::generateAlbanyInputDecks()
     return true;
 }
 /******************************************************************************/
+bool XMLGenerator::generatePlatoAnalyzeInputDecks()
+/******************************************************************************/
+{
+    char tmp_buf[200];
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        const Objective& cur_obj = m_InputData.objectives[i];
+        if(!cur_obj.code_name.compare("plato_analyze"))
+        {
+            char buf[200];
+            sprintf(buf, "plato_analyze_input_deck_%s.xml", cur_obj.name.c_str());
+            pugi::xml_document doc;
+
+            // Version entry
+            pugi::xml_node tmp_node = doc.append_child(pugi::node_declaration);
+            tmp_node.set_name("xml");
+            pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+            tmp_att.set_value("1.0");
+
+            pugi::xml_node n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12;
+            pugi::xml_attribute a1, a2, a3;
+            n1 = doc.append_child("ParameterList");
+            n1.append_attribute("name") = "Problem";
+            addNTVParameter(n1, "Physics", "string", "Plato Driver");
+            addNTVParameter(n1, "Spatial Dimension", "int", "3");
+            addNTVParameter(n1, "Input Mesh", "string", m_InputData.run_mesh_name.c_str());
+
+            n2 = n1.append_child("ParameterList");
+            n2.append_attribute("name") = "Plato Problem";
+            if(!cur_obj.type.compare("maximize stiffness"))
+            {
+                addNTVParameter(n2, "Physics", "string", "Mechanical");
+                addNTVParameter(n2, "PDE Constraint", "string", "Elastostatics");
+                addNTVParameter(n2, "Objective", "string", "Internal Elastic Energy");
+                addNTVParameter(n2, "Self-Adjoint", "bool", "true");
+                // Internal Elastic Energy
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Internal Elastic Energy";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "3.0");
+                // Elastostatics
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Elastostatics";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "3.0");
+                // Material model
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Material Model";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Isotropic Linear Elastic";
+                addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
+                addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
+                // Natural BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Natural Boundary Conditions";
+                for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
+                {
+                    bool found = false;
+                    LoadCase cur_load_case;
+                    std::string cur_load_id = cur_obj.load_case_ids[j];
+                    for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                    {
+                        if(cur_load_id == m_InputData.load_cases[qq].id)
+                        {
+                            found = true;
+                            cur_load_case = m_InputData.load_cases[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        for(size_t e=0; e<cur_load_case.loads.size(); e++)
+                        {
+                            Load cur_load = cur_load_case.loads[e];
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "Traction Vector Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Uniform");
+                            double x = std::atof(cur_load.x.c_str());
+                            double y = std::atof(cur_load.y.c_str());
+                            double z = std::atof(cur_load.z.c_str());
+                            sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
+                            addNTVParameter(n4, "Values", "Array(double)", tmp_buf);
+                            sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                        }
+                    }
+                }
+                // Essential BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Essential Boundary Conditions";
+                for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
+                {
+                    bool found = false;
+                    BC cur_bc;
+                    std::string cur_bc_id = cur_obj.bc_ids[j];
+                    for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
+                    {
+                        if(cur_bc_id == m_InputData.bcs[qq].bc_id)
+                        {
+                            found = true;
+                            cur_bc = m_InputData.bcs[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        if(cur_bc.dof.empty())
+                        {
+                            // apply in all 3 directions
+                            // X Displacement
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Zero Value");
+                            addNTVParameter(n4, "Index", "int", "0");
+                            sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            // Y Displacement
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Zero Value");
+                            addNTVParameter(n4, "Index", "int", "1");
+                            sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            // Z Displacement
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Zero Value");
+                            addNTVParameter(n4, "Index", "int", "2");
+                            sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                        }
+                        else
+                        {
+                            if(cur_bc.dof == "x")
+                            {
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "0");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                            else if(cur_bc.dof == "y")
+                            {
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "1");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                            else if(cur_bc.dof == "z")
+                            {
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "2");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                        }
+                    }
+                }
+            }
+            else if(!cur_obj.type.compare("maximize heat conduction"))
+            {
+                addNTVParameter(n2, "Physics", "string", "Thermal");
+                addNTVParameter(n2, "PDE Constraint", "string", "Thermostatics");
+                addNTVParameter(n2, "Objective", "string", "Internal Thermal Energy");
+                addNTVParameter(n2, "Self-Adjoint", "bool", "true");
+                // Internal Thermal Energy
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Internal Thermal Energy";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "1.0");
+                // Thermostatics
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Thermostatics";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "1.0");
+                // Material Model
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Material Model";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Isotropic Linear Thermal";
+                addNTVParameter(n4, "Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
+                // Natural BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Natural Boundary Conditions";
+                for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
+                {
+                    bool found = false;
+                    LoadCase cur_load_case;
+                    std::string cur_load_id = cur_obj.load_case_ids[j];
+                    for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                    {
+                        if(cur_load_id == m_InputData.load_cases[qq].id)
+                        {
+                            found = true;
+                            cur_load_case = m_InputData.load_cases[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        for(size_t e=0; e<cur_load_case.loads.size(); e++)
+                        {
+                            Load cur_load = cur_load_case.loads[e];
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "Flux Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Uniform");
+                            addNTVParameter(n4, "Value", "double", cur_load.scale);
+                            sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                        }
+                    }
+                }
+                // Essential BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Essential Boundary Conditions";
+                for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
+                {
+                    bool found = false;
+                    BC cur_bc;
+                    std::string cur_bc_id = cur_obj.bc_ids[j];
+                    for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
+                    {
+                        if(cur_bc_id == m_InputData.bcs[qq].bc_id)
+                        {
+                            found = true;
+                            cur_bc = m_InputData.bcs[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        n4 = n3.append_child("ParameterList");
+                        n4.append_attribute("name") = "Fixed Temperature Boundary Condition";
+                        addNTVParameter(n4, "Type", "string", "Zero Value");
+                        sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                        addNTVParameter(n4, "Sides", "string", tmp_buf);
+                    }
+                }
+            }
+
+            // Write the file to disk
+            doc.save_file(buf, "  ");
+        }
+    }
+    return true;
+}
+/******************************************************************************/
 bool XMLGenerator::addNTVParameter(pugi::xml_node parent_node,
                                 const std::string &name,
                                 const std::string &type,
@@ -2047,6 +2310,7 @@ bool XMLGenerator::generatePhysicsInputDecks()
     generateSalinasInputDecks();
     generateAlbanyInputDecks();
     generateLightMPInputDecks();
+    generatePlatoAnalyzeInputDecks();
     return true;
 }
 
@@ -4429,6 +4693,15 @@ bool XMLGenerator::parseCodePaths(std::istream &fin)
                             }
                             m_InputData.albany_path = tStringValue;
                         }
+                        else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","plato_analyze"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code plato_analyze\" keywords.\n";
+                                return false;
+                            }
+                            m_InputData.plato_analyze_path = tStringValue;
+                        }
                         else
                         {
                             PrintUnrecognizedTokens(tokens);
@@ -4919,6 +5192,7 @@ bool XMLGenerator::generatePerformerOperationsXML()
     generateSalinasOperationsXML();
     generateAlbanyOperationsXML();
     generateLightMPOperationsXML();
+    generatePlatoAnalyzeOperationsXML();
     return true;
 }
 /******************************************************************************/
@@ -4994,6 +5268,7 @@ bool XMLGenerator::generateLightMPOperationsXML()
 
     return true;
 }
+
 /******************************************************************************/
 bool XMLGenerator::generateAlbanyOperationsXML()
 /******************************************************************************/
@@ -5061,6 +5336,82 @@ bool XMLGenerator::generateAlbanyOperationsXML()
 
             char buf[200];
             sprintf(buf, "albany_operations_%s.xml", m_InputData.objectives[i].name.c_str());
+            // Write the file to disk
+            doc.save_file(buf, "  ");
+        }
+    }
+
+    return true;
+}
+/******************************************************************************/
+bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
+/******************************************************************************/
+{
+    int num_plato_analyze_objs = 0;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        if(!m_InputData.objectives[i].code_name.compare("plato_analyze"))
+        {
+            num_plato_analyze_objs++;
+
+            pugi::xml_document doc;
+            pugi::xml_node tmp_node, tmp_node1;
+
+            // Version entry
+            tmp_node = doc.append_child(pugi::node_declaration);
+            tmp_node.set_name("xml");
+            pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+            tmp_att.set_value("1.0");
+
+            // ComputeSolution
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "ComputeSolution");
+            addChild(tmp_node, "Name", "Compute Displacement Solution");
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", "Topology");
+
+            // ComputeObjectiveValue
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "ComputeObjectiveValue");
+            addChild(tmp_node, "Name", "Compute Objective Value");
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", "Topology");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Objective Value");
+
+            // ComputeObjectiveGradient
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "ComputeObjectiveGradient");
+            addChild(tmp_node, "Name", "Compute Objective Gradient");
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", "Topology");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+
+            // ComputeObjective
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "ComputeObjective");
+            addChild(tmp_node, "Name", "Compute Objective");
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", "Topology");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Objective Value");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+
+            // WriteOutput
+            tmp_node = doc.append_child("Operation");
+            addChild(tmp_node, "Function", "WriteOutput");
+            addChild(tmp_node, "Name", "Write Output");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Solution X");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Solution Y");
+            tmp_node1 = tmp_node.append_child("Output");
+            addChild(tmp_node1, "ArgumentName", "Solution Z");
+
+            char buf[200];
+            sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
             // Write the file to disk
             doc.save_file(buf, "  ");
         }
@@ -6020,16 +6371,28 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc)
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
+        Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
-        addChild(op_node, "Name", "Compute Objective");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+        if(cur_obj.code_name == "plato_analyze")
+        {
+            addChild(op_node, "Name", "Compute Objective Value");
+            addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        }
+        else
+        {
+            addChild(op_node, "Name", "Compute Objective");
+            addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        }
 
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
 
         output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "Internal Energy");
+        if(cur_obj.code_name == "plato_analyze")
+            addChild(output_node, "ArgumentName", "Objective Value");
+        else
+            addChild(output_node, "ArgumentName", "Internal Energy");
         sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
         addChild(output_node, "SharedDataName", tmp_buf);
     }
@@ -6108,16 +6471,28 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc)
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
+        Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
-        addChild(op_node, "Name", "Compute Gradient");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+        if(cur_obj.code_name == "plato_analyze")
+        {
+            addChild(op_node, "Name", "Compute Objective Gradient");
+            addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        }
+        else
+        {
+            addChild(op_node, "Name", "Compute Gradient");
+            addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        }
 
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
 
         output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "Internal Energy Gradient");
+        if(cur_obj.code_name == "plato_analyze")
+            addChild(output_node, "ArgumentName", "Objective Gradient");
+        else
+            addChild(output_node, "ArgumentName", "Internal Energy Gradient");
         sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(output_node, "SharedDataName", tmp_buf);
     }
@@ -6544,8 +6919,44 @@ bool XMLGenerator::generateInterfaceXML()
     // Output To File
     pugi::xml_node stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Output To File");
+    pugi::xml_node op_node, output_node;
 
-    pugi::xml_node op_node = stage_node.append_child("Operation");
+    // *********************************************************
+    // This code is a hack and needs to be fixed!!!!!!!!!!!!!
+    // This Alexa specific output information should probably
+    // go in the Alexa input deck rather than in interface.xml.
+    // We can't have it in hear because other performers won't
+    // know how to execute this Alexa-specific operation.
+    // *********************************************************
+    bool tAlexaRun = false;
+    std::string tPerformerName = "";
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        Objective cur_obj = m_InputData.objectives[i];
+        if(cur_obj.code_name == "plato_analyze")
+        {
+            tAlexaRun = true;
+            tPerformerName = cur_obj.performer_name;
+            break;
+        }
+    }
+    if(tAlexaRun)
+    {
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "Write Output");
+        addChild(op_node, "PerformerName", tPerformerName.c_str());
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Solution X");
+        addChild(output_node, "SharedDataName", "Displacement X");
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Solution Y");
+        addChild(output_node, "SharedDataName", "Displacement Y");
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Solution Z");
+        addChild(output_node, "SharedDataName", "Displacement Z");
+    }
+
+    op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "PlatoMainOutput");
     addChild(op_node, "PerformerName", "PlatoMain");
 
@@ -6610,7 +7021,7 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(op_node, "Name", "Initialize Field");
     addChild(op_node, "PerformerName", "PlatoMain");
 
-    pugi::xml_node output_node = op_node.append_child("Output");
+    output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Initialized Field");
     addChild(output_node, "SharedDataName", "Optimization DOFs");
 
