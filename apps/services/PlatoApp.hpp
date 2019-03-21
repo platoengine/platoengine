@@ -329,6 +329,7 @@ private:
         int m_outputFrequency;
         int m_outputMethod;
         std::string mDiscretization;
+        bool mWriteRestart;
     };
     friend class PlatoMainOutput;
 

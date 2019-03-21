@@ -433,17 +433,12 @@ IVEHandle IVEMeshAPISTK::new_tri(IVEHandle n1, IVEHandle n2, IVEHandle n3, bool 
   stk::mesh::Entity stk_n3 = get_stk_entity(n3);
   stk::mesh::EntityId entity_id = get_next_entity_id(stk::topology::ELEM_RANK);  
   stk::mesh::Entity stk_tri;
-#ifdef BUILD_IN_SIERRA
+
   if(is_fixed)
     stk_tri = mBulkData->declare_element(entity_id, stk::mesh::ConstPartVector{mFixedTriPart});
   else
       stk_tri = mBulkData->declare_element(entity_id, stk::mesh::ConstPartVector{mOptimizedTriPart});
-#else
-  if(is_fixed)
-    stk_tri = mBulkData->declare_element(entity_id, {mFixedTriPart});
-  else
-    stk_tri = mBulkData->declare_element(entity_id, {mOptimizedTriPart});
-#endif
+
   mBulkData->declare_relation(stk_tri, stk_n1, 0);
   mBulkData->declare_relation(stk_tri, stk_n2, 1);
   mBulkData->declare_relation(stk_tri, stk_n3, 2);
@@ -1114,20 +1109,20 @@ void IVEMeshAPISTK::prepare_to_create_tris()
 
 
   mFixedTriMap = &mMetaData->declare_field<stk::mesh::Field<double> >(stk::topology::ELEMENT_RANK, "FixedTriMap", 1);
-  stk::mesh::put_field(*mFixedTriMap, *mFixedTriPart);
+  stk::mesh::put_field_on_mesh(*mFixedTriMap, *mFixedTriPart, nullptr);
   stk::io::set_field_role(*mFixedTriMap, Ioss::Field::ATTRIBUTE);
 
   mOptimizedTriPart = &mMetaData->declare_part_with_topology( "OptimizedTriangles", stk::topology::SHELL_TRI_3 );
   stk::io::put_io_part_attribute(*mOptimizedTriPart);
 
   mOptimizedTriMap = &mMetaData->declare_field<stk::mesh::Field<double> >(stk::topology::ELEMENT_RANK, "OptimizedTriMap", 1);
-  stk::mesh::put_field(*mOptimizedTriMap, *mOptimizedTriPart);
+  stk::mesh::put_field_on_mesh(*mOptimizedTriMap, *mOptimizedTriPart, nullptr);
   stk::io::set_field_role(*mOptimizedTriMap, Ioss::Field::ATTRIBUTE);
 
   for(size_t i=0; i<mElementFields.size(); ++i)
   {
-    stk::mesh::put_field(*mElementFields[i], *mFixedTriPart);
-    stk::mesh::put_field(*mElementFields[i], *mOptimizedTriPart);
+    stk::mesh::put_field_on_mesh(*mElementFields[i], *mFixedTriPart, nullptr);
+    stk::mesh::put_field_on_mesh(*mElementFields[i], *mOptimizedTriPart, nullptr);
   }
 }
 

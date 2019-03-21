@@ -625,7 +625,7 @@ void PlatoApp::InitializeField::getInitialValuesForSwissCheeseLevelSet(Distribut
     stk::mesh::Field<double> &tTempField = meta_data->declare_field<stk::mesh::Field<double>>(stk::topology::NODE_RANK, "swiss", 1);
 
     std::vector<double> tTempFieldVals(2541, 0);
-    stk::mesh::put_field(tTempField, meta_data->universal_part(), tTempFieldVals.data());
+    stk::mesh::put_field_on_mesh(tTempField, meta_data->universal_part(), tTempFieldVals.data());
 
     broker->populate_bulk_data();
 
@@ -1068,6 +1068,8 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
     }
 
     mDiscretization = Plato::Get::String(aNode, "Discretization");
+
+    mWriteRestart   = Plato::Get::Bool(aNode, "WriteRestart");
 }
 
 /******************************************************************************/
@@ -2200,7 +2202,7 @@ void PlatoApp::PlatoMainOutput::operator()()
             extract_iso_surface(int_time);
 
             // Write restart file
-            if(tMyRank == 0)
+            if((tMyRank == 0) && mWriteRestart)
             {
                 std::ostringstream theCommand;
                 std::string tInputFilename = "platomain.exo.1.0";
@@ -2221,7 +2223,7 @@ void PlatoApp::PlatoMainOutput::operator()()
         }
         else if(mDiscretization == "levelset")
         {
-            if(tMyRank == 0)
+            if((tMyRank == 0) && mWriteRestart)
             {
                 std::string tListCommand = "ls -t IterationHistory* > junk.txt";
                 system(tListCommand.c_str());
