@@ -175,6 +175,11 @@ TEST(PlatoTest, PSO_PrintStoppingCriterion)
     Plato::pso::get_stop_criterion(tFlag, tDescription);
     tGold = "\n\n****** Optimization stopping due to standard deviation tolerance being met. ******\n\n";
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::particle_swarm::TRUST_REGION_MULTIPLIER_TOLERANCE;
+    Plato::pso::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to trust region multiplier tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
 TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
@@ -665,6 +670,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -687,6 +693,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -705,6 +712,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
     tOptions.add<std::string>("StdDevBestObjFuncTolerance", "0.0001");
     tOptions.add<std::string>("GlobalBestObjFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionMultiplierTolerance", "0.001");
     tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
     tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
     Plato::InputData tOptimizerNodeOne("OptimizerNode");
@@ -726,6 +734,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -759,6 +768,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsTwoPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
@@ -796,6 +806,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -824,6 +835,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -842,6 +854,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
     tOptions.add<std::string>("StdDevBestAugLagFuncTolerance", "0.0001");
     tOptions.add<std::string>("GlobalBestAugLagFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionMultiplierTolerance", "0.1");
     tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
     tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
     tOptions.add<std::string>("PenaltyExpansionMultiplier", "4");
@@ -877,6 +890,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-1, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mPenaltyExpansionMultiplier, tTolerance);
@@ -937,6 +951,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsTwoPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsTwoPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }

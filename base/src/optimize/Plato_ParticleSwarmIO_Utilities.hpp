@@ -138,6 +138,11 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
             aOutput = "\n\n****** Optimization stopping due to standard deviation tolerance being met. ******\n\n";
             break;
         }
+        case Plato::particle_swarm::stop_t::TRUST_REGION_MULTIPLIER_TOLERANCE:
+        {
+            aOutput = "\n\n****** Optimization stopping due to trust region multiplier tolerance being met. ******\n\n";
+            break;
+        }
     }
 }
 // function print_bcpso_diagnostics_header

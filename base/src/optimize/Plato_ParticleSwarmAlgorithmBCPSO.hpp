@@ -81,6 +81,7 @@ public:
             mMeanBestObjFuncTolerance(5e-4),
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-8),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -104,6 +105,7 @@ public:
             mMeanBestObjFuncTolerance(5e-4),
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-98),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -204,6 +206,15 @@ public:
     void setGlobalBestObjFuncTolerance(const ScalarType & aInput)
     {
         mGlobalBestObjFuncTolerance = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set stopping tolerance based on the trust region multiplier
+     * @param [in] aInput stopping tolerance
+    **********************************************************************************/
+    void setTrustRegionMultiplierTolerance(const ScalarType & aInput)
+    {
+        mTrustRegionMultiplierTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -360,6 +371,15 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return current trust region multiplier value
+     * @return current trust region multiplier value
+    **********************************************************************************/
+    ScalarType getTrustRegionMultiplier() const
+    {
+        return (mOperations->getTrustRegionMultiplier());
+    }
+
+    /******************************************************************************//**
      * @brief Get current best particle positions
      * @param [out] aInput 1D container of current best particle positions
     **********************************************************************************/
@@ -505,6 +525,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
+        const ScalarType tTrustRegionMultiplier = mOperations->getTrustRegionMultiplier();
         const ScalarType tMeanCurrentBestObjFunValue = mDataMng->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestObjFunValue = mDataMng->getCurrentGlobalBestObjFuncValue();
         const ScalarType tStdDevCurrentBestObjFunValue = mDataMng->getStdDevCurrentBestObjFuncValues();
@@ -528,6 +549,11 @@ private:
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
+        }
+        else if(tTrustRegionMultiplier < mTrustRegionMultiplierTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::TRUST_REGION_MULTIPLIER_TOLERANCE;
         }
 
         return (tStop);
@@ -644,6 +670,7 @@ private:
     ScalarType mMeanBestObjFuncTolerance; /*!< stopping tolerance on the mean of the best objective function values */
     ScalarType mStdDevBestObjFuncTolerance; /*!< stopping tolerance on the standard deviation of the best objective function values */
     ScalarType mGlobalBestObjFuncTolerance; /*!< stopping tolerance on global best objective function value */
+    ScalarType mTrustRegionMultiplierTolerance; /*!< stopping tolerance on the trust region multiplier */
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
     Plato::DiagnosticsBCPSO<ScalarType, OrdinalType> mOutputData; /*!< PSO algorithm output/diagnostics data structure */

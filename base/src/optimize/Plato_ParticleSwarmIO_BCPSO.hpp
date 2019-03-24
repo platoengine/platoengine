@@ -141,6 +141,7 @@ struct InputDataBCPSO
             mMeanBestObjFuncTolerance(5e-4),
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-8),
             mInertiaMultiplier(0.9),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
@@ -180,6 +181,7 @@ struct InputDataBCPSO
     ScalarType mMeanBestObjFuncTolerance; /*!< mean objective function stopping tolerance */
     ScalarType mStdDevBestObjFuncTolerance; /*!< standard deviation stopping tolerance */
     ScalarType mGlobalBestObjFuncTolerance; /*!< best objective function stopping tolerance */
+    ScalarType mTrustRegionMultiplierTolerance; /*!< stopping tolerance on the trust region multiplier */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */

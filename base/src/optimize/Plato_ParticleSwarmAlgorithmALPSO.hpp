@@ -82,6 +82,7 @@ public:
             mMeanBestAugLagFuncTolerance(5e-4),
             mStdDevBestAugLagFuncTolerance(1e-6),
             mGlobalBestAugLagFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-8),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mOutputData(aConstraints->size()),
             mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
@@ -249,6 +250,15 @@ public:
     void setBestAugLagFuncTolerance(const ScalarType & aInput)
     {
         mGlobalBestAugLagFuncTolerance = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set stopping tolerance based on the trust region multiplier
+     * @param [in] aInput stopping tolerance
+    **********************************************************************************/
+    void setTrustRegionMultiplierTolerance(const ScalarType & aInput)
+    {
+        mTrustRegionMultiplierTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -574,6 +584,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
+        const ScalarType tTrustRegionMultiplier = mOptimizer->getTrustRegionMultiplier();
         const ScalarType tMeanCurrentBestObjFuncValue = mOptimizer->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestAugLagFuncValue = mOptimizer->getCurrentGlobalBestObjFuncValue();
         const ScalarType tStdDevCurrentBestAugLagFuncValue = mOptimizer->getStdDevCurrentBestObjFuncValues();
@@ -597,6 +608,11 @@ private:
         {
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
+        }
+        else if(tTrustRegionMultiplier < mTrustRegionMultiplierTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::TRUST_REGION_MULTIPLIER_TOLERANCE;
         }
 
         return (tStop);
@@ -719,6 +735,7 @@ private:
     ScalarType mMeanBestAugLagFuncTolerance; /*!< stopping tolerance on the mean of the best augmented Lagrangian function values */
     ScalarType mStdDevBestAugLagFuncTolerance; /*!< stopping tolerance on the standard deviation of the best augmented Lagrangian function values */
     ScalarType mGlobalBestAugLagFuncTolerance; /*!< stopping tolerance on global best augmented Lagrangian function value */
+    ScalarType mTrustRegionMultiplierTolerance; /*!< stopping tolerance on the trust region multiplier */
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
     Plato::DiagnosticsALPSO<ScalarType, OrdinalType> mOutputData; /*!< ALPSO algorithm output/diagnostics data structure */
