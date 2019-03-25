@@ -1298,9 +1298,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     tAlgorithm.setUpperBounds(tBounds);   /* bounds are normalized */
     tBounds[0] = 0.06 / tNormalization[0]; tBounds[1] = 0.003 / tNormalization[1];
     tAlgorithm.setLowerBounds(tBounds);   /* bounds are normalized */
-    tAlgorithm.setMeanBestObjFuncTolerance(1e-6);
-    tAlgorithm.enableParticleDiagnostics();
-    tAlgorithm.enableDiagnostics();
+    tAlgorithm.setMeanBestObjFuncTolerance(1e-7);
     tAlgorithm.solve();
 
     // ********* TEST SOLUTION *********
