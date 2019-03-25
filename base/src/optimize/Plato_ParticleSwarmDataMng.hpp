@@ -343,6 +343,16 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Returns 2D container with current best set of particle positions
+     * @return const reference to 2D container with current best set of particle positions
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType> & getBestParticlePositions() const
+    {
+        assert(static_cast<OrdinalType>(mCurrentBestParticlePositions.use_count()) > static_cast<OrdinalType>(0));
+        return (*mCurrentBestParticlePositions);
+    }
+
+    /******************************************************************************//**
      * @brief Set rank that owns the current global best particle
      * @param [in] aInput rank that owns the current global best particle
     **********************************************************************************/

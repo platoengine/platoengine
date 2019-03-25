@@ -197,6 +197,89 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
     ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
 }
 
+TEST(PlatoTest, PSO_PrintParticleData)
+{
+    std::ofstream tOutputFile;
+    tOutputFile.open("MyFile.txt");
+    Plato::pso::print_particle_data_header(tOutputFile);
+
+    const size_t tNumParticles = 3;
+    const size_t tNumControls = 2;
+    Plato::StandardVector<double> tObjValues(tNumParticles);
+    tObjValues[0] = 1; tObjValues[1] = 2; tObjValues[2] = 3;
+    Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
+    tParticles(0,0) = 1.1; tParticles(1,0) = 2.1; tParticles(2,0) = 3.1;
+    tParticles(1,1) = 1.2; tParticles(1,1) = 2.2; tParticles(2,1) = 3.2;
+    size_t tIteration = 1;
+    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+    tIteration = 2;
+    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+    tOutputFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tReadFile;
+    tReadFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold;
+    tGold << "OUTPUTFORMAT:(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+    tGold << "Thesubscriptidenotestheparticleindexandthesuperscriptjdenotesthedesignvariableindex.";
+    tGold << "Eachparticleisassociatedwithacriterion(F_i(X))andasetofdesignvariables(X).";
+    tGold << "ThetotalnumberofparticlesanddesignvariablesisdenotedbyuppercaselettersIandJ,respectively.";
+    tGold << "Iter(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+    tGold << "1(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+    tGold << "2(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, PSO_PrintGlobalBestParticleData)
+{
+    std::ofstream tOutputFile;
+    tOutputFile.open("MyFile.txt");
+    Plato::pso::print_global_best_particle_data_header(tOutputFile);
+
+    const size_t tNumControls = 2;
+    Plato::StandardVector<double> tControls(tNumControls);
+    tControls[0] = 1.1; tControls[1] = 1.2;
+    size_t tIndex = 2;
+    size_t tIteration = 1;
+    double tObjValue = 1;
+    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+    tIndex = 1;
+    tIteration = 2;
+    tObjValue = 0.5;
+    tControls[0] = 2.1; tControls[1] = 2.2;
+    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+    tOutputFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tReadFile;
+    tReadFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold;
+    tGold << "OUTPUTFORMAT:(F(X),X^j,...,X^J)Thesuperscriptjdenotesthedesignvariableindex.";
+    tGold << "Eachparticleisassociatedwithasetofdesignvariables(X).";
+    tGold << "ThetotalnumberofdesignvariablesisdenotedbytheuppercaseletterJ.IterParticleIndex(F(X),X^j,...,X^J)";
+    tGold << "12(1.000000e+00,1.100000e+00,1.200000e+00)";
+    tGold << "21(5.000000e-01,2.100000e+00,2.200000e+00)";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
 TEST(PlatoTest, PSO_PrintDiagnostics)
 {
     int tMySize = 0;
@@ -661,6 +744,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
@@ -685,6 +769,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
@@ -709,6 +794,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
     tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
@@ -726,6 +812,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptimizerNodeOne, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
+    EXPECT_TRUE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumIterations);
@@ -760,6 +847,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumIterations);
@@ -791,6 +879,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
@@ -821,6 +910,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
@@ -851,6 +941,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
     tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
@@ -879,8 +970,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
-    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
+    EXPECT_TRUE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -933,6 +1025,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
 
     EXPECT_EQ(2u, tInputsTwoPSO.mConstraintTypes.size());
@@ -1206,6 +1299,8 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     tBounds[0] = 0.06 / tNormalization[0]; tBounds[1] = 0.003 / tNormalization[1];
     tAlgorithm.setLowerBounds(tBounds);   /* bounds are normalized */
     tAlgorithm.setMeanBestObjFuncTolerance(1e-6);
+    tAlgorithm.enableParticleDiagnostics();
+    tAlgorithm.enableDiagnostics();
     tAlgorithm.solve();
 
     // ********* TEST SOLUTION *********

@@ -192,6 +192,7 @@ private:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
@@ -229,6 +230,7 @@ private:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
@@ -304,6 +306,20 @@ private:
         if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output algorithm diagnostics keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool outputParticleDiagnostics(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("OutputParticleDiagnosticsToFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputParticleDiagnosticsToFile");
         }
         return (tOuput);
     }

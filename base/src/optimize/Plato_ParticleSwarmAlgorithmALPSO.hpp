@@ -75,7 +75,8 @@ public:
     ParticleSwarmAlgorithmALPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective,
                                 const std::shared_ptr<Plato::GradFreeCriteriaList<ScalarType, OrdinalType>> & aConstraints) :
-            mOutputDiagnostics(false),
+            mParticleDiagnostics(false),
+            mAlgorithmDiagnostics(false),
             mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mMaxNumAugLagOuterIterations(1e3),
@@ -100,12 +101,20 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Enable output of diagnostics (i.e. optimization problem status)
+     * @brief Enable output of ALPSO algorithm diagnostics (i.e. optimization problem status)
     **********************************************************************************/
     void enableDiagnostics()
     {
-        mOutputDiagnostics = true;
+        mAlgorithmDiagnostics = true;
         mOptimizer->enableDiagnostics();
+    }
+
+    /******************************************************************************//**
+     * @brief Enable output of particle data diagnostics (i.e. solution status)
+    **********************************************************************************/
+    void enableParticleDiagnostics()
+    {
+        mParticleDiagnostics = true;
     }
 
     /******************************************************************************//**
@@ -542,13 +551,13 @@ public:
         assert(mOptimizer.get() != nullptr);
 
         mNumIterations = 0;
-        this->openOutputFile();
+        this->openOutputFiles();
         this->initialize();
 
         while(1)
         {
             mNumIterations++;
-            mOptimizer->solve(mOutputStream);
+            mOptimizer->solve(mAlgoOutputStream);
             mStageMng->computeCriteriaStatistics();
 
             this->outputDiagnostics();
@@ -556,7 +565,7 @@ public:
             {
                 mOptimizer->computeCurrentBestParticlesStatistics();
                 this->outputStoppingCriterion();
-                this->closeOutputFile();
+                this->closeOutputFiles();
                 break;
             }
 
@@ -619,34 +628,91 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Open output file (i.e. diagnostics file)
+     * @brief Open diagnostic files
     **********************************************************************************/
-    void openOutputFile()
+    void openOutputFiles()
     {
-        if(mOutputDiagnostics == true)
+        this->openAlgoOutputFile();
+        this->openParticleOutputFiles();
+    }
+
+    /******************************************************************************//**
+     * @brief Open ALPSO algorithm diagnostics file
+    **********************************************************************************/
+    void openAlgoOutputFile()
+    {
+        if(mAlgorithmDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
-                Plato::pso::print_alpso_diagnostics_header(mOutputData, mOutputStream, mOutputDiagnostics);
+                mAlgoOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
+                Plato::pso::print_alpso_diagnostics_header(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Close output file (i.e. diagnostics file)
+     * @brief Open ALPSO particle history files (i.e. particle sets diagnostics files)
     **********************************************************************************/
-    void closeOutputFile()
+    void openParticleOutputFiles()
     {
-        if(mOutputDiagnostics == true)
+        if(mParticleDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.close();
+                mBestParticlesStream.open("plato_alpso_best_particles.txt");
+                Plato::pso::print_particle_data_header(mBestParticlesStream);
+                mTrialParticlesStream.open("plato_alpso_trial_particles.txt");
+                Plato::pso::print_particle_data_header(mTrialParticlesStream);
+                mGlobalBestParticlesStream.open("plato_alpso_global_best_particle.txt");
+                Plato::pso::print_global_best_particle_data_header(mGlobalBestParticlesStream);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close diagnostic files
+    **********************************************************************************/
+    void closeOutputFiles()
+    {
+        this->closeAlgoOutputFiles();
+        this->closeParticleOutputFiles();
+    }
+
+    /******************************************************************************//**
+     * @brief Close ALPSO algorithm diagnostics file
+    **********************************************************************************/
+    void closeAlgoOutputFiles()
+    {
+        if(mAlgorithmDiagnostics == true)
+        {
+            const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mAlgoOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close ALPSO particle history/diagnostics files
+    **********************************************************************************/
+    void closeParticleOutputFiles()
+    {
+        if(mParticleDiagnostics == true)
+        {
+            const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+            const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mBestParticlesStream.close();
+                mTrialParticlesStream.close();
+                mGlobalBestParticlesStream.close();
             }
         }
     }
@@ -656,7 +722,7 @@ private:
     **********************************************************************************/
     void outputStoppingCriterion()
     {
-        if(mOutputDiagnostics == true)
+        if(mAlgorithmDiagnostics == true)
         {
             const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
             const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
@@ -664,17 +730,28 @@ private:
             {
                 std::string tReason;
                 Plato::pso::get_stop_criterion(mStopCriterion, tReason);
-                mOutputStream << tReason.c_str();
+                mAlgoOutputStream << tReason.c_str();
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics for Kelley-Sachs bound constrained optimization algorithm
+     * @brief Print diagnostics for ALPSO algorithm
     **********************************************************************************/
     void outputDiagnostics()
     {
-        if(mOutputDiagnostics == false)
+        this->outputAlgoDiagnostics();
+        this->outputBestParticleDiagnostics();
+        this->outputTrialParticleDiagnostics();
+        this->outputGlobalBestParticleDiagnostics();
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for ALPSO algorithm
+    **********************************************************************************/
+    void outputAlgoDiagnostics()
+    {
+        if(mAlgorithmDiagnostics == false)
         {
             return;
         }
@@ -686,7 +763,71 @@ private:
         {
             this->cacheObjFuncOutputData();
             this->cacheConstraintOutputData();
-            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mOutputStream, mOutputDiagnostics);
+            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for best particle set
+    **********************************************************************************/
+    void outputBestParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_particle_data(mNumIterations,
+                                            tDataMng.getCurrentBestObjFuncValues(),
+                                            tDataMng.getBestParticlePositions(),
+                                            mBestParticlesStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for trial particle set
+    **********************************************************************************/
+    void outputTrialParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_particle_data(mNumIterations,
+                                            tDataMng.getCurrentObjFuncValues(),
+                                            tDataMng.getCurrentParticles(),
+                                            mTrialParticlesStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for global best particle
+    **********************************************************************************/
+    void outputGlobalBestParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & tDataMng = mOptimizer->getDataMng();
+        const Plato::CommWrapper& tMyCommWrapper = tDataMng.getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_global_best_particle_data(mNumIterations,
+                                                        tDataMng.getCurrentGlobalBestParticleIndex(),
+                                                        mOptimizer->getCurrentGlobalBestObjFuncValue(),
+                                                        tDataMng.getGlobalBestParticlePosition(),
+                                                        mGlobalBestParticlesStream);
         }
     }
 
@@ -725,9 +866,14 @@ private:
     }
 
 private:
-    bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mParticleDiagnostics; /*!< flag - print particle diagnostics (default=false) */
+    bool mAlgorithmDiagnostics; /*!< flag - print algorithm diagnostics (default = false) */
     bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
-    std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
+
+    std::ofstream mAlgoOutputStream; /*!< output stream for algorithm's diagnostics */
+    std::ofstream mBestParticlesStream; /*!< output stream for best particles */
+    std::ofstream mTrialParticlesStream; /*!< output stream for trial particles */
+    std::ofstream mGlobalBestParticlesStream; /*!< output stream for global best particles */
 
     OrdinalType mNumIterations; /*!< current number of iterations */
     OrdinalType mMaxNumAugLagOuterIterations; /*!< maximum number of outer iterations */

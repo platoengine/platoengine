@@ -148,7 +148,7 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
 // function print_bcpso_diagnostics_header
 
 /******************************************************************************//**
- * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
+ * @brief Print header for bound constrained Particle Swarm Optimization (BCPSO) diagnostics file
  * @param [in,out] aOutputFile output file
  * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
@@ -448,6 +448,95 @@ inline bool print_solution(const Plato::Vector<ScalarType, OrdinalType> & aBest,
     return (tPrintSolution);
 }
 // function print_solution
+
+/******************************************************************************//**
+ * @brief Print header for diagnostic file with particle data history
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+inline void print_particle_data_header(std::ofstream & aOutputFile)
+{
+    aOutputFile << "OUTPUT FORMAT: (F_i(X), X_i^j, ..., X_i^J) ... (F_I(X), X_I^j, ..., X_I^J)\n";
+    aOutputFile << "The subscript i denotes the particle index and the superscript j denotes the design variable index.\n";
+    aOutputFile << "Each particle is associated with a criterion (F_i(X)) and a set of design variables (X). The total\n";
+    aOutputFile << "number of particles and design variables is denoted by uppercase letters I and J, respectively.\n\n\n\n";
+    aOutputFile << std::right << "Iter    " << "(F_i(X), X_i^j, ..., X_i^J) ... (F_I(X), X_I^j, ..., X_I^J)\n";
+}
+// function print_particle_data_header
+
+/******************************************************************************//**
+ * @brief Print particle data and append information to existing file.
+ * @param [in] aIteration current outer optimization iteration
+ * @param [in] aCriteriaValues 1D container with criteria values
+ * @param [in] aParticlePositions 2D container with particle positions
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_particle_data(const OrdinalType & aIteration,
+                                const Plato::Vector<ScalarType, OrdinalType> & aCriteriaValues,
+                                const Plato::MultiVector<ScalarType, OrdinalType> & aParticlePositions,
+                                std::ofstream & aOutputFile)
+{
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aIteration << std::setw(8);
+    const OrdinalType tNumParticles = aParticlePositions.getNumVectors();
+    for(OrdinalType tParticleIndex = 0; tParticleIndex < tNumParticles; tParticleIndex++)
+    {
+        aOutputFile << "(" << aCriteriaValues[tParticleIndex] << ", ";
+        const OrdinalType tNumControls = aParticlePositions[tParticleIndex].size();
+        for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+        {
+            aOutputFile << aParticlePositions(tParticleIndex, tControlIndex);
+            std::string tChar = tControlIndex < tNumControls - static_cast<OrdinalType>(1) ? ", " : ")";
+            aOutputFile << tChar.c_str();
+        }
+        aOutputFile << "  ";
+    }
+    aOutputFile << "\n" << std::flush;
+}
+// function print_particle_data
+
+/******************************************************************************//**
+ * @brief Print header for diagnostic file with global best particle data history
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+inline void print_global_best_particle_data_header(std::ofstream & aOutputFile)
+{
+    aOutputFile << "OUTPUT FORMAT: (F(X), X^j, ..., X^J)\n";
+    aOutputFile << "The superscript j denotes the design variable index. Each particle is associated with a set of\n";
+    aOutputFile << "design variables (X). The total number of design variables is denoted by the uppercase letter J.";
+    aOutputFile << "\n\n\n\n";
+    aOutputFile << std::right << "Iter" << std::setw(18) <<  "Particle Index" << std::setw(28) << "(F(X), X^j, ..., X^J)\n";
+}
+// function print_global_best_particle_data_header
+
+/******************************************************************************//**
+ * @brief Print global best particle data and append information to existing file.
+ * @param [in] aIteration current outer optimization iteration
+ * @param [in] aParticleIndex global best particle index
+ * @param [in] aCriteriaValue global best criteria value
+ * @param [in] aParticlePositions 1D container with global best particle positions
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print_global_best_particle_data(const OrdinalType & aIteration,
+                                            const OrdinalType & aParticleIndex,
+                                            const ScalarType & aCriterionValue,
+                                            const Plato::Vector<ScalarType, OrdinalType> & aParticlePositions,
+                                            std::ofstream & aOutputFile)
+{
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aIteration << std::setw(12) <<
+            aParticleIndex << std::setw(14);
+    aOutputFile << "(" << aCriterionValue << ", ";
+    const OrdinalType tNumControls = aParticlePositions.size();
+    for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+    {
+        aOutputFile << aParticlePositions[tControlIndex];
+        std::string tChar = tControlIndex < tNumControls - static_cast<OrdinalType>(1) ? ", " : ")";
+        aOutputFile << tChar.c_str();
+    }
+    aOutputFile << "  ";
+    aOutputFile << "\n" << std::flush;
+}
+// function print_global_best_particle_data
 
 } // namespace pso
 

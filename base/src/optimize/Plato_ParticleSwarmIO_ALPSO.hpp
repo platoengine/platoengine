@@ -181,6 +181,7 @@ struct InputDataALPSO
     InputDataALPSO() :
             mOutputSolution(false),
             mOutputDiagnostics(false),
+            mOutputParticleDiagnostics(false),
             mDisableStdDevStoppingTol(false),
             mOutputStageName(),
             mNumParticles(10),
@@ -223,7 +224,8 @@ struct InputDataALPSO
     }
 
     bool mOutputSolution; /*!< flag to output solution (default=false) */
-    bool mOutputDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    bool mOutputDiagnostics; /*!< flag to enable algorithm diagnostics (default=false) */
+    bool mOutputParticleDiagnostics; /*!< flag to enable particle data diagnostics (default=false) */
     bool mDisableStdDevStoppingTol; /*!< flag to disable the stopping tolerance based on the standard deviation (default=false) */
 
     std::string mOutputStageName; /*!< output stage name */

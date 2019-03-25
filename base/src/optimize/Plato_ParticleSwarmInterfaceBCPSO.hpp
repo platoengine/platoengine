@@ -67,6 +67,11 @@ inline void set_bcpso_algorithm_inputs(const Plato::InputDataBCPSO<ScalarType,Or
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mOutputParticleDiagnostics == true)
+    {
+        aAlgorithm.enableParticleDiagnostics();
+    }
+
     if(aInputs.mDisableStdDevStoppingTol == true)
     {
         aAlgorithm.disableStdDevStoppingTolerance();
