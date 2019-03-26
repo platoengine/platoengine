@@ -60,6 +60,7 @@ struct particle_swarm
         TRUE_OBJECTIVE_TOLERANCE = 3,
         MEAN_OBJECTIVE_TOLERANCE = 4,
         STDDEV_OBJECTIVE_TOLERANCE = 5,
+        TRUST_REGION_MULTIPLIER_TOLERANCE = 6,
     };
 
     enum constraint_t

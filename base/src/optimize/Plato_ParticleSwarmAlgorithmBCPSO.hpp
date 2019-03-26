@@ -73,7 +73,8 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
-            mOutputDiagnostics(false),
+            mParticleDiagnostics(false),
+            mAlgorithmDiagnostics(false),
             mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mNumObjFuncEvals(0),
@@ -81,6 +82,7 @@ public:
             mMeanBestObjFuncTolerance(5e-4),
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-8),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -96,7 +98,8 @@ public:
     **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                  const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
-            mOutputDiagnostics(false),
+            mParticleDiagnostics(false),
+            mAlgorithmDiagnostics(false),
             mStdDevStoppingTolActive(true),
             mNumIterations(0),
             mNumObjFuncEvals(0),
@@ -104,6 +107,7 @@ public:
             mMeanBestObjFuncTolerance(5e-4),
             mStdDevBestObjFuncTolerance(1e-6),
             mGlobalBestObjFuncTolerance(1e-10),
+            mTrustRegionMultiplierTolerance(1e-98),
             mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
             mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
             mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -124,7 +128,15 @@ public:
     **********************************************************************************/
     void enableDiagnostics()
     {
-        mOutputDiagnostics = true;
+        mAlgorithmDiagnostics = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Enable output of particle data diagnostics (i.e. solution status)
+    **********************************************************************************/
+    void enableParticleDiagnostics()
+    {
+        mParticleDiagnostics = true;
     }
 
     /******************************************************************************//**
@@ -204,6 +216,15 @@ public:
     void setGlobalBestObjFuncTolerance(const ScalarType & aInput)
     {
         mGlobalBestObjFuncTolerance = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set stopping tolerance based on the trust region multiplier
+     * @param [in] aInput stopping tolerance
+    **********************************************************************************/
+    void setTrustRegionMultiplierTolerance(const ScalarType & aInput)
+    {
+        mTrustRegionMultiplierTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -360,6 +381,15 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return current trust region multiplier value
+     * @return current trust region multiplier value
+    **********************************************************************************/
+    ScalarType getTrustRegionMultiplier() const
+    {
+        return (mOperations->getTrustRegionMultiplier());
+    }
+
+    /******************************************************************************//**
      * @brief Get current best particle positions
      * @param [out] aInput 1D container of current best particle positions
     **********************************************************************************/
@@ -435,7 +465,7 @@ public:
         assert(static_cast<OrdinalType>(mDataMng.use_count()) > static_cast<OrdinalType>(0));
         assert(static_cast<OrdinalType>(mStageMng.use_count()) > static_cast<OrdinalType>(0));
 
-        this->openOutputFile();
+        this->openOutputFiles();
         this->initialize();
 
         mNumIterations = 0;
@@ -451,7 +481,7 @@ public:
             {
                 mDataMng->computeCurrentBestParticlesStatistics();
                 this->outputStoppingCriterion();
-                this->closeOutputFile();
+                this->closeOutputFiles();
                 break;
             }
 
@@ -505,6 +535,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
+        const ScalarType tTrustRegionMultiplier = mOperations->getTrustRegionMultiplier();
         const ScalarType tMeanCurrentBestObjFunValue = mDataMng->getMeanCurrentBestObjFuncValues();
         const ScalarType tCurrentGlobalBestObjFunValue = mDataMng->getCurrentGlobalBestObjFuncValue();
         const ScalarType tStdDevCurrentBestObjFunValue = mDataMng->getStdDevCurrentBestObjFuncValues();
@@ -529,37 +560,97 @@ private:
             tStop = true;
             mStopCriterion = Plato::particle_swarm::STDDEV_OBJECTIVE_TOLERANCE;
         }
+        else if(tTrustRegionMultiplier < mTrustRegionMultiplierTolerance)
+        {
+            tStop = true;
+            mStopCriterion = Plato::particle_swarm::TRUST_REGION_MULTIPLIER_TOLERANCE;
+        }
 
         return (tStop);
     }
 
     /******************************************************************************//**
-     * @brief Open output file (i.e. diagnostics file)
+     * @brief Open diagnostic files
     **********************************************************************************/
-    void openOutputFile()
+    void openOutputFiles()
     {
-        if(mOutputDiagnostics == true)
+        this->openAlgoOutputFile();
+        this->openParticleOutputFiles();
+    }
+
+    /******************************************************************************//**
+     * @brief Open diagnostics file for BCPSO algorithm
+    **********************************************************************************/
+    void openAlgoOutputFile()
+    {
+        if(mAlgorithmDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
-                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mOutputStream, mOutputDiagnostics);
+                mAlgoOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Close output file (i.e. diagnostics file)
+     * @brief Open ALPSO particle history files (i.e. particle sets diagnostics files)
     **********************************************************************************/
-    void closeOutputFile()
+    void openParticleOutputFiles()
     {
-        if(mOutputDiagnostics == true)
+        if(mParticleDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mOutputStream.close();
+                mBestParticlesStream.open("plato_bcpso_best_particles.txt");
+                Plato::pso::print_particle_data_header(mBestParticlesStream);
+                mTrialParticlesStream.open("plato_bcpso_trial_particles.txt");
+                Plato::pso::print_particle_data_header(mTrialParticlesStream);
+                mGlobalBestParticlesStream.open("plato_bcpso_global_best_particle.txt");
+                Plato::pso::print_global_best_particle_data_header(mGlobalBestParticlesStream);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close diagnostic files
+    **********************************************************************************/
+    void closeOutputFiles()
+    {
+        this->closeAlgoOutputFiles();
+        this->closeParticleOutputFiles();
+    }
+
+    /******************************************************************************//**
+     * @brief Close BCPSO algorithm diagnostics file
+    **********************************************************************************/
+    void closeAlgoOutputFiles()
+    {
+        if(mAlgorithmDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mAlgoOutputStream.close();
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close BCPSO particle history/diagnostics files
+    **********************************************************************************/
+    void closeParticleOutputFiles()
+    {
+        if(mParticleDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                mBestParticlesStream.close();
+                mTrialParticlesStream.close();
+                mGlobalBestParticlesStream.close();
             }
         }
     }
@@ -569,14 +660,14 @@ private:
     **********************************************************************************/
     void outputStoppingCriterion()
     {
-        if(mOutputDiagnostics == true)
+        if(mAlgorithmDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
                 std::string tReason;
                 Plato::pso::get_stop_criterion(mStopCriterion, tReason);
-                mOutputStream << tReason.c_str();
+                mAlgoOutputStream << tReason.c_str();
             }
         }
     }
@@ -586,7 +677,18 @@ private:
     **********************************************************************************/
     void outputDiagnostics()
     {
-        if(mOutputDiagnostics == false)
+        this->outputAlgoDiagnostics();
+        this->outputBestParticleDiagnostics();
+        this->outputTrialParticleDiagnostics();
+        this->outputGlobalBestParticleDiagnostics();
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for ALPSO algorithm
+    **********************************************************************************/
+    void outputAlgoDiagnostics()
+    {
+        if(mAlgorithmDiagnostics == false)
         {
             return;
         }
@@ -596,7 +698,68 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_bcpso_diagnostics(mOutputData, mOutputStream, mOutputDiagnostics);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for best particle set
+    **********************************************************************************/
+    void outputBestParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_particle_data(mNumIterations,
+                                            mDataMng->getCurrentBestObjFuncValues(),
+                                            mDataMng->getBestParticlePositions(),
+                                            mBestParticlesStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for trial particle set
+    **********************************************************************************/
+    void outputTrialParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_particle_data(mNumIterations,
+                                            mDataMng->getCurrentObjFuncValues(),
+                                            mDataMng->getCurrentParticles(),
+                                            mTrialParticlesStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Output diagnostics for global best particle
+    **********************************************************************************/
+    void outputGlobalBestParticleDiagnostics()
+    {
+        if(mParticleDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            Plato::pso::print_global_best_particle_data(mNumIterations,
+                                                        mDataMng->getCurrentGlobalBestParticleIndex(),
+                                                        mDataMng->getCurrentGlobalBestObjFuncValue(),
+                                                        mDataMng->getGlobalBestParticlePosition(),
+                                                        mGlobalBestParticlesStream);
         }
     }
 
@@ -605,7 +768,7 @@ private:
     **********************************************************************************/
     void outputDiagnostics(std::ofstream & aOutputStream)
     {
-        if(mOutputDiagnostics == false)
+        if(mAlgorithmDiagnostics == false)
         {
             return;
         }
@@ -614,7 +777,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mOutputDiagnostics);
+            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mAlgorithmDiagnostics);
         }
     }
 
@@ -633,9 +796,14 @@ private:
     }
 
 private:
-    bool mOutputDiagnostics; /*!< flag - print diagnostics (default = false) */
+    bool mParticleDiagnostics; /*!< flag - print particle diagnostics (default = false) */
+    bool mAlgorithmDiagnostics; /*!< flag - print algorithm diagnostics (default = false) */
     bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
-    std::ofstream mOutputStream; /*!< output stream for the algorithm's diagnostics */
+
+    std::ofstream mAlgoOutputStream; /*!< output stream for BCPSO algorithm diagnostics */
+    std::ofstream mBestParticlesStream; /*!< output stream for best particles */
+    std::ofstream mTrialParticlesStream; /*!< output stream for trial particles */
+    std::ofstream mGlobalBestParticlesStream; /*!< output stream for global best particles */
 
     OrdinalType mNumIterations; /*!< current number of iterations */
     OrdinalType mNumObjFuncEvals; /*!< current number of objective function values */
@@ -644,6 +812,7 @@ private:
     ScalarType mMeanBestObjFuncTolerance; /*!< stopping tolerance on the mean of the best objective function values */
     ScalarType mStdDevBestObjFuncTolerance; /*!< stopping tolerance on the standard deviation of the best objective function values */
     ScalarType mGlobalBestObjFuncTolerance; /*!< stopping tolerance on global best objective function value */
+    ScalarType mTrustRegionMultiplierTolerance; /*!< stopping tolerance on the trust region multiplier */
 
     Plato::particle_swarm::stop_t mStopCriterion; /*!< stopping criterion enum */
     Plato::DiagnosticsBCPSO<ScalarType, OrdinalType> mOutputData; /*!< PSO algorithm output/diagnostics data structure */

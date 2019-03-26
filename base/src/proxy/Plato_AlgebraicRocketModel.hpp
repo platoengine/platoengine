@@ -377,7 +377,7 @@ public:
             tTotalPressure = this->newton(tChamberArea, tTotalPressure, tThroatArea);
 
             tThrust = static_cast<ScalarType>(269.0) * static_cast<ScalarType>(9.8)
-                    * tChamberArea * (tTotalPressure - mAmbientPressure)
+                    * tThroatArea * (tTotalPressure - mAmbientPressure)
                     / mCharacteristicVelocity;
 
             ScalarType tRdot = mRefBurnRate * std::pow(tTotalPressure, mAlpha) * mInvPrefAlpha;

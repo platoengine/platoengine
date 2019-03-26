@@ -69,26 +69,31 @@ namespace PlatoTest
 std::vector<double> get_target_thrust_profile()
 {
     std::vector<double> tTargetThrustProfile =
-        { 0, 1656714.377766964, 1684717.520617273, 1713123.001583093, 1741935.586049868, 1771160.083875437,
-                1800801.349693849, 1830864.28322051, 1861353.829558637, 1892274.979507048, 1923632.769869272,
-                1955432.283763989, 1987678.650936801, 2020377.048073344, 2053532.699113719, 2087150.875568287,
-                2121236.896834771, 2155796.130516737, 2190833.992743404, 2226355.948490792, 2262367.511904243,
-                2298874.246622283, 2335881.766101836, 2373395.733944806, 2411421.864226017, 2449965.921822503,
-                2489033.722744186, 2528631.134465915, 2568764.076260844, 2609438.519535244, 2650660.488164633,
-                2692436.058831303, 2734771.361363255, 2777672.579074459, 2821145.949106557, 2865197.762771913,
-                2909834.365898075, 2955062.159173611, 3000887.598495364, 3047317.195317072, 3094357.516999425,
-                3142015.18716148, 3190296.886033527, 3239209.350811319, 3288759.376011737, 3338953.813829865,
-                3389799.574497465, 3441303.626642879, 3493472.997652346, 3546314.774032734, 3599836.101775718,
-                3654044.186723352, 3708946.294935087, 3764549.753056224, 3820861.948687783, 3877890.330757833,
-                3935642.409894215, 3994125.758798767, 4053348.012622938, 4113316.869344868, 4174040.090147917,
-                4235525.499800648, 4297780.987038235, 4360814.504945371, 4424634.071340578, 4489247.76916203,
-                4554663.746854796, 4620890.218759571, 4687935.465502855, 4755807.834388626, 4824515.739791448,
-                4894067.663551098, 4964472.155368621, 5035737.83320389, 5107873.383674653, 5180887.562457044,
-                5254789.194687578, 5329587.175366664, 5405290.469763565, 5481908.11382287, 5559449.214572486,
-                5637922.950533082, 5717338.572129052, 5797705.402100981, 5879032.835919643, 5961330.342201422,
-                6044607.46312535, 6128873.814851565, 6214139.087941348, 6300413.047778608, 6387705.534992979,
-                6476026.465884338, 6565385.832848894, 6655793.704806847, 6747260.227631442, 6839795.624579719,
-                6933410.196724654, 7028114.32338894, 7123918.462580209, 7220833.151427887 };
+        { 0, 6796.7769344285716215, 6867.4666589320704588, 6938.7140813601199625, 7010.5222074219882415,
+                7082.8940515426593265, 7155.8326368664666006, 7229.3409952607416926, 7303.4221673194269897,
+                7378.0792023667154353, 7453.3151584606503093, 7529.1331023967359215, 7605.5361097115401208,
+                7682.5272646862767942, 7760.1096603504056475, 7838.2863984852019712, 7917.0605896273045801,
+                7996.4353530723155927, 8076.4138168783356377, 8156.9991178695054259, 8238.1944016395609651,
+                8320.0028225553669472, 8402.427543760421031, 8485.4717371784081479, 8569.138583516696599,
+                8653.4312722698141442, 8738.3530017229986697, 8823.9069789556815522, 8910.0964198449109972,
+                8996.9245490689172584, 9084.3946001105268806, 9172.5098152606296935, 9261.2734456216821854,
+                9350.6887511110835476, 9440.7590004646899615, 9531.4874712402197474, 9622.8774498206785211,
+                9714.9322314177934459, 9807.6551200754420279, 9901.0494286730263411, 9995.1184789289254695,
+                10089.86560140385518, 10185.29413550427671, 10281.40742948577099, 10378.208840456431062,
+                10475.701734380227208, 10573.889486080362985, 10672.775479242660367, 10772.363106418877578,
+                10872.655769030066949, 10973.656877369950962, 11075.369850608207344, 11177.798116793806912,
+                11280.945112858358698, 11384.814284619407772, 11489.409086783754901, 11594.732982950727092,
+                11700.789445615524528, 11807.581956172476566, 11915.114004918334103, 12023.389091055551035,
+                12132.410722695569348, 12242.182416862038735, 12352.707699494156259, 12463.990105449835028,
+                12576.03317850901476, 12688.840471376890491, 12802.415545687126723, 12916.761972005117059,
+                13031.883329831192896, 13147.783207603848496, 13264.465202702955139, 13381.932921452975279,
+                13500.189979126145772, 13619.239999945690215, 13739.086617089016727, 13859.733472690882991,
+                13981.184217846597676, 14103.442512615172745, 14226.512026022497594, 14350.396436064524096,
+                14475.099429710398908, 14600.624702905623053, 14726.975960575182398, 14854.156916626747261,
+                14982.171293953710119, 15111.022824438417956, 15240.715248955209972, 15371.252317373619007,
+                15502.637788561391062, 15634.875430387684901, 15767.969019726122497, 15901.922342457881314,
+                16036.739193474852073, 16172.423376682612798, 16308.97870500362842, 16446.409000380237558,
+                16584.718093777799368, 16723.909825187685783, 16863.988043630397442 };
 
     return (tTargetThrustProfile);
 }
@@ -109,6 +114,9 @@ TEST(PlatoTest, GradBasedRocketObjectiveGradFree)
             std::make_pair<std::vector<double>, std::vector<double>>({0.07, 0.004},{0.08, 0.006});
     Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);
     tObjective.setOptimizationInputs(tNumEvaluationsPerDim, tBounds);
+
+    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
+    tObjective.initialize(tTargetThrustProfile);
 
     /* {chamber_radius, ref_burn_rate} */
     std::vector<double> tControls = {0.075, 0.005};
@@ -144,7 +152,7 @@ TEST(PlatoTest, GradBasedRocketObjective)
     std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
     Plato::GradBasedRocketObjective<double> tObjective(tTargetThrustProfile, tRocketInputs, tGeomModel);
     tObjective.disableObjectiveNormalization();
-    std::vector<double> tUpperBounds = {0.09, 0.007}; /* {chamber_radius_ub, ref_burn_rate_ub} */
+    std::vector<double> tUpperBounds = {0.09, 0.007};  /* {chamber_radius_ub, ref_burn_rate_ub} */
     tObjective.setNormalizationConstants(tUpperBounds);
 
     // evaluate criterion
@@ -169,8 +177,8 @@ TEST(PlatoTest, GradBasedRocketObjective)
     tObjective.setPerturbationParameter(1e-4);
     tObjective.gradient(tControl, tGradient);
     // test gradient evaluation
-    EXPECT_NEAR(tGradient(tVECTOR_INDEX,0), -0.0048183366343682423, tTolerance);
-    EXPECT_NEAR(tGradient(tVECTOR_INDEX,1), -0.0057808715527571993, tTolerance);
+    EXPECT_NEAR(tGradient(tVECTOR_INDEX,0), -0.002968542979588974, tTolerance);
+    EXPECT_NEAR(tGradient(tVECTOR_INDEX,1), -0.0046250072151658734, tTolerance);
 
     // evaluate hessian
     double tValue = 1;
@@ -223,7 +231,10 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
     std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
-    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);;
+    Plato::GradFreeRocketObjective tObjective(tRocketInputs, tGeomModel);
+
+    std::vector<double> tTargetThrustProfile = PlatoTest::get_target_thrust_profile();
+    tObjective.initialize(tTargetThrustProfile);
 
     // set inputs for optimization problem
     std::vector<int> tNumEvaluationsPerDim = {100, 100}; // domain dimension = 100x100=10000
@@ -246,6 +257,11 @@ TEST(PlatoTest, GradFreeSimpleRocketOptimization)
     std::cout << "Best1: " << tBestParameters[0] << ", Best2: " << tBestParameters[1] << std::endl;
 
     // equal by determinism of objective
+    double tTolerance = 1e-2;
+    EXPECT_NEAR(0.075, tBestParameters[0], tTolerance); // radius
+    EXPECT_NEAR(0.005, tBestParameters[1], tTolerance); // burn rate
+    tTolerance = 1e-4;
+    EXPECT_NEAR(0., tBestObjectiveValue, tTolerance);
     EXPECT_FLOAT_EQ(tBestObjectiveValue, tObjective.evaluate(tBestParameters));
 }
 
@@ -278,7 +294,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0]; 
     (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
-    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /*base value*/ );
 
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0]; 
@@ -289,11 +305,11 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface)
     Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-4;
+    const double tTolerance = 1e-2;
     const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
     const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
-    EXPECT_NEAR(tBest1, 0.0749614, tTolerance);
-    EXPECT_NEAR(tBest2, 0.00500168, tTolerance);
+    EXPECT_NEAR(tBest1, 0.0749444, tTolerance);
+    EXPECT_NEAR(tBest2, 0.00500195, tTolerance);
 
     // ********* OUTPUT TO TERMINAL *********
     std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
@@ -332,7 +348,7 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface_LBFGS)
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mLowerBounds)(0,0) = 0.06 / tNormalizationConstants[0];
     (*tInputs.mLowerBounds)(0,1) = 0.003 / tNormalizationConstants[1];
-    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* base value */);
+    tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /*base value*/ );
 
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls);
     (*tInputs.mInitialGuess)(0,0) = 0.074 / tNormalizationConstants[0];
@@ -343,14 +359,14 @@ TEST(PlatoTest, GradBasedSimpleRocketOptimizationWithLightInterface_LBFGS)
     Plato::solve_ksbc<double, size_t>(tMyObjective, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-4;
+    const double tTolerance = 1e-2;
+    EXPECT_EQ(324u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(386u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(325u, tOutputs.mNumObjGradEval);
     const double tBest1 = (*tOutputs.mSolution)(0,0) * tNormalizationConstants[0];
-    EXPECT_EQ(19u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(82u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(20u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.0749405, tBest1, tTolerance);
     const double tBest2 = (*tOutputs.mSolution)(0,1) * tNormalizationConstants[1];
-    EXPECT_NEAR(tBest1, 0.0750002, tTolerance);
-    EXPECT_NEAR(tBest2, 0.00499999, tTolerance);
+    EXPECT_NEAR(0.00500217, tBest2, tTolerance);
 
     // ********* OUTPUT TO TERMINAL *********
     std::cout << "NumIterationsDone = " << tOutputs.mNumOuterIter << std::endl;
