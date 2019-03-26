@@ -1048,11 +1048,13 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
     //
     m_outputFrequency = 5;
     m_outputMethod = 2;
+    mWriteRestart   = Plato::Get::Bool(aNode, "WriteRestart");
+    Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
     if(aNode.size<std::string>("OutputFrequency"))
         m_outputFrequency = Plato::Get::Int(aNode, "OutputFrequency");
-    if(aNode.size<std::string>("OutputMethod"))
+    if(tSurfaceExtractionNode.size<std::string>("OutputMethod"))
     {
-        std::string tMethod = Plato::Get::String(aNode, "OutputMethod");
+        std::string tMethod = Plato::Get::String(tSurfaceExtractionNode, "OutputMethod");
         if(!tMethod.compare("epu"))
         {
             m_outputMethod = 2;
@@ -1067,9 +1069,18 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
         }
     }
 
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
+    iso::STKExtract ex;
+    auto tAvailableFormats = ex.availableFormats();
+    for(auto tNode : tSurfaceExtractionNode.getByName<Plato::InputData>("Output"))
+    {
+        auto tFormat = Plato::Get::String(tNode, "Format", /*asUpperCase=*/ true);
+        if( std::count(tAvailableFormats.begin(), tAvailableFormats.end(), tFormat) )
+        {
+            mRequestedFormats.push_back(tFormat);
+        }
+    }
 
-    mWriteRestart   = Plato::Get::Bool(aNode, "WriteRestart");
+    mDiscretization = Plato::Get::String(tSurfaceExtractionNode, "Discretization");
 }
 
 /******************************************************************************/
@@ -2152,6 +2163,7 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
                                           output_filename,        // output filename
                                           "Topology",             // iso field name
                                           tOutputFields,          // names of fields to output
+                                          mRequestedFormats,      // names of formats to write
                                           1e-5,                   // min edge length
                                           0.5,                    // iso value
                                           0,                      // level_set data?
