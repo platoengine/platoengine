@@ -1,0 +1,118 @@
+material 1 {
+#  random_constants {
+#    instances = 1000
+#    constant {
+#      name = "crystal_basis|euler_angles[0]"
+#      range = {0.0, 1.57}
+#    }
+#    constant {
+#      name = "crystal_basis|euler_angles[1]"
+#      range = {0.0, 1.57}
+#    }
+#    constant {
+#      name = "crystal_basis|euler_angles[2]"
+#      range = {0.0, 1.57}
+#    }
+#    constant {
+#      name = "linear_thermal_conduction|initial_density"
+#      range = {2000.0, 12000.0}
+#    }
+#  }
+#  crystal_basis {
+#    euler_angles = { 0.5, 0.4, 0.3 }
+#  }
+#  linear_thermal_conduction { # conjugates: flux -- grad T
+#    conduction_coefficient = 60.7   # W/m-K
+#    initial_density = 8880.0        # Kg/m3
+#    initial_temperature = 298.0     # C
+#    specific_heat = 460.0           # J/Kg-C
+#  }
+#  linear_thermoelastic { # conjugates: stress -- temperature
+#    expansion_coefficient = 13.1e-6
+#    initial_temperature = 298.0
+#    C11 = 2.429e11
+#    C12 = 1.479e11
+#    C44 = 1.221e11
+#  }
+  linear_elastic {
+    C11 = 2.429e11
+    C12 = 1.479e11
+    C44 = 1.221e11
+  }
+}
+
+mesh {
+#  type = "structured"
+#  xlimits = {0.0, 0.008}
+#  ylimits = {0.0, 0.004}
+#  zlimits = {0.0, 0.004}
+#  intervals = {20, 10, 10}
+  type = "unstructured"
+  format = "exodus"
+  mesh = "unsmesh.gen"
+  block 1 {
+    integration {
+      type = "gauss"
+      order = 2
+    }
+    material = 1
+  }
+}
+
+output {
+  file = "output2"
+}  
+
+control {
+  time {
+    start = 0.0
+    end = 0.01
+    timestep = 0.001
+  }
+}
+
+
+physics {
+  solid_statics {
+    solver {
+      output_interval = 100
+      tolerance = 1e-9
+      iterations = 1000
+    }
+    boundary_conditions {
+      displacement {
+        nodeset = 1
+        direction = "x"
+        value = 0.0
+      }
+      displacement {
+        nodeset = 1
+        direction = "y"
+        value = 0.0
+      }
+      displacement {
+        nodeset = 1
+        direction = "z"
+        value = 0.0
+      }
+      traction {
+        nodeset = 2
+        direction = "y"
+        value = -1e4
+      }
+    }
+  }
+  thermal_diffusion {
+    initial_temperature = 298.0
+    energy_deposition {
+      python {
+        function = "deposition"
+        constants = { "A", "l", "Tpeak" }
+        values    = { 1.5e9, 0.008, 0.1 }
+        output    = {"energy"}
+        input     = {"x","y","z","t"}
+      }
+      block = 1
+    }
+  }
+}

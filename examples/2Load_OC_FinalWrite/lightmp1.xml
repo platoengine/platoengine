@@ -1,0 +1,141 @@
+<material>
+  <id>1</id>
+  <linear_elastic>
+    <C11>2.429e11</C11>
+    <C12>1.479e11</C12>
+    <C44>1.221e11</C44>
+  </linear_elastic>
+</material>
+<!--
+material 1 {
+  linear_elastic {
+    C11 = 2.429e11
+    C12 = 1.479e11
+    C44 = 1.221e11
+  }
+}
+-->
+
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>unsmesh.gen</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <material>1</material>
+  </block>
+</mesh>
+<!--
+mesh {
+  type = "unstructured"
+  format = "exodus"
+  mesh = "unsmesh.gen"
+  block 1 {
+    integration {
+      type = "gauss"
+      order = 2
+    }
+    material = 1
+  }
+}
+-->
+
+<output>
+  <file>output1</file>
+  <format>exodus</format>
+</output>
+<!--
+output {
+  file = "output1"
+}  
+-->
+
+<control>
+  <time>
+    <start>0.0</start>
+    <end>0.01</end>
+    <timestep>0.001</timestep>
+  </time>
+</control>
+<!--
+control {
+  time {
+    start = 0.0
+    end = 0.01
+    timestep = 0.001
+  }
+}
+-->
+
+<physics>
+  <solid_statics>
+    <solver>
+      <output_interval>100</output_interval>
+      <tolerance>1e-9</tolerance>
+      <iterations>1000</iterations>
+    </solver>
+    <boundary_conditions>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>x</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>y</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>z</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <traction>
+        <nodeset>2</nodeset>
+        <direction>y</direction>
+        <value>-1e4</value>
+        <scale>1.0</scale>
+      </traction>
+    </boundary_conditions>
+  </solid_statics>
+</physics>
+<!--
+physics {
+  solid_statics {
+    solver {
+      output_interval = 100
+      tolerance = 1e-9
+      iterations = 1000
+    }
+    boundary_conditions {
+      displacement {
+        nodeset = 1
+        direction = "x"
+        value = 0.0
+      }
+      displacement {
+        nodeset = 1
+        direction = "y"
+        value = 0.0
+      }
+      displacement {
+        nodeset = 1
+        direction = "z"
+        value = 0.0
+      }
+      traction {
+        nodeset = 2
+        direction = "y"
+        value = -1e4
+      }
+    }
+  }
+}
+-->

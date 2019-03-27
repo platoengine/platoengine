@@ -330,6 +330,8 @@ private:
         int m_outputMethod;
         std::string mDiscretization;
         bool mWriteRestart;
+        std::string mBaseName;
+        bool mAppendIterationCount;
         std::vector<std::string> mRequestedFormats;
     };
     friend class PlatoMainOutput;

@@ -1080,7 +1080,11 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
         }
     }
 
-    mDiscretization = Plato::Get::String(tSurfaceExtractionNode, "Discretization");
+    mDiscretization = Plato::Get::String( tSurfaceExtractionNode, "Discretization" );
+    std::string tDefaultName("Iteration");
+    mBaseName       = Plato::Get::String( tSurfaceExtractionNode, "BaseName", tDefaultName );
+
+    mAppendIterationCount = Plato::Get::Bool  ( tSurfaceExtractionNode, "AppendIterationCount", /*defaultValue=*/ true );
 }
 
 /******************************************************************************/
@@ -2139,8 +2143,11 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
         sprintf(tmp_str, "0%d", aIteration);
     else if(aIteration < 1000)
         sprintf(tmp_str, "%d", aIteration);
-    output_filename = "Iteration";
-    output_filename += tmp_str;
+    output_filename = mBaseName;
+    if( mAppendIterationCount )
+    {
+        output_filename += tmp_str;
+    }
     output_filename += ".exo";
     iso::STKExtract ex;
     std::string input_filename = "platomain.exo";

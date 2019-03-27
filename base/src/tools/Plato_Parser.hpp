@@ -127,7 +127,7 @@ class PugiParser : public Parser {
 
 namespace Get
 {
-bool                Bool      (const Plato::InputData & aInputData, const std::string & aFieldname);
+bool                Bool      (const Plato::InputData & aInputData, const std::string & aFieldname, bool aDefaultValue=false );
 double              Double    (const Plato::InputData & aInputData, const std::string & aFieldname);
 std::vector<double> Doubles   (const Plato::InputData & aInputData, const std::string & aKeyword);
 int                 Int       (const Plato::InputData & aInputData, const std::string & aFieldname, int aDefaultValue=0 );

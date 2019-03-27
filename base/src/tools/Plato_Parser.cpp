@@ -802,14 +802,14 @@ double Double(const Plato::InputData & aNode, const std::string & aFieldname)
     }
 }
 /******************************************************************************/
-bool Bool(const Plato::InputData & aNode, const std::string & aFieldname)
+bool Bool(const Plato::InputData & aNode, const std::string & aFieldname, bool aDefaultValue)
 /******************************************************************************/
 {
     if( aNode.size<std::string>(aFieldname) ){
       std::string strval = aNode.get<std::string>(aFieldname);
       return Parse::boolFromString(strval);
     } else {
-      return false;
+      return aDefaultValue;
     }
 }
 
