@@ -9,7 +9,7 @@
   <WriteRestart>False</WriteRestart>
   <OutputFrequency>5</OutputFrequency>
   <SurfaceExtraction>
-    <OutputMethod>epu</OutputMethod>
+    <OutputMethod>parallel write</OutputMethod>
     <Discretization>density</Discretization>
     <Output><Format>Exodus</Format></Output>
   </SurfaceExtraction>
@@ -24,7 +24,7 @@
   <WriteRestart>False</WriteRestart>
   <OutputFrequency>1</OutputFrequency>
   <SurfaceExtraction>
-    <OutputMethod>epu</OutputMethod>
+    <OutputMethod>parallel write</OutputMethod>
     <Discretization>density</Discretization>
     <BaseName>final_design</BaseName>
     <AppendIterationCount>False</AppendIterationCount>

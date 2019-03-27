@@ -1069,6 +1069,7 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
         }
     }
 
+#ifdef ENABLE_ISO
     iso::STKExtract ex;
     auto tAvailableFormats = ex.availableFormats();
     for(auto tNode : tSurfaceExtractionNode.getByName<Plato::InputData>("Output"))
@@ -1079,6 +1080,7 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
             mRequestedFormats.push_back(tFormat);
         }
     }
+#endif
 
     mDiscretization = Plato::Get::String( tSurfaceExtractionNode, "Discretization" );
     std::string tDefaultName("Iteration");
