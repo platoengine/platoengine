@@ -1150,6 +1150,11 @@ void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Pl
     {
         aOptimizerEngineStageData.addControlName(tControlName);
     }
+    std::string tFilteredName = Plato::Get::String(tOptimizationVariablesNode, "FilteredName");
+    if(tFilteredName.empty() == false)
+    {
+        aOptimizerEngineStageData.addFilteredControlName(tFilteredName);
+    }
     std::string tLowerBoundVectorName = Plato::Get::String(tOptimizationVariablesNode, "LowerBoundVectorName");
     if(tLowerBoundVectorName.empty() == false)
     {

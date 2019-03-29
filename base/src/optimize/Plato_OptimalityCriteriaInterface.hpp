@@ -134,8 +134,7 @@ public:
         this->solveOptimizationProblem(tDataMng, tDataFactory);
 
         // ********* OUTPUT SOLUTION *********
-/*        const Plato::Vector<ScalarType, OrdinalType> & tControl = tDataMng->getCurrentControl(0 control vector index);
-        Plato::call_finalization_stage(mInterface, mInputData, tControl);*/
+        Plato::call_finalization_stage(mInterface, mInputData);
 
         this->finalize();
     }

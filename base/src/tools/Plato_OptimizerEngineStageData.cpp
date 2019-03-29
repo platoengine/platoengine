@@ -122,6 +122,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mConstraintAbsoluteTargetValues(),
         mConstraintReferenceValues(),
         mControlNames(),
+        mFilteredControlNames(),
         mConstraintValueNames(),
         mDescentDirectionNames(),
         mConstraintValueStageNames(),
@@ -770,6 +771,23 @@ void OptimizerEngineStageData::setControlNames(const std::vector<std::string> & 
 {
     assert(aInput.empty() == false);
     mControlNames = aInput;
+}
+
+/******************************************************************************/
+std::string OptimizerEngineStageData::getFilteredControlName(const size_t & aInput) const
+/******************************************************************************/
+{
+    assert(mFilteredControlNames.empty() == false);
+    assert(aInput < mFilteredControlNames.size());
+    return (mFilteredControlNames[aInput]);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::addFilteredControlName(const std::string & aInput)
+/******************************************************************************/
+{
+    assert(aInput.empty() == false);
+    mFilteredControlNames.push_back(aInput);
 }
 
 std::vector<std::string> OptimizerEngineStageData::getDescentDirectionNames() const

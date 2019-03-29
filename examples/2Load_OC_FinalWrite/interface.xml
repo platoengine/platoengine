@@ -546,7 +546,7 @@
   <OptimizationVariables>
     <ValueName>Optimization DOFs</ValueName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
-    <FinalizationStage>Write Final Result</FinalizationStage>
+    <FinalizationStage>Write Final Output</FinalizationStage>
     <FilteredName>Topology</FilteredName>
   </OptimizationVariables>
   <Objective>

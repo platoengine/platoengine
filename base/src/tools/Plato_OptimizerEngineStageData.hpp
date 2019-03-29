@@ -269,6 +269,9 @@ public:
     void addControlName(const std::string & aInput);
     void setControlNames(const std::vector<std::string> & aInput);
 
+    void addFilteredControlName(const std::string & aInput);
+    std::string getFilteredControlName(const size_t & aIndex) const;
+
     std::string getLowerBoundVectorName() const;
     std::string getLowerBoundValueName() const;
     void setLowerBoundValueName(const std::string & aInput);
@@ -552,6 +555,7 @@ private:
     std::map<std::string, double> mConstraintReferenceValues;
 
     std::vector<std::string> mControlNames;
+    std::vector<std::string> mFilteredControlNames;
     std::vector<std::string> mConstraintValueNames;
     std::vector<std::string> mDescentDirectionNames;
     std::vector<std::string> mConstraintValueStageNames;
