@@ -1252,42 +1252,6 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     EXPECT_NEAR(tTotalProbability, 1.0000028690386313, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_beta_radians)
-{
-    // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
-    tStatsInputs.mMean = 1.570796326794897;
-    tStatsInputs.mUpperBound = 2.356194490192345;
-    tStatsInputs.mLowerBound = 1.178097245096172;
-    tStatsInputs.mVariance = 0.392699081698724;
-    tStatsInputs.mNumSamples = 3;
-    tStatsInputs.mMaxNumDistributionMoments = 4;
-
-    // SOLVE
-    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
-
-    // CHECK
-    ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
-
-    const double tTol = 1e-3;
-    double tTotalProbability = 0;
-    std::vector<double> tGoldValues = {1.5579215894374143, 1.561804085266068, 2.0548857858385023};
-    std::vector<double> tGoldWeights = {0.040995750516433525, 0.20627905575198596, 0.75269353827863106};
-    for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
-    {
-        EXPECT_NEAR(tOutput[tIndex].mSampleValue, tGoldValues[tIndex], tTol);
-        EXPECT_NEAR(tOutput[tIndex].mSampleWeight, tGoldWeights[tIndex], tTol);
-        tTotalProbability += tOutput[tIndex].mSampleWeight;
-    }
-
-    // expect total probability of unity
-    EXPECT_NEAR(tTotalProbability, 0.99996834454705052, tTol);
-}
-
 TEST(PlatoTest, solveUncertaintyProblem_uniform)
 {
     const double tTol = 1e-6;
