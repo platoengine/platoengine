@@ -314,6 +314,18 @@ public:
     std::string getInitializationStageName() const;
     void setInitializationStageName(const std::string & aInput);
 
+    /******************************************************************************//**
+     * @brief Return finalization stage name: stage responsible for writing output files
+     * @return stage name
+    ***********************************************************************************/
+    std::string getFinalizationStageName() const;
+
+    /******************************************************************************//**
+     * @brief Set finalization stage name: stage responsible for writing output files
+     * @param [in] aInput stage name
+    ***********************************************************************************/
+    void setFinalizationStageName(const std::string & aInput);
+
     std::string getSetLowerBoundsStageName() const;
     void setSetLowerBoundsStageName(const std::string & aInput);
 
@@ -521,6 +533,7 @@ private:
     std::string mObjectiveHessianOutputName;
     std::string mObjectiveGradientOutputName;
     std::string mInitializationStageName;
+    std::string mFinalizationStageName;
     std::string mSetLowerBoundsStageName;
     std::string mSetUpperBoundsStageName;
     std::string mLowerBoundValueName;

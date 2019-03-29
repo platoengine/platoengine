@@ -1170,10 +1170,15 @@ void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Pl
     {
         aOptimizerEngineStageData.setUpperBoundValueName(tUpperBoundValueName);
     }
-    std::string tControlInitializationStage = Plato::Get::String(tOptimizationVariablesNode, "InitializationStage");
-    if(tControlInitializationStage.empty() == false)
+    std::string tInitializationStage = Plato::Get::String(tOptimizationVariablesNode, "InitializationStage");
+    if(tInitializationStage.empty() == false)
     {
-        aOptimizerEngineStageData.setInitializationStageName(tControlInitializationStage);
+        aOptimizerEngineStageData.setInitializationStageName(tInitializationStage);
+    }
+    std::string tFinalizationStage = Plato::Get::String(tOptimizationVariablesNode, "FinalizationStage");
+    if(tFinalizationStage.empty() == false)
+    {
+        aOptimizerEngineStageData.setFinalizationStageName(tFinalizationStage);
     }
     std::string tSetLowerBoundsStagName = Plato::Get::String(tOptimizationVariablesNode, "SetLowerBoundsStage");
     if(tSetLowerBoundsStagName.empty() == false)

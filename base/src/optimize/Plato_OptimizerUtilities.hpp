@@ -243,6 +243,37 @@ inline void getInitialGuessInputData(const std::string & aControlName,
     }
 }
 
+template<typename ScalarType, typename OrdinalType>
+void transform(const Plato::Vector<ScalarType, OrdinalType> & aControl, std::vector<ScalarType> & aCopy)
+{
+    for(OrdinalType tIndex = 0; tIndex < aControl.size(); tIndex++)
+    {
+        aCopy[tIndex] = aControl[tIndex];
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
+void call_finalization_stage(Plato::Interface* aInterface,
+                             const Plato::OptimizerEngineStageData & aInputData,
+                             const Plato::Vector<ScalarType, OrdinalType> & aControl)
+{
+    std::string tStageName = aInputData.getFinalizationStageName();
+    if(tStageName.empty() == false)
+    {
+        std::vector<ScalarType> tCopy(aControl.size());
+        Plato::transform(aControl, tCopy);
+
+        constexpr OrdinalType tCONTROL_VECTOR_INDEX = 0;
+        std::string tControlName = aInputData.getControlName(tCONTROL_VECTOR_INDEX);
+        Teuchos::ParameterList tParameterList;
+        tParameterList.set(tControlName, tCopy.data());
+
+        std::vector<std::string> tStageNames;
+        tStageNames.push_back(tStageName);
+        aInterface->compute(tStageNames, tParameterList);
+    }
+}
+
 } //namespace Plato
 
 #endif /* PLATO_OPTIMIZERUTILITIES_HPP_ */

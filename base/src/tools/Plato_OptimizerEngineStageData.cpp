@@ -105,6 +105,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mObjectiveHessianOutputName(),
         mObjectiveGradientOutputName(),
         mInitializationStageName(),
+        mFinalizationStageName(),
         mSetLowerBoundsStageName(),
         mSetUpperBoundsStageName(),
         mLowerBoundValueName(),
@@ -967,6 +968,17 @@ void OptimizerEngineStageData::setInitializationStageName(const std::string & aI
     assert(aInput.empty() == false);
     mInitializationStageName.clear();
     mInitializationStageName.assign(aInput.begin(), aInput.end());
+}
+
+std::string OptimizerEngineStageData::getFinalizationStageName() const
+{
+    return (mFinalizationStageName);
+}
+
+void OptimizerEngineStageData::setFinalizationStageName(const std::string & aInput)
+{
+    mFinalizationStageName.clear();
+    mFinalizationStageName = aInput;
 }
 
 /******************************************************************************/
