@@ -243,6 +243,23 @@ inline void getInitialGuessInputData(const std::string & aControlName,
     }
 }
 
+/******************************************************************************//**
+ * @brief Call finalization stage: responsible for writing the solution to the output file
+ * @param [in] aInterface PLATO Engine interface
+ * @param [in] aInputData PLATO Engine struct with input data read from xml file
+***********************************************************************************/
+void call_finalization_stage(Plato::Interface* aInterface, const Plato::OptimizerEngineStageData & aInputData)
+{
+    std::string tStageName = aInputData.getFinalizationStageName();
+    if(tStageName.empty() == false)
+    {
+        std::vector<std::string> tStageNames;
+        tStageNames.push_back(tStageName);
+        Teuchos::ParameterList tParameterList;
+        aInterface->compute(tStageNames, tParameterList);
+    }
+}
+
 } //namespace Plato
 
 #endif /* PLATO_OPTIMIZERUTILITIES_HPP_ */

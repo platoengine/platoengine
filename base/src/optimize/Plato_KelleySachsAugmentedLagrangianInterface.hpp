@@ -141,6 +141,9 @@ public:
         // ********* SOLVE OPTIMIZATION PROBLEM ********* //
         this->solveOptimizationProblem(tDataFactory, tDataMng);
 
+        // ********* OUTPUT SOLUTION *********
+        Plato::call_finalization_stage(mInterface, mInputData);
+
         this->finalize();
     }
 

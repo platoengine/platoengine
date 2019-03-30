@@ -9,7 +9,7 @@
   <WriteRestart>False</WriteRestart>
   <OutputFrequency>5</OutputFrequency>
   <SurfaceExtraction>
-    <OutputMethod>epu</OutputMethod>
+    <OutputMethod>parallel write</OutputMethod>
     <Discretization>density</Discretization>
     <Output><Format>STL</Format></Output>
     <Output><Format>Exodus</Format></Output>

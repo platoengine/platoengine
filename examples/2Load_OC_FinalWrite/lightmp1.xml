@@ -6,15 +6,6 @@
     <C44>1.221e11</C44>
   </linear_elastic>
 </material>
-<!--
-material 1 {
-  linear_elastic {
-    C11 = 2.429e11
-    C12 = 1.479e11
-    C44 = 1.221e11
-  }
-}
--->
 
 <mesh>
   <type>unstructured</type>
@@ -29,30 +20,6 @@ material 1 {
     <material>1</material>
   </block>
 </mesh>
-<!--
-mesh {
-  type = "unstructured"
-  format = "exodus"
-  mesh = "unsmesh.gen"
-  block 1 {
-    integration {
-      type = "gauss"
-      order = 2
-    }
-    material = 1
-  }
-}
--->
-
-<output>
-  <file>output1</file>
-  <format>exodus</format>
-</output>
-<!--
-output {
-  file = "output1"
-}  
--->
 
 <control>
   <time>
@@ -61,15 +28,6 @@ output {
     <timestep>0.001</timestep>
   </time>
 </control>
-<!--
-control {
-  time {
-    start = 0.0
-    end = 0.01
-    timestep = 0.001
-  }
-}
--->
 
 <physics>
   <solid_statics>
@@ -106,36 +64,3 @@ control {
     </boundary_conditions>
   </solid_statics>
 </physics>
-<!--
-physics {
-  solid_statics {
-    solver {
-      output_interval = 100
-      tolerance = 1e-9
-      iterations = 1000
-    }
-    boundary_conditions {
-      displacement {
-        nodeset = 1
-        direction = "x"
-        value = 0.0
-      }
-      displacement {
-        nodeset = 1
-        direction = "y"
-        value = 0.0
-      }
-      displacement {
-        nodeset = 1
-        direction = "z"
-        value = 0.0
-      }
-      traction {
-        nodeset = 2
-        direction = "y"
-        value = -1e4
-      }
-    }
-  }
-}
--->

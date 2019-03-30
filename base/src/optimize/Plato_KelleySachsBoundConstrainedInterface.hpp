@@ -151,6 +151,9 @@ public:
         this->setParameters(tAlgorithm);
         tAlgorithm.solve();
 
+        // ********* OUTPUT SOLUTION *********
+        Plato::call_finalization_stage(mInterface, mInputData);
+
         this->finalize();
     }
 
