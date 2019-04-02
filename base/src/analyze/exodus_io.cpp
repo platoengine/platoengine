@@ -348,7 +348,8 @@ ExodusIO::readHeader()
       Topological::NullElement* eb = new Topological::NullElement( 0, 0 );
       eb->setBlockId(ids[i]); 
       myMesh->addElemBlk(eb);
-    } else if (!strncasecmp(elemtype, "BEAM",   4)) {
+    } else if (!strncasecmp(elemtype, "BEAM",   4) ||
+               !strncasecmp(elemtype, "BAR2",   4)) {
 //      if(Ndim == 1){
         Topological::Beam* eb = new Topological::Beam( num_elem_in_block, num_attr );
         Nel_truss2+=num_elem_in_block;
@@ -723,7 +724,8 @@ ExodusIO::readConn()
 	loconn+=NNPE;
         ++global_element_count;
       }
-    } else if (!strncasecmp(elemtype, "BEAM",  4)) {
+    } else if (!strncasecmp(elemtype, "BEAM",  4) ||
+               !strncasecmp(elemtype, "BAR2",  4)) {
       const int NNPE = 2;
       int* loconn = connect;
       for( int k=0; k<num_elem_in_block[i]; ++k ) {
