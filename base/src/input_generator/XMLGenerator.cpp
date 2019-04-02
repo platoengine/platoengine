@@ -5703,8 +5703,11 @@ bool XMLGenerator::generatePlatoOperationsXML()
         }
     }
     addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency.c_str());
-    addChild(tmp_node, "OutputMethod", m_InputData.output_method.c_str());
-    addChild(tmp_node, "Discretization", m_InputData.discretization);
+    tmp_node1 = tmp_node.append_child("SurfaceExtraction");
+    addChild(tmp_node1, "OutputMethod", m_InputData.output_method.c_str());
+    addChild(tmp_node1, "Discretization", m_InputData.discretization);
+    tmp_node2 = tmp_node1.append_child("Output");
+    addChild(tmp_node2, "Format", "Exodus");
 
     // Update Problem
     tmp_node = doc.append_child("Operation");
