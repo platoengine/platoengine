@@ -440,6 +440,17 @@ void IsoVolumeExtractionTool::process_tet(const IVEHandle &tet,
                                           std::vector<BoundaryNodeInfo> &duplicate_node_info,
                                           std::set<IVEHandle> &boundary_nodes)
 {
+  /* double t5707x = 0.22017025; */
+  /* double t5707y = 0.41603475; */
+  /* double t5707z = -0.071446; */
+	
+  /* double t6891x = 0.24403375; */
+  /* double t6891y = 0.43941275; */
+  /* double t6891z = -0.080284; */
+
+
+  /* printf("tolerance %f\n",value_tol); */
+  /* printf("iso_value %f\n",iso_value); */
   double lower_bound = iso_value - value_tol;
   double upper_bound = iso_value + value_tol;
   IVEHandle tet_nodes[4];
@@ -452,6 +463,21 @@ void IsoVolumeExtractionTool::process_tet(const IVEHandle &tet,
   IVEHandle n1 = tet_nodes[1];
   IVEHandle n2 = tet_nodes[2];
   IVEHandle n3 = tet_nodes[3];
+
+  /* IsoVector coords[4]; */
+  /* for(int i = 0; i < 4; i++) */
+  /*   coords[i] = mesh_api->node_coordinates(tet_nodes[i]); */
+
+  /* IsoVector average = (coords[0] + coords[1] + coords[2] + coords[3])*0.25; */
+
+  /* if(fabs(average.x() - t5707x) < value_tol && fabs(average.y() - t5707y) < value_tol && fabs(average.z() - t5707z) < value_tol) */
+  /* { */
+  /*   ; */
+  /* } */
+  /* if(fabs(average.x() - t6891x) < value_tol && fabs(average.y() - t6891y) < value_tol && fabs(average.z() - t6891z) < value_tol) */
+  /* { */
+  /*   ; */
+  /* } */
 
   // Edge crossing nodes.  They will be indexed in the following
   // way: 0: Edge01, 1: Edge12, 2: Edge20,
@@ -624,25 +650,19 @@ void IsoVolumeExtractionTool::process_tet(const IVEHandle &tet,
   {
     if(nodes_used_in_tris.size() == 3)
     {
-      IVEHandle new_tri = mesh_api_out->new_tri(nodes_used_in_tris[0],
-                                         nodes_used_in_tris[1],
-                                         nodes_used_in_tris[2],
-                                         false, tet);
+      IVEHandle new_tri = createOrientedTriInTet(mesh_api, mesh_api_out, tet, nodes_used_in_tris[0], nodes_used_in_tris[1], nodes_used_in_tris[2]);
       mesh_api->copy_element_output_fields(tet, new_tri, mesh_api_out);
       optimized_tris.push_back(new_tri);
-      mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);;
-      mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);;
+      mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);
+      mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);
     }
     else if(nodes_used_in_tris.size() == 4)
     {
-      IVEHandle new_tri = mesh_api_out->new_tri(nodes_used_in_tris[0],
-                                         nodes_used_in_tris[1],
-                                         nodes_used_in_tris[2],
-                                         false, tet);
+      IVEHandle new_tri = createOrientedTriInTet(mesh_api, mesh_api_out, tet, nodes_used_in_tris[0], nodes_used_in_tris[1], nodes_used_in_tris[2]);
       mesh_api->copy_element_output_fields(tet, new_tri, mesh_api_out);
       optimized_tris.push_back(new_tri);
-      mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);;
-      mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);;
+      mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);
+      mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);
       IsoVector p0 = mesh_api_out->node_coordinates(nodes_used_in_tris[0]);
       IsoVector p1 = mesh_api_out->node_coordinates(nodes_used_in_tris[1]);
       IsoVector p2 = mesh_api_out->node_coordinates(nodes_used_in_tris[2]);
@@ -658,36 +678,27 @@ void IsoVolumeExtractionTool::process_tet(const IVEHandle &tet,
       double dot3 = vec2 % vec3;
       if(dot1 < dot2 && dot1 < dot3)
       {
-        new_tri = mesh_api_out->new_tri(nodes_used_in_tris[0],
-                                    nodes_used_in_tris[1],
-                                    nodes_used_in_tris[3],
-                                    false, tet);
+        new_tri = createOrientedTriInTet(mesh_api, mesh_api_out, tet, nodes_used_in_tris[0], nodes_used_in_tris[1], nodes_used_in_tris[3]);
         mesh_api->copy_element_output_fields(tet, new_tri, mesh_api_out);
         optimized_tris.push_back(new_tri);
-        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);;
-        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);;
+        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);
+        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);
       }
       else if(dot2 < dot1 && dot2 < dot3)
       {
-        new_tri = mesh_api_out->new_tri(nodes_used_in_tris[0],
-                                    nodes_used_in_tris[2],
-                                    nodes_used_in_tris[3],
-                                    false, tet);
+        new_tri = createOrientedTriInTet(mesh_api, mesh_api_out, tet, nodes_used_in_tris[0], nodes_used_in_tris[2], nodes_used_in_tris[3]);
         mesh_api->copy_element_output_fields(tet, new_tri, mesh_api_out);
         optimized_tris.push_back(new_tri);
-        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);;
-        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);;
+        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);
+        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);
       }
       else if(dot3 < dot1 && dot3 < dot2)
       {
-        new_tri = mesh_api_out->new_tri(nodes_used_in_tris[1],
-                                    nodes_used_in_tris[2],
-                                    nodes_used_in_tris[3],
-                                    false, tet);
+        new_tri = createOrientedTriInTet(mesh_api, mesh_api_out, tet, nodes_used_in_tris[1], nodes_used_in_tris[2], nodes_used_in_tris[3]);
         mesh_api->copy_element_output_fields(tet, new_tri, mesh_api_out);
         optimized_tris.push_back(new_tri);
-        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);;
-        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);;
+        mesh_api_out->store_tri_to_tet_map_entry(new_tri, tet);
+        mesh_api_out->store_tet_to_tri_map_entry(tet, new_tri);
       }
     }
     else if(nodes_used_in_tris.size() > 0)
@@ -697,22 +708,108 @@ void IsoVolumeExtractionTool::process_tet(const IVEHandle &tet,
     }
   }
   
+  //compute outward normals for tet faces
+  IsoVector outwardNormal[4];
+  IsoVector p0 = mesh_api_out->node_coordinates(tet_nodes[0]);
+  IsoVector p1 = mesh_api_out->node_coordinates(tet_nodes[1]);
+  IsoVector p2 = mesh_api_out->node_coordinates(tet_nodes[2]);
+  IsoVector p3 = mesh_api_out->node_coordinates(tet_nodes[3]);
+  
+  IsoVector edge01 = p1 - p0;
+  IsoVector edge02 = p2 - p0;
+  IsoVector edge03 = p3 - p0;
+  IsoVector edge12 = p2 - p1;
+  IsoVector edge13 = p3 - p1;
+
+  outwardNormal[0] = edge12 * edge13;
+  outwardNormal[0].normalize();
+
+  outwardNormal[1] = edge03 * edge02;
+  outwardNormal[1].normalize();
+  
+  outwardNormal[2] = edge01 * edge03;
+  outwardNormal[2].normalize();
+
+  outwardNormal[3] = edge02 * edge01;
+  outwardNormal[3].normalize();
+
   // Face 012
   create_boundary_tris_for_tet(tet, n0, n1, n2, v0, v1, v2, ec01, ec12, ec20,
                                fixed_tris, upper_bound, lower_bound, node_map, mesh_api, mesh_api_out,
-                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes);
+                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes, outwardNormal[3]);
   // Face 013
   create_boundary_tris_for_tet(tet, n0, n1, n3, v0, v1, v3, ec01, ec31, ec30,
                                fixed_tris, upper_bound, lower_bound, node_map, mesh_api, mesh_api_out,
-                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes);
+                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes, outwardNormal[2]);
   // Face 023
   create_boundary_tris_for_tet(tet, n0, n2, n3, v0, v2, v3, ec20, ec32, ec30,
                                fixed_tris, upper_bound, lower_bound, node_map, mesh_api, mesh_api_out,
-                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes);
+                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes, outwardNormal[1]);
   // Face 123
   create_boundary_tris_for_tet(tet, n1, n2, n3, v1, v2, v3, ec12, ec32, ec31,
                                fixed_tris, upper_bound, lower_bound, node_map, mesh_api, mesh_api_out,
-                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes);
+                               only_create_boundary_node_info, duplicate_node_info, boundary_nodes, outwardNormal[0]);
+}
+
+IVEHandle IsoVolumeExtractionTool::createOrientedTriInTet(IVEMeshAPI* mesh_api, IVEMeshAPI* mesh_api_out,
+                                                IVEHandle tet, IVEHandle n0, IVEHandle n1, IVEHandle n2)
+{
+    //initialize tet info
+    IVEHandle tet_nodes[4];
+    mesh_api->tet_nodes(tet, tet_nodes);
+
+    double vals[4];
+    for(int i=0; i<4; i++)
+      vals[i] = mesh_api->get_nodal_iso_field_variable(tet_nodes[i]);
+
+    //compute density gradient in tet
+    IsoVector basisGrad[4];
+    IsoVector p0 = mesh_api_out->node_coordinates(tet_nodes[0]);
+    IsoVector p1 = mesh_api_out->node_coordinates(tet_nodes[1]);
+    IsoVector p2 = mesh_api_out->node_coordinates(tet_nodes[2]);
+    IsoVector p3 = mesh_api_out->node_coordinates(tet_nodes[3]);
+
+    IsoVector edge01 = p1 - p0;
+    IsoVector edge02 = p2 - p0;
+    IsoVector edge03 = p3 - p0;
+    IsoVector edge12 = p2 - p1;
+    IsoVector edge13 = p3 - p1;
+
+    basisGrad[3] = edge01 * edge02;
+    /* basisGrad[3].normalize(); */
+
+    basisGrad[0] = edge13 * edge12;
+    /* basisGrad[0].normalize(); */
+
+    basisGrad[2] = edge03 * edge01;
+    /* basisGrad[2].normalize(); */
+
+    basisGrad[1] = edge02 * edge03;
+    /* basisGrad[1].normalize(); */
+
+    IsoVector gradient = vals[0]*basisGrad[0] + vals[1]*basisGrad[1] + vals[2]*basisGrad[2] + vals[3]*basisGrad[3];
+    gradient.normalize();
+
+    //compute normal to new_tri
+    IsoVector tri_node0 = mesh_api_out->node_coordinates(n0);
+    IsoVector tri_node1 = mesh_api_out->node_coordinates(n1);
+    IsoVector tri_node2 = mesh_api_out->node_coordinates(n2);
+    IsoVector vec01 = tri_node1 - tri_node0;
+    IsoVector vec02 = tri_node2 - tri_node0;
+    IsoVector normal = vec01 * vec02;
+    normal.normalize();
+
+    IVEHandle new_tri;
+    if(normal % gradient < 0)
+    {
+        new_tri = mesh_api_out->new_tri(n0, n1, n2, false, tet);
+        return new_tri;
+    }
+    else
+    {
+        new_tri = mesh_api_out->new_tri(n0, n2, n1, false, tet);
+        return new_tri;
+    }
 }
 
 IVEHandle IsoVolumeExtractionTool::get_duplicate_node(const IVEHandle &old_node,
@@ -765,10 +862,12 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
                                                            IVEMeshAPI *mesh_api_out, 
                                                            bool boundary_info,
                                                            std::vector<BoundaryNodeInfo> &duplicate_node_info,
-                                                           std::set<IVEHandle> &boundary_nodes)
+                                                           std::set<IVEHandle> &boundary_nodes,
+                                                           IsoVector& outwardNormal)
 {
   IVEHandle new_tri;
   BoundaryNodeInfo bni;
+
   if(v0 > upper_bound || v1 > upper_bound || v2 > upper_bound)
   {
     // Something is positive so we need to do further checking.
@@ -802,7 +901,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
           n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
           n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
           n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
-          new_tri = mesh_api_out->new_tri(n0_new, n1_new, n2_new, true, cur_tet);
+          new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n0_new, n1_new, n2_new, outwardNormal);
           mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
           fixed_tris.push_back(new_tri);
           mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -835,7 +934,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n0_new, n1_new;
               n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
               n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n0_new, n1_new, ec12, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n0_new, n1_new, ec12, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -859,7 +958,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n0_new, n2_new;
               n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
               n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n0_new, n2_new, ec12, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n0_new, n2_new, ec12, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -889,7 +988,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n0_new, n1_new;
               n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
               n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n1_new, n0_new, ec20, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n1_new, n0_new, ec20, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -913,7 +1012,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n2_new, n1_new;
               n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
               n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n1_new, n2_new, ec20, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n1_new, n2_new, ec20, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -943,7 +1042,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n2_new, n0_new;
               n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
               n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n0_new, n2_new, ec01, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n0_new, n2_new, ec01, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -967,7 +1066,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               IVEHandle n2_new, n1_new;
               n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
               n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
-              new_tri = mesh_api_out->new_tri(n1_new, n2_new, ec01, true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n1_new, n2_new, ec01, outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
             }
           }
@@ -1039,10 +1138,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
           {
             if(node_list.size() == 3)
             {
-              new_tri = mesh_api_out->new_tri(node_list[0],
-                                          node_list[1],
-                                          node_list[2],
-                                          true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, node_list[0], node_list[1], node_list[2], outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
               fixed_tris.push_back(new_tri);
               mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1050,10 +1146,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
             }
             else if(node_list.size() == 4)
             {
-              new_tri = mesh_api_out->new_tri(node_list[0],
-                                          node_list[1],
-                                          node_list[2],
-                                          true, cur_tet);
+              new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, node_list[0], node_list[1], node_list[2], outwardNormal);
               mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
               fixed_tris.push_back(new_tri);
               mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1073,10 +1166,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               double dot3 = vec2 % vec3;
               if(dot1 < dot2 && dot1 < dot3)
               {
-                new_tri = mesh_api_out->new_tri(node_list[0],
-                                            node_list[1],
-                                            node_list[3],
-                                            true, cur_tet);
+                new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, node_list[0], node_list[1], node_list[3], outwardNormal);
                 mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
                 fixed_tris.push_back(new_tri);
                 mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1084,10 +1174,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               }
               else if(dot2 < dot1 && dot2 < dot3)
               {
-                new_tri = mesh_api_out->new_tri(node_list[0],
-                                            node_list[2],
-                                            node_list[3],
-                                            true, cur_tet);
+                new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, node_list[0], node_list[2], node_list[3], outwardNormal);
                 mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
                 fixed_tris.push_back(new_tri);
                 mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1095,10 +1182,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
               }
               else if(dot3 < dot1 && dot3 < dot2)
               {
-                new_tri = mesh_api_out->new_tri(node_list[1],
-                                            node_list[2],
-                                            node_list[3],
-                                            true, cur_tet);
+                new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, node_list[1], node_list[2], node_list[3], outwardNormal);
                 mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
                 fixed_tris.push_back(new_tri);
                 mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1114,8 +1198,9 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
           v1 >= lower_bound && v1 <= upper_bound &&
           v2 >= lower_bound && v2 <= upper_bound)
   {
-    // All 3 values are zero so we need to check for a connected tet and if there
-    // isn't one we will create a single try for the whole face.
+    // All 3 values are equal to the iso extraction values 
+    // so we need to check for a connected tet and if there
+    // isn't one we will create a single tri for the whole face.
 /*
     bool all_shared = (boundary_nodes.find(n0) != boundary_nodes.end() &&
                        boundary_nodes.find(n1) != boundary_nodes.end() &&
@@ -1149,7 +1234,7 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
         n0_new = get_duplicate_node(n0, node_map, mesh_api, mesh_api_out, false, bni);
         n1_new = get_duplicate_node(n1, node_map, mesh_api, mesh_api_out, false, bni);
         n2_new = get_duplicate_node(n2, node_map, mesh_api, mesh_api_out, false, bni);
-        new_tri = mesh_api_out->new_tri(n0_new, n1_new, n2_new, true, cur_tet);
+        new_tri = createOrientedTriOnBoundaryTet(mesh_api, mesh_api_out, cur_tet, n0_new, n1_new, n2_new, outwardNormal);
         mesh_api->copy_element_output_fields(cur_tet, new_tri, mesh_api_out);
         fixed_tris.push_back(new_tri);
         mesh_api_out->store_tri_to_tet_map_entry(new_tri, cur_tet);;
@@ -1157,6 +1242,29 @@ void IsoVolumeExtractionTool::create_boundary_tris_for_tet(const IVEHandle &cur_
       }
     }
   }
+}
+
+IVEHandle IsoVolumeExtractionTool::createOrientedTriOnBoundaryTet(IVEMeshAPI* mesh_api, IVEMeshAPI* mesh_api_out, IVEHandle tet,
+                                         IVEHandle n0, IVEHandle n1, IVEHandle n2, IsoVector& outwardNormal)
+{
+  IsoVector p0 = mesh_api->node_coordinates(n0);
+  IsoVector p1 = mesh_api->node_coordinates(n1);
+  IsoVector p2 = mesh_api->node_coordinates(n2);
+
+  IsoVector edge01 = p1 - p0;
+  IsoVector edge02 = p2 - p0;
+
+  IsoVector inputNormal = edge01 * edge02;
+  inputNormal.normalize();
+
+  IVEHandle new_tri;
+
+  if(inputNormal % outwardNormal > 0)
+    new_tri = mesh_api_out->new_tri(n0, n1, n2, true, tet);
+  else
+    new_tri = mesh_api_out->new_tri(n0, n2, n1, true, tet);
+
+  return new_tri;
 }
 
 void IsoVolumeExtractionTool::create_interior_tris_for_hex(IVEHandle hex,

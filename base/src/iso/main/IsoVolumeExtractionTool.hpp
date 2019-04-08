@@ -111,7 +111,8 @@ private:
                                     IVEMeshAPI *mesh_api_out,     
                                     bool boundary_info,
                                     std::vector<BoundaryNodeInfo> &duplicate_node_info,
-                                    std::set<IVEHandle> &boundary_nodes);
+                                    std::set<IVEHandle> &boundary_nodes,
+                                    IsoVector& outwardNormal);
   IVEHandle get_duplicate_node(const IVEHandle &old_node,
                                std::map<IVEHandle, IVEHandle> &node_map,
                                IVEMeshAPI *mesh_api,
@@ -145,6 +146,11 @@ private:
                    std::vector<BoundaryNodeInfo> &edge_node_info,
                    std::vector<BoundaryNodeInfo> &duplicate_node_info,
                    std::set<IVEHandle> &boundary_nodes);
+
+  IVEHandle createOrientedTriInTet(IVEMeshAPI* mesh_api, IVEMeshAPI* mesh_api_out, IVEHandle tet, IVEHandle n0, IVEHandle n1, IVEHandle n2);
+
+  IVEHandle createOrientedTriOnBoundaryTet(IVEMeshAPI* mesh_api, IVEMeshAPI* mesh_api_out, IVEHandle tet, IVEHandle n0, IVEHandle n1, IVEHandle n2, IsoVector& outwardNormal);
+
 public:
       double minx() { return mMinx; }
       double miny() { return mMiny; }
