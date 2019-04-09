@@ -973,16 +973,16 @@ void PlatoApp::UpdateProblem::getArguments(std::vector<LocalArg>& aLocalArgs)
 }
 
 /******************************************************************************/
-Plato::data::layout_t 
-getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
+Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
 /******************************************************************************/
 {
-  auto layoutStr = Plato::Get::String(aNode, "Layout");
-  Plato::data::layout_t layout = aDefaultLayout;
-  if(!layoutStr.empty()){
-    layout = getLayout(layoutStr);
-  }
-  return layout;
+    auto layoutStr = Plato::Get::String(aNode, "Layout");
+    Plato::data::layout_t layout = aDefaultLayout;
+    if(!layoutStr.empty())
+    {
+        layout = getLayout(layoutStr);
+    }
+    return layout;
 }
 
 /******************************************************************************/
@@ -1038,9 +1038,7 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
     for(auto tInputNode : aNode.getByName<Plato::InputData>("Input"))
     {
         std::string tName = Plato::Get::String(tInputNode, "ArgumentName");
-
         auto tInputLayout = getLayout(tInputNode, /*default=*/Plato::data::layout_t::SCALAR_FIELD);
-
         m_outputData.push_back(LocalArg {tInputLayout, tName, 0, tPlotTable});
     }
 
