@@ -325,6 +325,8 @@ private:
         void getArguments(std::vector<LocalArg> & aLocalArgs);
     private:
         void extract_iso_surface(int aIteration);
+
+    private:
         std::vector<LocalArg> m_outputData;
         int m_outputFrequency;
         int m_outputMethod;
