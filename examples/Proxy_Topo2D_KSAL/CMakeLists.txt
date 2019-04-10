@@ -5,7 +5,7 @@ if(PLATOPROXY)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "interface.xml;solution.txt.gold")
+set( testFiles "interface.xml;solution.txt.gold;diff.awk")
 Plato_add_test_files("${testFiles}")
 
 # Set number of processors for PlatoMain comm
