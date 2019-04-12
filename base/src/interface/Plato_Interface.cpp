@@ -382,6 +382,12 @@ void Interface::importData(double* aTo, Plato::SharedData* aFrom)
 void Interface::registerApplication(Plato::Application* aApplication)
 /******************************************************************************/
 {
+    if(aApplication == nullptr)
+    {
+        registerException(Plato::ParsingException("Failed to create Performer"));
+    }
+    mExceptionHandler->handleExceptions();
+    
     try
     {
         aApplication->initialize();

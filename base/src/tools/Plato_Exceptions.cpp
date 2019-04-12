@@ -150,7 +150,7 @@ void ExceptionHandler::registerException(const std::exception & any_std_exceptio
     {
         mErrorStream << " -- Fatal Error --------------------------------------------------------------" << std::endl;
         mErrorStream << "  std::exception on Performer '" << mMyCommName << "': " << std::endl;
-        mErrorStream << "  " << any_std_exception.what();
+        mErrorStream << "  " << any_std_exception.what() << std::endl;
         mErrorStream << " -----------------------------------------------------------------------------" << std::endl;
     }
 }
