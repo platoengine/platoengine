@@ -108,16 +108,23 @@ int main(int aArgc, char *aArgv[])
 
     // Create Plato services application and register it with the Plato interface
     PlatoApp *tPlatoApp = nullptr;
-    if(aArgc > static_cast<int>(1))
+    try
     {
-        tPlatoApp = new PlatoApp(aArgc, aArgv, tLocalComm);
+        if(aArgc > static_cast<int>(1))
+        {
+            tPlatoApp = new PlatoApp(aArgc, aArgv, tLocalComm);
+        }
+        else
+        {
+            tPlatoApp = new PlatoApp(tLocalComm);
+        }
     }
-    else
+    catch(...)
     {
-        tPlatoApp = new PlatoApp(tLocalComm);
+        tPlatoApp = nullptr;
+        tPlatoInterface->Catch();
     }
 
-    Plato::OptimizerInterface<double>* tOptimizer = nullptr;
     try
     {
         tPlatoInterface->registerPerformer(tPlatoApp);
@@ -127,6 +134,7 @@ int main(int aArgc, char *aArgv[])
         safeExit();
     }
 
+    Plato::OptimizerInterface<double>* tOptimizer = nullptr;
     try
     {
         Plato::OptimizerFactory<double> tOptimizerFactory;

@@ -129,6 +129,7 @@ bool STKExtract::create_mesh_apis_read_from_file(stk::ParallelMachine *comm,
                              std::string meshOut,
                              std::string fieldName,
                              std::string outputFieldsString,
+                             std::vector<std::string> requestedFormats,
                              double minEdgeLength,
                              double isoValue,
                              int levelSetData,
@@ -151,6 +152,7 @@ bool STKExtract::create_mesh_apis_read_from_file(stk::ParallelMachine *comm,
   mReadSpreadFile = readSpreadFile;
   mTimeStep = timeStep;
   mOutputFieldsString = outputFieldsString;
+  mRequestedFormats = requestedFormats;
 
   if(!init_single_mesh_apis())
   {
@@ -289,8 +291,10 @@ bool STKExtract::run_extraction(int iteration, int num_materials)
 
     mMeshAPIOut->bulk_data()->modification_end();
 
-    bool write_stl = (num_materials > 1);
-    if(write_stl)
+    
+    bool hasMultipleMaterials = (num_materials > 1);
+    bool requestedSTL = std::count(mRequestedFormats.begin(), mRequestedFormats.end(), "STL");
+    if( hasMultipleMaterials || requestedSTL )
     {
         // Strip off the ".exo" at the end and replace it with ".stl"
         std::string stl_filename = mMeshOut.substr(0, mMeshOut.length()-4);;
@@ -334,7 +338,7 @@ bool STKExtract::run_extraction(int iteration, int num_materials)
     // run epu and then delete temp files if neededs
     if(mMeshAPIOut->bulk_data()->parallel_rank() == 0)
     {
-        if(write_stl)
+        if( hasMultipleMaterials || requestedSTL )
         {
             concatenate_stl_files(mMeshOut);
             if(num_procs > 1)

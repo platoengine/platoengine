@@ -973,16 +973,16 @@ void PlatoApp::UpdateProblem::getArguments(std::vector<LocalArg>& aLocalArgs)
 }
 
 /******************************************************************************/
-Plato::data::layout_t 
-getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
+Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
 /******************************************************************************/
 {
-  auto layoutStr = Plato::Get::String(aNode, "Layout");
-  Plato::data::layout_t layout = aDefaultLayout;
-  if(!layoutStr.empty()){
-    layout = getLayout(layoutStr);
-  }
-  return layout;
+    auto layoutStr = Plato::Get::String(aNode, "Layout");
+    Plato::data::layout_t layout = aDefaultLayout;
+    if(!layoutStr.empty())
+    {
+        layout = getLayout(layoutStr);
+    }
+    return layout;
 }
 
 /******************************************************************************/
@@ -1038,9 +1038,7 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
     for(auto tInputNode : aNode.getByName<Plato::InputData>("Input"))
     {
         std::string tName = Plato::Get::String(tInputNode, "ArgumentName");
-
         auto tInputLayout = getLayout(tInputNode, /*default=*/Plato::data::layout_t::SCALAR_FIELD);
-
         m_outputData.push_back(LocalArg {tInputLayout, tName, 0, tPlotTable});
     }
 
@@ -1048,11 +1046,13 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
     //
     m_outputFrequency = 5;
     m_outputMethod = 2;
+    mWriteRestart   = Plato::Get::Bool(aNode, "WriteRestart");
+    Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
     if(aNode.size<std::string>("OutputFrequency"))
         m_outputFrequency = Plato::Get::Int(aNode, "OutputFrequency");
-    if(aNode.size<std::string>("OutputMethod"))
+    if(tSurfaceExtractionNode.size<std::string>("OutputMethod"))
     {
-        std::string tMethod = Plato::Get::String(aNode, "OutputMethod");
+        std::string tMethod = Plato::Get::String(tSurfaceExtractionNode, "OutputMethod");
         if(!tMethod.compare("epu"))
         {
             m_outputMethod = 2;
@@ -1067,7 +1067,24 @@ PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData
         }
     }
 
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
+#ifdef ENABLE_ISO
+    iso::STKExtract ex;
+    auto tAvailableFormats = ex.availableFormats();
+    for(auto tNode : tSurfaceExtractionNode.getByName<Plato::InputData>("Output"))
+    {
+        auto tFormat = Plato::Get::String(tNode, "Format", /*asUpperCase=*/ true);
+        if( std::count(tAvailableFormats.begin(), tAvailableFormats.end(), tFormat) )
+        {
+            mRequestedFormats.push_back(tFormat);
+        }
+    }
+#endif
+
+    mDiscretization = Plato::Get::String( tSurfaceExtractionNode, "Discretization" );
+    std::string tDefaultName("Iteration");
+    mBaseName       = Plato::Get::String( tSurfaceExtractionNode, "BaseName", tDefaultName );
+
+    mAppendIterationCount = Plato::Get::Bool  ( tSurfaceExtractionNode, "AppendIterationCount", /*defaultValue=*/ true );
 }
 
 /******************************************************************************/
@@ -2126,8 +2143,11 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
         sprintf(tmp_str, "0%d", aIteration);
     else if(aIteration < 1000)
         sprintf(tmp_str, "%d", aIteration);
-    output_filename = "Iteration";
-    output_filename += tmp_str;
+    output_filename = mBaseName;
+    if( mAppendIterationCount )
+    {
+        output_filename += tmp_str;
+    }
     output_filename += ".exo";
     iso::STKExtract ex;
     std::string input_filename = "platomain.exo";
@@ -2150,6 +2170,7 @@ void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
                                           output_filename,        // output filename
                                           "Topology",             // iso field name
                                           tOutputFields,          // names of fields to output
+                                          mRequestedFormats,      // names of formats to write
                                           1e-5,                   // min edge length
                                           0.5,                    // iso value
                                           0,                      // level_set data?
@@ -2200,7 +2221,7 @@ void PlatoApp::PlatoMainOutput::operator()()
             extract_iso_surface(int_time);
 
             // Write restart file
-            if(tMyRank == 0)
+            if((tMyRank == 0) && mWriteRestart)
             {
                 std::ostringstream theCommand;
                 std::string tInputFilename = "platomain.exo.1.0";
@@ -2221,7 +2242,7 @@ void PlatoApp::PlatoMainOutput::operator()()
         }
         else if(mDiscretization == "levelset")
         {
-            if(tMyRank == 0)
+            if((tMyRank == 0) && mWriteRestart)
             {
                 std::string tListCommand = "ls -t IterationHistory* > junk.txt";
                 system(tListCommand.c_str());

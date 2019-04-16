@@ -87,6 +87,12 @@ public:
                                const std::pair<std::vector<double>, std::vector<double>>& aBounds /* <lower,upper> */);
 
     /******************************************************************************//**
+     * @brief Set target thrust profile and disable console output.
+     * @param [in] aTarget target thrust profile
+    **********************************************************************************/
+    void initialize(const std::vector<double>& aTarget);
+
+    /******************************************************************************//**
      * @brief Return thrust profile
      * @return thrust profile
      **********************************************************************************/
@@ -109,11 +115,6 @@ public:
     double evaluate(const std::vector<double>& aControls);
 
 private:
-    /******************************************************************************//**
-     * @brief Set target data and disable console output.
-     **********************************************************************************/
-    void initialize();
-
     /******************************************************************************//**
      * @brief update parameters (e.g. design variables) for simulation.
      * @param [in] aControls design variables

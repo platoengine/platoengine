@@ -68,13 +68,17 @@
     class STKExtract
     {
     public:
-      STKExtract(){}
+      STKExtract() : 
+         mAvailableFormats({"EXODUS","STL"}),
+         mMeshAPIIn(nullptr),
+         mMeshAPIOut(nullptr) {}
       ~STKExtract();
       bool create_mesh_apis_read_from_file(stk::ParallelMachine *comm,
                              std::string meshIn,
                              std::string meshOut,
                              std::string fieldName,
                              std::string outputFieldsString,
+                             std::vector<std::string> requestedFormats,
                              double minEdgeLength,              
                              double isoValue,
                              int levelSetData,
@@ -123,6 +127,8 @@
       void maxz(double val) { mMaxz = val; }
       void average_edge_length(double average_edge_length) { mAverageEdgeLength = average_edge_length; }
 
+      std::vector<std::string> availableFormats() { return mAvailableFormats; }
+
     private:
       void concatenate_stl_files(std::string &filename);
       void write_tris_to_stl(FILE *fp, std::vector<IVEHandle> &tri_list);
@@ -139,6 +145,8 @@
       std::string mOutputFieldsString;
       std::string mFixedBlocksString;
       std::vector<std::string> mOutputFieldNames;
+      std::vector<std::string> mRequestedFormats;
+      std::vector<std::string> mAvailableFormats;
       double mIsoValue;
       double mMinEdgeLength;
       int mLevelSetData;

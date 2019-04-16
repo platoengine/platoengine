@@ -192,6 +192,7 @@ private:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
@@ -210,6 +211,7 @@ private:
             aData.mPenaltyContractionMultiplier = this->penaltyContractionMultiplier(tOptionsNode);
             aData.mStdDevBestAugLagFuncTolerance = this->stdDevBestAugLagFuncTolerance(tOptionsNode);
             aData.mGlobalBestAugLagFuncTolerance = this->globalBestAugLagFuncTolerance(tOptionsNode);
+            aData.mTrustRegionMultiplierTolerance = this->trustRegionMultiplierTolerance(tOptionsNode);
             aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
             aData.mFeasibilityInexactnessTolerance = this->feasibilityInexactnessTolerance(tOptionsNode);
             aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
@@ -228,6 +230,7 @@ private:
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
             aData.mNumParticles = this->numParticles(tOptionsNode);
@@ -241,6 +244,7 @@ private:
             aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
             aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
             aData.mStdDevBestObjFuncTolerance = this->stdDevBestObjFuncTolerance(tOptionsNode);
+            aData.mTrustRegionMultiplierTolerance = this->trustRegionMultiplierTolerance(tOptionsNode);
             aData.mCognitiveBehaviorMultiplier = this->cognitiveBehaviorMultiplier(tOptionsNode);
             aData.mTrustRegionExpansionMultiplier = this->trustRegionExpansionMultiplier(tOptionsNode);
             aData.mTrustRegionContractionMultiplier = this->trustRegionContractionMultiplier(tOptionsNode);
@@ -302,6 +306,20 @@ private:
         if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output algorithm diagnostics keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool outputParticleDiagnostics(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("OutputParticleDiagnosticsToFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputParticleDiagnosticsToFile");
         }
         return (tOuput);
     }
@@ -498,6 +516,20 @@ private:
         if(aOptionsNode.size<std::string>("StdDevBestObjFuncTolerance"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "StdDevBestObjFuncTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse lower tolerance on trust region multiplier
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    ScalarType trustRegionMultiplierTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-8;
+        if(aOptionsNode.size<std::string>("TrustRegionMultiplierTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "TrustRegionMultiplierTolerance");
         }
         return (tOutput);
     }

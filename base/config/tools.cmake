@@ -205,8 +205,6 @@ endfunction( Plato_add_test )
 
 ###############################################################################
 ## Plato_add_simple_test( 
-##    TESTED_CODE    == code to be tested
-##    TEST_LENGTH    == short or long
 ##    TEST_NAME      == test name
 ##    NUM_PROCS      == number of processors to use for test
 ##    IO_COMM_INDEX  == io communicator index
@@ -226,6 +224,29 @@ function( Plato_add_simple_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX )
               -P ${CMAKE_SOURCE_DIR}/base/config/runsimpletest.cmake )
 
 endfunction( Plato_add_simple_test )
+
+###############################################################################
+## Plato_add_awk_test( 
+##    TEST_NAME      == test name
+##    NUM_PROCS      == number of processors to use for test
+##    IO_COMM_INDEX  == io communicator index
+## )
+###############################################################################
+
+function( Plato_add_awk_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX )
+
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
+
+    add_test( NAME ${TEST_NAME}
+              COMMAND ${CMAKE_COMMAND} 
+              -DTEST_COMMAND=${RUN_COMMAND}
+              -DDATA_DIR=${CMAKE_CURRENT_SOURCE_DIR} 
+              -DOUT_FILE=${OUT_FILE} 
+              -DGOLD_FILE=${GOLD_FILE} 
+              -DAWK_FILE=${AWK_FILE} 
+              -P ${CMAKE_SOURCE_DIR}/base/config/runawktest.cmake )
+
+endfunction( Plato_add_awk_test )
 
 ###############################################################################
 ## Plato_add_pso_test( 

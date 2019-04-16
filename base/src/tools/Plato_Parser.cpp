@@ -802,14 +802,14 @@ double Double(const Plato::InputData & aNode, const std::string & aFieldname)
     }
 }
 /******************************************************************************/
-bool Bool(const Plato::InputData & aNode, const std::string & aFieldname)
+bool Bool(const Plato::InputData & aNode, const std::string & aFieldname, bool aDefaultValue)
 /******************************************************************************/
 {
     if( aNode.size<std::string>(aFieldname) ){
       std::string strval = aNode.get<std::string>(aFieldname);
       return Parse::boolFromString(strval);
     } else {
-      return false;
+      return aDefaultValue;
     }
 }
 
@@ -1150,6 +1150,11 @@ void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Pl
     {
         aOptimizerEngineStageData.addControlName(tControlName);
     }
+    std::string tFilteredName = Plato::Get::String(tOptimizationVariablesNode, "FilteredName");
+    if(tFilteredName.empty() == false)
+    {
+        aOptimizerEngineStageData.addFilteredControlName(tFilteredName);
+    }
     std::string tLowerBoundVectorName = Plato::Get::String(tOptimizationVariablesNode, "LowerBoundVectorName");
     if(tLowerBoundVectorName.empty() == false)
     {
@@ -1170,10 +1175,15 @@ void parseOptimizationVariablesNames(const Plato::InputData & aOptimizerNode, Pl
     {
         aOptimizerEngineStageData.setUpperBoundValueName(tUpperBoundValueName);
     }
-    std::string tControlInitializationStage = Plato::Get::String(tOptimizationVariablesNode, "InitializationStage");
-    if(tControlInitializationStage.empty() == false)
+    std::string tInitializationStage = Plato::Get::String(tOptimizationVariablesNode, "InitializationStage");
+    if(tInitializationStage.empty() == false)
     {
-        aOptimizerEngineStageData.setInitializationStageName(tControlInitializationStage);
+        aOptimizerEngineStageData.setInitializationStageName(tInitializationStage);
+    }
+    std::string tFinalizationStage = Plato::Get::String(tOptimizationVariablesNode, "FinalizationStage");
+    if(tFinalizationStage.empty() == false)
+    {
+        aOptimizerEngineStageData.setFinalizationStageName(tFinalizationStage);
     }
     std::string tSetLowerBoundsStagName = Plato::Get::String(tOptimizationVariablesNode, "SetLowerBoundsStage");
     if(tSetLowerBoundsStagName.empty() == false)

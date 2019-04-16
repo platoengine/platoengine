@@ -228,7 +228,7 @@ ExodusIO::readHeader()
     int num_nodes_in_set;
     int num_dist_in_set;
     for(int i=0; i<num_node_sets; i++) {
-      err = ex_get_node_set_param(myFileID, node_set_ids[i], &num_nodes_in_set,
+      err = ex_get_set_param(myFileID, EX_NODE_SET, node_set_ids[i], &num_nodes_in_set,
                                   &num_dist_in_set);
       // num_dist_in_set is not used - thrown away
       myMesh->registerNodeSet(node_set_ids[i], num_nodes_in_set);
@@ -250,12 +250,13 @@ ExodusIO::readHeader()
 
     int num_side_in_set;
     int num_dist_in_set;
+    int num_nodes_in_set;
     for(int i=0; i<num_side_sets; i++) {
-      err = ex_get_side_set_param(myFileID, side_set_ids[i], &num_side_in_set,
+      err = ex_get_set_param(myFileID, EX_SIDE_SET, side_set_ids[i], &num_side_in_set,
                                   &num_dist_in_set);
-      // num_dist_in_set is not used - thrown away
+      err = ex_get_side_set_node_list_len(myFileID, side_set_ids[i], &num_nodes_in_set);
       bool successful = myMesh->registerSideSet(side_set_ids[i], num_side_in_set, 
-                                                num_dist_in_set);
+                                                num_nodes_in_set);
       if(!successful){
         throw ParsingException("Fatal Error: Sideset registration failed");
       }
@@ -347,7 +348,8 @@ ExodusIO::readHeader()
       Topological::NullElement* eb = new Topological::NullElement( 0, 0 );
       eb->setBlockId(ids[i]); 
       myMesh->addElemBlk(eb);
-    } else if (!strncasecmp(elemtype, "BEAM",   4)) {
+    } else if (!strncasecmp(elemtype, "BEAM",   4) ||
+               !strncasecmp(elemtype, "BAR2",   4)) {
 //      if(Ndim == 1){
         Topological::Beam* eb = new Topological::Beam( num_elem_in_block, num_attr );
         Nel_truss2+=num_elem_in_block;
@@ -722,7 +724,8 @@ ExodusIO::readConn()
 	loconn+=NNPE;
         ++global_element_count;
       }
-    } else if (!strncasecmp(elemtype, "BEAM",  4)) {
+    } else if (!strncasecmp(elemtype, "BEAM",  4) ||
+               !strncasecmp(elemtype, "BAR2",  4)) {
       const int NNPE = 2;
       int* loconn = connect;
       for( int k=0; k<num_elem_in_block[i]; ++k ) {

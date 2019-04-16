@@ -73,26 +73,31 @@ namespace ParticleSwarmTest
 std::vector<double> get_target_thrust_profile()
 {
     std::vector<double> tTargetThrustProfile =
-        { 0, 1656714.377766964, 1684717.520617273, 1713123.001583093, 1741935.586049868, 1771160.083875437,
-                1800801.349693849, 1830864.28322051, 1861353.829558637, 1892274.979507048, 1923632.769869272,
-                1955432.283763989, 1987678.650936801, 2020377.048073344, 2053532.699113719, 2087150.875568287,
-                2121236.896834771, 2155796.130516737, 2190833.992743404, 2226355.948490792, 2262367.511904243,
-                2298874.246622283, 2335881.766101836, 2373395.733944806, 2411421.864226017, 2449965.921822503,
-                2489033.722744186, 2528631.134465915, 2568764.076260844, 2609438.519535244, 2650660.488164633,
-                2692436.058831303, 2734771.361363255, 2777672.579074459, 2821145.949106557, 2865197.762771913,
-                2909834.365898075, 2955062.159173611, 3000887.598495364, 3047317.195317072, 3094357.516999425,
-                3142015.18716148, 3190296.886033527, 3239209.350811319, 3288759.376011737, 3338953.813829865,
-                3389799.574497465, 3441303.626642879, 3493472.997652346, 3546314.774032734, 3599836.101775718,
-                3654044.186723352, 3708946.294935087, 3764549.753056224, 3820861.948687783, 3877890.330757833,
-                3935642.409894215, 3994125.758798767, 4053348.012622938, 4113316.869344868, 4174040.090147917,
-                4235525.499800648, 4297780.987038235, 4360814.504945371, 4424634.071340578, 4489247.76916203,
-                4554663.746854796, 4620890.218759571, 4687935.465502855, 4755807.834388626, 4824515.739791448,
-                4894067.663551098, 4964472.155368621, 5035737.83320389, 5107873.383674653, 5180887.562457044,
-                5254789.194687578, 5329587.175366664, 5405290.469763565, 5481908.11382287, 5559449.214572486,
-                5637922.950533082, 5717338.572129052, 5797705.402100981, 5879032.835919643, 5961330.342201422,
-                6044607.46312535, 6128873.814851565, 6214139.087941348, 6300413.047778608, 6387705.534992979,
-                6476026.465884338, 6565385.832848894, 6655793.704806847, 6747260.227631442, 6839795.624579719,
-                6933410.196724654, 7028114.32338894, 7123918.462580209, 7220833.151427887 };
+        { 0, 6796.7769344285716215, 6867.4666589320704588, 6938.7140813601199625, 7010.5222074219882415,
+                7082.8940515426593265, 7155.8326368664666006, 7229.3409952607416926, 7303.4221673194269897,
+                7378.0792023667154353, 7453.3151584606503093, 7529.1331023967359215, 7605.5361097115401208,
+                7682.5272646862767942, 7760.1096603504056475, 7838.2863984852019712, 7917.0605896273045801,
+                7996.4353530723155927, 8076.4138168783356377, 8156.9991178695054259, 8238.1944016395609651,
+                8320.0028225553669472, 8402.427543760421031, 8485.4717371784081479, 8569.138583516696599,
+                8653.4312722698141442, 8738.3530017229986697, 8823.9069789556815522, 8910.0964198449109972,
+                8996.9245490689172584, 9084.3946001105268806, 9172.5098152606296935, 9261.2734456216821854,
+                9350.6887511110835476, 9440.7590004646899615, 9531.4874712402197474, 9622.8774498206785211,
+                9714.9322314177934459, 9807.6551200754420279, 9901.0494286730263411, 9995.1184789289254695,
+                10089.86560140385518, 10185.29413550427671, 10281.40742948577099, 10378.208840456431062,
+                10475.701734380227208, 10573.889486080362985, 10672.775479242660367, 10772.363106418877578,
+                10872.655769030066949, 10973.656877369950962, 11075.369850608207344, 11177.798116793806912,
+                11280.945112858358698, 11384.814284619407772, 11489.409086783754901, 11594.732982950727092,
+                11700.789445615524528, 11807.581956172476566, 11915.114004918334103, 12023.389091055551035,
+                12132.410722695569348, 12242.182416862038735, 12352.707699494156259, 12463.990105449835028,
+                12576.03317850901476, 12688.840471376890491, 12802.415545687126723, 12916.761972005117059,
+                13031.883329831192896, 13147.783207603848496, 13264.465202702955139, 13381.932921452975279,
+                13500.189979126145772, 13619.239999945690215, 13739.086617089016727, 13859.733472690882991,
+                13981.184217846597676, 14103.442512615172745, 14226.512026022497594, 14350.396436064524096,
+                14475.099429710398908, 14600.624702905623053, 14726.975960575182398, 14854.156916626747261,
+                14982.171293953710119, 15111.022824438417956, 15240.715248955209972, 15371.252317373619007,
+                15502.637788561391062, 15634.875430387684901, 15767.969019726122497, 15901.922342457881314,
+                16036.739193474852073, 16172.423376682612798, 16308.97870500362842, 16446.409000380237558,
+                16584.718093777799368, 16723.909825187685783, 16863.988043630397442 };
 
     return (tTargetThrustProfile);
 }
@@ -175,6 +180,11 @@ TEST(PlatoTest, PSO_PrintStoppingCriterion)
     Plato::pso::get_stop_criterion(tFlag, tDescription);
     tGold = "\n\n****** Optimization stopping due to standard deviation tolerance being met. ******\n\n";
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::particle_swarm::TRUST_REGION_MULTIPLIER_TOLERANCE;
+    Plato::pso::get_stop_criterion(tFlag, tDescription);
+    tGold = "\n\n****** Optimization stopping due to trust region multiplier tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
 TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
@@ -185,6 +195,89 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
     ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
     ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1), std::invalid_argument);
     ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+}
+
+TEST(PlatoTest, PSO_PrintParticleData)
+{
+    std::ofstream tOutputFile;
+    tOutputFile.open("MyFile.txt");
+    Plato::pso::print_particle_data_header(tOutputFile);
+
+    const size_t tNumParticles = 3;
+    const size_t tNumControls = 2;
+    Plato::StandardVector<double> tObjValues(tNumParticles);
+    tObjValues[0] = 1; tObjValues[1] = 2; tObjValues[2] = 3;
+    Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
+    tParticles(0,0) = 1.1; tParticles(1,0) = 2.1; tParticles(2,0) = 3.1;
+    tParticles(1,1) = 1.2; tParticles(1,1) = 2.2; tParticles(2,1) = 3.2;
+    size_t tIteration = 1;
+    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+    tIteration = 2;
+    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+    tOutputFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tReadFile;
+    tReadFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold;
+    tGold << "OUTPUTFORMAT:(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+    tGold << "Thesubscriptidenotestheparticleindexandthesuperscriptjdenotesthedesignvariableindex.";
+    tGold << "Eachparticleisassociatedwithacriterion(F_i(X))andasetofdesignvariables(X).";
+    tGold << "ThetotalnumberofparticlesanddesignvariablesisdenotedbyuppercaselettersIandJ,respectively.";
+    tGold << "Iter(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+    tGold << "1(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+    tGold << "2(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, PSO_PrintGlobalBestParticleData)
+{
+    std::ofstream tOutputFile;
+    tOutputFile.open("MyFile.txt");
+    Plato::pso::print_global_best_particle_data_header(tOutputFile);
+
+    const size_t tNumControls = 2;
+    Plato::StandardVector<double> tControls(tNumControls);
+    tControls[0] = 1.1; tControls[1] = 1.2;
+    size_t tIndex = 2;
+    size_t tIteration = 1;
+    double tObjValue = 1;
+    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+    tIndex = 1;
+    tIteration = 2;
+    tObjValue = 0.5;
+    tControls[0] = 2.1; tControls[1] = 2.2;
+    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+    tOutputFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tReadFile;
+    tReadFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold;
+    tGold << "OUTPUTFORMAT:(F(X),X^j,...,X^J)Thesuperscriptjdenotesthedesignvariableindex.";
+    tGold << "Eachparticleisassociatedwithasetofdesignvariables(X).";
+    tGold << "ThetotalnumberofdesignvariablesisdenotedbytheuppercaseletterJ.IterParticleIndex(F(X),X^j,...,X^J)";
+    tGold << "12(1.000000e+00,1.100000e+00,1.200000e+00)";
+    tGold << "21(5.000000e-01,2.100000e+00,2.200000e+00)";
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
@@ -651,6 +744,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
@@ -665,6 +759,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -674,6 +769,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsPSO.mMaxNumIterations);
@@ -687,6 +783,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -697,6 +794,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
     tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
@@ -705,6 +803,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
     tOptions.add<std::string>("StdDevBestObjFuncTolerance", "0.0001");
     tOptions.add<std::string>("GlobalBestObjFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionMultiplierTolerance", "0.001");
     tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
     tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
     Plato::InputData tOptimizerNodeOne("OptimizerNode");
@@ -713,6 +812,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptimizerNodeOne, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
+    EXPECT_TRUE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumIterations);
@@ -726,6 +826,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -746,6 +847,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
     EXPECT_EQ(1000u, tInputsTwoPSO.mMaxNumIterations);
@@ -759,6 +861,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestObjFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsTwoPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
@@ -776,6 +879,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
@@ -796,6 +900,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -805,6 +910,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_TRUE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(10u, tInputsPSO.mNumParticles);
@@ -824,6 +930,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.75, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
 
@@ -834,6 +941,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
     tOptions.add<std::string>("OutputSolution", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
@@ -842,6 +950,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("CognitiveBehaviorMultiplier", "0.6");
     tOptions.add<std::string>("StdDevBestAugLagFuncTolerance", "0.0001");
     tOptions.add<std::string>("GlobalBestAugLagFuncTolerance", "0.000001");
+    tOptions.add<std::string>("TrustRegionMultiplierTolerance", "0.1");
     tOptions.add<std::string>("TrustRegionExpansionMultiplier", "2");
     tOptions.add<std::string>("TrustRegionContractionMultiplier", "0.5");
     tOptions.add<std::string>("PenaltyExpansionMultiplier", "4");
@@ -861,8 +970,9 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
-    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
+    EXPECT_TRUE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
+    EXPECT_FALSE(tInputsPSO.mConstraintTypes.empty());
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
     EXPECT_EQ(100u, tInputsPSO.mMaxNumOuterIter);
     EXPECT_EQ(7u, tInputsPSO.mMaxNumConsecutiveFailures);
@@ -877,6 +987,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-4, tInputsPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-1, tInputsPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(2.0, tInputsPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsPSO.mTrustRegionContractionMultiplier, tTolerance);
     EXPECT_NEAR(4.0, tInputsPSO.mPenaltyExpansionMultiplier, tTolerance);
@@ -914,6 +1025,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
 
     EXPECT_EQ(2u, tInputsTwoPSO.mConstraintTypes.size());
@@ -937,6 +1049,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     EXPECT_NEAR(1e-4, tInputsTwoPSO.mFeasibilityInexactnessTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwoPSO.mStdDevBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(1e-10, tInputsTwoPSO.mGlobalBestAugLagFuncTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsTwoPSO.mTrustRegionMultiplierTolerance, tTolerance);
     EXPECT_NEAR(4.0, tInputsTwoPSO.mTrustRegionExpansionMultiplier, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwoPSO.mTrustRegionContractionMultiplier, tTolerance);
 }
@@ -1157,20 +1270,20 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
     // ********* Allocate Core Optimization Data Templates *********
     std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
     const size_t tNumControls = 2;
-    const size_t tNumParticles = 15;
+    const size_t tNumParticles = 10;
     tFactory->allocateObjFuncValues(tNumParticles);
     tFactory->allocateControl(tNumControls, tNumParticles);
 
     // ********* ALLOCATE NORMALIZATION CONSTANTS *********
-    Plato::StandardVector<double> tVector(tNumControls);
-    tVector[0] = 0.08; tVector[1] = 0.006;
+    Plato::StandardVector<double> tNormalization(tNumControls);
+    tNormalization[0] = 0.08; tNormalization[1] = 0.006;
 
     // ********* ALLOCATE OBJECTIVE FUNCTION *********
     Plato::AlgebraicRocketInputs<double> tRocketInputs;
     std::shared_ptr<Plato::GeometryModel<double>> tGeomModel =
             std::make_shared<Plato::Cylinder<double>>(tRocketInputs.mChamberRadius, tRocketInputs.mChamberLength);
     std::shared_ptr<Plato::GradFreeRocketObjFunc<double>> tObjective =
-            std::make_shared<Plato::GradFreeRocketObjFunc<double>>(tVector, tRocketInputs, tGeomModel);
+            std::make_shared<Plato::GradFreeRocketObjFunc<double>>(tNormalization, tRocketInputs, tGeomModel);
     tObjective->disableOutput();
 
     // ********* SET TARGET THRUST PROFILE *********
@@ -1180,19 +1293,27 @@ TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
 
     // ********* TEST ALGORITHM *********
     Plato::ParticleSwarmAlgorithmBCPSO<double> tAlgorithm(tFactory, tObjective);
-    tVector[0] = 1; tVector[1] = 1;
-    tAlgorithm.setUpperBounds(tVector);  /* bounds are normalized */
-    tVector[0] = 0.06 / tVector[0]; tVector[1] = 0.003 / tVector[1];
-    tAlgorithm.setLowerBounds(tVector);  /* bounds are normalized */
-    tAlgorithm.setMeanBestObjFuncTolerance(1e-6);
+    Plato::StandardVector<double> tBounds(tNumControls);
+    tBounds[0] = 1; tBounds[1] = 1;
+    tAlgorithm.setUpperBounds(tBounds);   /* bounds are normalized */
+    tBounds[0] = 0.06 / tNormalization[0]; tBounds[1] = 0.003 / tNormalization[1];
+    tAlgorithm.setLowerBounds(tBounds);   /* bounds are normalized */
+    tAlgorithm.setMeanBestObjFuncTolerance(1e-7);
     tAlgorithm.solve();
 
-    const double tTolerance = 1e-2;
+    // ********* TEST SOLUTION *********
+    double tTolerance = 1e-5;
     EXPECT_NEAR(0, tAlgorithm.getCurrentGlobalBestObjFuncValue(), tTolerance);
+    tTolerance = 1e-2;
+    const double tRadius = tAlgorithm.getDataMng().getGlobalBestParticlePosition()[0] * tNormalization[0];
+    EXPECT_NEAR(0.0750078, tRadius, tTolerance);
+    const double tBurnRate = tAlgorithm.getDataMng().getGlobalBestParticlePosition()[1] * tNormalization[1];;
+    EXPECT_NEAR(0.00500394, tBurnRate, tTolerance);
 
     // ********* OUTPUT DIAGNOSTICS *********
     std::cout << "NUM ITERATIONS = " << tAlgorithm.getNumIterations() << "\n";
-    std::cout << "OBJECTIVE: BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
+    std::cout << "NUM FUNCTION EVALUATIONS = " << tAlgorithm.getNumIterations() * tNumParticles << "\n";
+    std::cout << "OBJECTIVE: GLOBAL BEST = " << tAlgorithm.getCurrentGlobalBestObjFuncValue() << ", MEAN = "
             << tAlgorithm.getMeanCurrentBestObjFuncValues() << ", STDDEV = "
             << tAlgorithm.getStdDevCurrentBestObjFuncValues() << "\n";
     std::cout << tAlgorithm.getStoppingCriterion() << "\n";

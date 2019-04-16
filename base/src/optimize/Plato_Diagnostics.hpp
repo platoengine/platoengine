@@ -198,14 +198,6 @@ public:
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
         mDidGradientTestPassed = tMinError < mGradientTestAccuracyBound ? true : false;
-        if(mDidGradientTestPassed)
-        {
-            aOutputMsg << "Derivative checker believes it passed.\n";
-        }
-        else
-        {
-            aOutputMsg << "Derivative checker believes it failed.\n";
-        }
     }
 
     void checkCriterionHessian(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,

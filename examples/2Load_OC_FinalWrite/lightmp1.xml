@@ -1,0 +1,66 @@
+<material>
+  <id>1</id>
+  <linear_elastic>
+    <C11>2.429e11</C11>
+    <C12>1.479e11</C12>
+    <C44>1.221e11</C44>
+  </linear_elastic>
+</material>
+
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>unsmesh.gen</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <material>1</material>
+  </block>
+</mesh>
+
+<control>
+  <time>
+    <start>0.0</start>
+    <end>0.01</end>
+    <timestep>0.001</timestep>
+  </time>
+</control>
+
+<physics>
+  <solid_statics>
+    <solver>
+      <output_interval>100</output_interval>
+      <tolerance>1e-9</tolerance>
+      <iterations>1000</iterations>
+    </solver>
+    <boundary_conditions>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>x</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>y</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <displacement>
+        <nodeset>1</nodeset>
+        <direction>z</direction>
+        <value>0.0</value>
+        <scale>1.0</scale>
+      </displacement>
+      <traction>
+        <nodeset>2</nodeset>
+        <direction>y</direction>
+        <value>-1e4</value>
+        <scale>1.0</scale>
+      </traction>
+    </boundary_conditions>
+  </solid_statics>
+</physics>

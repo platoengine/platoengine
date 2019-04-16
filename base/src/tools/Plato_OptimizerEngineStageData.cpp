@@ -105,6 +105,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mObjectiveHessianOutputName(),
         mObjectiveGradientOutputName(),
         mInitializationStageName(),
+        mFinalizationStageName(),
         mSetLowerBoundsStageName(),
         mSetUpperBoundsStageName(),
         mLowerBoundValueName(),
@@ -121,6 +122,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mConstraintAbsoluteTargetValues(),
         mConstraintReferenceValues(),
         mControlNames(),
+        mFilteredControlNames(),
         mConstraintValueNames(),
         mDescentDirectionNames(),
         mConstraintValueStageNames(),
@@ -771,6 +773,23 @@ void OptimizerEngineStageData::setControlNames(const std::vector<std::string> & 
     mControlNames = aInput;
 }
 
+/******************************************************************************/
+std::string OptimizerEngineStageData::getFilteredControlName(const size_t & aInput) const
+/******************************************************************************/
+{
+    assert(mFilteredControlNames.empty() == false);
+    assert(aInput < mFilteredControlNames.size());
+    return (mFilteredControlNames[aInput]);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::addFilteredControlName(const std::string & aInput)
+/******************************************************************************/
+{
+    assert(aInput.empty() == false);
+    mFilteredControlNames.push_back(aInput);
+}
+
 std::vector<std::string> OptimizerEngineStageData::getDescentDirectionNames() const
 {
     assert(mDescentDirectionNames.empty() == false);
@@ -967,6 +986,17 @@ void OptimizerEngineStageData::setInitializationStageName(const std::string & aI
     assert(aInput.empty() == false);
     mInitializationStageName.clear();
     mInitializationStageName.assign(aInput.begin(), aInput.end());
+}
+
+std::string OptimizerEngineStageData::getFinalizationStageName() const
+{
+    return (mFinalizationStageName);
+}
+
+void OptimizerEngineStageData::setFinalizationStageName(const std::string & aInput)
+{
+    mFinalizationStageName.clear();
+    mFinalizationStageName = aInput;
 }
 
 /******************************************************************************/
