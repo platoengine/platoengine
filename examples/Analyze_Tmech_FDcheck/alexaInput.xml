@@ -55,7 +55,7 @@
     <ParameterList  name="Thermal Natural Boundary Conditions">
       <ParameterList  name="Surface Flux Boundary Condition">
         <Parameter  name="Type"     type="string"   value="Uniform"/>
-        <Parameter  name="Value"    type="double"   value="-1.0e1"/>
+        <Parameter  name="Value"    type="double"   value="-1.0"/>
         <Parameter  name="Sides"    type="string"   value="ss_2"/>
       </ParameterList>
     </ParameterList>
