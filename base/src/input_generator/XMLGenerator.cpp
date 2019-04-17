@@ -88,6 +88,7 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
         m_filterType_kernelThenHeaviside_XMLName("KernelThenHeaviside")
 /******************************************************************************/
 {
+
 }
 
 /******************************************************************************/
