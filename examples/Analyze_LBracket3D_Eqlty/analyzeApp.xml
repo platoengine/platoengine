@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<Operation>
+  <Function>ComputeSolution</Function>
+  <Name>Compute Displacement Solution</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
+
+<Operation>
+  <Function>UpdateProblem</Function>
+  <Name>Update Problem</Name>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjectiveValue</Function>
+  <Name>Compute Objective Value</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjectiveGradient</Function>
+  <Name>Compute Objective Gradient</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Vonmises</ArgumentName>
+  </Output>
+</Operation>
