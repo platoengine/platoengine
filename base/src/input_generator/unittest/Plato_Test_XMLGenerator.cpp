@@ -545,7 +545,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
     stringInput = "begin optimization parameters\n"
-            "ks trust region ratio upper\n"
+            "ks trust region ratio high\n"
             "end optimization parameters\n";
     iss.str(stringInput);
     iss.clear();
@@ -555,7 +555,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     stringInput = "begin optimization parameters\n"
             "ks trust region ratio low 1.1\n"
             "ks trust region ratio mid 2.1\n"
-            "ks trust region ratio upper 3.1\n"
+            "ks trust region ratio high 3.1\n"
             "end optimization parameters\n";
     iss.str(stringInput);
     iss.clear();

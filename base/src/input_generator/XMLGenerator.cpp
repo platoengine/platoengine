@@ -3745,6 +3745,8 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.filter_heaviside_min = "";
     m_InputData.filter_heaviside_update = "";
     m_InputData.filter_heaviside_max = "";
+
+    m_InputData.write_restart_file = "False";
 }
 
 /******************************************************************************/
@@ -3861,6 +3863,16 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.create_levelset_spheres = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"write","restart","file"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"write restart file\" keyword(s).\n";
+                                return false;
+                            }
+                            if(tStringValue == "true")
+                                m_InputData.write_restart_file = "True";
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"levelset","initialization","method"}, tStringValue))
                         {
@@ -4042,11 +4054,11 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mTrustRegionRatioMidKS = tStringValue;
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","ratio","upper"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"ks","trust","region","ratio","high"}, tStringValue))
                         {
                             if(tStringValue == "")
                             {
-                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region ratio upper\" keyword(s).\n";
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"ks trust region ratio high\" keyword(s).\n";
                                 return false;
                             }
                             m_InputData.mTrustRegionRatioUpperKS = tStringValue;
@@ -5703,6 +5715,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
             }
         }
     }
+    addChild(tmp_node, "WriteRestart", m_InputData.write_restart_file.c_str());
     addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency.c_str());
     tmp_node1 = tmp_node.append_child("SurfaceExtraction");
     addChild(tmp_node1, "OutputMethod", m_InputData.output_method.c_str());

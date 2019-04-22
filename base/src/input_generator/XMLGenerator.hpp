@@ -224,6 +224,7 @@ struct InputData
   std::string number_refines;
   std::string number_buffer_layers;
   std::string initial_density_value;
+  std::string write_restart_file;
 
   std::string create_levelset_spheres;
   std::string levelset_sphere_radius;
