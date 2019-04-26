@@ -968,7 +968,8 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     isDifficultForSolver = true;
                 }
-                else if(cur_obj.type == "stress constrained volume minimization")
+                else if(cur_obj.type == "stress constrained volume minimization" ||
+                        cur_obj.type == "stress constrained volume minimization2")
                 {
                     isDifficultForSolver = true;
                 }
@@ -1100,6 +1101,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                     else if(cur_obj.type == "stress constrained volume minimization")
                     {
                         fprintf(fp, "  case = stress_constrained_volume_minimization\n");
+                    }
+                    else if(cur_obj.type == "stress constrained volume minimization2")
+                    {
+                        fprintf(fp, "  case = stress_constrained_volume_minimization2\n");
                     }
                     else if(cur_obj.type == "stress p norm")
                     {
@@ -2408,7 +2413,8 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.type += " ";
                                 new_objective.type += tokens[j];
                             }
-                            if(new_objective.type == "stress constrained volume minimization" &&
+                            if((new_objective.type == "stress constrained volume minimization" ||
+                                new_objective.type == "stress constrained volume minimization2")  &&
                                new_objective.analysis_solver_tolerance.length() == 0)
                             {
                                 // Set a default in case one isn't set by user.
