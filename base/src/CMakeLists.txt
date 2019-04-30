@@ -10,29 +10,14 @@ set(PLATO_INCLUDES ${PLATO_INCLUDES}
   ${CMAKE_SOURCE_DIR}/base/src/geometry/MovingLeastSquares
   ${CMAKE_SOURCE_DIR}/base/src/geometry/Cogent
   ${CMAKE_SOURCE_DIR}/base/src/EngineInterfaceToPlatoSubproblemLibrary
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/AbstractInterface
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/ActivationFunction
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Agent
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/BoundedSupportFunction
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/DataLossFunction
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/DataOrganizer
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/DecisionMetric
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/DiscreteGlobalOptimization
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/DistanceVoting
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Eigen
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Example
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Filter
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Geometry
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Graph
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Helper
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/InputOutput
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/InvertibleUnitRange
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/LearningPreprocessor
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/NeighborsSearching
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/NodeSetMatching
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/ParameterData
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/SpatialSearching
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/SupervisedLearning
-  ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/VectorKernel
   ${CMAKE_SOURCE_DIR}/base/src/xtk
     PARENT_SCOPE )

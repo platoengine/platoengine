@@ -33,57 +33,30 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_Triangle.cpp  
 							 PSL_Test_OverhangFilter.cpp  
 							 PSL_Test_KernelThenHeavisideFilter.cpp  
-							 PSL_Test_VectorKernel.cpp
-							 PSL_Test_VectorCoding.cpp
-							 PSL_Test_SupportVectorMachine.cpp
-							 PSL_Test_SupervisedLearning.cpp
-							 PSL_Test_SupervisedGenerator.cpp
 							 PSL_Test_Standardization.cpp
-							 PSL_Test_SpatialHashing.cpp
-							 PSL_Test_SelectedNodeSet.cpp
-							 PSL_Test_RandomForest.cpp
 							 PSL_Test_Random.cpp
-							 PSL_Test_PrincipalComponentsAnalysis.cpp
-							 PSL_Test_Preprocessor.cpp
 							 PSL_Test_ParameterData.cpp
 							 PSL_Test_ParallelExchanger.cpp
-							 PSL_Test_NodeSetMatcher.cpp
-							 PSL_Test_NeighborsSearching.cpp
 							 PSL_Test_NearestNeighborSearches.cpp
-							 PSL_Test_NearestNeighborsClassifier.cpp
-							 PSL_Test_MultiLayoutVector.cpp
 							 PSL_Test_MpiWrapperInterface.cpp
 							 PSL_Test_MpiWrapperImplementation.cpp
 							 PSL_Test_MeshScaleAgent.cpp
 							 PSL_Test_Mesh.cpp
 							 PSL_Test_KernelFilter.cpp
-							 PSL_Test_JacobiEigenpairs.cpp
-							 PSL_Test_InvertibleUnitRange.cpp
-							 PSL_Test_InputOutput.cpp
 							 PSL_Test_GradientCheck.cpp
 							 PSL_Test_GlobalUtilities.cpp
 							 PSL_Test_FreeHelpers.cpp
 							 PSL_Test_FixedRadiusNearestNeighborsSearches.cpp
-							 PSL_Test_FeedForwardNeuralNetwork.cpp
-							 PSL_Test_DistanceVoter.cpp
 							 PSL_Test_DenseMatrixImplementation.cpp
 							 PSL_Test_DenseMatrixBuilder.cpp
-							 PSL_Test_DecisionTree.cpp
-							 PSL_Test_DecisionMetric.cpp
-							 PSL_Test_DataOrganizer.cpp
-							 PSL_Test_DataLossFunction.cpp
 							 PSL_Test_ConjugateGradient.cpp
 							 PSL_Test_CompressedRowSparseMatrixImplementation.cpp
 							 PSL_Test_CompressedRowSparseMatrixBuilder.cpp
-							 PSL_Test_ClassificationAssessor.cpp
-							 PSL_Test_ClassificationArchive.cpp
 							 PSL_Test_BoundingBoxSearches.cpp
 							 PSL_Test_BoundingBoxMortonHierarchy.cpp
 							 PSL_Test_BoundingBox.cpp
-							 PSL_Test_BinaryTree.cpp
 							 PSL_Test_BasicDiscreteObjective.cpp
 							 PSL_Test_BasicDenseVectorOperations.cpp
-							 PSL_Test_ActivationFunction.cpp
 							 PSL_Test_AbstractAuthority.cpp
 							 PSL_Test_Point.cpp
 							 Plato_Test_TimersTree.cpp
