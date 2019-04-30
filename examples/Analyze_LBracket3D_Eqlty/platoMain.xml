@@ -3,7 +3,6 @@
   <format>exodus</format>
   <ignore_node_map>true</ignore_node_map>
   <mesh>lbracket.exo</mesh>
-  <!--mesh>lbracket_coarse.exo</mesh-->
   <block>
     <index>1</index>
     <integration>

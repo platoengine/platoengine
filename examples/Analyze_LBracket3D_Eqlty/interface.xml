@@ -292,9 +292,9 @@
     <KSMaxTrustRegionIterations>5</KSMaxTrustRegionIterations>
     <KSInitialRadiusScale>0.25</KSInitialRadiusScale>
     <KSMaxRadiusScale>0.9</KSMaxRadiusScale>
-    <!--HessianType>lbfgs</HessianType-->
-    <!--LimitedMemoryStorage>8</LimitedMemoryStorage-->
+    <HessianType>disabled</HessianType>
     <MinTrustRegionRadius>1e-12</MinTrustRegionRadius>
+    <LimitedMemoryStorage>8</LimitedMemoryStorage>
     <KSOuterGradientTolerance>1e-11</KSOuterGradientTolerance>
     <KSOuterStationarityTolerance>1e-11</KSOuterStationarityTolerance>
     <KSOuterStagnationTolerance>1e-11</KSOuterStagnationTolerance>
