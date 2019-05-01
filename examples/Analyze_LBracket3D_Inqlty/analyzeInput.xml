@@ -18,21 +18,24 @@
     </ParameterList>
 
     <ParameterList name="Stress Constraint">
-      <Parameter name="Stress Limit" type="double" value="4"/>
+      <Parameter name="Stress Limit" type="double" value="3e6"/>
+      <Parameter name="Initial Penalty" type="double" value="1000"/>
+      <Parameter name="Penalty Upper Bound" type="double" value="100000"/>
+      <Parameter name="Penalty Expansion Multiplier" type="double" value="1.05"/>
     </ParameterList>
 
     <ParameterList name="Material Model">
-      <Parameter  name="Density" type="double" value="1.0"/>
+      <Parameter  name="Density" type="double" value="1e3"/>
       <ParameterList name="Isotropic Linear Elastic">
         <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1.0"/>
+        <Parameter  name="Youngs Modulus" type="double" value="1e9"/>
       </ParameterList>
     </ParameterList>
   
     <ParameterList  name="Natural Boundary Conditions">
       <ParameterList  name="Traction Vector Boundary Condition">
         <Parameter  name="Type"     type="string"        value="Uniform"/>
-        <Parameter  name="Values"   type="Array(double)" value="{0.0, -1.0, 0.0}"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, -1e6, 0.0}"/>
         <Parameter  name="Sides"    type="string"        value="ss_2"/>
       </ParameterList>
     </ParameterList>
