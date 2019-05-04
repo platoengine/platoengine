@@ -334,6 +334,6 @@
     <Lower>0</Lower>
   </BoundConstraint>
   <Convergence>
-    <MaxIterations>10</MaxIterations>
+    <MaxIterations>7</MaxIterations>
   </Convergence>
 </Optimizer>
