@@ -69,9 +69,7 @@ public:
     virtual void cacheData() = 0;
 
     //! Directive to update problem criterion.
-    virtual void updateProblem()
-    {
-    }
+    virtual void updateProblem() { return; }
 
     /*!
      * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}

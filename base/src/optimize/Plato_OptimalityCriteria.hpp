@@ -237,6 +237,7 @@ public:
         mNumIterationsDone = 0;
         while(1)
         {
+            this->updateProblem();
             mStageMng->update(*mDataMng);
 
             this->computeStoppingMetrics();
@@ -253,8 +254,6 @@ public:
             mSubProblem->solve(*mDataMng, *mStageMng);
 
             mNumIterationsDone++;
-
-            this->conditionallyUpdateProblem();
         }
     }
 
@@ -262,7 +261,7 @@ private:
     /******************************************************************************//**
      * @brief Invoke update problem stage if needed.
      **********************************************************************************/
-    void conditionallyUpdateProblem()
+    void updateProblem()
     {
         // don't update if frequency == 0
         bool tHaveProblemUpdateFrequency = (0 < mProblemUpdateFrequency);
@@ -509,23 +508,23 @@ private:
     }
 
 private:
-    bool mPrintDiagnostics;
-    std::ofstream mOutputStream;
+    bool mPrintDiagnostics; /*!< flag: true = enable diagnostics & false = disable diagnostics */
+    std::ofstream mOutputStream; /*!< output file */
 
-    OrdinalType mMaxNumIterations;
-    OrdinalType mNumIterationsDone;
-    OrdinalType mProblemUpdateFrequency;
+    OrdinalType mMaxNumIterations; /*!< maximum number of outer optimization iterations */
+    OrdinalType mNumIterationsDone; /*!< number of outer optimization iterations done */
+    OrdinalType mProblemUpdateFrequency; /*!< problem update frequency */
 
-    ScalarType mFeasibilityTolerance;
-    ScalarType mControlStagnationTolerance;
-    ScalarType mObjectiveGradientTolerance;
-    ScalarType mObjectiveStagnationTolerance;
+    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
+    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
+    ScalarType mObjectiveGradientTolerance; /*!< optimality tolerance */
+    ScalarType mObjectiveStagnationTolerance; /*!< objective stagnation tolerance */
 
-    Plato::OutputDataOC<ScalarType, OrdinalType> mOutputData;
-    std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds;
-    std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> mDataMng;
-    std::shared_ptr<Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType>> mStageMng;
-    std::shared_ptr<Plato::OptimalityCriteriaSubProblem<ScalarType, OrdinalType>> mSubProblem;
+    Plato::OutputDataOC<ScalarType, OrdinalType> mOutputData; /*!< output data struct */
+    std::shared_ptr<Plato::BoundsBase<ScalarType, OrdinalType>> mBounds; /*!< box constraint interface */
+    std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> mDataMng; /*!< optimization data manager */
+    std::shared_ptr<Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType>> mStageMng; /*!< criteria evaluation manager */
+    std::shared_ptr<Plato::OptimalityCriteriaSubProblem<ScalarType, OrdinalType>> mSubProblem; /*!< optimality criteria udate manager */
 
 private:
     OptimalityCriteria(const Plato::OptimalityCriteria<ScalarType, OrdinalType>&);

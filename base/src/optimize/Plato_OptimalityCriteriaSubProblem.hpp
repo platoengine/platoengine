@@ -57,16 +57,28 @@ class OptimalityCriteriaDataMng;
 template<typename ScalarType, typename OrdinalType>
 class OptimalityCriteriaStageMngBase;
 
+/******************************************************************************//**
+ * @brief Optimality Criteria subproblem abstract class
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class OptimalityCriteriaSubProblem
 {
 public:
+    /******************************************************************************//**
+     * @brief Default destructor
+    **********************************************************************************/
     virtual ~OptimalityCriteriaSubProblem(){}
 
+    /******************************************************************************//**
+     * @brief Solve optimality criteria subproblem and update new set of design variables
+     * @param [in] aDataMng data manager for optimality criteria algorithm
+     * @param [in] aStageMng stage manager - responsible for managing criteria evaluations
+    **********************************************************************************/
     virtual void solve(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng,
                        Plato::OptimalityCriteriaStageMngBase<ScalarType, OrdinalType> & aStageMng) = 0;
 };
+//class OptimalityCriteriaSubProblem
 
-}
+} // namespace Plato
 
 #endif /* PLATO_OPTIMALITYCRITERIASUBPROBLEM_HPP_ */

@@ -65,14 +65,23 @@ public:
     {
     }
 
-    //! Directive to cache any criterion specific data once the trial control is accepted.
+    /******************************************************************************//**
+    * @brief Directive to cache any criterion specific data once the trial control is accepted.
+    ***********************************************************************************/
     virtual void cacheData() = 0;
-    //! Directive to update problem definition.
+
+    /******************************************************************************//**
+     * @brief Enables update/continuation of application specific parameters
+    **********************************************************************************/
     virtual void updateProblem() = 0;
-    //! Directive to update optimization specific data once the trial control is accepted.
+
+    /******************************************************************************//**
+    * @brief Directive to update optimization specific data once the trial control is accepted.
+    **********************************************************************************/
     virtual void update(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 };
+// class OptimalityCriteriaStageMngBase
 
-}
+} // namespace Plato
 
 #endif /* PLATO_OPTIMALITYCRITERIASTAGEMNGBASE_HPP_ */

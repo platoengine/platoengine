@@ -118,14 +118,19 @@ public:
         }
     }
 
-    //! Directive to update problem for each criterion.
+    /******************************************************************************//**
+     * @brief Update application specific data. Enables continuation on these parameters
+    **********************************************************************************/
     void updateProblem()
     {
         assert(mObjective.get() != nullptr);
         mObjective->updateProblem();
     }
 
-    //! Directive to update optimization specific data once the trial control is accepted.
+    /******************************************************************************//**
+     * @brief Compute new objective value and criteria gradients (objective and constraints)
+     * @param [in] aDataMng optimization data manager
+    **********************************************************************************/
     void update(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         // Evaluate objective function
