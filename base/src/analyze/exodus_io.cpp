@@ -554,6 +554,7 @@ ExodusIO::writeHeader()
     for(int i=0; i<num_side_sets; i++) {
       int side_set_id = ss[i].id;
       int num_side_in_set = ss[i].numSides;
+      int num_nodes_per_face = ss[i].nodesPerFace;
       int num_dist_in_set = 0;
       if( ex_put_side_set_param(myFileID, side_set_id, num_side_in_set,
                                 num_dist_in_set) ) {
@@ -568,7 +569,10 @@ ExodusIO::writeHeader()
           int* tmpelem = new int [num_side_in_set];
           int* tmpside = new int [num_side_in_set];
           for(int iside=0; iside<num_side_in_set; iside++) {
-            tmpside[iside] = side_map[side_list[iside]];
+            if(num_nodes_per_face == 4)
+              tmpside[iside] = side_map[side_list[iside]];
+            else
+              tmpside[iside] = side_list[iside] + 1;
             tmpelem[iside] = elem_list[iside] + 1;
           }
           if( ex_put_side_set(myFileID, side_set_id, tmpelem, tmpside)) {
