@@ -154,6 +154,7 @@ struct Objective
   std::string scmm_initial_mass_weight_factor;
   std::string scmm_control_stagnation_tolerance;
   std::string scmm_write_debug_output_files;
+  std::string scmm_constraint_exponent;
 };
 struct Constraint
 {

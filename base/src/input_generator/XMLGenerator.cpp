@@ -968,8 +968,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     isDifficultForSolver = true;
                 }
-                else if(cur_obj.type == "stress constrained volume minimization" ||
-                        cur_obj.type == "stress constrained volume minimization2")
+                else if(cur_obj.type == "stress constrained volume minimization")
                 {
                     isDifficultForSolver = true;
                 }
@@ -1102,10 +1101,6 @@ bool XMLGenerator::generateSalinasInputDecks()
                     {
                         fprintf(fp, "  case = stress_constrained_volume_minimization\n");
                     }
-                    else if(cur_obj.type == "stress constrained volume minimization2")
-                    {
-                        fprintf(fp, "  case = stress_constrained_volume_minimization2\n");
-                    }
                     else if(cur_obj.type == "stress p norm")
                     {
                         fprintf(fp, "  case = stress_min\n");
@@ -1130,6 +1125,10 @@ bool XMLGenerator::generateSalinasInputDecks()
                 if(cur_obj.scmm_penalty_param_expansion_factor != "")
                 {
                     fprintf(fp, "  aug_lag_penalty_param_expansion_factor = %s\n", cur_obj.scmm_penalty_param_expansion_factor.c_str());
+                }
+                if(cur_obj.scmm_constraint_exponent != "")
+                {
+                    fprintf(fp, "  aug_lag_constraint_exponent = %s\n", cur_obj.scmm_constraint_exponent.c_str());
                 }
                 if(cur_obj.scmm_initial_lagrange_multiplier != "")
                 {
@@ -2413,8 +2412,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.type += " ";
                                 new_objective.type += tokens[j];
                             }
-                            if((new_objective.type == "stress constrained volume minimization" ||
-                                new_objective.type == "stress constrained volume minimization2")  &&
+                            if((new_objective.type == "stress constrained volume minimization")  &&
                                new_objective.analysis_solver_tolerance.length() == 0)
                             {
                                 // Set a default in case one isn't set by user.
@@ -2483,6 +2481,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 return false;
                             }
                             new_objective.scmm_mass_to_stress_constraint_ratio = tokens[6];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "constraint", "exponent"}, tStringValue))
+                        {
+                            if(tokens.size() < 4)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm constraint exponent\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.scmm_constraint_exponent = tokens[3];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"scmm", "penalty", "param", "expansion", "factor"}, tStringValue))
                         {
