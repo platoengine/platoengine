@@ -40,62 +40,53 @@
 //@HEADER
 */
 
-#include "PlatoEngine_FilterFactory.hpp"
+#pragma once
 
+#include <mpi.h>
+#include <cstddef>
 #include "PlatoEngine_AbstractFilter.hpp"
-#include "PlatoEngine_IdentityFilter.hpp"
-#include "PlatoEngine_KernelFilter.hpp"
-#include "PlatoEngine_KernelThenHeavisideFilter.hpp"
-#include "PlatoEngine_KernelThenTANHFilter.hpp"
-#include "Plato_Interface.hpp"
-#include "data_mesh.hpp"
-#include "Plato_Parser.hpp"
 
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <iostream>
+namespace PlatoSubproblemLibrary
+{
+class KernelThenTANHFilter;
+class ParameterData;
+class AbstractAuthority;
+namespace AbstractInterface
+{
+class PointCloud;
+class ParallelExchanger;
+}
+}
+class DataMesh;
 
 namespace Plato
 {
+class InputData;
 
-Plato::AbstractFilter* build_filter(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh)
+class KernelThenTANHFilter : public AbstractFilter
 {
-    Plato::AbstractFilter* tResult = nullptr;
+public:
+    KernelThenTANHFilter();
+    virtual ~KernelThenTANHFilter();
 
-    if( aInputData.size<Plato::InputData>("Filter") == 0 )
-    {
-        // no filter
-        tResult = new Plato::IdentityFilter();
-    }
-    else
-    {
-        auto tFilterNode = aInputData.get<Plato::InputData>("Filter");
-        std::string tNameString = Plato::Get::String(tFilterNode, "Name");
-        if(tNameString == "Kernel")
-        {
-            tResult = new Plato::KernelFilter();
-        }
-        else if(tNameString == "KernelThenHeaviside")
-        {
-            tResult = new Plato::KernelThenHeavisideFilter();
-        }
-        else if(tNameString == "KernelThenTANH")
-        {
-            tResult = new Plato::KernelThenTANHFilter();
-        }
-        else if(tNameString == "Identity")
-        {
-            tResult = new Plato::IdentityFilter();
-        }
-        else
-        {
-            std::cout << "build_filter could not build '" << tNameString << "'" << std::endl;
-            std::abort();
-        }
-    }
-    tResult->build(aInputData, aLocalComm, aMesh);
-    return tResult;
-}
+    virtual void build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh);
+    virtual void apply_on_field(size_t length, double* field_data);
+    virtual void apply_on_gradient(size_t length, double* base_field_data, double* gradient_data);
+    virtual void advance_continuation();
+
+private:
+
+    void build_input_data(InputData interface);
+    void build_points(DataMesh* mesh);
+    void build_parallel_exchanger(DataMesh* mesh);
+
+    MPI_Comm m_comm;
+    PlatoSubproblemLibrary::KernelThenTANHFilter* m_filter;
+    PlatoSubproblemLibrary::AbstractAuthority* m_authority;
+    PlatoSubproblemLibrary::ParameterData* m_input_data;
+    PlatoSubproblemLibrary::AbstractInterface::PointCloud* m_points;
+    PlatoSubproblemLibrary::AbstractInterface::ParallelExchanger* m_parallel_exchanger;
+
+};
 
 }

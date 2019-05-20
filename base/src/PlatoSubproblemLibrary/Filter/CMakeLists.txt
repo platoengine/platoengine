@@ -7,6 +7,7 @@ set(${LIB_NAME}_SOURCES
     PSL_Filter.cpp
     PSL_KernelFilter.cpp
     PSL_KernelThenHeavisideFilter.cpp
+    PSL_KernelThenTANHFilter.cpp
     PSL_OverhangFilter.cpp
     )
 
@@ -14,6 +15,7 @@ set(${LIB_NAME}_HEADERS
     PSL_Filter.hpp
     PSL_KernelFilter.hpp
     PSL_KernelThenHeavisideFilter.hpp
+    PSL_KernelThenTANHFilter.hpp
     PSL_OverhangFilter.hpp
     )
 

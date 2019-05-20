@@ -26,6 +26,9 @@ double heaviside_gradient(const double& beta, const double& input);
 double heaviside_apply(const double& beta, const double& threshold, const double& input);
 double heaviside_gradient(const double& beta, const double& threshold, const double& input);
 
+double tanh_apply(const double& beta, const double& input);
+double tanh_gradient(const double& beta, const double& input);
+
 template<typename t>
 void fill_with_index(std::vector<t>& input)
 {

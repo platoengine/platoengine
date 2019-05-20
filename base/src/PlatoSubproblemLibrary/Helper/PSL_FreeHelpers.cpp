@@ -82,6 +82,22 @@ double heaviside_gradient(const double& beta, const double& threshold, const dou
     return (2.0 * beta * exp_quantity) / (pow(1. + exp_quantity, 2.0));
 }
 
+double tanh_apply(const double& aBeta, const double& aInput)
+{
+  double tEta = 0.5;
+  double tNumerator = std::tanh(aBeta*tEta) + tanh(aBeta*(aInput - tEta));
+  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
+  return tNumerator/tDenominator;
+}
+
+double tanh_gradient(const double& aBeta, const double& aInput)
+{
+  double tEta = 0.5;
+  double tNumerator = aBeta*(1-std::tanh(aBeta*(aInput - tEta))*std::tanh(aBeta*(aInput - tEta)));
+  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
+  return tNumerator/tDenominator;
+}
+
 void random_orthogonal_vector(const std::vector<double>& input, std::vector<double>& output)
 {
     const size_t dimension = input.size();

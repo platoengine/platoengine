@@ -235,7 +235,62 @@ PSL_TEST(FreeHelpers, checkHeavisideDerivative_noThreshold)
     double tolerance = 1e-3;
     EXPECT_NEAR(finite_diff_approx, analytical_derivative, tolerance);
 }
+PSL_TEST(FreeHelpers, checkTANHDerivative_finite_difference)
+{
+    // test that tanh derivative agrees with finite difference approximation
 
+    double heaviside_beta = 6.2;
+    double control_base = 0.425;
+    double control_step = 1e-3;
+
+    // evaluate finite difference
+    double plus_step = tanh_apply(heaviside_beta, control_base + control_step);
+    double minus_step = tanh_apply(heaviside_beta, control_base - control_step);
+    double finite_diff_approx = (plus_step - minus_step) / (2. * control_step);
+
+    // evaluate derivative
+    double analytical_derivative = tanh_gradient(heaviside_beta, control_base);
+
+    // expect small error
+    double tolerance = 1e-3;
+    EXPECT_NEAR(finite_diff_approx, analytical_derivative, tolerance);
+}
+PSL_TEST(FreeHelpers, checkTANHEval)
+{
+    // test that tanh derivative agrees with finite difference approximation
+
+    double beta = 6.2;
+
+    int num_comps = 5;
+    double input[num_comps] = {0.0,0.25,0.5,0.75,1.0};
+
+    double expected_output[num_comps] = {0.0,0.0412490195125303,0.5,0.9587509804874696,1.0};
+    double output[num_comps] = {0.0};
+
+    for(int i = 0; i < num_comps; i++)
+      output[i] = tanh_apply(beta,input[i]);
+
+    for(int i = 0; i < num_comps; i++)
+      EXPECT_DOUBLE_EQ(output[i], expected_output[i]);
+}
+PSL_TEST(FreeHelpers, checkTANHDerivative)
+{
+    // test that tanh derivative agrees with finite difference approximation
+
+    double beta = 6.2;
+
+    int num_comps = 5;
+    double input[num_comps] = {0.0,0.25,0.5,0.75,1.0};
+
+    double expected_output[num_comps] = {0.025165043534531462,0.51356812193240786,3.112608057122421,0.51356812193240786,0.025165043534531462};
+    double output[num_comps] = {0.0};
+
+    for(int i = 0; i < num_comps; i++)
+      output[i] = tanh_gradient(beta,input[i]);
+
+    for(int i = 0; i < num_comps; i++)
+      EXPECT_DOUBLE_EQ(output[i], expected_output[i]);
+}
 PSL_TEST(FreeHelpers,fillWithIndex)
 {
     set_rand_seed();
