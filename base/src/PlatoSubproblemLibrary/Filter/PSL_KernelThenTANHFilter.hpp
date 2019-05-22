@@ -1,9 +1,9 @@
 // PlatoSubproblemLibraryVersion(8): a stand-alone library for the kernel filter for plato.
 #pragma once
 
-/* Class: Kernel then heaviside filter for density method topology optimization.
+/* Class: Kernel then tanh filter for density method topology optimization.
 *
-* Smooth a field, and then apply a heaviside projection. This accomplishes the length scale
+* Smooth a field, and then apply a tanh "projection". This accomplishes the length scale
 * of the kernel, but retains a somewhat crisp zero-one design.
 */
 
