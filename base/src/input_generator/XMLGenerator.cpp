@@ -85,7 +85,9 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
         m_filterType_kernel_generatorName("kernel"),
         m_filterType_kernel_XMLName("Kernel"),
         m_filterType_kernelThenHeaviside_generatorName("kernel then heaviside"),
-        m_filterType_kernelThenHeaviside_XMLName("KernelThenHeaviside")
+        m_filterType_kernelThenHeaviside_XMLName("KernelThenHeaviside"),
+        m_filterType_kernelThenTANH_generatorName("kernel then tanh"),
+        m_filterType_kernelThenTANH_XMLName("KernelThenTANH")
 /******************************************************************************/
 {
 
@@ -3759,6 +3761,9 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.filter_heaviside_update = "";
     m_InputData.filter_heaviside_max = "";
 
+    m_InputData.filter_projection_start_iteration = "";
+    m_InputData.filter_projection_update_interval = "";
+
     m_InputData.write_restart_file = "False";
 }
 
@@ -4289,12 +4294,14 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             // check input is valid
                             if(m_InputData.filter_type != m_filterType_identity_generatorName &&
                                     m_InputData.filter_type != m_filterType_kernel_generatorName &&
-                                    m_InputData.filter_type != m_filterType_kernelThenHeaviside_generatorName)
+                                    m_InputData.filter_type != m_filterType_kernelThenHeaviside_generatorName &&
+                                    m_InputData.filter_type != m_filterType_kernelThenTANH_generatorName)
                             {
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: \"filter type\" did not match allowed types which include:\n\t"
                                         <<"\""<<m_filterType_identity_generatorName<<"\","
                                         <<"\""<<m_filterType_kernel_generatorName<<"\","
                                           <<"\""<<m_filterType_kernelThenHeaviside_generatorName<<"\""
+                                          <<"\""<<m_filterType_kernelThenTANH_generatorName<<"\""
                                           <<".\n";
                                 return false;
                             }
@@ -4386,6 +4393,24 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.filter_radius_absolute = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","projection","start","iteration"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter projection start iteration\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.filter_projection_start_iteration = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","projection","update","interval"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter projection update interval\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.filter_projection_update_interval = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"algorithm"}, tStringValue))
                         {
@@ -5643,6 +5668,11 @@ bool XMLGenerator::generatePlatoOperationsXML()
         // identity
         addChild(tmp_node, "Name", m_filterType_identity_XMLName);
     }
+    else if(m_InputData.filter_type == m_filterType_kernelThenTANH_generatorName)
+    {
+        // kernel then tanh
+        addChild(tmp_node, "Name", m_filterType_kernelThenTANH_XMLName);
+    }
     else
     {
         // kernel is default
@@ -5655,6 +5685,14 @@ bool XMLGenerator::generatePlatoOperationsXML()
     if(m_InputData.filter_radius_absolute != "")
     {
         addChild(tmp_node, "Absolute", m_InputData.filter_radius_absolute);
+    }
+    if(m_InputData.filter_projection_start_iteration != "")
+    {
+        addChild(tmp_node, "StartIteration", m_InputData.filter_projection_start_iteration);
+    }
+    if(m_InputData.filter_projection_update_interval != "")
+    {
+        addChild(tmp_node, "UpdateInterval", m_InputData.filter_projection_update_interval);
     }
     if(m_InputData.filter_power != "")
     {

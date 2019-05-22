@@ -195,6 +195,8 @@ struct InputData
   std::string filter_heaviside_min;
   std::string filter_heaviside_update;
   std::string filter_heaviside_max;
+  std::string filter_projection_start_iteration;
+  std::string filter_projection_update_interval;
 
   std::string num_opt_processors;
   std::string output_frequency;
@@ -357,6 +359,8 @@ protected:
   std::string m_filterType_kernel_XMLName;
   std::string m_filterType_kernelThenHeaviside_generatorName;
   std::string m_filterType_kernelThenHeaviside_XMLName;
+  std::string m_filterType_kernelThenTANH_generatorName;
+  std::string m_filterType_kernelThenTANH_XMLName;
 
 private:
   /******************************************************************************//**
