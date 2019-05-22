@@ -79,7 +79,11 @@ KernelThenTANHFilter::KernelThenTANHFilter() :
         m_filter(NULL),
         m_input_data(NULL),
         m_points(NULL),
-        m_parallel_exchanger(NULL)
+        m_parallel_exchanger(NULL),
+        mAdvanceContinuationIteration(0),
+        mStartIteration(0),
+        mUpdateInterval(1),
+        mProblemUpdateFrequency(1)
 {
 }
 
@@ -107,6 +111,17 @@ void KernelThenTANHFilter::build(InputData aInputData, MPI_Comm& aLocalComm, Dat
     build_input_data(aInputData);
     build_points(aMesh);
     build_parallel_exchanger(aMesh);
+
+    //set variables for continuation update
+    auto tFilterNode = aInputData.get<Plato::InputData>("Filter");
+    if(tFilterNode.size<std::string>("UpdateInterval") > 0)
+    {
+        mUpdateInterval = Plato::Get::Double(tFilterNode, "UpdateInterval");
+    }
+    if(tFilterNode.size<std::string>("StartIteration") > 0)
+    {
+        mStartIteration = Plato::Get::Double(tFilterNode, "StartIteration");
+    }
 
     // allocate filter
     m_filter = new PlatoSubproblemLibrary::KernelThenTANHFilter(m_authority, m_input_data, m_points, m_parallel_exchanger);
@@ -148,7 +163,10 @@ void KernelThenTANHFilter::apply_on_gradient(size_t length, double* base_field_d
 
 void KernelThenTANHFilter::advance_continuation()
 {
-    m_filter->advance_continuation();
+    if(mAdvanceContinuationIteration >= mStartIteration &&(mAdvanceContinuationIteration - mStartIteration) % mUpdateInterval == 0)
+      m_filter->advance_continuation();
+
+    mAdvanceContinuationIteration++;
 }
 
 void KernelThenTANHFilter::build_input_data(InputData aInputData)

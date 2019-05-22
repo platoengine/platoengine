@@ -87,6 +87,11 @@ private:
     PlatoSubproblemLibrary::AbstractInterface::PointCloud* m_points;
     PlatoSubproblemLibrary::AbstractInterface::ParallelExchanger* m_parallel_exchanger;
 
+    int mAdvanceContinuationIteration;
+    int mStartIteration;
+    int mUpdateInterval;
+    int mProblemUpdateFrequency;
+
 };
 
 }
