@@ -197,6 +197,7 @@ struct InputData
   std::string filter_heaviside_max;
   std::string filter_projection_start_iteration;
   std::string filter_projection_update_interval;
+  std::string filter_use_additive_continuation;
 
   std::string num_opt_processors;
   std::string output_frequency;

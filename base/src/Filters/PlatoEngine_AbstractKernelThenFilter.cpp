@@ -83,6 +83,7 @@ AbstractKernelThenFilter::AbstractKernelThenFilter() :
         mAdvanceContinuationIteration(0),
         mStartIteration(0),
         mUpdateInterval(1),
+        mAdditiveContinuation(false),
         mProblemUpdateFrequency(1)
 {
 }
@@ -121,6 +122,10 @@ void AbstractKernelThenFilter::build(InputData aInputData, MPI_Comm& aLocalComm,
     if(tFilterNode.size<std::string>("StartIteration") > 0)
     {
         mStartIteration = Plato::Get::Double(tFilterNode, "StartIteration");
+    }
+    if(tFilterNode.size<std::string>("UseAdditiveContinuation") > 0)
+    {
+        mAdditiveContinuation = Plato::Get::Bool(tFilterNode, "UseAdditiveContinuation");
     }
 
     allocateFilter();
@@ -163,7 +168,12 @@ void AbstractKernelThenFilter::apply_on_gradient(size_t length, double* base_fie
 void AbstractKernelThenFilter::advance_continuation()
 {
     if(mAdvanceContinuationIteration >= mStartIteration &&(mAdvanceContinuationIteration - mStartIteration) % mUpdateInterval == 0)
-      m_filter->advance_continuation();
+    {
+      if(mAdditiveContinuation)
+        m_filter->additive_advance_continuation();
+      else
+        m_filter->advance_continuation();
+    }
 
     mAdvanceContinuationIteration++;
 }

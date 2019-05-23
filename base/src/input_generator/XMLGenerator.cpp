@@ -3763,6 +3763,7 @@ void XMLGenerator::initializePlatoProblemOptions()
 
     m_InputData.filter_projection_start_iteration = "";
     m_InputData.filter_projection_update_interval = "";
+    m_InputData.filter_use_additive_continuation = "";
 
     m_InputData.write_restart_file = "False";
 }
@@ -4411,6 +4412,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.filter_projection_update_interval = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"filter","use","additive","continuation"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"filter use additive continuation\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.filter_use_additive_continuation = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"algorithm"}, tStringValue))
                         {
@@ -5693,6 +5703,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
     if(m_InputData.filter_projection_update_interval != "")
     {
         addChild(tmp_node, "UpdateInterval", m_InputData.filter_projection_update_interval);
+    }
+    if(m_InputData.filter_use_additive_continuation != "")
+    {
+        addChild(tmp_node, "UseAdditiveContinuation", m_InputData.filter_use_additive_continuation);
     }
     if(m_InputData.filter_power != "")
     {

@@ -85,10 +85,11 @@ private:
 
     MPI_Comm m_comm;
 
-    int mAdvanceContinuationIteration;
-    int mStartIteration;
-    int mUpdateInterval;
-    int mProblemUpdateFrequency;
+    int  mAdvanceContinuationIteration;
+    int  mStartIteration;
+    int  mUpdateInterval;
+    int  mProblemUpdateFrequency;
+    bool mAdditiveContinuation;
 
 protected:
 
