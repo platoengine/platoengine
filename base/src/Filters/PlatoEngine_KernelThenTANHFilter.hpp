@@ -42,56 +42,20 @@
 
 #pragma once
 
-#include <mpi.h>
-#include <cstddef>
-#include "PlatoEngine_AbstractFilter.hpp"
-
-namespace PlatoSubproblemLibrary
-{
-class KernelThenTANHFilter;
-class ParameterData;
-class AbstractAuthority;
-namespace AbstractInterface
-{
-class PointCloud;
-class ParallelExchanger;
-}
-}
-class DataMesh;
+#include "PlatoEngine_AbstractKernelThenFilter.hpp"
 
 namespace Plato
 {
-class InputData;
 
-class KernelThenTANHFilter : public AbstractFilter
+class KernelThenTANHFilter : public AbstractKernelThenFilter
 {
 public:
-    KernelThenTANHFilter();
-    virtual ~KernelThenTANHFilter();
-
-    virtual void build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh);
-    virtual void apply_on_field(size_t length, double* field_data);
-    virtual void apply_on_gradient(size_t length, double* base_field_data, double* gradient_data);
-    virtual void advance_continuation();
+    KernelThenTANHFilter(){}
+    virtual ~KernelThenTANHFilter(){}
 
 private:
 
-    void build_input_data(InputData interface);
-    void build_points(DataMesh* mesh);
-    void build_parallel_exchanger(DataMesh* mesh);
-
-    MPI_Comm m_comm;
-    PlatoSubproblemLibrary::KernelThenTANHFilter* m_filter;
-    PlatoSubproblemLibrary::AbstractAuthority* m_authority;
-    PlatoSubproblemLibrary::ParameterData* m_input_data;
-    PlatoSubproblemLibrary::AbstractInterface::PointCloud* m_points;
-    PlatoSubproblemLibrary::AbstractInterface::ParallelExchanger* m_parallel_exchanger;
-
-    int mAdvanceContinuationIteration;
-    int mStartIteration;
-    int mUpdateInterval;
-    int mProblemUpdateFrequency;
-
+    virtual void allocateFilter();
 };
 
 }

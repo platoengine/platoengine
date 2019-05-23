@@ -42,20 +42,62 @@
 
 #pragma once
 
-#include "PlatoEngine_AbstractKernelThenFilter.hpp"
+#include <mpi.h>
+#include <cstddef>
+#include "PlatoEngine_AbstractFilter.hpp"
+
+namespace PlatoSubproblemLibrary
+{
+class AbstractKernelThenFilter;
+class ParameterData;
+class AbstractAuthority;
+namespace AbstractInterface
+{
+class PointCloud;
+class ParallelExchanger;
+}
+}
+class DataMesh;
 
 namespace Plato
 {
+class InputData;
 
-class KernelThenHeavisideFilter : public AbstractKernelThenFilter
+class AbstractKernelThenFilter : public AbstractFilter
 {
 public:
-    KernelThenHeavisideFilter(){}
-    virtual ~KernelThenHeavisideFilter(){}
+    AbstractKernelThenFilter();
+    virtual ~AbstractKernelThenFilter();
+
+    //Filter functions
+    virtual void build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh);
+    virtual void apply_on_field(size_t length, double* field_data);
+    virtual void apply_on_gradient(size_t length, double* base_field_data, double* gradient_data);
+    virtual void advance_continuation();
 
 private:
 
-    virtual void allocateFilter();
+    virtual void allocateFilter() = 0;
+
+    void build_input_data(InputData interface);
+    void build_points(DataMesh* mesh);
+    void build_parallel_exchanger(DataMesh* mesh);
+
+    MPI_Comm m_comm;
+
+    int mAdvanceContinuationIteration;
+    int mStartIteration;
+    int mUpdateInterval;
+    int mProblemUpdateFrequency;
+
+protected:
+
+    PlatoSubproblemLibrary::AbstractKernelThenFilter* m_filter;
+    PlatoSubproblemLibrary::AbstractAuthority* m_authority;
+    PlatoSubproblemLibrary::ParameterData* m_input_data;
+    PlatoSubproblemLibrary::AbstractInterface::PointCloud* m_points;
+    PlatoSubproblemLibrary::AbstractInterface::ParallelExchanger* m_parallel_exchanger;
+
 };
 
 }
