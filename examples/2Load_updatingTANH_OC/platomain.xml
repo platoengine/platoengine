@@ -1,0 +1,18 @@
+<mesh>
+  <type>unstructured</type>
+  <format>exodus</format>
+  <mesh>unsmesh.gen</mesh>
+  <block>
+    <index>1</index>
+    <integration>
+      <type>gauss</type>
+      <order>2</order>
+    </integration>
+    <material>1</material>
+  </block>
+</mesh>
+
+<output>
+  <file>platomain</file>
+  <format>exodus</format>
+</output>
