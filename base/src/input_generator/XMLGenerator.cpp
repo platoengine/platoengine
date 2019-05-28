@@ -970,7 +970,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     isDifficultForSolver = true;
                 }
-                else if(cur_obj.type == "stress constrained volume minimization")
+                else if(cur_obj.type == "stress constrained mass minimization")
                 {
                     isDifficultForSolver = true;
                 }
@@ -1099,9 +1099,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                     {
                         fprintf(fp, "  case = stress_limit\n");
                     }
-                    else if(cur_obj.type == "stress constrained volume minimization")
+                    else if(cur_obj.type == "stress constrained mass minimization")
                     {
-                        fprintf(fp, "  case = stress_constrained_volume_minimization\n");
+                        fprintf(fp, "  case = stress_constrained_mass_minimization\n");
                     }
                     else if(cur_obj.type == "stress p norm")
                     {
@@ -1116,37 +1116,17 @@ bool XMLGenerator::generateSalinasInputDecks()
                 {
                     fprintf(fp, "  volume_misfit_target = %s\n", cur_obj.volume_misfit_target.c_str());
                 }
-                if(cur_obj.scmm_mass_to_stress_constraint_ratio != "")
+                if(cur_obj.scmm_initial_penalty != "")
                 {
-                    fprintf(fp, "  aug_lag_mass_to_constraint_ratio = %s\n", cur_obj.scmm_mass_to_stress_constraint_ratio.c_str());
+                    fprintf(fp, "  aug_lag_penalty_initial_value = %s\n", cur_obj.scmm_initial_penalty.c_str());
                 }
-                if(cur_obj.scmm_initial_penalty_param != "")
+                if(cur_obj.scmm_penalty_expansion_factor != "")
                 {
-                    fprintf(fp, "  aug_lag_penalty_param_initial_value = %s\n", cur_obj.scmm_initial_penalty_param.c_str());
-                }
-                if(cur_obj.scmm_penalty_param_expansion_factor != "")
-                {
-                    fprintf(fp, "  aug_lag_penalty_param_expansion_factor = %s\n", cur_obj.scmm_penalty_param_expansion_factor.c_str());
+                    fprintf(fp, "  aug_lag_penalty_expansion_factor = %s\n", cur_obj.scmm_penalty_expansion_factor.c_str());
                 }
                 if(cur_obj.scmm_constraint_exponent != "")
                 {
                     fprintf(fp, "  aug_lag_constraint_exponent = %s\n", cur_obj.scmm_constraint_exponent.c_str());
-                }
-                if(cur_obj.scmm_initial_lagrange_multiplier != "")
-                {
-                    fprintf(fp, "  aug_lag_initial_lagrange_multiplier_value = %s\n", cur_obj.scmm_initial_lagrange_multiplier.c_str());
-                }
-                if(cur_obj.scmm_initial_mass_weight_factor != "")
-                {
-                    fprintf(fp, "  aug_lag_initial_stress_weight_factor_value = %s\n", cur_obj.scmm_initial_mass_weight_factor.c_str());
-                }
-                if(cur_obj.scmm_control_stagnation_tolerance != "")
-                {
-                    fprintf(fp, "  aug_lag_control_stagnation_tolerance = %s\n", cur_obj.scmm_control_stagnation_tolerance.c_str());
-                }
-                if(cur_obj.scmm_write_debug_output_files == "true")
-                {
-                    fprintf(fp, "  aug_lag_write_debug_output_files = 1\n");
                 }
                 if(cur_obj.stress_limit != "")
                 {
@@ -2414,7 +2394,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 new_objective.type += " ";
                                 new_objective.type += tokens[j];
                             }
-                            if((new_objective.type == "stress constrained volume minimization")  &&
+                            if((new_objective.type == "stress constrained mass minimization")  &&
                                new_objective.analysis_solver_tolerance.length() == 0)
                             {
                                 // Set a default in case one isn't set by user.
@@ -2475,15 +2455,6 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.relative_stress_limit = tokens[3];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "mass", "to", "stress", "constraint", "ratio"}, tStringValue))
-                        {
-                            if(tokens.size() < 7)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm mass to stress constraint ratio\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.scmm_mass_to_stress_constraint_ratio = tokens[6];
-                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"scmm", "constraint", "exponent"}, tStringValue))
                         {
                             if(tokens.size() < 4)
@@ -2493,59 +2464,23 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.scmm_constraint_exponent = tokens[3];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "penalty", "param", "expansion", "factor"}, tStringValue))
-                        {
-                            if(tokens.size() < 6)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm penalty param expansion factor\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.scmm_penalty_param_expansion_factor = tokens[5];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "lagrange", "multiplier"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "penalty", "expansion", "factor"}, tStringValue))
                         {
                             if(tokens.size() < 5)
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial lagrange multiplier\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm penalty expansion factor\" keywords.\n";
                                 return false;
                             }
-                            new_objective.scmm_initial_lagrange_multiplier = tokens[4];
+                            new_objective.scmm_penalty_expansion_factor = tokens[4];
                         }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "mass", "weight", "factor"}, tStringValue))
+                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "penalty"}, tStringValue))
                         {
-                            if(tokens.size() < 6)
+                            if(tokens.size() < 4)
                             {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial mass weight factor\" keywords.\n";
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial penalty\" keywords.\n";
                                 return false;
                             }
-                            new_objective.scmm_initial_mass_weight_factor = tokens[5];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "control", "stagnation", "tolerance"}, tStringValue))
-                        {
-                            if(tokens.size() < 5)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm control stagnation tolerance\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.scmm_control_stagnation_tolerance = tokens[4];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm", "initial", "penalty","param"}, tStringValue))
-                        {
-                            if(tokens.size() < 5)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm initial penalty param\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.scmm_initial_penalty_param = tokens[4];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"scmm","write","debug","output","files"}, tStringValue))
-                        {
-                            if(tStringValue == "")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"scmm write debug output files\" keywords.\n";
-                                return false;
-                            }
-                            new_objective.scmm_write_debug_output_files = tStringValue;
+                            new_objective.scmm_initial_penalty = tokens[3];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"stress","p","norm","power"}, tStringValue))
                         {

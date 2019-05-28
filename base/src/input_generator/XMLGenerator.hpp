@@ -147,13 +147,8 @@ struct Objective
   std::string volume_penalty_power;
   std::string volume_penalty_divisor;
   std::string volume_penalty_bias;
-  std::string scmm_mass_to_stress_constraint_ratio;
-  std::string scmm_initial_penalty_param;
-  std::string scmm_penalty_param_expansion_factor;
-  std::string scmm_initial_lagrange_multiplier;
-  std::string scmm_initial_mass_weight_factor;
-  std::string scmm_control_stagnation_tolerance;
-  std::string scmm_write_debug_output_files;
+  std::string scmm_initial_penalty;
+  std::string scmm_penalty_expansion_factor;
   std::string scmm_constraint_exponent;
 };
 struct Constraint
