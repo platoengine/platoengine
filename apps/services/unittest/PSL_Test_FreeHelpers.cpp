@@ -261,7 +261,7 @@ PSL_TEST(FreeHelpers, checkTANHEval)
 
     double beta = 6.2;
 
-    int num_comps = 5;
+    const int num_comps = 5;
     double input[num_comps] = {0.0,0.25,0.5,0.75,1.0};
 
     double expected_output[num_comps] = {0.0,0.0412490195125303,0.5,0.9587509804874696,1.0};
@@ -279,7 +279,7 @@ PSL_TEST(FreeHelpers, checkTANHDerivative)
 
     double beta = 6.2;
 
-    int num_comps = 5;
+    const int num_comps = 5;
     double input[num_comps] = {0.0,0.25,0.5,0.75,1.0};
 
     double expected_output[num_comps] = {0.025165043534531462,0.51356812193240786,3.112608057122421,0.51356812193240786,0.025165043534531462};

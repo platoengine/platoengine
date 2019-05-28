@@ -8,11 +8,11 @@ namespace PlatoSubproblemLibrary
 
 double KernelThenHeavisideFilter::projection_apply(const double& beta, const double& input)
 {
-  heaviside_apply(beta,input); 
+  return heaviside_apply(beta,input);
 }
 double KernelThenHeavisideFilter::projection_gradient(const double& beta, const double& input)
 {
-  heaviside_gradient(beta,input); 
+  return heaviside_gradient(beta,input);
 }
 
 }
