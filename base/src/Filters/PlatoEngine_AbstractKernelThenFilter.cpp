@@ -76,15 +76,16 @@ namespace Plato
 AbstractKernelThenFilter::AbstractKernelThenFilter() :
         AbstractFilter(),
         m_comm(),
-        m_filter(NULL),
-        m_input_data(NULL),
-        m_points(NULL),
-        m_parallel_exchanger(NULL),
         mAdvanceContinuationIteration(0),
         mStartIteration(0),
         mUpdateInterval(1),
+        mProblemUpdateFrequency(1),
         mAdditiveContinuation(false),
-        mProblemUpdateFrequency(1)
+        m_filter(NULL),
+        m_authority(NULL),
+        m_input_data(NULL),
+        m_points(NULL),
+        m_parallel_exchanger(NULL)
 {
 }
 
