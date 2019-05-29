@@ -223,7 +223,7 @@ ExodusIO::readHeader()
 
   if( num_node_sets > 0 ) {
     int *node_set_ids = new int[num_node_sets];
-    err = ex_get_node_set_ids(myFileID, node_set_ids);
+    err = ex_get_ids(myFileID, EX_NODE_SET, node_set_ids);
 
     int num_nodes_in_set;
     int num_dist_in_set;
@@ -236,7 +236,7 @@ ExodusIO::readHeader()
       if(nsi->numNodes){
         int* nodes;
         myData->getVariable(nsi->NODE_LIST, nodes);
-        err = ex_get_node_set(myFileID, node_set_ids[i], nodes);
+        err = ex_get_set(myFileID, EX_NODE_SET, node_set_ids[i], nodes, NULL);
         for(int j=0; j<num_nodes_in_set; j++)
           nodes[j] = nodes[j] - 1;
       }
@@ -246,7 +246,7 @@ ExodusIO::readHeader()
 
   if( num_side_sets > 0 ) {
     int *side_set_ids = new int[num_side_sets];
-    err = ex_get_side_set_ids(myFileID, side_set_ids);
+    err = ex_get_ids(myFileID, EX_SIDE_SET, side_set_ids);
 
     int num_side_in_set;
     int num_dist_in_set;
@@ -266,7 +266,7 @@ ExodusIO::readHeader()
         int* elems; myData->getVariable(ssi->ELEM_ID_LIST, elems);
         int* nodes; myData->getVariable(ssi->FACE_NODE_LIST, nodes);
         int* nodes_per_face = new int[num_side_in_set];
-        err = ex_get_side_set(myFileID, side_set_ids[i], elems, sides);
+        err = ex_get_set(myFileID, EX_SIDE_SET, side_set_ids[i], elems, sides);
         err = ex_get_side_set_node_list(myFileID, side_set_ids[i], 
                                         nodes_per_face, nodes);
 
@@ -326,9 +326,11 @@ ExodusIO::readHeader()
   int *ids = new int[Neblock];
   int num_elem_in_block;
   int num_nodes_per_elem;
+  int num_edges_per_elem;
+  int num_faces_per_elem;
   int num_attr;
 
-  err = ex_get_elem_blk_ids(myFileID, ids);
+  err = ex_get_ids(myFileID, EX_ELEM_BLOCK, ids);
   if (err) {
     pXcout << "ERROR: EX_get_elem_blk_ids = " << err << endl;
     return false;
@@ -336,9 +338,11 @@ ExodusIO::readHeader()
 
   // using the element block parameters read the element block info
   for (int i=0; i<Neblock; i++) {
-    err = ex_get_elem_block( myFileID, ids[i], elemtype,
+    err = ex_get_block( myFileID, EX_ELEM_BLOCK, ids[i], elemtype,
                              &num_elem_in_block,
-                             &num_nodes_per_elem, &num_attr);
+                             &num_nodes_per_elem, 
+                             &num_edges_per_elem, 
+                             &num_faces_per_elem, &num_attr);
     if (err) {
       pXcout << "ERROR: EX_get_elem_block = " << err << endl;
       return false;
@@ -522,7 +526,7 @@ ExodusIO::writeHeader()
     return false;
   }
   // write global node info
-  ex_put_node_num_map(myFileID, myMesh->nodeGlobalIds);
+  ex_put_id_map(myFileID, EX_NODE_MAP, myMesh->nodeGlobalIds);
  
   // write nodeset data
   const vector<DMNodeSet>& ns = myMesh->getNodeSets();
@@ -530,7 +534,7 @@ ExodusIO::writeHeader()
     int node_set_id = ns[i].id;
     int num_nodes_in_set = ns[i].numNodes;
     int num_dist_in_set  = 0;
-    if( ex_put_node_set_param(myFileID, node_set_id,num_nodes_in_set,
+    if( ex_put_set_param(myFileID, EX_NODE_SET, node_set_id,num_nodes_in_set,
                               num_dist_in_set) ) {
       pXcout << "!!! Problem initializing exodus file "
              << myName << " with node set id " << node_set_id 
@@ -541,7 +545,7 @@ ExodusIO::writeHeader()
         int* mod_node_list = new int [num_nodes_in_set];
         for(int j=0; j<num_nodes_in_set; j++)
           mod_node_list[j] = node_list[j] + 1;
-        if( ex_put_node_set(myFileID, node_set_id, mod_node_list)) {
+        if( ex_put_set(myFileID, EX_NODE_SET, node_set_id, mod_node_list, NULL)) {
           pXcout << "!!! Problem writing nodes in node set id: " << node_set_id
                  << " to file " << myName << endl;
         }
@@ -556,7 +560,7 @@ ExodusIO::writeHeader()
       int num_side_in_set = ss[i].numSides;
       int num_nodes_per_face = ss[i].nodesPerFace;
       int num_dist_in_set = 0;
-      if( ex_put_side_set_param(myFileID, side_set_id, num_side_in_set,
+      if( ex_put_set_param(myFileID, EX_SIDE_SET, side_set_id, num_side_in_set,
                                 num_dist_in_set) ) {
         pXcout << "!!! Problem initializing exodus file "
                << myName << " with side set id " << side_set_id
@@ -575,7 +579,7 @@ ExodusIO::writeHeader()
               tmpside[iside] = side_list[iside] + 1;
             tmpelem[iside] = elem_list[iside] + 1;
           }
-          if( ex_put_side_set(myFileID, side_set_id, tmpelem, tmpside)) {
+          if( ex_put_set(myFileID, EX_SIDE_SET, side_set_id, tmpelem, tmpside)) {
             pXcout << "!!! Problem writing sides in side set id: " << side_set_id
                    << " to file " << myName << endl;
           }
@@ -635,23 +639,29 @@ ExodusIO::readConn()
 
   int* num_elem_in_block = new int[Neblock];
   int* num_nodes_per_elem = new int[Neblock];
+  int* num_edges_per_elem = new int[Neblock];
+  int* num_faces_per_elem = new int[Neblock];
   
   int global_element_count = 0;
   for( int i=0; i<Neblock; i++ ) {
     Topological::Element* elblock = myMesh->getElemBlk(i);
     int block_id = elblock->getBlockId();
     if(elblock->getNumElem() == 0) continue;
-    if(ex_get_elem_block( myFileID, 
+    if(ex_get_block( myFileID, EX_ELEM_BLOCK,  
 			  block_id,
 			  elemtype,
 			  &(num_elem_in_block[i]),
 			  &(num_nodes_per_elem[i]),
+			  &(num_edges_per_elem[i]),
+			  &(num_faces_per_elem[i]),
 			  &(num_attr[i]))) {
       pXcout << "!!! Problem reading element block " << block_id << "\n"
 	     << "!!! \tfrom exodus file "
 	     << myName << endl;
       delete [] num_elem_in_block;
       delete [] num_nodes_per_elem;
+      delete [] num_edges_per_elem;
+      delete [] num_faces_per_elem;
       delete [] num_attr;
       return false;
     }
@@ -660,7 +670,7 @@ ExodusIO::readConn()
     int tmpnn = num_elem_in_block[i]*num_nodes_per_elem[i];
     int *connect = new int[tmpnn];
 
-    if(ex_get_elem_conn (myFileID, block_id, connect)) {
+    if(ex_get_conn (myFileID, EX_ELEM_BLOCK, block_id, connect, 0, 0)) {
       pXcout << "ERROR: EX_get_elem_conn = " << endl;
       return false;
     }
@@ -759,7 +769,7 @@ ExodusIO::readConn()
     if(num_attr[i]){
       // get pointer to elem attributes from the topoelement, eb
       double* attributes = eb->getAttributes();
-      if(ex_get_elem_attr (myFileID, block_id, attributes)) {
+      if(ex_get_attr (myFileID, EX_ELEM_BLOCK, block_id, attributes)) {
         p0cout << "ERROR: EX_get_elem_conn = " << endl;
         return false;
       }
@@ -793,7 +803,7 @@ ExodusIO::writeConn()
     int* connect = elblock->getNodeConnect();
     int ebid = elblock->getBlockId();
     int Nattr = 0;
-    if( ex_put_elem_block( myFileID, ebid, type, Nel, Nnpe, Nattr ) ) {
+    if( ex_put_block( myFileID, EX_ELEM_BLOCK, ebid, type, Nel, Nnpe, 0, 0, Nattr ) ) {
       pXcout << "!!! Problem writing element block " << i+1 << "\n"
 	     << "!!! \tto exodus file "
 	     << myName << endl;
@@ -806,7 +816,7 @@ ExodusIO::writeConn()
   
     int* tmpconn = new int [tmpnn];
     for(int n=0;n<tmpnn;n++) tmpconn[n] = connect[n] + 1;  // exodus numbers from one
-    if( ex_put_elem_conn( myFileID, ebid, tmpconn ) ) {
+    if( ex_put_conn( myFileID, EX_ELEM_BLOCK, ebid, tmpconn, 0, 0) ) {
       pXcout << "!!! Problem writing connectivity for element block " << i << "\n"
              << "!!! \tto exodus file "
              << myName << endl;
@@ -835,14 +845,14 @@ ExodusIO::initVars(DataCentering centering,
   switch( centering ) {
     case NODE:
     {
-      if( ex_put_var_param(myFileID, "n", num_vars) ) {
+      if( ex_put_variable_param(myFileID, EX_NODAL, num_vars) ) {
         status = false;
         pXcout << "!!! Problem writing number of plot node variables " << "\n"
   	       << "!!! \tto exodus file "
 	       << myName << endl;
         break;
       }
-      if( ex_put_var_names(myFileID, "n", num_vars, vname) ) {
+      if( ex_put_variable_names(myFileID, EX_NODAL, num_vars, vname) ) {
         status = false;
         pXcout << "!!! Problem writing plot element variable names " << "\n"
   	       << "!!! \tto exodus file "
@@ -853,14 +863,14 @@ ExodusIO::initVars(DataCentering centering,
     }
     case ELEM:
     {
-      if( ex_put_var_param(myFileID, "e", num_vars) ) {
+      if( ex_put_variable_param(myFileID, EX_ELEM_BLOCK, num_vars) ) {
         status = false;
         pXcout << "!!! Problem writing number of plot element variables " << "\n"
   	       << "!!! \tto exodus file "
 	       << myName << endl;
         break;
       }
-      if( ex_put_var_names(myFileID, "e", num_vars, vname) ) {
+      if( ex_put_variable_names(myFileID, EX_ELEM_BLOCK, num_vars, vname) ) {
         status = false;
         pXcout << "!!! Problem writing plot element variable names" << "\n"
   	       << "!!! \tto exodus file "
@@ -946,7 +956,7 @@ bool
 ExodusIO::writeNodePlot(Real* data, int number, int time_step)
 {
   int num_nodes = myMesh->getNumNodes();
-  ex_put_nodal_var(myFileID, time_step, number+1, num_nodes, data);
+  ex_put_var(myFileID, time_step, EX_NODAL, number+1, 1, num_nodes, data);
   ex_update(myFileID);
   return true;
 }
@@ -961,12 +971,12 @@ ExodusIO::readNodePlot(double* data, string name)
   ex_inquire(myFileID, EX_INQ_TIME, &num_time_steps, &fdum, &cdum);
 
   int num_node_vars;
-  ex_get_var_param(myFileID, "n", &num_node_vars);
+  ex_get_variable_param(myFileID, EX_NODAL, &num_node_vars);
 
   char** names = new char*[num_node_vars];
   for(int i=0; i<num_node_vars; i++)
      names[i] = new char[MAX_STR_LENGTH+1];
-  ex_get_var_names(myFileID, "n", num_node_vars, names);
+  ex_get_variable_names(myFileID, EX_NODAL, num_node_vars, names);
 
   int varindex=-1;
   for(int i=0; i<num_node_vars; i++)
@@ -982,7 +992,7 @@ ExodusIO::readNodePlot(double* data, string name)
   if (varindex < 0) return false;
 
   int num_nodes = myMesh->getNumNodes();
-  ex_get_nodal_var(myFileID, num_time_steps, varindex, num_nodes, data);
+  ex_get_var(myFileID, num_time_steps, EX_NODAL, varindex, 1, num_nodes, data);
 
   return true;
 }
@@ -998,7 +1008,7 @@ ExodusIO::writeElemPlot(Real* data, int number, int time_step)
     if(num_elem_in_block == 0) continue;
     int ebid = myMesh->getBlockId(i);
     offset_data = &data[elem_count];
-    ex_put_elem_var(myFileID, time_step, number+1, ebid,
+    ex_put_var(myFileID, time_step, EX_ELEM_BLOCK, number+1, ebid,
                     num_elem_in_block, offset_data);
     elem_count += num_elem_in_block; //assumes all blocks have same data
   }
@@ -1018,12 +1028,12 @@ ExodusIO::readElemPlot(double* data, string name)
   assert(num_time_steps == 1);
 
   int num_elem_vars;
-  ex_get_var_param(myFileID, "e", &num_elem_vars);
+  ex_get_variable_param(myFileID, EX_ELEM_BLOCK, &num_elem_vars);
 
   char** names = new char*[num_elem_vars];
   for(int i=0; i<num_elem_vars; i++)
      names[i] = new char[MAX_STR_LENGTH+1];
-  ex_get_var_names(myFileID, "e", num_elem_vars, names);
+  ex_get_variable_names(myFileID, EX_ELEM_BLOCK, num_elem_vars, names);
 
   int varindex=-1;
   for(int i=0; i<num_elem_vars; i++)
@@ -1045,7 +1055,7 @@ ExodusIO::readElemPlot(double* data, string name)
     if(num_elem_in_block == 0) continue;
     int ebid = myMesh->getBlockId(i);
     offset_data = &data[elem_count];
-    ex_get_elem_var(myFileID, num_time_steps, varindex, ebid, 
+    ex_get_var(myFileID, num_time_steps, EX_ELEM_BLOCK, varindex, ebid, 
                     num_elem_in_block, offset_data);
     elem_count += num_elem_in_block; //assumes all blocks have same data
   }
@@ -1070,7 +1080,7 @@ void ExodusIO::GetExodusNodeIds(int * a_NodeIds, int a_MyFileId)
        }
        else
        {
-           ex_get_node_num_map(a_MyFileId, a_NodeIds);
+           ex_get_id_map(a_MyFileId, EX_NODE_MAP, a_NodeIds);
        }
     }
 }
@@ -1085,7 +1095,7 @@ void ExodusIO::GetExodusElementIds(int * a_ElemIds, int a_MyField)
     }
     else
     {
-        ex_get_elem_num_map(a_MyField, a_ElemIds);
+        ex_get_id_map(a_MyField, EX_ELEM_MAP, a_ElemIds);
     }
 
 }
