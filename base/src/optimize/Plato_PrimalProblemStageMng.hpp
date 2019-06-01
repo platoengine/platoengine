@@ -208,6 +208,19 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Allows save continuation on app-based parameters.
+     **********************************************************************************/
+    void updateProblem()
+    {
+        mObjective->updateProblem();
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            (*mConstraints)[tIndex].updateProblem();
+        }
+    }
+
+    /******************************************************************************//**
      * @brief Evaluate objective function
      * @param [in] aControl current controls (i.e. optimization variables)
      * @return objective function value

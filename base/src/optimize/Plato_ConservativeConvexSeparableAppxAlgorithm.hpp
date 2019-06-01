@@ -1,10 +1,4 @@
 /*
- * Plato_ConservativeConvexSeparableAppxAlgorithm.hpp
- *
- *  Created on: Nov 4, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_ConservativeConvexSeparableAppxAlgorithm.hpp
+ *
+ *  Created on: Nov 4, 2017
+ */
 
 #ifndef PLATO_CONSERVATIVECONVEXSEPARABLEAPPXALGORITHM_HPP_
 #define PLATO_CONSERVATIVECONVEXSEPARABLEAPPXALGORITHM_HPP_
@@ -87,6 +87,7 @@ public:
             mOutputStream(),
             mMaxNumOuterIter(500),
             mNumOuterIterDone(0),
+            mUpdateProblemFrequency(0),
             mStationarityTolerance(1e-4),
             mControlStagnationTolerance(1e-8),
             mObjectiveStagnationTolerance(1e-6),
@@ -150,6 +151,15 @@ public:
     OrdinalType getNumIterationsDone() const
     {
         return (mNumOuterIterDone);
+    }
+
+    /******************************************************************************//**
+     * @brief Set update application problem (i.e. continuation) frequency
+     * @param [in] aInput frequency
+    **********************************************************************************/
+    void setUpdateProblemFrequency(const OrdinalType& aInput)
+    {
+        mUpdateProblemFrequency = aInput;
     }
 
     /******************************************************************************//**
@@ -367,10 +377,29 @@ public:
 
             mSubProblem->solve(*mStageMng, *mDataMng);
             mNumOuterIterDone++;
+
+            this->performContinuation();
         }
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Allows save continuation on application based parameters
+    **********************************************************************************/
+    void performContinuation()
+    {
+        const bool tIsContinuationEnabled = (static_cast<OrdinalType>(0) < mUpdateProblemFrequency);
+        if(tIsContinuationEnabled == true)
+        {
+            const bool tIsIterationToUpdate =
+                    (mNumOuterIterDone % mUpdateProblemFrequency) == static_cast<OrdinalType>(0);
+            if(tIsIterationToUpdate == true)
+            {
+                mStageMng->updateProblem();
+            }
+        }
+    }
+
     /******************************************************************************//**
      * @brief Open output file (i.e. diagnostics file)
     **********************************************************************************/
@@ -697,39 +726,41 @@ private:
     }
 
 private:
-    bool mPrintDiagnostics;
-    std::ofstream mOutputStream;
+    bool mPrintDiagnostics; /*!< flag to enable output (default=false) */
+    std::ofstream mOutputStream; /*!< output string stream */
 
-    OrdinalType mMaxNumOuterIter;
-    OrdinalType mNumOuterIterDone;
+    OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+    OrdinalType mNumOuterIterDone; /*!< number of outer iterations done */
+    OrdinalType mUpdateProblemFrequency; /*!< continuation frequency */
 
-    ScalarType mStationarityTolerance;
-    ScalarType mControlStagnationTolerance;
-    ScalarType mObjectiveStagnationTolerance;
-    ScalarType mMovingAsymptoteExpansionFactor;
-    ScalarType mMovingAsymptoteContractionFactor;
-    ScalarType mInitialMovingAsymptoteScaleFactor;
-    ScalarType mKarushKuhnTuckerConditionsTolerance;
-    ScalarType mMovingAsymptoteUpperBoundScaleFactor;
-    ScalarType mMovingAsymptoteLowerBoundScaleFactor;
+    ScalarType mStationarityTolerance; /*!< stationarity tolerance */
+    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
+    ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptote expansion factor */
+    ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptote contraction factor */
+    ScalarType mInitialMovingAsymptoteScaleFactor; /*!< initial moving asymptote expansion factor */
+    ScalarType mKarushKuhnTuckerConditionsTolerance; /*!< Karush-Kuhn-Tucker (KKT) inexactness tolerance */
+    ScalarType mMovingAsymptoteUpperBoundScaleFactor; /*!< upper bound on moving asymptote scale factor */
+    ScalarType mMovingAsymptoteLowerBoundScaleFactor; /*!< lower bound on moving asymptote scale factor */
 
-    Plato::ccsa::stop_t mStopCriterion;
+    Plato::ccsa::stop_t mStopCriterion; /*!< stopping criterion flag */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWork;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWork;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousSigma;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControl;
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mWorkMultiVectorList;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDualWork; /*!< dual work vector */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlWork; /*!< control work vector */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousSigma; /*!< previous vector sigma coefficients */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControl; /*!< antepenultimate vector sigma coefficients */
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mWorkMultiVectorList; /*!< constraint gradient(s) work vector */
 
-    Plato::OutputDataCCSA<ScalarType, OrdinalType> mOutputData;
-    std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> mDataMng;
-    std::shared_ptr<Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>> mStageMng;
-    std::shared_ptr<Plato::ConservativeConvexSeparableApproximation<ScalarType, OrdinalType>> mSubProblem;
+    Plato::OutputDataCCSA<ScalarType, OrdinalType> mOutputData; /*!< output data structure */
+    std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> mDataMng; /*!< optimization problem data structure */
+    std::shared_ptr<Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>> mStageMng; /*!< stage manager- evaluates criteria */
+    std::shared_ptr<Plato::ConservativeConvexSeparableApproximation<ScalarType, OrdinalType>> mSubProblem; /*!< solves MMA subproblem */
 
 private:
     ConservativeConvexSeparableAppxAlgorithm(const Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aRhs);
     Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & operator=(const Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> & aRhs);
 };
+// class ConservativeConvexSeparableAppxAlgorithm
 
 } // namespace Plato
 

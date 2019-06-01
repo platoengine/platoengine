@@ -68,7 +68,7 @@ public:
     //! Directive to cache any criterion specific data once trial control is accepted.
     virtual void cacheData() = 0;
 
-    //! Directive to update problem criterion.
+    //! Allows save continuation on application based parameters.
     virtual void updateProblem() { return; }
 
     /*!
