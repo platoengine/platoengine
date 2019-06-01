@@ -296,22 +296,26 @@ private:
     /******************************************************************************/
     {
         // ********* Get User input ***************
+        OrdinalType tMaxNumOuterIterations = mInputData.getMaxNumIterations();
+        OrdinalType tMaxNumInnerIterations = mInputData.getGCMMAMaxInnerIterations();
+        OrdinalType tUpdateProblemFrequency = mInputData.getProblemUpdateFrequency();
+
         ScalarType tInnerKKTTolerance = mInputData.getGCMMAInnerKKTTolerance();
         ScalarType tOuterKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
         ScalarType tInnerStagnationTolerance = mInputData.getGCMMAInnerControlStagnationTolerance();
         ScalarType tOuterControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
         ScalarType tOuterObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
-        OrdinalType tMaxNumInnerIterations = mInputData.getGCMMAMaxInnerIterations();
-        OrdinalType tMaxNumOuterIterations = mInputData.getMaxNumIterations();
         ScalarType tOuterStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
         ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
 
+        // ********* Set User input ***************
         aSubProblem.setKarushKuhnTuckerConditionsTolerance(tInnerKKTTolerance);
         aSubProblem.setObjectiveStagnationTolerance(tInnerStagnationTolerance);
         aSubProblem.setControlStagnationTolerance(tInnerStagnationTolerance);
         aSubProblem.setMaxNumIterations(tMaxNumInnerIterations);
 
         aAlgorithm.setMaxNumIterations(tMaxNumOuterIterations);
+        aAlgorithm.setUpdateProblemFrequency(tUpdateProblemFrequency);
         aAlgorithm.setInitialMovingAsymptoteScaleFactor(tInitialMovingAsymptoteScaleFactor);
         aAlgorithm.setKarushKuhnTuckerConditionsTolerance(tOuterKKTTolerance);
         aAlgorithm.setStationarityTolerance(tOuterStationarityTolerance);
@@ -327,14 +331,15 @@ private:
     }
 
 private:
-    MPI_Comm mComm;
-    Plato::Interface* mInterface;
-    Plato::OptimizerEngineStageData mInputData;
+    MPI_Comm mComm; /*!< message passing communicator */
+    Plato::Interface* mInterface; /*!< PLATO Engine interface */
+    Plato::OptimizerEngineStageData mInputData; /*!< input data parsed from xml file */
 
 private:
     GloballyConvergentMethodMovingAsymptotesInterface(const Plato::GloballyConvergentMethodMovingAsymptotesInterface<ScalarType, OrdinalType>&);
     Plato::GloballyConvergentMethodMovingAsymptotesInterface<ScalarType, OrdinalType> & operator=(const Plato::GloballyConvergentMethodMovingAsymptotesInterface<ScalarType, OrdinalType>&);
 };
+// class GloballyConvergentMethodMovingAsymptotesInterface
 
 } // namespace Plato
 

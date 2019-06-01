@@ -731,7 +731,7 @@ private:
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mNumOuterIterDone; /*!< number of outer iterations done */
-    OrdinalType mUpdateProblemFrequency; /*!< continuation frequency */
+    OrdinalType mUpdateProblemFrequency; /*!< continuation frequency (default = disabled = 0)*/
 
     ScalarType mStationarityTolerance; /*!< stationarity tolerance */
     ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */

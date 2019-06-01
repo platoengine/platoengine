@@ -93,6 +93,7 @@ struct AlgorithmInputsMMA
     AlgorithmInputsMMA() :
             mPrintDiagnostics(false),
             mMaxNumOuterIter(500),
+            mUpdateProblemFrequency(0),
             mMovingAsymptoteExpansionFactor(1.2),
             mMovingAsymptoteContractionFactor(0.4),
             mInitialMovingAsymptoteScaleFactor(0.5),
@@ -123,6 +124,7 @@ struct AlgorithmInputsMMA
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
+    OrdinalType mUpdateProblemFrequency; /*!< continuation frequency (default = disabled = 0)*/
 
     ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
     ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
@@ -161,13 +163,15 @@ inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType,
         aAlgorithm.enableDiagnostics();
     }
 
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
+    aAlgorithm.setUpdateProblemFrequency(aInputs.mUpdateProblemFrequency);
+
     aAlgorithm.setMovingAsymptoteExpansionFactor(aInputs.mMovingAsymptoteExpansionFactor);
     aAlgorithm.setMovingAsymptoteContractionFactor(aInputs.mMovingAsymptoteContractionFactor);
     aAlgorithm.setInitialMovingAsymptoteScaleFactor(aInputs.mInitialMovingAsymptoteScaleFactor);
     aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(aInputs.mMovingAsymptoteUpperBoundScaleFactor);
     aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(aInputs.mMovingAsymptoteLowerBoundScaleFactor);
 
-    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
     aAlgorithm.setStationarityTolerance(aInputs.mStationarityTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
     aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);

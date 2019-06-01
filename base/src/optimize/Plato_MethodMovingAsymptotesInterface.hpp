@@ -295,6 +295,9 @@ private:
         // ********* Get User input ***************
         OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
+        OrdinalType tUpdateProblemFreq = mInputData.getProblemUpdateFrequency();
+        aAlgorithm.setUpdateProblemFrequency(tUpdateProblemFreq);
+
         ScalarType tKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
         aAlgorithm.setKarushKuhnTuckerConditionsTolerance(tKKTTolerance);
         ScalarType tStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();

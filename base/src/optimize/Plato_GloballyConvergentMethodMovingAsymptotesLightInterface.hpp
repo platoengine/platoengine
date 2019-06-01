@@ -94,6 +94,7 @@ struct AlgorithmInputsGCMMA
             mPrintDiagnostics(false),
             mMaxNumOuterIter(500),
             mMaxNumInnerIter(5),
+            mUpdateProblemFrequency(0),
             mMovingAsymptoteExpansionFactor(1.2),
             mMovingAsymptoteContractionFactor(0.4),
             mInitialMovingAsymptoteScaleFactor(0.5),
@@ -128,6 +129,7 @@ struct AlgorithmInputsGCMMA
 
     OrdinalType mMaxNumOuterIter; /*!< maximum number of outer iterations */
     OrdinalType mMaxNumInnerIter; /*!< maximum number of inner iterations */
+    OrdinalType mUpdateProblemFrequency; /*!< continuation frequency (default = disabled = 0)*/
 
     ScalarType mMovingAsymptoteExpansionFactor; /*!< moving asymptotes expansion factor */
     ScalarType mMovingAsymptoteContractionFactor; /*!< moving asymptotes' contraction factor */
@@ -178,13 +180,15 @@ inline void set_gcmma_algorithm_inputs(const Plato::AlgorithmInputsGCMMA<ScalarT
     aSubProblem.setObjectiveStagnationTolerance(aInputs.mInnerObjectiveStagnationTolerance);
     aSubProblem.setKarushKuhnTuckerConditionsTolerance(aInputs.mInnerKarushKuhnTuckerConditionsTolerance);
 
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
+    aAlgorithm.setUpdateProblemFrequency(aInputs.mUpdateProblemFrequency);
+
     aAlgorithm.setMovingAsymptoteExpansionFactor(aInputs.mMovingAsymptoteExpansionFactor);
     aAlgorithm.setMovingAsymptoteContractionFactor(aInputs.mMovingAsymptoteContractionFactor);
     aAlgorithm.setInitialMovingAsymptoteScaleFactor(aInputs.mInitialMovingAsymptoteScaleFactor);
     aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(aInputs.mMovingAsymptoteUpperBoundScaleFactor);
     aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(aInputs.mMovingAsymptoteLowerBoundScaleFactor);
 
-    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumOuterIter);
     aAlgorithm.setStationarityTolerance(aInputs.mOuterStationarityTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mOuterControlStagnationTolerance);
     aAlgorithm.setObjectiveStagnationTolerance(aInputs.mOuterObjectiveStagnationTolerance);
