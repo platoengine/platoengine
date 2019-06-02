@@ -302,7 +302,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
     for(int privateUncertainIndex = 0; privateUncertainIndex < num_uncertainties; privateUncertainIndex++)
     {
         // build map
-        const int load_id = std::atoi(m_InputData.uncertainties[privateUncertainIndex].load_id.c_str());
+        const int load_id = std::atoi(m_InputData.uncertainties[privateUncertainIndex].id.c_str());
         loadIdToPrivateUncertaintyIndices[load_id].push_back(privateUncertainIndex);
 
         // get load to be uncertain
@@ -3305,7 +3305,7 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                                 std::cout << error_prestring << "No load specified after \"load\" keyword.\n";
                                 return false;
                             }
-                            new_uncertainty.load_id = tokens[1];
+                            new_uncertainty.id = tokens[1];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"distribution"}, tStringValue))
                         {
