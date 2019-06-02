@@ -493,9 +493,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                     Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
 
                     // update vector in load
-                    loadToModify->x = std::to_string(rotated_load_vec.x);
-                    loadToModify->y = std::to_string(rotated_load_vec.y);
-                    loadToModify->z = std::to_string(rotated_load_vec.z);
+                    loadToModify->x = std::to_string(rotated_load_vec.mX);
+                    loadToModify->y = std::to_string(rotated_load_vec.mY);
+                    loadToModify->z = std::to_string(rotated_load_vec.mZ);
                 }
             }
         }

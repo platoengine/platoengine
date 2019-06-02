@@ -38,16 +38,16 @@ TEST(Vector3DVariations,vary)
     // X example
     rotated_vec = original_vec;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, 1., tol);
-    EXPECT_NEAR(rotated_vec.y, 1.730922168, tol);
-    EXPECT_NEAR(rotated_vec.z, 3.162895580, tol);
+    EXPECT_NEAR(rotated_vec.mX, 1., tol);
+    EXPECT_NEAR(rotated_vec.mY, 1.730922168, tol);
+    EXPECT_NEAR(rotated_vec.mZ, 3.162895580, tol);
     // example
     angle_to_vary = -5.;
     rotated_vec = original_vec;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, 1., tol);
-    EXPECT_NEAR(rotated_vec.y, 2.253856624, tol);
-    EXPECT_NEAR(rotated_vec.z, 2.814272608, tol);
+    EXPECT_NEAR(rotated_vec.mX, 1., tol);
+    EXPECT_NEAR(rotated_vec.mY, 2.253856624, tol);
+    EXPECT_NEAR(rotated_vec.mZ, 2.814272608, tol);
 
     // Y example
     axis_name = axis3D::axis3D::y;
@@ -55,16 +55,16 @@ TEST(Vector3DVariations,vary)
     rotated_vec = original_vec;
     angle_to_vary = 10.;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, 3.301719614, tol);
-    EXPECT_NEAR(rotated_vec.y, -1., tol);
-    EXPECT_NEAR(rotated_vec.z, 1.448670973, tol);
+    EXPECT_NEAR(rotated_vec.mX, 3.301719614, tol);
+    EXPECT_NEAR(rotated_vec.mY, -1., tol);
+    EXPECT_NEAR(rotated_vec.mZ, 1.448670973, tol);
     // example
     rotated_vec = original_vec;
     angle_to_vary = -10.;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, 2.607126904, tol);
-    EXPECT_NEAR(rotated_vec.y, -1., tol);
-    EXPECT_NEAR(rotated_vec.z, 2.490560039, tol);
+    EXPECT_NEAR(rotated_vec.mX, 2.607126904, tol);
+    EXPECT_NEAR(rotated_vec.mY, -1., tol);
+    EXPECT_NEAR(rotated_vec.mZ, 2.490560039, tol);
 
     // Z example
     axis_name = axis3D::axis3D::z;
@@ -72,16 +72,16 @@ TEST(Vector3DVariations,vary)
     rotated_vec = original_vec;
     angle_to_vary = 8.;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, -4.239418477, tol);
-    EXPECT_NEAR(rotated_vec.y, 1.423843733, tol);
-    EXPECT_NEAR(rotated_vec.z, 1., tol);
+    EXPECT_NEAR(rotated_vec.mX, -4.239418477, tol);
+    EXPECT_NEAR(rotated_vec.mY, 1.423843733, tol);
+    EXPECT_NEAR(rotated_vec.mZ, 1., tol);
     // example
     rotated_vec = original_vec;
     angle_to_vary = -8.;
     rotate_vector_by_axis(rotated_vec, axis_name, angle_to_vary);
-    EXPECT_NEAR(rotated_vec.x, -3.682726073, tol);
-    EXPECT_NEAR(rotated_vec.y, 2.537228541, tol);
-    EXPECT_NEAR(rotated_vec.z, 1., tol);
+    EXPECT_NEAR(rotated_vec.mX, -3.682726073, tol);
+    EXPECT_NEAR(rotated_vec.mY, 2.537228541, tol);
+    EXPECT_NEAR(rotated_vec.mZ, 1., tol);
 }
 
 }
