@@ -8,9 +8,6 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
 
 SET(PlatoXMLGenerator_UnitTester_HDRS XMLGenerator_UnitTester.hpp)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -std=c++11")
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -g -O3 -std=c++11")
-
 if(CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -Wno-unused-variable -Wno-write-strings")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-variable -Wno-write-strings")
