@@ -1,6 +1,6 @@
 #include "Plato_Vector3DVariations.hpp"
 
-#include <cmath>
+#include <math.h>
 #include <stdlib.h>
 #include <cstdlib>
 
