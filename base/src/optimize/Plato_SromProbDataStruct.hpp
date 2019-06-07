@@ -67,7 +67,7 @@ struct DistrubtionName
 // struct DistrubtionName
 
 template<typename ScalarType, typename OrdinalType = size_t>
-struct UncertaintyInputStruct
+struct SromInputs
 {
     DistrubtionName::type_t mDistribution;
     ScalarType mMean;
@@ -82,7 +82,7 @@ struct UncertaintyInputStruct
     OrdinalType mNumMonteCarloSamples;
     OrdinalType mMaxNumDistributionMoments; // if zero, then use default
 
-    UncertaintyInputStruct() :   // default Constructor
+    SromInputs() :   // default Constructor
             mDistribution(DistrubtionName::type_t::beta),
             mMean(0.),
             mLowerBound(0.),
@@ -99,7 +99,7 @@ struct UncertaintyInputStruct
 // struct UncertaintyInputStruct
 
 template<typename ScalarType>
-struct UncertaintyOutputStruct
+struct SromOutputs
 {
     // Primary outputs
     ScalarType mSampleValue;
@@ -108,7 +108,7 @@ struct UncertaintyOutputStruct
 // struct UncertaintyOutputStruct
 
 template<typename ScalarType>
-struct SromProblemDiagnosticsStruct
+struct SromDiagnostics
 {
     // Diagnostics - secondary outputs
     std::vector<ScalarType> mSromCDF;

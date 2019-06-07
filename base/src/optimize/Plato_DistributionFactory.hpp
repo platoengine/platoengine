@@ -21,7 +21,7 @@ namespace Plato
 // factory constructor
 template<typename ScalarType, typename OrdinalType>
 std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>>
-build_distrubtion(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aInput)
+build_distrubtion(const Plato::SromInputs<ScalarType, OrdinalType>& aInput)
 {
     // grab values from input struct
     const ScalarType tMean = aInput.mMean;

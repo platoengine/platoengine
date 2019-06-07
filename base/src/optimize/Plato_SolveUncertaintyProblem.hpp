@@ -70,22 +70,22 @@ template<typename ScalarType, typename OrdinalType>
 inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
                                   const Plato::MultiVector<ScalarType> & aFinalControl,
                                   const Plato::Distribution<ScalarType, OrdinalType> & aDistribution,
-                                  const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs)
+                                  const Plato::SromInputs<ScalarType, OrdinalType>& aSromInputs)
 {
     try
     {
         const bool tPrintErrorMsg = true;
-        Plato::StandardVector<ScalarType, OrdinalType> tMonteCarloCDF(aStatsInputs.mNumMonteCarloSamples + 1);
-        Plato::StandardVector<ScalarType, OrdinalType> tNormalizedMonteCarloSamples(aStatsInputs.mNumMonteCarloSamples + 1);
-        Plato::compute_monte_carlo_data(aStatsInputs.mNumMonteCarloSamples, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF, tPrintErrorMsg);
+        Plato::StandardVector<ScalarType, OrdinalType> tMonteCarloCDF(aSromInputs.mNumMonteCarloSamples + 1);
+        Plato::StandardVector<ScalarType, OrdinalType> tNormalizedMonteCarloSamples(aSromInputs.mNumMonteCarloSamples + 1);
+        Plato::compute_monte_carlo_data(aSromInputs.mNumMonteCarloSamples, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF, tPrintErrorMsg);
 
         const OrdinalType t_SAMPLES_VEC_INDEX = 0;
         const OrdinalType t_PROBABILITIES_VEC_INDEX = 1;
-        Plato::StandardVector<ScalarType, OrdinalType> tSromCDF(aStatsInputs.mNumMonteCarloSamples + 1);
+        Plato::StandardVector<ScalarType, OrdinalType> tSromCDF(aSromInputs.mNumMonteCarloSamples + 1);
         Plato::compute_srom_cdf_plot(tNormalizedMonteCarloSamples, aFinalControl[t_SAMPLES_VEC_INDEX], aFinalControl[t_PROBABILITIES_VEC_INDEX], tSromCDF);
 
-        Plato::StandardVector<ScalarType, OrdinalType> tUnnormalizedMonteCarloSamples(aStatsInputs.mNumMonteCarloSamples + 1);
-        Plato::compute_unnormalized_samples(aStatsInputs.mLowerBound, aStatsInputs.mUpperBound, tNormalizedMonteCarloSamples, tUnnormalizedMonteCarloSamples);
+        Plato::StandardVector<ScalarType, OrdinalType> tUnnormalizedMonteCarloSamples(aSromInputs.mNumMonteCarloSamples + 1);
+        Plato::compute_unnormalized_samples(aSromInputs.mLowerBound, aSromInputs.mUpperBound, tNormalizedMonteCarloSamples, tUnnormalizedMonteCarloSamples);
 
         Plato::output_cumulative_distribution_function(aCommWrapper, tSromCDF, tMonteCarloCDF, tUnnormalizedMonteCarloSamples, tPrintErrorMsg);
     }
@@ -105,18 +105,18 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
  * @param [in,out] aStageMng optimization problem stage manager (manages criteria evaluations)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void build_srom_criteria(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType> & aStatsInputs,
+inline void build_srom_criteria(const Plato::SromInputs<ScalarType, OrdinalType> & aSromInputs,
                                 const std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> & aReductionOps,
                                 const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
                                 std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> & aSromObjective,
                                 std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraintList)
 {
     // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
-    const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
-    const OrdinalType tMaxNumMoments = aStatsInputs.mMaxNumDistributionMoments;
+    const OrdinalType tNumSamples = aSromInputs.mNumSamples;
+    const OrdinalType tMaxNumMoments = aSromInputs.mMaxNumDistributionMoments;
     aSromObjective = std::make_shared<Plato::SromObjective<ScalarType, OrdinalType> >(aDistribution, tMaxNumMoments, tNumSamples);
-    aSromObjective->setMomentMisfitTermWeight(aStatsInputs.mMomentErrorCriterionWeight);
-    aSromObjective->setCdfMisfitTermWeight(aStatsInputs.mCumulativeDistributionFuncErrorWeight);
+    aSromObjective->setMomentMisfitTermWeight(aSromInputs.mMomentErrorCriterionWeight);
+    aSromObjective->setCdfMisfitTermWeight(aSromInputs.mCumulativeDistributionFuncErrorWeight);
 
     std::shared_ptr<Plato::SromConstraint<ScalarType, OrdinalType> > tSromConstraint =
             std::make_shared<Plato::SromConstraint<ScalarType, OrdinalType>>(aReductionOps);
@@ -165,7 +165,7 @@ inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plat
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
-                                    const Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics,
+                                    const Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
                                     const Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType>& aOutputsKSAL,
                                     bool aPrint = false)
 {
@@ -229,10 +229,10 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
  * @param [in] aPrintDiagnostics flag use to enable output to file (default = false)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void solve_uncertainty(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs,
+inline void solve_uncertainty(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
                               Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
-                              Plato::SromProblemDiagnosticsStruct<ScalarType>& aSromDiagnostics,
-                              std::vector<Plato::UncertaintyOutputStruct<ScalarType>>& aSolution,
+                              Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
+                              std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
                               bool aPrintDiagnostics = false)
 {
     // build distribution

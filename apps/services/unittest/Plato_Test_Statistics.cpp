@@ -366,7 +366,7 @@ TEST(PlatoTest, stats_stddev_one_value)
 
 TEST(PlatoTest, ComputeMonteCarloDataErrors)
 {
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -387,7 +387,7 @@ TEST(PlatoTest, ComputeMonteCarloDataErrors)
 
 TEST(PlatoTest, ComputeMonteCarloData)
 {
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -870,7 +870,7 @@ TEST(PlatoTest, PlotBetaCDF)
     }
 
     // POSE SROM PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
@@ -880,9 +880,9 @@ TEST(PlatoTest, PlotBetaCDF)
     tStatsInputs.mMaxNumDistributionMoments = 4;
 
     // SOLVE SROM PROBLEM
+    Plato::SromDiagnostics<double> tDiagnostics;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+    std::vector<Plato::SromOutputs<double>> tOutput;
     Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // GATHER OUTPUT FROM SROM PROBLEM
@@ -1219,7 +1219,7 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
@@ -1230,8 +1230,8 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
     Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
@@ -1257,7 +1257,7 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
     tStatsInputs.mMean = 0.;
     tStatsInputs.mUpperBound = 75.;
@@ -1268,8 +1268,8 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
     Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
@@ -1294,7 +1294,7 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 0.;
@@ -1305,8 +1305,8 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
     Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
@@ -1327,7 +1327,7 @@ TEST(PlatoTest, OutputSromDiagnostics)
     Plato::AlgorithmOutputsKSAL<double> tAlgorithmOutput;
     tAlgorithmOutput.mObjFuncValue = 1e-3;
     tAlgorithmOutput.mConstraints = std::make_shared<Plato::StandardVector<double>>(1 /* length */, 5e-4 /* base value */);
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
+    Plato::SromDiagnostics<double> tDiagnostics;
     tDiagnostics.mCumulativeDistributionFunctionError = 0.01;
     tDiagnostics.mMomentErrors.resize(4);
     tDiagnostics.mMomentErrors[0] = 0.020;

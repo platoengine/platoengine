@@ -363,9 +363,9 @@ inline void compute_srom_cdf_plot(const Plato::Vector<ScalarType, OrdinalType>& 
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void save_srom_solution(const Plato::UncertaintyInputStruct<ScalarType, OrdinalType>& aStatsInputs,
+inline void save_srom_solution(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
                                const Plato::MultiVector<ScalarType, OrdinalType>& aOptimalControls,
-                               std::vector<UncertaintyOutputStruct<ScalarType> >& aOutput)
+                               std::vector<SromOutputs<ScalarType> >& aOutput)
 {
     for(OrdinalType tIndex = 0; tIndex < aStatsInputs.mNumSamples; tIndex++)
     {
@@ -388,7 +388,7 @@ inline void save_srom_solution(const Plato::UncertaintyInputStruct<ScalarType, O
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void save_srom_moments_diagnostics(const Plato::SromObjective<ScalarType, OrdinalType>& aSromObjective,
-                                          Plato::SromProblemDiagnosticsStruct<ScalarType>& aOutput)
+                                          Plato::SromDiagnostics<ScalarType>& aOutput)
 {
     // Resize if necessary
     const OrdinalType tNumMoments = aSromObjective.getMaxNumMoments();
@@ -432,7 +432,7 @@ inline void save_srom_moments_diagnostics(const Plato::SromObjective<ScalarType,
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void save_srom_cdf_diagnostics(const Plato::SromObjective<ScalarType, OrdinalType>& aSromObjective,
-                                      Plato::SromProblemDiagnosticsStruct<ScalarType>& aOutput)
+                                      Plato::SromDiagnostics<ScalarType>& aOutput)
 {
     // Resize if necessary
     const OrdinalType tNumSamples = aSromObjective.getNumSamples();

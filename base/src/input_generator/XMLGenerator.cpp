@@ -362,38 +362,38 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
             originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].clear();
 
             // pose uncertainty
-            Plato::UncertaintyInputStruct<double, size_t> tInput;
+            Plato::SromInputs<double> tSromInputs;
             if(thisUncertainty.distribution == "normal")
             {
-                tInput.mDistribution = Plato::DistrubtionName::type_t::normal;
+                tSromInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
             }
             else if(thisUncertainty.distribution == "uniform")
             {
-                tInput.mDistribution = Plato::DistrubtionName::type_t::uniform;
+                tSromInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
             }
             else if(thisUncertainty.distribution == "beta")
             {
-                tInput.mDistribution = Plato::DistrubtionName::type_t::beta;
+                tSromInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
             }
             else
             {
                 std::cout << "XMLGenerator::expandUncertaintiesForGenerate: " << "Unmatched name." << std::endl;
                 return false;
             }
-            tInput.mMean = std::atof(thisUncertainty.mean.c_str());
-            tInput.mLowerBound = std::atof(thisUncertainty.lower.c_str());
-            tInput.mUpperBound = std::atof(thisUncertainty.upper.c_str());
+            tSromInputs.mMean = std::atof(thisUncertainty.mean.c_str());
+            tSromInputs.mLowerBound = std::atof(thisUncertainty.lower.c_str());
+            tSromInputs.mUpperBound = std::atof(thisUncertainty.upper.c_str());
             const double stdDev = std::atof(thisUncertainty.standard_deviation.c_str());
-            tInput.mVariance = stdDev * stdDev;
+            tSromInputs.mVariance = stdDev * stdDev;
             const size_t num_samples = std::atoi(thisUncertainty.num_samples.c_str());
-            tInput.mNumSamples = num_samples;
+            tSromInputs.mNumSamples = num_samples;
 
             // solve uncertainty sub-problem
             const bool tEnableOutput = true;
             Plato::AlgorithmInputsKSAL<double> tAlgoInputs;
-            Plato::SromProblemDiagnosticsStruct<double> tSromDiagnostics;
-            std::vector<Plato::UncertaintyOutputStruct<double>> tSromOutput;
-            Plato::solve_uncertainty(tInput, tAlgoInputs, tSromDiagnostics, tSromOutput, tEnableOutput);
+            Plato::SromDiagnostics<double> tSromDiagnostics;
+            std::vector<Plato::SromOutputs<double>> tSromOutput;
+            Plato::solve_uncertainty(tSromInputs, tAlgoInputs, tSromDiagnostics, tSromOutput, tEnableOutput);
 
             // check size
             if(tSromOutput.size() != num_samples)
