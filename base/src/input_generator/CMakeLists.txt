@@ -2,7 +2,7 @@
 # Sources:
 ###############################################################################
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp XMLGenerator.cpp)
-SET(XMLGenerator_HDRS XMLGenerator.hpp XMLGeneratorDataStruct.hpp)
+SET(XMLGenerator_HDRS XMLGenerator.hpp XMLGeneratorDataStruct.hpp XMLGeneratorDataStruct.hpp)
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 
