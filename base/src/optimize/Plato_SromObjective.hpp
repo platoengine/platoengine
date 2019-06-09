@@ -489,7 +489,7 @@ private:
             {
                 OrdinalType tMomentOrder = tMomentIndex + static_cast<OrdinalType>(1);
                 mSromMoments->operator[](tMomentIndex) =
-                        Plato::compute_srom_moment<ScalarType, OrdinalType>(tMomentOrder, tMySamples, tProbabilities);
+                        Plato::compute_raw_moment<ScalarType, OrdinalType>(tMomentOrder, tMySamples, tProbabilities);
                 tMyMomentMisfit[tMomentIndex] = mSromMoments->operator[](tMomentIndex) - mTrueMoments->operator[](tMomentIndex);
                 ScalarType tValue = tMyMomentMisfit[tMomentIndex] / mTrueMoments->operator[](tMomentIndex);
                 tMyMomentError[tMomentIndex] = tValue * tValue;

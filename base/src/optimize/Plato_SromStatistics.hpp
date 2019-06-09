@@ -59,15 +59,15 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Evaluate cumulative distribution function 
- @param [in] aX sample 
- @param [in] aSigma standard deviation
- @param [in] aSamples set of samples
- @param [in] aSamplesProbability sample probabilities
- @return cumulative distribution function evaluation 
+ * @brief Evaluate cumulative distribution function (CDF) at this sample point
+ * @param [in] aMySample input sample point
+ * @param [in] aSigma curvature correction
+ * @param [in] aSamples set of samples
+ * @param [in] aSamplesProbability set of sample probabilities
+ * @return CDF value given a sample computed with a stochastic reduced order model
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline ScalarType compute_srom_cdf(const ScalarType & aX,
+inline ScalarType compute_srom_cdf(const ScalarType & aMySample,
                                    const ScalarType & aSigma,
                                    const Plato::Vector<ScalarType, OrdinalType> & aSamples,
                                    const Plato::Vector<ScalarType, OrdinalType> & aSamplesProbability)
@@ -76,24 +76,25 @@ inline ScalarType compute_srom_cdf(const ScalarType & aX,
     OrdinalType tNumSamples = aSamples.size();
     for(OrdinalType tIndexJ = 0; tIndexJ < tNumSamples; tIndexJ++)
     {
-        ScalarType tValue = (aX - aSamples[tIndexJ]) / (aSigma * std::sqrt(static_cast<ScalarType>(2)));
+        ScalarType tValue = (aMySample - aSamples[tIndexJ]) / (aSigma * std::sqrt(static_cast<ScalarType>(2)));
         tSum = tSum + aSamplesProbability[tIndexJ] *
                 (static_cast<ScalarType>(0.5) * (static_cast<ScalarType>(1) + std::erf(tValue)));
     }
     return (tSum);
 }
+// function compute_srom_cdf
 
 /******************************************************************************//**
- * @brief Evaluate the n-th order raw moment  
- @param [in] aOrder moment's order 
- @param [in] aSamples set of samples
- @param [in] aSamplesProbability sample probabilities
- @return n-th order raw moment
+ * @brief Evaluate n-th order raw moment
+ * @param [in] aOrder raw moment order
+ * @param [in] aSamples set of samples
+ * @param [in] aSamplesProbability set of sample probabilities
+ * @return evaluation of the n-th order raw moment
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline ScalarType compute_srom_moment(const ScalarType & aOrder,
-                                      const Plato::Vector<ScalarType, OrdinalType> & aSamples,
-                                      const Plato::Vector<ScalarType, OrdinalType> & aSamplesProbability)
+inline ScalarType compute_raw_moment(const ScalarType & aOrder,
+                                     const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                                     const Plato::Vector<ScalarType, OrdinalType> & aSamplesProbability)
 {
     assert(aOrder >= static_cast<OrdinalType>(0));
     assert(aSamples.size() == aSamplesProbability.size());
@@ -106,7 +107,39 @@ inline ScalarType compute_srom_moment(const ScalarType & aOrder,
     }
     return (tOutput);
 }
+// function compute_raw_moment
 
-} // namespace Plato
+/******************************************************************************//**
+ * @brief Evaluate n-th order central moment
+ * @param [in] aOrder raw moment order
+ * @param [in] aSamples set of samples
+ * @param [in] aSamplesProbability set of sample probabilities
+ * @return evaluation of the n-th order raw moment
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline ScalarType compute_central_moment(const ScalarType & aOrder,
+                                         const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+                                         const Plato::Vector<ScalarType, OrdinalType> & aSampleProbabilities)
+{
+    assert(aOrder >= static_cast<OrdinalType>(0));
+    assert(aSamples.size() == aSampleProbabilities.size());
+
+    const ScalarType tOrderRawMoment= 1.0;
+    const ScalarType tSampleMean =
+            Plato::compute_raw_moment<ScalarType, OrdinalType>(tOrderRawMoment, aSamples, aSampleProbabilities);
+
+    ScalarType tOutput = 0;
+    OrdinalType tNumSamples = aSamples.size();
+    for(OrdinalType tSampleIndex = 0; tSampleIndex < tNumSamples; tSampleIndex++)
+    {
+        ScalarType tSampleMinusMean = aSamples[tSampleIndex] - tSampleMean;
+        tOutput = tOutput + (aSampleProbabilities[tSampleIndex] * std::pow(tSampleMinusMean, aOrder));
+    }
+    return (tOutput);
+}
+// function compute_central_moment
+
+}
+// namespace Plato
 
 #endif /* PLATO_SROMSTATISTICS_HPP_ */

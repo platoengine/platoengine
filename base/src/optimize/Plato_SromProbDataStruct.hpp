@@ -59,9 +59,7 @@ struct DistrubtionName
 {
     enum type_t
     {
-        beta = 0,
-        normal = 1,
-        uniform = 2,
+        beta = 0, normal = 1, uniform = 2, undefined = 3
     };
 };
 // struct DistrubtionName

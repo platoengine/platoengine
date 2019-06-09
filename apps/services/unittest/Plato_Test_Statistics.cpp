@@ -655,7 +655,7 @@ TEST(PlatoTest, SromMoments)
     for(size_t tIndex = 0; tIndex < tMoments.size(); tIndex++)
     {
         double tOrder = tIndex + static_cast<size_t>(1);
-        tMoments[tIndex] = Plato::compute_srom_moment<double>(tOrder, tSamples, tSampleProbabilities);
+        tMoments[tIndex] = Plato::compute_raw_moment(tOrder, tSamples, tSampleProbabilities);
     }
 
     Plato::StandardVector<double> tGold(4, 0.);
@@ -883,7 +883,7 @@ TEST(PlatoTest, PlotBetaCDF)
     Plato::SromDiagnostics<double> tDiagnostics;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     std::vector<Plato::SromOutputs<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // GATHER OUTPUT FROM SROM PROBLEM
     Plato::StandardVector<double> tSromCDF(tLength);
@@ -1214,7 +1214,7 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     }
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_beta)
+TEST(PlatoTest, solve_srom_problem_beta)
 {
     const double tTol = 1e-6;
 
@@ -1232,7 +1232,7 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::SromDiagnostics<double> tDiagnostics;
     std::vector<Plato::SromOutputs<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
@@ -1252,7 +1252,7 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     EXPECT_NEAR(tTotalProbability, 1.0000028690386313, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_uniform)
+TEST(PlatoTest, solve_srom_problem_uniform)
 {
     const double tTol = 1e-6;
 
@@ -1270,7 +1270,7 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::SromDiagnostics<double> tDiagnostics;
     std::vector<Plato::SromOutputs<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
@@ -1289,7 +1289,7 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_normal)
+TEST(PlatoTest, solve_srom_problem_normal)
 {
     const double tTol = 1e-6;
 
@@ -1307,7 +1307,7 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::SromDiagnostics<double> tDiagnostics;
     std::vector<Plato::SromOutputs<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);

@@ -221,7 +221,7 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
 }
 
 /******************************************************************************//**
- * @brief Solve optimization problem to construct an optimal stochastic reduced order model (SROM)
+ * @brief Solve optimization problem to construct a stochastic reduced order model (SROM)
  * @param [in] aStatsInputs data structure with inputs for probability distribution function
  * @param [in,out] aInputsKSAL input data structure for KSAL algorithm
  * @param [in,out] aSromDiagnostics diagnostics associated with the SROM optimization problem
@@ -229,11 +229,11 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
  * @param [in] aPrintDiagnostics flag use to enable output to file (default = false)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void solve_uncertainty(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
-                              Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
-                              Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
-                              std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
-                              bool aPrintDiagnostics = false)
+inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
+                               Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
+                               Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
+                               std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
+                               bool aPrintDiagnostics = false)
 {
     // build distribution
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution;
