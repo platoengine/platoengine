@@ -516,6 +516,16 @@ inline bool post_process_random_load(const std::vector<Plato::SromRandomVariable
         aRotationAxisToSampleProbPairs[tMyAxis] = aMySampleProbPairs[tRandVarIndex].mSampleProbPair;
     }
 
+    if(aMySampleProbPairs.size() != aRotationAxisToSampleProbPairs.size())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: DUPLICATE RANDOM ROTATIONS WERE PROVIDED FOR A SINGLE LOAD."
+                 << " RANDOM ROTATIONS ARE EXPECTED TO BE UNIQUE FOR A SINGLE LOAD.\n";
+        return (false);
+    }
+
     return (true);
 }
 
@@ -1314,6 +1324,209 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistic
     tRandomVarsSet[0].mNumSamples = "-1";
     tRandomVarsSet[0].mLowerBound = "65";
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+}
+
+TEST(PlatoTest, post_process_random_load_error)
+{
+    // ERROR: ZERO INPUTS PROVIDED
+    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
+    ASSERT_FALSE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+
+    // ERROR: INPUT RANDOM ROTATIONS ARE NOT UNIQUE
+    Plato::SromRandomVariable tRandomLoadX;
+    tRandomLoadX.mType = "random rotation";
+    tRandomLoadX.mSubType = "x";
+    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+
+    Plato::SromRandomVariable tRandomLoadY;
+    tRandomLoadY.mType = "random rotation";
+    tRandomLoadY.mSubType = "x"; // ERROR - OVERWRITES ORIGINAL INPUT
+    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
+    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+
+    tSromRandomVariableSet.push_back(tRandomLoadX);
+    tSromRandomVariableSet.push_back(tRandomLoadY);
+    ASSERT_FALSE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+}
+
+TEST(PlatoTest, post_process_random_load_OneRandomRotation)
+{
+    Plato::SromRandomVariable tRandomLoadX;
+    tRandomLoadX.mType = "random rotation";
+    tRandomLoadX.mSubType = "x";
+    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    tSromRandomVariableSet.push_back(tRandomLoadX);
+
+    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
+    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+
+    // TEST RESULTS
+    ASSERT_EQ(1u, tRotationAxisToSampleProbPairs.size());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairs = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
+    ASSERT_EQ(4u, tSampleProbabilityPairs.mNumSamples);
+
+    const double tTolerance = 1e-4;
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, post_process_random_load_TwoRandomRotations)
+{
+    Plato::SromRandomVariable tRandomLoadX;
+    tRandomLoadX.mType = "random rotation";
+    tRandomLoadX.mSubType = "x";
+    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+
+    Plato::SromRandomVariable tRandomLoadY;
+    tRandomLoadY.mType = "random rotation";
+    tRandomLoadY.mSubType = "y";
+    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
+    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+
+    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    tSromRandomVariableSet.push_back(tRandomLoadX);
+    tSromRandomVariableSet.push_back(tRandomLoadY);
+
+    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
+    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+
+    // TEST RESULTS
+    ASSERT_EQ(2u, tRotationAxisToSampleProbPairs.size());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+
+    // TEST RESULTS FOR ROTATION X SAMPLE-PROBABILITY PAIRS
+    const double tTolerance = 1e-4;
+
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsX = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
+    ASSERT_EQ(tRandomLoadX.mSampleProbPair.mNumSamples, tSampleProbabilityPairsX.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsX.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsX.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsX.mProbabilities[tIndex], tTolerance);
+    }
+
+    // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsY = tRotationAxisToSampleProbPairs.find(Plato::axis3D::y)->second;
+    ASSERT_EQ(tRandomLoadY.mSampleProbPair.mNumSamples, tSampleProbabilityPairsY.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsY.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsY.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsY.mProbabilities[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, post_process_random_load_ThreeRandomRotations)
+{
+    Plato::SromRandomVariable tRandomLoadX;
+    tRandomLoadX.mType = "random rotation";
+    tRandomLoadX.mSubType = "x";
+    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+
+    Plato::SromRandomVariable tRandomLoadY;
+    tRandomLoadY.mType = "random rotation";
+    tRandomLoadY.mSubType = "y";
+    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
+    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+
+    Plato::SromRandomVariable tRandomLoadZ;
+    tRandomLoadZ.mType = "random rotation";
+    tRandomLoadZ.mSubType = "z";
+    tRandomLoadZ.mSampleProbPair.mNumSamples = 4;
+    tRandomLoadZ.mSampleProbPair.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
+    tRandomLoadZ.mSampleProbPair.mProbabilities = {0.25, 0.25, 0.25, 0.25};
+
+    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    tSromRandomVariableSet.push_back(tRandomLoadX);
+    tSromRandomVariableSet.push_back(tRandomLoadY);
+    tSromRandomVariableSet.push_back(tRandomLoadZ);
+
+    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
+    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+
+    // TEST RESULTS
+    ASSERT_EQ(3u, tRotationAxisToSampleProbPairs.size());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+
+    // TEST RESULTS FOR ROTATION X SAMPLE-PROBABILITY PAIRS
+    const double tTolerance = 1e-4;
+
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsX = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
+    ASSERT_EQ(tRandomLoadX.mSampleProbPair.mNumSamples, tSampleProbabilityPairsX.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsX.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsX.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsX.mProbabilities[tIndex], tTolerance);
+    }
+
+    // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsY = tRotationAxisToSampleProbPairs.find(Plato::axis3D::y)->second;
+    ASSERT_EQ(tRandomLoadY.mSampleProbPair.mNumSamples, tSampleProbabilityPairsY.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsY.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsY.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsY.mProbabilities[tIndex], tTolerance);
+    }
+
+    // TEST RESULTS FOR ROTATION Z SAMPLE-PROBABILITY PAIRS
+    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsZ = tRotationAxisToSampleProbPairs.find(Plato::axis3D::z)->second;
+    ASSERT_EQ(tRandomLoadZ.mSampleProbPair.mNumSamples, tSampleProbabilityPairsZ.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsZ.mNumSamples; tIndex++)
+    {
+        ASSERT_NEAR(tRandomLoadZ.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsZ.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadZ.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsZ.mProbabilities[tIndex], tTolerance);
+    }
+}
+
+TEST(PlatoTest, set_random_rotations_about_xyz)
+{
+    Plato::SampleProbabilityPairs tSampleProbPairSetX;
+    tSampleProbPairSetX.mNumSamples = 4;
+    tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    Plato::SampleProbabilityPairs tSampleProbPairSetY;
+    tSampleProbPairSetY.mNumSamples = 3;
+    tSampleProbPairSetY.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tSampleProbPairSetY.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    tSampleProbPairSetZ.mNumSamples = 4;
+    tSampleProbPairSetZ.mProbabilities = {0.25, 0.25, 0.25, 0.25};
+    tSampleProbPairSetZ.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
+
+    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    Plato::set_random_rotations_about_xyz(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet);
+
+    // TEST NUMBER OF ROTATION VECTORS
+    const size_t tNumRotationVectors = tSampleProbPairSetX.mNumSamples * tSampleProbPairSetY.mNumSamples * tSampleProbPairSetZ.mNumSamples;
+    ASSERT_EQ(tNumRotationVectors, tRandomRotationSet.size()); // expects 48 rotation vectors
+    std::vector<std::vector<double>> tGoldRotations = { {62.92995363352, 79.56461506624, 10} };
+    std::vector<double> tGoldProbabilities = { 0.040214307576243 };
+    std::cout << "tRandomRotationSet.mProbability = " << tRandomRotationSet[0].mProbability << "\n";
+    std::cout << "RotationAngles(X,Y,Z) = (" << tRandomRotationSet[0].mRotationAngles.mX << ", "
+            << tRandomRotationSet[0].mRotationAngles.mY << ", " << tRandomRotationSet[0].mRotationAngles.mZ << ")\n";
 }
 
 }
