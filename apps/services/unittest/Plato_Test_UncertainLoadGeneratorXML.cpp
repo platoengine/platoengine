@@ -96,7 +96,7 @@ struct SromRandomVariable
 struct RandomRotations
 {
     double mProbability; /*!< probability associated with this random rotation */
-    Plato::Vector3D mRotationAngles; /*!< vector of random rotations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
+    Plato::Vector3D mRotations; /*!< vector of random rotations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
 };
 
 struct RandomLoad
@@ -543,9 +543,9 @@ inline bool set_random_rotations_about_xyz(const Plato::SampleProbabilityPairs& 
                 Plato::RandomRotations tMyRandomRotations;
                 tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                         * aMyYaxisSampleProbPairs.mProbabilities[tIndexJ] * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
-                tMyRandomRotations.mRotationAngles.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
-                tMyRandomRotations.mRotationAngles.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
-                tMyRandomRotations.mRotationAngles.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
+                tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
+                tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
+                tMyRandomRotations.mRotations.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
                 aMyRandomRotations.push_back(tMyRandomRotations);
             }
         }
@@ -565,8 +565,8 @@ inline bool set_random_rotations_about_xy(const Plato::SampleProbabilityPairs& a
             Plato::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                     * aMyYaxisSampleProbPairs.mProbabilities[tIndexJ];
-            tMyRandomRotations.mRotationAngles.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
-            tMyRandomRotations.mRotationAngles.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
+            tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
+            tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
             aMyRandomRotations.push_back(tMyRandomRotations);
         }
     }
@@ -585,8 +585,8 @@ inline bool set_random_rotations_about_xz(const Plato::SampleProbabilityPairs& a
             Plato::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                     * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
-            tMyRandomRotations.mRotationAngles.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
-            tMyRandomRotations.mRotationAngles.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
+            tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
+            tMyRandomRotations.mRotations.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
             aMyRandomRotations.push_back(tMyRandomRotations);
         }
     }
@@ -605,8 +605,8 @@ inline bool set_random_rotations_about_yz(const Plato::SampleProbabilityPairs& a
             Plato::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyYaxisSampleProbPairs.mProbabilities[tIndexJ]
                     * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
-            tMyRandomRotations.mRotationAngles.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
-            tMyRandomRotations.mRotationAngles.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
+            tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
+            tMyRandomRotations.mRotations.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
             aMyRandomRotations.push_back(tMyRandomRotations);
         }
     }
@@ -621,7 +621,7 @@ inline bool set_random_rotations_about_x(const Plato::SampleProbabilityPairs& aM
     {
         Plato::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI];
-        tMyRandomRotations.mRotationAngles.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
+        tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
         aMyRandomRotations.push_back(tMyRandomRotations);
     }
 
@@ -635,7 +635,7 @@ inline bool set_random_rotations_about_y(const Plato::SampleProbabilityPairs& aM
     {
         Plato::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyYaxisSampleProbPairs.mProbabilities[tIndexJ];
-        tMyRandomRotations.mRotationAngles.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
+        tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
         aMyRandomRotations.push_back(tMyRandomRotations);
     }
 
@@ -649,7 +649,7 @@ inline bool set_random_rotations_about_z(const Plato::SampleProbabilityPairs& aM
     {
         Plato::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
-        tMyRandomRotations.mRotationAngles.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
+        tMyRandomRotations.mRotations.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
         aMyRandomRotations.push_back(tMyRandomRotations);
     }
 
@@ -727,7 +727,7 @@ inline bool expand_random_loads(const Plato::Vector3D & aOriginalLoad,
         Plato::RandomLoad tMyRandomLoad;
         tMyRandomLoad.mLoad = aOriginalLoad;
         tMyRandomLoad.mProbability = aMyRandomRotations[tIndex].mProbability;
-        if(Plato::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotationAngles, tMyRandomLoad.mLoad) == false)
+        if(Plato::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotations, tMyRandomLoad.mLoad) == false)
         {
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -1522,11 +1522,48 @@ TEST(PlatoTest, set_random_rotations_about_xyz)
     // TEST NUMBER OF ROTATION VECTORS
     const size_t tNumRotationVectors = tSampleProbPairSetX.mNumSamples * tSampleProbPairSetY.mNumSamples * tSampleProbPairSetZ.mNumSamples;
     ASSERT_EQ(tNumRotationVectors, tRandomRotationSet.size()); // expects 48 rotation vectors
-    std::vector<std::vector<double>> tGoldRotations = { {62.92995363352, 79.56461506624, 10} };
-    std::vector<double> tGoldProbabilities = { 0.040214307576243 };
-    std::cout << "tRandomRotationSet.mProbability = " << tRandomRotationSet[0].mProbability << "\n";
-    std::cout << "RotationAngles(X,Y,Z) = (" << tRandomRotationSet[0].mRotationAngles.mX << ", "
-            << tRandomRotationSet[0].mRotationAngles.mY << ", " << tRandomRotationSet[0].mRotationAngles.mZ << ")\n";
+    std::vector<std::vector<double>> tSetGoldRotations =
+        { {62.92995363352, 79.56461506624, 10}, {62.92995363352, 79.56461506624, 13.333333333333}, {62.92995363352, 79.56461506624, 16.666666666667}, {62.92995363352, 79.56461506624, 20},
+          {62.92995363352,  95.1780010696, 10}, {62.92995363352,  95.1780010696, 13.333333333333}, {62.92995363352,  95.1780010696, 16.666666666667}, {62.92995363352,  95.1780010696, 20},
+          {62.92995363352, 104.3742043151, 10}, {62.92995363352, 104.3742043151, 13.333333333333}, {62.92995363352, 104.3742043151, 16.666666666667}, {62.92995363352, 104.3742043151, 20},
+          {69.67128118964, 79.56461506624, 10}, {69.67128118964, 79.56461506624, 13.333333333333}, {69.67128118964, 79.56461506624, 16.666666666667}, {69.67128118964, 79.56461506624, 20},
+          {69.67128118964,  95.1780010696, 10}, {69.67128118964,  95.1780010696, 13.333333333333}, {69.67128118964,  95.1780010696, 16.666666666667}, {69.67128118964,  95.1780010696, 20},
+          {69.67128118964, 104.3742043151, 10}, {69.67128118964, 104.3742043151, 13.333333333333}, {69.67128118964, 104.3742043151, 16.666666666667}, {69.67128118964, 104.3742043151, 20},
+          {66.03455388567, 79.56461506624, 10}, {66.03455388567, 79.56461506624, 13.333333333333}, {66.03455388567, 79.56461506624, 16.666666666667}, {66.03455388567, 79.56461506624, 20},
+          {66.03455388567,  95.1780010696, 10}, {66.03455388567,  95.1780010696, 13.333333333333}, {66.03455388567,  95.1780010696, 16.666666666667}, {66.03455388567,  95.1780010696, 20},
+          {66.03455388567, 104.3742043151, 10}, {66.03455388567, 104.3742043151, 13.333333333333}, {66.03455388567, 104.3742043151, 16.666666666667}, {66.03455388567, 104.3742043151, 20},
+          { 96.2527627689, 79.56461506624, 10}, { 96.2527627689, 79.56461506624, 13.333333333333}, { 96.2527627689, 79.56461506624, 16.666666666667}, { 96.2527627689, 79.56461506624, 20},
+          { 96.2527627689,  95.1780010696, 10}, { 96.2527627689,  95.1780010696, 13.333333333333}, { 96.2527627689,  95.1780010696, 16.666666666667}, { 96.2527627689,  95.1780010696, 20},
+          { 96.2527627689, 104.3742043151, 10}, { 96.2527627689, 104.3742043151, 13.333333333333}, { 96.2527627689, 104.3742043151, 16.666666666667}, { 96.2527627689, 104.3742043151, 20} };
+
+    std::vector<double> tGoldProbabilities = { 0.040214307576243, 0.040214307576243, 0.040214307576243, 0.040214307576243,
+                                               0.029659870248084, 0.029659870248084, 0.029659870248084, 0.029659870248084,
+                                               0.021188934342120, 0.021188934342120, 0.021188934342120, 0.021188934342120,
+                                               0.021685307558066, 0.021685307558066, 0.021685307558066, 0.021685307558066,
+                                               0.015993894890335, 0.015993894890335, 0.015993894890335, 0.015993894890335,
+                                               0.011425997007791, 0.011425997007791, 0.011425997007791, 0.011425997007791,
+                                               0.025396048040355, 0.025396048040355, 0.025396048040355, 0.025396048040355,
+                                               0.018730733788290, 0.018730733788290, 0.018730733788290, 0.018730733788290,
+                                               0.013381187614786, 0.013381187614786, 0.013381187614786, 0.013381187614786,
+                                               0.023089690523626, 0.023089690523626, 0.023089690523626, 0.023089690523626,
+                                               0.017029690830826, 0.017029690830826, 0.017029690830826, 0.017029690830826,
+                                               0.012165966939936, 0.012165966939936, 0.012165966939936, 0.012165966939936};
+
+    double tSum = 0;
+    double tTolerance = 1e-4;
+    const size_t tTotalNumSamples = tSetGoldRotations.size();
+    for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
+    {
+        const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
+        tSum += tRandomRotationSet[tSampleIndex].mProbability;
+    }
+
+    tTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tTolerance);
 }
 
 }
