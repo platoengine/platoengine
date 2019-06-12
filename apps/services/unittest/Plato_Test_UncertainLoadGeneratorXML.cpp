@@ -56,6 +56,7 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 #include "../../base/src/tools/Plato_UniqueCounter.hpp"
 #include "../../base/src/tools/Plato_Vector3DVariations.hpp"
@@ -78,6 +79,8 @@ class Variable
 
 public:
 
+    Variable();
+    virtual ~Variable();
     virtual VariableType variableType() = 0;
 
     // Get/set functions for member data
@@ -121,7 +124,9 @@ class SROMLoad : public Variable
 
 public:
 
-    virtual VariableType variableType() { return VT_LOAD; }
+    SROMLoad();
+    virtual ~SROMLoad();
+    VariableType variableType() override { return VT_LOAD; }
 
 private:
 
@@ -134,7 +139,9 @@ class SROMMaterial : public Variable
 
 public:
 
-    virtual VariableType variableType() { return VT_MATERIAL; }
+    SROMMaterial();
+    virtual ~SROMMaterial();
+    virtual VariableType variableType() override { return VT_MATERIAL; }
 
 };
 
@@ -225,18 +232,22 @@ inline void initialize_load_id_counter(const std::vector<LoadCase> &aLoadCases,
 
 inline void expand_single_load_case(const LoadCase &aOldLoadCase,
                                     std::vector<LoadCase> &aNewLoadCaseList,
-                                    UniqueCounter &aUniqueLoadIDCounter)
+                                    UniqueCounter &aUniqueLoadIDCounter,
+                                    std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
 {
+    int tOriginalLoadCaseID = std::atoi(aOldLoadCase.id.c_str());
     for(size_t j=0; j<aOldLoadCase.loads.size(); ++j)
     {
         std::string tIDString = aOldLoadCase.id;
+        int tCurLoadCaseID = std::atoi(tIDString.c_str());
         // If this is a multi-load load case we need to generate
         // a new load case with a new id.
         if(j>0)
         {
-            size_t tLoadID = aUniqueLoadIDCounter.assignNextUnique();
-            tIDString = std::to_string(tLoadID);
+            tCurLoadCaseID = aUniqueLoadIDCounter.assignNextUnique();
+            tIDString = std::to_string(tCurLoadCaseID);
         }
+        tOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(tCurLoadCaseID);
         LoadCase tNewLoadCase = aOldLoadCase;
         tNewLoadCase.id = tIDString;
         tNewLoadCase.loads[0] = aOldLoadCase.loads[j];
@@ -246,21 +257,58 @@ inline void expand_single_load_case(const LoadCase &aOldLoadCase,
 }
 
 inline void expand_load_cases(const InputData &aInputData,
-                              std::vector<LoadCase> &aNewLoadCaseList)
+                              std::vector<LoadCase> &aNewLoadCaseList,
+                              std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
 {
     UniqueCounter tUniqueLoadIDCounter;
     initialize_load_id_counter(aInputData.load_cases, tUniqueLoadIDCounter);
 
     for(size_t i=0; i<aInputData.load_cases.size(); ++i)
-        expand_single_load_case(aInputData.load_cases[i], aNewLoadCaseList, tUniqueLoadIDCounter);
+        expand_single_load_case(aInputData.load_cases[i], aNewLoadCaseList, tUniqueLoadIDCounter,
+                                tOriginalToNewLoadCaseMap);
 }
 
-inline bool generateSROMInput(const InputData &aInputData)
+inline bool generateSROMInput(const InputData &aInputData,
+                              std::vector<std::shared_ptr<Variable> > &aSROMVariables)
 {
+    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
+
     // Make sure we don't have any multi-load load cases.  If we do,
     // expand them into load cases with single loads.
     std::vector<LoadCase> tNewLoadCases;
-    expand_load_cases(aInputData, tNewLoadCases);
+    expand_load_cases(aInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
+
+    // Loop through uncertainties and add loads with uncertainties to the SROM input
+    // data structures.
+    for(size_t i=0; i<aInputData.uncertainties.size(); ++i)
+    {
+        const Uncertainty &tCurUncertainty = aInputData.uncertainties[i];
+        const std::string tLoadIDString = tCurUncertainty.id;
+        const int tLoadID = std::atoi(tLoadIDString.c_str());
+        for(size_t j=0; j<tOriginalToNewLoadCaseMap[tLoadID].size(); ++j)
+        {
+            const int tCurLoadCaseID = tOriginalToNewLoadCaseMap[tLoadID][j];
+            for(size_t k=0; k<tNewLoadCases.size(); ++k)
+            {
+                if(tNewLoadCases[k].id == tLoadIDString)
+                {
+                    std::shared_ptr<Variable> tNewLoad = std::make_shared<SROMLoad>();
+                    tNewLoad->isRandom(true);
+                    tNewLoad->type(tCurUncertainty.type);
+                    tNewLoad->subType(tCurUncertainty.axis);
+                    tNewLoad->globalID(tLoadIDString);
+                    tNewLoad->distribution(tCurUncertainty.distribution);
+                    tNewLoad->mean(tCurUncertainty.mean);
+                    tNewLoad->upperBound(tCurUncertainty.upper);
+                    tNewLoad->lowerBound(tCurUncertainty.lower);
+                    tNewLoad->standardDeviation(tCurUncertainty.standard_deviation);
+                    tNewLoad->numSamples(tCurUncertainty.num_samples);
+                    aSROMVariables.push_back(tNewLoad);
+                    k=tNewLoadCases.size(); // break out of the looping
+                }
+            }
+        }
+    }
 
     return true;
 }
@@ -2203,6 +2251,7 @@ TEST(PlatoTest, expand_random_loads_error_3)
 
 TEST(PlatoTest, expand_load_cases)
 {
+    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
     InputData tInputData;
     LoadCase tLC1;
     Load tL1;
@@ -2227,7 +2276,7 @@ TEST(PlatoTest, expand_load_cases)
     tLC1.loads.push_back(tL1);
     tInputData.load_cases.push_back(tLC1);
     std::vector<LoadCase> tNewLoadCases;
-    Plato::expand_load_cases(tInputData, tNewLoadCases);
+    Plato::expand_load_cases(tInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCases.size(), 9);
     ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
     ASSERT_STREQ(tNewLoadCases[1].id.c_str(), "1");
@@ -2238,6 +2287,15 @@ TEST(PlatoTest, expand_load_cases)
     ASSERT_STREQ(tNewLoadCases[6].id.c_str(), "6");
     ASSERT_STREQ(tNewLoadCases[7].id.c_str(), "10");
     ASSERT_STREQ(tNewLoadCases[8].id.c_str(), "8");
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 2);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 3);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][0], 4);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][1], 5);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][2], 7);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[6][0], 6);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[10][0], 10);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[10][1], 8);
 }
 
 TEST(PlatoTest, initialize_load_id_counter)
@@ -2259,6 +2317,7 @@ TEST(PlatoTest, initialize_load_id_counter)
 TEST(PlatoTest, expand_single_load_case)
 {
     // Check case of single load case with single load
+    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
     LoadCase tOldLoadCase;
     tOldLoadCase.id = "88";
     Load tLoad1;
@@ -2275,7 +2334,8 @@ TEST(PlatoTest, expand_single_load_case)
     tUniqueLoadIDCounter.mark(0);
     tUniqueLoadIDCounter.mark(88);
     std::vector<LoadCase> tNewLoadCaseList;
-    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter);
+    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter,
+                                   tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCaseList.size(), 1);
     ASSERT_STREQ(tNewLoadCaseList[0].id.c_str(), "88");
     ASSERT_EQ(tNewLoadCaseList[0].loads.size(), 1);
@@ -2287,6 +2347,7 @@ TEST(PlatoTest, expand_single_load_case)
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_type.c_str(), "nodeset");
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_id.c_str(), "34");
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].scale.c_str(), "24.5");
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][0], 88);
     // Check the case where a load case has more than one load
     Load tLoad2;
     tLoad2.app_id = "21";
@@ -2299,13 +2360,17 @@ TEST(PlatoTest, expand_single_load_case)
     tLoad2.load_id = "101";
     tOldLoadCase.loads.push_back(tLoad2);
     std::vector<LoadCase> tNewLoadCaseList2;
-    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter);
+    tOriginalToNewLoadCaseMap.clear();
+    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter,
+                                   tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCaseList2.size(), 2);
     ASSERT_STREQ(tNewLoadCaseList2[1].id.c_str(), "1");
     ASSERT_STREQ(tNewLoadCaseList2[0].id.c_str(), "88");
     ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].y.c_str(), "55");
     ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].x.c_str(), "44");
     ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].z.c_str(), "66");
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][0], 88);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][1], 1);
     // Check case where load case with multiple loads is is split and the ids of the resulting
     // load cases have to "straddle" original load case id
     LoadCase tLC1;
@@ -2318,11 +2383,16 @@ TEST(PlatoTest, expand_single_load_case)
     tIDCounter.mark(0);
     tIDCounter.mark(2);
     std::vector<LoadCase> tNewList;
-    Plato::expand_single_load_case(tLC1,tNewList,tIDCounter);
+    tOriginalToNewLoadCaseMap.clear();
+    Plato::expand_single_load_case(tLC1,tNewList,tIDCounter,
+                                   tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewList.size(), 3);
     ASSERT_STREQ(tNewList[0].id.c_str(), "2");
     ASSERT_STREQ(tNewList[1].id.c_str(), "1");
     ASSERT_STREQ(tNewList[2].id.c_str(), "3");
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 2);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
+    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 3);
 }
 
 }
