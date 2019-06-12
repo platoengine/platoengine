@@ -62,9 +62,81 @@
 #include "../../base/src/optimize/Plato_SromProbDataStruct.hpp"
 #include "../../base/src/optimize/Plato_SolveUncertaintyProblem.hpp"
 #include "../../base/src/optimize/Plato_KelleySachsAugmentedLagrangianLightInterface.hpp"
+#include "../../base/src/input_generator/XMLGeneratorDataStruct.hpp"
 
 namespace Plato
 {
+
+enum VariableType
+{
+    VT_LOAD,
+    VT_MATERIAL
+};
+
+class Variable
+{
+
+public:
+
+    virtual VariableType variableType() = 0;
+
+    // Get/set functions for member data
+    bool isRandom() { return  mIsRandom; }
+    void isRandom(const bool &aNewValue) { mIsRandom = aNewValue; }
+    std::string type() { return mType; }
+    void type(const std::string &aNewType) { mType = aNewType; }
+    std::string subType() { return mSubType; }
+    void subType(const std::string &aNewSubType) { mSubType = aNewSubType; }
+    std::string globalID() { return mGlobalID; }
+    void globalID(const std::string &aNewGlobalID) { mGlobalID = aNewGlobalID; }
+    std::string distribution() { return mDistribution; }
+    void distribution(const std::string &aNewDistribution) { mDistribution = aNewDistribution; }
+    std::string mean() { return mMean; }
+    void mean(const std::string &aNewMean) { mMean = aNewMean; }
+    std::string upperBound() { return mUpperBound; }
+    void upperBound(const std::string &aNewUpperBound) { mUpperBound = aNewUpperBound; }
+    std::string lowerBound() { return mLowerBound; }
+    void lowerBound(const std::string &aNewLowerBound) { mLowerBound = aNewLowerBound; }
+    std::string standardDeviation() { return mStandardDeviation; }
+    void standardDeviation(const std::string &aNewStandardDeviation) { mStandardDeviation = aNewStandardDeviation; }
+    std::string numSamples() { return mNumSamples; }
+    void numSamples(const std::string &aNewNumSamples) { mNumSamples = aNewNumSamples; }
+
+private:
+
+    bool mIsRandom; /*!< specifies whether this variable has uncertainty */
+    std::string mType; /*!< random variable type, e.g. random rotation */
+    std::string mSubType; /*!< random variable subtype, e.g. rotation axis */
+    std::string mGlobalID; /*!< random variable global identifier */
+    std::string mDistribution; /*!< probability distribution */
+    std::string mMean; /*!< probability distribution mean */
+    std::string mUpperBound; /*!< probability distribution upper bound */
+    std::string mLowerBound; /*!< probability distribution lower bound */
+    std::string mStandardDeviation; /*!< probability distribution standard deviation */
+    std::string mNumSamples; /*!< number of samples */
+};
+
+class SROMLoad : public Variable
+{
+
+public:
+
+    virtual VariableType variableType() { return VT_LOAD; }
+
+private:
+
+    Vector3D mLoadComponents;
+
+};
+
+class SROMMaterial : public Variable
+{
+
+public:
+
+    virtual VariableType variableType() { return VT_MATERIAL; }
+
+};
 
 struct RandomVariable
 {
@@ -142,6 +214,57 @@ inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
 
     return (true);
 }
+
+inline void initialize_load_id_counter(const std::vector<LoadCase> &aLoadCases,
+                                       UniqueCounter &aUniqueCounter)
+{
+    aUniqueCounter.mark(0); // Mark 0 as true since we don't want to have a 0 ID
+    for(size_t i=0; i<aLoadCases.size(); ++i)
+        aUniqueCounter.mark(std::atoi(aLoadCases[i].id.c_str()));
+}
+
+inline void expand_single_load_case(const LoadCase &aOldLoadCase,
+                                    std::vector<LoadCase> &aNewLoadCaseList,
+                                    UniqueCounter &aUniqueLoadIDCounter)
+{
+    for(size_t j=0; j<aOldLoadCase.loads.size(); ++j)
+    {
+        std::string tIDString = aOldLoadCase.id;
+        // If this is a multi-load load case we need to generate
+        // a new load case with a new id.
+        if(j>0)
+        {
+            size_t tLoadID = aUniqueLoadIDCounter.assign_next_unique();
+            tIDString = std::to_string(tLoadID);
+        }
+        LoadCase tNewLoadCase = aOldLoadCase;
+        tNewLoadCase.id = tIDString;
+        tNewLoadCase.loads[0] = aOldLoadCase.loads[j];
+        tNewLoadCase.loads.resize(1);
+        aNewLoadCaseList.push_back(tNewLoadCase);
+    }
+}
+
+inline void expand_load_cases(const InputData &aInputData,
+                              std::vector<LoadCase> &aNewLoadCaseList)
+{
+    UniqueCounter tUniqueLoadIDCounter;
+    initialize_load_id_counter(aInputData.load_cases, tUniqueLoadIDCounter);
+
+    for(size_t i=0; i<aInputData.load_cases.size(); ++i)
+        expand_single_load_case(aInputData.load_cases[i], aNewLoadCaseList, tUniqueLoadIDCounter);
+}
+
+inline bool generateSROMInput(const InputData &aInputData)
+{
+    // Make sure we don't have any multi-load load cases.  If we do,
+    // expand them into load cases with single loads.
+    std::vector<LoadCase> tNewLoadCases;
+    expand_load_cases(aInputData, tNewLoadCases);
+
+    return true;
+}
+
 
 inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees, Plato::Vector3D& aVectorToRotate)
 {
@@ -900,6 +1023,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::RandomLoad> & aNew
 
     return (true);
 }
+
 
 }
 
@@ -2075,6 +2199,130 @@ TEST(PlatoTest, expand_random_loads_error_3)
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Z-COMPONENT
     tMyRandomRotationsSet[0].mRotations.mY = 0; tMyRandomRotationsSet[0].mRotations.mZ = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+}
+
+TEST(PlatoTest, expand_load_cases)
+{
+    InputData tInputData;
+    LoadCase tLC1;
+    Load tL1;
+    tLC1.id = "2";
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "4";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "6";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "10";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    std::vector<LoadCase> tNewLoadCases;
+    Plato::expand_load_cases(tInputData, tNewLoadCases);
+    ASSERT_EQ(tNewLoadCases.size(), 9);
+    ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
+    ASSERT_STREQ(tNewLoadCases[1].id.c_str(), "1");
+    ASSERT_STREQ(tNewLoadCases[2].id.c_str(), "3");
+    ASSERT_STREQ(tNewLoadCases[3].id.c_str(), "4");
+    ASSERT_STREQ(tNewLoadCases[4].id.c_str(), "5");
+    ASSERT_STREQ(tNewLoadCases[5].id.c_str(), "7");
+    ASSERT_STREQ(tNewLoadCases[6].id.c_str(), "6");
+    ASSERT_STREQ(tNewLoadCases[7].id.c_str(), "10");
+    ASSERT_STREQ(tNewLoadCases[8].id.c_str(), "8");
+}
+
+TEST(PlatoTest, initialize_load_id_counter)
+{
+    std::vector<LoadCase> tLoadCases;
+    LoadCase tLC1;
+    tLC1.id = "3";
+    tLoadCases.push_back(tLC1);
+    Plato::UniqueCounter tUniqueLoadIDCounter;
+    Plato::initialize_load_id_counter(tLoadCases, tUniqueLoadIDCounter);
+    int tID = tUniqueLoadIDCounter.assign_next_unique();
+    ASSERT_EQ(tID, 1);
+    tID = tUniqueLoadIDCounter.assign_next_unique();
+    ASSERT_EQ(tID, 2);
+    tID = tUniqueLoadIDCounter.assign_next_unique();
+    ASSERT_EQ(tID, 4);
+}
+
+TEST(PlatoTest, expand_single_load_case)
+{
+    // Check case of single load case with single load
+    LoadCase tOldLoadCase;
+    tOldLoadCase.id = "88";
+    Load tLoad1;
+    tLoad1.app_id = "34";
+    tLoad1.app_type = "nodeset";
+    tLoad1.type = "traction";
+    tLoad1.x = "0.0";
+    tLoad1.y = "1.0";
+    tLoad1.z = "33";
+    tLoad1.scale = "24.5";
+    tLoad1.load_id = "89";
+    tOldLoadCase.loads.push_back(tLoad1);
+    Plato::UniqueCounter tUniqueLoadIDCounter;
+    tUniqueLoadIDCounter.mark(0);
+    tUniqueLoadIDCounter.mark(88);
+    std::vector<LoadCase> tNewLoadCaseList;
+    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter);
+    ASSERT_EQ(tNewLoadCaseList.size(), 1);
+    ASSERT_STREQ(tNewLoadCaseList[0].id.c_str(), "88");
+    ASSERT_EQ(tNewLoadCaseList[0].loads.size(), 1);
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].load_id.c_str(), "89");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].y.c_str(), "1.0");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].x.c_str(), "0.0");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].z.c_str(), "33");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].type.c_str(), "traction");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_type.c_str(), "nodeset");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_id.c_str(), "34");
+    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].scale.c_str(), "24.5");
+    // Check the case where a load case has more than one load
+    Load tLoad2;
+    tLoad2.app_id = "21";
+    tLoad2.app_type = "sideset";
+    tLoad2.type = "pressure";
+    tLoad2.x = "44";
+    tLoad2.y = "55";
+    tLoad2.z = "66";
+    tLoad2.scale = "12";
+    tLoad2.load_id = "101";
+    tOldLoadCase.loads.push_back(tLoad2);
+    std::vector<LoadCase> tNewLoadCaseList2;
+    Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter);
+    ASSERT_EQ(tNewLoadCaseList2.size(), 2);
+    ASSERT_STREQ(tNewLoadCaseList2[1].id.c_str(), "1");
+    ASSERT_STREQ(tNewLoadCaseList2[0].id.c_str(), "88");
+    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].y.c_str(), "55");
+    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].x.c_str(), "44");
+    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].z.c_str(), "66");
+    // Check case where load case with multiple loads is is split and the ids of the resulting
+    // load cases have to "straddle" original load case id
+    LoadCase tLC1;
+    tLC1.id = "2";
+    Load tL1, tL2, tL3;
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL2);
+    tLC1.loads.push_back(tL3);
+    Plato::UniqueCounter tIDCounter;
+    tIDCounter.mark(0);
+    tIDCounter.mark(2);
+    std::vector<LoadCase> tNewList;
+    Plato::expand_single_load_case(tLC1,tNewList,tIDCounter);
+    ASSERT_EQ(tNewList.size(), 3);
+    ASSERT_STREQ(tNewList[0].id.c_str(), "2");
+    ASSERT_STREQ(tNewList[1].id.c_str(), "1");
+    ASSERT_STREQ(tNewList[2].id.c_str(), "3");
 }
 
 }
