@@ -461,7 +461,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                     else
                     {
                         // get new load id
-                        const size_t newUniqueLoadId = unique_load_counter.assign_next_unique();
+                        const size_t newUniqueLoadId = unique_load_counter.assignNextUnique();
                         const std::string newUniqueLoadId_str = std::to_string(newUniqueLoadId);
                         loadcaseInThisUncertain.push_back(newUniqueLoadId);
 

@@ -51,43 +51,43 @@ namespace Plato
 {
 
 UniqueCounter::UniqueCounter() :
-        m_unassigned_index(0u),
-        m_is_assigned(),
-        m_max_unassigned_index(5000000u)
+        mUnassignedIndex(0u),
+        mIsAssigned(),
+        mMaxUnassignedIndex(5000000u)
 {
 }
 UniqueCounter::~UniqueCounter()
 {
 }
 
-bool UniqueCounter::mark(const size_t& index)
+bool UniqueCounter::mark(const size_t& aIndex)
 {
     // true if already assigned, false if unassigned before
-    const bool value_before = m_is_assigned[index];
-    m_is_assigned[index] = true;
-    return value_before;
+    const bool tValueBefore = mIsAssigned[aIndex];
+    mIsAssigned[aIndex] = true;
+    return (tValueBefore);
 }
 
-size_t UniqueCounter::assign_next_unique()
+size_t UniqueCounter::assignNextUnique()
 {
     // linear scan until find unassigned
     while(true)
     {
         // if unassigned
-        if(!m_is_assigned[m_unassigned_index])
+        if(!mIsAssigned[mUnassignedIndex])
         {
             // do assign
-            const size_t to_return = m_unassigned_index;
-            m_is_assigned[m_unassigned_index] = true;
-            m_unassigned_index++;
-            return to_return;
+            const size_t tToReturn = mUnassignedIndex;
+            mIsAssigned[mUnassignedIndex] = true;
+            mUnassignedIndex++;
+            return tToReturn;
         }
 
         // continue scan
-        m_unassigned_index++;
+        mUnassignedIndex++;
 
         // avoid infinite loop by max
-        if(m_max_unassigned_index < m_unassigned_index)
+        if(mMaxUnassignedIndex < mUnassignedIndex)
         {
             break;
         }
@@ -95,7 +95,23 @@ size_t UniqueCounter::assign_next_unique()
 
     // should never reach here
     std::abort();
-    return 0u;
+    return (0u);
+}
+
+std::vector<size_t> UniqueCounter::list()
+{
+    const size_t tNumIndices = mIsAssigned.size();
+    std::vector<size_t> tList(tNumIndices);
+
+    size_t tIndex = 0;
+    std::map<size_t, bool>::iterator tIterator;
+    for (tIterator = mIsAssigned.begin(); tIterator != mIsAssigned.end(); ++tIterator)
+    {
+        tList[tIndex] = tIterator->first;
+        tIndex++;
+    }
+
+    return (tList);
 }
 
 }

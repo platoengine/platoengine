@@ -42,35 +42,55 @@
 
 #pragma once
 
-#include <cstddef>
 #include <map>
-
-/* Efficiently store and retrieve the next unassigned index in the sequence 0, 1, ... etc
- *
- * Note, indices are zero based.
- */
+#include <vector>
+#include <cstddef>
 
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Efficiently store and retrieve the next unassigned index in the sequence
+ * 0, 1, ..., N. Note, indices are zero based.
+**********************************************************************************/
 class UniqueCounter
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     UniqueCounter();
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~UniqueCounter();
 
-    // mark an index as assigned
-    bool mark(const size_t& index);
+    /******************************************************************************//**
+     * @brief Mark an index as assigned
+     * @param [in] aIndex index to assigned
+     * @return true if already assigned, false if unassigned before
+    **********************************************************************************/
+    bool mark(const size_t& aIndex);
 
-    // retrieve smallest unassigned index
-    size_t assign_next_unique();
+    /******************************************************************************//**
+     * @brief Retrieve smallest unassigned index
+     * @return smallest unassigned index
+    **********************************************************************************/
+    size_t assignNextUnique();
+
+    /******************************************************************************//**
+     * @brief Retrieve list of assigned indices
+     * @return list of assigned indices
+    **********************************************************************************/
+    std::vector<size_t> list();
 
 private:
-
-    size_t m_unassigned_index;
-    std::map<size_t, bool> m_is_assigned;
-    size_t m_max_unassigned_index;
-
+    size_t mUnassignedIndex; /*!< smallest unassigned index */
+    std::map<size_t, bool> mIsAssigned; /*!< map from assigned index to assigned flag */
+    size_t mMaxUnassignedIndex; /*!< maximum unassigned index, i.e. upper bound */
 };
+// class UniqueCounter
 
 }
+// namespace Plato
