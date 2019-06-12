@@ -113,8 +113,49 @@ struct RandomLoadCase
     std::vector<Plato::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 };
 
+inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
+{
+    if(std::isfinite(aMyOriginalLoad.mX) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: X-COMPONENT IS NOT A FINITE NUMBER.\n";
+        return (false);
+    }
+    else if(std::isfinite(aMyOriginalLoad.mY) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: Y-COMPONENT IS NOT A FINITE NUMBER.\n";
+        return (false);
+    }
+    else if(std::isfinite(aMyOriginalLoad.mZ) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: Z-COMPONENT IS NOT A FINITE NUMBER.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
 inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees, Plato::Vector3D& aVectorToRotate)
 {
+    const bool tBadNumberDetected = Plato::check_vector3d_values(aVectorToRotate) == false;
+    const bool tBadRotationDetected = Plato::check_vector3d_values(aRotatioAnglesInDegrees) == false;
+    if(tBadRotationDetected || tBadNumberDetected)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: A NON-FINITE NUMBER WAS DETECTED.\n";
+        return (false);
+    }
+
     // compute cosine/sine
     const double tCosAngleX = cos(aRotatioAnglesInDegrees.mX * M_PI / 180.0);
     const double tSinAngleX = sin(aRotatioAnglesInDegrees.mX * M_PI / 180.0);
@@ -177,36 +218,6 @@ inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees
 
     return (true);
 }*/
-
-inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
-{
-    if(std::isfinite(aMyOriginalLoad.mX) == false)
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: X-COMPONENT IS NOT A FINITE NUMBER.\n";
-        return (false);
-    }
-    else if(std::isfinite(aMyOriginalLoad.mY) == false)
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: Y-COMPONENT IS NOT A FINITE NUMBER.\n";
-        return (false);
-    }
-    else if(std::isfinite(aMyOriginalLoad.mZ) == false)
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: Z-COMPONENT IS NOT A FINITE NUMBER.\n";
-        return (false);
-    }
-
-    return (true);
-}
 
 inline bool define_distribution(const Plato::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
@@ -745,7 +756,7 @@ inline bool check_expand_random_loads_inputs(const Plato::Vector3D & aMyOriginal
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT VECTOR OF RANDOM ROTATIONS IS EMPTY.\n";
+                 << "\nMESSAGE: VECTOR OF RANDOM ROTATIONS IS EMPTY.\n";
         return (false);
     }
     else if(Plato::check_vector3d_values(aMyOriginalLoad) == false)
@@ -753,7 +764,7 @@ inline bool check_expand_random_loads_inputs(const Plato::Vector3D & aMyOriginal
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: AN ELEMENT IN VECTOR 3D IS NOT FINITE.\n";
+                 << "\nMESSAGE: A NON-FINITE NUMBER WAS DETECTED IN VECTOR 3D.\n";
         return (false);
     }
 
@@ -785,7 +796,7 @@ inline bool expand_random_loads(const Plato::Vector3D & aMyOriginalLoad,
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
                      << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: APPLICATION OF ROTATION MATRIS WAS UNSUCCESSFUL.\n";
+                     << "\nMESSAGE: APPLICATION OF ROTATION MATRIX WAS UNSUCCESSFUL.\n";
             return (false);
         }
         tMyRandomLoad.mLoadID = aUniqueLoadCounter.assignNextUnique();
@@ -2019,6 +2030,50 @@ TEST(PlatoTest, expand_random_loads_error_1)
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
     std::vector<Plato::RandomLoad> tMyRandomLoads;
     std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+}
+
+TEST(PlatoTest, expand_random_loads_error_2)
+{
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
+    Plato::UniqueCounter tUniqueLoadCounter;
+    Plato::Vector3D tMyOriginalLoad(std::numeric_limits<double>::quiet_NaN(), 1, 1);
+    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    Plato::RandomRotations tMyRotation;
+    tMyRotation.mRotations.mX = 0;
+    tMyRotation.mRotations.mY = 0;
+    tMyRotation.mRotations.mZ = 62.92995363352;
+    tMyRandomRotationsSet.push_back(tMyRotation);
+    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Y-COMPONENT
+    tMyOriginalLoad.mX = 1; tMyOriginalLoad.mY = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Z-COMPONENT
+    tMyOriginalLoad.mY = 1; tMyOriginalLoad.mZ = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+}
+
+TEST(PlatoTest, expand_random_loads_error_3)
+{
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
+    Plato::UniqueCounter tUniqueLoadCounter;
+    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    Plato::RandomRotations tMyRotation;
+    tMyRotation.mRotations.mX = std::numeric_limits<double>::quiet_NaN(); tMyRotation.mRotations.mY = 0; tMyRotation.mRotations.mZ = 62.92995363352;
+    tMyRandomRotationsSet.push_back(tMyRotation);
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Y-COMPONENT
+    tMyRandomRotationsSet[0].mRotations.mX = 0; tMyRandomRotationsSet[0].mRotations.mY = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
+
+    // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Z-COMPONENT
+    tMyRandomRotationsSet[0].mRotations.mY = 0; tMyRandomRotationsSet[0].mRotations.mZ = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tUniqueLoadCounter, tMyRandomLoads));
 }
 
