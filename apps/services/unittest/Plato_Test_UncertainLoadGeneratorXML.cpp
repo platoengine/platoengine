@@ -234,7 +234,7 @@ inline void expand_single_load_case(const LoadCase &aOldLoadCase,
         // a new load case with a new id.
         if(j>0)
         {
-            size_t tLoadID = aUniqueLoadIDCounter.assign_next_unique();
+            size_t tLoadID = aUniqueLoadIDCounter.assignNextUnique();
             tIDString = std::to_string(tLoadID);
         }
         LoadCase tNewLoadCase = aOldLoadCase;
@@ -2248,11 +2248,11 @@ TEST(PlatoTest, initialize_load_id_counter)
     tLoadCases.push_back(tLC1);
     Plato::UniqueCounter tUniqueLoadIDCounter;
     Plato::initialize_load_id_counter(tLoadCases, tUniqueLoadIDCounter);
-    int tID = tUniqueLoadIDCounter.assign_next_unique();
+    int tID = tUniqueLoadIDCounter.assignNextUnique();
     ASSERT_EQ(tID, 1);
-    tID = tUniqueLoadIDCounter.assign_next_unique();
+    tID = tUniqueLoadIDCounter.assignNextUnique();
     ASSERT_EQ(tID, 2);
-    tID = tUniqueLoadIDCounter.assign_next_unique();
+    tID = tUniqueLoadIDCounter.assignNextUnique();
     ASSERT_EQ(tID, 4);
 }
 
