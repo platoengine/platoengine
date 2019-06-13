@@ -323,6 +323,31 @@ inline std::shared_ptr<Plato::SROMLoad> create_random_load_variable(const Uncert
     return tNewLoad;
 }
 
+inline void create_random_loads_from_uncertainty(const Uncertainty &aUncertainty,
+                                                 const std::vector<LoadCase> &aNewLoadCases,
+                                                 std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
+                                                 std::set<int> &aUncertainLoads,
+                                                 std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
+{
+    const int tUncertaintyLoadID = std::atoi(aUncertainty.id.c_str());
+    for(size_t j=0; j<aOriginalToNewLoadCaseMap[tUncertaintyLoadID].size(); ++j)
+    {
+        const int tCurLoadCaseID = aOriginalToNewLoadCaseMap[tUncertaintyLoadID][j];
+        std::string tCurLoadCaseIDString = std::to_string(tCurLoadCaseID);
+        aUncertainLoads.insert(tCurLoadCaseID);
+        for(size_t k=0; k<aNewLoadCases.size(); ++k)
+        {
+            if(aNewLoadCases[k].id == tCurLoadCaseIDString)
+            {
+                std::shared_ptr<Plato::Variable> tNewLoad =
+                        create_random_load_variable(aUncertainty, aNewLoadCases[k]);
+                aSROMVariables.push_back(tNewLoad);
+                k=aNewLoadCases.size();
+            }
+        }
+    }
+}
+
 inline void create_random_load_variables(const std::vector<Uncertainty> &aUncertainties,
                                          const std::vector<LoadCase> &aNewLoadCases,
                                          std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
@@ -331,24 +356,9 @@ inline void create_random_load_variables(const std::vector<Uncertainty> &aUncert
 {
     for(size_t i=0; i<aUncertainties.size(); ++i)
     {
-        const Uncertainty &tCurUncertainty = aUncertainties[i];
-        const int tUncertaintyLoadID = std::atoi(tCurUncertainty.id.c_str());
-        for(size_t j=0; j<aOriginalToNewLoadCaseMap[tUncertaintyLoadID].size(); ++j)
-        {
-            const int tCurLoadCaseID = aOriginalToNewLoadCaseMap[tUncertaintyLoadID][j];
-            std::string tCurLoadCaseIDString = std::to_string(tCurLoadCaseID);
-            aUncertainLoads.insert(tCurLoadCaseID);
-            for(size_t k=0; k<aNewLoadCases.size(); ++k)
-            {
-                if(aNewLoadCases[k].id == tCurLoadCaseIDString)
-                {
-                    std::shared_ptr<Plato::Variable> tNewLoad =
-                            create_random_load_variable(tCurUncertainty, aNewLoadCases[k]);
-                    aSROMVariables.push_back(tNewLoad);
-                    k=aNewLoadCases.size();
-                }
-            }
-        }
+        create_random_loads_from_uncertainty(aUncertainties[i], aNewLoadCases,
+                                             aOriginalToNewLoadCaseMap,
+                                             aUncertainLoads, aSROMVariables);
     }
 }
 
