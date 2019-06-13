@@ -127,10 +127,27 @@ public:
     SROMLoad();
     virtual ~SROMLoad();
     VariableType variableType() override { return VT_LOAD; }
+    void x(const double &aX) { mX = aX; }
+    double x() { return mX; }
+    void y(const double &aY) { mY = aY; }
+    double y() { return mY; }
+    void z(const double &aZ) { mZ = aZ; }
+    double z() { return mZ; }
+    void appType(const std::string &aAppType) { mAppType = aAppType; }
+    std::string appType() { return mAppType; }
+    void type(const std::string &aType) { mType = aType; }
+    std::string type() { return mType; }
+    void appID(const int &aAppID) { mAppID = aAppID; }
+    int appID() { return mAppID; }
 
 private:
 
-    Vector3D mLoadComponents;
+    double mX;
+    double mY;
+    double mZ;
+    std::string mType;
+    std::string mAppType;
+    int mAppID;
 
 };
 
@@ -268,47 +285,102 @@ inline void expand_load_cases(const InputData &aInputData,
                                 tOriginalToNewLoadCaseMap);
 }
 
+inline void set_load_parameters(const LoadCase &aLoadCase,
+                                std::shared_ptr<SROMLoad> &aLoad)
+{
+    aLoad->x(std::atof(aLoadCase.loads[0].x.c_str()));
+    aLoad->y(std::atof(aLoadCase.loads[0].y.c_str()));
+    aLoad->z(std::atof(aLoadCase.loads[0].z.c_str()));
+    aLoad->type(aLoadCase.loads[0].type);
+    aLoad->appType(aLoadCase.loads[0].app_type);
+    aLoad->appID(std::atoi(aLoadCase.loads[0].app_id.c_str()));
+}
+
+inline std::shared_ptr<SROMLoad> create_deterministic_load_variable(const LoadCase &aLoadCase)
+{
+    std::shared_ptr<SROMLoad> tNewLoad = std::make_shared<SROMLoad>();
+    tNewLoad->isRandom(false);
+    tNewLoad->globalID(aLoadCase.id);
+    set_load_parameters(aLoadCase, tNewLoad);
+    return tNewLoad;
+}
+
+inline std::shared_ptr<SROMLoad> create_random_load_variable(const Uncertainty &aUncertainty,
+                                                             const LoadCase &aLoadCase)
+{
+    std::shared_ptr<SROMLoad> tNewLoad = std::make_shared<SROMLoad>();
+    tNewLoad->isRandom(true);
+    tNewLoad->type(aUncertainty.type);
+    tNewLoad->subType(aUncertainty.axis);
+    tNewLoad->globalID(aLoadCase.id);
+    tNewLoad->distribution(aUncertainty.distribution);
+    tNewLoad->mean(aUncertainty.mean);
+    tNewLoad->upperBound(aUncertainty.upper);
+    tNewLoad->lowerBound(aUncertainty.lower);
+    tNewLoad->standardDeviation(aUncertainty.standard_deviation);
+    tNewLoad->numSamples(aUncertainty.num_samples);
+    set_load_parameters(aLoadCase, tNewLoad);
+    return tNewLoad;
+}
+
+inline void create_random_load_variables(const std::vector<Uncertainty> &aUncertainties,
+                                         const std::vector<LoadCase> &aNewLoadCases,
+                                         std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
+                                         std::set<int> &aUncertainLoads,
+                                         std::vector<std::shared_ptr<Variable> > &aSROMVariables)
+{
+    for(size_t i=0; i<aUncertainties.size(); ++i)
+    {
+        const Uncertainty &tCurUncertainty = aUncertainties[i];
+        const int tUncertaintyLoadID = std::atoi(tCurUncertainty.id.c_str());
+        for(size_t j=0; j<aOriginalToNewLoadCaseMap[tUncertaintyLoadID].size(); ++j)
+        {
+            const int tCurLoadCaseID = aOriginalToNewLoadCaseMap[tUncertaintyLoadID][j];
+            std::string tCurLoadCaseIDString = std::to_string(tCurLoadCaseID);
+            aUncertainLoads.insert(tCurLoadCaseID);
+            for(size_t k=0; k<aNewLoadCases.size(); ++k)
+            {
+                if(aNewLoadCases[k].id == tCurLoadCaseIDString)
+                {
+                    std::shared_ptr<Variable> tNewLoad =
+                            create_random_load_variable(tCurUncertainty, aNewLoadCases[k]);
+                    aSROMVariables.push_back(tNewLoad);
+                    k=aNewLoadCases.size();
+                }
+            }
+        }
+    }
+}
+
+inline void create_deterministic_load_variables(const std::vector<LoadCase> &aNewLoadCases,
+                                                std::set<int> &aUncertainLoads,
+                                                std::vector<std::shared_ptr<Variable> > &aSROMVariables)
+{
+    for(size_t i=0; i<aNewLoadCases.size(); ++i)
+    {
+        const int tCurLoadCaseID = std::atoi(aNewLoadCases[i].id.c_str());
+        if(aUncertainLoads.find(tCurLoadCaseID) == aUncertainLoads.end())
+        {
+            std::shared_ptr<SROMLoad> tNewLoad = create_deterministic_load_variable(aNewLoadCases[i]);
+            aSROMVariables.push_back(tNewLoad);
+        }
+    }
+}
+
 inline bool generateSROMInput(const InputData &aInputData,
                               std::vector<std::shared_ptr<Variable> > &aSROMVariables)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
 
-    // Make sure we don't have any multi-load load cases.  If we do,
-    // expand them into load cases with single loads.
     std::vector<LoadCase> tNewLoadCases;
     expand_load_cases(aInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
 
-    // Loop through uncertainties and add loads with uncertainties to the SROM input
-    // data structures.
-    for(size_t i=0; i<aInputData.uncertainties.size(); ++i)
-    {
-        const Uncertainty &tCurUncertainty = aInputData.uncertainties[i];
-        const std::string tLoadIDString = tCurUncertainty.id;
-        const int tLoadID = std::atoi(tLoadIDString.c_str());
-        for(size_t j=0; j<tOriginalToNewLoadCaseMap[tLoadID].size(); ++j)
-        {
-            const int tCurLoadCaseID = tOriginalToNewLoadCaseMap[tLoadID][j];
-            for(size_t k=0; k<tNewLoadCases.size(); ++k)
-            {
-                if(tNewLoadCases[k].id == tLoadIDString)
-                {
-                    std::shared_ptr<Variable> tNewLoad = std::make_shared<SROMLoad>();
-                    tNewLoad->isRandom(true);
-                    tNewLoad->type(tCurUncertainty.type);
-                    tNewLoad->subType(tCurUncertainty.axis);
-                    tNewLoad->globalID(tLoadIDString);
-                    tNewLoad->distribution(tCurUncertainty.distribution);
-                    tNewLoad->mean(tCurUncertainty.mean);
-                    tNewLoad->upperBound(tCurUncertainty.upper);
-                    tNewLoad->lowerBound(tCurUncertainty.lower);
-                    tNewLoad->standardDeviation(tCurUncertainty.standard_deviation);
-                    tNewLoad->numSamples(tCurUncertainty.num_samples);
-                    aSROMVariables.push_back(tNewLoad);
-                    k=tNewLoadCases.size(); // break out of the looping
-                }
-            }
-        }
-    }
+    std::set<int> tUncertainLoads;
+    create_random_load_variables(aInputData.uncertainties, tNewLoadCases,
+                                 tOriginalToNewLoadCaseMap, tUncertainLoads,
+                                 aSROMVariables);
+
+    create_deterministic_load_variables(tNewLoadCases, tUncertainLoads, aSROMVariables);
 
     return true;
 }
