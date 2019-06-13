@@ -79,8 +79,8 @@ class Variable
 
 public:
 
-    Variable();
-    virtual ~Variable();
+    Variable(){}
+    virtual ~Variable(){}
     virtual VariableType variableType() = 0;
 
     // Get/set functions for member data
@@ -124,8 +124,8 @@ class SROMLoad : public Variable
 
 public:
 
-    SROMLoad();
-    virtual ~SROMLoad();
+    SROMLoad(){}
+    virtual ~SROMLoad(){}
     VariableType variableType() override { return VT_LOAD; }
     void x(const double &aX) { mX = aX; }
     double x() { return mX; }
@@ -135,8 +135,8 @@ public:
     double z() { return mZ; }
     void appType(const std::string &aAppType) { mAppType = aAppType; }
     std::string appType() { return mAppType; }
-    void type(const std::string &aType) { mType = aType; }
-    std::string type() { return mType; }
+    void loadType(const std::string &aType) { mLoadType = aType; }
+    std::string loadType() { return mLoadType; }
     void appID(const int &aAppID) { mAppID = aAppID; }
     int appID() { return mAppID; }
 
@@ -145,7 +145,7 @@ private:
     double mX;
     double mY;
     double mZ;
-    std::string mType;
+    std::string mLoadType;
     std::string mAppType;
     int mAppID;
 
@@ -156,8 +156,8 @@ class SROMMaterial : public Variable
 
 public:
 
-    SROMMaterial();
-    virtual ~SROMMaterial();
+    SROMMaterial(){}
+    virtual ~SROMMaterial(){}
     virtual VariableType variableType() override { return VT_MATERIAL; }
 
 };
@@ -240,7 +240,7 @@ inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
 }
 
 inline void initialize_load_id_counter(const std::vector<LoadCase> &aLoadCases,
-                                       UniqueCounter &aUniqueCounter)
+                                       Plato::UniqueCounter &aUniqueCounter)
 {
     aUniqueCounter.mark(0); // Mark 0 as true since we don't want to have a 0 ID
     for(size_t i=0; i<aLoadCases.size(); ++i)
@@ -249,7 +249,7 @@ inline void initialize_load_id_counter(const std::vector<LoadCase> &aLoadCases,
 
 inline void expand_single_load_case(const LoadCase &aOldLoadCase,
                                     std::vector<LoadCase> &aNewLoadCaseList,
-                                    UniqueCounter &aUniqueLoadIDCounter,
+                                    Plato::UniqueCounter &aUniqueLoadIDCounter,
                                     std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
 {
     int tOriginalLoadCaseID = std::atoi(aOldLoadCase.id.c_str());
@@ -286,29 +286,29 @@ inline void expand_load_cases(const InputData &aInputData,
 }
 
 inline void set_load_parameters(const LoadCase &aLoadCase,
-                                std::shared_ptr<SROMLoad> &aLoad)
+                                std::shared_ptr<Plato::SROMLoad> &aLoad)
 {
     aLoad->x(std::atof(aLoadCase.loads[0].x.c_str()));
     aLoad->y(std::atof(aLoadCase.loads[0].y.c_str()));
     aLoad->z(std::atof(aLoadCase.loads[0].z.c_str()));
-    aLoad->type(aLoadCase.loads[0].type);
+    aLoad->loadType(aLoadCase.loads[0].type);
     aLoad->appType(aLoadCase.loads[0].app_type);
     aLoad->appID(std::atoi(aLoadCase.loads[0].app_id.c_str()));
 }
 
-inline std::shared_ptr<SROMLoad> create_deterministic_load_variable(const LoadCase &aLoadCase)
+inline std::shared_ptr<Plato::SROMLoad> create_deterministic_load_variable(const LoadCase &aLoadCase)
 {
-    std::shared_ptr<SROMLoad> tNewLoad = std::make_shared<SROMLoad>();
+    std::shared_ptr<Plato::SROMLoad> tNewLoad = std::make_shared<Plato::SROMLoad>();
     tNewLoad->isRandom(false);
     tNewLoad->globalID(aLoadCase.id);
     set_load_parameters(aLoadCase, tNewLoad);
     return tNewLoad;
 }
 
-inline std::shared_ptr<SROMLoad> create_random_load_variable(const Uncertainty &aUncertainty,
+inline std::shared_ptr<Plato::SROMLoad> create_random_load_variable(const Uncertainty &aUncertainty,
                                                              const LoadCase &aLoadCase)
 {
-    std::shared_ptr<SROMLoad> tNewLoad = std::make_shared<SROMLoad>();
+    std::shared_ptr<Plato::SROMLoad> tNewLoad = std::make_shared<Plato::SROMLoad>();
     tNewLoad->isRandom(true);
     tNewLoad->type(aUncertainty.type);
     tNewLoad->subType(aUncertainty.axis);
@@ -327,7 +327,7 @@ inline void create_random_load_variables(const std::vector<Uncertainty> &aUncert
                                          const std::vector<LoadCase> &aNewLoadCases,
                                          std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
                                          std::set<int> &aUncertainLoads,
-                                         std::vector<std::shared_ptr<Variable> > &aSROMVariables)
+                                         std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
 {
     for(size_t i=0; i<aUncertainties.size(); ++i)
     {
@@ -342,7 +342,7 @@ inline void create_random_load_variables(const std::vector<Uncertainty> &aUncert
             {
                 if(aNewLoadCases[k].id == tCurLoadCaseIDString)
                 {
-                    std::shared_ptr<Variable> tNewLoad =
+                    std::shared_ptr<Plato::Variable> tNewLoad =
                             create_random_load_variable(tCurUncertainty, aNewLoadCases[k]);
                     aSROMVariables.push_back(tNewLoad);
                     k=aNewLoadCases.size();
@@ -354,21 +354,21 @@ inline void create_random_load_variables(const std::vector<Uncertainty> &aUncert
 
 inline void create_deterministic_load_variables(const std::vector<LoadCase> &aNewLoadCases,
                                                 std::set<int> &aUncertainLoads,
-                                                std::vector<std::shared_ptr<Variable> > &aSROMVariables)
+                                                std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
 {
     for(size_t i=0; i<aNewLoadCases.size(); ++i)
     {
         const int tCurLoadCaseID = std::atoi(aNewLoadCases[i].id.c_str());
         if(aUncertainLoads.find(tCurLoadCaseID) == aUncertainLoads.end())
         {
-            std::shared_ptr<SROMLoad> tNewLoad = create_deterministic_load_variable(aNewLoadCases[i]);
+            std::shared_ptr<Plato::SROMLoad> tNewLoad = create_deterministic_load_variable(aNewLoadCases[i]);
             aSROMVariables.push_back(tNewLoad);
         }
     }
 }
 
 inline bool generateSROMInput(const InputData &aInputData,
-                              std::vector<std::shared_ptr<Variable> > &aSROMVariables)
+                              std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
 
@@ -2465,6 +2465,235 @@ TEST(PlatoTest, expand_single_load_case)
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 2);
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 3);
+}
+
+TEST(PlatoTest, generateSROMInput)
+{
+    InputData tInputData;
+    LoadCase tLC1;
+
+    Load tL1;
+    tL1.type = "pressure";
+    tL1.app_type = "sideset";
+    tL1.app_id = "55";
+    tL1.x = "11.1";
+    tL1.y = "22.2";
+    tL1.z = "33.3";
+    Load tL2;
+    tL2.type = "force";
+    tL2.app_type = "nodeset";
+    tL2.app_id = "3";
+    tL2.x = "21.1";
+    tL2.y = "32.2";
+    tL2.z = "43.3";
+    Load tL3;
+    tL3.type = "traction";
+    tL3.app_type = "sideset";
+    tL3.app_id = "4";
+    tL3.x = "31.1";
+    tL3.y = "42.2";
+    tL3.z = "53.3";
+
+    tLC1.id = "2";
+    tLC1.loads.push_back(tL1);
+    tLC1.loads.push_back(tL2);
+    tLC1.loads.push_back(tL3);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "4";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL3);
+    tLC1.loads.push_back(tL2);
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "6";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL2);
+    tInputData.load_cases.push_back(tLC1);
+    tLC1.id = "10";
+    tLC1.loads.clear();
+    tLC1.loads.push_back(tL3);
+    tLC1.loads.push_back(tL1);
+    tInputData.load_cases.push_back(tLC1);
+    Uncertainty tUncertainty1;
+    tUncertainty1.type = "angle variation";
+    tUncertainty1.id = "4";
+    tUncertainty1.axis = "x";
+    tUncertainty1.distribution = "beta";
+    tUncertainty1.mean = "90.0";
+    tUncertainty1.upper = "95.0";
+    tUncertainty1.lower = "89.0";
+    tUncertainty1.standard_deviation = "1.3";
+    tUncertainty1.num_samples = "3";
+    Uncertainty tUncertainty2;
+    tUncertainty2.type = "angle variation";
+    tUncertainty2.id = "10";
+    tUncertainty2.axis = "y";
+    tUncertainty2.distribution = "beta";
+    tUncertainty2.mean = "10.0";
+    tUncertainty2.upper = "15.0";
+    tUncertainty2.lower = "5.0";
+    tUncertainty2.standard_deviation = "2.3";
+    tUncertainty2.num_samples = "2";
+    tInputData.uncertainties.push_back(tUncertainty1);
+    tInputData.uncertainties.push_back(tUncertainty2);
+
+    std::vector<std::shared_ptr<Plato::Variable> > tSROMVariables;
+    Plato::generateSROMInput(tInputData, tSROMVariables);
+
+    const double tTolerance = 1e-6;
+    ASSERT_EQ(tSROMVariables.size(), 9);
+    ASSERT_STREQ(tSROMVariables[0]->globalID().c_str(), "4");
+    ASSERT_TRUE(tSROMVariables[0]->isRandom());
+    ASSERT_STREQ(tSROMVariables[0]->type().c_str(), "angle variation");
+    ASSERT_STREQ(tSROMVariables[0]->subType().c_str(), "x");
+    ASSERT_STREQ(tSROMVariables[0]->distribution().c_str(), "beta");
+    ASSERT_STREQ(tSROMVariables[0]->mean().c_str(), "90.0");
+    ASSERT_STREQ(tSROMVariables[0]->upperBound().c_str(), "95.0");
+    ASSERT_STREQ(tSROMVariables[0]->lowerBound().c_str(), "89.0");
+    ASSERT_STREQ(tSROMVariables[0]->standardDeviation().c_str(), "1.3");
+    ASSERT_STREQ(tSROMVariables[0]->numSamples().c_str(), "3");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->x(), 31.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->y(), 42.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->z(), 53.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->appID(), 4);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->loadType().c_str(), "traction");
+
+    ASSERT_STREQ(tSROMVariables[1]->globalID().c_str(), "5");
+    ASSERT_TRUE(tSROMVariables[1]->isRandom());
+    ASSERT_STREQ(tSROMVariables[1]->type().c_str(), "angle variation");
+    ASSERT_STREQ(tSROMVariables[1]->subType().c_str(), "x");
+    ASSERT_STREQ(tSROMVariables[1]->distribution().c_str(), "beta");
+    ASSERT_STREQ(tSROMVariables[1]->mean().c_str(), "90.0");
+    ASSERT_STREQ(tSROMVariables[1]->upperBound().c_str(), "95.0");
+    ASSERT_STREQ(tSROMVariables[1]->lowerBound().c_str(), "89.0");
+    ASSERT_STREQ(tSROMVariables[1]->standardDeviation().c_str(), "1.3");
+    ASSERT_STREQ(tSROMVariables[1]->numSamples().c_str(), "3");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->x(), 21.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->y(), 32.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->z(), 43.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->appID(), 3);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->appType().c_str(), "nodeset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->loadType().c_str(), "force");
+
+    ASSERT_STREQ(tSROMVariables[2]->globalID().c_str(), "7");
+    ASSERT_TRUE(tSROMVariables[2]->isRandom());
+    ASSERT_STREQ(tSROMVariables[2]->type().c_str(), "angle variation");
+    ASSERT_STREQ(tSROMVariables[2]->subType().c_str(), "x");
+    ASSERT_STREQ(tSROMVariables[2]->distribution().c_str(), "beta");
+    ASSERT_STREQ(tSROMVariables[2]->mean().c_str(), "90.0");
+    ASSERT_STREQ(tSROMVariables[2]->upperBound().c_str(), "95.0");
+    ASSERT_STREQ(tSROMVariables[2]->lowerBound().c_str(), "89.0");
+    ASSERT_STREQ(tSROMVariables[2]->standardDeviation().c_str(), "1.3");
+    ASSERT_STREQ(tSROMVariables[2]->numSamples().c_str(), "3");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->x(), 11.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->y(), 22.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->z(), 33.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->appID(), 55);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->loadType().c_str(), "pressure");
+
+    ASSERT_STREQ(tSROMVariables[3]->globalID().c_str(), "10");
+    ASSERT_TRUE(tSROMVariables[3]->isRandom());
+    ASSERT_STREQ(tSROMVariables[3]->type().c_str(), "angle variation");
+    ASSERT_STREQ(tSROMVariables[3]->subType().c_str(), "y");
+    ASSERT_STREQ(tSROMVariables[3]->distribution().c_str(), "beta");
+    ASSERT_STREQ(tSROMVariables[3]->mean().c_str(), "10.0");
+    ASSERT_STREQ(tSROMVariables[3]->upperBound().c_str(), "15.0");
+    ASSERT_STREQ(tSROMVariables[3]->lowerBound().c_str(), "5.0");
+    ASSERT_STREQ(tSROMVariables[3]->standardDeviation().c_str(), "2.3");
+    ASSERT_STREQ(tSROMVariables[3]->numSamples().c_str(), "2");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->x(), 31.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->y(), 42.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->z(), 53.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->appID(), 4);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->loadType().c_str(), "traction");
+
+    ASSERT_STREQ(tSROMVariables[4]->globalID().c_str(), "8");
+    ASSERT_TRUE(tSROMVariables[4]->isRandom());
+    ASSERT_STREQ(tSROMVariables[4]->type().c_str(), "angle variation");
+    ASSERT_STREQ(tSROMVariables[4]->subType().c_str(), "y");
+    ASSERT_STREQ(tSROMVariables[4]->distribution().c_str(), "beta");
+    ASSERT_STREQ(tSROMVariables[4]->mean().c_str(), "10.0");
+    ASSERT_STREQ(tSROMVariables[4]->upperBound().c_str(), "15.0");
+    ASSERT_STREQ(tSROMVariables[4]->lowerBound().c_str(), "5.0");
+    ASSERT_STREQ(tSROMVariables[4]->standardDeviation().c_str(), "2.3");
+    ASSERT_STREQ(tSROMVariables[4]->numSamples().c_str(), "2");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->x(), 11.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->y(), 22.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->z(), 33.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->appID(), 55);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->loadType().c_str(), "pressure");
+
+    ASSERT_STREQ(tSROMVariables[5]->globalID().c_str(), "2");
+    ASSERT_FALSE(tSROMVariables[5]->isRandom());
+    ASSERT_STREQ(tSROMVariables[5]->type().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->subType().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->distribution().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->mean().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->upperBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->lowerBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->standardDeviation().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[5]->numSamples().c_str(), "");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->x(), 11.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->y(), 22.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->z(), 33.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->appID(), 55);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->loadType().c_str(), "pressure");
+
+    ASSERT_STREQ(tSROMVariables[6]->globalID().c_str(), "1");
+    ASSERT_FALSE(tSROMVariables[6]->isRandom());
+    ASSERT_STREQ(tSROMVariables[6]->type().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->subType().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->distribution().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->mean().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->upperBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->lowerBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->standardDeviation().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[6]->numSamples().c_str(), "");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->x(), 21.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->y(), 32.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->z(), 43.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->appID(), 3);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->appType().c_str(), "nodeset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->loadType().c_str(), "force");
+
+    ASSERT_STREQ(tSROMVariables[7]->globalID().c_str(), "3");
+    ASSERT_FALSE(tSROMVariables[7]->isRandom());
+    ASSERT_STREQ(tSROMVariables[7]->type().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->subType().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->distribution().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->mean().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->upperBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->lowerBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->standardDeviation().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[7]->numSamples().c_str(), "");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->x(), 31.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->y(), 42.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->z(), 53.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->appID(), 4);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->appType().c_str(), "sideset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->loadType().c_str(), "traction");
+
+    ASSERT_STREQ(tSROMVariables[8]->globalID().c_str(), "6");
+    ASSERT_FALSE(tSROMVariables[8]->isRandom());
+    ASSERT_STREQ(tSROMVariables[8]->type().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->subType().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->distribution().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->mean().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->upperBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->lowerBound().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->standardDeviation().c_str(), "");
+    ASSERT_STREQ(tSROMVariables[8]->numSamples().c_str(), "");
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->x(), 21.1, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->y(), 32.2, tTolerance);
+    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->z(), 43.3, tTolerance);
+    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->appID(), 3);
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->appType().c_str(), "nodeset");
+    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->loadType().c_str(), "force");
 }
 
 }
