@@ -68,11 +68,34 @@
 namespace Plato
 {
 
-enum VariableType
+struct VariableType
 {
-    VT_LOAD,
-    VT_MATERIAL
+
+enum type_t
+{
+    LOAD, MATERIAL, UNDEFINED
 };
+
+};
+
+
+inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plato::VariableType::type_t& aEnumVarType)
+{
+    if(aStringVarType == "material")
+    {
+        aEnumVarType = Plato::VariableType::MATERIAL;
+    }
+    else if(aStringVarType == "load")
+    {
+        aEnumVarType = Plato::VariableType::LOAD;
+    }
+    else
+    {
+        return (false);
+    }
+
+    return (true);
+}
 
 class Variable
 {
@@ -81,28 +104,28 @@ public:
 
     Variable(){}
     virtual ~Variable(){}
-    virtual VariableType variableType() = 0;
+    virtual Plato::VariableType::type_t variableType() = 0;
 
     // Get/set functions for member data
-    bool isRandom() { return  mIsRandom; }
+    bool isRandom() const { return  mIsRandom; }
     void isRandom(const bool &aNewValue) { mIsRandom = aNewValue; }
-    std::string type() { return mType; }
+    std::string type() const { return mType; }
     void type(const std::string &aNewType) { mType = aNewType; }
-    std::string subType() { return mSubType; }
+    std::string subType() const { return mSubType; }
     void subType(const std::string &aNewSubType) { mSubType = aNewSubType; }
-    std::string globalID() { return mGlobalID; }
+    std::string globalID() const { return mGlobalID; }
     void globalID(const std::string &aNewGlobalID) { mGlobalID = aNewGlobalID; }
-    std::string distribution() { return mDistribution; }
+    std::string distribution() const { return mDistribution; }
     void distribution(const std::string &aNewDistribution) { mDistribution = aNewDistribution; }
-    std::string mean() { return mMean; }
+    std::string mean() const { return mMean; }
     void mean(const std::string &aNewMean) { mMean = aNewMean; }
-    std::string upperBound() { return mUpperBound; }
+    std::string upperBound() const { return mUpperBound; }
     void upperBound(const std::string &aNewUpperBound) { mUpperBound = aNewUpperBound; }
-    std::string lowerBound() { return mLowerBound; }
+    std::string lowerBound() const { return mLowerBound; }
     void lowerBound(const std::string &aNewLowerBound) { mLowerBound = aNewLowerBound; }
-    std::string standardDeviation() { return mStandardDeviation; }
+    std::string standardDeviation() const { return mStandardDeviation; }
     void standardDeviation(const std::string &aNewStandardDeviation) { mStandardDeviation = aNewStandardDeviation; }
-    std::string numSamples() { return mNumSamples; }
+    std::string numSamples() const { return mNumSamples; }
     void numSamples(const std::string &aNewNumSamples) { mNumSamples = aNewNumSamples; }
 
 private:
@@ -126,7 +149,7 @@ public:
 
     SROMLoad(){}
     virtual ~SROMLoad(){}
-    VariableType variableType() override { return VT_LOAD; }
+    Plato::VariableType::type_t variableType() override { return Plato::VariableType::LOAD; }
     void x(const double &aX) { mX = aX; }
     double x() { return mX; }
     void y(const double &aY) { mY = aY; }
@@ -158,7 +181,7 @@ public:
 
     SROMMaterial(){}
     virtual ~SROMMaterial(){}
-    virtual VariableType variableType() override { return VT_MATERIAL; }
+    Plato::VariableType::type_t variableType() override { return Plato::VariableType::MATERIAL; }
 
 };
 
@@ -354,11 +377,13 @@ inline void create_random_load_variables(const std::vector<Uncertainty> &aUncert
                                          std::set<int> &aUncertainLoads,
                                          std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
 {
-    for(size_t i=0; i<aUncertainties.size(); ++i)
+    for(size_t i = 0; i < aUncertainties.size(); ++i)
     {
-        create_random_loads_from_uncertainty(aUncertainties[i], aNewLoadCases,
+        create_random_loads_from_uncertainty(aUncertainties[i],
+                                             aNewLoadCases,
                                              aOriginalToNewLoadCaseMap,
-                                             aUncertainLoads, aSROMVariables);
+                                             aUncertainLoads,
+                                             aSROMVariables);
     }
 }
 
@@ -377,24 +402,24 @@ inline void create_deterministic_load_variables(const std::vector<LoadCase> &aNe
     }
 }
 
-inline bool generateSROMInput(const InputData &aInputData,
-                              std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
+inline bool generate_srom_inputs(const InputData &aInputData, std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
 
     std::vector<LoadCase> tNewLoadCases;
-    expand_load_cases(aInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
+    Plato::expand_load_cases(aInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
 
     std::set<int> tUncertainLoads;
-    create_random_load_variables(aInputData.uncertainties, tNewLoadCases,
-                                 tOriginalToNewLoadCaseMap, tUncertainLoads,
-                                 aSROMVariables);
+    Plato::create_random_load_variables(aInputData.uncertainties,
+                                        tNewLoadCases,
+                                        tOriginalToNewLoadCaseMap,
+                                        tUncertainLoads,
+                                        aSROMVariables);
 
-    create_deterministic_load_variables(tNewLoadCases, tUncertainLoads, aSROMVariables);
+    Plato::create_deterministic_load_variables(tNewLoadCases, tUncertainLoads, aSROMVariables);
 
-    return true;
+    return (true);
 }
-
 
 inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees, Plato::Vector3D& aVectorToRotate)
 {
@@ -440,37 +465,6 @@ inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees
 
     return (true);
 }
-
-/*inline bool register_all_load_ids(const std::vector<LoadCase> & aLoadCases, Plato::UniqueCounter & aUniqueLoadCounter)
-{
-    if(aLoadCases.size() <= 0)
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF LOAD CASES IS EMPTY.\n";
-        return (false);
-    }
-
-    const int tNumLoadCases = aLoadCases.size();
-    for(int tPrivateLoadIndex = 0; tPrivateLoadIndex < tNumLoadCases; tPrivateLoadIndex++)
-    {
-        // register load case
-        const int tMyLoadCaseId = std::atoi(aLoadCases[tPrivateLoadIndex].id.c_str());
-        aUniqueLoadCounter.mark(tMyLoadCaseId);
-
-        const std::vector<Load> & tMyLoadCaseLoads = aLoadCases[tPrivateLoadIndex].loads;
-        const int tMyLoadCaseNumLoads = tMyLoadCaseLoads.size();
-        for(int tLoadIndex = 0; tLoadIndex < tMyLoadCaseNumLoads; tLoadIndex++)
-        {
-            // register load id
-            const int tMyLoadID = std::atoi(tMyLoadCaseLoads[tLoadIndex].load_id.c_str());
-            aUniqueLoadCounter.mark(tMyLoadID);
-        }
-    }
-
-    return (true);
-}*/
 
 inline bool define_distribution(const Plato::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
@@ -1155,6 +1149,81 @@ inline bool set_random_load_case_id(std::vector<Plato::RandomLoadCase> & aRandom
     } // for-loop
 
     return (true);
+}
+
+inline void define_random_variable(const Plato::Variable& aVariable, Plato::RandomVariable& aRandomVariable)
+{
+    aRandomVariable.mType = aVariable.type();
+    aRandomVariable.mSubType = aVariable.subType();
+    aRandomVariable.mGlobalID = aVariable.globalID();
+
+    aRandomVariable.mMean = aVariable.mean();
+    aRandomVariable.mNumSamples = aVariable.numSamples();
+    aRandomVariable.mUpperBound = aVariable.upperBound();
+    aRandomVariable.mLowerBound = aVariable.lowerBound();
+    aRandomVariable.mDistribution = aVariable.distribution();
+    aRandomVariable.mStandardDeviation = aVariable.standardDeviation();
+}
+
+inline bool pre_process_input_variables(const std::vector<std::shared_ptr<Plato::Variable>>& aVariables,
+                                        std::map<Plato::VariableType::type_t, std::vector<Plato::RandomVariable>>& aRandomVariables,
+                                        std::map<Plato::VariableType::type_t, std::vector<Plato::RandomVariable>>& aDeterministicVariables)
+{
+    if(aVariables.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: INPUT SET OF VARIABLES IS EMPTY.\n";
+        return (false);
+    } // if statement
+
+    aRandomVariables.clear();
+    const size_t tNumRandomVariables = aVariables.size();
+    for(size_t tIndex = 0; tIndex < tNumRandomVariables; tIndex++)
+    {
+        const Plato::Variable& tVariable = aVariables[tIndex].operator*();
+        Plato::VariableType::type_t tMyVariableType =  Plato::VariableType::UNDEFINED;
+        Plato::variable_type_string_to_enum(tVariable.type(), tMyVariableType);
+
+        if(tVariable.isRandom())
+        {
+            Plato::RandomVariable tRandomVariable;
+            Plato::define_random_variable(tVariable, tRandomVariable);
+            aRandomVariables[tMyVariableType].push_back(tRandomVariable);
+        }
+        else
+        {
+            // if statement
+        }
+    } // for-loop
+
+    return (true);
+}
+
+inline bool solve_srom_problem(const std::vector<std::shared_ptr<Plato::Variable>>& aVariables)
+{
+/*    std::vector<Plato::RandomVariable> tRandomVariables;
+    if(Plato::pre_process_input_variables(aVariables, tRandomVariables) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: INPUT SET OF VARIABLES IS EMPTY.\n";
+        return (false);
+    }
+
+    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    if(Plato::compute_sample_probability_pairs(tRandomVariables, tMySampleProbPairs) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: PROBLEM FAILED TO GENERATE THE SAMPLE PROBABILITY PAIRS.\n";
+        return (false);
+    }
+*/
+    return(true);
 }
 
 }
@@ -2961,7 +3030,7 @@ TEST(PlatoTest, generateSROMInput)
     tInputData.uncertainties.push_back(tUncertainty2);
 
     std::vector<std::shared_ptr<Plato::Variable> > tSROMVariables;
-    Plato::generateSROMInput(tInputData, tSROMVariables);
+    Plato::generate_srom_inputs(tInputData, tSROMVariables);
 
     const double tTolerance = 1e-6;
     ASSERT_EQ(tSROMVariables.size(), 9);
