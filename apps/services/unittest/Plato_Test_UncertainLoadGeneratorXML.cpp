@@ -1326,6 +1326,128 @@ inline bool generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCa
     return (true);
 }
 
+inline bool check_deterministic_load_parameters(const Plato::srom::Load& aLoad)
+{
+    if(std::isfinite(aLoad.mAppID))
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: APPLICATION IDENTIFIER IS NOT A FINITE NUMBER.\n";
+        return (false);
+    }
+
+    if(aLoad.mAppType.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: APPLICATION TYPE IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    if(aLoad.mLoadType.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD TYPE IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    if(aLoad.mValues.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD COMPONENTS IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
+inline bool check_set_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads)
+{
+    for(size_t tIndex = 0; tIndex < aDeterministicLoads.size(); tIndex++)
+    {
+        if(Plato::check_deterministic_load_parameters(aDeterministicLoads[tIndex]) == false)
+        {
+            std::cout<< "\nFILE: " << __FILE__
+                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                     << "\nLINE:" << __LINE__
+                     << "\nMESSAGE: UNDEFINED PARAMETER FOR DETERMINISTIC LOAD #" << tIndex << ".\n";
+            return (false);
+        }
+    }
+
+    return (true);
+}
+
+inline bool append_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads,
+                                       std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
+{
+    if(aDeterministicLoads.empty())
+    {
+        return (true);
+    }
+
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
+    {
+        Plato::srom::RandomLoadCase& tRandomLoadCase = aSetLoadCases[tLoadCaseIndex];
+        for(size_t tLoadIndex = 0; tLoadIndex < aDeterministicLoads.size(); tLoadIndex++)
+        {
+            Plato::srom::RandomLoad tLoad;
+            tLoad.mProbability = 1.0;
+            tLoad.mAppID = aDeterministicLoads[tLoadIndex].mAppID;
+            tLoad.mAppType = aDeterministicLoads[tLoadIndex].mAppType;
+            tLoad.mLoadType = aDeterministicLoads[tLoadIndex].mLoadType;
+            Plato::set_load_components(aDeterministicLoads[tLoadIndex].mValues, tLoad.mMagnitude);
+            tRandomLoadCase.mLoads.push_back(tLoad);
+        }
+    }
+
+    return (true);
+}
+
+inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Load>& aDeterministicLoads,
+                                              std::vector<Plato::srom::RandomLoadCase> & aSetRandomLoadCases)
+{
+    if(aSetRandomLoadCases.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: SET OF RANDOM LOAD CASES IS EMPTY.\n";
+        return (false);
+    }
+
+    if(Plato::check_set_deterministic_loads(aDeterministicLoads) == false)
+    {
+        return (false);
+    }
+
+    if(Plato::append_deterministic_loads(aDeterministicLoads, aSetRandomLoadCases) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO APPEND DETERMINISTIC LOADS TO RANDOM LOAD CASES.\n";
+        return (false);
+    }
+
+    if(Plato::generate_load_case_identifiers(aSetRandomLoadCases) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO GENERATE IDENTIFIERS FOR EACH LOAD CASE.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
 inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput)
 {
     aOutput.mLoadCases.clear();
@@ -1376,17 +1498,17 @@ inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
                      << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO UPDATE RANDOM LOADS CASES FOR LOAD #" << tLoadIndex << ".\n";
+                     << "\nMESSAGE: FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
             return (false);
         }
     }
 
-    if(Plato::generate_load_case_identifiers(aOutput.mLoadCases) == false)
+    if(Plato::generate_output_random_load_cases(tDeterministicLoads, aOutput.mLoadCases) == false)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO GENERATE IDENTIFIERS FOR EACH LOAD CASE.\n";
+                 << "\nMESSAGE: FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n";
         return (false);
     }
 
