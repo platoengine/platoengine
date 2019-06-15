@@ -393,11 +393,7 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
         Plato::variable_type_string_to_enum(tRandomVariable.type, tVarType);
         if(tVarType == Plato::VariableType::LOAD)
         {
-            Plato::create_random_loads_from_uncertainty(tRandomVariable,
-                                                        aNewLoadCases,
-                                                        aOriginalToNewLoadCaseMap,
-                                                        aRandomLoadIDs,
-                                                        aLoad);
+            Plato::create_random_loads_from_uncertainty(tRandomVariable, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aLoad);
         }
     }
 }
@@ -1144,26 +1140,6 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
             return (false);
         } // if statement
     } // if-else statement
-
-    return (true);
-}
-
-inline bool set_random_load_case_id(std::vector<Plato::srom::RandomLoadCase> & aRandomLoadCases)
-{
-    if(aRandomLoadCases.empty())
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF RANDOM LOAD CASES IS EMPTY.\n";
-        return (false);
-    } // if statement
-
-    Plato::UniqueCounter tCounter;
-    for(size_t tIndex = 0; tIndex < aRandomLoadCases.size(); tIndex++)
-    {
-        aRandomLoadCases[tIndex].mLoadCaseID = tCounter.assignNextUnique();
-    } // for-loop
 
     return (true);
 }
@@ -3046,23 +3022,6 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
 
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
-
-    // SET RANDOM LOAD CASES IDS - FUNCTION BEING TESTED
-    ASSERT_TRUE(Plato::set_random_load_case_id(tRandomLoadCases));
-    std::vector<size_t> tGoldLoadCaseIDs =
-    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-     24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tRandomLoadCases.size(); tLoadCaseIndex++)
-    {
-        const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
-        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tRandomLoadCase.mLoadCaseID);
-    }
-}
-
-TEST(PlatoTest, set_random_load_case_id_error)
-{
-    std::vector<Plato::srom::RandomLoadCase> tRandomLoadCases;
-    ASSERT_FALSE(Plato::set_random_load_case_id(tRandomLoadCases));
 }
 
 TEST(PlatoTest, expand_load_cases)
