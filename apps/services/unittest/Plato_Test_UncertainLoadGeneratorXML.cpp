@@ -78,7 +78,6 @@ enum type_t
 
 };
 
-
 inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plato::VariableType::type_t& aEnumVarType)
 {
     if(aStringVarType == "material")
@@ -97,105 +96,34 @@ inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plat
     return (true);
 }
 
-class Variable
+namespace srom
 {
 
-public:
-
-    Variable(){}
-    virtual ~Variable(){}
-    virtual Plato::VariableType::type_t variableType() = 0;
-
-    // Get/set functions for member data
-    bool isRandom() const { return  mIsRandom; }
-    void isRandom(const bool &aNewValue) { mIsRandom = aNewValue; }
-    std::string type() const { return mType; }
-    void type(const std::string &aNewType) { mType = aNewType; }
-    std::string subType() const { return mSubType; }
-    void subType(const std::string &aNewSubType) { mSubType = aNewSubType; }
-    std::string globalID() const { return mGlobalID; }
-    void globalID(const std::string &aNewGlobalID) { mGlobalID = aNewGlobalID; }
-    std::string distribution() const { return mDistribution; }
-    void distribution(const std::string &aNewDistribution) { mDistribution = aNewDistribution; }
-    std::string mean() const { return mMean; }
-    void mean(const std::string &aNewMean) { mMean = aNewMean; }
-    std::string upperBound() const { return mUpperBound; }
-    void upperBound(const std::string &aNewUpperBound) { mUpperBound = aNewUpperBound; }
-    std::string lowerBound() const { return mLowerBound; }
-    void lowerBound(const std::string &aNewLowerBound) { mLowerBound = aNewLowerBound; }
-    std::string standardDeviation() const { return mStandardDeviation; }
-    void standardDeviation(const std::string &aNewStandardDeviation) { mStandardDeviation = aNewStandardDeviation; }
-    std::string numSamples() const { return mNumSamples; }
-    void numSamples(const std::string &aNewNumSamples) { mNumSamples = aNewNumSamples; }
-
-private:
-
-    bool mIsRandom; /*!< specifies whether this variable has uncertainty */
-    std::string mType; /*!< random variable type, e.g. random rotation */
-    std::string mSubType; /*!< random variable subtype, e.g. rotation axis */
-    std::string mGlobalID; /*!< random variable global identifier */
+struct Statistics
+{
+    std::string mNumSamples; /*!< number of samples */
     std::string mDistribution; /*!< probability distribution */
     std::string mMean; /*!< probability distribution mean */
     std::string mUpperBound; /*!< probability distribution upper bound */
     std::string mLowerBound; /*!< probability distribution lower bound */
     std::string mStandardDeviation; /*!< probability distribution standard deviation */
-    std::string mNumSamples; /*!< number of samples */
 };
 
-class SROMLoad : public Variable
-{
-
-public:
-
-    SROMLoad(){}
-    virtual ~SROMLoad(){}
-    Plato::VariableType::type_t variableType() override { return Plato::VariableType::LOAD; }
-    void x(const double &aX) { mX = aX; }
-    double x() { return mX; }
-    void y(const double &aY) { mY = aY; }
-    double y() { return mY; }
-    void z(const double &aZ) { mZ = aZ; }
-    double z() { return mZ; }
-    void appType(const std::string &aAppType) { mAppType = aAppType; }
-    std::string appType() { return mAppType; }
-    void loadType(const std::string &aType) { mLoadType = aType; }
-    std::string loadType() { return mLoadType; }
-    void appID(const int &aAppID) { mAppID = aAppID; }
-    int appID() { return mAppID; }
-
-private:
-
-    double mX;
-    double mY;
-    double mZ;
-    std::string mLoadType;
-    std::string mAppType;
-    int mAppID;
-
-};
-
-class SROMMaterial : public Variable
-{
-
-public:
-
-    SROMMaterial(){}
-    virtual ~SROMMaterial(){}
-    Plato::VariableType::type_t variableType() override { return Plato::VariableType::MATERIAL; }
-
-};
-
-struct RandomVariable
+struct Variable
 {
     std::string mType; /*!< random variable type, e.g. random rotation */
     std::string mSubType; /*!< random variable subtype, e.g. rotation axis */
-    std::string mGlobalID; /*!< random variable global identifier */
-    std::string mDistribution; /*!< probability distribution */
-    std::string mMean; /*!< probability distribution mean */
-    std::string mUpperBound; /*!< probability distribution upper bound */
-    std::string mLowerBound; /*!< probability distribution lower bound */
-    std::string mStandardDeviation; /*!< probability distribution standard deviation */
-    std::string mNumSamples; /*!< number of samples */
+    Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
+};
+
+struct Load
+{
+    int mAppID; /*!< application set identifier */
+    std::string mLoadID; /*!< global load identifier */
+    std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
+    std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
+    std::vector<std::string> mValues; /*!< load magnitudes, e.g. \f$F = \{F_x, F_y, F_z\}\f$. */
+    std::vector<Plato::srom::Variable> mData; /*!< set of random variables, e.g. rotations, \f$\theta = \{\theta_x, \theta_y, \theta_z\}\f$. */
 };
 
 struct SampleProbabilityPairs
@@ -205,11 +133,11 @@ struct SampleProbabilityPairs
     std::vector<double> mProbabilities; /*!< probability set  */
 };
 
-struct SromRandomVariable
+struct RandomVariable
 {
     std::string mType; /*!< random variable type, e.g. random rotation */
     std::string mSubType; /*!< random variable subtype, e.g. rotation axis */
-    Plato::SampleProbabilityPairs mSampleProbPair; /*!< sample-probability pair for this random variable */
+    Plato::srom::SampleProbabilityPairs mSampleProbPairs; /*!< sample-probability pair for this random variable */
 };
 
 struct RandomRotations
@@ -220,17 +148,32 @@ struct RandomRotations
 
 struct RandomLoad
 {
-    int mLoadID;           /*!< random load vector global identifier */
-    double mProbability;   /*!< probability associated with this random load */
-    Plato::Vector3D mMagnitude; /*!< vector of random loads, e.g. /f$(f_x, f_y, f_z)/f$ */
+    int mAppID; /*!< application set identifier */
+    int mLoadID; /*!< load identifier */
+    double mProbability; /*!< probability associated with this random load */
+    std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
+    std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
+    Plato::Vector3D mMagnitude; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
 };
 
 struct RandomLoadCase
 {
     int mLoadCaseID; /*!< random load case global identifier */
     double mProbability; /*!< probability associated with this random load case */
-    std::vector<Plato::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
+    std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 };
+
+struct OutputMetaData
+{
+    std::vector<Plato::srom::RandomLoadCase> mLoadCases;
+};
+
+struct InputMetaData
+{
+    std::vector<Plato::srom::Load> mLoads;
+};
+
+}
 
 inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
 {
@@ -262,161 +205,233 @@ inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
     return (true);
 }
 
-inline void initialize_load_id_counter(const std::vector<LoadCase> &aLoadCases,
+inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoadCases,
                                        Plato::UniqueCounter &aUniqueCounter)
 {
+    if(aLoadCases.empty() == true)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: INPUT SET OF LOAD CASES IS EMPTY.\n";
+        return (false);
+    }
+
     aUniqueCounter.mark(0); // Mark 0 as true since we don't want to have a 0 ID
-    for(size_t i=0; i<aLoadCases.size(); ++i)
-        aUniqueCounter.mark(std::atoi(aLoadCases[i].id.c_str()));
+    for(size_t tIndex = 0; tIndex < aLoadCases.size(); tIndex++)
+    {
+        aUniqueCounter.mark(std::atoi(aLoadCases[tIndex].id.c_str()));
+    }
+
+    return (true);
 }
 
-inline void expand_single_load_case(const LoadCase &aOldLoadCase,
-                                    std::vector<LoadCase> &aNewLoadCaseList,
+inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
+                                    std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
                                     Plato::UniqueCounter &aUniqueLoadIDCounter,
                                     std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
 {
+    if(aOldLoadCase.loads.empty() == true)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD CASE #" << aOldLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        return (false);
+    }
+
     int tOriginalLoadCaseID = std::atoi(aOldLoadCase.id.c_str());
-    for(size_t j=0; j<aOldLoadCase.loads.size(); ++j)
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aOldLoadCase.loads.size(); tLoadCaseIndex++)
     {
         std::string tIDString = aOldLoadCase.id;
         int tCurLoadCaseID = std::atoi(tIDString.c_str());
-        // If this is a multi-load load case we need to generate
-        // a new load case with a new id.
-        if(j>0)
+        // If this is a multi-load load case we need to generate a new load case with a new id.
+        if(tLoadCaseIndex > 0)
         {
             tCurLoadCaseID = aUniqueLoadIDCounter.assignNextUnique();
             tIDString = std::to_string(tCurLoadCaseID);
         }
         tOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(tCurLoadCaseID);
-        LoadCase tNewLoadCase = aOldLoadCase;
+        XMLGen::LoadCase tNewLoadCase = aOldLoadCase;
         tNewLoadCase.id = tIDString;
-        tNewLoadCase.loads[0] = aOldLoadCase.loads[j];
+        tNewLoadCase.loads[0] = aOldLoadCase.loads[tLoadCaseIndex];
         tNewLoadCase.loads.resize(1);
         aNewLoadCaseList.push_back(tNewLoadCase);
     }
+
+    return (true);
 }
 
-inline void expand_load_cases(const InputData &aInputData,
-                              std::vector<LoadCase> &aNewLoadCaseList,
-                              std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
+inline bool expand_load_cases(const XMLGen::InputData &aInputData,
+                              std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
+                              std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
 {
-    UniqueCounter tUniqueLoadIDCounter;
-    initialize_load_id_counter(aInputData.load_cases, tUniqueLoadIDCounter);
-
-    for(size_t i=0; i<aInputData.load_cases.size(); ++i)
-        expand_single_load_case(aInputData.load_cases[i], aNewLoadCaseList, tUniqueLoadIDCounter,
-                                tOriginalToNewLoadCaseMap);
-}
-
-inline void set_load_parameters(const LoadCase &aLoadCase,
-                                std::shared_ptr<Plato::SROMLoad> &aLoad)
-{
-    aLoad->x(std::atof(aLoadCase.loads[0].x.c_str()));
-    aLoad->y(std::atof(aLoadCase.loads[0].y.c_str()));
-    aLoad->z(std::atof(aLoadCase.loads[0].z.c_str()));
-    aLoad->loadType(aLoadCase.loads[0].type);
-    aLoad->appType(aLoadCase.loads[0].app_type);
-    aLoad->appID(std::atoi(aLoadCase.loads[0].app_id.c_str()));
-}
-
-inline std::shared_ptr<Plato::SROMLoad> create_deterministic_load_variable(const LoadCase &aLoadCase)
-{
-    std::shared_ptr<Plato::SROMLoad> tNewLoad = std::make_shared<Plato::SROMLoad>();
-    tNewLoad->isRandom(false);
-    tNewLoad->globalID(aLoadCase.id);
-    set_load_parameters(aLoadCase, tNewLoad);
-    return tNewLoad;
-}
-
-inline std::shared_ptr<Plato::SROMLoad> create_random_load_variable(const Uncertainty &aUncertainty,
-                                                             const LoadCase &aLoadCase)
-{
-    std::shared_ptr<Plato::SROMLoad> tNewLoad = std::make_shared<Plato::SROMLoad>();
-    tNewLoad->isRandom(true);
-    tNewLoad->type(aUncertainty.type);
-    tNewLoad->subType(aUncertainty.axis);
-    tNewLoad->globalID(aLoadCase.id);
-    tNewLoad->distribution(aUncertainty.distribution);
-    tNewLoad->mean(aUncertainty.mean);
-    tNewLoad->upperBound(aUncertainty.upper);
-    tNewLoad->lowerBound(aUncertainty.lower);
-    tNewLoad->standardDeviation(aUncertainty.standard_deviation);
-    tNewLoad->numSamples(aUncertainty.num_samples);
-    set_load_parameters(aLoadCase, tNewLoad);
-    return tNewLoad;
-}
-
-inline void create_random_loads_from_uncertainty(const Uncertainty &aUncertainty,
-                                                 const std::vector<LoadCase> &aNewLoadCases,
-                                                 std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
-                                                 std::set<int> &aUncertainLoads,
-                                                 std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
-{
-    const int tUncertaintyLoadID = std::atoi(aUncertainty.id.c_str());
-    for(size_t j=0; j<aOriginalToNewLoadCaseMap[tUncertaintyLoadID].size(); ++j)
+    Plato::UniqueCounter tUniqueLoadIDCounter;
+    if(Plato::initialize_load_id_counter(aInputData.load_cases, tUniqueLoadIDCounter) == false)
     {
-        const int tCurLoadCaseID = aOriginalToNewLoadCaseMap[tUncertaintyLoadID][j];
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n";
+        return (false);
+    }
+
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputData.load_cases.size(); tLoadCaseIndex++)
+    {
+        const XMLGen::LoadCase& tOldLoadCase = aInputData.load_cases[tLoadCaseIndex];
+        Plato::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
+    }
+
+    return (true);
+}
+
+inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVariable, Plato::srom::Statistics& aStatistics)
+{
+    bool tInputStatisticsError = aRandomVariable.mean.empty() || aRandomVariable.upper.empty() || aRandomVariable.lower.empty()
+            || aRandomVariable.num_samples.empty() || aRandomVariable.distribution.empty() || aRandomVariable.standard_deviation.empty();
+    if(tInputStatisticsError == true)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: STATISTICS FOR RANDOM VARIABLE #" << aRandomVariable.id << " WERE NOT PROPERLY DEFINED.\n";
+        return (false);
+    }
+
+    aStatistics.mMean = aRandomVariable.mean;
+    aStatistics.mUpperBound = aRandomVariable.upper;
+    aStatistics.mLowerBound = aRandomVariable.lower;
+    aStatistics.mNumSamples = aRandomVariable.num_samples;
+    aStatistics.mDistribution = aRandomVariable.distribution;
+    aStatistics.mStandardDeviation = aRandomVariable.standard_deviation;
+
+    return (true);
+}
+
+inline bool set_load_parameters(const XMLGen::LoadCase &aLoadCase, Plato::srom::Load& aLoad)
+{
+
+    if(aLoadCase.loads.empty() == true)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD CASE #" << aLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        return (false);
+    }
+
+    aLoad.mValues.push_back(aLoadCase.loads[0].x);
+    aLoad.mValues.push_back(aLoadCase.loads[0].y);
+    aLoad.mValues.push_back(aLoadCase.loads[0].z);
+
+    aLoad.mLoadID = aLoadCase.id;
+    aLoad.mAppType = aLoadCase.loads[0].app_type;
+    aLoad.mLoadType = aLoadCase.loads[0].type;
+    aLoad.mAppID = std::atoi(aLoadCase.loads[0].app_id.c_str());
+
+    return (true);
+}
+
+inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase, Plato::srom::Load& aLoad)
+{
+//    aLoad.mData.mType = "load";
+//    aLoad.mData.mSubType = "deterministic";
+//    aLoad.mData.mGlobalID = aLoadCase.id;
+    Plato::set_load_parameters(aLoadCase, aLoad);
+
+    return (true);
+}
+
+inline bool create_random_load_variable(const XMLGen::Uncertainty &aRandomVariable,
+                                        const XMLGen::LoadCase &aLoadCase,
+                                        Plato::srom::Load& aLoad)
+{
+//    aLoad.mData.mType = aRandomVariable.type;
+//    aLoad.mData.mSubType = aRandomVariable.axis;
+//    Plato::set_load_parameters(aLoadCase, aLoad);
+//    Plato::set_random_variable_statistics(aRandomVariable, aLoad.mData.mStatistics);
+
+    return (true);
+}
+
+inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRandomVariable,
+                                                 const std::vector<XMLGen::LoadCase> &aNewLoadCases,
+                                                 std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
+                                                 std::set<int> &aRandomLoadIDs,
+                                                 std::vector<Plato::srom::Load> &aRandomLoads)
+{
+    const int tRandomVarLoadID = std::atoi(aRandomVariable.id.c_str());
+    for(size_t tIndexJ = 0; tIndexJ < aOriginalToNewLoadCaseMap[tRandomVarLoadID].size(); tIndexJ++)
+    {
+        const int tCurLoadCaseID = aOriginalToNewLoadCaseMap[tRandomVarLoadID][tIndexJ];
         std::string tCurLoadCaseIDString = std::to_string(tCurLoadCaseID);
-        aUncertainLoads.insert(tCurLoadCaseID);
-        for(size_t k=0; k<aNewLoadCases.size(); ++k)
+        aRandomLoadIDs.insert(tCurLoadCaseID);
+        for(size_t tIndexK = 0; tIndexK < aNewLoadCases.size(); tIndexK++)
         {
-            if(aNewLoadCases[k].id == tCurLoadCaseIDString)
+            if(aNewLoadCases[tIndexK].id == tCurLoadCaseIDString)
             {
-                std::shared_ptr<Plato::Variable> tNewLoad =
-                        create_random_load_variable(aUncertainty, aNewLoadCases[k]);
-                aSROMVariables.push_back(tNewLoad);
-                k=aNewLoadCases.size();
+                Plato::srom::Load tRandomLoad;
+                Plato::create_random_load_variable(aRandomVariable, aNewLoadCases[tIndexK], tRandomLoad);
+                aRandomLoads.push_back(tRandomLoad);
+                tIndexK = aNewLoadCases.size();
             }
         }
     }
 }
 
-inline void create_random_load_variables(const std::vector<Uncertainty> &aUncertainties,
-                                         const std::vector<LoadCase> &aNewLoadCases,
+inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> &aRandomVariables,
+                                         const std::vector<XMLGen::LoadCase> &aNewLoadCases,
                                          std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
-                                         std::set<int> &aUncertainLoads,
-                                         std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
+                                         std::set<int> &aRandomLoadIDs,
+                                         std::vector<Plato::srom::Load> &aLoad)
 {
-    for(size_t i = 0; i < aUncertainties.size(); ++i)
+    const size_t tNumRandomVars = aRandomVariables.size();
+    for(size_t tRandomVarIndex = 0; tRandomVarIndex < tNumRandomVars; ++tRandomVarIndex)
     {
-        create_random_loads_from_uncertainty(aUncertainties[i],
-                                             aNewLoadCases,
-                                             aOriginalToNewLoadCaseMap,
-                                             aUncertainLoads,
-                                             aSROMVariables);
-    }
-}
-
-inline void create_deterministic_load_variables(const std::vector<LoadCase> &aNewLoadCases,
-                                                std::set<int> &aUncertainLoads,
-                                                std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
-{
-    for(size_t i=0; i<aNewLoadCases.size(); ++i)
-    {
-        const int tCurLoadCaseID = std::atoi(aNewLoadCases[i].id.c_str());
-        if(aUncertainLoads.find(tCurLoadCaseID) == aUncertainLoads.end())
+        const XMLGen::Uncertainty& tRandomVariable = aRandomVariables[tRandomVarIndex];
+        Plato::VariableType::type_t tVarType = Plato::VariableType::UNDEFINED;
+        Plato::variable_type_string_to_enum(tRandomVariable.type, tVarType);
+        if(tVarType == Plato::VariableType::LOAD)
         {
-            std::shared_ptr<Plato::SROMLoad> tNewLoad = create_deterministic_load_variable(aNewLoadCases[i]);
-            aSROMVariables.push_back(tNewLoad);
+            Plato::create_random_loads_from_uncertainty(tRandomVariable,
+                                                        aNewLoadCases,
+                                                        aOriginalToNewLoadCaseMap,
+                                                        aRandomLoadIDs,
+                                                        aLoad);
         }
     }
 }
 
-inline bool generate_srom_inputs(const InputData &aInputData, std::vector<std::shared_ptr<Plato::Variable> > &aSROMVariables)
+inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCase> &aNewLoadCases,
+                                                const std::set<int> & aRandomLoadIDs,
+                                                std::vector<Plato::srom::Load> &aLoad)
 {
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aNewLoadCases.size(); tLoadCaseIndex++)
+    {
+        const int tCurLoadCaseID = std::atoi(aNewLoadCases[tLoadCaseIndex].id.c_str());
+        if(aRandomLoadIDs.find(tCurLoadCaseID) == aRandomLoadIDs.end())
+        {
+            Plato::srom::Load tNewLoad;
+            Plato::create_deterministic_load_variable(aNewLoadCases[tLoadCaseIndex], tNewLoad);
+            aLoad.push_back(tNewLoad);
+        }
+    }
+}
+
+inline bool generate_srom_load_inputs(const XMLGen::InputData &aInputData, std::vector<Plato::srom::Load> &aLoads)
+{
+    std::vector<XMLGen::LoadCase> tNewSetLoadCases;
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
+    Plato::expand_load_cases(aInputData, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
 
-    std::vector<LoadCase> tNewLoadCases;
-    Plato::expand_load_cases(aInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
-
-    std::set<int> tUncertainLoads;
+    std::set<int> tRandomLoadIDs;
     Plato::create_random_load_variables(aInputData.uncertainties,
-                                        tNewLoadCases,
+                                        tNewSetLoadCases,
                                         tOriginalToNewLoadCaseMap,
-                                        tUncertainLoads,
-                                        aSROMVariables);
+                                        tRandomLoadIDs,
+                                        aLoads);
 
-    Plato::create_deterministic_load_variables(tNewLoadCases, tUncertainLoads, aSROMVariables);
+    Plato::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, aLoads);
 
     return (true);
 }
@@ -466,17 +481,17 @@ inline bool apply_rotation_matrix(const Plato::Vector3D& aRotatioAnglesInDegrees
     return (true);
 }
 
-inline bool define_distribution(const Plato::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
+inline bool define_distribution(const Plato::srom::Variable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
-    if(aMyRandomVar.mDistribution == "normal")
+    if(aMyRandomVar.mStatistics.mDistribution == "normal")
     {
         aInput.mDistribution = Plato::DistrubtionName::normal;
     }
-    else if(aMyRandomVar.mDistribution == "uniform")
+    else if(aMyRandomVar.mStatistics.mDistribution == "uniform")
     {
         aInput.mDistribution = Plato::DistrubtionName::uniform;
     }
-    else if(aMyRandomVar.mDistribution == "beta")
+    else if(aMyRandomVar.mStatistics.mDistribution == "beta")
     {
         aInput.mDistribution = Plato::DistrubtionName::beta;
     }
@@ -485,7 +500,7 @@ inline bool define_distribution(const Plato::RandomVariable & aMyRandomVar, Plat
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: DISTRIBUTION = " << aMyRandomVar.mDistribution
+                 << "\nMESSAGE: DISTRIBUTION = " << aMyRandomVar.mStatistics.mDistribution
                  << " IS NOT DEFINED. OPTIONS ARE NORMAL, UNIFORM AND BETA.\n";
         return (false);
     }
@@ -493,9 +508,9 @@ inline bool define_distribution(const Plato::RandomVariable & aMyRandomVar, Plat
     return (true);
 }
 
-inline bool check_input_mean(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_mean(const Plato::srom::Variable & aMyRandomVar)
 {
-    if(aMyRandomVar.mMean.empty() == true)
+    if(aMyRandomVar.mStatistics.mMean.empty() == true)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -506,9 +521,9 @@ inline bool check_input_mean(const Plato::RandomVariable & aMyRandomVar)
     return (true);
 }
 
-inline bool check_input_lower_bound(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_lower_bound(const Plato::srom::Variable & aMyRandomVar)
 {
-    if(aMyRandomVar.mLowerBound.empty() == true)
+    if(aMyRandomVar.mStatistics.mLowerBound.empty() == true)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -519,9 +534,9 @@ inline bool check_input_lower_bound(const Plato::RandomVariable & aMyRandomVar)
     return (true);
 }
 
-inline bool check_input_upper_bound(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_upper_bound(const Plato::srom::Variable & aMyRandomVar)
 {
-    if(aMyRandomVar.mUpperBound.empty() == true)
+    if(aMyRandomVar.mStatistics.mUpperBound.empty() == true)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -532,9 +547,9 @@ inline bool check_input_upper_bound(const Plato::RandomVariable & aMyRandomVar)
     return (true);
 }
 
-inline bool check_input_standard_deviation(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_standard_deviation(const Plato::srom::Variable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStandardDeviation.empty() == true)
+    if(aMyRandomVar.mStatistics.mStandardDeviation.empty() == true)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -545,9 +560,9 @@ inline bool check_input_standard_deviation(const Plato::RandomVariable & aMyRand
     return (true);
 }
 
-inline bool check_input_number_samples(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_number_samples(const Plato::srom::Variable & aMyRandomVar)
 {
-    if(aMyRandomVar.mNumSamples.empty() == true)
+    if(aMyRandomVar.mStatistics.mNumSamples.empty() == true)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -555,29 +570,29 @@ inline bool check_input_number_samples(const Plato::RandomVariable & aMyRandomVa
                  << "\nMESSAGE: NUMBER OF SAMPLES IS NOT DEFINED.\n";
         return (false);
     }
-    else if(std::atof(aMyRandomVar.mNumSamples.c_str()) <= 0)
+    else if(std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) <= 0)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
                  << "\nMESSAGE: NUMBER OF SAMPLES SHOULD BE GREATER THAN ZERO. "
-                 << "INPUT NUMBER OF SAMPLES = " << std::atof(aMyRandomVar.mNumSamples.c_str()) << ".\n";
+                 << "INPUT NUMBER OF SAMPLES = " << std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) << ".\n";
         return (false);
     }
 
     return (true);
 }
 
-inline bool check_input_statistics(const Plato::RandomVariable & aMyRandomVar)
+inline bool check_input_statistics(const Plato::srom::Variable & aMyRandomVar)
 {
     std::locale tLocale;
     std::stringstream tOutput;
-    for(std::string::size_type tIndex = 0; tIndex < aMyRandomVar.mDistribution.length(); ++tIndex)
+    for(std::string::size_type tIndex = 0; tIndex < aMyRandomVar.mStatistics.mDistribution.length(); ++tIndex)
     {
-        tOutput << std::toupper(aMyRandomVar.mDistribution[tIndex], tLocale);
+        tOutput << std::toupper(aMyRandomVar.mStatistics.mDistribution[tIndex], tLocale);
     }
 
-    if(aMyRandomVar.mDistribution == "beta" || aMyRandomVar.mDistribution == "normal")
+    if(aMyRandomVar.mStatistics.mDistribution == "beta" || aMyRandomVar.mStatistics.mDistribution == "normal")
     {
         bool tIsMeanDefined = Plato::check_input_mean(aMyRandomVar);
         bool tIsLowerBoundDefined = Plato::check_input_lower_bound(aMyRandomVar);
@@ -596,7 +611,7 @@ inline bool check_input_statistics(const Plato::RandomVariable & aMyRandomVar)
             return (false);
         }
     }
-    else if(aMyRandomVar.mDistribution == "uniform")
+    else if(aMyRandomVar.mStatistics.mDistribution == "uniform")
     {
         bool tIsLowerBoundDefined = Plato::check_input_lower_bound(aMyRandomVar);
         bool tIsUpperBoundDefined = Plato::check_input_upper_bound(aMyRandomVar);
@@ -616,27 +631,27 @@ inline bool check_input_statistics(const Plato::RandomVariable & aMyRandomVar)
     return (true);
 }
 
-inline bool define_input_statistics(const Plato::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
+inline bool define_input_statistics(const Plato::srom::Variable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
     if(Plato::check_input_statistics(aMyRandomVar) == false)
     {
         return (false);
     }
 
-    aInput.mMean = std::atof(aMyRandomVar.mMean.c_str());
-    aInput.mLowerBound = std::atof(aMyRandomVar.mLowerBound.c_str());
-    aInput.mUpperBound = std::atof(aMyRandomVar.mUpperBound.c_str());
-    const double tStdDev = std::atof(aMyRandomVar.mStandardDeviation.c_str());
+    aInput.mMean = std::atof(aMyRandomVar.mStatistics.mMean.c_str());
+    aInput.mLowerBound = std::atof(aMyRandomVar.mStatistics.mLowerBound.c_str());
+    aInput.mUpperBound = std::atof(aMyRandomVar.mStatistics.mUpperBound.c_str());
+    const double tStdDev = std::atof(aMyRandomVar.mStatistics.mStandardDeviation.c_str());
     aInput.mVariance = tStdDev * tStdDev;
-    const int tNumSamples = std::atoi(aMyRandomVar.mNumSamples.c_str());
+    const int tNumSamples = std::atoi(aMyRandomVar.mStatistics.mNumSamples.c_str());
     aInput.mNumSamples = tNumSamples;
 
     return (true);
 }
 
 inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromOutputs<double>> aMySromSolution,
-                                                  const Plato::RandomVariable & aMyRandomVariable,
-                                                  Plato::SromRandomVariable & aMySromRandomVariable)
+                                                  const Plato::srom::Variable & aMyRandomVariable,
+                                                  Plato::srom::RandomVariable & aMySromRandomVariable)
 {
     if(aMySromSolution.size() <= 0)
     {
@@ -647,21 +662,21 @@ inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromO
         return (false);
     }
 
-    aMySromRandomVariable.mSampleProbPair.mSamples.clear();
-    aMySromRandomVariable.mSampleProbPair.mProbabilities.clear();
+    aMySromRandomVariable.mSampleProbPairs.mSamples.clear();
+    aMySromRandomVariable.mSampleProbPairs.mProbabilities.clear();
 
     aMySromRandomVariable.mType = aMyRandomVariable.mType;
     aMySromRandomVariable.mSubType = aMyRandomVariable.mSubType;
 
     const size_t tNumSamples = aMySromSolution.size();
-    aMySromRandomVariable.mSampleProbPair.mNumSamples = tNumSamples;
-    aMySromRandomVariable.mSampleProbPair.mSamples.resize(tNumSamples);
-    aMySromRandomVariable.mSampleProbPair.mProbabilities.resize(tNumSamples);
+    aMySromRandomVariable.mSampleProbPairs.mNumSamples = tNumSamples;
+    aMySromRandomVariable.mSampleProbPairs.mSamples.resize(tNumSamples);
+    aMySromRandomVariable.mSampleProbPairs.mProbabilities.resize(tNumSamples);
 
     for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        aMySromRandomVariable.mSampleProbPair.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
-        aMySromRandomVariable.mSampleProbPair.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
+        aMySromRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
+        aMySromRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
     }
 
     return (true);
@@ -718,10 +733,10 @@ inline bool compute_random_variable_statistics(const Plato::SromInputs<double> &
     return (true);
 }
 
-inline bool compute_sample_probability_pairs(const std::vector<Plato::RandomVariable> & aMySetRandomVars,
-                                             std::vector<Plato::SromRandomVariable> & aMySampleProbPairs)
+inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::Variable> & aSetRandomVariables,
+                                             std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs)
 {
-    if(aMySetRandomVars.size() <= 0)
+    if(aSetRandomVariables.size() <= 0)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -732,12 +747,12 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::RandomVari
 
     aMySampleProbPairs.clear();
 
-    const size_t tMyNumRandomVars = aMySetRandomVars.size();
-    for(size_t tRandomVarIndex = 0; tRandomVarIndex < tMyNumRandomVars; tRandomVarIndex++)
+    const size_t tNumRandomVariables = aSetRandomVariables.size();
+    for(size_t tRandomVarIndex = 0; tRandomVarIndex < tNumRandomVariables; tRandomVarIndex++)
     {
         // pose uncertainty
         Plato::SromInputs<double> tSromInputs;
-        const Plato::RandomVariable & tMyRandomVar = aMySetRandomVars[tRandomVarIndex];
+        const Plato::srom::Variable & tMyRandomVar = aSetRandomVariables[tRandomVarIndex];
         if(Plato::define_distribution(tMyRandomVar, tSromInputs) == false)
         {
             std::cout<< "\nFILE: " << __FILE__
@@ -768,7 +783,7 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::RandomVari
             return (false);
         }
 
-        Plato::SromRandomVariable tMySampleProbPairs;
+        Plato::srom::RandomVariable tMySampleProbPairs;
         if(Plato::post_process_sample_probability_pairs(tSromOutputs, tMyRandomVar, tMySampleProbPairs) == false)
         {
             std::cout<< "\nFILE: " <<  __FILE__
@@ -784,8 +799,10 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::RandomVari
     return (true);
 }
 
-inline bool post_process_random_load(const std::vector<Plato::SromRandomVariable> & aMySampleProbPairs,
-                                     std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> & aRotationAxisToSampleProbPairs)
+inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs,
+                                                Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                                Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                                Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs)
 {
     if(aMySampleProbPairs.size() <= 0)
     {
@@ -796,31 +813,31 @@ inline bool post_process_random_load(const std::vector<Plato::SromRandomVariable
         return (false);
     }
 
-    const size_t tNumRandomVariables = aMySampleProbPairs.size();
-    for(size_t tRandVarIndex = 0; tRandVarIndex < tNumRandomVariables; tRandVarIndex++)
+    for(size_t tRandVarIndex = 0; tRandVarIndex < aMySampleProbPairs.size(); tRandVarIndex++)
     {
         Plato::axis3D::axis3D tMyAxis = Plato::axis3D::axis3D::x;
         Plato::axis3D_stringToEnum(aMySampleProbPairs[tRandVarIndex].mSubType, tMyAxis);
-        aRotationAxisToSampleProbPairs[tMyAxis] = aMySampleProbPairs[tRandVarIndex].mSampleProbPair;
-    }
-
-    if(aMySampleProbPairs.size() != aRotationAxisToSampleProbPairs.size())
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: DUPLICATE RANDOM ROTATIONS WERE PROVIDED FOR A SINGLE LOAD."
-                 << " RANDOM ROTATIONS ARE EXPECTED TO BE UNIQUE FOR A SINGLE LOAD.\n";
-        return (false);
+        if(tMyAxis == Plato::axis3D::axis3D::x)
+        {
+            aMyXaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
+        }
+        else if(tMyAxis == Plato::axis3D::axis3D::y)
+        {
+            aMyYaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
+        }
+        else
+        {
+            aMyZaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
+        }
     }
 
     return (true);
 }
 
-inline bool set_random_rotations_about_xyz(const Plato::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
-                                           const Plato::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
-                                           const Plato::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
-                                           std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_xyz(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                               const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                               const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
+                                               std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexI = 0; tIndexI < aMyXaxisSampleProbPairs.mSamples.size(); tIndexI++)
     {
@@ -828,7 +845,7 @@ inline bool set_random_rotations_about_xyz(const Plato::SampleProbabilityPairs& 
         {
             for(size_t tIndexK = 0; tIndexK < aMyZaxisSampleProbPairs.mSamples.size(); tIndexK++)
             {
-                Plato::RandomRotations tMyRandomRotations;
+                Plato::srom::RandomRotations tMyRandomRotations;
                 tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                         * aMyYaxisSampleProbPairs.mProbabilities[tIndexJ] * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
                 tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
@@ -842,15 +859,15 @@ inline bool set_random_rotations_about_xyz(const Plato::SampleProbabilityPairs& 
     return (true);
 }
 
-inline bool set_random_rotations_about_xy(const Plato::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
-                                          const Plato::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
-                                          std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_xy(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                              const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexI = 0; tIndexI < aMyXaxisSampleProbPairs.mSamples.size(); tIndexI++)
     {
         for(size_t tIndexJ = 0; tIndexJ < aMyYaxisSampleProbPairs.mSamples.size(); tIndexJ++)
         {
-            Plato::RandomRotations tMyRandomRotations;
+            Plato::srom::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                     * aMyYaxisSampleProbPairs.mProbabilities[tIndexJ];
             tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
@@ -862,15 +879,15 @@ inline bool set_random_rotations_about_xy(const Plato::SampleProbabilityPairs& a
     return (true);
 }
 
-inline bool set_random_rotations_about_xz(const Plato::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
-                                          const Plato::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
-                                          std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_xz(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                              const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
+                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexI = 0; tIndexI < aMyXaxisSampleProbPairs.mSamples.size(); tIndexI++)
     {
         for(size_t tIndexK = 0; tIndexK < aMyZaxisSampleProbPairs.mSamples.size(); tIndexK++)
         {
-            Plato::RandomRotations tMyRandomRotations;
+            Plato::srom::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI]
                     * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
             tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
@@ -882,15 +899,15 @@ inline bool set_random_rotations_about_xz(const Plato::SampleProbabilityPairs& a
     return (true);
 }
 
-inline bool set_random_rotations_about_yz(const Plato::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
-                                          const Plato::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
-                                          std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_yz(const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                              const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
+                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexJ = 0; tIndexJ < aMyYaxisSampleProbPairs.mSamples.size(); tIndexJ++)
     {
         for(size_t tIndexK = 0; tIndexK < aMyZaxisSampleProbPairs.mSamples.size(); tIndexK++)
         {
-            Plato::RandomRotations tMyRandomRotations;
+            Plato::srom::RandomRotations tMyRandomRotations;
             tMyRandomRotations.mProbability = aMyYaxisSampleProbPairs.mProbabilities[tIndexJ]
                     * aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
             tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
@@ -902,12 +919,12 @@ inline bool set_random_rotations_about_yz(const Plato::SampleProbabilityPairs& a
     return (true);
 }
 
-inline bool set_random_rotations_about_x(const Plato::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
-                                         std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_x(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                             std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexI = 0; tIndexI < aMyXaxisSampleProbPairs.mSamples.size(); tIndexI++)
     {
-        Plato::RandomRotations tMyRandomRotations;
+        Plato::srom::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyXaxisSampleProbPairs.mProbabilities[tIndexI];
         tMyRandomRotations.mRotations.mX = aMyXaxisSampleProbPairs.mSamples[tIndexI];
         aMyRandomRotations.push_back(tMyRandomRotations);
@@ -916,12 +933,12 @@ inline bool set_random_rotations_about_x(const Plato::SampleProbabilityPairs& aM
     return (true);
 }
 
-inline bool set_random_rotations_about_y(const Plato::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
-                                         std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_y(const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                             std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexJ = 0; tIndexJ < aMyYaxisSampleProbPairs.mSamples.size(); tIndexJ++)
     {
-        Plato::RandomRotations tMyRandomRotations;
+        Plato::srom::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyYaxisSampleProbPairs.mProbabilities[tIndexJ];
         tMyRandomRotations.mRotations.mY = aMyYaxisSampleProbPairs.mSamples[tIndexJ];
         aMyRandomRotations.push_back(tMyRandomRotations);
@@ -930,12 +947,12 @@ inline bool set_random_rotations_about_y(const Plato::SampleProbabilityPairs& aM
     return (true);
 }
 
-inline bool set_random_rotations_about_z(const Plato::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
-                                         std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool compute_random_rotations_about_z(const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
+                                             std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     for(size_t tIndexK = 0; tIndexK < aMyZaxisSampleProbPairs.mSamples.size(); tIndexK++)
     {
-        Plato::RandomRotations tMyRandomRotations;
+        Plato::srom::RandomRotations tMyRandomRotations;
         tMyRandomRotations.mProbability = aMyZaxisSampleProbPairs.mProbabilities[tIndexK];
         tMyRandomRotations.mRotations.mZ = aMyZaxisSampleProbPairs.mSamples[tIndexK];
         aMyRandomRotations.push_back(tMyRandomRotations);
@@ -944,10 +961,10 @@ inline bool set_random_rotations_about_z(const Plato::SampleProbabilityPairs& aM
     return (true);
 }
 
-inline bool expand_random_rotations(const Plato::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
-                                    const Plato::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
-                                    const Plato::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
-                                    std::vector<Plato::RandomRotations> & aMyRandomRotations)
+inline bool expand_random_rotations(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
+                                    const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
+                                    const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
+                                    std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     aMyRandomRotations.clear();
 
@@ -957,31 +974,31 @@ inline bool expand_random_rotations(const Plato::SampleProbabilityPairs& aMyXaxi
 
     if(tRotateAboutX && tRotateAboutY && tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_xyz(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_xyz(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_xy(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_xy(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && !tRotateAboutY && tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_xz(aMyXaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_xz(aMyXaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && tRotateAboutY && tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_yz(aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_yz(aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && !tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_x(aMyXaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_x(aMyXaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_y(aMyYaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_y(aMyYaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && !tRotateAboutY && tRotateAboutZ)
     {
-        Plato::set_random_rotations_about_z(aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::compute_random_rotations_about_z(aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else
     {
@@ -996,7 +1013,7 @@ inline bool expand_random_rotations(const Plato::SampleProbabilityPairs& aMyXaxi
 }
 
 inline bool check_expand_random_loads_inputs(const Plato::Vector3D & aMyOriginalLoad,
-                                             const std::vector<Plato::RandomRotations> & aMyRandomRotations)
+                                             const std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
     if(aMyRandomRotations.empty())
     {
@@ -1019,8 +1036,8 @@ inline bool check_expand_random_loads_inputs(const Plato::Vector3D & aMyOriginal
 }
 
 inline bool expand_random_loads(const Plato::Vector3D & aMyOriginalLoad,
-                                const std::vector<Plato::RandomRotations> & aMyRandomRotations,
-                                std::vector<Plato::RandomLoad> & aMyRandomLoads)
+                                const std::vector<Plato::srom::RandomRotations> & aMyRandomRotations,
+                                std::vector<Plato::srom::RandomLoad> & aMyRandomLoads)
 {
     if(Plato::check_expand_random_loads_inputs(aMyOriginalLoad, aMyRandomRotations) == false)
     {
@@ -1034,7 +1051,7 @@ inline bool expand_random_loads(const Plato::Vector3D & aMyOriginalLoad,
     const size_t tNumRandomLoads = aMyRandomRotations.size();
     for(size_t tIndex = 0; tIndex < tNumRandomLoads; tIndex++)
     {
-        Plato::RandomLoad tMyRandomLoad;
+        Plato::srom::RandomLoad tMyRandomLoad;
         tMyRandomLoad.mMagnitude = aMyOriginalLoad;
         tMyRandomLoad.mProbability = aMyRandomRotations[tIndex].mProbability;
         if(Plato::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotations, tMyRandomLoad.mMagnitude) == false)
@@ -1051,15 +1068,15 @@ inline bool expand_random_loads(const Plato::Vector3D & aMyOriginalLoad,
     return (true);
 }
 
-inline bool update_initial_random_load_case(const std::vector<Plato::RandomLoad> & aNewSetRandomLoads,
-                                            std::vector<Plato::RandomLoadCase> & aOldRandomLoadCases)
+inline bool update_initial_random_load_case(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
+                                            std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
-    std::vector<Plato::RandomLoadCase> tNewSetRandomLoadCase;
+    std::vector<Plato::srom::RandomLoadCase> tNewSetRandomLoadCase;
 
     for(size_t tLoadIndex = 0; tLoadIndex < aNewSetRandomLoads.size(); tLoadIndex++)
     {
-        Plato::RandomLoadCase tNewRandomLoadCase;
-        const Plato::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tLoadIndex];
+        Plato::srom::RandomLoadCase tNewRandomLoadCase;
+        const Plato::srom::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tLoadIndex];
         tNewRandomLoadCase.mLoads.push_back(tMyNewRandomLoad);
         tNewRandomLoadCase.mProbability = tMyNewRandomLoad.mProbability;
         tNewSetRandomLoadCase.push_back(tNewRandomLoadCase);
@@ -1070,19 +1087,19 @@ inline bool update_initial_random_load_case(const std::vector<Plato::RandomLoad>
     return (true);
 }
 
-inline bool update_random_load_cases(const std::vector<Plato::RandomLoad> & aNewSetRandomLoads,
-                                     std::vector<Plato::RandomLoadCase> & aOldRandomLoadCases)
+inline bool update_random_load_cases(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
+                                     std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
-    std::vector<Plato::RandomLoadCase> tNewSetRandomLoadCase;
+    std::vector<Plato::srom::RandomLoadCase> tNewSetRandomLoadCase;
 
     for(size_t tNewLoadIndex = 0; tNewLoadIndex < aNewSetRandomLoads.size(); tNewLoadIndex++)
     {
-        const Plato::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tNewLoadIndex];
-        std::vector<Plato::RandomLoadCase> tTempRandomLoadCases = aOldRandomLoadCases;
+        const Plato::srom::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tNewLoadIndex];
+        std::vector<Plato::srom::RandomLoadCase> tTempRandomLoadCases = aOldRandomLoadCases;
         for(size_t tOldLoadCaseIndex = 0; tOldLoadCaseIndex < aOldRandomLoadCases.size(); tOldLoadCaseIndex++)
         {
             tTempRandomLoadCases[tOldLoadCaseIndex].mLoads.push_back(tMyNewRandomLoad);
-            Plato::RandomLoadCase& tMyTempRandomLoadCase = tTempRandomLoadCases[tOldLoadCaseIndex];
+            Plato::srom::RandomLoadCase& tMyTempRandomLoadCase = tTempRandomLoadCases[tOldLoadCaseIndex];
             tMyTempRandomLoadCase.mProbability = tMyTempRandomLoadCase.mProbability * tMyNewRandomLoad.mProbability;
             tNewSetRandomLoadCase.push_back(tMyTempRandomLoadCase);
         } // index over old random load cases
@@ -1093,8 +1110,8 @@ inline bool update_random_load_cases(const std::vector<Plato::RandomLoad> & aNew
     return (true);
 }
 
-inline bool expand_random_load_cases(const std::vector<Plato::RandomLoad> & aNewSetRandomLoads,
-                                     std::vector<Plato::RandomLoadCase> & aOldRandomLoadCases)
+inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
+                                     std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
     if(aNewSetRandomLoads.empty())
     {
@@ -1131,7 +1148,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::RandomLoad> & aNew
     return (true);
 }
 
-inline bool set_random_load_case_id(std::vector<Plato::RandomLoadCase> & aRandomLoadCases)
+inline bool set_random_load_case_id(std::vector<Plato::srom::RandomLoadCase> & aRandomLoadCases)
 {
     if(aRandomLoadCases.empty())
     {
@@ -1151,78 +1168,228 @@ inline bool set_random_load_case_id(std::vector<Plato::RandomLoadCase> & aRandom
     return (true);
 }
 
-inline void define_random_variable(const Plato::Variable& aVariable, Plato::RandomVariable& aRandomVariable)
+inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom::Load>& aLoads,
+                                                     std::vector<Plato::srom::Load>& aRandomLoads,
+                                                     std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
-    aRandomVariable.mType = aVariable.type();
-    aRandomVariable.mSubType = aVariable.subType();
-    aRandomVariable.mGlobalID = aVariable.globalID();
-
-    aRandomVariable.mMean = aVariable.mean();
-    aRandomVariable.mNumSamples = aVariable.numSamples();
-    aRandomVariable.mUpperBound = aVariable.upperBound();
-    aRandomVariable.mLowerBound = aVariable.lowerBound();
-    aRandomVariable.mDistribution = aVariable.distribution();
-    aRandomVariable.mStandardDeviation = aVariable.standardDeviation();
-}
-
-inline bool pre_process_input_variables(const std::vector<std::shared_ptr<Plato::Variable>>& aVariables,
-                                        std::map<Plato::VariableType::type_t, std::vector<Plato::RandomVariable>>& aRandomVariables,
-                                        std::map<Plato::VariableType::type_t, std::vector<Plato::RandomVariable>>& aDeterministicVariables)
-{
-    if(aVariables.empty())
+    if(aLoads.empty())
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF VARIABLES IS EMPTY.\n";
+                 << "\nMESSAGE: INPUT LOAD SET IS EMPTY.\n";
         return (false);
     } // if statement
 
-    aRandomVariables.clear();
-    const size_t tNumRandomVariables = aVariables.size();
-    for(size_t tIndex = 0; tIndex < tNumRandomVariables; tIndex++)
+    const size_t tNumLoads = aLoads.size();
+    for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
     {
-        const Plato::Variable& tVariable = aVariables[tIndex].operator*();
-        Plato::VariableType::type_t tMyVariableType =  Plato::VariableType::UNDEFINED;
-        Plato::variable_type_string_to_enum(tVariable.type(), tMyVariableType);
-
-        if(tVariable.isRandom())
+        const Plato::srom::Load& tLoad = aLoads[tLoadIndex];
+        if(tLoad.mData.empty())
         {
-            Plato::RandomVariable tRandomVariable;
-            Plato::define_random_variable(tVariable, tRandomVariable);
-            aRandomVariables[tMyVariableType].push_back(tRandomVariable);
+            // deterministic load
+            aDeterministicLoads.push_back(aLoads[tLoadIndex]);
         }
         else
         {
-            // if statement
+            // random load
+            aRandomLoads.push_back(aLoads[tLoadIndex]);
         }
-    } // for-loop
+    }
 
     return (true);
 }
 
-inline bool solve_srom_problem(const std::vector<std::shared_ptr<Plato::Variable>>& aVariables)
+inline bool set_load_components(const std::vector<std::string> & aInput, Plato::Vector3D & aOutput)
 {
-/*    std::vector<Plato::RandomVariable> tRandomVariables;
-    if(Plato::pre_process_input_variables(aVariables, tRandomVariables) == false)
+    if(aInput.empty())
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF VARIABLES IS EMPTY.\n";
+                 << "\nMESSAGE: INPUT VECTOR WITH LOAD MAGNITUDES IS EMPTY.\n";
         return (false);
     }
 
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
-    if(Plato::compute_sample_probability_pairs(tRandomVariables, tMySampleProbPairs) == false)
+    if(aInput.size() != static_cast<size_t>(3))
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: PROBLEM FAILED TO GENERATE THE SAMPLE PROBABILITY PAIRS.\n";
+                 << "\nMESSAGE: INPUT DIMENSIONS = " << aInput.size() << ". ONLY 3D LOAD CASES ARE CURRENTLY SUPPORTED.\n";
         return (false);
     }
-*/
+
+    aOutput.mX = std::atof(aInput[0].c_str());
+    aOutput.mY = std::atof(aInput[1].c_str());
+    aOutput.mZ = std::atof(aInput[2].c_str());
+
+    return (true);
+}
+
+inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
+{
+    for(size_t tLoadIndex = 0; tLoadIndex < aSetRandomLoads.size(); tLoadIndex++)
+    {
+        aSetRandomLoads[tLoadIndex].mAppID = aOriginalLoad.mAppID;
+        aSetRandomLoads[tLoadIndex].mAppType = aOriginalLoad.mAppType;
+        aSetRandomLoads[tLoadIndex].mLoadType = aOriginalLoad.mLoadType;
+    }
+
+    return (true);
+}
+
+inline bool generate_set_random_rotations(const std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs,
+                                          std::vector<Plato::srom::RandomRotations> & aMySetRandomRotation)
+{
+    Plato::srom::SampleProbabilityPairs tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs;
+    if(Plato::expand_load_sample_probability_pair(aMySampleProbPairs,  tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs) == false)
+    {
+        std::cout << "\nFILE: " << __FILE__
+                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                  << "\nLINE:" << __LINE__
+                  << "\nMESSAGE: FAILED TO POST-PROCESS SAMPLE-PROBABILITY PAIRS.\n";
+        return (false);
+    }
+
+    if(Plato::expand_random_rotations(tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs, aMySetRandomRotation) == false)
+    {
+        std::cout << "\nFILE: " << __FILE__
+                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                  << "\nLINE:" << __LINE__
+                  << "\nMESSAGE: FAILED TO EXPAND RANDOM ROTATIONS.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
+inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
+                                      const std::vector<Plato::srom::RandomRotations> & aSetRandomRotations,
+                                      std::vector<Plato::srom::RandomLoad> & tSetRandomLoads)
+{
+    Plato::Vector3D tMyOriginalLoadComponents;
+    if(Plato::set_load_components(aOriginalLoad.mValues, tMyOriginalLoadComponents) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO SET ARRAY OF LOAD COMPONENTS.\n";
+        return (false);
+    }
+
+    if(Plato::expand_random_loads(tMyOriginalLoadComponents, aSetRandomRotations, tSetRandomLoads) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO EXPAND SET OF RANDOM LOADS.\n";
+        return (false);
+    }
+
+    if(Plato::set_random_load_parameters(aOriginalLoad, tSetRandomLoads) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO SET LOAD TYPE, APPLICATION TYPE AND APPLICATION IDENTIFIER.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
+inline bool generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
+{
+    if(aSetLoadCases.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: SET OF LOAD CASES IS EMPTY.\n";
+        return (false);
+    }
+
+    Plato::UniqueCounter tLoadCounter, tLoadCaseCounter;
+    tLoadCounter.mark(0); tLoadCaseCounter.mark(0);
+
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
+    {
+        Plato::srom::RandomLoadCase& tMyLoadCase = aSetLoadCases[tLoadCaseIndex];
+        tMyLoadCase.mLoadCaseID = tLoadCaseCounter.assignNextUnique();
+        for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.mLoads.size(); tLoadIndex++)
+        {
+            tMyLoadCase.mLoads[tLoadIndex].mLoadID = tLoadCounter.assignNextUnique();
+        }
+    }
+
+    return (true);
+}
+
+inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput)
+{
+    aOutput.mLoadCases.clear();
+    std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;
+    if(Plato::expand_random_and_deterministic_loads(aInput.mLoads, tRandomLoads, tDeterministicLoads) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO GENERATE RANDOM AND DETERMINISTIC SETS OF LOADS.\n";
+        return (false);
+    }
+
+    for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
+    {
+        std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
+        if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mData, tMySampleProbPairs) == false)
+        {
+            std::cout<< "\nFILE: " << __FILE__
+                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                     << "\nLINE:" << __LINE__
+                     << "\nMESSAGE: FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIR FOR LOAD #" << tLoadIndex << ".\n";
+            return (false);
+        }
+
+        std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
+        if(Plato::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation) == false)
+        {
+            std::cout<< "\nFILE: " << __FILE__
+                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                     << "\nLINE:" << __LINE__
+                     << "\nMESSAGE: FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
+            return (false);
+        }
+
+        std::vector<Plato::srom::RandomLoad> tMySetRandomLoads;
+        if(Plato::generate_set_random_loads(tRandomLoads[tLoadIndex], tMySetRandomRotation, tMySetRandomLoads) == false)
+        {
+            std::cout<< "\nFILE: " << __FILE__
+                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                     << "\nLINE:" << __LINE__
+                     << "\nMESSAGE: FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
+            return (false);
+        }
+
+        if(Plato::expand_random_load_cases(tMySetRandomLoads, aOutput.mLoadCases) == false)
+        {
+            std::cout<< "\nFILE: " << __FILE__
+                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                     << "\nLINE:" << __LINE__
+                     << "\nMESSAGE: FAILED TO UPDATE RANDOM LOADS CASES FOR LOAD #" << tLoadIndex << ".\n";
+            return (false);
+        }
+    }
+
+    if(Plato::generate_load_case_identifiers(aOutput.mLoadCases) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: FAILED TO GENERATE IDENTIFIERS FOR EACH LOAD CASE.\n";
+        return (false);
+    }
+
     return(true);
 }
 
@@ -1233,207 +1400,204 @@ namespace PlatoUncertainLoadGeneratorXMLTest
 
 TEST(PlatoTest, check_input_mean)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     ASSERT_FALSE(Plato::check_input_mean(tMyRandomVar));
 
-    tMyRandomVar.mMean = "5";
+    tMyRandomVar.mStatistics.mMean = "5";
     ASSERT_TRUE(Plato::check_input_mean(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_lower_bound)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     ASSERT_FALSE(Plato::check_input_lower_bound(tMyRandomVar));
 
-    tMyRandomVar.mLowerBound = "5";
+    tMyRandomVar.mStatistics.mLowerBound = "5";
     ASSERT_TRUE(Plato::check_input_lower_bound(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_upper_bound)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     ASSERT_FALSE(Plato::check_input_upper_bound(tMyRandomVar));
 
-    tMyRandomVar.mUpperBound = "5";
+    tMyRandomVar.mStatistics.mUpperBound = "5";
     ASSERT_TRUE(Plato::check_input_upper_bound(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_standard_deviation)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     ASSERT_FALSE(Plato::check_input_standard_deviation(tMyRandomVar));
 
-    tMyRandomVar.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
     ASSERT_TRUE(Plato::check_input_standard_deviation(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_number_samples)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mNumSamples = "-1";
+    tMyRandomVar.mStatistics.mNumSamples = "-1";
     ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mNumSamples = "0";
+    tMyRandomVar.mStatistics.mNumSamples = "0";
     ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mNumSamples = "2";
+    tMyRandomVar.mStatistics.mNumSamples = "2";
     ASSERT_TRUE(Plato::check_input_number_samples(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_uniform)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mDistribution = "uniform";
+    tMyRandomVar.mStatistics.mDistribution = "uniform";
 
     // TEST UNDEFINED UPPER BOUND
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mLowerBound = "";
-    tMyRandomVar.mUpperBound = "135";
+    tMyRandomVar.mStatistics.mLowerBound = "";
+    tMyRandomVar.mStatistics.mUpperBound = "135";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "";
-    tMyRandomVar.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mNumSamples = "";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mNumSamples = "0";
+    tMyRandomVar.mStatistics.mNumSamples = "0";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "-1";
+    tMyRandomVar.mStatistics.mNumSamples = "-1";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
     ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_normal)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mNumSamples = "4";
-    tMyRandomVar.mLowerBound = "65";
-    tMyRandomVar.mUpperBound = "95";
-    tMyRandomVar.mStandardDeviation = "5";
-    tMyRandomVar.mDistribution = "normal";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mUpperBound = "95";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mDistribution = "normal";
 
     // TEST UNDEFINED MEAN
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
-    tMyRandomVar.mMean = "80";
-    tMyRandomVar.mUpperBound = "";
+    tMyRandomVar.mStatistics.mMean = "80";
+    tMyRandomVar.mStatistics.mUpperBound = "";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mLowerBound = "";
-    tMyRandomVar.mUpperBound = "95";
+    tMyRandomVar.mStatistics.mLowerBound = "";
+    tMyRandomVar.mStatistics.mUpperBound = "95";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "";
-    tMyRandomVar.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mNumSamples = "";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mNumSamples = "0";
+    tMyRandomVar.mStatistics.mNumSamples = "0";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "-1";
+    tMyRandomVar.mStatistics.mNumSamples = "-1";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
-    tMyRandomVar.mNumSamples = "4";
-    tMyRandomVar.mStandardDeviation = "";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mStandardDeviation = "";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
     ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_beta)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mNumSamples = "4";
-    tMyRandomVar.mLowerBound = "65";
-    tMyRandomVar.mUpperBound = "95";
-    tMyRandomVar.mStandardDeviation = "5";
-    tMyRandomVar.mDistribution = "beta";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mUpperBound = "95";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mDistribution = "beta";
 
     // TEST UNDEFINED MEAN
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
-    tMyRandomVar.mMean = "80";
-    tMyRandomVar.mUpperBound = "";
+    tMyRandomVar.mStatistics.mMean = "80";
+    tMyRandomVar.mStatistics.mUpperBound = "";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mLowerBound = "";
-    tMyRandomVar.mUpperBound = "95";
+    tMyRandomVar.mStatistics.mLowerBound = "";
+    tMyRandomVar.mStatistics.mUpperBound = "95";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "";
-    tMyRandomVar.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mNumSamples = "";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mNumSamples = "0";
+    tMyRandomVar.mStatistics.mNumSamples = "0";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mNumSamples = "-1";
+    tMyRandomVar.mStatistics.mNumSamples = "-1";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
-    tMyRandomVar.mNumSamples = "4";
-    tMyRandomVar.mStandardDeviation = "";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mStandardDeviation = "";
     ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
     ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, define_input_statistics)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mNumSamples = "4";
-    tMyRandomVar.mLowerBound = "65";
-    tMyRandomVar.mUpperBound = "95";
-    tMyRandomVar.mStandardDeviation = "5";
-    tMyRandomVar.mDistribution = "beta";
+    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mUpperBound = "95";
+    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.mStatistics.mDistribution = "beta";
 
     // TEST UNDEFINED PARAMETER
     Plato::SromInputs<double> tSromInputs;
     ASSERT_FALSE(Plato::define_input_statistics(tMyRandomVar, tSromInputs));
 
     // TEST SUCCESS
-    tMyRandomVar.mMean = "80";
+    tMyRandomVar.mStatistics.mMean = "80";
     ASSERT_TRUE(Plato::define_input_statistics(tMyRandomVar, tSromInputs));
 
     ASSERT_EQ(4u, tSromInputs.mNumSamples);
@@ -1448,22 +1612,22 @@ TEST(PlatoTest, define_input_statistics)
 
 TEST(PlatoTest, define_distribution)
 {
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     Plato::SromInputs<double> tSromInputs;
 
-    tMyRandomVar.mDistribution = "normal";
+    tMyRandomVar.mStatistics.mDistribution = "normal";
     ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::normal, tSromInputs.mDistribution);
 
-    tMyRandomVar.mDistribution = "beta";
+    tMyRandomVar.mStatistics.mDistribution = "beta";
     ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
 
-    tMyRandomVar.mDistribution = "uniform";
+    tMyRandomVar.mStatistics.mDistribution = "uniform";
     ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::uniform, tSromInputs.mDistribution);
 
-    tMyRandomVar.mDistribution = "lognormal";
+    tMyRandomVar.mStatistics.mDistribution = "lognormal";
     ASSERT_FALSE(Plato::define_distribution(tMyRandomVar, tSromInputs));
 }
 
@@ -1529,35 +1693,34 @@ TEST(PlatoTest, compute_random_variable_statistics)
 TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mDistribution = "beta";
-    tMyRandomVar.mMean = "85";
-    tMyRandomVar.mUpperBound = "65";
-    tMyRandomVar.mLowerBound = "135";
-    tMyRandomVar.mStandardDeviation = "15";
-    tMyRandomVar.mNumSamples = "3";
-    std::vector<Plato::RandomVariable> tRandomVarsSet;
+    tMyRandomVar.mStatistics.mDistribution = "beta";
+    tMyRandomVar.mStatistics.mMean = "85";
+    tMyRandomVar.mStatistics.mUpperBound = "65";
+    tMyRandomVar.mStatistics.mLowerBound = "135";
+    tMyRandomVar.mStatistics.mStandardDeviation = "15";
+    tMyRandomVar.mStatistics.mNumSamples = "3";
+    std::vector<Plato::srom::Variable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
     // SOLVE SROM PROBLEM
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
     Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
 
     // TEST RESULTS
     ASSERT_EQ(1u, tMySampleProbPairs.size());
     ASSERT_STREQ("x", tMySampleProbPairs[0].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[0].mType.c_str());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mNumSamples);
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mSamples.size());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mProbabilities.size());
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mSamples.size());
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mProbabilities.size());
 
     // TEST RESULTS
     double tSum = 0;
     double tTolerance = 1e-4;
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPair;
+    const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
     std::vector<double> tGoldSamples = {102.6401761033302, 88.31771931721183, 76.83726384445947};
     std::vector<double> tGoldProbabilities = {0.18178392025984, 0.19071306890276, 0.62750198867198};
     for(size_t tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
@@ -1572,48 +1735,46 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
 
 TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
 {
-    std::vector<Plato::RandomVariable> tRandomVarsSet;
+    std::vector<Plato::srom::Variable> tRandomVarsSet;
 
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVarOne;
+    Plato::srom::Variable tMyRandomVarOne;
     tMyRandomVarOne.mType = "random rotation";
     tMyRandomVarOne.mSubType = "x";
-    tMyRandomVarOne.mGlobalID = "1";
-    tMyRandomVarOne.mDistribution = "beta";
-    tMyRandomVarOne.mMean = "85";
-    tMyRandomVarOne.mLowerBound = "65";
-    tMyRandomVarOne.mUpperBound = "135";
-    tMyRandomVarOne.mStandardDeviation = "15";
-    tMyRandomVarOne.mNumSamples = "3";
+    tMyRandomVarOne.mStatistics.mDistribution = "beta";
+    tMyRandomVarOne.mStatistics.mMean = "85";
+    tMyRandomVarOne.mStatistics.mLowerBound = "65";
+    tMyRandomVarOne.mStatistics.mUpperBound = "135";
+    tMyRandomVarOne.mStatistics.mStandardDeviation = "15";
+    tMyRandomVarOne.mStatistics.mNumSamples = "3";
     tRandomVarsSet.push_back(tMyRandomVarOne);
 
-    Plato::RandomVariable tMyRandomVarTwo;
+    Plato::srom::Variable tMyRandomVarTwo;
     tMyRandomVarTwo.mType = "random rotation";
     tMyRandomVarTwo.mSubType = "y";
-    tMyRandomVarTwo.mGlobalID = "1";
-    tMyRandomVarTwo.mNumSamples = "4";
-    tMyRandomVarTwo.mDistribution = "beta";
-    tMyRandomVarTwo.mMean = "70";
-    tMyRandomVarTwo.mLowerBound = "50";
-    tMyRandomVarTwo.mUpperBound = "120";
-    tMyRandomVarTwo.mStandardDeviation = "15";
+    tMyRandomVarTwo.mStatistics.mNumSamples = "4";
+    tMyRandomVarTwo.mStatistics.mDistribution = "beta";
+    tMyRandomVarTwo.mStatistics.mMean = "70";
+    tMyRandomVarTwo.mStatistics.mLowerBound = "50";
+    tMyRandomVarTwo.mStatistics.mUpperBound = "120";
+    tMyRandomVarTwo.mStatistics.mStandardDeviation = "15";
     tRandomVarsSet.push_back(tMyRandomVarTwo);
 
     // SOLVE SROM PROBLEM
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
     Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
 
     // TEST RESULTS - RANDOM VARIABLE ONE
     ASSERT_EQ(2u, tMySampleProbPairs.size());
     ASSERT_STREQ("x", tMySampleProbPairs[0].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[0].mType.c_str());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mNumSamples);
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mSamples.size());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPair.mProbabilities.size());
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mSamples.size());
+    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mProbabilities.size());
 
     double tSum = 0;
     double tTolerance = 1e-4;
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsOne = tMySampleProbPairs[0].mSampleProbPair;
+    const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairsOne = tMySampleProbPairs[0].mSampleProbPairs;
     std::vector<double> tGoldSamplesOne = {79.56461506624, 95.1780010696, 104.3742043151};
     std::vector<double> tGoldProbabilitiesOne = {0.441549282785, 0.3256625620299, 0.2326524892665};
     for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsOne.mNumSamples; tIndex++)
@@ -1628,13 +1789,13 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     // TEST RESULTS - RANDOM VARIABLE TWO
     ASSERT_STREQ("y", tMySampleProbPairs[1].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[1].mType.c_str());
-    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPair.mNumSamples);
-    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPair.mSamples.size());
-    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPair.mProbabilities.size());
+    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mSamples.size());
+    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mProbabilities.size());
 
     tSum = 0;
     tTolerance = 1e-4;
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsTwo = tMySampleProbPairs[1].mSampleProbPair;
+    const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairsTwo = tMySampleProbPairs[1].mSampleProbPairs;
     std::vector<double> tGoldSamplesTwo = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     std::vector<double> tGoldProbabilitiesTwo = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
     for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsTwo.mNumSamples; tIndex++)
@@ -1650,262 +1811,232 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
 TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_distribution)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mDistribution = "";
-    tMyRandomVar.mMean = "85";
-    tMyRandomVar.mUpperBound = "135";
-    tMyRandomVar.mLowerBound = "65";
-    tMyRandomVar.mStandardDeviation = "15";
-    tMyRandomVar.mNumSamples = "3";
-    std::vector<Plato::RandomVariable> tRandomVarsSet;
+    tMyRandomVar.mStatistics.mDistribution = "";
+    tMyRandomVar.mStatistics.mMean = "85";
+    tMyRandomVar.mStatistics.mUpperBound = "135";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mStandardDeviation = "15";
+    tMyRandomVar.mStatistics.mNumSamples = "3";
+    std::vector<Plato::srom::Variable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
     // SOLVE SROM PROBLEM
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_empty_random_var_set)
 {
     // SOLVE SROM PROBLEM
-    std::vector<Plato::RandomVariable> tRandomVarsSet;
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::Variable> tRandomVarsSet;
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistics_uniform)
 {
     // DEFINE INPUTS
-    Plato::RandomVariable tMyRandomVar;
+    Plato::srom::Variable tMyRandomVar;
     tMyRandomVar.mType = "random rotation";
     tMyRandomVar.mSubType = "x";
-    tMyRandomVar.mGlobalID = "1";
-    tMyRandomVar.mDistribution = "uniform";
-    tMyRandomVar.mLowerBound = "65";
-    tMyRandomVar.mUpperBound = "";
-    tMyRandomVar.mNumSamples = "3";
-    std::vector<Plato::RandomVariable> tRandomVarsSet;
+    tMyRandomVar.mStatistics.mDistribution = "uniform";
+    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.mStatistics.mUpperBound = "";
+    tMyRandomVar.mStatistics.mNumSamples = "3";
+    std::vector<Plato::srom::Variable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
     // TEST UNDEFINED UPPER BOUND
-    std::vector<Plato::SromRandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED LOWER BOUND
-    tRandomVarsSet[0].mLowerBound = "";
-    tRandomVarsSet[0].mUpperBound = "135";
+    tRandomVarsSet[0].mStatistics.mLowerBound = "";
+    tRandomVarsSet[0].mStatistics.mUpperBound = "135";
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tRandomVarsSet[0].mNumSamples = "";
-    tRandomVarsSet[0].mLowerBound = "65";
+    tRandomVarsSet[0].mStatistics.mNumSamples = "";
+    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NUMBER OF SAMPLES = 0
-    tRandomVarsSet[0].mNumSamples = "0";
-    tRandomVarsSet[0].mLowerBound = "65";
+    tRandomVarsSet[0].mStatistics.mNumSamples = "0";
+    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tRandomVarsSet[0].mNumSamples = "-1";
-    tRandomVarsSet[0].mLowerBound = "65";
+    tRandomVarsSet[0].mStatistics.mNumSamples = "-1";
+    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
     ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, post_process_random_load_error)
 {
     // ERROR: ZERO INPUTS PROVIDED
-    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
-    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
-    ASSERT_FALSE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
-
-    // ERROR: INPUT RANDOM ROTATIONS ARE NOT UNIQUE
-    Plato::SromRandomVariable tRandomLoadX;
-    tRandomLoadX.mType = "random rotation";
-    tRandomLoadX.mSubType = "x";
-    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
-    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
-    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-
-    Plato::SromRandomVariable tRandomLoadY;
-    tRandomLoadY.mType = "random rotation";
-    tRandomLoadY.mSubType = "x"; // ERROR - OVERWRITES ORIGINAL INPUT
-    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
-    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
-    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
-
-    tSromRandomVariableSet.push_back(tRandomLoadX);
-    tSromRandomVariableSet.push_back(tRandomLoadY);
-    ASSERT_FALSE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+    std::vector<Plato::srom::RandomVariable> tSromRandomVariableSet;
+    Plato::srom::SampleProbabilityPairs tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs;
+    ASSERT_FALSE(Plato::expand_load_sample_probability_pair(tSromRandomVariableSet, tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs));
 }
 
 TEST(PlatoTest, post_process_random_load_OneRandomRotation)
 {
-    Plato::SromRandomVariable tRandomLoadX;
+    Plato::srom::RandomVariable tRandomLoadX;
     tRandomLoadX.mType = "random rotation";
     tRandomLoadX.mSubType = "x";
-    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
-    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
-    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    tRandomLoadX.mSampleProbPairs.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPairs.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPairs.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    std::vector<Plato::srom::RandomVariable> tSromRandomVariableSet;
     tSromRandomVariableSet.push_back(tRandomLoadX);
 
-    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
-    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+    Plato::srom::SampleProbabilityPairs tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs;
+    ASSERT_TRUE(Plato::expand_load_sample_probability_pair(tSromRandomVariableSet, tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs));
 
     // TEST RESULTS
-    ASSERT_EQ(1u, tRotationAxisToSampleProbPairs.size());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_TRUE(tMyYaxisSampleProbPairs.mSamples.empty());
+    ASSERT_TRUE(tMyZaxisSampleProbPairs.mSamples.empty());
+    ASSERT_FALSE(tMyXaxisSampleProbPairs.mSamples.empty());
 
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairs = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
-    ASSERT_EQ(4u, tSampleProbabilityPairs.mNumSamples);
+    ASSERT_EQ(4u, tMyXaxisSampleProbPairs.mNumSamples);
 
     const double tTolerance = 1e-4;
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
+    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 }
 
 TEST(PlatoTest, post_process_random_load_TwoRandomRotations)
 {
-    Plato::SromRandomVariable tRandomLoadX;
+    Plato::srom::RandomVariable tRandomLoadX;
     tRandomLoadX.mType = "random rotation";
     tRandomLoadX.mSubType = "x";
-    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
-    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
-    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    tRandomLoadX.mSampleProbPairs.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPairs.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPairs.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
-    Plato::SromRandomVariable tRandomLoadY;
+    Plato::srom::RandomVariable tRandomLoadY;
     tRandomLoadY.mType = "random rotation";
     tRandomLoadY.mSubType = "y";
-    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
-    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
-    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+    tRandomLoadY.mSampleProbPairs.mNumSamples = 3;
+    tRandomLoadY.mSampleProbPairs.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tRandomLoadY.mSampleProbPairs.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
-    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    std::vector<Plato::srom::RandomVariable> tSromRandomVariableSet;
     tSromRandomVariableSet.push_back(tRandomLoadX);
     tSromRandomVariableSet.push_back(tRandomLoadY);
 
-    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
-    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+    Plato::srom::SampleProbabilityPairs tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs;
+    ASSERT_TRUE(Plato::expand_load_sample_probability_pair(tSromRandomVariableSet, tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs));
 
     // TEST RESULTS
-    ASSERT_EQ(2u, tRotationAxisToSampleProbPairs.size());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_TRUE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_TRUE(tMyZaxisSampleProbPairs.mSamples.empty());
+    ASSERT_FALSE(tMyYaxisSampleProbPairs.mSamples.empty());
+    ASSERT_FALSE(tMyXaxisSampleProbPairs.mSamples.empty());
 
     // TEST RESULTS FOR ROTATION X SAMPLE-PROBABILITY PAIRS
     const double tTolerance = 1e-4;
 
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsX = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
-    ASSERT_EQ(tRandomLoadX.mSampleProbPair.mNumSamples, tSampleProbabilityPairsX.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsX.mNumSamples; tIndex++)
+    ASSERT_EQ(tRandomLoadX.mSampleProbPairs.mNumSamples, tMyXaxisSampleProbPairs.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsX.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsX.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 
     // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsY = tRotationAxisToSampleProbPairs.find(Plato::axis3D::y)->second;
-    ASSERT_EQ(tRandomLoadY.mSampleProbPair.mNumSamples, tSampleProbabilityPairsY.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsY.mNumSamples; tIndex++)
+    ASSERT_EQ(tRandomLoadY.mSampleProbPairs.mNumSamples, tMyYaxisSampleProbPairs.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsY.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsY.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mSamples[tIndex], tMyYaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mProbabilities[tIndex], tMyYaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 }
 
 TEST(PlatoTest, post_process_random_load_ThreeRandomRotations)
 {
-    Plato::SromRandomVariable tRandomLoadX;
+    Plato::srom::RandomVariable tRandomLoadX;
     tRandomLoadX.mType = "random rotation";
     tRandomLoadX.mSubType = "x";
-    tRandomLoadX.mSampleProbPair.mNumSamples = 4;
-    tRandomLoadX.mSampleProbPair.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
-    tRandomLoadX.mSampleProbPair.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    tRandomLoadX.mSampleProbPairs.mNumSamples = 4;
+    tRandomLoadX.mSampleProbPairs.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tRandomLoadX.mSampleProbPairs.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
-    Plato::SromRandomVariable tRandomLoadY;
+    Plato::srom::RandomVariable tRandomLoadY;
     tRandomLoadY.mType = "random rotation";
     tRandomLoadY.mSubType = "y";
-    tRandomLoadY.mSampleProbPair.mNumSamples = 3;
-    tRandomLoadY.mSampleProbPair.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
-    tRandomLoadY.mSampleProbPair.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+    tRandomLoadY.mSampleProbPairs.mNumSamples = 3;
+    tRandomLoadY.mSampleProbPairs.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tRandomLoadY.mSampleProbPairs.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
-    Plato::SromRandomVariable tRandomLoadZ;
+    Plato::srom::RandomVariable tRandomLoadZ;
     tRandomLoadZ.mType = "random rotation";
     tRandomLoadZ.mSubType = "z";
-    tRandomLoadZ.mSampleProbPair.mNumSamples = 4;
-    tRandomLoadZ.mSampleProbPair.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
-    tRandomLoadZ.mSampleProbPair.mProbabilities = {0.25, 0.25, 0.25, 0.25};
+    tRandomLoadZ.mSampleProbPairs.mNumSamples = 4;
+    tRandomLoadZ.mSampleProbPairs.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
+    tRandomLoadZ.mSampleProbPairs.mProbabilities = {0.25, 0.25, 0.25, 0.25};
 
-    std::vector<Plato::SromRandomVariable> tSromRandomVariableSet;
+    std::vector<Plato::srom::RandomVariable> tSromRandomVariableSet;
     tSromRandomVariableSet.push_back(tRandomLoadX);
     tSromRandomVariableSet.push_back(tRandomLoadY);
     tSromRandomVariableSet.push_back(tRandomLoadZ);
 
-    std::map<Plato::axis3D::axis3D, Plato::SampleProbabilityPairs> tRotationAxisToSampleProbPairs;
-    ASSERT_TRUE(Plato::post_process_random_load(tSromRandomVariableSet, tRotationAxisToSampleProbPairs));
+    Plato::srom::SampleProbabilityPairs tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs;
+    ASSERT_TRUE(Plato::expand_load_sample_probability_pair(tSromRandomVariableSet, tMyXaxisSampleProbPairs, tMyYaxisSampleProbPairs, tMyZaxisSampleProbPairs));
 
     // TEST RESULTS
-    ASSERT_EQ(3u, tRotationAxisToSampleProbPairs.size());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::x) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::y) == tRotationAxisToSampleProbPairs.end());
-    ASSERT_FALSE(tRotationAxisToSampleProbPairs.find(Plato::axis3D::z) == tRotationAxisToSampleProbPairs.end());
+    ASSERT_FALSE(tMyZaxisSampleProbPairs.mSamples.empty());
+    ASSERT_FALSE(tMyYaxisSampleProbPairs.mSamples.empty());
+    ASSERT_FALSE(tMyXaxisSampleProbPairs.mSamples.empty());
 
     // TEST RESULTS FOR ROTATION X SAMPLE-PROBABILITY PAIRS
     const double tTolerance = 1e-4;
 
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsX = tRotationAxisToSampleProbPairs.find(Plato::axis3D::x)->second;
-    ASSERT_EQ(tRandomLoadX.mSampleProbPair.mNumSamples, tSampleProbabilityPairsX.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsX.mNumSamples; tIndex++)
+    ASSERT_EQ(tRandomLoadX.mSampleProbPairs.mNumSamples, tMyXaxisSampleProbPairs.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsX.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadX.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsX.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 
     // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsY = tRotationAxisToSampleProbPairs.find(Plato::axis3D::y)->second;
-    ASSERT_EQ(tRandomLoadY.mSampleProbPair.mNumSamples, tSampleProbabilityPairsY.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsY.mNumSamples; tIndex++)
+    ASSERT_EQ(tRandomLoadY.mSampleProbPairs.mNumSamples, tMyYaxisSampleProbPairs.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsY.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadY.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsY.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mSamples[tIndex], tMyYaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mProbabilities[tIndex], tMyYaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 
     // TEST RESULTS FOR ROTATION Z SAMPLE-PROBABILITY PAIRS
-    const Plato::SampleProbabilityPairs& tSampleProbabilityPairsZ = tRotationAxisToSampleProbPairs.find(Plato::axis3D::z)->second;
-    ASSERT_EQ(tRandomLoadZ.mSampleProbPair.mNumSamples, tSampleProbabilityPairsZ.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsZ.mNumSamples; tIndex++)
+    ASSERT_EQ(tRandomLoadZ.mSampleProbPairs.mNumSamples, tMyZaxisSampleProbPairs.mNumSamples);
+    for(size_t tIndex = 0; tIndex < tMyZaxisSampleProbPairs.mNumSamples; tIndex++)
     {
-        ASSERT_NEAR(tRandomLoadZ.mSampleProbPair.mSamples[tIndex], tSampleProbabilityPairsZ.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tRandomLoadZ.mSampleProbPair.mProbabilities[tIndex], tSampleProbabilityPairsZ.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadZ.mSampleProbPairs.mSamples[tIndex], tMyZaxisSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tRandomLoadZ.mSampleProbPairs.mProbabilities[tIndex], tMyZaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
     }
 }
 
 TEST(PlatoTest, expand_random_rotations_about_xyz)
 {
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
     tSampleProbPairSetY.mNumSamples = 3;
     tSampleProbPairSetY.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
     tSampleProbPairSetY.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetZ.mNumSamples = 4;
     tSampleProbPairSetZ.mProbabilities = {0.25, 0.25, 0.25, 0.25};
     tSampleProbPairSetZ.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
 
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST NUMBER OF ROTATION VECTORS
@@ -1958,18 +2089,18 @@ TEST(PlatoTest, expand_random_rotations_about_xyz)
 TEST(PlatoTest, expand_random_rotations_about_xy)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
     tSampleProbPairSetY.mNumSamples = 3;
     tSampleProbPairSetY.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
     tSampleProbPairSetY.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2005,18 +2136,18 @@ TEST(PlatoTest, expand_random_rotations_about_xy)
 TEST(PlatoTest, expand_random_rotations_about_xz)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetZ.mNumSamples = 3;
     tSampleProbPairSetZ.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2052,18 +2183,18 @@ TEST(PlatoTest, expand_random_rotations_about_xz)
 TEST(PlatoTest, expand_random_rotations_about_yz)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
     tSampleProbPairSetY.mNumSamples = 4;
     tSampleProbPairSetY.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetY.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetZ.mNumSamples = 3;
     tSampleProbPairSetZ.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2099,15 +2230,15 @@ TEST(PlatoTest, expand_random_rotations_about_yz)
 TEST(PlatoTest, expand_random_rotations_about_x)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2136,15 +2267,15 @@ TEST(PlatoTest, expand_random_rotations_about_x)
 TEST(PlatoTest, expand_random_rotations_about_y)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
     tSampleProbPairSetY.mNumSamples = 4;
     tSampleProbPairSetY.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetY.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2173,15 +2304,15 @@ TEST(PlatoTest, expand_random_rotations_about_y)
 TEST(PlatoTest, expand_random_rotations_about_z)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetZ.mNumSamples = 4;
     tSampleProbPairSetZ.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetZ.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // CALL FUNCTION
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 
     // TEST OUTPUTS
@@ -2209,30 +2340,30 @@ TEST(PlatoTest, expand_random_rotations_about_z)
 
 TEST(PlatoTest, expand_random_rotations_error)
 {
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
-    std::vector<Plato::RandomRotations> tRandomRotationSet;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
+    std::vector<Plato::srom::RandomRotations> tRandomRotationSet;
     ASSERT_FALSE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tRandomRotationSet));
 }
 
 TEST(PlatoTest, expand_random_loads_about_z)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetZ.mNumSamples = 4;
     tSampleProbPairSetZ.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetZ.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2262,20 +2393,20 @@ TEST(PlatoTest, expand_random_loads_about_z)
 TEST(PlatoTest, expand_random_loads_about_y)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetY.mNumSamples = 4;
     tSampleProbPairSetY.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetY.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2305,20 +2436,20 @@ TEST(PlatoTest, expand_random_loads_about_y)
 TEST(PlatoTest, expand_random_loads_about_x)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2348,9 +2479,9 @@ TEST(PlatoTest, expand_random_loads_about_x)
 TEST(PlatoTest, expand_random_loads_about_yz)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetY.mNumSamples = 4;
     tSampleProbPairSetY.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetY.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2359,12 +2490,12 @@ TEST(PlatoTest, expand_random_loads_about_yz)
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2399,9 +2530,9 @@ TEST(PlatoTest, expand_random_loads_about_yz)
 TEST(PlatoTest, expand_random_loads_about_xz)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2410,12 +2541,12 @@ TEST(PlatoTest, expand_random_loads_about_xz)
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2450,9 +2581,9 @@ TEST(PlatoTest, expand_random_loads_about_xz)
 TEST(PlatoTest, expand_random_loads_about_xy)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2461,12 +2592,12 @@ TEST(PlatoTest, expand_random_loads_about_xy)
     tSampleProbPairSetY.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2501,9 +2632,9 @@ TEST(PlatoTest, expand_random_loads_about_xy)
 TEST(PlatoTest, expand_random_loads_about_xyz)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2515,12 +2646,12 @@ TEST(PlatoTest, expand_random_loads_about_xyz)
     tSampleProbPairSetZ.mSamples = {10, 13.333333333333, 16.666666666667, 20.0};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // TEST OUTPUTS
@@ -2577,8 +2708,8 @@ TEST(PlatoTest, expand_random_loads_error_1)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED SINCE SET OF RANDOM ROTATION IS EMPTY
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 }
 
@@ -2586,13 +2717,13 @@ TEST(PlatoTest, expand_random_loads_error_2)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
     Plato::Vector3D tMyOriginalLoad(std::numeric_limits<double>::quiet_NaN(), 1, 1);
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
-    Plato::RandomRotations tMyRotation;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
+    Plato::srom::RandomRotations tMyRotation;
     tMyRotation.mRotations.mX = 0;
     tMyRotation.mRotations.mY = 0;
     tMyRotation.mRotations.mZ = 62.92995363352;
     tMyRandomRotationsSet.push_back(tMyRotation);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Y-COMPONENT
@@ -2608,9 +2739,9 @@ TEST(PlatoTest, expand_random_loads_error_3)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tMyRandomLoads;
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
-    Plato::RandomRotations tMyRotation;
+    std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
+    Plato::srom::RandomRotations tMyRotation;
     tMyRotation.mRotations.mX = std::numeric_limits<double>::quiet_NaN(); tMyRotation.mRotations.mY = 0; tMyRotation.mRotations.mZ = 62.92995363352;
     tMyRandomRotationsSet.push_back(tMyRotation);
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
@@ -2627,17 +2758,17 @@ TEST(PlatoTest, expand_random_loads_error_3)
 TEST(PlatoTest, expand_random_load_cases_error)
 {
     // CALL EXPAND RANDOM LOAD CASES FUNCTION - FAILURE IS EXPECTED DUE TO EMPTY ARRAY OF NEW RANDOM LOADS
-    std::vector<Plato::RandomLoad> tNewSetRandomLoads;
-    std::vector<Plato::RandomLoadCase> tOldRandomLoadCases;
+    std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
+    std::vector<Plato::srom::RandomLoadCase> tOldRandomLoadCases;
     ASSERT_FALSE(Plato::expand_random_load_cases(tNewSetRandomLoads, tOldRandomLoadCases));
 }
 
 TEST(PlatoTest, expand_random_load_cases_one_load)
 {
     // SET INPUTS
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2646,16 +2777,16 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tNewSetRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
     // CALL EXPAND RANDOM LOAD CASES FUNCTION - FUNCTION BEING TESTED
-    std::vector<Plato::RandomLoadCase> tRandomLoadCases;
+    std::vector<Plato::srom::RandomLoadCase> tRandomLoadCases;
     ASSERT_TRUE(Plato::expand_random_load_cases(tNewSetRandomLoads, tRandomLoadCases));
 
     std::vector<std::vector<double>> tGoldLoads =
@@ -2672,8 +2803,8 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
     double tTolerance = 1e-4;
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tRandomLoadCases.size(); tLoadCaseIndex++)
     {
-        const Plato::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
-        const Plato::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[0];
+        const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
+        const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[0];
 
         ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][0], tRandomLoad.mMagnitude.mX, tTolerance);
         ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][1], tRandomLoad.mMagnitude.mY, tTolerance);
@@ -2689,9 +2820,9 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
 TEST(PlatoTest, expand_random_load_cases_two_load)
 {
     // *** SET FIRST LOAD CASE ***
-    Plato::SampleProbabilityPairs tSampleProbPairSetX;
-    Plato::SampleProbabilityPairs tSampleProbPairSetY;
-    Plato::SampleProbabilityPairs tSampleProbPairSetZ;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
     tSampleProbPairSetX.mNumSamples = 4;
     tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
@@ -2700,16 +2831,16 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
     tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
 
     // COMPUTE RANDOM ROTATIONS SET
-    std::vector<Plato::RandomRotations> tMyRandomRotationsSet;
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
     Plato::Vector3D tMyOriginalLoad(1, 1, 1);
-    std::vector<Plato::RandomLoad> tNewSetRandomLoads;
+    std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
     // CALL EXPAND RANDOM LOAD CASES FUNCTION - FUNCTION BEING TESTED
-    std::vector<Plato::RandomLoadCase> tRandomLoadCases;
+    std::vector<Plato::srom::RandomLoadCase> tRandomLoadCases;
     ASSERT_TRUE(Plato::expand_random_load_cases(tNewSetRandomLoads, tRandomLoadCases));
 
     // *** SET SECOND LOAD CASE ***
@@ -2732,7 +2863,6 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
     // CALL EXPAND RANDOM LOAD CASES FUNCTION - FUNCTION BEING TESTED
-    tRandomLoadCases;
     ASSERT_TRUE(Plato::expand_random_load_cases(tNewSetRandomLoads, tRandomLoadCases));
 
     std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
@@ -2780,11 +2910,11 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
     double tTolerance = 1e-4;
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tRandomLoadCases.size(); tLoadCaseIndex++)
     {
-        const Plato::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
+        const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
         ASSERT_NEAR(tGoldProbabilities[tLoadCaseIndex], tRandomLoadCase.mProbability, tTolerance);
         for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoadCase.mLoads.size(); tLoadIndex++)
         {
-            const Plato::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[tLoadIndex];
+            const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[tLoadIndex];
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tRandomLoad.mMagnitude.mX, tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tRandomLoad.mMagnitude.mY, tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tRandomLoad.mMagnitude.mZ, tTolerance);
@@ -2802,23 +2932,23 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
      24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tRandomLoadCases.size(); tLoadCaseIndex++)
     {
-        const Plato::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
+        const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
         ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tRandomLoadCase.mLoadCaseID);
     }
 }
 
 TEST(PlatoTest, set_random_load_case_id_error)
 {
-    std::vector<Plato::RandomLoadCase> tRandomLoadCases;
+    std::vector<Plato::srom::RandomLoadCase> tRandomLoadCases;
     ASSERT_FALSE(Plato::set_random_load_case_id(tRandomLoadCases));
 }
 
 TEST(PlatoTest, expand_load_cases)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    InputData tInputData;
-    LoadCase tLC1;
-    Load tL1;
+    XMLGen::InputData tInputData;
+    XMLGen::LoadCase tLC1;
+    XMLGen::Load tL1;
     tLC1.id = "2";
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
@@ -2839,7 +2969,7 @@ TEST(PlatoTest, expand_load_cases)
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
     tInputData.load_cases.push_back(tLC1);
-    std::vector<LoadCase> tNewLoadCases;
+    std::vector<XMLGen::LoadCase> tNewLoadCases;
     Plato::expand_load_cases(tInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCases.size(), 9);
     ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
@@ -2864,8 +2994,8 @@ TEST(PlatoTest, expand_load_cases)
 
 TEST(PlatoTest, initialize_load_id_counter)
 {
-    std::vector<LoadCase> tLoadCases;
-    LoadCase tLC1;
+    std::vector<XMLGen::LoadCase> tLoadCases;
+    XMLGen::LoadCase tLC1;
     tLC1.id = "3";
     tLoadCases.push_back(tLC1);
     Plato::UniqueCounter tUniqueLoadIDCounter;
@@ -2882,9 +3012,9 @@ TEST(PlatoTest, expand_single_load_case)
 {
     // Check case of single load case with single load
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    LoadCase tOldLoadCase;
+    XMLGen::LoadCase tOldLoadCase;
     tOldLoadCase.id = "88";
-    Load tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.app_id = "34";
     tLoad1.app_type = "nodeset";
     tLoad1.type = "traction";
@@ -2897,7 +3027,7 @@ TEST(PlatoTest, expand_single_load_case)
     Plato::UniqueCounter tUniqueLoadIDCounter;
     tUniqueLoadIDCounter.mark(0);
     tUniqueLoadIDCounter.mark(88);
-    std::vector<LoadCase> tNewLoadCaseList;
+    std::vector<XMLGen::LoadCase> tNewLoadCaseList;
     Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter,
                                    tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCaseList.size(), 1);
@@ -2913,7 +3043,7 @@ TEST(PlatoTest, expand_single_load_case)
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].scale.c_str(), "24.5");
     ASSERT_EQ(tOriginalToNewLoadCaseMap[88][0], 88);
     // Check the case where a load case has more than one load
-    Load tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.app_id = "21";
     tLoad2.app_type = "sideset";
     tLoad2.type = "pressure";
@@ -2923,7 +3053,7 @@ TEST(PlatoTest, expand_single_load_case)
     tLoad2.scale = "12";
     tLoad2.load_id = "101";
     tOldLoadCase.loads.push_back(tLoad2);
-    std::vector<LoadCase> tNewLoadCaseList2;
+    std::vector<XMLGen::LoadCase> tNewLoadCaseList2;
     tOriginalToNewLoadCaseMap.clear();
     Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter,
                                    tOriginalToNewLoadCaseMap);
@@ -2937,16 +3067,16 @@ TEST(PlatoTest, expand_single_load_case)
     ASSERT_EQ(tOriginalToNewLoadCaseMap[88][1], 1);
     // Check case where load case with multiple loads is is split and the ids of the resulting
     // load cases have to "straddle" original load case id
-    LoadCase tLC1;
+    XMLGen::LoadCase tLC1;
     tLC1.id = "2";
-    Load tL1, tL2, tL3;
+    XMLGen::Load tL1, tL2, tL3;
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL2);
     tLC1.loads.push_back(tL3);
     Plato::UniqueCounter tIDCounter;
     tIDCounter.mark(0);
     tIDCounter.mark(2);
-    std::vector<LoadCase> tNewList;
+    std::vector<XMLGen::LoadCase> tNewList;
     tOriginalToNewLoadCaseMap.clear();
     Plato::expand_single_load_case(tLC1,tNewList,tIDCounter,
                                    tOriginalToNewLoadCaseMap);
@@ -2957,235 +3087,6 @@ TEST(PlatoTest, expand_single_load_case)
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 2);
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
     ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 3);
-}
-
-TEST(PlatoTest, generateSROMInput)
-{
-    InputData tInputData;
-    LoadCase tLC1;
-
-    Load tL1;
-    tL1.type = "pressure";
-    tL1.app_type = "sideset";
-    tL1.app_id = "55";
-    tL1.x = "11.1";
-    tL1.y = "22.2";
-    tL1.z = "33.3";
-    Load tL2;
-    tL2.type = "force";
-    tL2.app_type = "nodeset";
-    tL2.app_id = "3";
-    tL2.x = "21.1";
-    tL2.y = "32.2";
-    tL2.z = "43.3";
-    Load tL3;
-    tL3.type = "traction";
-    tL3.app_type = "sideset";
-    tL3.app_id = "4";
-    tL3.x = "31.1";
-    tL3.y = "42.2";
-    tL3.z = "53.3";
-
-    tLC1.id = "2";
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL2);
-    tLC1.loads.push_back(tL3);
-    tInputData.load_cases.push_back(tLC1);
-    tLC1.id = "4";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL3);
-    tLC1.loads.push_back(tL2);
-    tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
-    tLC1.id = "6";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL2);
-    tInputData.load_cases.push_back(tLC1);
-    tLC1.id = "10";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL3);
-    tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
-    Uncertainty tUncertainty1;
-    tUncertainty1.type = "angle variation";
-    tUncertainty1.id = "4";
-    tUncertainty1.axis = "x";
-    tUncertainty1.distribution = "beta";
-    tUncertainty1.mean = "90.0";
-    tUncertainty1.upper = "95.0";
-    tUncertainty1.lower = "89.0";
-    tUncertainty1.standard_deviation = "1.3";
-    tUncertainty1.num_samples = "3";
-    Uncertainty tUncertainty2;
-    tUncertainty2.type = "angle variation";
-    tUncertainty2.id = "10";
-    tUncertainty2.axis = "y";
-    tUncertainty2.distribution = "beta";
-    tUncertainty2.mean = "10.0";
-    tUncertainty2.upper = "15.0";
-    tUncertainty2.lower = "5.0";
-    tUncertainty2.standard_deviation = "2.3";
-    tUncertainty2.num_samples = "2";
-    tInputData.uncertainties.push_back(tUncertainty1);
-    tInputData.uncertainties.push_back(tUncertainty2);
-
-    std::vector<std::shared_ptr<Plato::Variable> > tSROMVariables;
-    Plato::generate_srom_inputs(tInputData, tSROMVariables);
-
-    const double tTolerance = 1e-6;
-    ASSERT_EQ(tSROMVariables.size(), 9);
-    ASSERT_STREQ(tSROMVariables[0]->globalID().c_str(), "4");
-    ASSERT_TRUE(tSROMVariables[0]->isRandom());
-    ASSERT_STREQ(tSROMVariables[0]->type().c_str(), "angle variation");
-    ASSERT_STREQ(tSROMVariables[0]->subType().c_str(), "x");
-    ASSERT_STREQ(tSROMVariables[0]->distribution().c_str(), "beta");
-    ASSERT_STREQ(tSROMVariables[0]->mean().c_str(), "90.0");
-    ASSERT_STREQ(tSROMVariables[0]->upperBound().c_str(), "95.0");
-    ASSERT_STREQ(tSROMVariables[0]->lowerBound().c_str(), "89.0");
-    ASSERT_STREQ(tSROMVariables[0]->standardDeviation().c_str(), "1.3");
-    ASSERT_STREQ(tSROMVariables[0]->numSamples().c_str(), "3");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->x(), 31.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->y(), 42.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->z(), 53.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->appID(), 4);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[0]))->loadType().c_str(), "traction");
-
-    ASSERT_STREQ(tSROMVariables[1]->globalID().c_str(), "5");
-    ASSERT_TRUE(tSROMVariables[1]->isRandom());
-    ASSERT_STREQ(tSROMVariables[1]->type().c_str(), "angle variation");
-    ASSERT_STREQ(tSROMVariables[1]->subType().c_str(), "x");
-    ASSERT_STREQ(tSROMVariables[1]->distribution().c_str(), "beta");
-    ASSERT_STREQ(tSROMVariables[1]->mean().c_str(), "90.0");
-    ASSERT_STREQ(tSROMVariables[1]->upperBound().c_str(), "95.0");
-    ASSERT_STREQ(tSROMVariables[1]->lowerBound().c_str(), "89.0");
-    ASSERT_STREQ(tSROMVariables[1]->standardDeviation().c_str(), "1.3");
-    ASSERT_STREQ(tSROMVariables[1]->numSamples().c_str(), "3");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->x(), 21.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->y(), 32.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->z(), 43.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->appID(), 3);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->appType().c_str(), "nodeset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[1]))->loadType().c_str(), "force");
-
-    ASSERT_STREQ(tSROMVariables[2]->globalID().c_str(), "7");
-    ASSERT_TRUE(tSROMVariables[2]->isRandom());
-    ASSERT_STREQ(tSROMVariables[2]->type().c_str(), "angle variation");
-    ASSERT_STREQ(tSROMVariables[2]->subType().c_str(), "x");
-    ASSERT_STREQ(tSROMVariables[2]->distribution().c_str(), "beta");
-    ASSERT_STREQ(tSROMVariables[2]->mean().c_str(), "90.0");
-    ASSERT_STREQ(tSROMVariables[2]->upperBound().c_str(), "95.0");
-    ASSERT_STREQ(tSROMVariables[2]->lowerBound().c_str(), "89.0");
-    ASSERT_STREQ(tSROMVariables[2]->standardDeviation().c_str(), "1.3");
-    ASSERT_STREQ(tSROMVariables[2]->numSamples().c_str(), "3");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->x(), 11.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->y(), 22.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->z(), 33.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->appID(), 55);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[2]))->loadType().c_str(), "pressure");
-
-    ASSERT_STREQ(tSROMVariables[3]->globalID().c_str(), "10");
-    ASSERT_TRUE(tSROMVariables[3]->isRandom());
-    ASSERT_STREQ(tSROMVariables[3]->type().c_str(), "angle variation");
-    ASSERT_STREQ(tSROMVariables[3]->subType().c_str(), "y");
-    ASSERT_STREQ(tSROMVariables[3]->distribution().c_str(), "beta");
-    ASSERT_STREQ(tSROMVariables[3]->mean().c_str(), "10.0");
-    ASSERT_STREQ(tSROMVariables[3]->upperBound().c_str(), "15.0");
-    ASSERT_STREQ(tSROMVariables[3]->lowerBound().c_str(), "5.0");
-    ASSERT_STREQ(tSROMVariables[3]->standardDeviation().c_str(), "2.3");
-    ASSERT_STREQ(tSROMVariables[3]->numSamples().c_str(), "2");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->x(), 31.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->y(), 42.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->z(), 53.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->appID(), 4);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[3]))->loadType().c_str(), "traction");
-
-    ASSERT_STREQ(tSROMVariables[4]->globalID().c_str(), "8");
-    ASSERT_TRUE(tSROMVariables[4]->isRandom());
-    ASSERT_STREQ(tSROMVariables[4]->type().c_str(), "angle variation");
-    ASSERT_STREQ(tSROMVariables[4]->subType().c_str(), "y");
-    ASSERT_STREQ(tSROMVariables[4]->distribution().c_str(), "beta");
-    ASSERT_STREQ(tSROMVariables[4]->mean().c_str(), "10.0");
-    ASSERT_STREQ(tSROMVariables[4]->upperBound().c_str(), "15.0");
-    ASSERT_STREQ(tSROMVariables[4]->lowerBound().c_str(), "5.0");
-    ASSERT_STREQ(tSROMVariables[4]->standardDeviation().c_str(), "2.3");
-    ASSERT_STREQ(tSROMVariables[4]->numSamples().c_str(), "2");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->x(), 11.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->y(), 22.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->z(), 33.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->appID(), 55);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[4]))->loadType().c_str(), "pressure");
-
-    ASSERT_STREQ(tSROMVariables[5]->globalID().c_str(), "2");
-    ASSERT_FALSE(tSROMVariables[5]->isRandom());
-    ASSERT_STREQ(tSROMVariables[5]->type().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->subType().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->distribution().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->mean().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->upperBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->lowerBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->standardDeviation().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[5]->numSamples().c_str(), "");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->x(), 11.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->y(), 22.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->z(), 33.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->appID(), 55);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[5]))->loadType().c_str(), "pressure");
-
-    ASSERT_STREQ(tSROMVariables[6]->globalID().c_str(), "1");
-    ASSERT_FALSE(tSROMVariables[6]->isRandom());
-    ASSERT_STREQ(tSROMVariables[6]->type().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->subType().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->distribution().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->mean().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->upperBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->lowerBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->standardDeviation().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[6]->numSamples().c_str(), "");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->x(), 21.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->y(), 32.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->z(), 43.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->appID(), 3);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->appType().c_str(), "nodeset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[6]))->loadType().c_str(), "force");
-
-    ASSERT_STREQ(tSROMVariables[7]->globalID().c_str(), "3");
-    ASSERT_FALSE(tSROMVariables[7]->isRandom());
-    ASSERT_STREQ(tSROMVariables[7]->type().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->subType().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->distribution().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->mean().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->upperBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->lowerBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->standardDeviation().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[7]->numSamples().c_str(), "");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->x(), 31.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->y(), 42.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->z(), 53.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->appID(), 4);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->appType().c_str(), "sideset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[7]))->loadType().c_str(), "traction");
-
-    ASSERT_STREQ(tSROMVariables[8]->globalID().c_str(), "6");
-    ASSERT_FALSE(tSROMVariables[8]->isRandom());
-    ASSERT_STREQ(tSROMVariables[8]->type().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->subType().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->distribution().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->mean().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->upperBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->lowerBound().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->standardDeviation().c_str(), "");
-    ASSERT_STREQ(tSROMVariables[8]->numSamples().c_str(), "");
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->x(), 21.1, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->y(), 32.2, tTolerance);
-    ASSERT_NEAR((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->z(), 43.3, tTolerance);
-    ASSERT_EQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->appID(), 3);
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->appType().c_str(), "nodeset");
-    ASSERT_STREQ((std::static_pointer_cast<Plato::SROMLoad>(tSROMVariables[8]))->loadType().c_str(), "force");
 }
 
 }

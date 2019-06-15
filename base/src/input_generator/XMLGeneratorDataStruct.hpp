@@ -6,6 +6,9 @@
 
 #pragma once
 
+namespace XMLGen
+{
+
 struct Uncertainty
 {
     std::string type; // currently always "angle variation"
@@ -32,7 +35,7 @@ struct Load
 
 struct LoadCase
 {
-    std::vector<Load> loads;
+    std::vector<XMLGen::Load> loads;
     std::string id; // note LoadCase id is not necessarily shared with its Loads
 };
 
@@ -140,10 +143,10 @@ struct Material
 
 struct InputData
 {
-    std::vector<Objective> objectives;
-    std::vector<Constraint> constraints;
-    std::vector<Material> materials;
-    std::vector<Block> blocks;
+    std::vector<XMLGen::Objective> objectives;
+    std::vector<XMLGen::Constraint> constraints;
+    std::vector<XMLGen::Material> materials;
+    std::vector<XMLGen::Block> blocks;
 
     std::string filter_type;
     std::string filter_radius_scale;
@@ -232,7 +235,10 @@ struct InputData
     std::vector<std::string> fixed_sideset_ids;
     std::vector<std::string> fixed_nodeset_ids;
 
-    std::vector<LoadCase> load_cases;
-    std::vector<BC> bcs;
-    std::vector<Uncertainty> uncertainties;
+    std::vector<XMLGen::LoadCase> load_cases;
+    std::vector<XMLGen::BC> bcs;
+    std::vector<XMLGen::Uncertainty> uncertainties;
 };
+
+}
+// namespace XMLGen

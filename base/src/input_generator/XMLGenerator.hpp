@@ -124,7 +124,7 @@ protected:
 
     std::string m_InputFilename;
     bool m_UseLaunch;
-    InputData m_InputData;
+    XMLGen::InputData m_InputData;
     std::string m_filterType_identity_generatorName;
     std::string m_filterType_identity_XMLName;
     std::string m_filterType_kernel_generatorName;

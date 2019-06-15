@@ -277,7 +277,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
         const int load_cases_id = std::atoi(m_InputData.load_cases[privateLoadIndex].id.c_str());
         unique_load_counter.mark(load_cases_id);
 
-        const std::vector<Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
+        const std::vector<XMLGen::Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
         const int num_this_loads = this_loads.size();
         if(num_this_loads == 1)
         {
@@ -328,7 +328,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
     for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
     {
         // skip multiple loads in this loadcase
-        const std::vector<Load>& this_first_loads = m_InputData.load_cases[privateLoadIndex].loads;
+        const std::vector<XMLGen::Load>& this_first_loads = m_InputData.load_cases[privateLoadIndex].loads;
         if(this_first_loads.size() != 1)
         {
             continue;
@@ -356,7 +356,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
         for(int this_loadUncertain_index = 0; this_loadUncertain_index < this_load_num_uncertainties; this_loadUncertain_index++)
         {
             int thisUncertaintyIndex = thisLoadUncertaintyIndices[this_loadUncertain_index];
-            const Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
+            const XMLGen::Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
 
             // clear any previously established loadcases and weights
             originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].clear();
@@ -421,7 +421,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                 const int this_privateLoadIndex = loadIdToPrivateLoadIndices[this_load_id][0];
 
                 // get loads from private
-                const std::vector<Load>& this_loads = m_InputData.load_cases[this_privateLoadIndex].loads;
+                const std::vector<XMLGen::Load>& this_loads = m_InputData.load_cases[this_privateLoadIndex].loads;
                 if(this_loads.size() != 1)
                 {
                     std::cout << "unexpected length" << std::endl;
@@ -445,7 +445,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                     const double this_sample_weight = tSromOutput[sample_index].mSampleWeight * thisLoadId_UncertaintyWeight;
 
                     // decide which load to modify
-                    Load* loadToModify = NULL;
+                    XMLGen::Load* loadToModify = NULL;
                     if(sample_index == 0u && abstractIndex_loadcaseInThisUncertain == 0)
                     {
                         // modify original load
@@ -469,9 +469,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                         loadIdToPrivateLoadIndices[newUniqueLoadId].push_back(m_InputData.load_cases.size());
 
                         // make new load
-                        LoadCase new_load_case;
+                        XMLGen::LoadCase new_load_case;
                         m_InputData.load_cases.push_back(new_load_case);
-                        LoadCase& last_load_case = m_InputData.load_cases.back();
+                        XMLGen::LoadCase& last_load_case = m_InputData.load_cases.back();
                         last_load_case.id = newUniqueLoadId_str;
                         last_load_case.loads.assign(1u, m_InputData.load_cases[this_privateLoadIndex].loads[0]);
                         last_load_case.loads[0].load_id = newUniqueLoadId_str;
@@ -505,7 +505,7 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
     const int num_objectives = m_InputData.objectives.size();
     for(int objIndex = 0; objIndex < num_objectives; objIndex++)
     {
-        Objective& this_obj = m_InputData.objectives[objIndex];
+        XMLGen::Objective& this_obj = m_InputData.objectives[objIndex];
 
         // get all load cases
         const std::vector<std::string>& this_obj_load_case_ids = this_obj.load_case_ids;
@@ -745,7 +745,7 @@ bool XMLGenerator::generateLaunchScript()
         fprintf(fp, "plato_main platomain.xml \\\n");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const Objective& cur_obj = m_InputData.objectives[i];
+        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.num_procs.empty())
             fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
         else
@@ -794,7 +794,7 @@ bool XMLGenerator::generateSalinasInputDecks()
         levelset = true;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const Objective& cur_obj = m_InputData.objectives[i];
+        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.code_name.compare("sierra_sd"))
         {
             bool frf = false;
@@ -811,7 +811,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                     for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
                     {
                         bool found = false;
-                        LoadCase cur_load_case;
+                        XMLGen::LoadCase cur_load_case;
                         std::string cur_load_id = cur_obj.load_case_ids[k];
                         for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                         {
@@ -1249,7 +1249,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                     for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
                     {
                         bool found = false;
-                        LoadCase cur_load_case;
+                        XMLGen::LoadCase cur_load_case;
                         std::string cur_load_id = cur_obj.load_case_ids[k];
                         for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                         {
@@ -1264,7 +1264,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                             fprintf(fp, "LOAD=%s\n", cur_load_case.id.c_str());
                             for(size_t d=0; d<cur_load_case.loads.size(); d++)
                             {
-                                Load cur_load = cur_load_case.loads[d];
+                                XMLGen::Load cur_load = cur_load_case.loads[d];
                                 if(cur_load.type == "acceleration")
                                 {
                                     fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
@@ -1301,7 +1301,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                     for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
                     {
                         bool found = false;
-                        LoadCase cur_load_case;
+                        XMLGen::LoadCase cur_load_case;
                         std::string cur_load_id = cur_obj.load_case_ids[k];
                         for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                         {
@@ -1315,7 +1315,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                         {
                             for(size_t d=0; d<cur_load_case.loads.size(); d++)
                             {
-                                Load cur_load = cur_load_case.loads[d];
+                                XMLGen::Load cur_load = cur_load_case.loads[d];
                                 if(cur_load.type == "acceleration")
                                 {
                                     fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
@@ -1354,7 +1354,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                 for(size_t k=0; k<cur_obj.bc_ids.size(); ++k)
                 {
                     bool found = false;
-                    BC cur_bc;
+                    XMLGen::BC cur_bc;
                     std::string cur_bc_id = cur_obj.bc_ids[k];
                     for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                     {
@@ -1395,7 +1395,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
     char string_var[200];
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const Objective& cur_obj = m_InputData.objectives[i];
+        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.code_name.compare("albany"))
         {
             char buf[200];
@@ -1488,7 +1488,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
             for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
             {
                 bool found = false;
-                BC cur_bc;
+                XMLGen::BC cur_bc;
                 std::string cur_bc_id = cur_obj.bc_ids[j];
                 for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                 {
@@ -1542,7 +1542,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
             for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
             {
                 bool found = false;
-                LoadCase cur_load_case;
+                XMLGen::LoadCase cur_load_case;
                 std::string cur_load_id = cur_obj.load_case_ids[j];
                 for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                 {
@@ -1556,7 +1556,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
                 {
                     for(size_t e=0; e<cur_load_case.loads.size(); e++)
                     {
-                        Load cur_load = cur_load_case.loads[e];
+                        XMLGen::Load cur_load = cur_load_case.loads[e];
                         if(!cur_obj.type.compare("maximize stiffness"))
                         {
                             if(cur_load.type == "traction")
@@ -1788,7 +1788,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
     char tmp_buf[200];
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const Objective& cur_obj = m_InputData.objectives[i];
+        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.code_name.compare("plato_analyze"))
         {
             char buf[200];
@@ -1845,7 +1845,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
                 {
                     bool found = false;
-                    LoadCase cur_load_case;
+                    XMLGen::LoadCase cur_load_case;
                     std::string cur_load_id = cur_obj.load_case_ids[j];
                     for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                     {
@@ -1859,7 +1859,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                     {
                         for(size_t e=0; e<cur_load_case.loads.size(); e++)
                         {
-                            Load cur_load = cur_load_case.loads[e];
+                            XMLGen::Load cur_load = cur_load_case.loads[e];
                             n4 = n3.append_child("ParameterList");
                             n4.append_attribute("name") = "Traction Vector Boundary Condition";
                             addNTVParameter(n4, "Type", "string", "Uniform");
@@ -1879,7 +1879,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
                 {
                     bool found = false;
-                    BC cur_bc;
+                    XMLGen::BC cur_bc;
                     std::string cur_bc_id = cur_obj.bc_ids[j];
                     for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                     {
@@ -1982,7 +1982,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
                 {
                     bool found = false;
-                    LoadCase cur_load_case;
+                    XMLGen::LoadCase cur_load_case;
                     std::string cur_load_id = cur_obj.load_case_ids[j];
                     for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                     {
@@ -1996,7 +1996,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                     {
                         for(size_t e=0; e<cur_load_case.loads.size(); e++)
                         {
-                            Load cur_load = cur_load_case.loads[e];
+                            XMLGen::Load cur_load = cur_load_case.loads[e];
                             n4 = n3.append_child("ParameterList");
                             n4.append_attribute("name") = "Flux Boundary Condition";
                             addNTVParameter(n4, "Type", "string", "Uniform");
@@ -2012,7 +2012,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
                 {
                     bool found = false;
-                    BC cur_bc;
+                    XMLGen::BC cur_bc;
                     std::string cur_bc_id = cur_obj.bc_ids[j];
                     for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                     {
@@ -2072,7 +2072,7 @@ bool XMLGenerator::generateLightMPInputDecks()
     pugi::xml_node node1, node2, node3;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const Objective& cur_obj = m_InputData.objectives[i];
+        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.code_name.compare("lightmp"))
         {
             char buf[200];
@@ -2164,7 +2164,7 @@ bool XMLGenerator::generateLightMPInputDecks()
             for(size_t j=0; j<cur_obj.bc_ids.size(); ++j)
             {
                 bool found = false;
-                BC cur_bc;
+                XMLGen::BC cur_bc;
                 std::string cur_bc_id = cur_obj.bc_ids[j];
                 for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
                 {
@@ -2239,7 +2239,7 @@ bool XMLGenerator::generateLightMPInputDecks()
             for(size_t j=0; j<cur_obj.load_case_ids.size(); ++j)
             {
                 bool found = false;
-                LoadCase cur_load_case;
+                XMLGen::LoadCase cur_load_case;
                 std::string cur_load_id = cur_obj.load_case_ids[j];
                 for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
                 {
@@ -2253,7 +2253,7 @@ bool XMLGenerator::generateLightMPInputDecks()
                 {
                     for(size_t e=0; e<cur_load_case.loads.size(); ++e)
                     {
-                        Load cur_load = cur_load_case.loads[e];
+                        XMLGen::Load cur_load = cur_load_case.loads[e];
                         node4 = node3.append_child("traction");
                         node5 = node4.append_child("nodeset");
                         node6 = node5.append_child(pugi::node_pcdata);
@@ -2360,7 +2360,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
 
             if(parseSingleValue(tokens, tInputStringList = {"begin","objective"}, tStringValue))
             {
-                Objective new_objective;
+                XMLGen::Objective new_objective;
                 new_objective.weight="1";
                 // found an objective. parse it.
                 // parse the rest of the objective
@@ -3038,7 +3038,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                         }
                         else
                         {
-                            Load new_load;
+                            XMLGen::Load new_load;
                             int j=0;
                             new_load.type = tokens[j];  // traction or heat [flux] or force
                             if(!new_load.type.compare("traction"))
@@ -3192,7 +3192,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                             }
                             if(!found_load_case)
                             {
-                                LoadCase new_load_case;
+                                XMLGen::LoadCase new_load_case;
                                 new_load_case.id = new_load.load_id;
                                 new_load_case.loads.push_back(new_load);
                                 m_InputData.load_cases.push_back(new_load_case);
@@ -3232,7 +3232,7 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
 
             if(parseSingleValue(tokens, tInputStringList = {"begin","uncertainty"}, tStringValue))
             {
-                Uncertainty new_uncertainty;
+                XMLGen::Uncertainty new_uncertainty;
                 // found an uncertainty. parse it.
                 while (!fin.eof())
                 {
@@ -3510,7 +3510,7 @@ bool XMLGenerator::parseBCs(std::istream &fin)
                         }
                         else
                         {
-                            BC new_bc;
+                            XMLGen::BC new_bc;
                             if(tokens.size() < 7)
                             {
                                 std::cout << "ERROR:XMLGenerator:parseBCs: Valid number of BC parameters were not specified in \"boundary conditions\" block.\n";
@@ -4737,7 +4737,7 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
 
             if(parseSingleValue(tokens, tInputStringList = {"begin","block"}, tStringValue))
             {
-                Block new_block;
+                XMLGen::Block new_block;
                 if(tStringValue == "")
                 {
                     std::cout << "ERROR:XMLGenerator:parseBlocks: No block id specified.\n";
@@ -4821,7 +4821,7 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
 
             if(parseSingleValue(tokens, tInputStringList = {"begin","material"}, tStringValue))
             {
-                Material new_material;
+                XMLGen::Material new_material;
                 new_material.penalty_exponent = "3.0";
                 if(tStringValue == "")
                 {
@@ -4933,7 +4933,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
 
             if(parseSingleValue(tokens, tInputStringList = {"begin","constraint"}, tStringValue))
             {
-                Constraint new_constraint;
+                XMLGen::Constraint new_constraint;
                 // found constraint
                 while (!fin.eof())
                 {
@@ -5167,7 +5167,7 @@ bool XMLGenerator::generatePlatoMainInputDeckXML()
     bool tAlexaRun = false;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.code_name == "plato_analyze")
         {
             tAlexaRun = true;
@@ -5442,7 +5442,7 @@ bool XMLGenerator::generateSalinasOperationsXML()
     {
         if(!m_InputData.objectives[i].code_name.compare("sierra_sd"))
         {
-            Objective cur_obj = m_InputData.objectives[i];
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
             num_sierra_sd_objs++;
 
             pugi::xml_document doc;
@@ -5685,7 +5685,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
     }
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.multi_load_case == "true")
         {
             for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
@@ -6406,7 +6406,7 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc)
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         if(cur_obj.code_name == "plato_analyze")
         {
@@ -6506,7 +6506,7 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc)
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         if(cur_obj.code_name == "plato_analyze")
         {
@@ -6744,7 +6744,7 @@ bool XMLGenerator::generateInterfaceXML()
     // Output shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.multi_load_case == "true")
         {
             for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
@@ -6967,7 +6967,7 @@ bool XMLGenerator::generateInterfaceXML()
     std::string tPerformerName = "";
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.code_name == "plato_analyze")
         {
             tAlexaRun = true;
@@ -7021,7 +7021,7 @@ bool XMLGenerator::generateInterfaceXML()
     }
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.multi_load_case == "true")
         {
             for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
@@ -7073,7 +7073,7 @@ bool XMLGenerator::generateInterfaceXML()
         {
             op_node = stage_node.append_child("Operation");
             addChild(op_node, "Name", "Update Problem");
-            Objective cur_obj = m_InputData.objectives[i];
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
             addChild(op_node, "PerformerName", cur_obj.performer_name);
         }
     }
@@ -7094,7 +7094,7 @@ bool XMLGenerator::generateInterfaceXML()
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        Objective cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze")) // Albany and analyzie don't handle Cache State correctly yet
         {
             op_node = cur_parent.append_child("Operation");
