@@ -123,7 +123,7 @@ struct Load
     std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
     std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
     std::vector<std::string> mValues; /*!< load magnitudes, e.g. \f$F = \{F_x, F_y, F_z\}\f$. */
-    std::vector<Plato::srom::Variable> mData; /*!< set of random variables, e.g. rotations, \f$\theta = \{\theta_x, \theta_y, \theta_z\}\f$. */
+    std::vector<Plato::srom::Variable> mRandomVars; /*!< set of random variables, e.g. rotations, \f$\theta = \{\theta_x, \theta_y, \theta_z\}\f$. */
 };
 
 struct SampleProbabilityPairs
@@ -165,12 +165,12 @@ struct RandomLoadCase
 
 struct OutputMetaData
 {
-    std::vector<Plato::srom::RandomLoadCase> mLoadCases;
+    std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
 };
 
 struct InputMetaData
 {
-    std::vector<Plato::srom::Load> mLoads;
+    std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
 };
 
 }
@@ -1145,15 +1145,15 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
 }
 
 inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom::Load>& aLoads,
-                                                     std::vector<Plato::srom::Load>& aRandomLoads,
-                                                     std::vector<Plato::srom::Load>& aDeterministicLoads)
+                                                  std::vector<Plato::srom::Load>& aRandomLoads,
+                                                  std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
     if(aLoads.empty())
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT LOAD SET IS EMPTY.\n";
+                 << "\nMESSAGE: INPUT SET OF LOADS IS EMPTY.\n";
         return (false);
     } // if statement
 
@@ -1161,7 +1161,7 @@ inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom:
     for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
     {
         const Plato::srom::Load& tLoad = aLoads[tLoadIndex];
-        if(tLoad.mData.empty())
+        if(tLoad.mRandomVars.empty())
         {
             // deterministic load
             aDeterministicLoads.push_back(aLoads[tLoadIndex]);
@@ -1170,8 +1170,8 @@ inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom:
         {
             // random load
             aRandomLoads.push_back(aLoads[tLoadIndex]);
-        }
-    }
+        } // if-else statement
+    }// for-loop
 
     return (true);
 }
@@ -1440,7 +1440,7 @@ inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato
     for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
     {
         std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
-        if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mData, tMySampleProbPairs) == false)
+        if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
         {
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -3022,6 +3022,216 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
 
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+}
+
+TEST(PlatoTest, expand_random_and_deterministic_loads_error)
+{
+    // FUNCTION FAILED DUE TO EMPTY SET OF LOADS
+    std::vector<Plato::srom::Load> tLoads;
+    std::vector<Plato::srom::Load> tRandomLoads;
+    std::vector<Plato::srom::Load> tDeterministicLoads;
+    ASSERT_FALSE(Plato::expand_random_and_deterministic_loads(tLoads, tRandomLoads, tDeterministicLoads));
+}
+
+TEST(PlatoTest, expand_random_and_deterministic_loads_only_random_loads)
+{
+    // INPUTS
+    std::vector<Plato::srom::Load> tLoads;
+    Plato::srom::Load tLoad1;
+    tLoad1.mAppID = 1;
+    tLoad1.mAppType = "nodeset";
+    tLoad1.mLoadID = 1;
+    tLoad1.mLoadType = "traction";
+    tLoad1.mValues = {"1", "2", "3"};
+    Plato::srom::Variable tRandVar1;
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "60";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "40";
+    tRandVar1.mStatistics.mUpperBound = "100";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "10";
+    Plato::srom::Variable tRandVar2;
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "y";
+    tRandVar2.mStatistics.mMean = "65";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "40";
+    tRandVar2.mStatistics.mUpperBound = "100";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "10";
+    tLoad1.mRandomVars.push_back(tRandVar2);
+    tLoads.push_back(tLoad1);
+
+    Plato::srom::Load tLoad2;
+    tLoad2.mAppID = 2;
+    tLoad2.mAppType = "nodeset";
+    tLoad2.mLoadID = 2;
+    tLoad2.mLoadType = "traction";
+    tLoad2.mValues = {"1", "2", "3"};
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "70";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "45";
+    tRandVar1.mStatistics.mUpperBound = "110";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "15";
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "z";
+    tRandVar2.mStatistics.mMean = "75";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "50";
+    tRandVar2.mStatistics.mUpperBound = "120";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "12";
+    tLoad2.mRandomVars.push_back(tRandVar2);
+    tLoads.push_back(tLoad2);
+
+    // CALL FUNCTION TO BE TESTED
+    std::vector<Plato::srom::Load> tRandomLoads;
+    std::vector<Plato::srom::Load> tDeterministicLoads;
+    ASSERT_TRUE(Plato::expand_random_and_deterministic_loads(tLoads, tRandomLoads, tDeterministicLoads));
+
+    // TEST OUTPUT
+    ASSERT_FALSE(tRandomLoads.empty());
+    ASSERT_TRUE(tDeterministicLoads.empty());
+
+    ASSERT_EQ(2u, tRandomLoads.size());
+    for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
+    {
+        ASSERT_EQ(tLoads[tLoadIndex].mAppID, tRandomLoads[tLoadIndex].mAppID);
+        ASSERT_EQ(tLoads[tLoadIndex].mLoadID, tRandomLoads[tLoadIndex].mLoadID);
+        ASSERT_STREQ(tLoads[tLoadIndex].mAppType.c_str(), tRandomLoads[tLoadIndex].mAppType.c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mLoadType.c_str(), tRandomLoads[tLoadIndex].mLoadType.c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[0].c_str(), tRandomLoads[tLoadIndex].mValues[0].c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[1].c_str(), tRandomLoads[tLoadIndex].mValues[1].c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[2].c_str(), tRandomLoads[tLoadIndex].mValues[2].c_str());
+
+        for(size_t tVarIndex = 0; tVarIndex < tRandomLoads[tLoadIndex].mRandomVars.size(); tVarIndex++)
+        {
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mType.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mType.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mSubType.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mSubType.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str());
+        }
+    }
+}
+
+TEST(PlatoTest, expand_random_and_deterministic_loads)
+{
+    // RANDOM INPUTS
+    std::vector<Plato::srom::Load> tLoads;
+    Plato::srom::Load tLoad1;
+    tLoad1.mAppID = 1;
+    tLoad1.mAppType = "nodeset";
+    tLoad1.mLoadID = 1;
+    tLoad1.mLoadType = "traction";
+    tLoad1.mValues = {"1", "2", "3"};
+    Plato::srom::Variable tRandVar1;
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "60";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "40";
+    tRandVar1.mStatistics.mUpperBound = "100";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "10";
+    Plato::srom::Variable tRandVar2;
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "y";
+    tRandVar2.mStatistics.mMean = "65";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "40";
+    tRandVar2.mStatistics.mUpperBound = "100";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "10";
+    tLoad1.mRandomVars.push_back(tRandVar2);
+    tLoads.push_back(tLoad1);
+
+    Plato::srom::Load tLoad2;
+    tLoad2.mAppID = 2;
+    tLoad2.mAppType = "nodeset";
+    tLoad2.mLoadID = 2;
+    tLoad2.mLoadType = "traction";
+    tLoad2.mValues = {"1", "2", "3"};
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "70";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "45";
+    tRandVar1.mStatistics.mUpperBound = "110";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "15";
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "z";
+    tRandVar2.mStatistics.mMean = "75";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "50";
+    tRandVar2.mStatistics.mUpperBound = "120";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "12";
+    tLoad2.mRandomVars.push_back(tRandVar2);
+    tLoads.push_back(tLoad2);
+
+    // DETERMINISTIC INPUTS
+    Plato::srom::Load tLoad3;
+    tLoad3.mAppID = 3;
+    tLoad3.mAppType = "SIDESET";
+    tLoad3.mLoadID = 3;
+    tLoad3.mLoadType = "pressure";
+    tLoad3.mValues = {"1", "2", "3"};
+    tLoads.push_back(tLoad3);
+
+    // CALL FUNCTION TO BE TESTED
+    std::vector<Plato::srom::Load> tRandomLoads;
+    std::vector<Plato::srom::Load> tDeterministicLoads;
+    ASSERT_TRUE(Plato::expand_random_and_deterministic_loads(tLoads, tRandomLoads, tDeterministicLoads));
+
+    // TEST OUTPUT
+    ASSERT_FALSE(tRandomLoads.empty());
+    ASSERT_FALSE(tDeterministicLoads.empty());
+
+    // TEST RANDOM LOADS
+    ASSERT_EQ(2u, tRandomLoads.size());
+    for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
+    {
+        ASSERT_EQ(tLoads[tLoadIndex].mAppID, tRandomLoads[tLoadIndex].mAppID);
+        ASSERT_EQ(tLoads[tLoadIndex].mLoadID, tRandomLoads[tLoadIndex].mLoadID);
+        ASSERT_STREQ(tLoads[tLoadIndex].mAppType.c_str(), tRandomLoads[tLoadIndex].mAppType.c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mLoadType.c_str(), tRandomLoads[tLoadIndex].mLoadType.c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[0].c_str(), tRandomLoads[tLoadIndex].mValues[0].c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[1].c_str(), tRandomLoads[tLoadIndex].mValues[1].c_str());
+        ASSERT_STREQ(tLoads[tLoadIndex].mValues[2].c_str(), tRandomLoads[tLoadIndex].mValues[2].c_str());
+
+        for(size_t tVarIndex = 0; tVarIndex < tRandomLoads[tLoadIndex].mRandomVars.size(); tVarIndex++)
+        {
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mType.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mType.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mSubType.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mSubType.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str());
+        }
+    }
+
+    // TEST DETERMINISTIC LOADS
+    ASSERT_EQ(1u, tDeterministicLoads.size());
+    ASSERT_TRUE(tDeterministicLoads[0].mRandomVars.empty());
+    ASSERT_EQ(tLoads[2].mAppID, tDeterministicLoads[0].mAppID);
+    ASSERT_EQ(tLoads[2].mLoadID, tDeterministicLoads[0].mLoadID);
+    ASSERT_STREQ(tLoads[2].mAppType.c_str(), tDeterministicLoads[0].mAppType.c_str());
+    ASSERT_STREQ(tLoads[2].mLoadType.c_str(), tDeterministicLoads[0].mLoadType.c_str());
+    ASSERT_STREQ(tLoads[2].mValues[0].c_str(), tDeterministicLoads[0].mValues[0].c_str());
+    ASSERT_STREQ(tLoads[2].mValues[1].c_str(), tDeterministicLoads[0].mValues[1].c_str());
+    ASSERT_STREQ(tLoads[2].mValues[2].c_str(), tDeterministicLoads[0].mValues[2].c_str());
 }
 
 TEST(PlatoTest, expand_load_cases)
