@@ -1176,6 +1176,47 @@ inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom:
     return (true);
 }
 
+inline bool check_load_parameters(const Plato::srom::Load& aLoad)
+{
+    if(std::isfinite(aLoad.mAppID) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: APPLICATION IDENTIFIER IS NOT A FINITE NUMBER.\n";
+        return (false);
+    }
+
+    if(aLoad.mAppType.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: APPLICATION TYPE IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    if(aLoad.mLoadType.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD TYPE IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    if(aLoad.mValues.empty())
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: LOAD COMPONENTS IS NOT DEFINE.\n";
+        return (false);
+    }
+
+    return (true);
+}
+
 inline bool set_load_components(const std::vector<std::string> & aInput, Plato::Vector3D & aOutput)
 {
     if(aInput.empty())
@@ -1183,7 +1224,7 @@ inline bool set_load_components(const std::vector<std::string> & aInput, Plato::
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT VECTOR WITH LOAD MAGNITUDES IS EMPTY.\n";
+                 << "\nMESSAGE: INPUT LOAD VECTOR IS EMPTY.\n";
         return (false);
     }
 
@@ -1192,7 +1233,7 @@ inline bool set_load_components(const std::vector<std::string> & aInput, Plato::
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT DIMENSIONS = " << aInput.size() << ". ONLY 3D LOAD CASES ARE CURRENTLY SUPPORTED.\n";
+                 << "\nMESSAGE: INPUT DIMENSIONS = " << aInput.size() << ". CURRENTLY, ONLY 3-DIM PROBLEMS ARE SUPPORTED.\n";
         return (false);
     }
 
@@ -1205,6 +1246,15 @@ inline bool set_load_components(const std::vector<std::string> & aInput, Plato::
 
 inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
 {
+    if(Plato::check_load_parameters(aOriginalLoad) == false)
+    {
+        std::cout<< "\nFILE: " << __FILE__
+                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
+                 << "\nLINE:" << __LINE__
+                 << "\nMESSAGE: ONE OR MORE LOAD PARAMETERS ARE NOT DEFINED.\n";
+        return (false);
+    }
+
     for(size_t tLoadIndex = 0; tLoadIndex < aSetRandomLoads.size(); tLoadIndex++)
     {
         aSetRandomLoads[tLoadIndex].mAppID = aOriginalLoad.mAppID;
@@ -1224,18 +1274,11 @@ inline bool generate_set_random_rotations(const std::vector<Plato::srom::RandomV
         std::cout << "\nFILE: " << __FILE__
                   << "\nFUNCTION: " << __PRETTY_FUNCTION__
                   << "\nLINE:" << __LINE__
-                  << "\nMESSAGE: FAILED TO POST-PROCESS SAMPLE-PROBABILITY PAIRS.\n";
+                  << "\nMESSAGE: FAILED TO EXPAND SAMPLE-PROBABILITY PAIRS.\n";
         return (false);
     }
 
-    if(Plato::expand_random_rotations(tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs, aMySetRandomRotation) == false)
-    {
-        std::cout << "\nFILE: " << __FILE__
-                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                  << "\nLINE:" << __LINE__
-                  << "\nMESSAGE: FAILED TO EXPAND RANDOM ROTATIONS.\n";
-        return (false);
-    }
+    Plato::expand_random_rotations(tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs, aMySetRandomRotation);
 
     return (true);
 }
@@ -1302,52 +1345,11 @@ inline bool generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCa
     return (true);
 }
 
-inline bool check_deterministic_load_parameters(const Plato::srom::Load& aLoad)
-{
-    if(std::isfinite(aLoad.mAppID))
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: APPLICATION IDENTIFIER IS NOT A FINITE NUMBER.\n";
-        return (false);
-    }
-
-    if(aLoad.mAppType.empty())
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: APPLICATION TYPE IS NOT DEFINE.\n";
-        return (false);
-    }
-
-    if(aLoad.mLoadType.empty())
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD TYPE IS NOT DEFINE.\n";
-        return (false);
-    }
-
-    if(aLoad.mValues.empty())
-    {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD COMPONENTS IS NOT DEFINE.\n";
-        return (false);
-    }
-
-    return (true);
-}
-
 inline bool check_set_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
     for(size_t tIndex = 0; tIndex < aDeterministicLoads.size(); tIndex++)
     {
-        if(Plato::check_deterministic_load_parameters(aDeterministicLoads[tIndex]) == false)
+        if(Plato::check_load_parameters(aDeterministicLoads[tIndex]) == false)
         {
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -3232,6 +3234,90 @@ TEST(PlatoTest, expand_random_and_deterministic_loads)
     ASSERT_STREQ(tLoads[2].mValues[0].c_str(), tDeterministicLoads[0].mValues[0].c_str());
     ASSERT_STREQ(tLoads[2].mValues[1].c_str(), tDeterministicLoads[0].mValues[1].c_str());
     ASSERT_STREQ(tLoads[2].mValues[2].c_str(), tDeterministicLoads[0].mValues[2].c_str());
+}
+
+TEST(PlatoTest, set_load_components_errors)
+{
+    // TEST ERROR: EMPTY INPUT ARRAY
+    Plato::Vector3D tFloatLoad;
+    std::vector<std::string> tStringLoad;
+    ASSERT_FALSE(Plato::set_load_components(tStringLoad, tFloatLoad));
+
+    // TEST ERROR: INPUT ARRAY SIZE IS NOT EQUAL TO 3
+    tStringLoad = {"1", "2"};
+    ASSERT_FALSE(Plato::set_load_components(tStringLoad, tFloatLoad));
+}
+
+TEST(PlatoTest, set_load_components)
+{
+    Plato::Vector3D tFloatLoad;
+    std::vector<std::string> tStringLoad = {"1", "2", "3"};
+    ASSERT_TRUE(Plato::set_load_components(tStringLoad, tFloatLoad));
+
+    // TEST OUTPUT
+    ASSERT_EQ(1.0, tFloatLoad.mX);
+    ASSERT_EQ(2.0, tFloatLoad.mY);
+    ASSERT_EQ(3.0, tFloatLoad.mZ);
+}
+
+TEST(PlatoTest, generate_set_random_rotations_errors)
+{
+    // TEST ERROR: EMPTY SET OF SAMPLE-PROBABILITY PAIRS
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
+    std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
+    ASSERT_FALSE(Plato::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation));
+}
+
+TEST(PlatoTest, generate_set_random_rotations)
+{
+    // SET INPUTS
+    Plato::srom::RandomVariable tRandVar;
+    tRandVar.mSubType = "x";
+    tRandVar.mType = "random rotation";
+    tRandVar.mSampleProbPairs.mNumSamples = 2;
+    tRandVar.mSampleProbPairs.mSamples = {1, 2};
+    tRandVar.mSampleProbPairs.mProbabilities = {0.5, 0.5};
+    std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
+    tMySampleProbPairs.push_back(tRandVar);
+
+    // CALL FUNCTION
+    std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
+    ASSERT_TRUE(Plato::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation));
+
+    // TEST OUTPUT
+    ASSERT_FALSE(tMySetRandomRotation.empty());
+    ASSERT_EQ(0.5, tMySetRandomRotation[0].mProbability);
+    ASSERT_EQ(1.0, tMySetRandomRotation[0].mRotations.mX);
+    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations.mY);
+    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations.mZ);
+
+    ASSERT_EQ(0.5, tMySetRandomRotation[1].mProbability);
+    ASSERT_EQ(2.0, tMySetRandomRotation[1].mRotations.mX);
+    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations.mY);
+    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations.mZ);
+}
+
+TEST(PlatoTest, check_load_parameters)
+{
+    // FAILED: APPLICATION ID IS NOT DEFINED
+    Plato::srom::Load tLoad;
+    ASSERT_FALSE(Plato::check_load_parameters(tLoad));
+
+    // FAILED: APPLICATION TYPE IS NOT DEFINED
+    tLoad.mAppID = 1;
+    ASSERT_FALSE(Plato::check_load_parameters(tLoad));
+
+    // FAILED: LOAD TYPE IS NOT DEFINED
+    tLoad.mAppType = "sideset";
+    ASSERT_FALSE(Plato::check_load_parameters(tLoad));
+
+    // FAILED: LOAD VALUES/COMPONENTS ARE NOT DEFINED
+    tLoad.mLoadType = "traction";
+    ASSERT_FALSE(Plato::check_load_parameters(tLoad));
+
+    // PASS
+    tLoad.mValues = {"1", "2", "3"};
+    ASSERT_TRUE(Plato::check_load_parameters(tLoad));
 }
 
 TEST(PlatoTest, expand_load_cases)
