@@ -174,6 +174,7 @@ struct InputMetaData
 };
 
 }
+// namespace srom
 
 inline bool check_vector3d_values(const Plato::Vector3D & aMyOriginalLoad)
 {
