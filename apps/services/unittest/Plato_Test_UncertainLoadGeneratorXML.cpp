@@ -1411,7 +1411,7 @@ inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
                  << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO GENERATE RANDOM AND DETERMINISTIC SETS OF LOADS.\n";
+                 << "\nMESSAGE: FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n";
         return (false);
     }
 
@@ -1423,7 +1423,7 @@ inline bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato
             std::cout<< "\nFILE: " << __FILE__
                      << "\nFUNCTION: " << __PRETTY_FUNCTION__
                      << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIR FOR LOAD #" << tLoadIndex << ".\n";
+                     << "\nMESSAGE: FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
             return (false);
         }
 
@@ -3603,6 +3603,264 @@ TEST(PlatoTest, generate_output_random_load_cases)
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
         }
     }
+}
+
+TEST(PlatoTest, generate_load_sroms_error)
+{
+    Plato::srom::InputMetaData tInputs;
+    Plato::srom::OutputMetaData tOutputs;
+    ASSERT_FALSE(Plato::generate_load_sroms(tInputs, tOutputs));
+}
+
+TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
+{
+    // SET INPUTS - CREATE FIRST RANDOM LOAD
+    Plato::srom::Load tLoad1;
+    tLoad1.mAppID = 1;
+    tLoad1.mAppType = "nodeset";
+    tLoad1.mLoadID = 1;
+    tLoad1.mLoadType = "traction";
+    tLoad1.mValues = {"1", "1", "1"};
+    Plato::srom::Variable tRandVar1;
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "85";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "65";
+    tRandVar1.mStatistics.mUpperBound = "135";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "15";
+    // APPEND FIRST RANDOM VARIABLE FOR LOAD 1
+    tLoad1.mRandomVars.push_back(tRandVar1);
+    Plato::srom::Variable tRandVar2;
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "y";
+    tRandVar2.mStatistics.mMean = "70";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "50";
+    tRandVar2.mStatistics.mUpperBound = "120";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "15";
+    // APPEND SECOND RANDOM VARIABLE FOR LOAD 1
+    tLoad1.mRandomVars.push_back(tRandVar2);
+
+    // APPEND FIRST RANDOM LOAD TO INPUT META DATA
+    Plato::srom::InputMetaData tInputs;
+    tInputs.mLoads.push_back(tLoad1);
+
+    // SET INPUTS - CREATE SECOND RANDOM LOAD
+    Plato::srom::Load tLoad2;
+    tLoad2.mAppID = 2;
+    tLoad2.mAppType = "nodeset";
+    tLoad2.mLoadID = 2;
+    tLoad2.mLoadType = "traction";
+    tLoad2.mValues = {"1", "1", "1"};
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "85";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "65";
+    tRandVar1.mStatistics.mUpperBound = "135";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "15";
+    // APPEND FIRST RANDOM VARIABLE FOR LOAD 2
+    tLoad2.mRandomVars.push_back(tRandVar1);
+    tRandVar2.mType = "random rotation";
+    tRandVar2.mSubType = "y";
+    tRandVar2.mStatistics.mMean = "70";
+    tRandVar2.mStatistics.mNumSamples = "2";
+    tRandVar2.mStatistics.mLowerBound = "50";
+    tRandVar2.mStatistics.mUpperBound = "120";
+    tRandVar2.mStatistics.mDistribution = "beta";
+    tRandVar2.mStatistics.mStandardDeviation = "10";
+    // APPEND SECOND RANDOM VARIABLE FOR LOAD 2
+    tLoad2.mRandomVars.push_back(tRandVar2);
+
+    // APPEND SECOND RANDOM LOAD TO INPUT META DATA
+    tInputs.mLoads.push_back(tLoad2);
+
+    // SET INPUTS - CREATE DETERMINISTIC LOADS
+    Plato::srom::Load tLoad3;
+    tLoad3.mAppID = 3;
+    tLoad3.mAppType = "sideset";
+    tLoad3.mLoadID = 3;
+    tLoad3.mLoadType = "pressure";
+    tLoad3.mValues = {"1", "2", "3"};
+
+    // SET INPUTS - APPEND FORST DETERMINISTIC LOAD
+    tInputs.mLoads.push_back(tLoad3);
+
+    // CALL FUNCTION TO BE TESTED
+    Plato::srom::OutputMetaData tOutputs;
+    ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_EQ(16u, tOutputs.mLoadCases.size());
+
+    // SET GOLD VALUES
+    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
+    { { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
+      { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
+      { {1.129580691573818, -1.2174657500169410, -0.491756656039655}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
+      { {0.7297339277702746, -1.217465750016941, -0.992605431275013}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
+      { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {1.49410148829542, -0.6912988161476783, -0.5382998137341604}, {1, 2, 3} },
+      { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {1.49410148829542, -0.6912988161476783, -0.5382998137341604}, {1, 2, 3} },
+      { {1.129580691573818, -1.2174657500169410, -0.491756656039655}, {1.49410148829542, -0.6912988161476783, -0.5382998137341604}, {1, 2, 3} },
+      { {0.7297339277702746, -1.217465750016941, -0.992605431275013}, {1.49410148829542, -0.6912988161476783, -0.5382998137341604}, {1, 2, 3} },
+      { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {0.95880529000861, -1.2174657500169410, -0.7736081458897784}, {1, 2, 3} },
+      { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {0.95880529000861, -1.2174657500169410, -0.7736081458897784}, {1, 2, 3} },
+      { {1.129580691573818, -1.2174657500169410, -0.491756656039655}, {0.95880529000861, -1.2174657500169410, -0.7736081458897784}, {1, 2, 3} },
+      { {0.7297339277702746, -1.217465750016941, -0.992605431275013}, {0.95880529000861, -1.2174657500169410, -0.7736081458897784}, {1, 2, 3} },
+      { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {1.008570893282811, -1.217465750016941, -0.7075039934575635}, {1, 2, 3} },
+      { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {1.008570893282811, -1.217465750016941, -0.7075039934575635}, {1, 2, 3} },
+      { {1.129580691573818, -1.2174657500169410, -0.491756656039655}, {1.008570893282811, -1.217465750016941, -0.7075039934575635}, {1, 2, 3} },
+      { {0.7297339277702746, -1.217465750016941, -0.992605431275013}, {1.008570893282811, -1.217465750016941, -0.7075039934575635}, {1, 2, 3} } };
+
+    std::vector<double> tGoldLoadCasesProbs =
+            {0.1271150547979226, 0.08266435562779866, 0.08266435562779866, 0.05375756398187734, 0.0953682783064585, 0.0620190683634493, 0.0620190683634493, 0.04033170052950105,
+             0.0826643556277987, 0.05375756398187733, 0.05375756398187733, 0.03495915093413995, 0.0620190683634493, 0.0403317005295011, 0.0403317005295011, 0.02622816031464305};
+
+    std::vector<std::vector<std::string>> tGoldAppType =
+            { {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"},
+              {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"},
+              {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"},
+              {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"}, {"nodeset", "nodeset", "sideset"} };
+
+    std::vector<std::vector<std::string>> tGoldLoadType =
+            { {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"},
+              {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"},
+              {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"},
+              {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"} };
+
+    std::vector<std::vector<int>> tGoldAppIDs =
+            { {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3},
+              {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3} };
+
+    std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+                                     25, 26 ,27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41 ,42 ,43, 44, 45, 46, 47, 48};
+
+    // TEST OUTPUT
+    double tSum = 0;
+    double tTolerance = 1e-6;
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tOutputs.mLoadCases.size(); tLoadCaseIndex++)
+    {
+        const Plato::srom::RandomLoadCase& tLoadCase = tOutputs.mLoadCases[tLoadCaseIndex];
+        tSum += tLoadCase.mProbability;
+        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
+        const size_t tNumLoads = tLoadCase.mLoads.size();
+        for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
+        {
+            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
+            ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
+            ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
+            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
+            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+        }
+    }
+
+    tTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tTolerance);
+}
+
+TEST(PlatoTest, generate_load_sroms_only_random_loads)
+{
+    // SET INPUTS - CREATE FIRST RANDOM LOAD
+    Plato::srom::Load tLoad1;
+    tLoad1.mAppID = 1;
+    tLoad1.mAppType = "nodeset";
+    tLoad1.mLoadID = 1;
+    tLoad1.mLoadType = "traction";
+    tLoad1.mValues = {"1", "1", "1"};
+    Plato::srom::Variable tRandVar1;
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "85";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "65";
+    tRandVar1.mStatistics.mUpperBound = "135";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "15";
+    // APPEND FIRST RANDOM VARIABLE FOR LOAD 1
+    tLoad1.mRandomVars.push_back(tRandVar1);
+
+    // APPEND FIRST RANDOM LOAD TO INPUT META DATA
+    Plato::srom::InputMetaData tInputs;
+    tInputs.mLoads.push_back(tLoad1);
+
+    // SET INPUTS - CREATE SECOND RANDOM LOAD
+    Plato::srom::Load tLoad2;
+    tLoad2.mAppID = 2;
+    tLoad2.mAppType = "sideset";
+    tLoad2.mLoadID = 2;
+    tLoad2.mLoadType = "pressure";
+    tLoad2.mValues = {"1", "1", "1"};
+    tRandVar1.mType = "random rotation";
+    tRandVar1.mSubType = "x";
+    tRandVar1.mStatistics.mMean = "85";
+    tRandVar1.mStatistics.mNumSamples = "2";
+    tRandVar1.mStatistics.mLowerBound = "65";
+    tRandVar1.mStatistics.mUpperBound = "135";
+    tRandVar1.mStatistics.mDistribution = "beta";
+    tRandVar1.mStatistics.mStandardDeviation = "10";
+    // APPEND FIRST RANDOM VARIABLE FOR LOAD 2
+    tLoad2.mRandomVars.push_back(tRandVar1);
+
+    // APPEND SECOND RANDOM LOAD TO INPUT META DATA
+    tInputs.mLoads.push_back(tLoad2);
+
+    // CALL FUNCTION TO BE TESTED
+    Plato::srom::OutputMetaData tOutputs;
+    ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_EQ(4u, tOutputs.mLoadCases.size());
+
+    // SET GOLD VALUES
+    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4};
+    std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
+    { { {1.0, -0.691298816147678, 1.2337365791743464}, {1.0, -0.99362231248073574, 1.006337269577369} },
+      { {1.0, -1.217465750016941, 0.7195673335662809}, {1.0, -0.99362231248073574, 1.006337269577369} },
+      { {1.0, -0.691298816147678, 1.2337365791743464}, {1.0, -0.9238313790941014, 1.0707640183537599} },
+      { {1.0, -1.217465750016941, 0.7195673335662809}, {1.0, -0.9238313790941014, 1.0707640183537599} } };
+
+    std::vector<double> tGoldLoadCasesProbs = {0.3462045113834939, 0.22514070339228703, 0.25974050237448448, 0.16891218190764895};
+
+    std::vector<std::vector<std::string>> tGoldAppType =
+            { {"nodeset", "sideset"}, {"nodeset", "sideset"}, {"nodeset", "sideset"}, {"nodeset", "sideset"} };
+
+    std::vector<std::vector<std::string>> tGoldLoadType =
+            { {"traction", "pressure"}, {"traction", "pressure"}, {"traction", "pressure"}, {"traction", "pressure"} };
+
+    std::vector<std::vector<int>> tGoldAppIDs = { {1, 2}, {1, 2}, {1, 2}, {1, 2} };
+
+    std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8};
+
+    // TEST OUTPUT
+    double tSum = 0;
+    double tTolerance = 1e-6;
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tOutputs.mLoadCases.size(); tLoadCaseIndex++)
+    {
+        const Plato::srom::RandomLoadCase& tLoadCase = tOutputs.mLoadCases[tLoadCaseIndex];
+        tSum += tLoadCase.mProbability;
+        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
+        const size_t tNumLoads = tLoadCase.mLoads.size();
+        for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
+        {
+            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
+            ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
+            ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
+            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
+            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+        }
+    }
+
+    tTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tTolerance);
 }
 
 TEST(PlatoTest, expand_load_cases)
