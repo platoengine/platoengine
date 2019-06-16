@@ -3320,6 +3320,35 @@ TEST(PlatoTest, check_load_parameters)
     ASSERT_TRUE(Plato::check_load_parameters(tLoad));
 }
 
+TEST(PlatoTest, set_random_load_parameters_error)
+{
+    Plato::srom::Load tOriginalLoad;
+    std::vector<Plato::srom::RandomLoad> tSetRandomLoads;
+    ASSERT_FALSE(Plato::set_random_load_parameters(tOriginalLoad, tSetRandomLoads));
+}
+
+TEST(PlatoTest, set_random_load_parameters)
+{
+    // SET INPUTS
+    Plato::srom::Load tOriginalLoad;
+    tOriginalLoad.mAppID = 1;
+    tOriginalLoad.mAppType = "sideset";
+    tOriginalLoad.mLoadType = "traction";
+    tOriginalLoad.mValues = {"1", "2", "3"};
+
+    // CALL FUNCTION
+    Plato::srom::RandomLoad tRandVar1;
+    tRandVar1.mProbability = 0.5;
+    std::vector<Plato::srom::RandomLoad> tSetRandomLoads;
+    tSetRandomLoads.push_back(tRandVar1);
+    ASSERT_TRUE(Plato::set_random_load_parameters(tOriginalLoad, tSetRandomLoads));
+
+    // TEST OUTPUT
+    ASSERT_EQ(tOriginalLoad.mAppID, tSetRandomLoads[0].mAppID);
+    ASSERT_STREQ(tOriginalLoad.mAppType.c_str(), tSetRandomLoads[0].mAppType.c_str());
+    ASSERT_STREQ(tOriginalLoad.mLoadType.c_str(), tSetRandomLoads[0].mLoadType.c_str());
+}
+
 TEST(PlatoTest, expand_load_cases)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
