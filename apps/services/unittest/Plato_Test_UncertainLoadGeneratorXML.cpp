@@ -3533,6 +3533,78 @@ TEST(PlatoTest, generate_output_random_load_cases_errors)
     ASSERT_FALSE(Plato::generate_output_random_load_cases(tDeterministicLoads, tSetRandomLoadCases));
 }
 
+TEST(PlatoTest, generate_output_random_load_cases)
+{
+    // SET INPUTS - CREATE SET OF DETERMINISTIC LOADS
+    Plato::srom::Load tLoadDet1;
+    tLoadDet1.mAppID = 3;
+    tLoadDet1.mAppType = "sideset";
+    tLoadDet1.mLoadID = 3;
+    tLoadDet1.mLoadType = "pressure";
+    tLoadDet1.mValues = {"1", "2", "3"};
+    std::vector<Plato::srom::Load> tDeterministicLoads;
+    tDeterministicLoads.push_back(tLoadDet1);
+
+    // SET INPUTS - CREATE SET OF RANDOM LOAD CASES
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetX;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetY;
+    Plato::srom::SampleProbabilityPairs tSampleProbPairSetZ;
+    tSampleProbPairSetX.mNumSamples = 4;
+    tSampleProbPairSetX.mSamples = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
+    tSampleProbPairSetX.mProbabilities = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
+    tSampleProbPairSetZ.mNumSamples = 3;
+    tSampleProbPairSetZ.mSamples = {79.56461506624, 95.1780010696, 104.3742043151};
+    tSampleProbPairSetZ.mProbabilities = {0.441549282785, 0.3256625620299, 0.2326524892665};
+
+    // COMPUTE RANDOM ROTATIONS SET
+    std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
+    ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
+
+    // CALL EXPAND RANDOM LOADS FUNCTION
+    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
+    ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
+
+    // CALL EXPAND RANDOM LOAD CASES FUNCTION
+    std::vector<Plato::srom::RandomLoadCase> tSetRandomLoadCases;
+    ASSERT_TRUE(Plato::expand_random_load_cases(tNewSetRandomLoads, tSetRandomLoadCases));
+    ASSERT_EQ(12u, tSetRandomLoadCases.size());
+
+    // CALL FUNCTION TO BE TESTED
+    ASSERT_TRUE(Plato::generate_output_random_load_cases(tDeterministicLoads, tSetRandomLoadCases));
+
+    // TEST OUTPUT
+    std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
+    { { {0.609296803530850, 0.90460248117150, 1.34553028812638}, {1, 2, 3} }, { {0.343344489354037, 1.03521147857081, 1.34553028812638}, {1, 2, 3} },
+      { {0.173488310131751, 1.07677762327334, 1.34553028812638}, {1, 2, 3} }, { {0.761671920821811, 0.87653912858296, 1.28512063289585}, {1, 2, 3} },
+      { {0.497650027509830, 1.04919464782510, 1.28512063289585}, {1, 2, 3} }, { {0.323575806212112, 1.11524152385909, 1.28512063289585}, {1, 2, 3} },
+      { {0.680335616523720, 0.89151906380038, 1.31997621485002}, {1, 2, 3} }, { {0.415283283979423, 1.04173057278621, 1.31997621485002}, {1, 2, 3} },
+      { {0.243460611096492, 1.09470988077881, 1.31997621485002}, {1, 2, 3} }, { {1.265849164342930, 0.78368339200601, 0.88513628003052}, {1, 2, 3} },
+      { {1.008214628020530, 1.09546201651137, 0.88513628003052}, {1, 2, 3} }, { {0.820183791860380, 1.24251048822264, 0.88513628003052}, {1, 2, 3} } };
+    std::vector<double> tGoldLoadCasesProbs =
+            {0.160857230304970, 0.118639480992335, 0.0847557373684797,  0.0867412302322639, 0.0639755795613402, 0.0457039880311642,
+             0.101584192161421, 0.0749229351531628, 0.0535247504591439, 0.0923587620945064, 0.0681187633233061, 0.0486638677597447};
+    std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12};
+
+    const double tTolerance = 1e-6;
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tSetRandomLoadCases.size(); tLoadCaseIndex++)
+    {
+        const Plato::srom::RandomLoadCase& tLoadCase = tSetRandomLoadCases[tLoadCaseIndex];
+        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
+        const size_t tNumLoads = tLoadCase.mLoads.size();
+        for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
+        {
+            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
+            ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+        }
+    }
+}
+
 TEST(PlatoTest, expand_load_cases)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
