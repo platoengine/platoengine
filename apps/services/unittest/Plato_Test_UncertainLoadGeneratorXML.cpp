@@ -99,6 +99,9 @@ inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plat
 namespace srom
 {
 
+/******************************************************************************//**
+ * @brief Statistics metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct Statistics
 {
     std::string mNumSamples; /*!< number of samples */
@@ -109,6 +112,9 @@ struct Statistics
     std::string mStandardDeviation; /*!< probability distribution standard deviation */
 };
 
+/******************************************************************************//**
+ * @brief Variable metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct Variable
 {
     std::string mType; /*!< random variable type, e.g. random rotation */
@@ -116,6 +122,9 @@ struct Variable
     Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
 };
 
+/******************************************************************************//**
+ * @brief Load metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct Load
 {
     int mAppID; /*!< application set identifier */
@@ -126,6 +135,9 @@ struct Load
     std::vector<Plato::srom::Variable> mRandomVars; /*!< set of random variables, e.g. rotations, \f$\theta = \{\theta_x, \theta_y, \theta_z\}\f$. */
 };
 
+/******************************************************************************//**
+ * @brief Sample-Probability pairs defined by the Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct SampleProbabilityPairs
 {
     int mNumSamples; /*!< total number of samples */
@@ -133,6 +145,9 @@ struct SampleProbabilityPairs
     std::vector<double> mProbabilities; /*!< probability set  */
 };
 
+/******************************************************************************//**
+ * @brief Random vriable metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct RandomVariable
 {
     std::string mType; /*!< random variable type, e.g. random rotation */
@@ -140,12 +155,18 @@ struct RandomVariable
     Plato::srom::SampleProbabilityPairs mSampleProbPairs; /*!< sample-probability pair for this random variable */
 };
 
+/******************************************************************************//**
+ * @brief Random rotations metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct RandomRotations
 {
     double mProbability; /*!< probability associated with this random rotation */
     Plato::Vector3D mRotations; /*!< vector of random rotations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
 };
 
+/******************************************************************************//**
+ * @brief Random load metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct RandomLoad
 {
     int mAppID; /*!< application set identifier */
@@ -156,6 +177,9 @@ struct RandomLoad
     Plato::Vector3D mLoadValues; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
 };
 
+/******************************************************************************//**
+ * @brief Random load case metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct RandomLoadCase
 {
     int mLoadCaseID; /*!< random load case global identifier */
@@ -163,11 +187,17 @@ struct RandomLoadCase
     std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 };
 
+/******************************************************************************//**
+ * @brief Output metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct OutputMetaData
 {
     std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
 };
 
+/******************************************************************************//**
+ * @brief Input metadata for Stochastic Reduced Order Model (SROM) problem.
+**********************************************************************************/
 struct InputMetaData
 {
     std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
