@@ -3233,6 +3233,7 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
             if(parseSingleValue(tokens, tInputStringList = {"begin","uncertainty"}, tStringValue))
             {
                 XMLGen::Uncertainty new_uncertainty;
+                new_uncertainty.variable_type = "load"; // default until user is allowed to set it
                 // found an uncertainty. parse it.
                 while (!fin.eof())
                 {
@@ -3248,6 +3249,7 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                             tokens[j] = toLower(tokens[j]);
 
                         // begin uncertainty
+                        //      variable_type load or material
                         //      type angle variation
                         //      axis STRING
                         //      load INTEGER
@@ -3306,6 +3308,15 @@ bool XMLGenerator::parseUncertainties(std::istream &fin)
                                 return false;
                             }
                             new_uncertainty.id = tokens[1];
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"variable", "type"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << error_prestring << "No load specified after \"variable type\" keyword.\n";
+                                return false;
+                            }
+                            new_uncertainty.variable_type = tokens[2];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"distribution"}, tStringValue))
                         {
