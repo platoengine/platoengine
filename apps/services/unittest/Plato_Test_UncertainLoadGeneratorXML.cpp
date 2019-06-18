@@ -293,12 +293,12 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
     return (true);
 }
 
-inline bool expand_load_cases(const XMLGen::InputData &aInputData,
+inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
                               std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
                               std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
 {
     Plato::UniqueCounter tUniqueLoadIDCounter;
-    if(Plato::initialize_load_id_counter(aInputData.load_cases, tUniqueLoadIDCounter) == false)
+    if(Plato::initialize_load_id_counter(aInputLoadCases, tUniqueLoadIDCounter) == false)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -307,9 +307,9 @@ inline bool expand_load_cases(const XMLGen::InputData &aInputData,
         return (false);
     }
 
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputData.load_cases.size(); tLoadCaseIndex++)
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputLoadCases.size(); tLoadCaseIndex++)
     {
-        const XMLGen::LoadCase& tOldLoadCase = aInputData.load_cases[tLoadCaseIndex];
+        const XMLGen::LoadCase& tOldLoadCase = aInputLoadCases[tLoadCaseIndex];
         Plato::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
     }
 
@@ -452,14 +452,16 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
     }
 }
 
-inline bool generate_srom_load_inputs(const XMLGen::InputData &aInputData, std::vector<Plato::srom::Load> &aLoads)
+inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
+                                      const std::vector<XMLGen::Uncertainty> &aUncertainties,
+                                      std::vector<Plato::srom::Load> &aLoads)
 {
     std::vector<XMLGen::LoadCase> tNewSetLoadCases;
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    Plato::expand_load_cases(aInputData, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
+    Plato::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
 
     std::set<int> tRandomLoadIDs;
-    Plato::create_random_load_variables(aInputData.uncertainties,
+    Plato::create_random_load_variables(aUncertainties,
                                         tNewSetLoadCases,
                                         tOriginalToNewLoadCaseMap,
                                         tRandomLoadIDs,
@@ -3883,17 +3885,18 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
     tU4.standard_deviation = "10";
     tU4.num_samples = "2";
 
-    XMLGen::InputData tInputData;
-    tInputData.load_cases.push_back(tLC1);
-    tInputData.load_cases.push_back(tLC2);
-    tInputData.load_cases.push_back(tLC3);
-    tInputData.uncertainties.push_back(tU1);
-    tInputData.uncertainties.push_back(tU2);
-    tInputData.uncertainties.push_back(tU3);
-    tInputData.uncertainties.push_back(tU4);
+    std::vector<XMLGen::LoadCase> tLoadCases;
+    std::vector<XMLGen::Uncertainty> tUncertainties;
+    tLoadCases.push_back(tLC1);
+    tLoadCases.push_back(tLC2);
+    tLoadCases.push_back(tLC3);
+    tUncertainties.push_back(tU1);
+    tUncertainties.push_back(tU2);
+    tUncertainties.push_back(tU3);
+    tUncertainties.push_back(tU4);
 
     std::vector<Plato::srom::Load> tLoads;
-    Plato::generate_srom_load_inputs(tInputData, tLoads);
+    Plato::generate_srom_load_inputs(tLoadCases, tUncertainties, tLoads);
 
     Plato::srom::InputMetaData tInputs;
     tInputs.mLoads = tLoads;
@@ -4154,31 +4157,31 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
 TEST(PlatoTest, expand_load_cases)
 {
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    XMLGen::InputData tInputData;
+    std::vector<XMLGen::LoadCase> tLoadCases;
     XMLGen::LoadCase tLC1;
     XMLGen::Load tL1;
     tLC1.id = "2";
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
+    tLoadCases.push_back(tLC1);
     tLC1.id = "4";
     tLC1.loads.clear();
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
+    tLoadCases.push_back(tLC1);
     tLC1.id = "6";
     tLC1.loads.clear();
     tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
+    tLoadCases.push_back(tLC1);
     tLC1.id = "10";
     tLC1.loads.clear();
     tLC1.loads.push_back(tL1);
     tLC1.loads.push_back(tL1);
-    tInputData.load_cases.push_back(tLC1);
+    tLoadCases.push_back(tLC1);
     std::vector<XMLGen::LoadCase> tNewLoadCases;
-    Plato::expand_load_cases(tInputData, tNewLoadCases, tOriginalToNewLoadCaseMap);
+    Plato::expand_load_cases(tLoadCases, tNewLoadCases, tOriginalToNewLoadCaseMap);
     ASSERT_EQ(tNewLoadCases.size(), 9);
     ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
     ASSERT_STREQ(tNewLoadCases[1].id.c_str(), "1");
