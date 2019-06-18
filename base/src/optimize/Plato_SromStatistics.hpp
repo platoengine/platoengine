@@ -58,6 +58,14 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Evaluate cumulative distribution function 
+ @param [in] aX sample 
+ @param [in] aSigma standard deviation
+ @param [in] aSamples set of samples
+ @param [in] aSamplesProbability sample probabilities
+ @return cumulative distribution function evaluation 
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline ScalarType compute_srom_cdf(const ScalarType & aX,
                                    const ScalarType & aSigma,
@@ -75,6 +83,13 @@ inline ScalarType compute_srom_cdf(const ScalarType & aX,
     return (tSum);
 }
 
+/******************************************************************************//**
+ * @brief Evaluate the n-th order raw moment  
+ @param [in] aOrder moment's order 
+ @param [in] aSamples set of samples
+ @param [in] aSamplesProbability sample probabilities
+ @return n-th order raw moment
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline ScalarType compute_srom_moment(const ScalarType & aOrder,
                                       const Plato::Vector<ScalarType, OrdinalType> & aSamples,
