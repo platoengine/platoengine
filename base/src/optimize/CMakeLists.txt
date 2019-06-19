@@ -64,11 +64,9 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_IdentityHessian.hpp
                         Plato_IdentityPreconditioner.hpp
                         Plato_KelleySachsAlgorithm.hpp
-                        Plato_MLKelleySachsAlgorithm.hpp
                         Plato_TrustRegionStageMng.hpp
                         Plato_TrustRegionStepMng.hpp
                         Plato_TrustRegionAlgorithmDataMng.hpp
-                        Plato_MLKelleySachsAugmentedLagrangian.hpp
                         Plato_KelleySachsBoundConstrained.hpp
                         Plato_ReducedSpaceTrustRegionStageMng.hpp
                         Plato_KelleySachsBoundLightInterface.hpp
@@ -76,7 +74,6 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_KelleySachsAugmentedLagrangianInterface.hpp
                         Plato_KelleySachsAugmentedLagrangianLightInterface.hpp
                         Plato_KelleySachsStepMng.hpp
-                        Plato_MLKelleySachsStepMng.hpp
                         Plato_LineSearch.hpp
                         Plato_LinearOperator.hpp
                         Plato_LinearOperatorList.hpp
@@ -135,7 +132,6 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_EpetraSerialDenseVector.hpp
                         Plato_OptimalityCriteriaInterface.hpp
                         Plato_EpetraSerialDenseMultiVector.hpp
-                        Plato_MLTrustRegionStepPrediction.hpp
                         Plato_BetaDistribution.hpp
                         Plato_Distribution.hpp
                         Plato_NormalDistribution.hpp
