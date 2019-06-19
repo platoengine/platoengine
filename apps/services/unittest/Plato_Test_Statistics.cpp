@@ -638,7 +638,7 @@ TEST(PlatoTest, SromCDF)
     EXPECT_NEAR(tGold, tOutput, tTolerance);
 }
 
-TEST(PlatoTest, SromMoments)
+TEST(PlatoTest, RawMoments)
 {
     Plato::StandardVector<double> tSamples(4, 0.);
     tSamples[0] = 0.276806509167094;
@@ -663,6 +663,34 @@ TEST(PlatoTest, SromMoments)
     tGold[1] = 0.078186314972017;
     tGold[2] = 0.028149028892565;
     tGold[3] = 0.010734332952929;
+    PlatoTest::checkVectorData(tMoments, tGold);
+}
+
+TEST(PlatoTest, CentralMoments)
+{
+    Plato::StandardVector<double> tSamples(4, 0.);
+    tSamples[0] = 0.276806509167094;
+    tSamples[1] = 0.431107226622461;
+    tSamples[2] = 0.004622102620248;
+    tSamples[3] = 0.224162021074166;
+    Plato::StandardVector<double> tSampleProbabilities(4, 0.);
+    tSampleProbabilities[0] = 0.25;
+    tSampleProbabilities[1] = 0.25;
+    tSampleProbabilities[2] = 0.25;
+    tSampleProbabilities[3] = 0.25;
+
+    Plato::StandardVector<double> tMoments(4, 0.);
+    for(size_t tIndex = 0; tIndex < tMoments.size(); tIndex++)
+    {
+        double tOrder = tIndex + static_cast<size_t>(1);
+        tMoments[tIndex] = Plato::compute_central_moment(tOrder, tSamples, tSampleProbabilities);
+    }
+
+    Plato::StandardVector<double> tGold(4, 0.);
+    tGold[0] = 0.0;
+    tGold[1] = 0.023348634974401761;
+    tGold[2] = -0.00109551777743925;
+    tGold[3] = 0.001071021123917853;
     PlatoTest::checkVectorData(tMoments, tGold);
 }
 
@@ -1284,6 +1312,7 @@ TEST(PlatoTest, solve_srom_problem_uniform)
     double tTotalProbability = 0;
     for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
     {
+        std::cout << tOutput[tIndex].mSampleWeight << "\n";
         tTotalProbability += tOutput[tIndex].mSampleWeight;
     }
     EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
