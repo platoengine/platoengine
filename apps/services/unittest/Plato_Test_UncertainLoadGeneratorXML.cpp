@@ -48,26 +48,7 @@
 
 #include "gtest/gtest.h"
 
-/*
-#include <map>
-#include <cmath>
-#include <locale>
-#include <cctype>
-#include <cstdlib>
-#include <iostream>
-#include <memory>
-
-#include "../../base/src/tools/Plato_UniqueCounter.hpp"
-#include "../../base/src/optimize/Plato_SromProbDataStruct.hpp"
-#include "../../base/src/optimize/Plato_SolveUncertaintyProblem.hpp"
-#include "../../base/src/optimize/Plato_KelleySachsAugmentedLagrangianLightInterface.hpp"
-#include "../../base/src/input_generator/XMLGeneratorDataStruct.hpp"
-*/
 #include "Plato_SROM_Utilities.hpp"
-
-
-
-
 
 namespace PlatoUncertainLoadGeneratorXMLTest
 {
