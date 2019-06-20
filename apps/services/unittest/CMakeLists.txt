@@ -7,7 +7,6 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_PlatoProxyApp.cpp
 							 Plato_PhysicsProxyApp.cpp
 							 Plato_StructuralTopologyOptimizationProxyGoldResults.cpp
-							 Plato_SROM_Utilities.cpp
 							 Plato_Test_GradFreeCriteria.cpp
 							 Plato_Test_ParticleSwarm.cpp
 							 Plato_Test_Proxy.cpp
@@ -85,9 +84,11 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/tpls/gtest/include
                        ${CMAKE_SOURCE_DIR}/apps/services/unittest
                        ${CMAKE_SOURCE_DIR}/base/src/analyze
                        ${CMAKE_SOURCE_DIR}/base/src/interface
+                       ${CMAKE_SOURCE_DIR}/base/src/input_generator
                        ${CMAKE_SOURCE_DIR}/base/src/data_layer
                        ${CMAKE_SOURCE_DIR}/base/src/Filters
                        ${CMAKE_SOURCE_DIR}/base/src/tools
+                       ${CMAKE_SOURCE_DIR}/base/src/optimize
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/AbstractInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/ActivationFunction

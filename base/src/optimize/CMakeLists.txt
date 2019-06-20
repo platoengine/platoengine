@@ -3,6 +3,7 @@ set(LIB_NAMES)
 set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
+                        Plato_SromXML.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
@@ -140,6 +141,8 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_SromConstraint.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
+                        Plato_SromXMLUtils.hpp
+                        Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
                         Plato_LinearCriterionHessian.hpp

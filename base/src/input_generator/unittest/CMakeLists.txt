@@ -16,7 +16,7 @@ endif()
 set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/tools ..)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
-set(PlatoXMLGenerator_UnitTester_LIBS ${GTEST_LIBRARY} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} PlatoParser )
+set(PlatoXMLGenerator_UnitTester_LIBS ${GTEST_LIBRARY} ${PLATO_LIBRARIES} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} PlatoParser )
 #set(PlatoXMLGenerator_UnitTester_LIBS ${GTEST_LIBRARY} PlatoParser PlatoExceptions ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} )
 add_executable(PlatoXMLGenerator_UnitTester ${PlatoXMLGenerator_UnitTester_SRCS})
 target_link_libraries(PlatoXMLGenerator_UnitTester ${PlatoXMLGenerator_UnitTester_LIBS})

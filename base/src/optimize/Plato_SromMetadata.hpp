@@ -51,7 +51,6 @@
 
 #include <string>
 #include <vector>
-#include "../../base/src/tools/Plato_Vector3DVariations.hpp"
 
 namespace Plato
 {
@@ -121,7 +120,7 @@ struct RandomVariable
 struct RandomRotations
 {
     double mProbability; /*!< probability associated with this random rotation */
-    Plato::Vector3D mRotations; /*!< vector of random rotations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
+    std::vector<double> mRotations; /*!< vector of random rotations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
 };
 
 /******************************************************************************//**
@@ -134,7 +133,7 @@ struct RandomLoad
     double mProbability; /*!< probability associated with this random load */
     std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
     std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
-    Plato::Vector3D mLoadValues; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
+    std::vector<double> mLoadValues; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
 };
 
 /******************************************************************************//**

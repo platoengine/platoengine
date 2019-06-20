@@ -48,7 +48,8 @@
 
 #include "gtest/gtest.h"
 
-#include "Plato_SROM_Utilities.hpp"
+#include "Plato_SromXMLUtils.hpp"
+#include "Plato_SromXML.hpp"
 
 namespace PlatoUncertainLoadGeneratorXMLTest
 {
@@ -730,9 +731,9 @@ TEST(PlatoTest, expand_random_rotations_about_xyz)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -777,9 +778,9 @@ TEST(PlatoTest, expand_random_rotations_about_xy)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -824,9 +825,9 @@ TEST(PlatoTest, expand_random_rotations_about_xz)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -871,9 +872,9 @@ TEST(PlatoTest, expand_random_rotations_about_yz)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -908,9 +909,9 @@ TEST(PlatoTest, expand_random_rotations_about_x)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -945,9 +946,9 @@ TEST(PlatoTest, expand_random_rotations_about_y)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -982,9 +983,9 @@ TEST(PlatoTest, expand_random_rotations_about_z)
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
         const std::vector<double>& tGoldRotations = tSetGoldRotations[tSampleIndex];
-        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations.mX, tTolerance);
-        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations.mY, tTolerance);
-        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations.mZ, tTolerance);
+        ASSERT_NEAR(tGoldRotations[0], tRandomRotationSet[tSampleIndex].mRotations[0], tTolerance);
+        ASSERT_NEAR(tGoldRotations[1], tRandomRotationSet[tSampleIndex].mRotations[1], tTolerance);
+        ASSERT_NEAR(tGoldRotations[2], tRandomRotationSet[tSampleIndex].mRotations[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tRandomRotationSet[tSampleIndex].mProbability, tTolerance);
         tSum += tRandomRotationSet[tSampleIndex].mProbability;
     }
@@ -1017,7 +1018,7 @@ TEST(PlatoTest, expand_random_loads_about_z)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3,1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1034,9 +1035,9 @@ TEST(PlatoTest, expand_random_loads_about_z)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1060,7 +1061,7 @@ TEST(PlatoTest, expand_random_loads_about_y)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1077,9 +1078,9 @@ TEST(PlatoTest, expand_random_loads_about_y)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1103,7 +1104,7 @@ TEST(PlatoTest, expand_random_loads_about_x)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1120,9 +1121,9 @@ TEST(PlatoTest, expand_random_loads_about_x)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1149,7 +1150,7 @@ TEST(PlatoTest, expand_random_loads_about_yz)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1171,9 +1172,9 @@ TEST(PlatoTest, expand_random_loads_about_yz)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1200,7 +1201,7 @@ TEST(PlatoTest, expand_random_loads_about_xz)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1222,9 +1223,9 @@ TEST(PlatoTest, expand_random_loads_about_xz)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1251,7 +1252,7 @@ TEST(PlatoTest, expand_random_loads_about_xy)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1273,9 +1274,9 @@ TEST(PlatoTest, expand_random_loads_about_xy)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1305,7 +1306,7 @@ TEST(PlatoTest, expand_random_loads_about_xyz)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FUNCTION BEING TESTED
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
@@ -1348,9 +1349,9 @@ TEST(PlatoTest, expand_random_loads_about_xyz)
     const size_t tTotalNumSamples = tMyRandomLoads.size();
     for(size_t tSampleIndex = 0; tSampleIndex < tTotalNumSamples; tSampleIndex++)
     {
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][0], tMyRandomLoads[tSampleIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][1], tMyRandomLoads[tSampleIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tSampleIndex][2], tMyRandomLoads[tSampleIndex].mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tSampleIndex], tMyRandomLoads[tSampleIndex].mProbability, tTolerance);
         tSum += tMyRandomLoads[tSampleIndex].mProbability;
     }
@@ -1362,7 +1363,7 @@ TEST(PlatoTest, expand_random_loads_about_xyz)
 TEST(PlatoTest, expand_random_loads_error_1)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED SINCE SET OF RANDOM ROTATION IS EMPTY
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
@@ -1371,42 +1372,47 @@ TEST(PlatoTest, expand_random_loads_error_1)
 TEST(PlatoTest, expand_random_loads_error_2)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
-    Plato::Vector3D tMyOriginalLoad(std::numeric_limits<double>::quiet_NaN(), 1, 1);
+    std::vector<double> tMyOriginalLoad;
+    tMyOriginalLoad.push_back(std::numeric_limits<double>::quiet_NaN());
+    tMyOriginalLoad.push_back(1);
+    tMyOriginalLoad.push_back(1);
     std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     Plato::srom::RandomRotations tMyRotation;
-    tMyRotation.mRotations.mX = 0;
-    tMyRotation.mRotations.mY = 0;
-    tMyRotation.mRotations.mZ = 62.92995363352;
+    tMyRotation.mRotations.resize(3, 0.0);
+    tMyRotation.mRotations[0] = 0;
+    tMyRotation.mRotations[1] = 0;
+    tMyRotation.mRotations[2] = 62.92995363352;
     tMyRandomRotationsSet.push_back(tMyRotation);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Y-COMPONENT
-    tMyOriginalLoad.mX = 1; tMyOriginalLoad.mY = std::numeric_limits<double>::quiet_NaN();
+    tMyOriginalLoad[0] = 1; tMyOriginalLoad[1] = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Z-COMPONENT
-    tMyOriginalLoad.mY = 1; tMyOriginalLoad.mZ = std::numeric_limits<double>::quiet_NaN();
+    tMyOriginalLoad[1] = 1; tMyOriginalLoad[2] = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 }
 
 TEST(PlatoTest, expand_random_loads_error_3)
 {
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN X-COMPONENT
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tMyRandomLoads;
     std::vector<Plato::srom::RandomRotations> tMyRandomRotationsSet;
     Plato::srom::RandomRotations tMyRotation;
-    tMyRotation.mRotations.mX = std::numeric_limits<double>::quiet_NaN(); tMyRotation.mRotations.mY = 0; tMyRotation.mRotations.mZ = 62.92995363352;
+    tMyRotation.mRotations.resize(3, 0.0);
+    tMyRotation.mRotations[0] = std::numeric_limits<double>::quiet_NaN(); tMyRotation.mRotations[1] = 0; tMyRotation.mRotations[2] = 62.92995363352;
     tMyRandomRotationsSet.push_back(tMyRotation);
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Y-COMPONENT
-    tMyRandomRotationsSet[0].mRotations.mX = 0; tMyRandomRotationsSet[0].mRotations.mY = std::numeric_limits<double>::quiet_NaN();
+    tMyRandomRotationsSet[0].mRotations[0] = 0; tMyRandomRotationsSet[0].mRotations[1] = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 
     // CALL EXPAND RANDOM LOADS FUNCTION - FAILURE IS EXPECTED DUE TO NaN Z-COMPONENT
-    tMyRandomRotationsSet[0].mRotations.mY = 0; tMyRandomRotationsSet[0].mRotations.mZ = std::numeric_limits<double>::quiet_NaN();
+    tMyRandomRotationsSet[0].mRotations[1] = 0; tMyRandomRotationsSet[0].mRotations[2] = std::numeric_limits<double>::quiet_NaN();
     ASSERT_FALSE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tMyRandomLoads));
 }
 
@@ -1436,7 +1442,7 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
@@ -1461,9 +1467,9 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
         const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
         const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[0];
 
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][0], tRandomLoad.mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][1], tRandomLoad.mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][2], tRandomLoad.mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][0], tRandomLoad.mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][1], tRandomLoad.mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][2], tRandomLoad.mLoadValues[2], tTolerance);
         ASSERT_NEAR(tGoldProbabilities[tLoadCaseIndex], tRandomLoad.mProbability, tTolerance);
         tSum += tRandomLoadCase.mProbability;
     }
@@ -1490,7 +1496,7 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
@@ -1570,9 +1576,9 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
         for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoadCase.mLoads.size(); tLoadIndex++)
         {
             const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[tLoadIndex];
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tRandomLoad.mLoadValues.mX, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tRandomLoad.mLoadValues.mY, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tRandomLoad.mLoadValues.mZ, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tRandomLoad.mLoadValues[0], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tRandomLoad.mLoadValues[1], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tRandomLoad.mLoadValues[2], tTolerance);
         }
         tSum += tRandomLoadCase.mProbability;
     }
@@ -1794,7 +1800,7 @@ TEST(PlatoTest, expand_random_and_deterministic_loads)
 TEST(PlatoTest, set_load_components_errors)
 {
     // TEST ERROR: EMPTY INPUT ARRAY
-    Plato::Vector3D tFloatLoad;
+    std::vector<double> tFloatLoad(3, 0.0);
     std::vector<std::string> tStringLoad;
     ASSERT_FALSE(Plato::set_load_components(tStringLoad, tFloatLoad));
 
@@ -1805,14 +1811,14 @@ TEST(PlatoTest, set_load_components_errors)
 
 TEST(PlatoTest, set_load_components)
 {
-    Plato::Vector3D tFloatLoad;
+    std::vector<double> tFloatLoad(3, 0.0);
     std::vector<std::string> tStringLoad = {"1", "2", "3"};
     ASSERT_TRUE(Plato::set_load_components(tStringLoad, tFloatLoad));
 
     // TEST OUTPUT
-    ASSERT_EQ(1.0, tFloatLoad.mX);
-    ASSERT_EQ(2.0, tFloatLoad.mY);
-    ASSERT_EQ(3.0, tFloatLoad.mZ);
+    ASSERT_EQ(1.0, tFloatLoad[0]);
+    ASSERT_EQ(2.0, tFloatLoad[1]);
+    ASSERT_EQ(3.0, tFloatLoad[2]);
 }
 
 TEST(PlatoTest, generate_set_random_rotations_errors)
@@ -1842,14 +1848,14 @@ TEST(PlatoTest, generate_set_random_rotations)
     // TEST OUTPUT
     ASSERT_FALSE(tMySetRandomRotation.empty());
     ASSERT_EQ(0.5, tMySetRandomRotation[0].mProbability);
-    ASSERT_EQ(1.0, tMySetRandomRotation[0].mRotations.mX);
-    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations.mY);
-    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations.mZ);
+    ASSERT_EQ(1.0, tMySetRandomRotation[0].mRotations[0]);
+    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations[1]);
+    ASSERT_EQ(0.0, tMySetRandomRotation[0].mRotations[2]);
 
     ASSERT_EQ(0.5, tMySetRandomRotation[1].mProbability);
-    ASSERT_EQ(2.0, tMySetRandomRotation[1].mRotations.mX);
-    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations.mY);
-    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations.mZ);
+    ASSERT_EQ(2.0, tMySetRandomRotation[1].mRotations[0]);
+    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations[1]);
+    ASSERT_EQ(0.0, tMySetRandomRotation[1].mRotations[2]);
 }
 
 TEST(PlatoTest, check_load_parameters)
@@ -1918,7 +1924,7 @@ TEST(PlatoTest, append_deterministic_loads)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
@@ -1952,9 +1958,9 @@ TEST(PlatoTest, append_deterministic_loads)
         // EXPECT VALUES FOR DETERMINISTIC LOAD
         ASSERT_EQ(3, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mAppID);
         ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mProbability, tTolerance);
-        ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(2.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(3.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(2.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(3.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[2], tTolerance);
         ASSERT_STREQ(tLoadDet1.mAppType.c_str(), tRandomLoadCases[tLoadCaseIndex].mLoads[1].mAppType.c_str());
         ASSERT_STREQ(tLoadDet1.mLoadType.c_str(), tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadType.c_str());
     }
@@ -2003,19 +2009,23 @@ TEST(PlatoTest, generate_set_random_loads_error)
 
     // ERROR: LOAD PARAMETERS ARE NOT DEFINED
     Plato::srom::RandomRotations tRotations1;
-    tRotations1.mRotations.mX = 62.92995363352; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations1.mRotations.resize(3, 0.0);
+    tRotations1.mRotations[0] = 62.92995363352; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations1.mProbability = 0.3643018720139;
     tSetRandomRotations.push_back(tRotations1);
     Plato::srom::RandomRotations tRotations2;
-    tRotations2.mRotations.mX = 69.67128118964; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations2.mRotations.resize(3, 0.0);
+    tRotations2.mRotations[0] = 69.67128118964; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations2.mProbability = 0.1964474490484;
     tSetRandomRotations.push_back(tRotations2);
     Plato::srom::RandomRotations tRotations3;
-    tRotations3.mRotations.mX = 66.03455388567; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations3.mRotations.resize(3, 0.0);
+    tRotations3.mRotations[0] = 66.03455388567; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations3.mProbability = 0.2300630894941;
     tSetRandomRotations.push_back(tRotations3);
     Plato::srom::RandomRotations tRotations4;
-    tRotations4.mRotations.mX = 96.25276276890; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations4.mRotations.resize(3, 0.0);
+    tRotations4.mRotations[0] = 96.25276276890; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations4.mProbability = 0.2091697703866;
     tSetRandomRotations.push_back(tRotations4);
     ASSERT_FALSE(Plato::generate_set_random_loads(tOriginalLoad, tSetRandomRotations, tSetRandomLoads));
@@ -2032,19 +2042,23 @@ TEST(PlatoTest, generate_set_random_loads)
     tOriginalLoad.mValues = {"1", "1", "1"};
     std::vector<Plato::srom::RandomRotations> tSetRandomRotations;
     Plato::srom::RandomRotations tRotations1;
-    tRotations1.mRotations.mX = 62.92995363352; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations1.mRotations.resize(3, 0.0);
+    tRotations1.mRotations[0] = 62.92995363352; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations1.mProbability = 0.3643018720139;
     tSetRandomRotations.push_back(tRotations1);
     Plato::srom::RandomRotations tRotations2;
-    tRotations2.mRotations.mX = 69.67128118964; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations2.mRotations.resize(3, 0.0);
+    tRotations2.mRotations[0] = 69.67128118964; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations2.mProbability = 0.1964474490484;
     tSetRandomRotations.push_back(tRotations2);
     Plato::srom::RandomRotations tRotations3;
-    tRotations3.mRotations.mX = 66.03455388567; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations3.mRotations.resize(3, 0.0);
+    tRotations3.mRotations[0] = 66.03455388567; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations3.mProbability = 0.2300630894941;
     tSetRandomRotations.push_back(tRotations3);
     Plato::srom::RandomRotations tRotations4;
-    tRotations4.mRotations.mX = 96.25276276890; tRotations1.mRotations.mY = 0; tRotations1.mRotations.mZ = 0;
+    tRotations4.mRotations.resize(3, 0.0);
+    tRotations4.mRotations[0] = 96.25276276890; tRotations1.mRotations[1] = 0; tRotations1.mRotations[2] = 0;
     tRotations4.mProbability = 0.2091697703866;
     tSetRandomRotations.push_back(tRotations4);
 
@@ -2061,9 +2075,9 @@ TEST(PlatoTest, generate_set_random_loads)
     for(size_t tIndex =0; tIndex < tSetRandomLoads.size(); tIndex++)
     {
         ASSERT_NEAR(tGoldProbabilities[tIndex], tSetRandomLoads[tIndex].mProbability, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tIndex][0], tSetRandomLoads[tIndex].mLoadValues.mX, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tIndex][1], tSetRandomLoads[tIndex].mLoadValues.mY, tTolerance);
-        ASSERT_NEAR(tGoldLoads[tIndex][2], tSetRandomLoads[tIndex].mLoadValues.mZ, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tIndex][0], tSetRandomLoads[tIndex].mLoadValues[0], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tIndex][1], tSetRandomLoads[tIndex].mLoadValues[1], tTolerance);
+        ASSERT_NEAR(tGoldLoads[tIndex][2], tSetRandomLoads[tIndex].mLoadValues[2], tTolerance);
     }
 }
 
@@ -2101,7 +2115,7 @@ TEST(PlatoTest, generate_output_random_load_cases_errors)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
@@ -2140,7 +2154,7 @@ TEST(PlatoTest, generate_output_random_load_cases)
     ASSERT_TRUE(Plato::expand_random_rotations(tSampleProbPairSetX, tSampleProbPairSetY, tSampleProbPairSetZ, tMyRandomRotationsSet));
 
     // CALL EXPAND RANDOM LOADS FUNCTION
-    Plato::Vector3D tMyOriginalLoad(1, 1, 1);
+    std::vector<double> tMyOriginalLoad(3, 1.0);
     std::vector<Plato::srom::RandomLoad> tNewSetRandomLoads;
     ASSERT_TRUE(Plato::expand_random_loads(tMyOriginalLoad, tMyRandomRotationsSet, tNewSetRandomLoads));
 
@@ -2177,9 +2191,9 @@ TEST(PlatoTest, generate_output_random_load_cases)
         {
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
         }
     }
 }
@@ -2334,9 +2348,9 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
         }
     }
 
@@ -2497,9 +2511,9 @@ TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
                     tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
                     tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
                     tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
-                    tNewLoad.x = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues.mX);
-                    tNewLoad.y = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues.mY);
-                    tNewLoad.z = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues.mZ);
+                    tNewLoad.x = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[0]);
+                    tNewLoad.y = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[1]);
+                    tNewLoad.z = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[2]);
                     tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
@@ -2704,9 +2718,9 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
         }
     }
 
@@ -2802,9 +2816,9 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
-            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues.mX, tTolerance);
-            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues.mY, tTolerance);
-            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues.mZ, tTolerance);
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
+            EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
         }
     }
 

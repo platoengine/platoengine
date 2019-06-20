@@ -62,6 +62,8 @@
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "Plato_FreeFunctions.hpp"
+#include "Plato_SromXMLUtils.hpp"
+#include "Plato_SromXML.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -100,6 +102,96 @@ XMLGenerator::~XMLGenerator()
 }
 
 /******************************************************************************/
+bool XMLGenerator::runSROMForUncertainVariables()
+/******************************************************************************/
+{
+    std::vector<XMLGen::LoadCase> tNewLoadCases;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        std::vector<XMLGen::LoadCase> tCurObjLoadCases;
+        std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
+        XMLGen::Objective &tCurObj = m_InputData.objectives[i];
+        for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+        {
+            const std::string &tCurID = tCurObj.load_case_ids[j];
+            for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
+            {
+                if(m_InputData.load_cases[k].id == tCurID)
+                {
+                    tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
+                    k=m_InputData.load_cases.size();
+                }
+            }
+            for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
+            {
+                if(m_InputData.uncertainties[k].id == tCurID)
+                    tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+            }
+        }
+
+        std::vector<Plato::srom::Load> tLoads;
+        Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+
+        if(tCurObjUncertainties.size() > 0)
+        {
+            Plato::srom::InputMetaData tInputs;
+            tInputs.mLoads = tLoads;
+            Plato::srom::OutputMetaData tOutputs;
+            Plato::generate_load_sroms(tInputs, tOutputs);
+
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
+            {
+                XMLGen::LoadCase tNewLoadCase;
+                tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+                for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
+                {
+                    XMLGen::Load tNewLoad;
+                    tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
+                    tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
+                    tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                    tNewLoad.x = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[0]);
+                    tNewLoad.y = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[1]);
+                    tNewLoad.z = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[2]);
+                    tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
+                    tNewLoadCase.loads.push_back(tNewLoad);
+                }
+                tNewLoadCases.push_back(tNewLoadCase);
+                tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+                tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
+                tStartingLoadCaseID++;
+            }
+        }
+        else
+        {
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            XMLGen::LoadCase tNewLoadCase;
+            tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+            for(size_t j=0; j<tLoads.size(); ++j)
+            {
+                XMLGen::Load tNewLoad;
+                tNewLoad.type = tLoads[j].mLoadType;
+                tNewLoad.app_type = tLoads[j].mAppType;
+                tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
+                tNewLoad.x = tLoads[j].mValues[0];
+                tNewLoad.y = tLoads[j].mValues[1];
+                tNewLoad.z = tLoads[j].mValues[2];
+                tNewLoadCase.loads.push_back(tNewLoad);
+            }
+            tNewLoadCases.push_back(tNewLoadCase);
+            tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+            tCurObj.load_case_weights.push_back("1.0");
+        }
+    }
+    m_InputData.load_cases = tNewLoadCases;
+    return true;
+}
+
+/******************************************************************************/
 bool XMLGenerator::generate()
 /******************************************************************************/
 {
@@ -110,7 +202,15 @@ bool XMLGenerator::generate()
     }
 
     // NOTE: modifies objectives and loads for uncertainties
+    /*
     if(!expandUncertaintiesForGenerate())
+    {
+        std::cout << "Failed to expand uncertainties in file generation" << std::endl;
+        return false;
+    }
+    */
+
+    if(!runSROMForUncertainVariables())
     {
         std::cout << "Failed to expand uncertainties in file generation" << std::endl;
         return false;

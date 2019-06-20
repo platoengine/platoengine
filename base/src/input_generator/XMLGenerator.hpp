@@ -84,6 +84,7 @@ protected:
     bool generatePlatoAnalyzeInputDecks();
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
+    bool runSROMForUncertainVariables();
     bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();
     bool parseFile();
