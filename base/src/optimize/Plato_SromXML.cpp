@@ -59,10 +59,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
     std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;
     if(Plato::expand_random_and_deterministic_loads(aInput.mLoads, tRandomLoads, tDeterministicLoads) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n";
+        PRNTERR("FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n");
         return (false);
     }
 
@@ -71,49 +68,42 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
         std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
         if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
         if(Plato::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         std::vector<Plato::srom::RandomLoad> tMySetRandomLoads;
         if(Plato::generate_set_random_loads(tRandomLoads[tLoadIndex], tMySetRandomRotation, tMySetRandomLoads) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         if(Plato::expand_random_load_cases(tMySetRandomLoads, aOutput.mLoadCases) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
     }
 
     if(Plato::generate_output_random_load_cases(tDeterministicLoads, aOutput.mLoadCases) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n";
+        PRNTERR("FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n");
         return (false);
     }
 

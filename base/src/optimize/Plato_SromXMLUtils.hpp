@@ -56,14 +56,14 @@
 #include <cctype>
 #include <cstdlib>
 #include <iostream>
-#include <memory>
 
-#include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_KelleySachsAugmentedLagrangianLightInterface.hpp"
+#include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_SromProbDataStruct.hpp"
-#include "Plato_UniqueCounter.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include "Plato_UniqueCounter.hpp"
 #include "Plato_SromMetadata.hpp"
+#include "Plato_Macros.hpp"
 
 using namespace XMLGen;
 
@@ -147,26 +147,17 @@ inline bool check_vector3d_values(const std::vector<double> & aInput)
 {
     if(std::isfinite(aInput[0]) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: X-COMPONENT IS NOT A FINITE NUMBER.\n";
+        PRNTERR("X-COMPONENT IS NOT A FINITE NUMBER.\n");
         return (false);
     }
     else if(std::isfinite(aInput[1]) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: Y-COMPONENT IS NOT A FINITE NUMBER.\n";
+        PRNTERR("Y-COMPONENT IS NOT A FINITE NUMBER.\n");
         return (false);
     }
     else if(std::isfinite(aInput[2]) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: Z-COMPONENT IS NOT A FINITE NUMBER.\n";
+        PRNTERR("Z-COMPONENT IS NOT A FINITE NUMBER.\n");
         return (false);
     }
 
@@ -184,10 +175,7 @@ inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoa
 {
     if(aLoadCases.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF LOAD CASES IS EMPTY.\n";
+        PRNTERR("INPUT SET OF LOAD CASES IS EMPTY.\n");
         return (false);
     }
 
@@ -216,10 +204,9 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
 {
     if(aOldLoadCase.loads.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD CASE #" << aOldLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        std::ostringstream tMsg;
+        tMsg << "LOAD CASE #" << aOldLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -260,10 +247,7 @@ inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCas
     Plato::UniqueCounter tUniqueLoadIDCounter;
     if(Plato::initialize_load_id_counter(aInputLoadCases, tUniqueLoadIDCounter) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n";
+        PRNTERR("FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n");
         return (false);
     }
 
@@ -288,10 +272,9 @@ inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVar
             || aRandomVariable.num_samples.empty() || aRandomVariable.distribution.empty() || aRandomVariable.standard_deviation.empty();
     if(tInputStatisticsError == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: STATISTICS FOR RANDOM VARIABLE #" << aRandomVariable.id << " WERE NOT PROPERLY DEFINED.\n";
+        std::ostringstream tMsg;
+        tMsg << "STATISTICS FOR RANDOM VARIABLE #" << aRandomVariable.id << " WERE NOT PROPERLY DEFINED.\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -316,10 +299,9 @@ inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase
 {
     if(aLoadCase.loads.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD CASE #" << aLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        std::ostringstream tMsg;
+        tMsg << "LOAD CASE #" << aLoadCase.id << " HAS AN EMPTY LOADS SET.\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -502,10 +484,7 @@ inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDeg
     const bool tBadRotationDetected = Plato::check_vector3d_values(aRotatioAnglesInDegrees) == false;
     if(tBadRotationDetected || tBadNumberDetected)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: A NON-FINITE NUMBER WAS DETECTED.\n";
+        PRNTERR("A NON-FINITE NUMBER WAS DETECTED.\n");
         return (false);
     }
 
@@ -563,11 +542,10 @@ inline bool define_distribution(const Plato::srom::Variable & aMyRandomVar, Plat
     }
     else
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: DISTRIBUTION = " << aMyRandomVar.mStatistics.mDistribution
-                 << " IS NOT DEFINED. OPTIONS ARE NORMAL, UNIFORM AND BETA.\n";
+        std::ostringstream tMsg;
+        tMsg << "DISTRIBUTION = " << aMyRandomVar.mStatistics.mDistribution
+             << " IS NOT DEFINED. OPTIONS ARE NORMAL, UNIFORM AND BETA.\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -583,10 +561,7 @@ inline bool check_input_mean(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mMean.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: MEAN IS NOT DEFINED.\n";
+        PRNTERR("MEAN IS NOT DEFINED.\n");
         return (false);
     }
     return (true);
@@ -601,10 +576,7 @@ inline bool check_input_lower_bound(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mLowerBound.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOWER BOUND IS NOT DEFINED.\n";
+        PRNTERR("LOWER BOUND IS NOT DEFINED.\n");
         return (false);
     }
     return (true);
@@ -619,10 +591,7 @@ inline bool check_input_upper_bound(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mUpperBound.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: UPPER BOUND IS NOT DEFINED.\n";
+        PRNTERR("UPPER BOUND IS NOT DEFINED.\n");
         return (false);
     }
     return (true);
@@ -637,10 +606,7 @@ inline bool check_input_standard_deviation(const Plato::srom::Variable & aMyRand
 {
     if(aMyRandomVar.mStatistics.mStandardDeviation.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: STANDARD DEVIATION IS NOT DEFINED.\n";
+        PRNTERR("STANDARD DEVIATION IS NOT DEFINED.\n");
         return (false);
     }
     return (true);
@@ -655,19 +621,15 @@ inline bool check_input_number_samples(const Plato::srom::Variable & aMyRandomVa
 {
     if(aMyRandomVar.mStatistics.mNumSamples.empty() == true)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: NUMBER OF SAMPLES IS NOT DEFINED.\n";
+        PRNTERR("NUMBER OF SAMPLES IS NOT DEFINED.\n");
         return (false);
     }
     else if(std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) <= 0)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: NUMBER OF SAMPLES SHOULD BE GREATER THAN ZERO. "
-                 << "INPUT NUMBER OF SAMPLES = " << std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) << ".\n";
+        std::ostringstream tMsg;
+        tMsg << "NUMBER OF SAMPLES SHOULD BE GREATER THAN ZERO. " << "INPUT NUMBER OF SAMPLES = "
+             << std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) << ".\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -700,11 +662,10 @@ inline bool check_input_statistics(const Plato::srom::Variable & aMyRandomVar)
                 && tIsStandardDeviationDefined;
         if(tStatisticsDefined == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FULL SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
-                     << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            std::ostringstream tMsg;
+            tMsg << "FULL SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
+                 << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
     }
@@ -716,11 +677,10 @@ inline bool check_input_statistics(const Plato::srom::Variable & aMyRandomVar)
         bool tStatisticsDefined = tIsLowerBoundDefined && tIsUpperBoundDefined && tIsNumSamplesDefined;
         if(tStatisticsDefined == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
-                     << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            std::ostringstream tMsg;
+            tMsg << "SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
+                 << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
     }
@@ -766,10 +726,7 @@ inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromO
 {
     if(aMySromSolution.size() <= 0)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: SROM SOLUTION IS EMPTY.\n";
+        PRNTERR("SROM SOLUTION IS EMPTY.\n");
         return (false);
     }
 
@@ -845,10 +802,7 @@ inline bool compute_random_variable_statistics(const Plato::SromInputs<double> &
         default:
         case Plato::DistrubtionName::undefined:
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n";
+            PRNTERR("INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n");
             return (false);
         }
     }
@@ -867,13 +821,11 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::Vari
 {
     if(aSetRandomVariables.size() <= 0)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF RANDOM VARIABLES IS EMPTY.\n";
+        PRNTERR("INPUT SET OF RANDOM VARIABLES IS EMPTY.\n");
         return (false);
     }
 
+    std::ostringstream tMsg;
     aMySampleProbPairs.clear();
 
     const size_t tNumRandomVariables = aSetRandomVariables.size();
@@ -884,42 +836,32 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::Vari
         const Plato::srom::Variable & tMyRandomVar = aSetRandomVariables[tRandomVarIndex];
         if(Plato::define_distribution(tMyRandomVar, tSromInputs) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: PROBABILITY DISTIRBUTION WAS NOT DEFINED FOR RANDOM VARIABLE #"
-                     << tRandomVarIndex << ".\n";
+            tMsg << "PROBABILITY DISTIRBUTION WAS NOT DEFINED FOR RANDOM VARIABLE #" << tRandomVarIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         if(Plato::define_input_statistics(tMyRandomVar, tSromInputs) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: SET OF INPUT STATISTICS FOR THE SROM PROBLEM IS NOT PROPERLY DEFINED FOR RANDOM VARIABLE #"
-                     << tRandomVarIndex << ".\n";
+            tMsg << "SET OF INPUT STATISTICS FOR THE SROM PROBLEM IS NOT PROPERLY DEFINED FOR RANDOM VARIABLE #"
+                 << tRandomVarIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         std::vector<Plato::SromOutputs<double>> tSromOutputs;
         if(Plato::compute_random_variable_statistics(tSromInputs, tSromOutputs) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: STATISTICS FOR RANDOM VARIABLE #" << tRandomVarIndex << " WERE NOT COMPUTED.\n";
+            tMsg << "STATISTICS FOR RANDOM VARIABLE #" << tRandomVarIndex << " WERE NOT COMPUTED.\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
 
         Plato::srom::RandomVariable tMySampleProbPairs;
         if(Plato::post_process_sample_probability_pairs(tSromOutputs, tMyRandomVar, tMySampleProbPairs) == false)
         {
-            std::cout<< "\nFILE: " <<  __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: SAMPLE PROBABILITY PAIR POST PROCESSING FAILED FOR RANDOM VARIABLE #"
-                     << tRandomVarIndex << ".\n";
+            tMsg << "SAMPLE PROBABILITY PAIR POST PROCESSING FAILED FOR RANDOM VARIABLE #" << tRandomVarIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
         aMySampleProbPairs.push_back(tMySampleProbPairs);
@@ -943,10 +885,7 @@ inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::R
 {
     if(aMySampleProbPairs.size() <= 0)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF RANDOM VARIABLES IS EMPTY.\n";
+        PRNTERR("INPUT SET OF RANDOM VARIABLES IS EMPTY.\n");
         return (false);
     }
 
@@ -1201,10 +1140,7 @@ inline bool expand_random_rotations(const Plato::srom::SampleProbabilityPairs& a
     }
     else
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF SAMPLE PROBABILITY PAIRS ARE EMPTY. LOAD VECTOR IS DETERMINISTIC.\n";
+        PRNTERR("INPUT SET OF SAMPLE PROBABILITY PAIRS ARE EMPTY. LOAD VECTOR IS DETERMINISTIC.\n");
         return (false);
     }
 
@@ -1222,18 +1158,12 @@ inline bool check_expand_random_loads_inputs(const std::vector<double> & aMyOrig
 {
     if(aMyRandomRotations.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: VECTOR OF RANDOM ROTATIONS IS EMPTY.\n";
+        PRNTERR("VECTOR OF RANDOM ROTATIONS IS EMPTY.\n");
         return (false);
     }
     else if(Plato::check_vector3d_values(aMyOriginalLoad) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: A NON-FINITE NUMBER WAS DETECTED IN VECTOR 3D.\n";
+        PRNTERR("A NON-FINITE NUMBER WAS DETECTED IN VECTOR 3D.\n");
         return (false);
     }
 
@@ -1253,10 +1183,7 @@ inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
 {
     if(Plato::check_expand_random_loads_inputs(aMyOriginalLoad, aMyRandomRotations) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: ONE OF THE INPUT ARGUMENTS IS NOT PROPERLY DEFINED.\n";
+        PRNTERR("ONE OF THE INPUT ARGUMENTS IS NOT PROPERLY DEFINED.\n");
         return (false);
     }
 
@@ -1268,10 +1195,7 @@ inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
         tMyRandomLoad.mProbability = aMyRandomRotations[tIndex].mProbability;
         if(Plato::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotations, tMyRandomLoad.mLoadValues) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: APPLICATION OF ROTATION MATRIX WAS UNSUCCESSFUL.\n";
+            PRNTERR("APPLICATION OF ROTATION MATRIX WAS UNSUCCESSFUL.\n");
             return (false);
         }
         aMyRandomLoads.push_back(tMyRandomLoad);
@@ -1346,10 +1270,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
 {
     if(aNewSetRandomLoads.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: THE NEW SET OF RANDOM LOADS IS EMPTY.\n";
+        PRNTERR("THE NEW SET OF RANDOM LOADS IS EMPTY.\n");
         return (false);
     } // if statement
 
@@ -1357,10 +1278,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
     {
         if(Plato::update_initial_random_load_case(aNewSetRandomLoads, aOldRandomLoadCases) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FUNCTION FAILED WHILE TRYING TO UPDATE THE FIRST RANDOM LOAD CASE.\n";
+            PRNTERR("FUNCTION FAILED WHILE TRYING TO UPDATE THE FIRST RANDOM LOAD CASE.\n");
             return (false);
         } // if statement
     } // if-else statement
@@ -1368,10 +1286,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
     {
         if(Plato::update_random_load_cases(aNewSetRandomLoads, aOldRandomLoadCases) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: FUNCTION FAILED WHILE TRYING TO ADD A NEW RANDOM LOAD CASE.\n";
+            PRNTERR("FUNCTION FAILED WHILE TRYING TO ADD A NEW RANDOM LOAD CASE.\n");
             return (false);
         } // if statement
     } // if-else statement
@@ -1392,10 +1307,7 @@ inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom:
 {
     if(aLoads.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT SET OF LOADS IS EMPTY.\n";
+        PRNTERR("INPUT SET OF LOADS IS EMPTY.\n");
         return (false);
     } // if statement
 
@@ -1427,37 +1339,25 @@ inline bool check_load_parameters(const Plato::srom::Load& aLoad)
 {
     if(std::isfinite(aLoad.mAppID) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: APPLICATION IDENTIFIER IS NOT A FINITE NUMBER.\n";
+        PRNTERR("APPLICATION IDENTIFIER IS NOT A FINITE NUMBER.\n");
         return (false);
     }
 
     if(aLoad.mAppType.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: APPLICATION TYPE IS NOT DEFINE.\n";
+        PRNTERR("APPLICATION TYPE IS NOT DEFINE.\n");
         return (false);
     }
 
     if(aLoad.mLoadType.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD TYPE IS NOT DEFINE.\n";
+        PRNTERR("LOAD TYPE IS NOT DEFINE.\n");
         return (false);
     }
 
     if(aLoad.mValues.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: LOAD VALUES/COMPONENTS ARE NOT DEFINE, VALUES VECTOR IS EMPTY.\n";
+        PRNTERR("LOAD VALUES/COMPONENTS ARE NOT DEFINE, VALUES VECTOR IS EMPTY.\n");
         return (false);
     }
 
@@ -1474,19 +1374,15 @@ inline bool set_load_components(const std::vector<std::string> & aInput, std::ve
 {
     if(aInput.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT LOAD VECTOR IS EMPTY.\n";
+        PRNTERR("INPUT LOAD VECTOR IS EMPTY.\n");
         return (false);
     }
 
     if(aInput.size() != static_cast<size_t>(3))
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: INPUT DIMENSIONS = " << aInput.size() << ". CURRENTLY, ONLY 3-DIM PROBLEMS ARE SUPPORTED.\n";
+        std::ostringstream tMsg;
+        tMsg << "INPUT DIMENSIONS = " << aInput.size() << ". CURRENTLY, ONLY 3-DIM PROBLEMS ARE SUPPORTED.\n";
+        PRNTERR(tMsg.str().c_str());
         return (false);
     }
 
@@ -1508,10 +1404,7 @@ inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, 
 {
     if(Plato::check_load_parameters(aOriginalLoad) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: ONE OR MORE LOAD PARAMETERS ARE NOT DEFINED.\n";
+        PRNTERR("ONE OR MORE LOAD PARAMETERS ARE NOT DEFINED.\n");
         return (false);
     }
 
@@ -1537,10 +1430,7 @@ inline bool generate_set_random_rotations(const std::vector<Plato::srom::RandomV
     Plato::srom::SampleProbabilityPairs tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs;
     if(Plato::expand_load_sample_probability_pair(aMySampleProbPairs,  tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs) == false)
     {
-        std::cout << "\nFILE: " << __FILE__
-                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                  << "\nLINE:" << __LINE__
-                  << "\nMESSAGE: FAILED TO EXPAND SAMPLE-PROBABILITY PAIRS.\n";
+        PRNTERR("FAILED TO EXPAND SAMPLE-PROBABILITY PAIRS.\n");
         return (false);
     }
 
@@ -1563,28 +1453,19 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
     tMyOriginalLoadComponents.resize(3, 0.0);
     if(Plato::set_load_components(aOriginalLoad.mValues, tMyOriginalLoadComponents) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO SET ARRAY OF LOAD COMPONENTS.\n";
+        PRNTERR("FAILED TO SET ARRAY OF LOAD COMPONENTS.\n");
         return (false);
     }
 
     if(Plato::expand_random_loads(tMyOriginalLoadComponents, aSetRandomRotations, aSetRandomLoads) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO EXPAND SET OF RANDOM LOADS.\n";
+        PRNTERR("FAILED TO EXPAND SET OF RANDOM LOADS.\n");
         return (false);
     }
 
     if(Plato::set_random_load_parameters(aOriginalLoad, aSetRandomLoads) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: FAILED TO SET LOAD TYPE, APPLICATION TYPE AND APPLICATION IDENTIFIER.\n";
+        PRNTERR("FAILED TO SET LOAD TYPE, APPLICATION TYPE AND APPLICATION IDENTIFIER.\n");
         return (false);
     }
 
@@ -1623,10 +1504,9 @@ inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDet
     {
         if(Plato::check_load_parameters(aDeterministicLoads[tIndex]) == false)
         {
-            std::cout<< "\nFILE: " << __FILE__
-                     << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                     << "\nLINE:" << __LINE__
-                     << "\nMESSAGE: UNDEFINED PARAMETER FOR DETERMINISTIC LOAD #" << tIndex << ".\n";
+            std::ostringstream tMsg;
+            tMsg << "UNDEFINED PARAMETER FOR DETERMINISTIC LOAD #" << tIndex << ".\n";
+            PRNTERR(tMsg.str().c_str());
             return (false);
         }
     }
@@ -1675,19 +1555,13 @@ inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Loa
 {
     if(aSetRandomLoadCases.empty())
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: SET OF RANDOM LOAD CASES IS EMPTY.\n";
+        PRNTERR("SET OF RANDOM LOAD CASES IS EMPTY.\n");
         return (false);
     }
 
     if(Plato::check_deterministic_loads(aDeterministicLoads) == false)
     {
-        std::cout<< "\nFILE: " << __FILE__
-                 << "\nFUNCTION: " << __PRETTY_FUNCTION__
-                 << "\nLINE:" << __LINE__
-                 << "\nMESSAGE: AN ERROR WAS DETECTED WITH THE INPUT SET OF DETERMINISTIC LOADS.\n";
+        PRNTERR("AN ERROR WAS DETECTED WITH THE INPUT SET OF DETERMINISTIC LOADS.\n");
         return (false);
     }
 
