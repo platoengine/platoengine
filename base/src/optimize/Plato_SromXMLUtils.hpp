@@ -81,6 +81,13 @@ struct VariableType
 
 };
 
+
+/******************************************************************************//**
+ * @brief transform string with variable type to an enum (Plato::VariableType)
+ * @param [in] aStringVarType string variable type
+ * @param [out] aEnumVarType enum variable type
+ * @return flag (true = no error, false = error, string variable type is not defined/supported)
+**********************************************************************************/
 inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plato::VariableType::type_t& aEnumVarType)
 {
     if(aStringVarType == "material")
@@ -99,10 +106,14 @@ inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plat
     return (true);
 }
 
-
-inline bool check_vector3d_values(const std::vector<double> & aMyOriginalLoad)
+/******************************************************************************//**
+ * @brief Check if array's values are finite
+ * @param [in] aInput array of values
+ * @return flag (true = no error, false = error)
+**********************************************************************************/
+inline bool check_vector3d_values(const std::vector<double> & aInput)
 {
-    if(std::isfinite(aMyOriginalLoad[0]) == false)
+    if(std::isfinite(aInput[0]) == false)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -110,7 +121,7 @@ inline bool check_vector3d_values(const std::vector<double> & aMyOriginalLoad)
                  << "\nMESSAGE: X-COMPONENT IS NOT A FINITE NUMBER.\n";
         return (false);
     }
-    else if(std::isfinite(aMyOriginalLoad[1]) == false)
+    else if(std::isfinite(aInput[1]) == false)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -118,7 +129,7 @@ inline bool check_vector3d_values(const std::vector<double> & aMyOriginalLoad)
                  << "\nMESSAGE: Y-COMPONENT IS NOT A FINITE NUMBER.\n";
         return (false);
     }
-    else if(std::isfinite(aMyOriginalLoad[2]) == false)
+    else if(std::isfinite(aInput[2]) == false)
     {
         std::cout<< "\nFILE: " << __FILE__
                  << "\nFUNCTION: " << __PRETTY_FUNCTION__
@@ -130,6 +141,12 @@ inline bool check_vector3d_values(const std::vector<double> & aMyOriginalLoad)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Initialize counter used to set load identifiers (IDs)
+ * @param [in] aLoadCases array of load cases
+ * @param [in] aUniqueCounter IDs counter
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoadCases,
                                        Plato::UniqueCounter &aUniqueCounter)
 {
@@ -151,10 +168,19 @@ inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoa
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Expand set of load cases into an array of single load cases
+ * @param [in] aOldLoadCase old load case metadata
+ * @param [out] aNewLoadCaseList expanded set of load cases - load case is reformatted
+ *               to facilitate the creation of the stochastic reduced order models
+ * @param [out] aUniqueLoadIDCounter load identifiers counter
+ * @param [out] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
                                     std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
                                     Plato::UniqueCounter &aUniqueLoadIDCounter,
-                                    std::map<int, std::vector<int> > &tOriginalToNewLoadCaseMap)
+                                    std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
 {
     if(aOldLoadCase.loads.empty() == true)
     {
@@ -176,7 +202,7 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
             tCurLoadCaseID = aUniqueLoadIDCounter.assignNextUnique();
             tIDString = std::to_string(tCurLoadCaseID);
         }
-        tOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(aNewLoadCaseList.size());
+        aOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(aNewLoadCaseList.size());
         XMLGen::LoadCase tNewLoadCase = aOldLoadCase;
         tNewLoadCase.id = tIDString;
         tNewLoadCase.loads[0] = aOldLoadCase.loads[tLoadCaseIndex];
@@ -187,6 +213,13 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Expand old set of load cases into an array of new load cases with one load
+ * @param [in] aOldLoadCase old set of load cases
+ * @param [in] aNewLoadCaseList new set of load cases re-formatted to create the stochastic reduced order models (srom)
+ * @param [in] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
                               std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
                               std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
@@ -210,6 +243,12 @@ inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCas
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Set the statistics associated with the input random variable
+ * @param [in] aRandomVariable random variable metadata
+ * @param [in] aStatistics random variable statistics metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVariable, Plato::srom::Statistics& aStatistics)
 {
     bool tInputStatisticsError = aRandomVariable.mean.empty() || aRandomVariable.upper.empty() || aRandomVariable.lower.empty()
@@ -233,6 +272,12 @@ inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVar
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Create a deterministic load from the input deterministic load case
+ * @param [in] aLoadCase deterministic load case metadata (input load case has only one load, multiple loads are not expected)
+ * @param [out] aLoad deterministic load metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase, Plato::srom::Load& aLoad)
 {
     if(aLoadCase.loads.empty() == true)
@@ -256,13 +301,19 @@ inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Get or create a random load given a random load case
+ * @param [in] aLoadCase random load case metadata (load case only has one load, multiple loads are not expected)
+ * @param [out] aRandomLoad set of random loads
+ * @return random load identifier
+**********************************************************************************/
 inline int get_or_create_random_load_variable(const XMLGen::LoadCase &aLoadCase,
                                               std::vector<Plato::srom::Load> &aRandomLoads)
 {
     for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < aRandomLoads.size(); ++tRandomLoadIndex)
     {
         if(aRandomLoads[tRandomLoadIndex].mLoadID == aLoadCase.id)
-            return tRandomLoadIndex;
+            return (tRandomLoadIndex);
     }
 
     Plato::srom::Load tNewLoad;
@@ -278,6 +329,12 @@ inline int get_or_create_random_load_variable(const XMLGen::LoadCase &aLoadCase,
     return (aRandomLoads.size() - 1);
 }
 
+/******************************************************************************//**
+ * @brief Append a random variable, and corresponding statistics, to the random load.
+ * @param [in] aRandomLoad random load metadata
+ * @param [out] aRandomVariable random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
                                                const XMLGen::Uncertainty &aRandomVariable)
 {
@@ -293,6 +350,14 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
     aRandomLoad.mRandomVars.push_back(tNewVariable);
 }
 
+/******************************************************************************//**
+ * @brief Create a random load and append it to the set of random load cases
+ * @param [in] aRandomVariable random variable metadata
+ * @param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
+ * @param [in] aOriginalToNewLoadCaseMap map from original load case identifier to new/expanded load case identifier
+ * @param [out] aRandomLoadIDs set of random load case identifiers
+ * @param [out] aRandomLoads set of random load cases
+**********************************************************************************/
 inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRandomVariable,
                                                  const std::vector<XMLGen::LoadCase> &aNewLoadCases,
                                                  std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
@@ -311,6 +376,14 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
     }
 }
 
+/******************************************************************************//**
+ * @brief Create set of random loads
+ * @param [in] aRandomVariable random variable metadata
+ * @param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
+ * @param [in] aOriginalToNewLoadCaseMap map from original load case identifier to new/expanded load case identifier
+ * @param [out] aRandomLoadIDs set of random load case identifiers
+ * @param [out] aRandomLoads set of random load cases
+**********************************************************************************/
 inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> &aRandomVariables,
                                          const std::vector<XMLGen::LoadCase> &aNewLoadCases,
                                          std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
@@ -330,9 +403,15 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
     }
 }
 
+/******************************************************************************//**
+ * @brief Create set of deterministic loads
+ * @param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
+ * @param [in] aRandomLoadIDs set of random load case identifiers
+ * @param [out] aDeterministicLoads set of deterministic load cases
+**********************************************************************************/
 inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCase> &aNewLoadCases,
                                                 const std::set<int> & aRandomLoadIDs,
-                                                std::vector<Plato::srom::Load> &aLoad)
+                                                std::vector<Plato::srom::Load> &aDeterministicLoads)
 {
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aNewLoadCases.size(); tLoadCaseIndex++)
     {
@@ -341,11 +420,20 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
         {
             Plato::srom::Load tNewLoad;
             Plato::create_deterministic_load_variable(aNewLoadCases[tLoadCaseIndex], tNewLoad);
-            aLoad.push_back(tNewLoad);
+            aDeterministicLoads.push_back(tNewLoad);
         }
     }
 }
 
+/******************************************************************************//**
+ * @brief Generate array of deterministic and random loads in the format expected
+ * by the stochastic reduced order model application programming interface.
+ * @param [in] aInputLoadCases set of load cases created by the XML generator
+ * @param [in] aUncertainties set of random variables created by the XML generator
+ * @param [out] aLoads set of deterministic and random loads in the format expected
+ *                    by the Stochastic Reduced Order Model (SROM) interface
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
                                       const std::vector<XMLGen::Uncertainty> &aUncertainties,
                                       std::vector<Plato::srom::Load> &aLoads)
@@ -366,7 +454,14 @@ inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInpu
     return (true);
 }
 
-inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDegrees, std::vector<double>& aVectorToRotate)
+/******************************************************************************//**
+ * @brief Apply rotation matrix to a vector
+ * @param [in] aRotatioAnglesInDegrees rotation angles in degrees
+ * @param [out] aVectorToRotate rotated vector
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
+inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDegrees,
+                                  std::vector<double>& aVectorToRotate)
 {
     const bool tBadNumberDetected = Plato::check_vector3d_values(aVectorToRotate) == false;
     const bool tBadRotationDetected = Plato::check_vector3d_values(aRotatioAnglesInDegrees) == false;
@@ -411,6 +506,12 @@ inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDeg
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Define the distribution associated with the input random variable
+ * @param [in] aMyRandomVar random variable metadata
+ * @param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool define_distribution(const Plato::srom::Variable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
     if(aMyRandomVar.mStatistics.mDistribution == "normal")
@@ -438,6 +539,11 @@ inline bool define_distribution(const Plato::srom::Variable & aMyRandomVar, Plat
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check random variable's mean
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_mean(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mMean.empty() == true)
@@ -451,6 +557,11 @@ inline bool check_input_mean(const Plato::srom::Variable & aMyRandomVar)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check random variable's lower bound
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_lower_bound(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mLowerBound.empty() == true)
@@ -464,6 +575,11 @@ inline bool check_input_lower_bound(const Plato::srom::Variable & aMyRandomVar)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check random variable's upper bound
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_upper_bound(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mUpperBound.empty() == true)
@@ -477,6 +593,11 @@ inline bool check_input_upper_bound(const Plato::srom::Variable & aMyRandomVar)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check random variable's standard deviation
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_standard_deviation(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mStandardDeviation.empty() == true)
@@ -490,6 +611,11 @@ inline bool check_input_standard_deviation(const Plato::srom::Variable & aMyRand
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check random variable's number of samples
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_number_samples(const Plato::srom::Variable & aMyRandomVar)
 {
     if(aMyRandomVar.mStatistics.mNumSamples.empty() == true)
@@ -513,6 +639,12 @@ inline bool check_input_number_samples(const Plato::srom::Variable & aMyRandomVa
     return (true);
 }
 
+
+/******************************************************************************//**
+ * @brief Check random variable statistics
+ * @param [in] aMyRandomVar random variable metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_input_statistics(const Plato::srom::Variable & aMyRandomVar)
 {
     std::locale tLocale;
@@ -561,6 +693,12 @@ inline bool check_input_statistics(const Plato::srom::Variable & aMyRandomVar)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Define random variable's statistics
+ * @param [in] aMyRandomVar random variable metadata
+ * @param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool define_input_statistics(const Plato::srom::Variable & aMyRandomVar, Plato::SromInputs<double> & aInput)
 {
     if(Plato::check_input_statistics(aMyRandomVar) == false)
@@ -579,9 +717,17 @@ inline bool define_input_statistics(const Plato::srom::Variable & aMyRandomVar, 
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Post-process sample probability pairs computed by solving the SROM problem
+ * @param [in] aMySromSolution sample-probability pairs for this random variable -
+ *            computed by solving the Stochastic Reduced Order Model (SROM) problem
+ * @param [in] aMyVariable input variable
+ * @param [out] aMyRandomVariable random variable
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromOutputs<double>> aMySromSolution,
-                                                  const Plato::srom::Variable & aMyRandomVariable,
-                                                  Plato::srom::RandomVariable & aMySromRandomVariable)
+                                                  const Plato::srom::Variable & aMyVariable,
+                                                  Plato::srom::RandomVariable & aMyRandomVariable)
 {
     if(aMySromSolution.size() <= 0)
     {
@@ -592,47 +738,59 @@ inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromO
         return (false);
     }
 
-    aMySromRandomVariable.mSampleProbPairs.mSamples.clear();
-    aMySromRandomVariable.mSampleProbPairs.mProbabilities.clear();
+    aMyRandomVariable.mSampleProbPairs.mSamples.clear();
+    aMyRandomVariable.mSampleProbPairs.mProbabilities.clear();
 
-    aMySromRandomVariable.mType = aMyRandomVariable.mType;
-    aMySromRandomVariable.mSubType = aMyRandomVariable.mSubType;
+    aMyRandomVariable.mType = aMyVariable.mType;
+    aMyRandomVariable.mSubType = aMyVariable.mSubType;
 
     const size_t tNumSamples = aMySromSolution.size();
-    aMySromRandomVariable.mSampleProbPairs.mNumSamples = tNumSamples;
-    aMySromRandomVariable.mSampleProbPairs.mSamples.resize(tNumSamples);
-    aMySromRandomVariable.mSampleProbPairs.mProbabilities.resize(tNumSamples);
+    aMyRandomVariable.mSampleProbPairs.mNumSamples = tNumSamples;
+    aMyRandomVariable.mSampleProbPairs.mSamples.resize(tNumSamples);
+    aMyRandomVariable.mSampleProbPairs.mProbabilities.resize(tNumSamples);
 
     for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
-        aMySromRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
-        aMySromRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
+        aMyRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
+        aMyRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
     }
 
     return (true);
 }
 
-inline bool compute_uniform_random_variable_statistics(const Plato::SromInputs<double> & aSromInputs,
-                                                       std::vector<Plato::SromOutputs<double>> & aSromOutputSet)
+/******************************************************************************//**
+ * @brief Compute sample probability pairs for an uniform random variable
+ * @param [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
+ * @param [out] aOutputMetaData output metadata for the SROM problem
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
+inline bool compute_uniform_random_variable_statistics(const Plato::SromInputs<double> & aInputMetaData,
+                                                       std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
 {
-    aSromOutputSet.clear();
+    aOutputMetaData.clear();
 
-    const double tSampleProbability = static_cast<double>(1.0 / aSromInputs.mNumSamples);
-    const double tDelta = (aSromInputs.mUpperBound - aSromInputs.mLowerBound) / static_cast<double>(aSromInputs.mNumSamples - 1);
-    for(size_t tIndex = 0; tIndex < aSromInputs.mNumSamples; tIndex++)
+    const double tSampleProbability = static_cast<double>(1.0 / aInputMetaData.mNumSamples);
+    const double tDelta = (aInputMetaData.mUpperBound - aInputMetaData.mLowerBound) / static_cast<double>(aInputMetaData.mNumSamples - 1);
+    for(size_t tIndex = 0; tIndex < aInputMetaData.mNumSamples; tIndex++)
     {
         Plato::SromOutputs<double> tSromOutputs;
         tSromOutputs.mSampleWeight = tSampleProbability;
-        tSromOutputs.mSampleValue = aSromInputs.mLowerBound + (static_cast<double>(tIndex) * tDelta);
-        aSromOutputSet.push_back(tSromOutputs);
+        tSromOutputs.mSampleValue = aInputMetaData.mLowerBound + (static_cast<double>(tIndex) * tDelta);
+        aOutputMetaData.push_back(tSromOutputs);
     }
     return (true);
 }
 
-inline bool compute_random_variable_statistics(const Plato::SromInputs<double> & aSromInputs,
-                                               std::vector<Plato::SromOutputs<double>> & aSromOutputs)
+/******************************************************************************//**
+ * @brief Compute random variable's statistics
+ * @param [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
+ * @param [out] aOutputMetaData output metadata for the SROM problem
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
+inline bool compute_random_variable_statistics(const Plato::SromInputs<double> & aInputMetaData,
+                                               std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
 {
-    switch(aSromInputs.mDistribution)
+    switch(aInputMetaData.mDistribution)
     {
         case Plato::DistrubtionName::beta:
         case Plato::DistrubtionName::normal:
@@ -641,12 +799,12 @@ inline bool compute_random_variable_statistics(const Plato::SromInputs<double> &
             const bool tEnableOutput = true;
             Plato::AlgorithmInputsKSAL<double> tAlgoInputs;
             Plato::SromDiagnostics<double> tSromDiagnostics;
-            Plato::solve_srom_problem(aSromInputs, tAlgoInputs, tSromDiagnostics, aSromOutputs, tEnableOutput);
+            Plato::solve_srom_problem(aInputMetaData, tAlgoInputs, tSromDiagnostics, aOutputMetaData, tEnableOutput);
             break;
         }
         case Plato::DistrubtionName::uniform:
         {
-            Plato::compute_uniform_random_variable_statistics(aSromInputs, aSromOutputs);
+            Plato::compute_uniform_random_variable_statistics(aInputMetaData, aOutputMetaData);
             break;
         }
         default:
@@ -663,6 +821,12 @@ inline bool compute_random_variable_statistics(const Plato::SromInputs<double> &
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute the sample-probability pairs for the set of random variables
+ * @param [in] aSetRandomVariables set of input random variables
+ * @param [out] aMySampleProbPairs set of sample-probability pairs
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::Variable> & aSetRandomVariables,
                                              std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs)
 {
@@ -729,6 +893,14 @@ inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::Vari
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Expand sample-probability pairs
+ * @param [in] aMySampleProbPairs sample-probability pairs for this random load
+ * @param [out] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [out] aMyYaxisSampleProbPairs sample-probability for a random rotation along the y-axis
+ * @param [out] aMyZaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs,
                                                 Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                                 Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
@@ -764,6 +936,14 @@ inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::R
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the x, y and z axes
+ * @param [in] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the y-axis
+ * @param [in] aMyZaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_xyz(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                                const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
                                                const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
@@ -790,6 +970,13 @@ inline bool compute_random_rotations_about_xyz(const Plato::srom::SampleProbabil
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the x and y axes
+ * @param [in] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the y-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_xy(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                               const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
                                               std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
@@ -811,6 +998,13 @@ inline bool compute_random_rotations_about_xy(const Plato::srom::SampleProbabili
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the x and z axes
+ * @param [in] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [in] aMyZaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_xz(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                               const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
                                               std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
@@ -832,6 +1026,13 @@ inline bool compute_random_rotations_about_xz(const Plato::srom::SampleProbabili
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the y and z axes
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the y-axis
+ * @param [in] aMyZaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_yz(const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
                                               const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
                                               std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
@@ -853,6 +1054,12 @@ inline bool compute_random_rotations_about_yz(const Plato::srom::SampleProbabili
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the x axis
+ * @param [in] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_x(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
@@ -868,6 +1075,12 @@ inline bool compute_random_rotations_about_x(const Plato::srom::SampleProbabilit
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the y axis
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_y(const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
@@ -883,6 +1096,12 @@ inline bool compute_random_rotations_about_y(const Plato::srom::SampleProbabilit
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute random rotations along the z axis
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool compute_random_rotations_about_z(const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
                                              std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
@@ -898,6 +1117,14 @@ inline bool compute_random_rotations_about_z(const Plato::srom::SampleProbabilit
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Compute vector of random rotations
+ * @param [in] aMyXaxisSampleProbPairs sample-probability for a random rotation along the x-axis
+ * @param [in] aMyYaxisSampleProbPairs sample-probability for a random rotation along the y-axis
+ * @param [in] aMyZaxisSampleProbPairs sample-probability for a random rotation along the z-axis
+ * @param [out] aMyRandomRotations vector of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_random_rotations(const Plato::srom::SampleProbabilityPairs& aMyXaxisSampleProbPairs,
                                     const Plato::srom::SampleProbabilityPairs& aMyYaxisSampleProbPairs,
                                     const Plato::srom::SampleProbabilityPairs& aMyZaxisSampleProbPairs,
@@ -949,6 +1176,12 @@ inline bool expand_random_rotations(const Plato::srom::SampleProbabilityPairs& a
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check the input arguments needed to compute the set of random loads
+ * @param [in] aMyOriginalLoad original load vector (x, y and z components)
+ * @param [in] aMyRandomRotations random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_expand_random_loads_inputs(const std::vector<double> & aMyOriginalLoad,
                                              const std::vector<Plato::srom::RandomRotations> & aMyRandomRotations)
 {
@@ -972,6 +1205,13 @@ inline bool check_expand_random_loads_inputs(const std::vector<double> & aMyOrig
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Create the set of random loads given its corresponding set of random rotations
+ * @param [in] aMyOriginalLoad original load vector (x, y and z components)
+ * @param [in] aMyRandomRotations set of random rotations
+ * @param [out] aMyRandomLoads set of random loads
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
                                 const std::vector<Plato::srom::RandomRotations> & aMyRandomRotations,
                                 std::vector<Plato::srom::RandomLoad> & aMyRandomLoads)
@@ -1005,6 +1245,12 @@ inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Create initial/first random load case
+ * @param [in] aNewSetRandomLoads set of random loads for the input random variable
+ * @param [out] aOldRandomLoadCases set of random load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool update_initial_random_load_case(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
                                             std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
@@ -1024,6 +1270,12 @@ inline bool update_initial_random_load_case(const std::vector<Plato::srom::Rando
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Update set of random load cases
+ * @param [in] aNewSetRandomLoads set of random loads for the input random variable
+ * @param [out] aOldRandomLoadCases set of random load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool update_random_load_cases(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
                                      std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
@@ -1047,6 +1299,13 @@ inline bool update_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Create the set of random load cases resulting from the solution to the
+ *   stochastic reduced order model (SROM) problem
+ * @param [in] aNewSetRandomLoads set of random loads for a given random variable
+ * @param [out] aOldRandomLoadCases updated set of random load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> & aNewSetRandomLoads,
                                      std::vector<Plato::srom::RandomLoadCase> & aOldRandomLoadCases)
 {
@@ -1085,6 +1344,13 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Create the set of random and deterministic loads
+ * @param [in] aLoads set of random and deterministic loads
+ * @param [out] aRandomLoads set of random loads
+ * @param [out] aDeterministicLoads set of deterministic loads
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom::Load>& aLoads,
                                                   std::vector<Plato::srom::Load>& aRandomLoads,
                                                   std::vector<Plato::srom::Load>& aDeterministicLoads)
@@ -1117,6 +1383,11 @@ inline bool expand_random_and_deterministic_loads(const std::vector<Plato::srom:
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Check the parameters that define a load
+ * @param [in] aLoads set of loads
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_load_parameters(const Plato::srom::Load& aLoad)
 {
     if(std::isfinite(aLoad.mAppID) == false)
@@ -1158,6 +1429,12 @@ inline bool check_load_parameters(const Plato::srom::Load& aLoad)
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Set load components (i.e. magnitudes)
+ * @param [in] aInput array of load components string values
+ * @param [out] aOutput array of load component values
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool set_load_components(const std::vector<std::string> & aInput, std::vector<double> & aOutput)
 {
     if(aInput.empty())
@@ -1186,6 +1463,12 @@ inline bool set_load_components(const std::vector<std::string> & aInput, std::ve
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Set all the parameters used to identify a random load
+ * @param [in] aOriginalLoad original load metadata
+ * @param [out] aSetRandomLoads set of random loads
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
 {
     if(Plato::check_load_parameters(aOriginalLoad) == false)
@@ -1207,6 +1490,12 @@ inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, 
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Generate the set of random rotations associated with the input random variable
+ * @param [in] aMySampleProbPairs sample-probability pairs
+ * @param [out] aMySetRandomRotation set of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool generate_set_random_rotations(const std::vector<Plato::srom::RandomVariable> & aMySampleProbPairs,
                                           std::vector<Plato::srom::RandomRotations> & aMySetRandomRotation)
 {
@@ -1225,6 +1514,12 @@ inline bool generate_set_random_rotations(const std::vector<Plato::srom::RandomV
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Generate the set of random loads associated with the input random variable
+ * @param [in] aMySampleProbPairs sample-probability pairs
+ * @param [out] aMySetRandomRotation set of random rotations
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
                                       const std::vector<Plato::srom::RandomRotations> & aSetRandomRotations,
                                       std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
@@ -1261,6 +1556,11 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Generate the load case identifiers for each load case in the set
+ * @param [out] aSetLoadCases set of load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline void generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
 {
     Plato::UniqueCounter tLoadCounter, tLoadCaseCounter;
@@ -1277,6 +1577,11 @@ inline void generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCa
     }
 }
 
+/******************************************************************************//**
+ * @brief Check the parameters used to identified a deterministic load
+ * @param [in] aDeterministicLoads set of deterministic loads
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
     for(size_t tIndex = 0; tIndex < aDeterministicLoads.size(); tIndex++)
@@ -1294,6 +1599,12 @@ inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDet
     return (true);
 }
 
+/******************************************************************************//**
+ * @brief Append the set of deterministic loads to the set of random load cases
+ * @param [in] aDeterministicLoads set of deterministic loads
+ * @param [out] aSetLoadCases set of random load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads,
                                        std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
 {
@@ -1318,6 +1629,12 @@ inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDe
     }
 }
 
+/******************************************************************************//**
+ * @brief Create the set of the output set of random load cases
+ * @param [in] aDeterministicLoads set of deterministic loads
+ * @param [out] aSetLoadCases set of random load cases
+ * @return error flag - function call was successful, true = no error, false = error
+**********************************************************************************/
 inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Load>& aDeterministicLoads,
                                               std::vector<Plato::srom::RandomLoadCase> & aSetRandomLoadCases)
 {
@@ -1344,7 +1661,6 @@ inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Loa
 
     return (true);
 }
-
 
 } // namespace Plato
 
