@@ -2341,7 +2341,7 @@ bool XMLGenerator::generateLightMPInputDecks()
                 bool found = false;
                 XMLGen::LoadCase cur_load_case;
                 std::string cur_load_id = cur_obj.load_case_ids[j];
-                for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                for(size_t qq=0; found == false && qq<m_InputData.load_cases.size(); ++qq)
                 {
                     if(cur_load_id == m_InputData.load_cases[qq].id)
                     {
@@ -2363,21 +2363,28 @@ bool XMLGenerator::generateLightMPInputDecks()
                         double x = std::atof(cur_load.x.c_str());
                         double y = std::atof(cur_load.y.c_str());
                         double z = std::atof(cur_load.z.c_str());
-                        if(x > y && x > z)
+                        double magx = fabs(x);
+                        double magy = fabs(y);
+                        double magz = fabs(z);
+                        std::string value = "0.0";
+                        if(magx > magy && magx > magz)
                         {
                             node6.set_value("x");
+                            value = std::to_string(x);
                         }
-                        else if(y > x && y > z)
+                        else if(magy > magx && magy > magz)
                         {
                             node6.set_value("y");
+                            value = std::to_string(y);
                         }
-                        else if(z > x && z > y)
+                        else if(magz > magx && magz > magy)
                         {
                             node6.set_value("z");
+                            value = std::to_string(z);
                         }
                         node5 = node4.append_child("value");
                         node6 = node5.append_child(pugi::node_pcdata);
-                        node6.set_value(cur_load.scale.c_str());
+                        node6.set_value(value.c_str());
                         node5 = node4.append_child("scale");
                         node6 = node5.append_child(pugi::node_pcdata);
                         node6.set_value("1.0");
@@ -3149,11 +3156,6 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     return false;
                                 }
                                 new_load.app_type = tokens[1];
-                                if(new_load.app_type != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Tractions can only be specified on sidesets currently.\n";
-                                    return false;
-                                }
                                 new_load.app_id = tokens[2];
                                 if(tokens[3] != "value")
                                 {
@@ -5340,10 +5342,12 @@ bool XMLGenerator::generateLightMPOperationsXML()
             pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
             tmp_att.set_value("1.0");
 
+            /* light mp doesn't currently support this
             // Cache State
             tmp_node = doc.append_child("Operation");
             addChild(tmp_node, "Function", "Cache State");
             addChild(tmp_node, "Name", "Cache State");
+            */
 
             // InternalEnergy
             tmp_node = doc.append_child("Operation");
@@ -7206,7 +7210,8 @@ bool XMLGenerator::generateInterfaceXML()
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze")) // Albany and analyzie don't handle Cache State correctly yet
+        if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+                cur_obj.code_name.compare("lightmp")) // Albany, analyze, and lightmp don't handle Cache State correctly yet
         {
             op_node = cur_parent.append_child("Operation");
             addChild(op_node, "Name", "Cache State");
