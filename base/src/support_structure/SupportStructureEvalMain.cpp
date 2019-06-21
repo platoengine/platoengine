@@ -46,11 +46,9 @@ int main(int argc,  char **argv)
     clp.setOption("output_file",  &outputFilename, "output text filename to append to.", true );
     clp.setOption("iteration",  &iteration, "iteartion number.", true );
 
-    Teuchos::CommandLineProcessor::EParseCommandLineReturn parseReturn =
-            Teuchos::CommandLineProcessor::PARSE_SUCCESSFUL;
     try
     {
-        parseReturn = clp.parse( argc, argv );
+        clp.parse( argc, argv );
     }
     catch (std::exception exc)
     {

@@ -25,16 +25,6 @@ namespace plato
 namespace support_structure
 {
 
-bool sortCounterClockwise(Point2D p1, Point2D p2)
-{
-    /*
-        double a1 = Math.toDegrees(atan2(a.x - center.x, a.y - center.y)) + 360) % 360;
-        double a2 = (Math.toDegrees(Math.atan2(b.x - center.x, b.y - center.y)) + 360) % 360;
-        return (int) (a1 - a2);
-    });
-     */
-}
-
 SupportStructure::~SupportStructure()
 {
     if(mSTKMeshIn)
@@ -145,7 +135,6 @@ int SupportStructure::getIntersectionInfo(stk::mesh::Entity &element,
                                           std::vector<Vector3D> &aTriPoints)
 {
     // find interection points
-    double tolerance = 1e-6;
     stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(element);
     int numNodes = mSTKMeshIn->bulk_data()->num_nodes(element);
 
@@ -933,7 +922,6 @@ bool SupportStructure::pointInTriangle(Vector3D &p,
 
 bool SupportStructure::runPrivateElementBased()
 {
-    bool return_val = true;
     if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
         std::cout << "Generating support material field. " << std::endl;
 
@@ -980,7 +968,6 @@ bool SupportStructure::runPrivateElementBased()
             bool allNodesInside = true;
             bool allNodesOutside = true;
             stk::mesh::Entity curElem = tmpBucket[i];
-            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
             stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
             int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
             for(int j=0; j<numNodes; ++j)
@@ -1061,7 +1048,7 @@ bool SupportStructure::runPrivateElementBased()
                     {
                 //        elemsToFlip.push_back(curElem);
                         // project all of the interface triangle points to a plane parallel to build plate
-                        for(int r=0; r<triPoints.size(); ++r)
+                        for(size_t r=0; r<triPoints.size(); ++r)
                             projectPointToPlane(triPoints[r], interfaceOrigin, mBuildPlateNormal, triPoints[r]);
 
                         stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
@@ -1096,7 +1083,7 @@ bool SupportStructure::runPrivateElementBased()
 
                                 bool pointIsBelowInterface = false;
                                 // see if the current node is in any of the triangles
-                                for(int w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
+                                for(size_t w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
                                 {
                                     if(pointInTriangle(pointOnPlane, triPoints[w], triPoints[w+1], triPoints[w+2]))
                                         pointIsBelowInterface = true;
@@ -1110,7 +1097,6 @@ bool SupportStructure::runPrivateElementBased()
                                     for(int i=0; i<numElems; ++i)
                                     {
                                         stk::mesh::Entity curNeighborElem = nodeElements[i];
-                                        uint64_t globalElemId2 = mSTKMeshIn->bulk_data()->identifier(curNeighborElem);
                                      //   if(staticElemsToCheck.find(curNeighborElem) == staticElemsToCheck.end())
                                         {
                                             newElemsToCheck.insert(curNeighborElem);
@@ -1149,7 +1135,7 @@ bool SupportStructure::runPrivateElementBased()
                     if(dot < -.707)
                     {
                         // project all of the interface triangle points to a plane parallel to build plate
-                        for(int r=0; r<triPoints.size(); ++r)
+                        for(size_t r=0; r<triPoints.size(); ++r)
                             projectPointToPlane(triPoints[r], interfaceOrigin, mBuildPlateNormal, triPoints[r]);
 
                         stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
@@ -1185,7 +1171,7 @@ bool SupportStructure::runPrivateElementBased()
 
                                 bool pointIsBelowInterface = false;
                                 // see if the current node is in any of the triangles
-                                for(int w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
+                                for(size_t w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
                                 {
                                     if(pointInTriangle(pointOnPlane, triPoints[w], triPoints[w+1], triPoints[w+2]))
                                         pointIsBelowInterface = true;
@@ -1270,7 +1256,6 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
     }
 
     double tolerance = 1e-12;
-    double angleCosine = cos(mOverhangAngle*platoPI/180.0);
     std::set<stk::mesh::Entity> designInterfaceElements;
     std::map<stk::mesh::Entity, double> interfaceMap;
     for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
@@ -1283,7 +1268,6 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAbove()
             bool allNodesInside = true;
             bool allNodesOutside = true;
             stk::mesh::Entity curElem = tmpBucket[i];
-            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
             stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
             int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
             for(int j=0; j<numNodes; ++j)
@@ -1613,7 +1597,6 @@ void SupportStructure::getNodesSortedInZDirection(Vector3D &aOrigin,
         size_t numBucketNodes = tmpBucket.size();
         for (size_t i=0; i<numBucketNodes; ++i)
         {
-            bool foundDesignNode = false;
             stk::mesh::Entity curNode = tmpBucket[i];
             Vector3D curNodeCoords;
             mSTKMeshIn->nodeCoordinates(curNode, curNodeCoords.data());
@@ -1689,6 +1672,8 @@ void SupportStructure::getGridDimensions(double &aAverageEdgeLength, Vector3D &a
     double maxX, maxY, minX, minY;
     bool firstNode = true;
 
+    minY = minX = maxX = maxY = 0.0;
+
     std::vector<std::pair<stk::mesh::Entity, double> > nodeDotPairs;
     for ( stk::mesh::BucketVector::const_iterator nodeBucketIter = nodeBuckets.begin();
             nodeBucketIter != nodeBuckets.end();
@@ -1745,7 +1730,6 @@ void SupportStructure::getNodeInterfaceData(std::map<stk::mesh::Entity, double> 
             stk::topology::ELEMENT_RANK, myElemSelector );
 
     double tolerance = 1e-12;
-    double angleCosine = cos(mOverhangAngle*platoPI/180.0);
     std::set<stk::mesh::Entity> designInterfaceElements;
     std::map<stk::mesh::Entity, Vector3D> interfaceMap;
     for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
@@ -1758,7 +1742,6 @@ void SupportStructure::getNodeInterfaceData(std::map<stk::mesh::Entity, double> 
             bool allNodesInside = true;
             bool allNodesOutside = true;
             stk::mesh::Entity curElem = tmpBucket[i];
-            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
             stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
             int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
             for(int j=0; j<numNodes; ++j)
@@ -2420,7 +2403,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
             if((curDensity + tolerance) >= mDesignFieldThresholdValue)
             {
                 double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
-                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
                     mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
                 curVoxelData.maxDensity = curDensity;
                 curVoxelData.maxDot = curDot;
@@ -2433,7 +2416,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
             else
             {
                 double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
-                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
                     mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
                 curVoxelData.maxDensity = aboveVoxelData.maxDensity;
                 curVoxelData.maxDot = aboveVoxelData.maxDot;
@@ -2449,7 +2432,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
             if((curDensity + tolerance) >= mDesignFieldThresholdValue)
             {
                 double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
-                for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
                     mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
                 curVoxelData.maxDensity = curDensity;
                 curVoxelData.maxDot = curDot;
@@ -2464,7 +2447,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
                 if(aboveVoxelData.maxIsDesign)
                 {
                     double supportStructureValue = calculateSupportStructureValue(curDensity, aboveVoxelData.maxDensity, aboveVoxelData.maxDot, true);
-                    for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                    for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
                         mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
                     curVoxelData.maxDensity = aboveVoxelData.maxDensity;
                     curVoxelData.maxDot = aboveVoxelData.maxDot;
@@ -2482,7 +2465,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
                         curVoxelData.maxDensity = aboveVoxelData.maxDensity;
 
                     double supportStructureValue = calculateSupportStructureValue(curDensity, curVoxelData.maxDensity, curDot, false);
-                    for(int j=0; j<curVoxelData.nodes.size(); ++j)
+                    for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
                         mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
                     curVoxelData.maxDot = curDot;
                     curVoxelData.dataExists = true;
@@ -2513,7 +2496,7 @@ void SupportStructure::setVoxelDataByNode(int aXIndex, int aYIndex,
         curVoxelData.maxDot = curDot;
         curVoxelData.setByNode = true;
         double supportStructureValue = calculateSupportStructureValue(curDensity, curDensity, curDot, false);
-        for(int j=0; j<curVoxelData.nodes.size(); ++j)
+        for(size_t j=0; j<curVoxelData.nodes.size(); ++j)
             mSTKMeshIn->setSupportStructureFieldValue(curVoxelData.nodes[j].m_value, supportStructureValue);
     }
 }
@@ -2816,7 +2799,6 @@ bool SupportStructure::runPrivateVoxelBased()
     // Bump the z extents a bit to avoid tolerance issues.
     zMax += 1e-4;
     zMin -= 1e-4;
-    double tolerance = 1e-12;
     int numZLayers = (int)(((zMax-zMin)/averageEdgeLength) + 1.0);
     double zStep = (zMax - zMin) / (double)numZLayers;
     double curZ = zMax - zStep;
@@ -2841,7 +2823,6 @@ bool SupportStructure::runPrivateVoxelBased()
         }
     }
 
-    int voxelMin = -mNeighborSearchRadius;
     int voxelMax = mNeighborSearchRadius;
     int voxelMemoryOffset = mNeighborSearchRadius;
     for(int zLayer=0; zLayer < numZLayers; ++zLayer)
@@ -3109,7 +3090,6 @@ bool SupportStructure::runPrivateVoxelBasedInefficientMemory()
     // Bump the z extents a bit to avoid tolerance issues.
     zMax += 1e-4;
     zMin -= 1e-4;
-    double tolerance = 1e-12;
     int numZLayers = (int)(((zMax-zMin)/averageEdgeLength) + 1.0);
     double zStep = (zMax - zMin) / (double)numZLayers;
     double curZ = zMax - zStep;
@@ -3119,7 +3099,6 @@ bool SupportStructure::runPrivateVoxelBasedInefficientMemory()
 
     // New approach with 3D vector
     // 3D vector: 1st index is the z layer, 2nd is x, and 3rd is y
-    int voxelNumLayers = 2*mNeighborSearchRadius + 1;
     std::vector<std::vector<std::vector<VoxelData> > > voxelData3D(numZLayers,
                          std::vector<std::vector<VoxelData> >(numGridX,
                          std::vector<VoxelData>(numGridY)));
@@ -3226,7 +3205,6 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
     }
 
     double tolerance = 1e-12;
-    double angleCosine = cos(mOverhangAngle*platoPI/180.0);
     std::set<stk::mesh::Entity> designInterfaceElements;
     std::map<stk::mesh::Entity, Vector3D> interfaceMap;
     for ( stk::mesh::BucketVector::const_iterator bucketIter = elementBuckets.begin();
@@ -3239,7 +3217,6 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
             bool allNodesInside = true;
             bool allNodesOutside = true;
             stk::mesh::Entity curElem = tmpBucket[i];
-            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
             stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
             int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
             for(int j=0; j<numNodes; ++j)
@@ -3401,7 +3378,6 @@ bool SupportStructure::runPrivateNodeBasedMaxDensityAboveTopDown()
         size_t numBucketNodes = tmpBucket.size();
         for (size_t i=0; i<numBucketNodes; ++i)
         {
-            bool foundDesignNode = false;
             stk::mesh::Entity curNode = tmpBucket[i];
             Vector3D curNodeCoords;
             mSTKMeshIn->nodeCoordinates(curNode, curNodeCoords.data());
@@ -3638,7 +3614,6 @@ double SupportStructure::calculateSupportStructureValue(double &aMyDensity, doub
 
 bool SupportStructure::runPrivateProjectTriangle()
 {
-    bool return_val = true;
     if(mSTKMeshIn->bulk_data()->parallel_rank() == 0)
         std::cout << "Generating support material field. " << std::endl;
 
@@ -3683,7 +3658,6 @@ bool SupportStructure::runPrivateProjectTriangle()
             bool allNodesInside = true;
             bool allNodesOutside = true;
             stk::mesh::Entity curElem = tmpBucket[i];
-            uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
             stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
             int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
             for(int j=0; j<numNodes; ++j)
@@ -3712,7 +3686,6 @@ bool SupportStructure::runPrivateProjectTriangle()
     while(interfaceIter != designInterfaceElements.end())
     {
         stk::mesh::Entity curElem = *interfaceIter;
-        uint64_t globalElemId = mSTKMeshIn->bulk_data()->identifier(curElem);
         Vector3D interfaceNormal;
         Vector3D interfaceOrigin;
         std::vector<Vector3D> triPoints;
@@ -3732,7 +3705,7 @@ bool SupportStructure::runPrivateProjectTriangle()
                 double edgeLength = p1.distance(p2);
 
                 // project all of the interface triangle points to a plane parallel to build plate
-                for(int r=0; r<triPoints.size(); ++r)
+                for(size_t r=0; r<triPoints.size(); ++r)
                     projectPointToPlane(triPoints[r], interfaceOrigin, mBuildPlateNormal, triPoints[r]);
 
                 std::set<stk::mesh::Entity> processedNodes;
@@ -3759,7 +3732,7 @@ bool SupportStructure::runPrivateProjectTriangle()
                             projectPointToPlane(pointCoords, interfaceOrigin, mBuildPlateNormal, pointOnPlane);
                             bool pointIsBelowInterface = false;
                             // see if the current node is in any of the triangles
-                            for(int w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
+                            for(size_t w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
                             {
                                 if(pointInTriangle(pointOnPlane, triPoints[w], triPoints[w+1], triPoints[w+2]))
                                     pointIsBelowInterface = true;
@@ -3792,7 +3765,6 @@ bool SupportStructure::runPrivateProjectTriangle()
                                 stk::mesh::Entity curNeighborElem = nodeElements[q];
                                 if(curNeighborElem != curElem)
                                 {
-                                    uint64_t globalElemId2 = mSTKMeshIn->bulk_data()->identifier(curNeighborElem);
                                     elemsToCheck.insert(curNeighborElem);
                                 }
                             }
@@ -3821,7 +3793,6 @@ bool SupportStructure::runPrivateProjectTriangle()
                     {
                         stk::mesh::Entity curElem = *(elemsToCheck.begin());
                         elemsToCheck.erase(elemsToCheck.begin());
-                        uint64_t globalElemId2 = mSTKMeshIn->bulk_data()->identifier(curElem);
 
                         stk::mesh::Entity const *elemNodes = mSTKMeshIn->bulk_data()->begin_nodes(curElem);
                         int numNodes = mSTKMeshIn->bulk_data()->num_nodes(curElem);
@@ -3852,7 +3823,7 @@ bool SupportStructure::runPrivateProjectTriangle()
                                     {
                                         bool pointIsBelowInterface = false;
                                         // see if the current node is in any of the triangles
-                                        for(int w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
+                                        for(size_t w=0; !pointIsBelowInterface && w<triPoints.size(); w+=3)
                                         {
                                             if(pointInTriangle(pointOnPlane, triPoints[w], triPoints[w+1], triPoints[w+2]))
                                                 pointIsBelowInterface = true;
@@ -3868,7 +3839,6 @@ bool SupportStructure::runPrivateProjectTriangle()
                                         for(int q=0; q<numElems; ++q)
                                         {
                                             stk::mesh::Entity curNeighborElem = nodeElements[q];
-                                            uint64_t globalElemId3 = mSTKMeshIn->bulk_data()->identifier(curNeighborElem);
                                             if(processedElements.find(curNeighborElem) == processedElements.end())
                                                 newElemsToCheck.insert(curNeighborElem);
                                         }
@@ -4291,7 +4261,7 @@ bool SupportStructure::nodeNeedsSupport(stk::mesh::Entity &aCurNode, uint64_t &a
     double bestDot = -1.0;
     bool needsSupport = true;
     stk::mesh::Entity bestNode;
-    uint64_t bestNodeLocalId;
+    uint64_t bestNodeLocalId = 0;
     mSTKMeshIn->nodeCoordinates(aCurNode, inCoords);
     stk::mesh::Entity const *nodeElements = mSTKMeshIn->bulk_data()->begin_elements(aCurNode);
     int numElems = mSTKMeshIn->bulk_data()->num_elements(aCurNode);
