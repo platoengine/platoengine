@@ -64,7 +64,6 @@
 #include "Plato_UniqueCounter.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 #include "Plato_SromMetadata.hpp"
-#include "Plato_Vector3DVariations.hpp"
 
 using namespace XMLGen;
 
@@ -81,6 +80,39 @@ struct VariableType
 
 };
 
+struct RotationAxis
+{
+
+    enum type_t
+    {
+        x, y, z
+    };
+};
+
+/******************************************************************************//**
+ * @brief Return rotation axis
+ * @param [in] aStringAxis rotation axis
+ * @param [out] aEnumAxis rotation axis
+**********************************************************************************/
+inline void rotation_axis_string_to_enum(const std::string & aStringAxis, Plato::RotationAxis::type_t & aEnumAxis)
+{
+    if(aStringAxis == "x")
+    {
+        aEnumAxis = Plato::RotationAxis::x;
+    }
+    else if(aStringAxis == "y")
+    {
+        aEnumAxis = Plato::RotationAxis::y;
+    }
+    else if(aStringAxis == "z")
+    {
+        aEnumAxis = Plato::RotationAxis::z;
+    }
+    else
+    {
+        std::abort();
+    }
+}
 
 /******************************************************************************//**
  * @brief transform string with variable type to an enum (Plato::VariableType)
@@ -216,7 +248,8 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
 /******************************************************************************//**
  * @brief Expand old set of load cases into an array of new load cases with one load
  * @param [in] aOldLoadCase old set of load cases
- * @param [in] aNewLoadCaseList new set of load cases re-formatted to create the stochastic reduced order models (srom)
+ * @param [in] aNewLoadCaseList new set of load cases re-formatted to create the
+ *             stochastic reduced order models (srom)
  * @param [in] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
  * @return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
@@ -274,7 +307,8 @@ inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVar
 
 /******************************************************************************//**
  * @brief Create a deterministic load from the input deterministic load case
- * @param [in] aLoadCase deterministic load case metadata (input load case has only one load, multiple loads are not expected)
+ * @param [in] aLoadCase deterministic load case metadata (input load case has only
+ *            one load, multiple loads are not expected)
  * @param [out] aLoad deterministic load metadata
  * @return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
@@ -303,7 +337,8 @@ inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase
 
 /******************************************************************************//**
  * @brief Get or create a random load given a random load case
- * @param [in] aLoadCase random load case metadata (load case only has one load, multiple loads are not expected)
+ * @param [in] aLoadCase random load case metadata (load case only has one load,
+ *              multiple loads are not expected)
  * @param [out] aRandomLoad set of random loads
  * @return random load identifier
 **********************************************************************************/
@@ -917,13 +952,13 @@ inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::R
 
     for(size_t tRandVarIndex = 0; tRandVarIndex < aMySampleProbPairs.size(); tRandVarIndex++)
     {
-        Plato::axis3D::axis3D tMyAxis = Plato::axis3D::axis3D::x;
-        Plato::axis3D_stringToEnum(aMySampleProbPairs[tRandVarIndex].mSubType, tMyAxis);
-        if(tMyAxis == Plato::axis3D::axis3D::x)
+        Plato::RotationAxis::type_t tMyAxis = Plato::RotationAxis::x;
+        Plato::rotation_axis_string_to_enum(aMySampleProbPairs[tRandVarIndex].mSubType, tMyAxis);
+        if(tMyAxis == Plato::RotationAxis::x)
         {
             aMyXaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
         }
-        else if(tMyAxis == Plato::axis3D::axis3D::y)
+        else if(tMyAxis == Plato::RotationAxis::y)
         {
             aMyYaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
         }

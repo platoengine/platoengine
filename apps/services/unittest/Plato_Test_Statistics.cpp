@@ -1312,7 +1312,6 @@ TEST(PlatoTest, solve_srom_problem_uniform)
     double tTotalProbability = 0;
     for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
     {
-        std::cout << tOutput[tIndex].mSampleWeight << "\n";
         tTotalProbability += tOutput[tIndex].mSampleWeight;
     }
     EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
