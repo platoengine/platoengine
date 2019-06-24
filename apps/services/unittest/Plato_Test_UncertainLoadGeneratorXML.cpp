@@ -369,7 +369,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
     ASSERT_EQ(1u, tMySampleProbPairs.size());
     ASSERT_STREQ("x", tMySampleProbPairs[0].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[0].mType.c_str());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(3, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
     ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mSamples.size());
     ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mProbabilities.size());
 
@@ -379,7 +379,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
     const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
     std::vector<double> tGoldSamples = {102.6401761033302, 88.31771931721183, 76.83726384445947};
     std::vector<double> tGoldProbabilities = {0.18178392025984, 0.19071306890276, 0.62750198867198};
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairs.mProbabilities[tIndex];
         ASSERT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tTolerance);
@@ -424,7 +424,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     ASSERT_EQ(2u, tMySampleProbPairs.size());
     ASSERT_STREQ("x", tMySampleProbPairs[0].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[0].mType.c_str());
-    ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(3, tMySampleProbPairs[0].mSampleProbPairs.mNumSamples);
     ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mSamples.size());
     ASSERT_EQ(3u, tMySampleProbPairs[0].mSampleProbPairs.mProbabilities.size());
 
@@ -433,7 +433,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairsOne = tMySampleProbPairs[0].mSampleProbPairs;
     std::vector<double> tGoldSamplesOne = {79.56461506624, 95.1780010696, 104.3742043151};
     std::vector<double> tGoldProbabilitiesOne = {0.441549282785, 0.3256625620299, 0.2326524892665};
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsOne.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tSampleProbabilityPairsOne.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairsOne.mProbabilities[tIndex];
         ASSERT_NEAR(tGoldSamplesOne[tIndex], tSampleProbabilityPairsOne.mSamples[tIndex], tTolerance);
@@ -445,7 +445,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     // TEST RESULTS - RANDOM VARIABLE TWO
     ASSERT_STREQ("y", tMySampleProbPairs[1].mSubType.c_str());
     ASSERT_STREQ("random rotation", tMySampleProbPairs[1].mType.c_str());
-    ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mNumSamples);
+    ASSERT_EQ(4, tMySampleProbPairs[1].mSampleProbPairs.mNumSamples);
     ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mSamples.size());
     ASSERT_EQ(4u, tMySampleProbPairs[1].mSampleProbPairs.mProbabilities.size());
 
@@ -454,7 +454,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairsTwo = tMySampleProbPairs[1].mSampleProbPairs;
     std::vector<double> tGoldSamplesTwo = {62.92995363352, 69.67128118964, 66.03455388567, 96.2527627689};
     std::vector<double> tGoldProbabilitiesTwo = {0.3643018720139, 0.1964474490484, 0.2300630894941, 0.2091697703866};
-    for(size_t tIndex = 0; tIndex < tSampleProbabilityPairsTwo.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tSampleProbabilityPairsTwo.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairsTwo.mProbabilities[tIndex];
         ASSERT_NEAR(tGoldSamplesTwo[tIndex], tSampleProbabilityPairsTwo.mSamples[tIndex], tTolerance);
@@ -557,10 +557,10 @@ TEST(PlatoTest, post_process_random_load_OneRandomRotation)
     ASSERT_TRUE(tMyZaxisSampleProbPairs.mSamples.empty());
     ASSERT_FALSE(tMyXaxisSampleProbPairs.mSamples.empty());
 
-    ASSERT_EQ(4u, tMyXaxisSampleProbPairs.mNumSamples);
+    ASSERT_EQ(4, tMyXaxisSampleProbPairs.mNumSamples);
 
     const double tTolerance = 1e-4;
-    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -599,7 +599,7 @@ TEST(PlatoTest, post_process_random_load_TwoRandomRotations)
     const double tTolerance = 1e-4;
 
     ASSERT_EQ(tRandomLoadX.mSampleProbPairs.mNumSamples, tMyXaxisSampleProbPairs.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -607,7 +607,7 @@ TEST(PlatoTest, post_process_random_load_TwoRandomRotations)
 
     // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
     ASSERT_EQ(tRandomLoadY.mSampleProbPairs.mNumSamples, tMyYaxisSampleProbPairs.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mSamples[tIndex], tMyYaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mProbabilities[tIndex], tMyYaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -654,7 +654,7 @@ TEST(PlatoTest, post_process_random_load_ThreeRandomRotations)
     const double tTolerance = 1e-4;
 
     ASSERT_EQ(tRandomLoadX.mSampleProbPairs.mNumSamples, tMyXaxisSampleProbPairs.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyXaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mSamples[tIndex], tMyXaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadX.mSampleProbPairs.mProbabilities[tIndex], tMyXaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -662,7 +662,7 @@ TEST(PlatoTest, post_process_random_load_ThreeRandomRotations)
 
     // TEST RESULTS FOR ROTATION Y SAMPLE-PROBABILITY PAIRS
     ASSERT_EQ(tRandomLoadY.mSampleProbPairs.mNumSamples, tMyYaxisSampleProbPairs.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyYaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mSamples[tIndex], tMyYaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadY.mSampleProbPairs.mProbabilities[tIndex], tMyYaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -670,7 +670,7 @@ TEST(PlatoTest, post_process_random_load_ThreeRandomRotations)
 
     // TEST RESULTS FOR ROTATION Z SAMPLE-PROBABILITY PAIRS
     ASSERT_EQ(tRandomLoadZ.mSampleProbPairs.mNumSamples, tMyZaxisSampleProbPairs.mNumSamples);
-    for(size_t tIndex = 0; tIndex < tMyZaxisSampleProbPairs.mNumSamples; tIndex++)
+    for(int tIndex = 0; tIndex < tMyZaxisSampleProbPairs.mNumSamples; tIndex++)
     {
         ASSERT_NEAR(tRandomLoadZ.mSampleProbPairs.mSamples[tIndex], tMyZaxisSampleProbPairs.mSamples[tIndex], tTolerance);
         ASSERT_NEAR(tRandomLoadZ.mSampleProbPairs.mProbabilities[tIndex], tMyZaxisSampleProbPairs.mProbabilities[tIndex], tTolerance);
@@ -2548,13 +2548,13 @@ TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
     }
     tInputData.load_cases = tNewLoadCases;
 
-    ASSERT_EQ(tInputData.load_cases.size(), 273);
-    ASSERT_EQ(tInputData.objectives[0].load_case_ids.size(), 256);
-    ASSERT_EQ(tInputData.objectives[1].load_case_ids.size(), 1);
-    ASSERT_EQ(tInputData.objectives[2].load_case_ids.size(), 16);
-    ASSERT_EQ(tInputData.objectives[0].load_case_weights.size(), 256);
-    ASSERT_EQ(tInputData.objectives[1].load_case_weights.size(), 1);
-    ASSERT_EQ(tInputData.objectives[2].load_case_weights.size(), 16);
+    ASSERT_EQ(tInputData.load_cases.size(), 273u);
+    ASSERT_EQ(tInputData.objectives[0].load_case_ids.size(), 256u);
+    ASSERT_EQ(tInputData.objectives[1].load_case_ids.size(), 1u);
+    ASSERT_EQ(tInputData.objectives[2].load_case_ids.size(), 16u);
+    ASSERT_EQ(tInputData.objectives[0].load_case_weights.size(), 256u);
+    ASSERT_EQ(tInputData.objectives[1].load_case_weights.size(), 1u);
+    ASSERT_EQ(tInputData.objectives[2].load_case_weights.size(), 16u);
 }
 
 TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_parsed_data)
@@ -2854,7 +2854,7 @@ TEST(PlatoTest, expand_load_cases)
     tLoadCases.push_back(tLC1);
     std::vector<XMLGen::LoadCase> tNewLoadCases;
     Plato::expand_load_cases(tLoadCases, tNewLoadCases, tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCases.size(), 9);
+    ASSERT_EQ(tNewLoadCases.size(), 9u);
     ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
     ASSERT_STREQ(tNewLoadCases[1].id.c_str(), "1");
     ASSERT_STREQ(tNewLoadCases[2].id.c_str(), "3");
@@ -2913,9 +2913,9 @@ TEST(PlatoTest, expand_single_load_case)
     std::vector<XMLGen::LoadCase> tNewLoadCaseList;
     Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter,
                                    tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCaseList.size(), 1);
+    ASSERT_EQ(tNewLoadCaseList.size(), 1u);
     ASSERT_STREQ(tNewLoadCaseList[0].id.c_str(), "88");
-    ASSERT_EQ(tNewLoadCaseList[0].loads.size(), 1);
+    ASSERT_EQ(tNewLoadCaseList[0].loads.size(), 1u);
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].load_id.c_str(), "89");
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].y.c_str(), "1.0");
     ASSERT_STREQ(tNewLoadCaseList[0].loads[0].x.c_str(), "0.0");
@@ -2940,7 +2940,7 @@ TEST(PlatoTest, expand_single_load_case)
     tOriginalToNewLoadCaseMap.clear();
     Plato::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter,
                                    tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCaseList2.size(), 2);
+    ASSERT_EQ(tNewLoadCaseList2.size(), 2u);
     ASSERT_STREQ(tNewLoadCaseList2[1].id.c_str(), "1");
     ASSERT_STREQ(tNewLoadCaseList2[0].id.c_str(), "88");
     ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].y.c_str(), "55");
@@ -2963,7 +2963,7 @@ TEST(PlatoTest, expand_single_load_case)
     tOriginalToNewLoadCaseMap.clear();
     Plato::expand_single_load_case(tLC1,tNewList,tIDCounter,
                                    tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewList.size(), 3);
+    ASSERT_EQ(tNewList.size(), 3u);
     ASSERT_STREQ(tNewList[0].id.c_str(), "2");
     ASSERT_STREQ(tNewList[1].id.c_str(), "1");
     ASSERT_STREQ(tNewList[2].id.c_str(), "3");

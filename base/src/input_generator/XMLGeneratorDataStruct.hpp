@@ -106,8 +106,9 @@ struct Objective
     std::string volume_penalty_divisor;
     std::string volume_penalty_bias;
     std::string scmm_mass_to_stress_constraint_ratio;
-    std::string scmm_initial_penalty_param;
-    std::string scmm_penalty_param_expansion_factor;
+    std::string scmm_initial_penalty;
+    std::string scmm_penalty_expansion_factor;
+    std::string scmm_constraint_exponent;
     std::string scmm_initial_lagrange_multiplier;
     std::string scmm_initial_mass_weight_factor;
     std::string scmm_control_stagnation_tolerance;
@@ -239,6 +240,10 @@ struct InputData
     std::vector<XMLGen::LoadCase> load_cases;
     std::vector<XMLGen::BC> bcs;
     std::vector<XMLGen::Uncertainty> uncertainties;
+
+    std::string filter_projection_start_iteration;
+    std::string filter_projection_update_interval;
+    std::string filter_use_additive_continuation;
 };
 
 }

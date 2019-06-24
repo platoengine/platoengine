@@ -132,7 +132,8 @@ protected:
     std::string m_filterType_kernel_XMLName;
     std::string m_filterType_kernelThenHeaviside_generatorName;
     std::string m_filterType_kernelThenHeaviside_XMLName;
-
+    std::string m_filterType_kernelThenTANH_generatorName;
+    std::string m_filterType_kernelThenTANH_XMLName;
 private:
     /******************************************************************************//**
      * @brief Initialize Plato problem options
