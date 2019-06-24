@@ -305,9 +305,8 @@ inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase
         return (false);
     }
 
-    aLoad.mValues.push_back(aLoadCase.loads[0].x);
-    aLoad.mValues.push_back(aLoadCase.loads[0].y);
-    aLoad.mValues.push_back(aLoadCase.loads[0].z);
+    for(size_t i=0; i<aLoadCase.loads[0].values.size(); ++i)
+        aLoad.mValues.push_back(aLoadCase.loads[0].values[i]);
 
     aLoad.mLoadID = aLoadCase.id;
     aLoad.mAppType = aLoadCase.loads[0].app_type;
@@ -338,9 +337,8 @@ inline int get_or_create_random_load_variable(const XMLGen::LoadCase &aLoadCase,
     tNewLoad.mAppType = aLoadCase.loads[0].app_type;
     tNewLoad.mAppID = std::atoi(aLoadCase.loads[0].app_id.c_str());
     tNewLoad.mLoadID = aLoadCase.id;
-    tNewLoad.mValues.push_back(aLoadCase.loads[0].x);
-    tNewLoad.mValues.push_back(aLoadCase.loads[0].y);
-    tNewLoad.mValues.push_back(aLoadCase.loads[0].z);
+    for(size_t i=0; i<aLoadCase.loads[0].values.size(); ++i)
+        tNewLoad.mValues.push_back(aLoadCase.loads[0].values[i]);
     aRandomLoads.push_back(tNewLoad);
 
     return (aRandomLoads.size() - 1);

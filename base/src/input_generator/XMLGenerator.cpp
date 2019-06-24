@@ -105,89 +105,90 @@ XMLGenerator::~XMLGenerator()
 bool XMLGenerator::runSROMForUncertainVariables()
 /******************************************************************************/
 {
-    std::vector<XMLGen::LoadCase> tNewLoadCases;
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_InputData.uncertainties.size() > 0)
     {
-        std::vector<XMLGen::LoadCase> tCurObjLoadCases;
-        std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
-        XMLGen::Objective &tCurObj = m_InputData.objectives[i];
-        for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+        std::vector<XMLGen::LoadCase> tNewLoadCases;
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
-            const std::string &tCurID = tCurObj.load_case_ids[j];
-            for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
+            std::vector<XMLGen::LoadCase> tCurObjLoadCases;
+            std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
+            XMLGen::Objective &tCurObj = m_InputData.objectives[i];
+            for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
             {
-                if(m_InputData.load_cases[k].id == tCurID)
+                const std::string &tCurID = tCurObj.load_case_ids[j];
+                for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
                 {
-                    tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
-                    k=m_InputData.load_cases.size();
+                    if(m_InputData.load_cases[k].id == tCurID)
+                    {
+                        tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
+                        k=m_InputData.load_cases.size();
+                    }
+                }
+                for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
+                {
+                    if(m_InputData.uncertainties[k].id == tCurID)
+                        tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
                 }
             }
-            for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
+
+            std::vector<Plato::srom::Load> tLoads;
+            Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+
+            if(tCurObjUncertainties.size() > 0)
             {
-                if(m_InputData.uncertainties[k].id == tCurID)
-                    tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+                Plato::srom::InputMetaData tInputs;
+                tInputs.mLoads = tLoads;
+                Plato::srom::OutputMetaData tOutputs;
+                Plato::generate_load_sroms(tInputs, tOutputs);
+
+                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+                tCurObj.load_case_ids.clear();
+                tCurObj.load_case_weights.clear();
+                for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
+                {
+                    XMLGen::LoadCase tNewLoadCase;
+                    tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+                    for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
+                    {
+                        XMLGen::Load tNewLoad;
+                        tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
+                        tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
+                        tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                        for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
+                            tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
+                        tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
+                        tNewLoadCase.loads.push_back(tNewLoad);
+                    }
+                    tNewLoadCases.push_back(tNewLoadCase);
+                    tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+                    tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
+                    tStartingLoadCaseID++;
+                }
             }
-        }
-
-        std::vector<Plato::srom::Load> tLoads;
-        Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
-
-        if(tCurObjUncertainties.size() > 0)
-        {
-            Plato::srom::InputMetaData tInputs;
-            tInputs.mLoads = tLoads;
-            Plato::srom::OutputMetaData tOutputs;
-            Plato::generate_load_sroms(tInputs, tOutputs);
-
-            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-            tCurObj.load_case_ids.clear();
-            tCurObj.load_case_weights.clear();
-            for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
+            else
             {
+                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+                tCurObj.load_case_ids.clear();
+                tCurObj.load_case_weights.clear();
                 XMLGen::LoadCase tNewLoadCase;
                 tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-                for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
+                for(size_t j=0; j<tLoads.size(); ++j)
                 {
                     XMLGen::Load tNewLoad;
-                    tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
-                    tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
-                    tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
-                    tNewLoad.x = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[0]);
-                    tNewLoad.y = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[1]);
-                    tNewLoad.z = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[2]);
-                    tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
+                    tNewLoad.type = tLoads[j].mLoadType;
+                    tNewLoad.app_type = tLoads[j].mAppType;
+                    tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
+                    for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
+                        tNewLoad.values.push_back(tLoads[j].mValues[h]);
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
                 tNewLoadCases.push_back(tNewLoadCase);
                 tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-                tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
-                tStartingLoadCaseID++;
+                tCurObj.load_case_weights.push_back("1.0");
             }
         }
-        else
-        {
-            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-            tCurObj.load_case_ids.clear();
-            tCurObj.load_case_weights.clear();
-            XMLGen::LoadCase tNewLoadCase;
-            tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-            for(size_t j=0; j<tLoads.size(); ++j)
-            {
-                XMLGen::Load tNewLoad;
-                tNewLoad.type = tLoads[j].mLoadType;
-                tNewLoad.app_type = tLoads[j].mAppType;
-                tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
-                tNewLoad.x = tLoads[j].mValues[0];
-                tNewLoad.y = tLoads[j].mValues[1];
-                tNewLoad.z = tLoads[j].mValues[2];
-                tNewLoadCase.loads.push_back(tNewLoad);
-            }
-            tNewLoadCases.push_back(tNewLoadCase);
-            tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-            tCurObj.load_case_weights.push_back("1.0");
-        }
+        m_InputData.load_cases = tNewLoadCases;
     }
-    m_InputData.load_cases = tNewLoadCases;
     return true;
 }
 
@@ -529,9 +530,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                 }
 
                 // get original load vector
-                const double loadVecX = std::atof(this_loads[0].x.c_str());
-                const double loadVecY = std::atof(this_loads[0].y.c_str());
-                const double loadVecZ = std::atof(this_loads[0].z.c_str());
+                const double loadVecX = std::atof(this_loads[0].values[0].c_str());
+                const double loadVecY = std::atof(this_loads[0].values[1].c_str());
+                const double loadVecZ = std::atof(this_loads[0].values[2].c_str());
                 Plato::Vector3D original_load_vec = {loadVecX, loadVecY, loadVecZ};
 
                 // get axis
@@ -593,9 +594,9 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
                     Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
 
                     // update vector in load
-                    loadToModify->x = std::to_string(rotated_load_vec.mX);
-                    loadToModify->y = std::to_string(rotated_load_vec.mY);
-                    loadToModify->z = std::to_string(rotated_load_vec.mZ);
+                    loadToModify->values[0] = std::to_string(rotated_load_vec.mX);
+                    loadToModify->values[1] = std::to_string(rotated_load_vec.mY);
+                    loadToModify->values[2] = std::to_string(rotated_load_vec.mZ);
                 }
             }
         }
@@ -1368,9 +1369,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                                 if(cur_load.type == "acceleration")
                                 {
                                     fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
-                                            cur_load.x.c_str(),
-                                            cur_load.y.c_str(),
-                                            cur_load.z.c_str());
+                                            cur_load.values[0].c_str(),
+                                            cur_load.values[1].c_str(),
+                                            cur_load.values[2].c_str());
                                 }
                                 else if(cur_load.type == "pressure")
                                 {
@@ -1378,7 +1379,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                                             cur_load.app_type.c_str(),
                                             cur_load.app_id.c_str(),
                                             cur_load.type.c_str(),
-                                            cur_load.scale.c_str());
+                                            cur_load.values[0].c_str());
                                 }
                                 else
                                 {
@@ -1386,9 +1387,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                                             cur_load.app_type.c_str(),
                                             cur_load.app_id.c_str(),
                                             cur_load.type.c_str(),
-                                            cur_load.x.c_str(),
-                                            cur_load.y.c_str(),
-                                            cur_load.z.c_str());
+                                            cur_load.values[0].c_str(),
+                                            cur_load.values[1].c_str(),
+                                            cur_load.values[2].c_str());
                                 }
                             }
                             fprintf(fp, "END\n");
@@ -1419,9 +1420,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                                 if(cur_load.type == "acceleration")
                                 {
                                     fprintf(fp, "  body gravity %s %s %s scale 1.0\n",
-                                            cur_load.x.c_str(),
-                                            cur_load.y.c_str(),
-                                            cur_load.z.c_str());
+                                            cur_load.values[0].c_str(),
+                                            cur_load.values[1].c_str(),
+                                            cur_load.values[2].c_str());
                                 }
                                 else if(cur_load.type == "pressure")
                                 {
@@ -1429,7 +1430,7 @@ bool XMLGenerator::generateSalinasInputDecks()
                                             cur_load.app_type.c_str(),
                                             cur_load.app_id.c_str(),
                                             cur_load.type.c_str(),
-                                            cur_load.scale.c_str());
+                                            cur_load.values[0].c_str());
                                 }
                                 else
                                 {
@@ -1437,9 +1438,9 @@ bool XMLGenerator::generateSalinasInputDecks()
                                             cur_load.app_type.c_str(),
                                             cur_load.app_id.c_str(),
                                             cur_load.type.c_str(),
-                                            cur_load.x.c_str(),
-                                            cur_load.y.c_str(),
-                                            cur_load.z.c_str());
+                                            cur_load.values[0].c_str(),
+                                            cur_load.values[1].c_str(),
+                                            cur_load.values[2].c_str());
                                 }
                             }
                         }
@@ -1664,9 +1665,9 @@ bool XMLGenerator::generateAlbanyInputDecks()
                                 sprintf(string_var, "NBC on SS surface_%s for DOF all set (t_x, t_y, t_z)",
                                         cur_load.app_id.c_str());
                                 char tmp_buf[200];
-                                double x = std::atof(cur_load.x.c_str());
-                                double y = std::atof(cur_load.y.c_str());
-                                double z = std::atof(cur_load.z.c_str());
+                                double x = std::atof(cur_load.values[0].c_str());
+                                double y = std::atof(cur_load.values[1].c_str());
+                                double z = std::atof(cur_load.values[2].c_str());
                                 sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
                                 addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
                             }
@@ -1678,7 +1679,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
                                 sprintf(string_var, "NBC on SS surface_%s for DOF P set (dudx, dudy, dudz)",
                                         cur_load.app_id.c_str());
                                 char tmp_buf[200];
-                                sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.scale.c_str());
+                                sprintf(tmp_buf, "{%s,0.0,0.0}", cur_load.values[0].c_str());
                                 addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
                             }
                         }
@@ -1963,9 +1964,9 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                             n4 = n3.append_child("ParameterList");
                             n4.append_attribute("name") = "Traction Vector Boundary Condition";
                             addNTVParameter(n4, "Type", "string", "Uniform");
-                            double x = std::atof(cur_load.x.c_str());
-                            double y = std::atof(cur_load.y.c_str());
-                            double z = std::atof(cur_load.z.c_str());
+                            double x = std::atof(cur_load.values[0].c_str());
+                            double y = std::atof(cur_load.values[1].c_str());
+                            double z = std::atof(cur_load.values[2].c_str());
                             sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
                             addNTVParameter(n4, "Values", "Array(double)", tmp_buf);
                             sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
@@ -2100,7 +2101,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                             n4 = n3.append_child("ParameterList");
                             n4.append_attribute("name") = "Flux Boundary Condition";
                             addNTVParameter(n4, "Type", "string", "Uniform");
-                            addNTVParameter(n4, "Value", "double", cur_load.scale);
+                            addNTVParameter(n4, "Value", "double", cur_load.values[0]);
                             sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
                             addNTVParameter(n4, "Sides", "string", tmp_buf);
                         }
@@ -2360,9 +2361,9 @@ bool XMLGenerator::generateLightMPInputDecks()
                         node6.set_value(cur_load.app_id.c_str());
                         node5 = node4.append_child("direction");
                         node6 = node5.append_child(pugi::node_pcdata);
-                        double x = std::atof(cur_load.x.c_str());
-                        double y = std::atof(cur_load.y.c_str());
-                        double z = std::atof(cur_load.z.c_str());
+                        double x = std::atof(cur_load.values[0].c_str());
+                        double y = std::atof(cur_load.values[1].c_str());
+                        double z = std::atof(cur_load.values[2].c_str());
                         double magx = fabs(x);
                         double magy = fabs(y);
                         double magz = fabs(z);
@@ -3162,9 +3163,9 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
                                     return false;
                                 }
-                                new_load.x = tokens[4];
-                                new_load.y = tokens[5];
-                                new_load.z = tokens[6];
+                                new_load.values.push_back(tokens[4]);
+                                new_load.values.push_back(tokens[5]);
+                                new_load.values.push_back(tokens[6]);
                                 if(tokens[7] != "load" || tokens[8] != "id")
                                 {
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
@@ -3191,7 +3192,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
                                     return false;
                                 }
-                                new_load.scale = tokens[4];
+                                new_load.values.push_back(tokens[4]);
                                 if(tokens[5] != "load" || tokens[6] != "id")
                                 {
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
@@ -3207,9 +3208,9 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     return false;
                                 }
                                 new_load.app_type = "body";
-                                new_load.x = tokens[1];
-                                new_load.y = tokens[2];
-                                new_load.z = tokens[3];
+                                new_load.values.push_back(tokens[1]);
+                                new_load.values.push_back(tokens[2]);
+                                new_load.values.push_back(tokens[3]);
                                 if(tokens[4] != "load" || tokens[5] != "id")
                                 {
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
@@ -3234,7 +3235,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     }
                                     new_load.app_id = tokens[3];
                                     // tokens[4] is "value"
-                                    new_load.scale = tokens[5];
+                                    new_load.values.push_back(tokens[5]);
                                     if(tokens[6] != "load" || tokens[7] != "id")
                                     {
                                         std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
@@ -3267,9 +3268,9 @@ bool XMLGenerator::parseLoads(std::istream &fin)
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
                                     return false;
                                 }
-                                new_load.x = tokens[4];
-                                new_load.y = tokens[5];
-                                new_load.z = tokens[6];
+                                new_load.values.push_back(tokens[4]);
+                                new_load.values.push_back(tokens[5]);
+                                new_load.values.push_back(tokens[6]);
                                 if(tokens[7] != "load" || tokens[8] != "id")
                                 {
                                     std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";

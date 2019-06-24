@@ -28,9 +28,8 @@ struct Load
     std::string type; // traction, heat flux, force, pressure ...
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id
-    std::string x, y, z; // direction vector
+    std::vector<std::string> values; // direction vector
     std::string dof;  // x, y, or z
-    std::string scale; // magnitude
     std::string load_id;
 };
 
