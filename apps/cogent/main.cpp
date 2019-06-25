@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
             std::vector<Cogent::Vector3D<RealType>::Type> V(nFaceVerts);
             for(int inode=0; inode<nFaceVerts; inode++){
               V[inode].clear();
-              for(uint idim=0; idim<numDims; idim++)
+              for(int idim=0; idim<numDims; idim++)
                 V[inode](idim) = hexCoordCon(hextopo.side[iside].node[inode],idim);
             }
 
