@@ -68,8 +68,12 @@ public:
     //! Directive to cache any criterion specific data once trial control is accepted.
     virtual void cacheData() = 0;
 
-    //! Allows save continuation on application based parameters.
-    virtual void updateProblem() { return; }
+    /*! Allows save continuation on application based parameters.
+     *  Parameters:
+     *    \param In
+     *          aControl: control variables
+     * **/
+    virtual void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) { return; }
 
     /*!
      * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}

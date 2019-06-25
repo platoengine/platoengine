@@ -80,8 +80,9 @@ public:
 
     /******************************************************************************//**
      * @brief Allows application to perform continuation on app-based parameters.
+     * @param [in] aControl design variables
      **********************************************************************************/
-    virtual void updateProblem() = 0;
+    virtual void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) = 0;
 
     /******************************************************************************//**
      * @brief Update optimization problem's data, e.g. objective and constraint(s)

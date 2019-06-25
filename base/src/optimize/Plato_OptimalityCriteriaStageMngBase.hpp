@@ -73,7 +73,7 @@ public:
     /******************************************************************************//**
      * @brief Enables update/continuation of application specific parameters
     **********************************************************************************/
-    virtual void updateProblem() = 0;
+    virtual void updateProblem(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng) = 0;
 
     /******************************************************************************//**
     * @brief Directive to update optimization specific data once the trial control is accepted.

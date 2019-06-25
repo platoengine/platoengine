@@ -395,7 +395,8 @@ private:
                     (mNumOuterIterDone % mUpdateProblemFrequency) == static_cast<OrdinalType>(0);
             if(tIsIterationToUpdate == true)
             {
-                mStageMng->updateProblem();
+                const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
+                mStageMng->updateProblem(tCurrentControl);
             }
         }
     }

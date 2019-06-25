@@ -455,12 +455,10 @@ public:
             if(tIsIterationToUpdate)
             {
                 tDidUpdate = true;
-
                 // invoke advance continuation
-                aStageMng.updateProblem();
-
-                // invoke new objective
                 const Plato::MultiVector<ScalarType, OrdinalType> & tMidControl = aStepMng.getMidPointControls();
+                aStageMng.updateProblem(tMidControl);
+                // invoke new objective
                 const ScalarType tNewMidObjectiveFunctionValue = aStageMng.evaluateObjective(tMidControl);
                 aStepMng.setMidPointObjectiveFunctionValue(tNewMidObjectiveFunctionValue);
             }

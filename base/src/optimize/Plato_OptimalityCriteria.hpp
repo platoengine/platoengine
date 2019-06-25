@@ -278,7 +278,7 @@ private:
         }
 
         // invoke advance continuation
-        mStageMng->updateProblem();
+        mStageMng->updateProblem(*mDataMng);
     }
 
     /******************************************************************************//**

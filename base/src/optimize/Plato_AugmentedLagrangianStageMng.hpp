@@ -516,19 +516,20 @@ public:
     }
 
     /*******************************************************************************//**
-     * @brief Directive to update problem for each criterion (e.g. application based continuation).
+     * @brief Directive to update app-specific parameters (e.g. continuation).
+     * @param [in] aControl optimization variables
     ***********************************************************************************/
-    void updateProblem()
+    void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         // Communicate user that criteria specific data can be cached since trial control was accepted
         assert(mObjective.get() != nullptr);
-        mObjective->updateProblem();
+        mObjective->updateProblem(aControl);
 
         const OrdinalType tNumConstraints = mConstraints->size();
         assert(tNumConstraints == mConstraints->size());
         for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
         {
-            (*mConstraints)[tConstraintIndex].updateProblem();
+            (*mConstraints)[tConstraintIndex].updateProblem(aControl);
         }
     }
 

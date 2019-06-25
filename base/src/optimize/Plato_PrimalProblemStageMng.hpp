@@ -208,15 +208,17 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Allows save continuation on app-based parameters.
+     * @brief Update app-specific parameters given a new trial set of design variables.
+     * For instance, it enables continuation on app-specific parameters.
+     * @param [in] aControl current controls (i.e. optimization variables)
      **********************************************************************************/
-    void updateProblem()
+    void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
-        mObjective->updateProblem();
+        mObjective->updateProblem(aControl);
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            (*mConstraints)[tIndex].updateProblem();
+            (*mConstraints)[tIndex].updateProblem(aControl);
         }
     }
 
