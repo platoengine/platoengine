@@ -317,7 +317,7 @@ static PyObject *
 expy_get_coord(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_dim, num_nodes, error;
+  int exoid, num_dim, num_nodes;
   double *x_coor, *y_coor, *z_coor;
 
   PyObject *px_coor, *py_coor, *pz_coor;
@@ -331,7 +331,7 @@ expy_get_coord(PyObject *self, PyObject *args)
     z_coor = (double*) calloc(num_nodes, sizeof(double));
   else z_coor = NULL;
 
-  error = ex_get_coord(exoid, x_coor, y_coor, z_coor);
+  ex_get_coord(exoid, x_coor, y_coor, z_coor);
 
   px_coor = list_from_double_array(x_coor, num_nodes);
   py_coor = list_from_double_array(y_coor, num_nodes);
@@ -397,12 +397,11 @@ expy_get_var_param(PyObject *self, PyObject *args)
   int exoid;
   char* var_type;
   int num_vars;
-  int return_status;
   
   if(!PyArg_ParseTuple(args, "is", &exoid, &var_type) )
     return NULL;
   
-  return_status = ex_get_var_param(exoid, var_type, &num_vars);
+  ex_get_var_param(exoid, var_type, &num_vars);
   
   return Py_BuildValue("i",num_vars);
 
@@ -432,7 +431,7 @@ static PyObject *
 expy_get_elem_var(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_elems, error;
+  int exoid, num_elems;
   int time_step, var_index, block_id;
   double *values;
   PyObject *pyvalues;
@@ -443,7 +442,7 @@ expy_get_elem_var(PyObject *self, PyObject *args)
 
   values = (double*) calloc(num_elems, sizeof(double));
 
-  error = ex_get_elem_var(exoid, time_step, var_index, block_id, num_elems, values);
+  ex_get_elem_var(exoid, time_step, var_index, block_id, num_elems, values);
 
   pyvalues = list_from_double_array(values, num_elems);
 
@@ -456,7 +455,7 @@ static PyObject *
 expy_get_nodal_var(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_nodes, error;
+  int exoid, num_nodes;
   int time_step, var_index;
   double *values;
   PyObject *pyvalues;
@@ -467,7 +466,7 @@ expy_get_nodal_var(PyObject *self, PyObject *args)
 
   values = (double*) calloc(num_nodes, sizeof(double));
 
-  error = ex_get_nodal_var(exoid, time_step, var_index, num_nodes, values);
+  ex_get_nodal_var(exoid, time_step, var_index, num_nodes, values);
 
   pyvalues = list_from_double_array(values, num_nodes);
 
@@ -480,7 +479,7 @@ static PyObject *
 expy_get_node_num_map(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_nodes, error;
+  int exoid, num_nodes;
   int *map;
   PyObject *pymap;
 
@@ -489,7 +488,7 @@ expy_get_node_num_map(PyObject *self, PyObject *args)
 
   map = (int*) calloc(num_nodes, sizeof(int));
 
-  error = ex_get_node_num_map(exoid, map);
+  ex_get_node_num_map(exoid, map);
 
   pymap = list_from_int_array(map, num_nodes);
 
@@ -502,7 +501,7 @@ static PyObject *
 expy_get_elem_num_map(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_elems, error;
+  int exoid, num_elems;
   int *map;
   PyObject *pymap;
 
@@ -511,7 +510,7 @@ expy_get_elem_num_map(PyObject *self, PyObject *args)
 
   map = (int*) calloc(num_elems, sizeof(int));
 
-  error = ex_get_elem_num_map(exoid, map);
+  ex_get_elem_num_map(exoid, map);
 
   pymap = list_from_int_array(map, num_elems);
 
@@ -525,7 +524,7 @@ static PyObject *
 expy_get_all_times(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, num_times, error;
+  int exoid, num_times;
   double *times;
   float fdum;
   char cdum[1];
@@ -534,11 +533,11 @@ expy_get_all_times(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "i:get_all_times", &exoid) )
     return NULL;
 
-  error = ex_inquire(exoid, EX_INQ_TIME, &num_times, &fdum, cdum);
+  ex_inquire(exoid, EX_INQ_TIME, &num_times, &fdum, cdum);
 
   times = (double*) calloc(num_times, sizeof(double));
 
-  error = ex_get_all_times(exoid, times);
+  ex_get_all_times(exoid, times);
 
   pytimes = list_from_double_array(times, num_times);
 
@@ -554,7 +553,6 @@ expy_get_var_names(PyObject *self, PyObject *args)
   int i, exoid;
   char* var_type;
   int num_vars;
-  int return_status;
   char** names;
   PyObject *pynames;
 
@@ -567,7 +565,7 @@ expy_get_var_names(PyObject *self, PyObject *args)
         for(i=0;i<num_vars;i++) 
           names[i] = (char*)calloc((MAX_STR_LENGTH+1),sizeof(char));
   
-  return_status = ex_get_var_names(exoid, var_type, num_vars, names);
+  ex_get_var_names(exoid, var_type, num_vars, names);
 
         for(i=0;i<num_vars;i++) 
           PyList_SetItem(pynames,i,Py_BuildValue("s",names[i]));
@@ -693,7 +691,7 @@ expy_get_coord_names(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
   int i;
-  int exoid, num_dim, return_value;
+  int exoid, num_dim;
   char *coord_names[3];
   PyObject *names[3];
 
@@ -703,7 +701,7 @@ expy_get_coord_names(PyObject *self, PyObject *args)
   for(i=0;i<num_dim;i++) 
     coord_names[i] = (char*)calloc((MAX_STR_LENGTH+1),sizeof(char));
 
-  return_value = ex_get_coord_names(exoid, coord_names);
+  ex_get_coord_names(exoid, coord_names);
 
   for(i=0;i<num_dim;i++) 
     names[i] = Py_BuildValue("s",coord_names[i]);
@@ -745,7 +743,7 @@ static PyObject *
 expy_get_elem_block(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, elem_blk_id;
+  int exoid, elem_blk_id;
   char elem_type[MAX_STR_LENGTH+1];
   int num_elem_this_blk, num_nodes_per_elem, num_attr;
   PyObject *py_elem_type;
@@ -754,7 +752,7 @@ expy_get_elem_block(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "ii", &exoid, &elem_blk_id))
     return NULL;
 
-  return_status = ex_get_elem_block(exoid, elem_blk_id, elem_type,
+  ex_get_elem_block(exoid, elem_blk_id, elem_type,
                     &num_elem_this_blk, &num_nodes_per_elem, &num_attr);
 
   py_elem_type = Py_BuildValue("s",elem_type);
@@ -796,7 +794,7 @@ expy_get_elem_blk_ids(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
  
-  int exoid, return_status, num_elem_blks;
+  int exoid, num_elem_blks;
   int *elem_blk_ids;
   PyObject *py_elem_blk_ids;
 
@@ -805,7 +803,7 @@ expy_get_elem_blk_ids(PyObject *self, PyObject *args)
 
   elem_blk_ids = (int*)calloc(num_elem_blks,sizeof(int));
 
-  return_status = ex_get_elem_blk_ids(exoid, elem_blk_ids);
+  ex_get_elem_blk_ids(exoid, elem_blk_ids);
 
   py_elem_blk_ids = list_from_int_array(elem_blk_ids, num_elem_blks);
 
@@ -819,7 +817,7 @@ expy_get_elem_conn(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
   int *connect;
-  int exoid, return_status, elem_blk_id, num_elem_this_blk, num_nodes_per_elem;
+  int exoid, elem_blk_id, num_elem_this_blk, num_nodes_per_elem;
   int connect_length;
   PyObject *py_connect;
 
@@ -830,7 +828,7 @@ expy_get_elem_conn(PyObject *self, PyObject *args)
   connect_length = num_elem_this_blk*num_nodes_per_elem;
   connect = (int*)calloc(connect_length,sizeof(int));
 
-  return_status = ex_get_elem_conn(exoid, elem_blk_id, connect);
+  ex_get_elem_conn(exoid, elem_blk_id, connect);
 
   py_connect = list_from_int_array(connect, connect_length);
   free(connect);
@@ -891,13 +889,13 @@ static PyObject *
 expy_get_node_set_param(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, node_set_id, num_nodes_in_set, num_dist_in_set;
+  int exoid, node_set_id, num_nodes_in_set, num_dist_in_set;
   PyObject *py_num_nodes_in_set, *py_num_dist_in_set;
 
   if(!PyArg_ParseTuple(args, "ii", &exoid, &node_set_id))
     return NULL;
 
-  return_status = ex_get_node_set_param(exoid, node_set_id, &num_nodes_in_set,
+  ex_get_node_set_param(exoid, node_set_id, &num_nodes_in_set,
                                               &num_dist_in_set);
 
   py_num_nodes_in_set = Py_BuildValue("i",num_nodes_in_set);
@@ -911,7 +909,7 @@ static PyObject *
 expy_get_node_set_ids(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, num_node_sets;
+  int exoid, num_node_sets;
   int *node_set_ids;
   PyObject *py_node_set_ids;
 
@@ -920,7 +918,7 @@ expy_get_node_set_ids(PyObject *self, PyObject *args)
 
   node_set_ids = (int*)calloc(num_node_sets, sizeof(int));
 
-  return_status = ex_get_node_set_ids(exoid, node_set_ids);
+  ex_get_node_set_ids(exoid, node_set_ids);
 
         py_node_set_ids = list_from_int_array(node_set_ids, num_node_sets);
         free(node_set_ids);
@@ -955,7 +953,7 @@ static PyObject *
 expy_get_node_set(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, node_set_id, num_nodes_in_set;
+  int exoid, node_set_id, num_nodes_in_set;
   int* node_set_node_list;
   PyObject *py_node_set_node_list;
 
@@ -964,7 +962,7 @@ expy_get_node_set(PyObject *self, PyObject *args)
          
   node_set_node_list = (int*)calloc(num_nodes_in_set,sizeof(int));
 
-  return_status = ex_get_node_set(exoid, node_set_id, node_set_node_list);
+  ex_get_node_set(exoid, node_set_id, node_set_node_list);
 
   py_node_set_node_list = list_from_int_array(node_set_node_list, num_nodes_in_set);
   free(node_set_node_list);
@@ -978,13 +976,13 @@ static PyObject *
 expy_get_side_set_param(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, side_set_id, num_side_in_set, num_dist_in_set;
+  int exoid, side_set_id, num_side_in_set, num_dist_in_set;
   PyObject *py_num_side_in_set, *py_num_dist_in_set;
 
   if(!PyArg_ParseTuple(args, "ii", &exoid, &side_set_id))
     return NULL;
 
-  return_status = ex_get_side_set_param(exoid, side_set_id, &num_side_in_set,
+  ex_get_side_set_param(exoid, side_set_id, &num_side_in_set,
                                         &num_dist_in_set);
 
   py_num_side_in_set = Py_BuildValue("i",num_side_in_set);
@@ -998,7 +996,7 @@ static PyObject *
 expy_get_side_set_ids(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, num_side_sets;
+  int exoid, num_side_sets;
   int *side_set_ids;
   PyObject *py_side_set_ids;
 
@@ -1007,7 +1005,7 @@ expy_get_side_set_ids(PyObject *self, PyObject *args)
 
   side_set_ids = (int*)calloc(num_side_sets, sizeof(int));
 
-  return_status = ex_get_side_set_ids(exoid, side_set_ids);
+  ex_get_side_set_ids(exoid, side_set_ids);
 
   py_side_set_ids = list_from_int_array(side_set_ids, num_side_sets);
   free(side_set_ids);
@@ -1021,7 +1019,7 @@ static PyObject *
 expy_get_side_set(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
-  int exoid, return_status, side_set_id, num_sides_in_set;
+  int exoid, side_set_id, num_sides_in_set;
   int *side_set_elem_list, *side_set_side_list;
   PyObject *py_side_set_elem_list, *py_side_set_side_list;
 
@@ -1031,7 +1029,7 @@ expy_get_side_set(PyObject *self, PyObject *args)
   side_set_elem_list = (int*)calloc(num_sides_in_set,sizeof(int));
   side_set_side_list = (int*)calloc(num_sides_in_set,sizeof(int));
 
-  return_status = ex_get_side_set(exoid, side_set_id, side_set_elem_list,
+  ex_get_side_set(exoid, side_set_id, side_set_elem_list,
                                   side_set_side_list);
 
   py_side_set_elem_list = list_from_int_array(side_set_elem_list, num_sides_in_set);
