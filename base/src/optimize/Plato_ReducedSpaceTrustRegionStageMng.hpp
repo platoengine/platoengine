@@ -200,15 +200,19 @@ public:
         }
     }
 
-    //! Directive to update problem for each criterion.
-    void updateProblem()
+    /******************************************************************************//**
+     * Directive to update app-specific parameters. It also enables the opportunity to
+     * perform continuation on these parameters.
+     * @param [in] aControl design variables
+    ***********************************************************************************/
+    void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         // Communicate user that criteria specific data can be cached since trial control was accepted
         assert(mObjectives.get() != nullptr);
         const OrdinalType tNumObjectives = mObjectives->size();
         for(OrdinalType tObjectiveIndex = 0; tObjectiveIndex < tNumObjectives; tObjectiveIndex++)
         {
-            (*mObjectives)[tObjectiveIndex].updateProblem();
+            (*mObjectives)[tObjectiveIndex].updateProblem(aControl);
         }
     }
 

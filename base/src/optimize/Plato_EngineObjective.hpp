@@ -118,10 +118,11 @@ public:
     }
 
     //! Directive to update problem criterion.
-    void updateProblem()
+    void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mInterface != nullptr);
 
+        this->setControls(aControl);
         // Tell performers to cache the state
         std::vector<std::string> tStageNames;
         std::string tUpdateProblemName = mEngineInputData.getUpdateProblemStageName();
@@ -146,15 +147,9 @@ public:
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mInterface != nullptr);
+
         // ********* Set view to each control vector entry ********* //
-        const OrdinalType tControlVectorIndex = 0;
-        assert(aControl[tControlVectorIndex].size() == mControl.size());
-        for(OrdinalType tControlIndex = 0; tControlIndex < mControl.size(); tControlIndex++)
-        {
-            mControl[tControlIndex] = aControl(tControlVectorIndex, tControlIndex);
-        }
-        std::string tControlName = mEngineInputData.getControlName(tControlVectorIndex);
-        mParameterList->set(tControlName, mControl.data());
+        this->setControls(aControl);
 
         // ********* Set view to objective function value ********* //
         ScalarType tObjectiveValue = 0;
@@ -186,14 +181,7 @@ public:
     {
         assert(mInterface != nullptr);
         // ********* Set view to each control vector entry ********* //
-        const OrdinalType tControlVectorIndex = 0;
-        assert(aControl[tControlVectorIndex].size() == mControl.size());
-        for(OrdinalType tControlIndex = 0; tControlIndex < mControl.size(); tControlIndex++)
-        {
-            mControl[tControlIndex] = aControl(tControlVectorIndex, tControlIndex);
-        }
-        std::string tControlName = mEngineInputData.getControlName(tControlVectorIndex);
-        mParameterList->set(tControlName, mControl.data());
+        this->setControls(aControl);
 
         // ********* Set view to each output vector ********* //
         std::string tGradientOutputName = mEngineInputData.getObjectiveGradientOutputName();
@@ -256,6 +244,11 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Copy elements in standard vector into a Plato multi-vector
+     * @param [in] aFrom input data
+     * @param [out] aTo output data
+    **********************************************************************************/
     void copy(const std::vector<ScalarType> & aFrom, Plato::MultiVector<ScalarType, OrdinalType> & aTo)
     {
         const OrdinalType tVectorIndex = 0;
@@ -267,15 +260,32 @@ private:
         }
     }
 
-private:
-    std::vector<ScalarType> mVector;
-    std::vector<ScalarType> mControl;
-    std::vector<ScalarType> mGradient;
-    std::vector<ScalarType> mHessianTimesVector;
+    /******************************************************************************//**
+     * @brief Make control variables available to the parameter list
+     * @param [in] aControl design variables
+    **********************************************************************************/
+    void setControls(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    {
+        // ********* Set view to each control vector entry ********* //
+        const OrdinalType tControlVectorIndex = 0;
+        assert(aControl[tControlVectorIndex].size() == mControl.size());
+        for(OrdinalType tControlIndex = 0; tControlIndex < mControl.size(); tControlIndex++)
+        {
+            mControl[tControlIndex] = aControl(tControlVectorIndex, tControlIndex);
+        }
+        std::string tControlName = mEngineInputData.getControlName(tControlVectorIndex);
+        mParameterList->set(tControlName, mControl.data());
+    }
 
-    Plato::Interface* mInterface;
-    Plato::OptimizerEngineStageData mEngineInputData;
-    std::shared_ptr<Teuchos::ParameterList> mParameterList;
+private:
+    std::vector<ScalarType> mVector; /*!< local copy of a descent direction vector */
+    std::vector<ScalarType> mControl; /*!< local copy of the control variables */
+    std::vector<ScalarType> mGradient; /*!< local copy of the gradient vector */
+    std::vector<ScalarType> mHessianTimesVector; /*!< local copy of the application of a vector to the Hessian */
+
+    Plato::Interface* mInterface; /*!< PLATO Engine interface */
+    Plato::OptimizerEngineStageData mEngineInputData; /*!< Parsed input data */
+    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< parameter list with data to be communicated through the PLATO Engine interface */
 
 private:
     EngineObjective(const Plato::EngineObjective<ScalarType, OrdinalType>&);

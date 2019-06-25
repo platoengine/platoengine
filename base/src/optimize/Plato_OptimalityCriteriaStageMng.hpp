@@ -120,11 +120,13 @@ public:
 
     /******************************************************************************//**
      * @brief Update application specific data. Enables continuation on these parameters
+     * @param [in] aDataMng optimization data manager
     **********************************************************************************/
-    void updateProblem()
+    void updateProblem(Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
     {
         assert(mObjective.get() != nullptr);
-        mObjective->updateProblem();
+        const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();
+        mObjective->updateProblem(tControl);
     }
 
     /******************************************************************************//**
