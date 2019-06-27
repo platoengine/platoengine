@@ -52,6 +52,7 @@
 #include <memory>
 
 #include "Plato_Types.hpp"
+#include "Plato_Macros.hpp"
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_LinearAlgebra.hpp"
@@ -537,8 +538,7 @@ public:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         try
@@ -550,8 +550,7 @@ public:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = aDataMng.getCurrentControl();

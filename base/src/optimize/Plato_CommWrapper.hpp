@@ -53,6 +53,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 
 namespace Plato
@@ -159,17 +160,13 @@ public:
         {
             if( mIsCommSet == false )
             {
-                throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+                throw std::invalid_argument("NULL MPI COMMUNICATOR DETECTED.\n");
             }
             MPI_Comm_size(mComm, &tWorldSize);
         }
         catch(const std::invalid_argument & tError)
         {
-            std::ostringstream tMessage;
-            tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-                     << __LINE__ << " ******** \n\n";
-            tMessage << tError.what();
-            std::cout << tMessage.str().c_str() << std::flush;
+            PRINTERR(tError.what());
             throw tError;
         }
         return (tWorldSize);
@@ -186,17 +183,13 @@ public:
         {
             if( mIsCommSet == false )
             {
-                throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+                throw std::invalid_argument("NULL MPI COMMUNICATOR DETECTED.\n");
             }
             MPI_Comm_rank(mComm, &tMyProcID);
         }
         catch(const std::invalid_argument & tError)
         {
-            std::ostringstream tMessage;
-            tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-                     << __LINE__ << " ******** \n\n";
-            tMessage << tError.what();
-            std::cout << tMessage.str().c_str() << std::flush;
+            PRINTERR(tError.what());
             throw tError;
         }
         return (tMyProcID);

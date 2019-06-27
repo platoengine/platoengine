@@ -55,6 +55,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "Plato_Macros.hpp"
 #include "Plato_CommWrapper.hpp"
 #include "Plato_MultiVector.hpp"
 
@@ -89,14 +90,14 @@ void check_dimension(const OrdinalType & aDimOne, const OrdinalType & aDimTwo)
     {
         if(aDimOne != aDimTwo)
         {
-            std::ostringstream tMessage;
-            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! APP DIM = " << aDimOne << " AND SHARED DATA DIM = "
-                    << aDimTwo << ". ABORT! ******** \n\n";
-            throw std::invalid_argument(tMessage.str().c_str());
+            std::string tMessage = "DIMENSION MISMATCH! APP DIM = " + std::to_string(aDimOne)
+                                   + " AND SHARED DATA DIM = " + std::to_string(aDimTwo) + ".\n";
+            throw std::invalid_argument(tMessage);
         }
     }
     catch(const std::invalid_argument & tErrorMsg)
     {
+        PRINTERR(tErrorMsg.what());
         throw tErrorMsg;
     }
 }
@@ -113,11 +114,12 @@ inline void check_null_comm(const Plato::CommWrapper & aCommWrapper)
     {
         if(aCommWrapper.isCommInitialized() == false)
         {
-            throw std::invalid_argument("\n\n ******** MESSAGE: NULL MPI COMMUNICATOR. ABORT! ******** \n\n");
+            throw std::invalid_argument("NULL MPI COMMUNICATOR DETECTED.\n");
         }
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
+        PRINTERR(tErrorMsg.what());
         throw tErrorMsg;
     }
 }
@@ -137,14 +139,14 @@ inline void check_dimension_mismatch(const Plato::Vector<ScalarType, OrdinalType
     {
         if(aVecOne.size() != aVecTwo.size())
         {
-            std::ostringstream tMessage;
-            tMessage << "\n\n ******** MESSAGE: DIMENSION MISMATCH! VEC_1 DIM = " << aVecOne.size() << " AND VEC_2 DIM = "
-            << aVecTwo.size() << ". ABORT! ******** \n\n";
-            throw std::invalid_argument(tMessage.str().c_str());
+            std::string tMessage = "DIMENSION MISMATCH! VEC_1 DIM = " + std::to_string(aVecOne.size())
+                                   + " AND VEC_2 DIM = " + std::to_string(aVecTwo.size()) + ".\n";
+            throw std::invalid_argument(tMessage);
         }
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
+        PRINTERR(tErrorMsg.what());
         throw tErrorMsg;
     }
 }
@@ -167,13 +169,11 @@ inline void checkBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aLow
         OrdinalType tNumUpperBoundVectors = aUpperBounds.getNumVectors();
         if(tNumLowerBoundVectors != tNumUpperBoundVectors)
         {
-            std::ostringstream tErrorMessage;
-            tErrorMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-            << __LINE__ << ", MESSAGE: DIMENSION MISMATCH BETWEEN UPPER BOUND AND LOWER BOUND MULTIVECTORS."
-            << " UPPER BOUND MULTIVECTOR HAS SIZE = " << tNumUpperBoundVectors << " AND LOWER BOUND MULTIVECTOR HAS SIZE = "
-            << tNumLowerBoundVectors
-            << ". PLEASE MAKE SURE LOWER AND UPPER BOUND MULTIVECTORS DIMENSIONS MATCH. ABORT! ******** \n\n";
-            throw std::invalid_argument(tErrorMessage.str().c_str());
+            std::string tErrorMessage = std::string("DIMENSION MISMATCH BETWEEN UPPER BOUND AND LOWER BOUND MULTIVECTORS.")
+                    + " UPPER BOUND MULTIVECTOR HAS SIZE = " + std::to_string(tNumUpperBoundVectors)
+                    + " AND LOWER BOUND MULTIVECTOR HAS SIZE = " + std::to_string(tNumLowerBoundVectors)
+                    + ". MAKE SURE THAT THE LOWER AND UPPER BOUND MULTIVECTORS DIMENSIONS MATCH.\n";
+            throw std::invalid_argument(tErrorMessage);
         }
 
         OrdinalType tNumVectors = aLowerBounds.getNumVectors();
@@ -184,12 +184,12 @@ inline void checkBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aLow
 
             if(tLowerBoundLength != tUpperBoundLength)
             {
-                std::ostringstream tErrorMessage;
-                tErrorMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-                << ", LINE: " << __LINE__ << ", MESSAGE: DIMENSION MISMATCH BETWEEN UPPER BOUND AND LOWER BOUND VECTORS WITH INDEX = "
-                << tVectorIndex << ". UPPER BOUND VECTOR HAS LENGTH = " << tUpperBoundLength << " AND LOWER BOUND VECTOR HAS LENGTH = "
-                << tLowerBoundLength << ". PLEASE MAKE SURE LOWER AND UPPER BOUND VECTORS DIMENSIONS MATCH. ABORT! ******** \n\n";
-                throw std::invalid_argument(tErrorMessage.str().c_str());
+                std::string tErrorMessage =
+                        std::string("DIMENSION MISMATCH BETWEEN UPPER BOUND AND LOWER BOUND VECTORS WITH INDEX = ") + std::to_string(tVectorIndex)
+                        + ". UPPER BOUND VECTOR HAS LENGTH = " + std::to_string(tUpperBoundLength)
+                        + " AND LOWER BOUND VECTOR HAS LENGTH = " + std::to_string(tLowerBoundLength)
+                        + ". MAKE SURE THAT THE DIMENSIONS OF THE LOWER AND UPPER BOUND VECTORS MATCH.\n";
+                throw std::invalid_argument(tErrorMessage);
             }
 
             OrdinalType tNumElements = aLowerBounds[tVectorIndex].size();
@@ -199,14 +199,13 @@ inline void checkBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aLow
             {
                 if(tLowerBounds[tElemIndex] > tUpperBounds[tElemIndex])
                 {
-                    std::ostringstream tErrorMessage;
-                    tErrorMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-                    << ", LINE: " << __LINE__ << ", MESSAGE: LOWER BOUND EXCEEDS UPPER BOUND." << " LOWER_BOUND("
-                    << tVectorIndex << "," << tElemIndex << ") = " << tLowerBounds[tElemIndex] << " AND UPPER_BOUND("
-                    << tVectorIndex << "," << tElemIndex << ") = " << tUpperBounds[tElemIndex]
-                    << ". THE FIRST ENTRY DENOTES THE VECTOR INDEX"
-                    << " AND THE SECOND ENTRY DENOTES THE ELEMENT INDEX. ABORT! ******** \n\n";
-                    throw std::invalid_argument(tErrorMessage.str().c_str());
+                    std::string tErrorMessage = std::string("LOWER BOUND VALUE EXCEEDS UPPER BOUND VALUE.")
+                            + " LOWER_BOUND(" + std::to_string(tVectorIndex) + "," + std::to_string(tElemIndex) + ") = "
+                            + std::to_string(tLowerBounds[tElemIndex]) + " AND UPPER_BOUND("
+                            + std::to_string(tVectorIndex) + "," + std::to_string(tElemIndex) + ") = "
+                            + std::to_string(tUpperBounds[tElemIndex]) + ". THE FIRST ENTRY DENOTES THE VECTOR INDEX"
+                            + " AND THE SECOND ENTRY DENOTES THE ELEMENT INDEX.\n";
+                    throw std::invalid_argument(tErrorMessage);
                 }
             }
         }
@@ -215,7 +214,7 @@ inline void checkBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aLow
     {
         if(aPrintMessage == true)
         {
-            std::cout << tErrorMsg.what() << std::flush;
+            PRINTERR(tErrorMsg.what());
         }
         throw tErrorMsg;
     }
@@ -227,17 +226,15 @@ inline void checkInitialGuessIsSet(const bool & aIsSet, bool aPrintMessage = fal
     {
         if(aIsSet == false)
         {
-            std::ostringstream tErrorMsg;
-            tErrorMsg << "\n\n ******* ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-                      << __LINE__ << ", MESSAGE: USER DID NOT DEFINE INITIAL GUESS. ABORT! ******\n\n";
-            throw std::invalid_argument(tErrorMsg.str().c_str());
+            std::string tErrorMsg("USER DID NOT DEFINE INITIAL GUESS.\n");
+            throw std::invalid_argument(tErrorMsg);
         }
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
         if(aPrintMessage == true)
         {
-            std::cout << tErrorMsg.what() << std::flush;
+            PRINTERR(tErrorMsg.what());
         }
         throw tErrorMsg;
     }
@@ -257,7 +254,7 @@ inline void checkInitialGuess(const Plato::MultiVector<ScalarType, OrdinalType> 
     {
         if(aPrintMessage == true)
         {
-            std::cout << tErrorMsg.what() << std::flush;
+            PRINTERR(tErrorMsg.what());
         }
         throw tErrorMsg;
     }
@@ -268,20 +265,18 @@ inline void checkInitialGuess(const Plato::MultiVector<ScalarType, OrdinalType> 
         OrdinalType tNumLowerBoundVectors = aLowerBounds.getNumVectors();
         if(tNumControlVectors != tNumLowerBoundVectors)
         {
-            std::ostringstream tErrorMessage;
-            tErrorMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-            << __LINE__ << ", MESSAGE: DIMENSION MISMATCH BETWEEN CONTROL AND BOUND MULTIVECTORS."
-            << " CONTROL MULTIVECTOR HAS SIZE = " << tNumControlVectors << " AND BOUND CONTAINERS HAVE SIZE = "
-            << tNumLowerBoundVectors
-            << ". PLEASE MAKE SURE CONTROL AND AND BOUND MULTIVECTORS DIMENSIONS MATCH. ABORT! ******** \n\n";
-            throw std::invalid_argument(tErrorMessage.str().c_str());
+            std::string tErrorMessage = std::string("DIMENSION MISMATCH BETWEEN CONTROL AND BOUND MULTIVECTORS.")
+                    + " CONTROL MULTIVECTOR HAS SIZE = " + std::to_string(tNumControlVectors)
+                    + " AND BOUND CONTAINERS HAVE SIZE = " + std::to_string(tNumLowerBoundVectors)
+                    + ". PLEASE MAKE SURE CONTROL AND AND BOUND MULTIVECTORS DIMENSIONS MATCH.\n";
+            throw std::invalid_argument(tErrorMessage);
         }
     }
     catch(const std::invalid_argument & tErrorMsg)
     {
         if(aPrintMessage == true)
         {
-            std::cout << tErrorMsg.what() << std::flush;
+            PRINTERR(tErrorMsg.what());
         }
         throw tErrorMsg;
     }

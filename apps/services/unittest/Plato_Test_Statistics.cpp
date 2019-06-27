@@ -376,13 +376,11 @@ TEST(PlatoTest, ComputeMonteCarloDataErrors)
 
     Plato::StandardVector<double> tCDF_1(tStatsInputs.mNumSamples);
     Plato::StandardVector<double> tSamples_1(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1), std::runtime_error);
 
     Plato::StandardVector<double> tCDF_2(tStatsInputs.mNumSamples + 1);
     Plato::StandardVector<double> tSamples_2(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2), std::runtime_error);
 }
 
 TEST(PlatoTest, ComputeMonteCarloData)
@@ -417,8 +415,7 @@ TEST(PlatoTest, ComputeUnnormalizedSamples)
 
     Plato::StandardVector<double> VecOne(tValues);
     Plato::StandardVector<double> VecTwo(9 /* size */);
-    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo), std::runtime_error);
 
     Plato::StandardVector<double> tNormalized(tValues);
     Plato::StandardVector<double> tUnnormalized(tValues.size());
@@ -472,24 +469,20 @@ TEST(PlatoTest, OutputCumulativeDistributionFunctionErrors)
     Plato::StandardVector<double> tSamples(tSize);
     Plato::StandardVector<double> tSromCDF(tSize);
     Plato::StandardVector<double> tMonteCarloCDF(tSize);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples), std::runtime_error);
     tCommWrapper.useDefaultComm();
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tSromCDF_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tSamples_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tMonteCarloCDF_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 }
 

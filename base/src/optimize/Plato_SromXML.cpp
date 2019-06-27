@@ -59,7 +59,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
     std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;
     if(Plato::expand_random_and_deterministic_loads(aInput.mLoads, tRandomLoads, tDeterministicLoads) == false)
     {
-        PRNTERR("FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n");
+        PRINTERR("FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n");
         return (false);
     }
 
@@ -70,7 +70,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
         {
             std::ostringstream tMsg;
             tMsg << "FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
-            PRNTERR(tMsg.str().c_str());
+            PRINTERR(tMsg.str().c_str());
             return (false);
         }
 
@@ -79,7 +79,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
         {
             std::ostringstream tMsg;
             tMsg << "FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
-            PRNTERR(tMsg.str().c_str());
+            PRINTERR(tMsg.str().c_str());
             return (false);
         }
 
@@ -88,7 +88,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
         {
             std::ostringstream tMsg;
             tMsg << "FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
-            PRNTERR(tMsg.str().c_str());
+            PRINTERR(tMsg.str().c_str());
             return (false);
         }
 
@@ -96,14 +96,14 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
         {
             std::ostringstream tMsg;
             tMsg << "FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
-            PRNTERR(tMsg.str().c_str());
+            PRINTERR(tMsg.str().c_str());
             return (false);
         }
     }
 
     if(Plato::generate_output_random_load_cases(tDeterministicLoads, aOutput.mLoadCases) == false)
     {
-        PRNTERR("FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n");
+        PRINTERR("FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n");
         return (false);
     }
 

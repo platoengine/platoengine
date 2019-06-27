@@ -51,6 +51,7 @@
 
 #include <cmath>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Distribution.hpp"
 
 #define _MATH_DEFINES_DEFINED
@@ -143,9 +144,8 @@ inline ScalarType normal_moment(const OrdinalType & aOrder, const ScalarType & a
         }
         default:
         {
-            std::cout << "\n\n********** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
-            << ", MSG: Moment of Order = " << aOrder << " is NOT Defined **********\n\n";
-            std::abort();
+            std::string tError = std::string("MOMENT OF ORDER = ") + std::to_string(aOrder) + " IS NOT DEFINED.\n";
+            THROWERR(tError)
             break;
         }
     }

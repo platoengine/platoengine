@@ -47,6 +47,7 @@
 
 #pragma once
 
+#include "Plato_Macros.hpp"
 #include "Plato_SromUtilis.hpp"
 #include "Plato_SromObjective.hpp"
 #include "Plato_SromConstraint.hpp"
@@ -74,10 +75,9 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
 {
     try
     {
-        const bool tPrintErrorMsg = true;
         Plato::StandardVector<ScalarType, OrdinalType> tMonteCarloCDF(aSromInputs.mNumMonteCarloSamples + 1);
         Plato::StandardVector<ScalarType, OrdinalType> tNormalizedMonteCarloSamples(aSromInputs.mNumMonteCarloSamples + 1);
-        Plato::compute_monte_carlo_data(aSromInputs.mNumMonteCarloSamples, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF, tPrintErrorMsg);
+        Plato::compute_monte_carlo_data(aSromInputs.mNumMonteCarloSamples, aDistribution, tNormalizedMonteCarloSamples, tMonteCarloCDF);
 
         const OrdinalType t_SAMPLES_VEC_INDEX = 0;
         const OrdinalType t_PROBABILITIES_VEC_INDEX = 1;
@@ -87,11 +87,11 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
         Plato::StandardVector<ScalarType, OrdinalType> tUnnormalizedMonteCarloSamples(aSromInputs.mNumMonteCarloSamples + 1);
         Plato::compute_unnormalized_samples(aSromInputs.mLowerBound, aSromInputs.mUpperBound, tNormalizedMonteCarloSamples, tUnnormalizedMonteCarloSamples);
 
-        Plato::output_cumulative_distribution_function(aCommWrapper, tSromCDF, tMonteCarloCDF, tUnnormalizedMonteCarloSamples, tPrintErrorMsg);
+        Plato::output_cumulative_distribution_function(aCommWrapper, tSromCDF, tMonteCarloCDF, tUnnormalizedMonteCarloSamples);
     }
     catch(const std::invalid_argument & tErrorMsg)
     {
-        throw tErrorMsg;
+        THROWERR(tErrorMsg.what())
     }
 }
 
@@ -161,13 +161,11 @@ inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plat
  * @param [in] aCommWrapper distributed memory communicator wrapper
  * @param [in] aSromDiagnostics SROM problem diagnostics
  * @param [in] aOutputsKSAL optimizer diagnostics
- * @param [in] aPrint flag use to enable terminal output (default = false)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
                                     const Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
-                                    const Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType>& aOutputsKSAL,
-                                    bool aPrint = false)
+                                    const Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType>& aOutputsKSAL)
 {
     try
     {
@@ -175,15 +173,7 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\nFUNCTION: " << __PRETTY_FUNCTION__ << "\nLINE: "
-                 << __LINE__ << "\n ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     if(aCommWrapper.myProcID() == 0)
@@ -268,9 +258,7 @@ inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>&
     {
         // transfer to output data structure
         Plato::output_cdf_comparison(aInputsKSAL.mCommWrapper, *tOutputsKSAL.mSolution, *tDistribution, aStatsInputs);
-
-        const bool tPrintErrorMsg = true;
-        Plato::output_srom_diagnostics(aInputsKSAL.mCommWrapper, aSromDiagnostics, tOutputsKSAL, tPrintErrorMsg);
+        Plato::output_srom_diagnostics(aInputsKSAL.mCommWrapper, aSromDiagnostics, tOutputsKSAL);
     }
 }
 // function solve_uncertainty

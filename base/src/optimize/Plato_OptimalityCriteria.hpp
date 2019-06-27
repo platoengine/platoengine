@@ -306,7 +306,7 @@ private:
                 mOutputData.mConstraints.clear();
                 mOutputData.mConstraints.resize(tNumConstraints);
                 mOutputStream.open("plato_optimality_criteria_diagnostics.txt");
-                Plato::print_oc_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::print_oc_diagnostics_header(mOutputData, mOutputStream);
             }
         }
     }
@@ -358,8 +358,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         Plato::MemorySpace::type_t tMemorySpace = mDataMng->getMemorySpace();
@@ -451,8 +450,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         try
@@ -464,8 +462,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();
@@ -503,7 +500,7 @@ private:
                 mOutputData.mConstraints[tIndex] = mDataMng->getCurrentConstraintValues(tIndex);
             }
 
-            Plato::print_oc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::print_oc_diagnostics(mOutputData, mOutputStream);
         }
     }
 
