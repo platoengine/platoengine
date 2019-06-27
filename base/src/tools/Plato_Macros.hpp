@@ -51,11 +51,17 @@
 namespace Plato
 {
 
-#define PRNTERR(msg) \
-        std::cout<< "\nFILE: " << __FILE__ \
-        << "\nFUNCTION: " << __PRETTY_FUNCTION__ \
-        << "\nLINE:" << __LINE__ \
-        << "\nMESSAGE: " << msg;
+#define PRINTERR(msg) \
+        std::cout << std::string("\nFILE: ") + __FILE__ \
+        + std::string("\nFUNCTION: ") + __PRETTY_FUNCTION__ \
+        + std::string("\nLINE:") + std::to_string(__LINE__) \
+        + std::string("\nMESSAGE: ") + msg;
+
+#define THROWERR(msg) \
+        throw std::runtime_error(std::string("\nFILE: ") + __FILE__ \
+        + std::string("\nFUNCTION: ") + __PRETTY_FUNCTION__ \
+        + std::string("\nLINE:") + std::to_string(__LINE__) \
+        + std::string("\nMESSAGE: ") + msg);
 
 }
 // namespace Plato
