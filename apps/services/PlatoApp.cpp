@@ -68,100 +68,6 @@
 #include "Plato_OperationsUtilities.hpp"
 
 /******************************************************************************/
-void PlatoApp::SetLowerBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
-}
-
-/******************************************************************************/
-PlatoApp::SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
-  Plato::LocalOp(p)
-/******************************************************************************/
-{
-    mInputName = "Lower Bound Value";
-    auto tInputData = Plato::Get::InputData(aNode,"Input");
-    mInputName = Plato::Get::String(tInputData, "ArgumentName");
-
-    mOutputName = "Lower Bound Vector";
-    auto tOutputNode = Plato::Get::InputData(aNode,"Output");
-    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
-    mOutputSize = Plato::Get::Int(tOutputNode,"Size");
-
-    auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
-    mFixedBlocks = Plato::Get::Ints(tFixedBlocksNode, "Index");
-
-    auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
-    mFixedSidesets = Plato::Get::Ints(tFixedSidesetsNode, "Index");
-
-    auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
-    mFixedNodesets = Plato::Get::Ints(tFixedNodesetsNode, "Index");
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
-}
-
-/******************************************************************************/
-void PlatoApp::SetLowerBounds::operator()()
-/******************************************************************************/
-{
-    // Get the output field
-    double* toData; 
-    int tDataLen=0;
-
-    if( mOutputLayout == Plato::data::layout_t::SCALAR_FIELD ){
-      auto& tOutputField = *(mPlatoApp->getNodeField(mOutputName));
-      tOutputField.ExtractView(&toData);
-      tDataLen = tOutputField.MyLength();
-    } else 
-    if( mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD ){
-      throw Plato::ParsingException("ELEMENT_FIELD not implemented for SetLowerBounds operation");
-    } else
-    if( mOutputLayout == Plato::data::layout_t::SCALAR ){
-      auto tOutputScalar = mPlatoApp->getValue(mOutputName);
-      tDataLen = mOutputSize;
-      tOutputScalar->resize(tDataLen);
-      toData = tOutputScalar->data();
-    }
-
-    // Get incoming global lower bound specified by user
-    std::vector<double>* tInData = mPlatoApp->getValue(mInputName);
-    double tLowerBoundIn = (*tInData)[0];
-
-    // Set specified value for the user
-    for(int i=0; i<tDataLen; i++)
-    {
-        toData[i] = tLowerBoundIn;
-    }
-
-    // Now update values based on fixed entities
-    if(mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD )
-    {
-        LightMP* tLightMP = mPlatoApp->getLightMP();
-        const int dofsPerNode_1D = 1;
-        SystemContainer* sysGraph_1D = new SystemContainer(tLightMP->getMesh(), dofsPerNode_1D, tLightMP->getInput());
-        std::vector<VarIndex> single_value(1u);
-        DataContainer* dataContainer = tLightMP->getDataContainer();
-        bool plottable = true;
-        single_value[0] = dataContainer->registerVariable(RealType, "lowerBoundWorking", NODE, !plottable);
-        DistributedVector* dist_vector = new DistributedVector(sysGraph_1D, single_value);
-
-        double tBoundaryValue = .5001;
-        double tUpperValue = 1.;
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedBlocks(toData,
-                                                                  mFixedBlocks,
-                                                                  tLowerBoundIn,
-                                                                  tBoundaryValue,
-                                                                  tUpperValue,
-                                                                  *dist_vector);
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedSidesets(toData, mFixedSidesets, tBoundaryValue);
-        mPlatoApp->mMeshServices->updateLowerBoundsForFixedNodesets(toData, mFixedNodesets, tBoundaryValue);
-
-        delete dist_vector;
-        delete sysGraph_1D;
-    }
-}
-
-/******************************************************************************/
 void PlatoApp::EnforceBounds::getArguments(std::vector<Plato::LocalArg>& localArgs)
 /******************************************************************************/
 {
@@ -204,82 +110,6 @@ void PlatoApp::EnforceBounds::operator()()
     {
         tOutputData[tIndex] = std::max(tOutputData[tIndex], tLowerBoundData[tIndex]);
         tOutputData[tIndex] = std::min(tOutputData[tIndex], tUpperBoundData[tIndex]);
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::SetUpperBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
-}
-
-/******************************************************************************/
-PlatoApp::SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-  Plato::LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    mInputName = "Upper Bound Value";
-    auto tInputData = Plato::Get::InputData(aNode,"Input");
-    mInputName = Plato::Get::String(tInputData, "ArgumentName");
-
-    mOutputName = "Upper Bound Vector";
-    auto tOutputNode = Plato::Get::InputData(aNode,"Output");
-    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
-    mOutputSize = Plato::Get::Int(tOutputNode,"Size");
-
-    auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
-    mFixedBlocks = Plato::Get::Ints(tFixedBlocksNode, "Index");
-
-    auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
-    mFixedSidesets = Plato::Get::Ints(tFixedSidesetsNode, "Index");
-
-    auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
-    mFixedNodesets = Plato::Get::Ints(tFixedNodesetsNode, "Index");
-
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
-}
-
-/******************************************************************************/
-void PlatoApp::SetUpperBounds::operator()()
-/******************************************************************************/
-{
-    // Get the output field
-    double* toData; 
-    int tDataLen=0;
-
-    if( mOutputLayout == Plato::data::layout_t::SCALAR_FIELD ){
-      auto& tOutputField = *(mPlatoApp->getNodeField(mOutputName));
-      tOutputField.ExtractView(&toData);
-      tDataLen = tOutputField.MyLength();
-    } else 
-    if( mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD ){
-      throw Plato::ParsingException("ELEMENT_FIELD not implemented for SetUpperBounds operation");
-    } else
-    if( mOutputLayout == Plato::data::layout_t::SCALAR ){
-      auto tOutputScalar = mPlatoApp->getValue(mOutputName);
-      tDataLen = mOutputSize;
-      tOutputScalar->resize(tDataLen);
-      toData = tOutputScalar->data();
-    }
-
-    // Get incoming global Upper bound specified by user
-    std::vector<double>* tInData = mPlatoApp->getValue(mInputName);
-    double tUpperBoundIn = (*tInData)[0];
-
-    // Set specified value for the user
-    for(int i=0; i<tDataLen; i++)
-    {
-        toData[i] = tUpperBoundIn;
-    }
-    // Now update values based on fixed entities
-    if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD )
-    {
-        double tValue = -0.001;
-        mPlatoApp->mMeshServices->updateUpperBoundsForFixedBlocks(toData, mFixedBlocks, tValue);
-        mPlatoApp->mMeshServices->updateUpperBoundsForFixedSidesets(toData, mFixedSidesets, tValue);
-        mPlatoApp->mMeshServices->updateUpperBoundsForFixedNodesets(toData, mFixedNodesets, tValue);
     }
 }
 
@@ -905,140 +735,6 @@ void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &fi
 }
 
 /******************************************************************************/
-PlatoApp::ComputeVolume::ComputeVolume(PlatoApp* p, Plato::InputData& node) :
-        Plato::LocalOp(p),
-        m_topologyName("Topology"),
-        m_volumeName("Volume"),
-        m_gradientName("Volume Gradient"),
-        m_penaltyModel(nullptr)
-/******************************************************************************/
-{
-  Plato::PenaltyModelFactory pmFactory;
-  m_penaltyModel = pmFactory.create(node);
-}
-
-/******************************************************************************/
-PlatoApp::ComputeVolume::~ComputeVolume()
-/******************************************************************************/
-{
-    if(m_penaltyModel)
-    {
-        delete m_penaltyModel;
-        m_penaltyModel = nullptr;
-    }
-}
-
-
-PlatoApp::UpdateProblem::UpdateProblem(PlatoApp* p, Plato::InputData& node) :
-        Plato::LocalOp(p)
-{
-}
-PlatoApp::UpdateProblem::~UpdateProblem()
-{
-}
-void PlatoApp::UpdateProblem::operator()()
-{
-    // update filter
-    Plato::AbstractFilter* filter = mPlatoApp->getFilter();
-    filter->advance_continuation();
-
-    // update other portions of the problem here
-}
-void PlatoApp::UpdateProblem::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-{
-}
-
-/******************************************************************************/
-PlatoApp::Filter::Filter(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        Plato::LocalOp(aPlatoApp),
-        mFilter(),
-        m_input_toFilter_name(),
-        m_input_baseField_name(),
-        m_output_fromFilter_name(),
-        m_isGradient()
-/******************************************************************************/
-{
-    // retrieve filter
-    mFilter = mPlatoApp->getFilter();
-
-    // decide names differently
-    m_isGradient = Plato::Get::Bool(aNode, "Gradient");
-    if(m_isGradient)
-    {
-        m_input_toFilter_name = "Gradient";
-        m_input_baseField_name = "Field";
-        m_output_fromFilter_name = "Filtered Gradient";
-    }
-    else
-    {
-        m_input_toFilter_name = "Field";
-        m_input_baseField_name = "";
-        m_output_fromFilter_name = "Filtered Field";
-    }
-}
-
-/******************************************************************************/
-PlatoApp::Filter::~Filter()
-/******************************************************************************/
-{
-    mFilter = nullptr;
-}
-
-/******************************************************************************/
-void PlatoApp::Filter::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_toFilter_name});
-    if(!m_input_baseField_name.empty())
-    {
-        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_baseField_name});
-    }
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_output_fromFilter_name});
-}
-
-/******************************************************************************/
-void PlatoApp::Filter::operator()()
-/******************************************************************************/
-{
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
-    }
-
-    // get input data
-    auto infield = mPlatoApp->getNodeField(m_input_toFilter_name);
-    Real* input_field;
-    infield->ExtractView(&input_field);
-    auto outfield = mPlatoApp->getNodeField(m_output_fromFilter_name);
-    Real* output_field;
-    outfield->ExtractView(&output_field);
-
-    // copy input field to output
-    const int length = infield->MyLength();
-    std::copy(input_field, input_field + length, output_field);
-
-    if(m_isGradient)
-    {
-        // get base field for gradient application
-        auto basefield = mPlatoApp->getNodeField(m_input_baseField_name);
-        Real* base_field;
-        basefield->ExtractView(&base_field);
-
-        mFilter->apply_on_gradient(length, base_field, output_field);
-    }
-    else
-    {
-        mFilter->apply_on_field(length, output_field);
-    }
-
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->end_partition();
-    }
-}
-
-
-/******************************************************************************/
 PlatoApp::Roughness::Roughness(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
         Plato::LocalOp(aPlatoAppp),
         m_topologyName("Topology"),
@@ -1255,7 +951,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("SetLowerBounds");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new SetLowerBounds(this, tNode);
+                mOperationMap[tStrName] = new Plato::SetLowerBounds(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1263,7 +959,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("SetUpperBounds");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new SetUpperBounds(this, tNode);
+                mOperationMap[tStrName] = new Plato::SetUpperBounds(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1271,7 +967,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("Filter");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new Filter(this, tNode);
+                mOperationMap[tStrName] = new Plato::Filter(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1359,7 +1055,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("ComputeVolume");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new ComputeVolume(this, tNode);
+                mOperationMap[tStrName] = new Plato::ComputeVolume(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1367,7 +1063,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("DesignVolume");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new DesignVolume(this, tNode);
+                mOperationMap[tStrName] = new Plato::DesignVolume(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1383,7 +1079,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("Update Problem");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new UpdateProblem(this, tNode);
+                mOperationMap[tStrName] = new Plato::UpdateProblem(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1528,33 +1224,6 @@ PlatoApp::~PlatoApp()
 }
 
 /******************************************************************************/
-void PlatoApp::DesignVolume::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_outValueName,/*length=*/1});
-}
-
-/******************************************************************************/
-PlatoApp::DesignVolume::DesignVolume(PlatoApp* p, Plato::InputData& node) : 
-  Plato::LocalOp(p), m_outValueName("Design Volume")
-/******************************************************************************/
-{
-
-}
-
-/******************************************************************************/
-void PlatoApp::DesignVolume::operator()()
-/******************************************************************************/
-{
-  double tVolume = mPlatoApp->mMeshServices->getTotalVolume();
-  std::vector<double>* tData = mPlatoApp->getValue(m_outValueName);
-
-  (*tData)[0] = tVolume;
-
-  return;
-}
-
-/******************************************************************************/
 std::vector<double>* PlatoApp::getValue(const std::string & aName)
 /******************************************************************************/
 {
@@ -1598,37 +1267,6 @@ void PlatoApp::throwParsingException(const std::string & aName, const std::map<s
 }
 
 /******************************************************************************/
-void PlatoApp::ComputeVolume::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_volumeName,/*length=*/1});
-    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
-}
-
-/******************************************************************************/
-void PlatoApp::ComputeVolume::operator()()
-/******************************************************************************/
-{
-  // Input:  Topology
-  // Output: Volume, Volume Gradient
-
-  // get local topology
-  auto& tTopology = *(mPlatoApp->getNodeField(m_topologyName));
-
-  // get local volume
-  std::vector<double>* tData = mPlatoApp->getValue(m_volumeName);
-  double& tVolumeValue = (*tData)[0];
-
-  // get local gradient
-  auto& tVolumeGradient = *(mPlatoApp->getNodeField(m_gradientName));
-
-  mPlatoApp->mMeshServices->getCurrentVolume(tTopology, tVolumeValue, tVolumeGradient);
-
-  return;
-}
-
-/******************************************************************************/
 LightMP* PlatoApp::getLightMP()
 /******************************************************************************/
 {
@@ -1657,6 +1295,27 @@ Plato::AbstractFilter* PlatoApp::getFilter()
         }
     }
     return mFilter;
+}
+
+/******************************************************************************/
+SystemContainer* PlatoApp::getSysGraph()
+/******************************************************************************/
+{
+    return mSysGraph;
+}
+
+/******************************************************************************/
+MeshServices* PlatoApp::getMeshServices()
+/******************************************************************************/
+{
+    return mMeshServices;
+}
+
+/******************************************************************************/
+Plato::TimersTree* PlatoApp::getTimersTree()
+/******************************************************************************/
+{
+    return mTimersTree;
 }
 
 /******************************************************************************/

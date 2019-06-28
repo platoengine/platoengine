@@ -182,15 +182,9 @@ public:
     LightMP* getLightMP();
     const MPI_Comm& getComm() const;
     Plato::AbstractFilter* getFilter();
-
-    SystemContainer* getSysGraph()
-    {
-        return mSysGraph;
-    }
-    Plato::TimersTree* getTimersTree()
-    {
-        return mTimersTree;
-    }
+    SystemContainer* getSysGraph();
+    MeshServices* getMeshServices();
+    Plato::TimersTree* getTimersTree();
     DistributedVector* getNodeField(const std::string & aName);
     std::vector<double>* getValue(const std::string & aName);
 
@@ -423,22 +417,6 @@ private:
 
 #endif
 
-    class Filter : public Plato::LocalOp
-    {
-    public:
-        Filter(PlatoApp* aPlatoApp, Plato::InputData& aNode);
-        ~Filter();
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
-    private:
-        Plato::AbstractFilter* mFilter;
-        std::string m_input_toFilter_name;
-        std::string m_input_baseField_name;
-        std::string m_output_fromFilter_name;
-        bool m_isGradient;
-    };
-    friend class Filter;
-
     class Roughness : public Plato::LocalOp
     {
     public:
@@ -511,80 +489,6 @@ private:
         std::string mTopologyFieldName;
     };
     friend class EnforceBounds;
-
-    class SetLowerBounds : public Plato::LocalOp
-    {
-    public:
-        SetLowerBounds(PlatoApp* p, Plato::InputData& node);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& localArgs);
-    private:
-        std::string mOutputName;
-        Plato::data::layout_t mOutputLayout;
-        int mOutputSize;
-        std::string mInputName;
-        std::string mDiscretization;
-        std::vector<int> mFixedBlocks;
-        std::vector<int> mFixedSidesets;
-        std::vector<int> mFixedNodesets;
-    };
-    friend class SetLowerBounds;
-
-    class SetUpperBounds : public Plato::LocalOp
-    {
-    public:
-        SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aXML_Node);
-
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
-    private:
-        std::string mOutputName;
-        std::string mDiscretization;
-        Plato::data::layout_t mOutputLayout;
-        int mOutputSize;
-        std::string mInputName;
-        std::vector<int> mFixedBlocks;
-        std::vector<int> mFixedSidesets;
-        std::vector<int> mFixedNodesets;
-    };
-    friend class SetUpperBounds;
-
-    class DesignVolume : public Plato::LocalOp
-    {
-    public:
-        DesignVolume(PlatoApp* p, Plato::InputData& node);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
-    private:
-        std::string m_outValueName;
-    };
-    friend class DesignVolume;
-
-    class ComputeVolume : public Plato::LocalOp
-    {
-    public:
-        ComputeVolume(PlatoApp* p, Plato::InputData& node);
-        ~ComputeVolume();
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
-    private:
-        std::string m_topologyName;
-        std::string m_volumeName;
-        std::string m_gradientName;
-        Plato::PenaltyModel* m_penaltyModel;
-    };
-    friend class ComputeVolume;
-
-    class UpdateProblem : public Plato::LocalOp
-    {
-    public:
-        UpdateProblem(PlatoApp* p, Plato::InputData& node);
-        ~UpdateProblem();
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
-    private:
-    };
-    friend class UpdateProblem;
 
     void createLocalData(Plato::LocalOp* op);
     void createLocalData(Plato::LocalArg arg);

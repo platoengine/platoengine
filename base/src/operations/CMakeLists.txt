@@ -2,7 +2,13 @@ set(LIB_NAMES)
 
 set(LIB_NAME Operations)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
-set(${LIB_NAME}_SOURCES Plato_Aggregator.cpp
+set(${LIB_NAME}_SOURCES Plato_Filter.cpp
+                        Plato_Aggregator.cpp
+                        Plato_DesignVolume.cpp
+                        Plato_UpdateProblem.cpp
+                        Plato_ComputeVolume.cpp
+                        Plato_SetUpperBounds.cpp
+                        Plato_SetLowerBounds.cpp
                         Plato_PlatoMainOutput.cpp
                         Plato_WriteGlobalValue.cpp
                         Plato_OperationsUtilities.cpp
@@ -12,7 +18,13 @@ set(${LIB_NAME}_SOURCES Plato_Aggregator.cpp
                         Plato_ReciprocateObjectiveGradient.cpp
                         )
                         
-set(${LIB_NAME}_HEADERS Plato_Aggregator.hpp
+set(${LIB_NAME}_HEADERS Plato_Filter.hpp
+                        Plato_Aggregator.hpp
+                        Plato_DesignVolume.hpp
+                        Plato_UpdateProblem.hpp
+                        Plato_ComputeVolume.hpp
+                        Plato_SetUpperBounds.hpp
+                        Plato_SetLowerBounds.hpp
                         Plato_LocalOperation.hpp
                         Plato_PlatoMainOutput.hpp
                         Plato_WriteGlobalValue.hpp
