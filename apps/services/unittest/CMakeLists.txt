@@ -89,6 +89,7 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/tpls/gtest/include
                        ${CMAKE_SOURCE_DIR}/base/src/Filters
                        ${CMAKE_SOURCE_DIR}/base/src/tools
                        ${CMAKE_SOURCE_DIR}/base/src/optimize
+                       ${CMAKE_SOURCE_DIR}/base/src/operations
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/AbstractInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/ActivationFunction

@@ -1,6 +1,7 @@
 set(PLATO_INCLUDES ${PLATO_INCLUDES} 
   ${CMAKE_SOURCE_DIR}/base/src/analyze
   ${CMAKE_SOURCE_DIR}/base/src/optimize
+  ${CMAKE_SOURCE_DIR}/base/src/operations
   ${CMAKE_SOURCE_DIR}/base/src/tools
   ${CMAKE_SOURCE_DIR}/base/src/proxy
   ${CMAKE_SOURCE_DIR}/base/src/models

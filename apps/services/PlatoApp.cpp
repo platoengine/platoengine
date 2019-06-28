@@ -43,10 +43,6 @@
 #include <sstream>
 #include <fstream>
 
-#ifdef ENABLE_ISO
-#include "STKExtract.hpp"
-#endif
-
 #ifdef STK_ENABLED
 #include "stk_mesh/base/MetaData.hpp"
 #include <stk_mesh/base/Field.hpp>
@@ -68,40 +64,20 @@
 #include "types.hpp"
 #include "matrix_container.hpp"
 
-/******************************************************************************/
-/*! \brief Get the layout.
- *  If no 'Layout' keyword is given in the input xml_node (aNode), 
- *  aDefaultLayout is returned.
- */
-/******************************************************************************/
-Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout);
+#include "Plato_Operations_incl.hpp"
+#include "Plato_OperationsUtilities.hpp"
 
 /******************************************************************************/
-/*! \brief Get the layout.
- *  If no 'Layout' keyword is given in the input xml_node (aNode), 
- *  a Plato::ParsingException is thrown.
- */
-/******************************************************************************/
-Plato::data::layout_t getLayout(Plato::InputData& aNode);
-
-/******************************************************************************/
-/*! \brief Get the layout.
- *  Returns the layout_t with the given name.
- */
-/******************************************************************************/
-Plato::data::layout_t getLayout(const std::string & aLayoutStr);
-
-/******************************************************************************/
-void PlatoApp::SetLowerBounds::getArguments(std::vector<LocalArg> & aLocalArgs)
+void PlatoApp::SetLowerBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName, mOutputSize));
+    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
+    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
 }
 
 /******************************************************************************/
 PlatoApp::SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
-  LocalOp(p)
+  Plato::LocalOp(p)
 /******************************************************************************/
 {
     mInputName = "Lower Bound Value";
@@ -110,7 +86,7 @@ PlatoApp::SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
 
     mOutputName = "Lower Bound Vector";
     auto tOutputNode = Plato::Get::InputData(aNode,"Output");
-    mOutputLayout = getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
     mOutputSize = Plato::Get::Int(tOutputNode,"Size");
 
     auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
@@ -186,17 +162,17 @@ void PlatoApp::SetLowerBounds::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::EnforceBounds::getArguments(std::vector<LocalArg>& localArgs)
+void PlatoApp::EnforceBounds::getArguments(std::vector<Plato::LocalArg>& localArgs)
 /******************************************************************************/
 {
-    localArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR_FIELD, mLowerBoundVectorFieldName));
-    localArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR_FIELD, mUpperBoundVectorFieldName));
-    localArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR_FIELD, mTopologyFieldName));
+    localArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR_FIELD, mLowerBoundVectorFieldName));
+    localArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR_FIELD, mUpperBoundVectorFieldName));
+    localArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR_FIELD, mTopologyFieldName));
 }
 
 /******************************************************************************/
 PlatoApp::EnforceBounds::EnforceBounds(PlatoApp* p, Plato::InputData& node) :
-  LocalOp(p)
+  Plato::LocalOp(p)
 /******************************************************************************/
 {
     mLowerBoundVectorFieldName = "Lower Bound Vector";
@@ -232,16 +208,16 @@ void PlatoApp::EnforceBounds::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::SetUpperBounds::getArguments(std::vector<LocalArg> & aLocalArgs)
+void PlatoApp::SetUpperBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(LocalArg(mOutputLayout, mOutputName, mOutputSize));
+    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
+    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
 }
 
 /******************************************************************************/
 PlatoApp::SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-  LocalOp(aPlatoApp)
+  Plato::LocalOp(aPlatoApp)
 /******************************************************************************/
 {
     mInputName = "Upper Bound Value";
@@ -250,7 +226,7 @@ PlatoApp::SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& 
 
     mOutputName = "Upper Bound Vector";
     auto tOutputNode = Plato::Get::InputData(aNode,"Output");
-    mOutputLayout = getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
     mOutputSize = Plato::Get::Int(tOutputNode,"Size");
 
     auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
@@ -308,15 +284,15 @@ void PlatoApp::SetUpperBounds::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::InitializeField::getArguments(std::vector<LocalArg> & aLocalArgs)
+void PlatoApp::InitializeField::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg(mOutputLayout, m_outputFieldName));
+    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, m_outputFieldName));
 }
 
 /******************************************************************************/
 PlatoApp::InitializeField::InitializeField(PlatoApp* aPlatoApp, Plato::InputData & aNode) :
-  LocalOp(aPlatoApp), m_outputFieldName("Initialized Field")
+  Plato::LocalOp(aPlatoApp), m_outputFieldName("Initialized Field")
 /******************************************************************************/
 {
   m_strMethod = Plato::Get::String(aNode, "Method");
@@ -437,7 +413,7 @@ PlatoApp::InitializeField::InitializeField(PlatoApp* aPlatoApp, Plato::InputData
   }
 
   Plato::InputData tOutputNode = Plato::Get::InputData(aNode,"Output");
-  mOutputLayout = getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+  mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
 }
 
 /******************************************************************************/
@@ -930,7 +906,7 @@ void PlatoApp::InitializeField::getInitialValuesForRestart(DistributedVector &fi
 
 /******************************************************************************/
 PlatoApp::ComputeVolume::ComputeVolume(PlatoApp* p, Plato::InputData& node) :
-        LocalOp(p),
+        Plato::LocalOp(p),
         m_topologyName("Topology"),
         m_volumeName("Volume"),
         m_gradientName("Volume Gradient"),
@@ -954,7 +930,7 @@ PlatoApp::ComputeVolume::~ComputeVolume()
 
 
 PlatoApp::UpdateProblem::UpdateProblem(PlatoApp* p, Plato::InputData& node) :
-        LocalOp(p)
+        Plato::LocalOp(p)
 {
 }
 PlatoApp::UpdateProblem::~UpdateProblem()
@@ -968,134 +944,13 @@ void PlatoApp::UpdateProblem::operator()()
 
     // update other portions of the problem here
 }
-void PlatoApp::UpdateProblem::getArguments(std::vector<LocalArg>& aLocalArgs)
-{
-}
-
-/******************************************************************************/
-Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
-/******************************************************************************/
-{
-    auto layoutStr = Plato::Get::String(aNode, "Layout");
-    Plato::data::layout_t layout = aDefaultLayout;
-    if(!layoutStr.empty())
-    {
-        layout = getLayout(layoutStr);
-    }
-    return layout;
-}
-
-/******************************************************************************/
-Plato::data::layout_t 
-getLayout(Plato::InputData& aNode)
-/******************************************************************************/
-{
-  auto layoutStr = Plato::Get::String(aNode, "Layout");
-  if( layoutStr.empty() )
-  {
-    Plato::ParsingException pe(" PlatoApp: required 'Layout' not specified");
-    throw pe;
-  } 
-  return getLayout(layoutStr);
-}
-
-/******************************************************************************/
-Plato::data::layout_t getLayout(const std::string & aLayoutStr)
-/******************************************************************************/
-{
-
-    Plato::data::layout_t tLayout;
-    if(aLayoutStr == "Nodal Field")
-    {
-        tLayout = Plato::data::layout_t::SCALAR_FIELD;
-    }
-    else if(aLayoutStr == "Element Field")
-    {
-        tLayout = Plato::data::layout_t::ELEMENT_FIELD;
-    }
-    else if(aLayoutStr == "Value" || aLayoutStr == "Global" || aLayoutStr == "Scalar" )
-    {
-        tLayout = Plato::data::layout_t::SCALAR;
-    }
-    else
-    {
-        std::stringstream tError;
-        tError << std::endl << " PlatoApp: " << std::endl;
-        tError << "   Unknown layout specified: '" << aLayoutStr << "'" << std::endl;
-        Plato::ParsingException tParsingException(tError.str());
-        throw tParsingException;
-    }
-    return tLayout;
-}
-
-
-/******************************************************************************/
-PlatoApp::PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    bool tPlotTable = true;
-    for(auto tInputNode : aNode.getByName<Plato::InputData>("Input"))
-    {
-        std::string tName = Plato::Get::String(tInputNode, "ArgumentName");
-        auto tInputLayout = getLayout(tInputNode, /*default=*/Plato::data::layout_t::SCALAR_FIELD);
-        m_outputData.push_back(LocalArg {tInputLayout, tName, 0, tPlotTable});
-    }
-
-    // configure iso surface output
-    //
-    m_outputFrequency = 5;
-    m_outputMethod = 2;
-    mWriteRestart   = Plato::Get::Bool(aNode, "WriteRestart");
-    Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
-    if(aNode.size<std::string>("OutputFrequency"))
-        m_outputFrequency = Plato::Get::Int(aNode, "OutputFrequency");
-    if(tSurfaceExtractionNode.size<std::string>("OutputMethod"))
-    {
-        std::string tMethod = Plato::Get::String(tSurfaceExtractionNode, "OutputMethod");
-        if(!tMethod.compare("epu"))
-        {
-            m_outputMethod = 2;
-        }
-        else if(!tMethod.compare("parallel write"))
-        {
-            m_outputMethod = 1;
-        }
-        else
-        {
-            m_outputMethod = 2;
-        }
-    }
-
-#ifdef ENABLE_ISO
-    iso::STKExtract ex;
-    auto tAvailableFormats = ex.availableFormats();
-    for(auto tNode : tSurfaceExtractionNode.getByName<Plato::InputData>("Output"))
-    {
-        auto tFormat = Plato::Get::String(tNode, "Format", /*asUpperCase=*/ true);
-        if( std::count(tAvailableFormats.begin(), tAvailableFormats.end(), tFormat) )
-        {
-            mRequestedFormats.push_back(tFormat);
-        }
-    }
-#endif
-
-    mDiscretization = Plato::Get::String( tSurfaceExtractionNode, "Discretization" );
-    std::string tDefaultName("Iteration");
-    mBaseName       = Plato::Get::String( tSurfaceExtractionNode, "BaseName", tDefaultName );
-
-    mAppendIterationCount = Plato::Get::Bool  ( tSurfaceExtractionNode, "AppendIterationCount", /*defaultValue=*/ true );
-}
-
-/******************************************************************************/
-PlatoApp::PlatoMainOutput::~PlatoMainOutput()
-/******************************************************************************/
+void PlatoApp::UpdateProblem::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 {
 }
 
 /******************************************************************************/
 PlatoApp::Filter::Filter(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp),
+        Plato::LocalOp(aPlatoApp),
         mFilter(),
         m_input_toFilter_name(),
         m_input_baseField_name(),
@@ -1130,15 +985,15 @@ PlatoApp::Filter::~Filter()
 }
 
 /******************************************************************************/
-void PlatoApp::Filter::getArguments(std::vector<LocalArg>& aLocalArgs)
+void PlatoApp::Filter::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_toFilter_name});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_toFilter_name});
     if(!m_input_baseField_name.empty())
     {
-        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_baseField_name});
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_input_baseField_name});
     }
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_output_fromFilter_name});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_output_fromFilter_name});
 }
 
 /******************************************************************************/
@@ -1185,7 +1040,7 @@ void PlatoApp::Filter::operator()()
 
 /******************************************************************************/
 PlatoApp::Roughness::Roughness(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
-        LocalOp(aPlatoAppp),
+        Plato::LocalOp(aPlatoAppp),
         m_topologyName("Topology"),
         m_roughnessName("Roughness"),
         m_gradientName("Roughness Gradient")
@@ -1216,17 +1071,17 @@ void PlatoApp::Roughness::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::Roughness::getArguments(std::vector<LocalArg>& aLocalArgs)
+void PlatoApp::Roughness::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_roughnessName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_roughnessName,/*length=*/1});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
 }
 
 /******************************************************************************/
 PlatoApp::InitializeValues::InitializeValues(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
-        LocalOp(aPlatoAppp),
+        Plato::LocalOp(aPlatoAppp),
         m_valuesName("Values")
 {
     m_value = Plato::Get::Double(aNode, "InitialValue");
@@ -1244,177 +1099,10 @@ void PlatoApp::InitializeValues::operator()()
 }
 
 /******************************************************************************/
-void PlatoApp::InitializeValues::getArguments(std::vector<LocalArg>& aLocalArgs)
+void PlatoApp::InitializeValues::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_valuesName,/*length=*/1});
-}
-
-/******************************************************************************/
-PlatoApp::NormalizeObjectiveValue::NormalizeObjectiveValue(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tOutputNode = Plato::Get::InputData(aNode,"Output");
-    if( aNode.size<Plato::InputData>("Output") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveValue: more than one Output specified.");
-    }
-    m_outputName = Plato::Get::String(tOutputNode, "ArgumentName");
-
-    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
-    if( aNode.size<Plato::InputData>("Input") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveValue: more than one Input specified.");
-    }
-    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
-
-    Plato::InputData tRefValNode = Plato::Get::InputData(aNode,"ReferenceValue");
-    if( aNode.size<Plato::InputData>("ReferenceValue") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveGradient: more than one ReferenceValue specified.");
-    }
-    m_refValName = Plato::Get::String(tRefValNode, "ArgumentName");
-}
-
-/******************************************************************************/
-PlatoApp::NormalizeObjectiveGradient::NormalizeObjectiveGradient(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tOutputNode = Plato::Get::InputData(aNode,"Output");
-    if( aNode.size<Plato::InputData>("Output") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveGradient: more than one Output specified.");
-    }
-    m_outputName = Plato::Get::String(tOutputNode, "ArgumentName");
-
-    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
-    if( aNode.size<Plato::InputData>("Input") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveGradient: more than one Input specified.");
-    }
-    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
-
-    Plato::InputData tRefValNode = Plato::Get::InputData(aNode,"ReferenceValue");
-    if( aNode.size<Plato::InputData>("ReferenceValue") > 1 )
-    {
-        throw ParsingException("PlatoApp::NormalizeObjectiveGradient: more than one ReferenceValue specified.");
-    }
-    m_refValName = Plato::Get::String(tRefValNode, "ArgumentName");
-}
-
-/******************************************************************************/
-PlatoApp::WriteGlobalValue::WriteGlobalValue(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
-    if( aNode.size<Plato::InputData>("Input") > 1 )
-    {
-        throw ParsingException("PlatoApp::WriteGlobalValue: more than one Input specified.");
-    }
-    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
-
-    m_size = Plato::Get::Int(aNode,"Size");
-    m_filename = Plato::Get::String(aNode, "Filename");
-}
-
-/******************************************************************************/
-PlatoApp::ReciprocateObjectiveValue::ReciprocateObjectiveValue(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tOutputNode = Plato::Get::InputData(aNode,"Output");
-    if( aNode.size<Plato::InputData>("Output") > 1 )
-    {
-        throw ParsingException("PlatoApp::ReciprocateObjectiveValue: more than one Output specified.");
-    }
-    m_outputName = Plato::Get::String(tOutputNode, "ArgumentName");
-
-    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
-    if( aNode.size<Plato::InputData>("Input") > 1 )
-    {
-        throw ParsingException("PlatoApp::ReciprocateObjectiveValue: more than one Input specified.");
-    }
-    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
-}
-
-/******************************************************************************/
-PlatoApp::ReciprocateObjectiveGradient::ReciprocateObjectiveGradient(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tOutputNode = Plato::Get::InputData(aNode,"Output");
-    if( aNode.size<Plato::InputData>("Output") > 1 )
-    {
-        throw ParsingException("PlatoApp::ReciprocateObjectiveGradient: more than one Output specified.");
-    }
-    m_outputName = Plato::Get::String(tOutputNode, "ArgumentName");
-
-    Plato::InputData tInputNode = Plato::Get::InputData(aNode,"Input");
-    if( aNode.size<Plato::InputData>("Input") > 1 )
-    {
-        throw ParsingException("PlatoApp::ReciprocateObjectiveGradient: more than one Input specified.");
-    }
-    m_inputName = Plato::Get::String(tInputNode, "ArgumentName");
-
-    Plato::InputData tRefValNode = Plato::Get::InputData(aNode,"ObjectiveValue");
-    if( aNode.size<Plato::InputData>("ObjectiveValue") > 1 )
-    {
-        throw ParsingException("PlatoApp::ReciprocateObjectiveGradient: more than one ObjectiveValue specified.");
-    }
-    m_refValName = Plato::Get::String(tRefValNode, "ArgumentName");
-}
-
-/******************************************************************************/
-PlatoApp::Aggregator::Aggregator(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        LocalOp(aPlatoApp)
-/******************************************************************************/
-{
-    Plato::InputData tWeightNode = Plato::Get::InputData(aNode,"Weighting");
-    for(auto tNode : tWeightNode.getByName<Plato::InputData>("Weight"))
-    {
-        m_weights.push_back(Plato::Get::Double(tNode, "Value"));
-    }
-    m_weightMethod = Plato::Get::String(tWeightNode, "Method",/*toUpper=*/true);
-    if(m_weightMethod == "FIXED")
-    {
-        m_limitWeight = Plato::Get::Double(tWeightNode, "Limit");
-        if(m_limitWeight == 0.0) m_limitWeight = 1e9;
-        Plato::InputData tBasesNode = Plato::Get::InputData(tWeightNode,"Bases");
-        for(auto tInputNode : tBasesNode.getByName<Plato::InputData>("Input"))
-        {
-            std::string tBasisName = Plato::Get::String(tInputNode, "ArgumentName");
-            m_weightBases.push_back(tBasisName);
-        }
-    }
-    Plato::InputData tNormalsNode = Plato::Get::InputData(tWeightNode,"Normals");
-    for(auto tInputNode : tNormalsNode.getByName<Plato::InputData>("Input"))
-    {
-        std::string tNormalName = Plato::Get::String(tInputNode, "ArgumentName");
-        m_weightNormals.push_back(tNormalName);
-    }
-    // TODO check that number of weights == number of fields, etc.
-
-    for(Plato::InputData tNode : aNode.getByName<Plato::InputData>("Aggregate"))
-    {
-        AggStruct tNewAggStruct;
-        Plato::InputData tOutputNode = Plato::Get::InputData(tNode,"Output");
-        if( tNode.size<Plato::InputData>("Output") > 1 )
-        {
-            throw ParsingException("PlatoApp::Aggregator: more than one Output specified.");
-        }
-        tNewAggStruct.outputName = Plato::Get::String(tOutputNode, "ArgumentName");
-
-        for(Plato::InputData tInputNode : tNode.getByName<Plato::InputData>("Input"))
-        {
-            tNewAggStruct.inputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
-        }
-        tNewAggStruct.layout = getLayout(tNode);
-
-        m_aggStructs.push_back(tNewAggStruct);
-    }
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_valuesName,/*length=*/1});
 }
 
 /******************************************************************************/
@@ -1503,7 +1191,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("NormalizeObjectiveValue");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new NormalizeObjectiveValue(this, tNode);
+                mOperationMap[tStrName] = new Plato::NormalizeObjectiveValue(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1511,7 +1199,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("NormalizeObjectiveGradient");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new NormalizeObjectiveGradient(this, tNode);
+                mOperationMap[tStrName] = new Plato::NormalizeObjectiveGradient(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1519,7 +1207,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("WriteGlobalValue");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new WriteGlobalValue(this, tNode);
+                mOperationMap[tStrName] = new Plato::WriteGlobalValue(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1527,7 +1215,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("ReciprocateObjectiveValue");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new ReciprocateObjectiveValue(this, tNode);
+                mOperationMap[tStrName] = new Plato::ReciprocateObjectiveValue(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1535,7 +1223,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("ReciprocateObjectiveGradient");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new ReciprocateObjectiveGradient(this, tNode);
+                mOperationMap[tStrName] = new Plato::ReciprocateObjectiveGradient(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1543,7 +1231,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("Aggregator");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new Aggregator(this, tNode);
+                mOperationMap[tStrName] = new Plato::Aggregator(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1559,7 +1247,7 @@ void PlatoApp::initialize()
             tFunctions.push_back("PlatoMainOutput");
             if(tStrFunction == tFunctions.back())
             {
-                mOperationMap[tStrName] = new PlatoMainOutput(this, tNode);
+                mOperationMap[tStrName] = new Plato::PlatoMainOutput(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -1722,10 +1410,10 @@ void PlatoApp::initialize()
 
 /******************************************************************************/
 void
-PlatoApp::createLocalData(LocalOp* aLocalOperation)
+PlatoApp::createLocalData(Plato::LocalOp* aLocalOperation)
 /******************************************************************************/
 {
-    std::vector<LocalArg> tLocalArgs;
+    std::vector<Plato::LocalArg> tLocalArgs;
     aLocalOperation->getArguments(tLocalArgs);
     for(auto tArgument : tLocalArgs)
     {
@@ -1734,7 +1422,7 @@ PlatoApp::createLocalData(LocalOp* aLocalOperation)
 }
 
 /******************************************************************************/
-void PlatoApp::createLocalData(LocalArg aLocalArguments)
+void PlatoApp::createLocalData(Plato::LocalArg aLocalArguments)
 /******************************************************************************/
 {
     if(aLocalArguments.mLayout == Plato::data::layout_t::SCALAR_FIELD)
@@ -1840,463 +1528,15 @@ PlatoApp::~PlatoApp()
 }
 
 /******************************************************************************/
-void PlatoApp::NormalizeObjectiveValue::operator()() 
+void PlatoApp::DesignVolume::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
-    std::vector<double>& toData    = *(mPlatoApp->getValue(m_outputName));
-    std::vector<double>& fromData  = *(mPlatoApp->getValue(m_inputName));
-    std::vector<double>& refValVec = *(mPlatoApp->getValue(m_refValName));
-    double refVal = refValVec[0];
-
-    for(unsigned int i=0; i<toData.size(); i++)
-    {
-      toData[i] = fromData[i] / refVal;
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::NormalizeObjectiveGradient::operator()() 
-/******************************************************************************/
-{
-    auto& inField  = *(mPlatoApp->getNodeField(m_inputName));
-    double* inData;
-    inField.ExtractView(&inData);
-
-    auto& outField = *(mPlatoApp->getNodeField(m_outputName));
-    double* outData;
-    outField.ExtractView(&outData);
-
-    std::vector<double>& refValVec = *(mPlatoApp->getValue(m_refValName));
-    double refVal = refValVec[0];
-
-    int dataLen = inField.MyLength();
-    for(int i=0; i<dataLen; i++)
-    {
-      outData[i] = inData[i] / refVal;
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::WriteGlobalValue::operator()() 
-/******************************************************************************/
-{
-    int my_rank = 0;
-    MPI_Comm_rank(mPlatoApp->mLocalComm, &my_rank);
-    if(my_rank == 0)
-    {
-        fstream outfile;
-        outfile.open(m_filename, std::ios::app);
-        std::vector<double>& fromData = *(mPlatoApp->getValue(m_inputName));
-
-        for(unsigned int i=0; i<fromData.size(); i++)
-        {
-          outfile << std::setprecision(8) << fromData[i] << " ";
-        }
-        outfile << std::endl;
-        outfile.close();
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::ReciprocateObjectiveValue::operator()() 
-/******************************************************************************/
-{
-    std::vector<double>& toData   = *(mPlatoApp->getValue(m_outputName));
-    std::vector<double>& fromData = *(mPlatoApp->getValue(m_inputName));
-
-    for(unsigned int i=0; i<toData.size(); i++)
-    {
-      toData[i] = fromData[i] != 0 ? 1.0/fromData[i] : 0.0;
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::ReciprocateObjectiveGradient::operator()() 
-/******************************************************************************/
-{
-    auto& inField  = *(mPlatoApp->getNodeField(m_inputName));
-    double* inData;
-    inField.ExtractView(&inData);
-
-    auto& outField = *(mPlatoApp->getNodeField(m_outputName));
-    double* outData;
-    outField.ExtractView(&outData);
-
-
-    std::vector<double>& refValVec = *(mPlatoApp->getValue(m_refValName));
-    double refVal = refValVec[0];
-
-    int dataLen = inField.MyLength();
-    double factor = refVal!=0 ? -1.0/(refVal*refVal) : 1.0;
-    for(int i=0; i<dataLen; i++)
-    {
-      outData[i] = factor*inData[i];
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::Aggregator::operator()() 
-/******************************************************************************/
-{
-    // begin timer if timing
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::aggregator);
-    }
-
-  std::vector<double> weights(m_weights);
-  if(!m_weightBases.empty()){
-    int nvals = m_weightBases.size();
-    std::vector<double> B(nvals);
-    for(int ival=0; ival<nvals; ival++){
-      std::vector<double>* data = mPlatoApp->getValue(m_weightBases[ival]);
-      B[ival] = *(data->data());
-    }
-    double etaSum = 0.0;
-    for(int ival=1; ival<nvals; ival++){
-      etaSum += m_weights[ival];
-    }
-    if(!m_weightNormals.empty()){
-      nvals = m_weightNormals.size();
-      std::vector<double> N(nvals);
-      for(int ival=0; ival<nvals; ival++){
-        std::vector<double>* data = mPlatoApp->getValue(m_weightNormals[ival]);
-        N[ival] = *(data->data());
-      }
-      for(int ival=0; ival<nvals; ival++){
-        weights[ival] = B[0]*m_weights[ival]/(B[ival]*(1.0-etaSum));
-        weights[ival] *= N[ival]/N[0];
-        if(weights[ival] > m_limitWeight) weights[ival] = m_limitWeight;
-      }
-    } else {
-      for(int ival=0; ival<nvals; ival++){
-        weights[ival] = B[0]*m_weights[ival]/(B[ival]*(1.0-etaSum));
-        if(weights[ival] > m_limitWeight) weights[ival] = m_limitWeight;
-      }
-    }
-  } else {
-    if(!m_weightNormals.empty()){
-      int nvals = m_weightNormals.size();
-      std::vector<double> N(nvals);
-      for(int ival=0; ival<nvals; ival++){
-        std::vector<double>* data = mPlatoApp->getValue(m_weightNormals[ival]);
-        N[ival] = *(data->data());
-      }
-      for(int ival=0; ival<nvals; ival++){
-        weights[ival] /= N[ival];
-      }
-    }
-  }
-
-  for(AggStruct& agg : m_aggStructs){
-
-    if(agg.layout == Plato::data::layout_t::SCALAR_FIELD){
-
-      auto& field = *(mPlatoApp->getNodeField(agg.outputName));
-      double* toData; field.ExtractView(&toData);
-      int dataLen = field.MyLength();
-  
-      int nvals = agg.inputNames.size();
-      std::vector<double*> fromData(nvals);
-      for(int ival=0; ival<nvals; ival++){
-        auto pfield = mPlatoApp->getNodeField(agg.inputNames[ival]);
-        pfield->ExtractView(&fromData[ival]);
-      }
-  
-      for(int i=0; i<dataLen; i++){
-        toData[i] = 0.0;
-        for(int j=0; j<nvals; j++){
-          toData[i] += fromData[j][i]*weights[j];
-        }
-      }
-
-    } else
-    if(agg.layout == Plato::data::layout_t::SCALAR){
-
-      std::vector<double>& toData = *(mPlatoApp->getValue(agg.outputName));
-  
-      unsigned int dataLen = 0;
-      int nvals = agg.inputNames.size();
-      std::vector<double*> fromData(nvals);
-
-      // read first input value
-      std::vector<double>* v = mPlatoApp->getValue(agg.inputNames[0]);
-      fromData[0] = v->data();
-      dataLen = v->size();
-   
-      // read remaining input values
-      for(int ival=1; ival<nvals; ival++){
-        v = mPlatoApp->getValue(agg.inputNames[ival]);
-        fromData[ival] = v->data();
-        if( v->size() != dataLen ){
-          throw ParsingException("PlatoApp::Aggregator: attempted to aggregate vectors of differing lengths.");
-        }
-      }
-  
-      toData.resize(dataLen);
-      for(unsigned int i=0; i<dataLen; i++){
-        toData[i] = 0.0;
-        for(int j=0; j<nvals; j++){
-          toData[i] += fromData[j][i]*weights[j];
-        }
-      }
-
-    } else {
- 
-      std::stringstream message;
-      message << "Unknown 'Layout' (" << agg.layout << ") specified in PlatoApp::Aggregator." << std::endl;
-      Plato::ParsingException pe(message.str());
-      throw pe;
-    }
-  }
-
-  // end: "aggregator"
-  if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->end_partition();
-    }
-
-  return;
-}
-
-/******************************************************************************/
-void PlatoApp::NormalizeObjectiveValue::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_refValName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_outputName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_inputName, /*length=*/1});
-}
-
-/******************************************************************************/
-void PlatoApp::NormalizeObjectiveGradient::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_refValName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_outputName});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_inputName});
-}
-
-/******************************************************************************/
-void PlatoApp::WriteGlobalValue::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_inputName, m_size});
-}
-
-/******************************************************************************/
-void PlatoApp::ReciprocateObjectiveValue::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_outputName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_inputName, /*length=*/1});
-}
-
-/******************************************************************************/
-void PlatoApp::ReciprocateObjectiveGradient::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_refValName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_outputName});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_inputName});
-}
-
-/******************************************************************************/
-void PlatoApp::Aggregator::getArguments(std::vector<LocalArg> & aLocalArgs)
-/******************************************************************************/
-{
-    for(auto& tArgument : m_aggStructs)
-    {
-        aLocalArgs.push_back(LocalArg {tArgument.layout, tArgument.outputName});
-        for(auto& tInput : tArgument.inputNames)
-        {
-            aLocalArgs.push_back(LocalArg {tArgument.layout, tInput});
-        }
-    }
-    for(auto& tArgument : m_weightBases)
-    {
-        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, tArgument});
-    }
-    for(auto& tArgument : m_weightNormals)
-    {
-        aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, tArgument});
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::PlatoMainOutput::getArguments(std::vector<LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-  aLocalArgs = m_outputData;
-}
-
-/******************************************************************************/
-void PlatoApp::PlatoMainOutput::extract_iso_surface(int aIteration)
-/******************************************************************************/
-{
-#ifdef ENABLE_ISO
-    std::string output_filename = "";
-    char tmp_str[200];
-    if(aIteration < 10)
-        sprintf(tmp_str, "00%d", aIteration);
-    else if(aIteration < 100)
-        sprintf(tmp_str, "0%d", aIteration);
-    else if(aIteration < 1000)
-        sprintf(tmp_str, "%d", aIteration);
-    output_filename = mBaseName;
-    if( mAppendIterationCount )
-    {
-        output_filename += tmp_str;
-    }
-    output_filename += ".exo";
-    iso::STKExtract ex;
-    std::string input_filename = "platomain.exo";
-    int num_procs = 0;
-    MPI_Comm_size(mPlatoApp->mLocalComm, &num_procs);
-    if(num_procs == 1)
-        input_filename += ".1.0";
-
-    std::string tOutputFields = "";
-    for(size_t i=0; i<m_outputData.size(); ++i)
-    {
-        tOutputFields += m_outputData[i].mName;
-        if(i < (m_outputData.size()-1))
-        {
-            tOutputFields += ",";
-        }
-    }
-    if(ex.create_mesh_apis_read_from_file(&mPlatoApp->mLocalComm, // MPI_Comm
-                                          input_filename,         // input filename
-                                          output_filename,        // output filename
-                                          "Topology",             // iso field name
-                                          tOutputFields,          // names of fields to output
-                                          mRequestedFormats,      // names of formats to write
-                                          1e-5,                   // min edge length
-                                          0.5,                    // iso value
-                                          0,                      // level_set data?
-                                          m_outputMethod,         // epu results
-                                          1,                      // iso_only
-                                          1,                      // read spread file
-                                          aIteration))            // time step/iteration
-    {
-        ex.run_extraction(aIteration, 1);
-    }
-    int my_rank = 0;
-    MPI_Comm_rank(mPlatoApp->mLocalComm, &my_rank);
-    if(my_rank == 0)
-    {
-        FILE *fp = fopen("last_time_step.txt", "w");
-        if(fp)
-        {
-            fprintf(fp, "%s\n", tmp_str);
-            fclose(fp);
-            system("ls Iteration*.exo >> last_time_step.txt");
-        }
-    }
-#endif
-}
-
-/******************************************************************************/
-void PlatoApp::PlatoMainOutput::operator()()
-/******************************************************************************/
-{
-    // time operation
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::file_input_output);
-    }
-
-    LightMP* lmp = mPlatoApp->getLightMP();
-    double time = lmp->getCurrentTime();
-    time += 1.0;
-    lmp->setCurrentTime(time);
-    int int_time = (int)time;
-    lmp->WriteOutput();
-    int tMyRank = 0;
-    MPI_Comm_rank(mPlatoApp->mLocalComm, &tMyRank);
-    if(m_outputFrequency > 0 && int_time % m_outputFrequency == 0)
-    {
-        if(mDiscretization == "density")
-        {
-            extract_iso_surface(int_time);
-
-            // Write restart file
-            if((tMyRank == 0) && mWriteRestart)
-            {
-                std::ostringstream theCommand;
-                std::string tInputFilename = "platomain.exo.1.0";
-                int tNumProcs = 0;
-                MPI_Comm_size(mPlatoApp->mLocalComm, &tNumProcs);
-                if(tNumProcs > 1)
-                {
-                    theCommand << "epu -auto platomain.exo." << tNumProcs << ".0 > epu.txt;";
-                    tInputFilename = "platomain.exo";
-                }
-                theCommand << "echo times " << int_time << " > commands.txt;";
-                theCommand << "echo save optimizationdofs >> commands.txt;";
-                theCommand << "echo end >> commands.txt;";
-                theCommand << "algebra " << tInputFilename << " restart_" << int_time << ".exo < commands.txt > algebra.txt";
-                std::cout << "\nExecuting system call: " << theCommand.str() << "\n";
-                system(theCommand.str().c_str());
-            }
-        }
-        else if(mDiscretization == "levelset")
-        {
-            if((tMyRank == 0) && mWriteRestart)
-            {
-                std::string tListCommand = "ls -t IterationHistory* > junk.txt";
-                system(tListCommand.c_str());
-                FILE *fp = fopen("junk.txt", "r");
-                if(fp)
-                {
-                    char tLastHistFileName[200] = " ";
-                    fscanf(fp, "%s", tLastHistFileName);
-                    fclose(fp);
-                    std::string tNewFilename = "Iteration";
-                    char tmp_str[200];
-                    if(int_time < 10)
-                        sprintf(tmp_str, "00%d", int_time);
-                    else if(int_time < 100)
-                        sprintf(tmp_str, "0%d", int_time);
-                    else if(int_time < 1000)
-                        sprintf(tmp_str, "%d", int_time);
-                    tNewFilename += tmp_str;
-                    tNewFilename += ".exo";
-                    std::string tCopyCommand = "cp ";
-                    tCopyCommand += tLastHistFileName;
-                    tCopyCommand += " ";
-                    tCopyCommand += tNewFilename;
-                    system(tCopyCommand.c_str());
-                    system("rm -f IterationHistory*");
-                    fp = fopen("last_time_step.txt", "w");
-                    if(fp)
-                    {
-                        fprintf(fp, "%s\n", tmp_str);
-                        fclose(fp);
-                        system("ls Iteration*.exo >> last_time_step.txt");
-                    }
-                }
-            }
-        }
-    }
-
-    // end I/O timer
-    if(mPlatoApp->mTimersTree)
-    {
-        mPlatoApp->mTimersTree->end_partition();
-    }
-}
-
-/******************************************************************************/
-void PlatoApp::DesignVolume::getArguments(std::vector<LocalArg>& aLocalArgs)
-/******************************************************************************/
-{
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_outValueName,/*length=*/1});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_outValueName,/*length=*/1});
 }
 
 /******************************************************************************/
 PlatoApp::DesignVolume::DesignVolume(PlatoApp* p, Plato::InputData& node) : 
-  LocalOp(p), m_outValueName("Design Volume")
+  Plato::LocalOp(p), m_outValueName("Design Volume")
 /******************************************************************************/
 {
 
@@ -2358,12 +1598,12 @@ void PlatoApp::throwParsingException(const std::string & aName, const std::map<s
 }
 
 /******************************************************************************/
-void PlatoApp::ComputeVolume::getArguments(std::vector<LocalArg>& aLocalArgs)
+void PlatoApp::ComputeVolume::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 /******************************************************************************/
 {
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR, m_volumeName,/*length=*/1});
-    aLocalArgs.push_back(LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_topologyName});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, m_volumeName,/*length=*/1});
+    aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR_FIELD, m_gradientName});
 }
 
 /******************************************************************************/
@@ -2393,6 +1633,11 @@ LightMP* PlatoApp::getLightMP()
 /******************************************************************************/
 {
     return mLightMp;
+}
+
+const MPI_Comm& PlatoApp::getComm() const
+{
+    return(mLocalComm);
 }
 
 /******************************************************************************/
