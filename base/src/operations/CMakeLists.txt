@@ -3,13 +3,17 @@ set(LIB_NAMES)
 set(LIB_NAME Operations)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_Filter.cpp
+                        Plato_Roughness.cpp
                         Plato_Aggregator.cpp
                         Plato_DesignVolume.cpp
+                        Plato_EnforceBounds.cpp
                         Plato_UpdateProblem.cpp
                         Plato_ComputeVolume.cpp
                         Plato_SetUpperBounds.cpp
                         Plato_SetLowerBounds.cpp
                         Plato_PlatoMainOutput.cpp
+                        Plato_InitializeField.cpp
+                        Plato_InitializeValues.cpp
                         Plato_WriteGlobalValue.cpp
                         Plato_OperationsUtilities.cpp
                         Plato_NormalizeObjectiveValue.cpp
@@ -19,20 +23,35 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_Filter.hpp
+                        Plato_Roughness.hpp
                         Plato_Aggregator.hpp
                         Plato_DesignVolume.hpp
+                        Plato_EnforceBounds.hpp
                         Plato_UpdateProblem.hpp
                         Plato_ComputeVolume.hpp
                         Plato_SetUpperBounds.hpp
                         Plato_SetLowerBounds.hpp
                         Plato_LocalOperation.hpp
                         Plato_PlatoMainOutput.hpp
+                        Plato_InitializeField.hpp
+                        Plato_InitializeValues.hpp
                         Plato_WriteGlobalValue.hpp
                         Plato_OperationsUtilities.hpp
                         Plato_NormalizeObjectiveValue.hpp
                         Plato_NormalizeObjectiveGradient.hpp
                         Plato_ReciprocateObjectiveGradient.hpp
                         )
+                        
+if( GEOMETRY )
+                        
+set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
+                        Plato_MapMLSField.hpp
+                        Plato_MetaDataMLS.hpp
+                        Plato_ComputeMLSField.hpp
+                        Plato_InitializeMLSPoints.hpp
+                        )
+                        
+endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES} ${CMAKE_SOURCE_DIR}/apps/services)
 

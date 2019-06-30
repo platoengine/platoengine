@@ -61,444 +61,204 @@ class xml_document;
 namespace Plato
 {
 
-//class Interface;
 class SharedData;
 class AbstractFilter;
 
 }
 
-/******************************************************************************/
+/******************************************************************************//**
+ * @brief PLATO Application
+**********************************************************************************/
 class PlatoApp : public Plato::Application
-/******************************************************************************/
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aLocalComm local communicator
+    **********************************************************************************/
     PlatoApp(MPI_Comm& aLocalComm);
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aArgc input arguments
+     * @param [in] aArgv input arguments
+     * @param [in] aLocalComm local communicator
+    **********************************************************************************/
     PlatoApp(int aArgc, char **aArgv, MPI_Comm& aLocalComm);
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aPhysics_XML_File interface input file
+     * @param [in] aApp_XML_File PLATO application input file
+     * @param [in] aLocalComm local communicator
+    **********************************************************************************/
     PlatoApp(const std::string &aPhysics_XML_File, const std::string &aApp_XML_File, MPI_Comm& aLocalComm);
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~PlatoApp();
 
+    /******************************************************************************//**
+     * @brief Safely deallocate local memory
+    **********************************************************************************/
     void finalize();
+
+    /******************************************************************************//**
+     * @brief Safely allocate local memory
+    **********************************************************************************/
     void initialize();
+
+    /******************************************************************************//**
+     * @brief Perform local operation
+     * @param [in] aOperationName local operation name
+    **********************************************************************************/
     void compute(const std::string & aOperationName);
+
+    /******************************************************************************//**
+     * @brief Import data
+     * @param [in] aArgumentName argument name used to identify import data
+     * @param [in] aImportData data
+    **********************************************************************************/
     void importData(const std::string & aArgumentName, const Plato::SharedData & aImportData);
+
+    /******************************************************************************//**
+     * @brief Export local data
+     * @param [in] aArgumentName argument name used to identify export data
+     * @param [in] aImportData data
+    **********************************************************************************/
     void exportData(const std::string & aArgumentName, Plato::SharedData & aImportData);
+
+    /******************************************************************************//**
+     * @brief Export parallel graph
+     * @param [in] aDataLayout data layout
+     * @param [in] aMyOwnedGlobalIDs local rank owned identifiers
+    **********************************************************************************/
     void exportDataMap(const Plato::data::layout_t & aDataLayout, std::vector<int> & aMyOwnedGlobalIDs);
 
-    /******************************************************************************/
-    template<typename SharedDataT>
-    void importDataT(const std::string& aArgumentName, const SharedDataT& aImportData)
-    /******************************************************************************/
-    {
-        if(aImportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
-        {
-            DistributedVector* tLocalData = getNodeField(aArgumentName);
-
-            int tMyLength = tLocalData->getEpetraVector()->MyLength();
-            assert(tMyLength == aImportData.size());
-            std::vector<double> tImportData(tMyLength);
-            aImportData.getData(tImportData);
-
-            double* tDataView;
-            tLocalData->getEpetraVector()->ExtractView(&tDataView);
-            std::copy(tImportData.begin(), tImportData.end(), tDataView);
-
-            tLocalData->Import();
-            tLocalData->DisAssemble();
-        }
-        else if(aImportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
-        {
-            auto dataContainer = mLightMp->getDataContainer();
-            double* tDataView;
-            dataContainer->getVariable(getElementField(aArgumentName), tDataView);
-            int tMyLength = mLightMp->getMesh()->getNumElems();
-
-            assert(tMyLength == aImportData.size());
-
-            std::vector<double> tImportData(tMyLength);
-            aImportData.getData(tImportData);
-
-            std::copy(tImportData.begin(), tImportData.end(), tDataView);
-        }
-        else if(aImportData.myLayout() == Plato::data::layout_t::SCALAR)
-        {
-            std::vector<double>* tLocalData = getValue(aArgumentName);
-            tLocalData->resize(aImportData.size());
-            aImportData.getData(*tLocalData);
-        }
-    }
-
-    /******************************************************************************/
-    template<typename SharedDataT>
-    void exportDataT(const std::string& aArgumentName, SharedDataT& aExportData)
-    /******************************************************************************/
-    {
-        if(aExportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
-        {
-            DistributedVector* tLocalData = getNodeField(aArgumentName);
-
-            tLocalData->LocalExport();
-            double* tDataView;
-            tLocalData->getEpetraVector()->ExtractView(&tDataView);
-
-            int tMyLength = tLocalData->getEpetraVector()->MyLength();
-            assert(tMyLength == aExportData.size());
-            std::vector<double> tExportData(tMyLength);
-            std::copy(tDataView, tDataView + tMyLength, tExportData.begin());
-
-            aExportData.setData(tExportData);
-        }
-        else if(aExportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
-        {
-            auto dataContainer = mLightMp->getDataContainer();
-            double* tDataView;
-            dataContainer->getVariable(getElementField(aArgumentName), tDataView);
-            int tMyLength = mLightMp->getMesh()->getNumElems();
-
-            assert(tMyLength == aExportData.size());
-            std::vector<double> tExportData(tMyLength);
-            std::copy(tDataView, tDataView + tMyLength, tExportData.begin());
-
-            aExportData.setData(tExportData);
-        }
-        else if(aExportData.myLayout() == Plato::data::layout_t::SCALAR)
-        {
-            std::vector<double>* tLocalData = getValue(aArgumentName);
-            if(int(tLocalData->size()) == aExportData.size())
-            {
-                aExportData.setData(*tLocalData);
-            }
-            else if(tLocalData->size() == 1u)
-            {
-                std::vector<double> retVec(aExportData.size(), (*tLocalData)[0]);
-                aExportData.setData(retVec);
-            }
-            else
-            {
-                throw Plato::ParsingException("SharedValued length mismatch.");
-            }
-        }
-    }
-
+    /******************************************************************************//**
+     * @brief Return pointer to application-specific services
+     * @return pointer to application-specific services
+    **********************************************************************************/
     LightMP* getLightMP();
-    const MPI_Comm& getComm() const;
-    Plato::AbstractFilter* getFilter();
-    SystemContainer* getSysGraph();
-    MeshServices* getMeshServices();
-    Plato::TimersTree* getTimersTree();
-    DistributedVector* getNodeField(const std::string & aName);
-    std::vector<double>* getValue(const std::string & aName);
 
-private:
+    /******************************************************************************//**
+     * @brief Return reference to local communicator
+     * @return reference to local communicator
+    **********************************************************************************/
+    const MPI_Comm& getComm() const;
+
+    /******************************************************************************//**
+     * @brief Return pointer to local filter operator
+     * @return pointer to local filter operator
+    **********************************************************************************/
+    Plato::AbstractFilter* getFilter();
+
+    /******************************************************************************//**
+     * @brief Return pointer to parallel graph
+     * @return pointer to parallel graph
+    **********************************************************************************/
+    SystemContainer* getSysGraph();
+
+    /******************************************************************************//**
+     * @brief Return pointer to local mesh services
+     * @return pointer to local mesh services
+    **********************************************************************************/
+    MeshServices* getMeshServices();
+
+    /******************************************************************************//**
+     * @brief Return pointer to timer services
+     * @return pointer to timer services
+    **********************************************************************************/
+    Plato::TimersTree* getTimersTree();
+
+    /******************************************************************************//**
+     * @brief Return element field
+     * @param [in] aName field name
+     * @return element field
+    **********************************************************************************/
     VarIndex getElementField(const std::string & aName);
 
+    /******************************************************************************//**
+     * @brief Return distributed node field
+     * @param [in] aName field name
+     * @return pointer to node field
+    **********************************************************************************/
+    DistributedVector* getNodeField(const std::string & aName);
+
+    /******************************************************************************//**
+     * @brief Return scalar values
+     * @param [in] aName quantity name
+     * @return pointer to array of values
+    **********************************************************************************/
+    std::vector<double>* getValue(const std::string & aName);
+
+#ifdef GEOMETRY
+
+    /******************************************************************************//**
+     * @brief Return Moving Least Squared (MLS) data
+     * @return reference to MLS data
+    **********************************************************************************/
+    std::map<std::string,std::shared_ptr<Plato::MLSstruct>>& getMovingLeastSquaredData()
+        {return mMLS;}
+#endif
+
+private:
+    /******************************************************************************//**
+     * @brief Import data operation
+     * @param [in] aArgumentName name used to identify data
+     * @param [in] aImportData data
+    **********************************************************************************/
+    template<typename SharedDataT>
+    void importDataT(const std::string& aArgumentName, const SharedDataT& aImportData);
+
+    /******************************************************************************//**
+     * @brief Export local data operation
+     * @param [in] aArgumentName name used to identify data
+     * @param [in/out] aExportData data
+    **********************************************************************************/
+    template<typename SharedDataT>
+    void exportDataT(const std::string& aArgumentName, SharedDataT& aExportData);
+
+    /******************************************************************************//**
+     * @brief Parsing exception handler
+     * @param [in] aName input data name
+     * @param [in] aValueMap name-data map
+    **********************************************************************************/
     template<typename ValueType>
     void throwParsingException(const std::string & aName, const std::map<std::string, ValueType> & aValueMap);
 
-    MPI_Comm mLocalComm;
-    LightMP* mLightMp;
-    SystemContainer* mSysGraph;
-    MeshServices* mMeshServices;
-    Plato::AbstractFilter* mFilter;
-#ifdef GEOMETRY
-    struct MLSstruct
-    {   Plato::any mls; int dimension;};
-    std::map<std::string,std::shared_ptr<MLSstruct>> mMLS;
-#endif
-    Plato::InputData mAppfileData;
-    Plato::InputData mInputfileData;
+    /******************************************************************************//**
+     * @brief Create local operation
+     * @param [in] aOperation local operation
+    **********************************************************************************/
+    void createLocalData(Plato::LocalOp* aOperation);
+
+    /******************************************************************************//**
+     * @brief Create local arguments
+     * @param [in] aArguments arguments associated with an operation
+    **********************************************************************************/
+    void createLocalData(Plato::LocalArg aArguments);
+
+private:
+    MPI_Comm mLocalComm; /*!< local communicator */
+    LightMP* mLightMp; /*!< application-specific services */
+    SystemContainer* mSysGraph; /*!< parallel graph services */
+    MeshServices* mMeshServices; /*!< mesh services */
+    Plato::AbstractFilter* mFilter; /*!< filter services */
+    Plato::InputData mAppfileData; /*!< PLATO application input data */
+    Plato::InputData mInputfileData; /*!< Shared input data */
 
 #ifdef GEOMETRY
-    template<int SpaceDim, typename ScalarType=double>
-    class ComputeMLSField : public Plato::LocalOp
-    {
-    public:
-        ComputeMLSField( PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        Plato::LocalOp(aPlatoApp), m_inputName("MLS Point Values"), m_outputName("MLS Field Values")
-        {
-            auto tName = Plato::Get::String(aNode,"MLSName");
-            auto& tMLS = mPlatoApp->mMLS;
-            if( tMLS.count(tName) == 0 )
-            {
-                throw Plato::ParsingException("Requested PointArray that doesn't exist.");
-            }
-            m_MLS = mPlatoApp->mMLS[tName];
-        }
-
-        ~ComputeMLSField()
-        {}
-
-        void operator()()
-        {
-            std::vector<double>* tLocalData = mPlatoApp->getValue(m_inputName);
-            Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_pointsHost(tLocalData->data(),tLocalData->size());
-            Kokkos::View<ScalarType*, Kokkos::DefaultExecutionSpace::memory_space> t_pointValues("point values",tLocalData->size());
-            Kokkos::deep_copy(t_pointValues, t_pointsHost);
-
-            auto& tLocalOutput = *(mPlatoApp->getNodeField(m_outputName));
-            int tMyLength = tLocalOutput.MyLength();
-
-            Kokkos::View<ScalarType*, Kokkos::DefaultExecutionSpace::memory_space> t_nodeValues("values", tMyLength);
-            Kokkos::View<ScalarType**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> t_nodeCoords("coords", tMyLength, SpaceDim);
-            auto t_nodeCoordsHost = Kokkos::create_mirror_view(t_nodeCoords);
-            auto mesh = mPlatoApp->mLightMp->getMesh();
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/0);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getX(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            if( SpaceDim > 1 )
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/1);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getY(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            if( SpaceDim > 2 )
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/2);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getZ(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            Kokkos::deep_copy(t_nodeCoords, t_nodeCoordsHost);
-
-            Plato::any_cast<MLS_Type>(m_MLS->mls).f(t_pointValues, t_nodeCoords, t_nodeValues);
-
-            double* tDataView;
-            tLocalOutput.ExtractView(&tDataView);
-            Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_nodeValuesHost(tDataView,tMyLength);
-            Kokkos::deep_copy(t_nodeValuesHost, t_nodeValues);
-        }
-
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-        {
-            int tNumPoints = Plato::any_cast<MLS_Type>(m_MLS->mls).getNumPoints();
-            aLocalArgs.push_back(Plato::LocalArg
-                    {   Plato::data::layout_t::SCALAR_FIELD, m_outputName});
-            aLocalArgs.push_back(Plato::LocalArg
-                    {   Plato::data::layout_t::SCALAR, m_inputName, tNumPoints});
-        }
-
-    private:
-        shared_ptr<MLSstruct> m_MLS;
-        typedef typename Plato::Geometry::MovingLeastSquares<SpaceDim, ScalarType> MLS_Type;
-        const std::string m_inputName;
-        const std::string m_outputName;
-    };
-    template<int SpaceDim, typename ScalarType> friend class ComputeMLSField;
-
-    template<int SpaceDim, typename ScalarType=double>
-    class InitializeMLSPoints : public Plato::LocalOp
-    {
-    public:
-        InitializeMLSPoints( PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        Plato::LocalOp(aPlatoApp), m_outputName("MLS Point Values")
-        {
-            auto tName = Plato::Get::String(aNode,"MLSName");
-            auto& tMLS = mPlatoApp->mMLS;
-            if( tMLS.count(tName) == 0 )
-            {
-                throw Plato::ParsingException("Requested PointArray that doesn't exist.");
-            }
-            m_MLS = mPlatoApp->mMLS[tName];
-
-            m_fieldName = Plato::Get::String(aNode, "Field");
-        }
-
-        ~InitializeMLSPoints()
-        {}
-
-        void operator()()
-        {
-            auto tFields = Plato::any_cast<MLS_Type>(m_MLS->mls).getPointFields();
-            auto tField = tFields[m_fieldName];
-
-            std::vector<double>* tLocalData = mPlatoApp->getValue(m_outputName);
-            Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> tLocalDataHost(tLocalData->data(),tLocalData->size());
-            Kokkos::deep_copy(tLocalDataHost, tField);
-        }
-
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-        {
-            int tNumPoints = Plato::any_cast<MLS_Type>(m_MLS->mls).getNumPoints();
-            aLocalArgs.push_back(Plato::LocalArg
-                    {   Plato::data::layout_t::SCALAR, m_outputName, tNumPoints});
-        }
-
-    private:
-        shared_ptr<MLSstruct> m_MLS;
-        typedef typename Plato::Geometry::MovingLeastSquares<SpaceDim, ScalarType> MLS_Type;
-        const std::string m_outputName;
-        std::string m_fieldName;
-    };
-    template<int SpaceDim, typename ScalarType> friend class InitializeMLSPoints;
-
-    template<int SpaceDim, typename ScalarType=double>
-    class MapMLSField : public Plato::LocalOp
-    {
-    public:
-        MapMLSField( PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        Plato::LocalOp(aPlatoApp), m_inputName("MLS Field Values"), m_outputName("Mapped MLS Point Values")
-        {
-            auto tName = Plato::Get::String(aNode,"MLSName");
-            auto& tMLS = mPlatoApp->mMLS;
-            if( tMLS.count(tName) == 0 )
-            {
-                throw Plato::ParsingException("Requested PointArray that doesn't exist.");
-            }
-            m_MLS = mPlatoApp->mMLS[tName];
-        }
-
-        ~MapMLSField()
-        {}
-
-        void operator()()
-        {
-            // pull field values into Kokkos::View
-            //
-            auto& tLocalInput = *(mPlatoApp->getNodeField(m_inputName));
-            int tMyLength = tLocalInput.MyLength();
-            double* tDataView; tLocalInput.ExtractView(&tDataView);
-            Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_nodeValuesHost(tDataView,tMyLength);
-            Kokkos::View<ScalarType*, Kokkos::DefaultExecutionSpace::memory_space> t_nodeValues("values", tMyLength);
-            Kokkos::deep_copy(t_nodeValues, t_nodeValuesHost);
-
-            // pull node coordinates into Kokkos::View
-            //
-            Kokkos::View<ScalarType**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> t_nodeCoords("coords", tMyLength, SpaceDim);
-            auto t_nodeCoordsHost = Kokkos::create_mirror_view(t_nodeCoords);
-            auto mesh = mPlatoApp->mLightMp->getMesh();
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/0);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getX(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            if( SpaceDim > 1 )
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/1);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getY(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            if( SpaceDim > 2 )
-            {
-                auto tCoordsSub = Kokkos::subview(t_nodeCoordsHost, Kokkos::ALL(), /*dim_index=*/2);
-                Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> t_coord(mesh->getZ(),tMyLength);
-                Kokkos::deep_copy(tCoordsSub, t_coord);
-            }
-            Kokkos::deep_copy(t_nodeCoords, t_nodeCoordsHost);
-
-            // create output View
-            //
-            std::vector<double>* tLocalData = mPlatoApp->getValue(m_outputName);
-            Kokkos::View<ScalarType*, Kokkos::DefaultExecutionSpace::memory_space> t_mappedValues("mapped values",tLocalData->size());
-
-            Plato::any_cast<MLS_Type>(m_MLS->mls).mapToPoints(t_nodeCoords, t_nodeValues, t_mappedValues);
-
-            // pull from View to local data
-            //
-            Kokkos::View<ScalarType*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> tLocalDataHost(tLocalData->data(),tLocalData->size());
-            Kokkos::deep_copy(tLocalDataHost, t_mappedValues);
-        }
-
-        void getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
-        {
-            int tNumPoints = Plato::any_cast<MLS_Type>(m_MLS->mls).getNumPoints();
-            aLocalArgs.push_back(Plato::LocalArg
-                    {   Plato::data::layout_t::SCALAR_FIELD, m_inputName});
-            aLocalArgs.push_back(Plato::LocalArg
-                    {   Plato::data::layout_t::SCALAR, m_outputName, tNumPoints});
-        }
-
-    private:
-        shared_ptr<MLSstruct> m_MLS;
-        typedef typename Plato::Geometry::MovingLeastSquares<SpaceDim, ScalarType> MLS_Type;
-        const std::string m_inputName;
-        const std::string m_outputName;
-    };
-    template<int SpaceDim, typename ScalarType> friend class MapMLSField;
-
+    std::map<std::string,std::shared_ptr<Plato::MLSstruct>> mMLS;  /*!< Moving Least Squared (MLS) metadata */
 #endif
 
-    class Roughness : public Plato::LocalOp
-    {
-    public:
-        Roughness(PlatoApp* aPlatoApp, Plato::InputData & aNode);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
-    private:
-        std::string m_topologyName;
-        std::string m_roughnessName;
-        std::string m_gradientName;
-    };
-    friend class Roughness;
+    std::map<std::string, VarIndex> mElementFieldMap; /*!< Name - Element Field map */
+    std::map<std::string, DistributedVector*> mNodeFieldMap; /*!< Name - Node Field map */
+    std::map<std::string, std::vector<double>*> mValueMap; /*!< Name - Scalar values map */
+    std::map<std::string, Plato::LocalOp*> mOperationMap; /*!< Name - Operation map */
 
-    class InitializeValues : public Plato::LocalOp
-    {
-    public:
-        InitializeValues(PlatoApp* aPlatoApp, Plato::InputData & aNode);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
-    private:
-        std::string m_valuesName;
-        double m_value;
-    };
-    friend class InitializeValues;
-
-    class InitializeField : public Plato::LocalOp
-    {
-    public:
-        InitializeField(PlatoApp* aPlatoApp, Plato::InputData & aNode);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
-    private:
-        void getInitialValuesForRestart(DistributedVector &field, std::vector<double> &values);
-        void getInitialValuesForSwissCheeseLevelSet(DistributedVector &field, std::vector<double> &values);
-        void getInitialValuesForPrimitivesLevelSet(DistributedVector &field, std::vector<double> &values);
-        double evaluateSwissCheeseLevelSet(const double &aX,
-                                           const double &aY,
-                                           const double &aZ,
-                                           std::vector<double> aLowerCoordBoundsOfDomain,
-                                           std::vector<double> aUpperCoordBoundsOfDomain,
-                                           double aAverageElemLength);
-        std::string m_strMethod;
-        std::string m_outputFieldName;
-        Plato::data::layout_t mOutputLayout;
-        double m_uniformValue;
-        std::string m_fileName;
-        std::string m_sphereRadius;
-        std::string m_spherePackingFactor;
-        bool m_createSpheres;
-        std::string m_sphereSpacingX;
-        std::string m_sphereSpacingY;
-        std::string m_sphereSpacingZ;
-        std::string m_variableName;
-        std::vector<int> m_levelSetNodesets;
-        int m_iteration;
-        double m_minCoords[3];
-        double m_maxCoords[3];
-    };
-    friend class InitializeField;
-
-    class EnforceBounds : public Plato::LocalOp
-    {
-    public:
-        EnforceBounds(PlatoApp* p, Plato::InputData& node);
-        void operator()();
-        void getArguments(std::vector<Plato::LocalArg>& localArgs);
-    private:
-        std::string mLowerBoundVectorFieldName;
-        std::string mUpperBoundVectorFieldName;
-        std::string mTopologyFieldName;
-    };
-    friend class EnforceBounds;
-
-    void createLocalData(Plato::LocalOp* op);
-    void createLocalData(Plato::LocalArg arg);
-
-    std::map<std::string, VarIndex> mElementFieldMap;
-    std::map<std::string, DistributedVector*> mNodeFieldMap;
-    std::map<std::string, std::vector<double>*> mValueMap;
-    std::map<std::string, Plato::LocalOp*> mOperationMap;
-
-    Plato::TimersTree* mTimersTree;
-
+    Plato::TimersTree* mTimersTree; /*!< timer tools/services */
 };
+// class PlatoApp
 
