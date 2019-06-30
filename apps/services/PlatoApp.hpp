@@ -48,7 +48,7 @@
 #include "Plato_TimersTree.hpp"
 
 #ifdef GEOMETRY
-#include "Plato_MLS.hpp"
+#include "Plato_MetaDataMLS.hpp"
 #endif
 
 namespace pugi
