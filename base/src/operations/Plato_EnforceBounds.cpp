@@ -27,11 +27,11 @@ void EnforceBounds::operator()()
     double* tOutputData;
     double* tLowerBoundData;
     double* tUpperBoundData;
-    int tDataLenth = 0;
+    int tDataLength = 0;
 
     auto& tOutputField = *(mPlatoApp->getNodeField(mTopologyFieldName));
     tOutputField.ExtractView(&tOutputData);
-    tDataLenth = tOutputField.MyLength();
+    tDataLength = tOutputField.MyLength();
 
     auto& tLowerBoundField = *(mPlatoApp->getNodeField(mLowerBoundVectorFieldName));
     tLowerBoundField.ExtractView(&tLowerBoundData);
@@ -39,7 +39,7 @@ void EnforceBounds::operator()()
     auto& tUpperBoundField = *(mPlatoApp->getNodeField(mUpperBoundVectorFieldName));
     tUpperBoundField.ExtractView(&tUpperBoundData);
 
-    for(int tIndex = 0; tIndex < tDataLenth; tIndex++)
+    for(int tIndex = 0; tIndex < tDataLength; tIndex++)
     {
         tOutputData[tIndex] = std::max(tOutputData[tIndex], tLowerBoundData[tIndex]);
         tOutputData[tIndex] = std::min(tOutputData[tIndex], tUpperBoundData[tIndex]);

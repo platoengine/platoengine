@@ -151,12 +151,12 @@ void PlatoApp::importDataT(const std::string& aArgumentName, const SharedDataT& 
 
 void PlatoApp::importData(const std::string & aArgumentName, const Plato::SharedData & aImportData)
 {
-    importDataT(aArgumentName, aImportData);
+    this->importDataT(aArgumentName, aImportData);
 }
 
 void PlatoApp::exportData(const std::string & aArgumentName, Plato::SharedData & aExportData)
 {
-    exportDataT(aArgumentName, aExportData);
+    this->exportDataT(aArgumentName, aExportData);
 }
 
 void PlatoApp::exportDataMap(const Plato::data::layout_t & aDataLayout, std::vector<int> & aMyOwnedGlobalIDs)
@@ -582,6 +582,11 @@ DistributedVector* PlatoApp::getNodeField(const std::string & aName)
     return tIterator->second;
 }
 
+size_t PlatoApp::getNumElements() const
+{
+    return (mLightMp->getMesh()->getNumElems());
+}
+
 VarIndex PlatoApp::getElementField(const std::string & aName)
 {
     auto tIterator = mElementFieldMap.find(aName);
@@ -589,7 +594,31 @@ VarIndex PlatoApp::getElementField(const std::string & aName)
     {
         throwParsingException(aName, mElementFieldMap);
     }
-    return tIterator->second;
+    return (tIterator->second);
+}
+
+double* PlatoApp::getElementFieldData(const std::string & aName)
+{
+    double* tOutputDataView;
+    auto tFieldIndex = this->getElementField(aName);
+    auto tDataContainer = mLightMp->getDataContainer();
+    tDataContainer->getVariable(tFieldIndex, tOutputDataView);
+    return (tOutputDataView);
+}
+
+size_t PlatoApp::getNodeFieldLength(const std::string & aName)
+{
+    DistributedVector* tOutputField = this->getNodeField(aName);
+    size_t tLength = tOutputField->MyLength();
+    return (tLength);
+}
+
+double* PlatoApp::getNodeFieldData(const std::string & aName)
+{
+    double* tOutputData;
+    DistributedVector* tLocalData = this->getNodeField(aName);
+    tLocalData->ExtractView(&tOutputData);
+    return (tOutputData);
 }
 
 template<typename ValueType>

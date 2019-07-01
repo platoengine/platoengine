@@ -54,6 +54,13 @@ namespace Plato
 class InputData;
 
 /******************************************************************************//**
+ * @brief Return string layout
+ * @param [in] aInput enum layout
+ * @return string layout
+**********************************************************************************/
+std::string getLayout(const Plato::data::layout_t & aInput);
+
+/******************************************************************************//**
  * @brief Return shared data layout
  * @param [in] aLayoutStr layout string
  * @return layout

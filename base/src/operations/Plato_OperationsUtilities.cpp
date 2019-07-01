@@ -13,6 +13,51 @@
 namespace Plato
 {
 
+std::string getLayout(const Plato::data::layout_t & aInput)
+{
+    std::string tOutput;
+    switch(aInput)
+    {
+        case Plato::data::SCALAR:
+        {
+            tOutput = std::string("SCALAR");
+            break;
+        }
+        case Plato::data::SCALAR_FIELD:
+        {
+            tOutput = std::string("SCALAR FIELD");
+            break;
+        }
+        case Plato::data::VECTOR_FIELD:
+        {
+            tOutput = std::string("VECTOR FIELD");
+            break;
+        }
+        case Plato::data::TENSOR_FIELD:
+        {
+            tOutput = std::string("TENSOR FIELD");
+            break;
+        }
+        case Plato::data::ELEMENT_FIELD:
+        {
+            tOutput = std::string("ELEMENT FIELD");
+            break;
+        }
+        case Plato::data::SCALAR_PARAMETER:
+        {
+            tOutput = std::string("SCALAR PARAMETER");
+            break;
+        }
+        case Plato::data::UNDEFINED:
+        default:
+        {
+            tOutput = std::string("UNDEFINED");
+            break;
+        }
+    }
+    return(tOutput);
+}
+
 Plato::data::layout_t getLayout(const std::string & aLayoutStr)
 {
 

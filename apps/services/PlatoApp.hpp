@@ -173,11 +173,39 @@ public:
     Plato::TimersTree* getTimersTree();
 
     /******************************************************************************//**
-     * @brief Return element field
+     * @brief Return local number of elements
      * @param [in] aName field name
-     * @return element field
+     * @return local number of elements
+    **********************************************************************************/
+    size_t getNumElements() const;
+
+    /******************************************************************************//**
+     * @brief Return element field identifier
+     * @param [in] aName argument/field name
+     * @return element field identifier
     **********************************************************************************/
     VarIndex getElementField(const std::string & aName);
+
+    /******************************************************************************//**
+     * @brief Return pointer to element field data
+     * @param [in] aName argument/field name
+     * @return pointer to element field data
+    **********************************************************************************/
+    double* getElementFieldData(const std::string & aName);
+
+    /******************************************************************************//**
+     * @brief Return local number of node field elements
+     * @param [in] aName argument/field name
+     * @return local number of node field elements
+    **********************************************************************************/
+    size_t getNodeFieldLength(const std::string & aName);
+
+    /******************************************************************************//**
+     * @brief Return pointer to node field data
+     * @param [in] aName argument/field name
+     * @return pointer to node field data
+    **********************************************************************************/
+    double* getNodeFieldData(const std::string & aName);
 
     /******************************************************************************//**
      * @brief Return distributed node field
