@@ -472,10 +472,8 @@ void PlatoApp::createLocalData(Plato::LocalArg aLocalArguments)
             return;
         }
         std::vector<VarIndex> tNewData(1);
-        tNewData[0] = mLightMp->getDataContainer()->registerVariable(RealType,
-                                                                     aLocalArguments.mName,
-                                                                     NODE,
-                                                                     aLocalArguments.mWrite);
+        tNewData[0] =
+                mLightMp->getDataContainer()->registerVariable(RealType, aLocalArguments.mName, NODE, aLocalArguments.mWrite);
         mNodeFieldMap[aLocalArguments.mName] = new DistributedVector(mSysGraph, tNewData);
     }
     else if(aLocalArguments.mLayout == Plato::data::layout_t::ELEMENT_FIELD)
@@ -486,10 +484,8 @@ void PlatoApp::createLocalData(Plato::LocalArg aLocalArguments)
             return;
         }
         VarIndex tNewDataIndex;
-        tNewDataIndex = mLightMp->getDataContainer()->registerVariable(RealType,
-                                                                       aLocalArguments.mName,
-                                                                       ELEM,
-                                                                       aLocalArguments.mWrite);
+        tNewDataIndex =
+                mLightMp->getDataContainer()->registerVariable(RealType, aLocalArguments.mName, ELEM, aLocalArguments.mWrite);
         mElementFieldMap[aLocalArguments.mName] = tNewDataIndex;
     }
     else if(aLocalArguments.mLayout == Plato::data::layout_t::SCALAR)

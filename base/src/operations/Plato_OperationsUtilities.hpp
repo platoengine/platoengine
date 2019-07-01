@@ -67,14 +67,14 @@ Plato::data::layout_t getLayout(const std::string & aLayoutStr);
  * @param [in/out] aDefaultLayout default layout
  * @return layout
 **********************************************************************************/
-Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout);
+Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout);
 
 /******************************************************************************//**
  * @brief Return shared data layout
  * @param [in] aNode XML input data
  * @return layout
 **********************************************************************************/
-Plato::data::layout_t getLayout(Plato::InputData& aNode);
+Plato::data::layout_t getLayout(const Plato::InputData& aNode);
 
 }
 // namespace Plato

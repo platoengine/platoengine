@@ -40,7 +40,7 @@ Plato::data::layout_t getLayout(const std::string & aLayoutStr)
     return (tLayout);
 }
 
-Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
+Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
 {
     auto tLayoutString = Plato::Get::String(aNode, "Layout");
     Plato::data::layout_t tLayout = aDefaultLayout;
@@ -51,7 +51,7 @@ Plato::data::layout_t getLayout(Plato::InputData& aNode, Plato::data::layout_t a
     return (tLayout);
 }
 
-Plato::data::layout_t getLayout(Plato::InputData& aNode)
+Plato::data::layout_t getLayout(const Plato::InputData& aNode)
 {
     auto tLayoutString = Plato::Get::String(aNode, "Layout");
     if(tLayoutString.empty())
