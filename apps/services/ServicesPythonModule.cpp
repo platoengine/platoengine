@@ -40,13 +40,13 @@
 //@HEADER
 */
 
+#include <Python.h>
 #include <map>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
 #include "PlatoApp.hpp"
-#include <Python.h>
 #include <structmember.h>
 #include <Kokkos_Core.hpp>
 
