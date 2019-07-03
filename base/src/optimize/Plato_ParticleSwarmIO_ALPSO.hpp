@@ -179,6 +179,7 @@ struct InputDataALPSO
      * @brief Default constructor
     **********************************************************************************/
     InputDataALPSO() :
+            mRestart(false),
             mOutputSolution(false),
             mOutputDiagnostics(false),
             mOutputParticleDiagnostics(false),
@@ -223,6 +224,7 @@ struct InputDataALPSO
     {
     }
 
+    bool mRestart; /*!< flag to output restart data (default=false) */
     bool mOutputSolution; /*!< flag to output solution (default=false) */
     bool mOutputDiagnostics; /*!< flag to enable algorithm diagnostics (default=false) */
     bool mOutputParticleDiagnostics; /*!< flag to enable particle data diagnostics (default=false) */

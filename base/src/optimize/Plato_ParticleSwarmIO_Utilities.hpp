@@ -416,7 +416,7 @@ inline void print_alpso_inner_diagnostics(const Plato::DiagnosticsBCPSO<ScalarTy
  * @param [in] aBest 1D container with global best solution (i.e. optimization variables)
  * @param [in] aMean 1D container with the mean of the best set of solutions
  * @param [in] aStdDev 1D container with the standard deviation of the best set of solutions
- * @return indicate if solution was print to file
+ * @return indicate if solution was printed to output file
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline bool print_solution(const Plato::Vector<ScalarType, OrdinalType> & aBest,

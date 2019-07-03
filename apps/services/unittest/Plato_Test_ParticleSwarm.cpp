@@ -1244,6 +1244,9 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle)
     tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
+    tInputs.mOutputSolution = true;
+    tInputs.mOutputSolution = true;
+    tInputs.mOutputParticleDiagnostics = true;
     Plato::OutputDataBCPSO<double> tOutputs;
     Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
 
