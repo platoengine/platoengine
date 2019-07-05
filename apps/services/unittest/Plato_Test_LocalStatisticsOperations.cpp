@@ -55,12 +55,24 @@
 namespace Plato
 {
 
+void tolower(std::string & aInput)
+{
+    std::transform(aInput.begin(), aInput.end(), aInput.begin(),
+                   [](unsigned char aOut) -> unsigned char { return std::tolower(aOut); });
+}
+
+void toupper(std::string & aInput)
+{
+    std::transform(aInput.begin(), aInput.end(), aInput.begin(),
+                   [](unsigned char aOut) -> unsigned char { return std::toupper(aOut); });
+}
+
 class MeanPlusVarianceMeasure : public Plato::LocalOp
 {
 public:
     MeanPlusVarianceMeasure(PlatoApp* aPlatoApp, const Plato::InputData& aStatisticsNode) :
             Plato::LocalOp(aPlatoApp),
-            mSigmas(std::vector<double>{0., 1., 2., 3.})
+            mDataLayout(Plato::data::UNDEFINED)
     {
         this->initialize(aStatisticsNode);
     }
@@ -80,134 +92,147 @@ public:
     }
 
 private:
+    void split(const std::string & aInput, std::vector<std::string> & aOutput)
+    {
+        std::string tSegment;
+        std::stringstream tArgument(aInput);
+        while(std::getline(tArgument, tSegment, '_'))
+        {
+           aOutput.push_back(tSegment);
+        }
+    }
+
     void initialize(const Plato::InputData& aStatisticsNode)
+    {
+        this->parseAlias(aStatisticsNode);
+        this->parseDataLayout(aStatisticsNode);
+        this->parseInputs(aStatisticsNode);
+        this->parseOutputs(aStatisticsNode);
+    }
+
+    void parseAlias(const Plato::InputData& aStatisticsNode)
+    {
+        mAlias = Plato::Get::String(aStatisticsNode, "Alias");
+        if(mAlias.empty() == true)
+        {
+            const std::string tOperationName = Plato::Get::String(aStatisticsNode, "Name");
+            const std::string tError = std::string("ALIAS IS NOT DEFINED IN OPERATION = ") + tOperationName + ".\n";
+            THROWERR(tError);
+        }
+    }
+
+    void parseDataLayout(const Plato::InputData& aStatisticsNode)
+    {
+        const std::string tLayout = Plato::Get::String(aStatisticsNode, "Layout");
+        if(tLayout.empty() == true)
+        {
+            const std::string tOperationName = Plato::Get::String(aStatisticsNode, "Name");
+            const std::string tError = std::string("DATA LAYOUT IS NOT DEFINED IN OPERATION = ") + tOperationName + ".\n";
+            THROWERR(tError);
+        }
+        mDataLayout = Plato::getLayout(tLayout);
+    }
+
+    void parseInputs(const Plato::InputData& aStatisticsNode)
     {
         for(auto tInputNode : aStatisticsNode.getByName<Plato::InputData>("Input"))
         {
-            this->setSampleProbability(tInputNode);
-            this->setInputArgumentName(tInputNode);
+            std::string tArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
+            this->setMyLocalArgument(tArgumentName);
+            mInputArguments.push_back(tArgumentName);
+            double tProbability = this->getMyProbability(tInputNode);
+            mInArgumentToProbability[tArgumentName] = tProbability;
         }
-        this->checkInputArgumentsLayout();
-        this->setStandardDeviationCoefficients(aStatisticsNode);
-        this->setOutputArguments(aStatisticsNode);
     }
 
-    void setSampleProbability(const Plato::InputData& aInputNode)
+    void parseOutputs(const Plato::InputData& aStatisticsNode)
     {
-        std::string tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
+        for(auto tOutputNode : aStatisticsNode.getByName<Plato::InputData>("Output"))
+        {
+            std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "ArgumentName", true);
+            this->setOutputArgumentName(tStatisticMeasure);
+            this->setMySigmaValue(tStatisticMeasure);
+            this->setMyLocalArgument(tStatisticMeasure);
+        }
+    }
+
+    void setMySigmaValue(const std::string & aStatisticMeasure)
+    {
+        if(aStatisticMeasure.empty() == true)
+        {
+            THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
+        }
+
+        std::vector<std::string> tStringList;
+        this->split(aStatisticMeasure, tStringList);
+        if(tStringList.size() > 1u)
+        {
+            if(tStringList.size() < 3u)
+            {
+                const std::string tError = std::string("STATISTIC MEASURE ARGUMENT IS NOT PROPERLY FORMATED. ")
+                        + "THE FORMAT IS EXPECTED TO BE: MEAN_PLUS_#_STDDEV. USER PROVIDED THE FOLLOWING FORMAT INSTEAD: "
+                        + aStatisticMeasure + ".\n";
+            }
+            const double tMySigmaValue = std::stod(tStringList[2]);
+            const std::string& tArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
+            mOutArgumentToSigma[tArgumentName] = tMySigmaValue;
+        }
+    }
+
+    void setOutputArgumentName(const std::string & aStatisticMeasure)
+    {
+        if(aStatisticMeasure.empty() == true)
+        {
+            THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
+        }
+        std::string tArgumentName = mAlias + "_" + aStatisticMeasure;
+        mOutputArguments.push_back(tArgumentName);
+        mStatisticsToOutArgument[aStatisticMeasure] = tArgumentName;
+    }
+
+    double getMyProbability(const Plato::InputData& aInputNode)
+    {
         const double tProbability = Plato::Get::Double(aInputNode, "Probability");
         if(tProbability > 0.0)
         {
-            std::string tError = std::string("ZERO OR NEGATIVE PROBABILITY SPECIFIED FOR INPUT ARGUMENT = ") + tArgumentName + ". "
-                                 + "INPUT PROBABILITY SHOULD BE A POSITIVE NUMBER (I.E. GREATER THAN ZERO).\n";
+            const std::string tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
+            const std::string tError = std::string("INVALID PROBABILITY SPECIFIED FOR INPUT ARGUMENT = ") + tArgumentName
+                    + ". " + "INPUT PROBABILITY WAS SET TO " + std::to_string(tProbability)
+                    + ". INPUT PROBABILITY SHOULD BE A POSITIVE NUMBER (I.E. GREATER THAN ZERO).\n";
             THROWERR(tError);
         }
-        mInputArgumentNameToProbability[tArgumentName] = tProbability;
+        return (tProbability);
     }
 
-    void setStandardDeviationCoefficients(const Plato::InputData& aStatisticsNode)
+    void setMyLocalArgument(const std::string & aStatisticMeasure)
     {
-        const std::vector<double> tSigmas = Plato::Get::Doubles(aStatisticsNode, "Sigma");
-        if(tSigmas.empty() == true)
+        if(aStatisticMeasure.empty() == true)
         {
-            // USE DEFAULT VALUES, SIGMA = {0, 1, 2, 3}
-            return;
+            THROWERR("INPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
         }
-        mSigmas = tSigmas;
-    }
-
-    void setInputArgumentName(const Plato::InputData& aInputNode)
-    {
-        std::string tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
-        auto tInputLayout = Plato::getLayout(aInputNode, /*default=*/Plato::data::layout_t::UNDEFINED);
-        if(tInputLayout == Plato::data::layout_t::UNDEFINED)
-        {
-            std::string tError = std::string("INPUT ARGUMENT = ") + tArgumentName + " LAYOUT IS UNDEFINED. " +
-                    "PLEASE USE THE LAYOUT KEYWORD TO DEFINE THE INPUT ARGUMENT'S LAYOUT.\n";
-            THROWERR(tError);
-        }
-        mLocalArguments.push_back(Plato::LocalArg {tInputLayout, tArgumentName});
-    }
-
-    void setOutputArguments(const Plato::InputData& aStatisticsNode)
-    {
-        std::string tAlias = Plato::Get::String(aStatisticsNode, "Output Alias");
-        if(tAlias.empty() == true)
-        {
-            THROWERR("OUTPUT ARGUMENT'S ALIAS WAS NOT DEFINED.\n");
-        }
-
-        mStatisticsToOutputArguments.clear();
-        const Plato::data::layout_t tOUTPUT_ARGUMENT_LAYOUT = mLocalArguments[0].mLayout;
-        for(size_t tIndex = 0; tIndex < mSigmas.size(); tIndex++)
-        {
-            size_t tSigmaValue = mSigmas[tIndex];
-            std::string tOutputArgumentName = tAlias;
-            std::string tStatistic = this->appendSuffix(tSigmaValue, tOutputArgumentName);
-            mLocalArguments.push_back(Plato::LocalArg {tOUTPUT_ARGUMENT_LAYOUT, tOutputArgumentName});
-            mStatisticsToOutputArguments[tStatistic] = tOutputArgumentName;
-        }
-
-        // append standard deviation
-        std::string tOutputArgumentName = tAlias + "_standard_deviation";
-        mLocalArguments.push_back(Plato::LocalArg {tOUTPUT_ARGUMENT_LAYOUT, tOutputArgumentName});
-        mStatisticsToOutputArguments["Sigma"] = tOutputArgumentName;
-    }
-
-    std::string appendSuffix(const size_t & aSigmaValue, std::string & aOutputArgumentName)
-    {
-        std::string tStatistic;
-        if(aSigmaValue == 0)
-        {
-            aOutputArgumentName = aOutputArgumentName + "_mean";
-            tStatistic = std::string("Mean");
-        }
-        else
-        {
-            aOutputArgumentName = aOutputArgumentName + "_mean_plus_" + std::to_string(aSigmaValue) + "_sigma";
-            tStatistic = std::to_string(aSigmaValue) + std::string("Sigma");
-        }
-        return (tStatistic);
-    }
-
-    void checkInputArgumentsLayout()
-    {
-        size_t tCount = 0;
-        const Plato::data::layout_t tEXPECTED_ARGUMENT_LAYOUT = mLocalArguments[0].mLayout;
-        for(auto tIterator = mLocalArguments.begin(); tIterator != mLocalArguments.end(); ++tIterator)
-        {
-            if(tIterator->mLayout != tEXPECTED_ARGUMENT_LAYOUT)
-            {
-                std::string tParsedLayout = Plato::getLayout(tIterator->mLayout);
-                std::string tExpectedLayout = Plato::getLayout(tEXPECTED_ARGUMENT_LAYOUT);
-                std::string tError = std::string("EXPECTED INPUT ARGUMENT LAYOUT = ") + tExpectedLayout
-                                     + ". HOWEVER, INPUT ARGUMENT #" + std::to_string(tCount)
-                                     + " LAYOUT IS DEFINED AS " + tParsedLayout + ".\n";
-                THROWERR(tError);
-            }
-            tCount++;
-        }
+        const std::string& tArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
+        mLocalArguments.push_back(Plato::LocalArg { mDataLayout, tArgumentName });
     }
 
     void computeMean()
     {
-        if(mLocalArguments[0].mLayout == Plato::data::ELEMENT_FIELD)
+        if(mDataLayout == Plato::data::ELEMENT_FIELD)
         {
             this->computeMeanElementField();
         }
-        else if(mLocalArguments[0].mLayout == Plato::data::SCALAR_FIELD)
+        else if(mDataLayout == Plato::data::SCALAR_FIELD)
         {
             this->computeMeanNodeField();
         }
-        else if(mLocalArguments[0].mLayout == Plato::data::SCALAR)
+        else if(mDataLayout == Plato::data::SCALAR)
         {
             this->computeMeanScalarValue();
         }
         else
         {
-            std::string tParsedLayout = Plato::getLayout(mLocalArguments[0].mLayout);
-            std::string tError = std::string("MEAN CAN'T BE COMPUTED FOR INPUT ARGUMENT WITH DATA LAYOUT = ")
-                    + tParsedLayout + ".\n";
+            const std::string tParsedLayout = Plato::getLayout(mDataLayout);
+            const std::string tError = std::string("MEAN CAN ONLY BE COMPUTED FOR NODAL FIELDS, ELEMENT FIELDS AND SCALAR VALUES QoIs.")
+                    + " INPUT DATA LAYOUT = " + tParsedLayout + ".\n";
             THROWERR(tError);
         }
     }
@@ -215,33 +240,33 @@ private:
     void computeMeanScalarValue()
     {
         double tLocalValue = 0;
-        for(auto tIterator = mInputArgumentNameToProbability.begin(); tIterator != mInputArgumentNameToProbability.end(); ++tIterator)
+        for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
         {
             const std::string& tInputArgumentName = tIterator->first;
             std::vector<double>* tInputValue = mPlatoApp->getValue(tInputArgumentName);
-            const double tProbability = mInputArgumentNameToProbability[tInputArgumentName];
+            const double tProbability = mInArgumentToProbability[tInputArgumentName];
             tLocalValue += tProbability * (*tInputValue)[0];
         }
 
         double tGlobalValue = 0.;
         const MPI_Comm& tComm = mPlatoApp->getComm();
         MPI_Allreduce(&tLocalValue, &tGlobalValue, 1, MPI_DOUBLE, MPI_MAX, tComm);
-        const std::string& tOutputArgumentName = mStatisticsToOutputArguments["Mean"];
+        const std::string& tOutputArgumentName = mStatisticsToOutArgument["Mean"];
         std::vector<double>* tOutputValue = mPlatoApp->getValue(tOutputArgumentName);
         (*tOutputValue)[0] = tGlobalValue;
     }
 
     void computeMeanNodeField()
     {
-        const std::string& tOutputArgumentName = mStatisticsToOutputArguments["Mean"];
+        const std::string& tOutputArgumentName = mStatisticsToOutArgument["Mean"];
         const size_t tLength = mPlatoApp->getNodeFieldLength(tOutputArgumentName);
         double* tOutputNodeFieldData = mPlatoApp->getNodeFieldData(tOutputArgumentName);
 
-        for(auto tIterator = mInputArgumentNameToProbability.begin(); tIterator != mInputArgumentNameToProbability.end(); ++tIterator)
+        for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
         {
             const std::string& tInputArgumentName = tIterator->first;
             double* tInputNodeFieldData = mPlatoApp->getNodeFieldData(tInputArgumentName);
-            const double tProbability = mInputArgumentNameToProbability[tInputArgumentName];
+            const double tProbability = mInArgumentToProbability[tInputArgumentName];
             for(size_t tIndex = 0; tIndex < tLength; tIndex++)
             {
                 tOutputNodeFieldData[tIndex] += tProbability * tInputNodeFieldData[tIndex];
@@ -256,14 +281,14 @@ private:
     void computeMeanElementField()
     {
         const size_t tNumElements = mPlatoApp->getNumElements();
-        const std::string& tOutputArgument = mStatisticsToOutputArguments["Mean"];
+        const std::string& tOutputArgument = mStatisticsToOutArgument["MEAN"];
         double* tOutputDataView = mPlatoApp->getElementFieldData(tOutputArgument);
 
-        for(auto tIterator = mInputArgumentNameToProbability.begin(); tIterator != mInputArgumentNameToProbability.end(); ++tIterator)
+        for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
         {
             const std::string& tInputArgumentName = tIterator->first;
             double* tInputDataView = mPlatoApp->getElementFieldData(tInputArgumentName);
-            const double tProbability = mInputArgumentNameToProbability[tInputArgumentName];
+            const double tProbability = mInArgumentToProbability[tInputArgumentName];
             for(size_t tIndex = 0; tIndex < tNumElements; tIndex++)
             {
                 tOutputDataView[tIndex] += tProbability * tInputDataView[tIndex];
@@ -274,28 +299,36 @@ private:
     void computeStandardDeviationElementField()
     {
         const size_t tNumElements = mPlatoApp->getNumElements();
-        const std::string& tOutputMean = mStatisticsToOutputArguments["Mean"];
+        const std::string& tOutputMean = mStatisticsToOutArgument["MEAN"];
         double* tOutputMeanData = mPlatoApp->getElementFieldData(tOutputMean);
-        const std::string& tOutputSigma = mStatisticsToOutputArguments["Sigma"];
+        const std::string& tOutputSigma = mStatisticsToOutArgument["STDDEV"];
         double* tOutputSigmaData = mPlatoApp->getElementFieldData(tOutputSigma);
+        //TODO: ZERO OUTPUT VALUE
 
-        for(auto tIterator = mInputArgumentNameToProbability.begin(); tIterator != mInputArgumentNameToProbability.end(); ++tIterator)
+        for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
         {
             const std::string& tInputArgumentName = tIterator->first;
             double* tInputDataView = mPlatoApp->getElementFieldData(tInputArgumentName);
-            const double tProbability = mInputArgumentNameToProbability[tInputArgumentName];
+            const double tProbability = mInArgumentToProbability[tInputArgumentName];
             for(size_t tIndex = 0; tIndex < tNumElements; tIndex++)
             {
-                tOutputSigmaData[tIndex] += tProbability * tInputDataView[tIndex];
+                double tSampleMinusMean = tInputDataView[tIndex] - tOutputMeanData[tIndex];
+                tOutputSigmaData[tIndex] += tProbability * std::pow(tSampleMinusMean, 2.0);
             }
         }
     }
 
 private:
-    std::vector<double> mSigmas; /*!< sigma, i.e. standard deviation, intervals */
+    std::string mAlias;
+    Plato::data::layout_t mDataLayout;
+
+    std::vector<std::string> mInputArguments;
+    std::vector<std::string> mOutputArguments;
     std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
-    std::map<std::string, double> mInputArgumentNameToProbability; /*!< sample to probability map */
-    std::map<std::string, std::string> mStatisticsToOutputArguments;  /*!< statistics to output argument name map */
+
+    std::map<std::string, double> mInArgumentToProbability; /*!< sample to probability map */
+    std::map<double, std::string> mOutArgumentToSigma; /*!< standard deviation multiplier to output argument name map */
+    std::map<std::string, std::string> mStatisticsToOutArgument; /*!< statistics to output argument name map */
 
 };
 
