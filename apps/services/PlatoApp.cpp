@@ -562,6 +562,18 @@ PlatoApp::~PlatoApp()
     }
 }
 
+void PlatoApp::reduceScalarValue(const double& aLocalValue, double& aGlobalValue)
+{
+    MPI_Allreduce(&aLocalValue, &aGlobalValue, 1, MPI_DOUBLE, MPI_MAX, mLocalComm);
+}
+
+void PlatoApp::compressAndUpdateNodeField(const std::string & aName)
+{
+    DistributedVector* tLocalData = this->getNodeField(aName);
+    tLocalData->Import();
+    tLocalData->DisAssemble();
+}
+
 std::vector<double>* PlatoApp::getValue(const std::string & aName)
 {
     auto tIterator = mValueMap.find(aName);
@@ -582,7 +594,7 @@ DistributedVector* PlatoApp::getNodeField(const std::string & aName)
     return tIterator->second;
 }
 
-size_t PlatoApp::getNumElements() const
+size_t PlatoApp::getLocalNumElements() const
 {
     return (mLightMp->getMesh()->getNumElems());
 }

@@ -177,7 +177,7 @@ public:
      * @param [in] aName field name
      * @return local number of elements
     **********************************************************************************/
-    size_t getNumElements() const;
+    size_t getLocalNumElements() const;
 
     /******************************************************************************//**
      * @brief Return element field identifier
@@ -220,6 +220,19 @@ public:
      * @return pointer to array of values
     **********************************************************************************/
     std::vector<double>* getValue(const std::string & aName);
+
+    /******************************************************************************//**
+     * @brief Combines values from all processes and distributes the result back to all processes
+     * @param [in] aLocalValue local process value
+     * @param [in] aGlobalValue global, i.e. reduced, value
+    **********************************************************************************/
+    void reduceScalarValue(const double& aLocalValue, double& aGlobalValue);
+
+    /******************************************************************************//**
+     * @brief Communicates boundary data to the owner process and update values in ghost indices
+     * @param [in] aName argument name
+    **********************************************************************************/
+    void compressAndUpdateNodeField(const std::string & aName);
 
 #ifdef GEOMETRY
 
