@@ -144,7 +144,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return list of standard deviation multipliers
+     * @brief Return list of standard deviation multipliers in ascending order
      * @return standard deviation multipliers
     **********************************************************************************/
     std::vector<double> getStandardDeviationMultipliers() const
@@ -154,6 +154,7 @@ public:
         {
             tOuput.push_back(tIterator->second);
         }
+        std::sort(tOuput.begin(), tOuput.end());
         return (tOuput);
     }
 
@@ -754,6 +755,9 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     Plato::InputData tOutput3("Output");
     tOutput3.add<std::string>("ArgumentName", "Mean_Plus_1_StdDev");
     tOperations.add<Plato::InputData>("Output", tOutput3);
+    Plato::InputData tOutput4("Output");
+    tOutput4.add<std::string>("ArgumentName", "Mean_Plus_5_StdDev");
+    tOperations.add<Plato::InputData>("Output", tOutput4);
 
     // TEST THAT INPUT DATA IS PARSED
     MPI_Comm tMyComm = MPI_COMM_WORLD;
@@ -768,10 +772,10 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
 
     std::vector<Plato::LocalArg> tLocalArguments;
     tOperation.getArguments(tLocalArguments);
-    ASSERT_EQ(6u, tLocalArguments.size());
+    ASSERT_EQ(7u, tLocalArguments.size());
     std::vector<std::string> tArgumentNames =
-            {"sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective",
-                    "Objective_MEAN", "Objective_STDDEV", "Objective_MEAN_PLUS_1_STDDEV"};
+        { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "Objective_MEAN",
+                "Objective_STDDEV", "Objective_MEAN_PLUS_1_STDDEV", "Objective_MEAN_PLUS_5_STDDEV" };
     for(size_t tIndex = 0; tIndex < tArgumentNames.size(); tIndex++)
     {
         bool tFoundGoldValue =
@@ -786,12 +790,14 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     ASSERT_THROW(tOperation.getProbability("sierra_sd1_lc4_objective"), std::runtime_error);
 
     std::vector<double> tMultipliers = tOperation.getStandardDeviationMultipliers();
-    ASSERT_EQ(1u, tMultipliers.size());
+    ASSERT_EQ(2u, tMultipliers.size());
     ASSERT_NEAR(1.0, tMultipliers[0], tTolerance);
+    ASSERT_NEAR(5.0, tMultipliers[1], tTolerance);
 
     ASSERT_STREQ("Objective_MEAN", tOperation.getOutputArgument("MEAN").c_str());
     ASSERT_STREQ("Objective_STDDEV", tOperation.getOutputArgument("STDDEV").c_str());
     ASSERT_STREQ("Objective_MEAN_PLUS_1_STDDEV", tOperation.getOutputArgument("MEAN_PLUS_1_STDDEV").c_str());
+    ASSERT_STREQ("Objective_MEAN_PLUS_5_STDDEV", tOperation.getOutputArgument("MEAN_PLUS_5_STDDEV").c_str());
     ASSERT_THROW(tOperation.getOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
 }
 
