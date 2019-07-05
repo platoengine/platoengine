@@ -41,10 +41,12 @@
  */
 
 /*
- * PLATO_Test_LocalStatisticsOperations.cpp
+ * Plato_Test_LocalStatisticsOperations.cpp
  *
  *  Created on: Jun 27, 2019
  */
+
+#include <gtest/gtest.h>
 
 #include "PlatoApp.hpp"
 #include "Plato_Macros.hpp"
@@ -55,20 +57,34 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Compute mean, standard deviation and mean plus standard deviation measures
+**********************************************************************************/
 class MeanPlusVarianceMeasure : public Plato::LocalOp
 {
 public:
-    MeanPlusVarianceMeasure(PlatoApp* aPlatoApp, const Plato::InputData& aStatisticsNode) :
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aPlatoApp PLATO application interface
+     * @param [in] aOperationNode input data
+    **********************************************************************************/
+    MeanPlusVarianceMeasure(PlatoApp* aPlatoApp, const Plato::InputData& aOperationNode) :
             Plato::LocalOp(aPlatoApp),
             mDataLayout(Plato::data::UNDEFINED)
     {
-        this->initialize(aStatisticsNode);
+        this->initialize(aOperationNode);
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~MeanPlusVarianceMeasure()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Compute statistics
+    **********************************************************************************/
     void operator()()
     {
         this->computeMean();
@@ -80,56 +96,188 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Get input and output arguments associated with the local operation
+     * @param [in/out] aLocalArgs local input and output arguments
+    **********************************************************************************/
     void getArguments(std::vector<LocalArg>& aLocalArgs)
     {
         aLocalArgs = mLocalArguments;
     }
 
-private:
-    void split(const std::string & aInput, std::vector<std::string> & aOutput)
+    /******************************************************************************//**
+     * @brief Return output argument's alias
+     * @return output argument's alias
+    **********************************************************************************/
+    std::string getOutputAlias() const
     {
-        std::string tSegment;
-        std::stringstream tArgument(aInput);
-        while(std::getline(tArgument, tSegment, '_'))
+        return (mOutputAlias);
+    }
+
+    /******************************************************************************//**
+     * @brief Return name used by the user to identify the function.
+     * @return user-defined function name
+    **********************************************************************************/
+    std::string getOperationName() const
+    {
+        return (mOperationName);
+    }
+
+    /******************************************************************************//**
+     * @brief Return function's identifier, i.e. Mean Plus StdDev.
+     * @return function's identifier, the user shall use "Mean Plus StdDev" as the
+     *   function identifier. the function identifier is used by the PLATO application
+     *   to create the function.
+    **********************************************************************************/
+    std::string getFunctionIdentifier() const
+    {
+        return (mFunctionIdentifier);
+    }
+
+    /******************************************************************************//**
+     * @brief Input and output data layout.
+     * return data layout, valid options are element field, node field and scalar value
+    **********************************************************************************/
+    Plato::data::layout_t getDataLayout() const
+    {
+        return (mDataLayout);
+    }
+
+    /******************************************************************************//**
+     * @brief Return list of standard deviation multipliers
+     * @return standard deviation multipliers
+    **********************************************************************************/
+    std::vector<double> getStandardDeviationMultipliers() const
+    {
+        std::vector<double> tOuput;
+        for(auto tIterator = mOutArgumentToSigma.begin(); tIterator != mOutArgumentToSigma.end(); ++ tIterator)
         {
-           aOutput.push_back(tSegment);
+            tOuput.push_back(tIterator->second);
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Return probability associated with input argument name
+     * @param [in] aInput input argument name
+     * @return probability
+    **********************************************************************************/
+    double getProbability(const std::string& aInput) const
+    {
+        auto tIterator = mInArgumentToProbability.find(aInput);
+        if(tIterator != mInArgumentToProbability.end())
+        {
+            return(tIterator->second);
+        }
+        else
+        {
+            const std::string tError = std::string("INPUT ARGUMENT NAME = ") + aInput + " IS NOT DEFINED.\n";
+            THROWERR(tError);
         }
     }
 
-    void initialize(const Plato::InputData& aStatisticsNode)
+    /******************************************************************************//**
+     * @brief Return output argument name associated with statistic measure
+     * @param [in] aInput upper case statistic's measure name, valid options are: MEAN, STDDEV
+     *   and MEAN_PLUS_#_STDDEV, where # denotes the standard deviation multiplier
+     * @return output argument name
+    **********************************************************************************/
+    std::string getOutputArgument(const std::string& aInput) const
     {
-        this->parseAlias(aStatisticsNode);
-        this->parseDataLayout(aStatisticsNode);
-        this->parseInputs(aStatisticsNode);
-        this->parseOutputs(aStatisticsNode);
+        auto tIterator = mStatisticsToOutArgument.find(aInput);
+        if(tIterator != mStatisticsToOutArgument.end())
+        {
+            return(tIterator->second);
+        }
+        else
+        {
+            const std::string tError = std::string("INPUT STATISTIC'S MEASURE NAME = ") + aInput
+                    + " IS NOT DEFINED.\n";
+            THROWERR(tError);
+        }
     }
 
-    void parseAlias(const Plato::InputData& aStatisticsNode)
+private:
+    /******************************************************************************//**
+     * @brief Initialize mean plus variance local operation
+     * @param [in] aOperationNode input data associated with statistics XML node
+    **********************************************************************************/
+    void initialize(const Plato::InputData& aOperationNode)
     {
-        mAlias = Plato::Get::String(aStatisticsNode, "Alias");
-        if(mAlias.empty() == true)
+        this->parseName(aOperationNode);
+        this->parseAlias(aOperationNode);
+        this->parseFunction(aOperationNode);
+        this->parseDataLayout(aOperationNode);
+        this->parseInputs(aOperationNode);
+        this->parseOutputs(aOperationNode);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse user defined function name
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseName(const Plato::InputData& aOperationNode)
+    {
+        mOperationName = Plato::Get::String(aOperationNode, "Name");
+        if(mOperationName.empty() == true)
         {
-            const std::string tOperationName = Plato::Get::String(aStatisticsNode, "Name");
+            const std::string tOperationName = Plato::Get::String(aOperationNode, "Name");
+            THROWERR("USER DEFINED FUNCTION NAME IS NOT.\n");
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Parse function identifier
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseFunction(const Plato::InputData& aOperationNode)
+    {
+        mFunctionIdentifier = Plato::Get::String(aOperationNode, "Function");
+        if(mFunctionIdentifier.empty() == true)
+        {
+            const std::string tError = std::string("FUNCTION IS NOT DEFINED IN OPERATION = ") + mOperationName + ".\n";
+            THROWERR(tError);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output argument alias from input file
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseAlias(const Plato::InputData& aOperationNode)
+    {
+        mOutputAlias = Plato::Get::String(aOperationNode, "Alias");
+        if(mOutputAlias.empty() == true)
+        {
+            const std::string tOperationName = Plato::Get::String(aOperationNode, "Name");
             const std::string tError = std::string("ALIAS IS NOT DEFINED IN OPERATION = ") + tOperationName + ".\n";
             THROWERR(tError);
         }
     }
 
-    void parseDataLayout(const Plato::InputData& aStatisticsNode)
+    /******************************************************************************//**
+     * @brief Parse data layout from input file
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseDataLayout(const Plato::InputData& aOperationNode)
     {
-        const std::string tLayout = Plato::Get::String(aStatisticsNode, "Layout");
+        const std::string tLayout = Plato::Get::String(aOperationNode, "Layout");
         if(tLayout.empty() == true)
         {
-            const std::string tOperationName = Plato::Get::String(aStatisticsNode, "Name");
+            const std::string tOperationName = Plato::Get::String(aOperationNode, "Name");
             const std::string tError = std::string("DATA LAYOUT IS NOT DEFINED IN OPERATION = ") + tOperationName + ".\n";
             THROWERR(tError);
         }
         mDataLayout = Plato::getLayout(tLayout);
     }
 
-    void parseInputs(const Plato::InputData& aStatisticsNode)
+    /******************************************************************************//**
+     * @brief Parse input arguments from input files
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseInputs(const Plato::InputData& aOperationNode)
     {
-        for(auto tInputNode : aStatisticsNode.getByName<Plato::InputData>("Input"))
+        for(auto tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
         {
             std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
             this->setMyLocalArgument(tInputArgumentName);
@@ -138,9 +286,13 @@ private:
         }
     }
 
-    void parseOutputs(const Plato::InputData& aStatisticsNode)
+    /******************************************************************************//**
+     * @brief Parse output arguments from input files
+     * @param [in] aOperationNode input data associated with the statistics XML node
+    **********************************************************************************/
+    void parseOutputs(const Plato::InputData& aOperationNode)
     {
-        for(auto tOutputNode : aStatisticsNode.getByName<Plato::InputData>("Output"))
+        for(auto tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
         {
             std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "ArgumentName", true);
             this->setOutputArgumentName(tStatisticMeasure);
@@ -150,6 +302,10 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Set output argument to standard deviation (i.e. sigma) multiplier map
+     * @param [in] aStatisticMeasure statistic measure name
+    **********************************************************************************/
     void setMySigmaValue(const std::string & aStatisticMeasure)
     {
         if(aStatisticMeasure.empty() == true)
@@ -167,26 +323,53 @@ private:
                         + "THE STATISTIC'S MEASURE FORMAT IS EXPECTED TO BE: MEAN_PLUS_#_STDDEV. "
                         + "THE USER PROVIDED THE FOLLOWING FORMAT INSTEAD: " + aStatisticMeasure + ".\n";
             }
-            const double tMySigmaValue = std::stod(tStringList[2]);
+            const double tMySigmaValue = this->getMySigmaValue(tStringList[2]);
             const std::string& tOutputArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
             mOutArgumentToSigma[tOutputArgumentName] = tMySigmaValue;
         }
     }
 
+    /******************************************************************************//**
+     * @brief Convert string standard deviation multiplier to double
+     * @param [in] aInput string standard deviation multiplier
+     * @return double standard deviation multiplier
+    **********************************************************************************/
+    double getMySigmaValue(const std::string& aInput)
+    {
+        try
+        {
+            double tMySigmaValue = std::stod(aInput);
+            return (tMySigmaValue);
+        }
+        catch(const std::invalid_argument& tErrorMsg)
+        {
+            THROWERR(tErrorMsg.what())
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set statistic to output argument map
+     * @param [in] aStatisticMeasure statistic measure name
+    **********************************************************************************/
     void setOutputArgumentName(const std::string & aStatisticMeasure)
     {
         if(aStatisticMeasure.empty() == true)
         {
             THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
         }
-        std::string tOutputArgumentName = mAlias + "_" + aStatisticMeasure;
+        std::string tOutputArgumentName = mOutputAlias + "_" + aStatisticMeasure;
         mStatisticsToOutArgument[aStatisticMeasure] = tOutputArgumentName;
     }
 
+    /******************************************************************************//**
+     * @brief Return probability measure
+     * @param [in] aInputNode input data XML node
+     * @return return probability measure
+    **********************************************************************************/
     double getMyProbability(const Plato::InputData& aInputNode)
     {
         const double tProbability = Plato::Get::Double(aInputNode, "Probability");
-        if(tProbability > 0.0)
+        if(tProbability <= 0.0)
         {
             const std::string tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
             const std::string tError = std::string("INVALID PROBABILITY SPECIFIED FOR INPUT ARGUMENT = ") + tArgumentName
@@ -197,6 +380,10 @@ private:
         return (tProbability);
     }
 
+    /******************************************************************************//**
+     * @brief Add argument to local argument list
+     * @param [in] aArgumentName argument name
+    **********************************************************************************/
     void setMyLocalArgument(const std::string & aArgumentName)
     {
         if(aArgumentName.empty() == true)
@@ -206,6 +393,9 @@ private:
         mLocalArguments.push_back(Plato::LocalArg { mDataLayout, aArgumentName });
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean measure
+    **********************************************************************************/
     void computeMean()
     {
         if(mDataLayout == Plato::data::ELEMENT_FIELD)
@@ -229,6 +419,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean measure for a scalar value
+    **********************************************************************************/
     void computeMeanScalarValue()
     {
         double tLocalValue = 0;
@@ -246,6 +439,9 @@ private:
         (*tOutputValue)[0] = tGlobalValue;
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean measure for a node field
+    **********************************************************************************/
     void computeMeanNodeField()
     {
         const std::string& tOutputArgumentName = mStatisticsToOutArgument["MEAN"];
@@ -266,6 +462,9 @@ private:
         mPlatoApp->compressAndUpdateNodeField(tOutputArgumentName);
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean measure for an element field
+    **********************************************************************************/
     void computeMeanElementField()
     {
         const size_t tLocalNumElements = mPlatoApp->getLocalNumElements();
@@ -284,6 +483,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute standard deviation measure
+    **********************************************************************************/
     void computeStandardDeviation()
     {
         if(mDataLayout == Plato::data::ELEMENT_FIELD)
@@ -307,6 +509,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute standard deviation measure for a scalar value
+    **********************************************************************************/
     void computeStandardDeviationScalarValue()
     {
         const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
@@ -317,7 +522,7 @@ private:
         {
             const std::string& tInputArgumentName = tIterator->first;
             std::vector<double>* tInputData = mPlatoApp->getValue(tInputArgumentName);
-            double tSampleMinusMean = tInputData[0] - tOutputMeanData[0];
+            double tSampleMinusMean = (*tInputData)[0] - (*tOutputMeanData)[0];
             tLocalValue += tIterator->second * std::pow(tSampleMinusMean, 2.0); // tIterator->second = Probability
         }
 
@@ -328,6 +533,9 @@ private:
         (*tOutputSigmaData)[0] = tGlobalValue;
     }
 
+    /******************************************************************************//**
+     * @brief Compute standard deviation measure for a node field
+    **********************************************************************************/
     void computeStandardDeviationNodeField()
     {
         const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
@@ -352,6 +560,9 @@ private:
         mPlatoApp->compressAndUpdateNodeField(tOutputArgumentStdDev);
     }
 
+    /******************************************************************************//**
+     * @brief Compute standard deviation measure for an element field
+    **********************************************************************************/
     void computeStandardDeviationElementField()
     {
         const size_t tLocalNumElements = mPlatoApp->getLocalNumElements();
@@ -373,6 +584,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean plus standard deviation measure
+    **********************************************************************************/
     void computeMeanPlusStdDev()
     {
         if(mDataLayout == Plato::data::ELEMENT_FIELD)
@@ -396,6 +610,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean plus standard deviation measure for a scalar value
+    **********************************************************************************/
     void computeMeanPlusStdDevScalarValue()
     {
         const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
@@ -411,6 +628,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean plus standard deviation measure for a node field
+    **********************************************************************************/
     void computeMeanPlusStdDevNodeField()
     {
         const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
@@ -433,6 +653,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute mean plus standard deviation measure for an element field
+    **********************************************************************************/
     void computeMeanPlusStdDevElementField()
     {
         const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
@@ -453,6 +676,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Zero all entries
+     * @param [in] aLength container's length
+     * @param [in/out] aData container's data
+    **********************************************************************************/
     void zero(const size_t& aLength, double* aData)
     {
         for(size_t tIndex = 0; tIndex < aLength; tIndex++)
@@ -461,13 +689,30 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Split collection of strings separated by the '_' delimiter.
+     * @param [in] aInput input string
+     * @param [in/out] aOutput list of strings
+    **********************************************************************************/
+    void split(const std::string & aInput, std::vector<std::string> & aOutput)
+    {
+        std::string tSegment;
+        std::stringstream tArgument(aInput);
+        while(std::getline(tArgument, tSegment, '_'))
+        {
+           aOutput.push_back(tSegment);
+        }
+    }
+
 private:
-    std::string mAlias; /*!< alias used for output QoI */
+    std::string mOutputAlias; /*!< alias used for output QoI */
+    std::string mOperationName; /*!< user defined function name */
+    std::string mFunctionIdentifier; /*!< function identifier */
     Plato::data::layout_t mDataLayout; /*!< output/input data layout */
     std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
 
     std::map<std::string, double> mInArgumentToProbability; /*!< sample to probability map */
-    std::map<std::string, double> mOutArgumentToSigma; /*!< standard deviation multiplier to output argument name map */
+    std::map<std::string, double> mOutArgumentToSigma; /*!< output argument name to standard deviation multiplier map */
     std::map<std::string, std::string> mStatisticsToOutArgument; /*!< statistics to output argument name map */
 
 };
@@ -476,3 +721,79 @@ private:
 }
 // namespace Plato
 
+namespace MeanPlusVarianceMeasureTest
+{
+
+TEST(PlatoTest, MeanPlusVarianceMeasure)
+{
+    Plato::InputData tOperations("Operation");
+    tOperations.add<std::string>("Function", "Mean Plus StdDev");
+    tOperations.add<std::string>("Name", "Objective Statistics");
+    tOperations.add<std::string>("Layout", "Scalar");
+    tOperations.add<std::string>("Alias", "Objective");
+
+    Plato::InputData tInput1("Input");
+    tInput1.add<std::string>("ArgumentName", "sierra_sd1_lc1_objective");
+    tInput1.add<std::string>("Probability", "0.5");
+    tOperations.add<Plato::InputData>("Input", tInput1);
+    Plato::InputData tInput2("Input");
+    tInput2.add<std::string>("ArgumentName", "sierra_sd1_lc2_objective");
+    tInput2.add<std::string>("Probability", "0.25");
+    tOperations.add<Plato::InputData>("Input", tInput2);
+    Plato::InputData tInput3("Input");
+    tInput3.add<std::string>("ArgumentName", "sierra_sd1_lc3_objective");
+    tInput3.add<std::string>("Probability", "0.25");
+    tOperations.add<Plato::InputData>("Input", tInput3);
+
+    Plato::InputData tOutput1("Output");
+    tOutput1.add<std::string>("ArgumentName", "Mean");
+    tOperations.add<Plato::InputData>("Output", tOutput1);
+    Plato::InputData tOutput2("Output");
+    tOutput2.add<std::string>("ArgumentName", "StdDev");
+    tOperations.add<Plato::InputData>("Output", tOutput2);
+    Plato::InputData tOutput3("Output");
+    tOutput3.add<std::string>("ArgumentName", "Mean_Plus_1_StdDev");
+    tOperations.add<Plato::InputData>("Output", tOutput3);
+
+    // TEST THAT INPUT DATA IS PARSED
+    MPI_Comm tMyComm = MPI_COMM_WORLD;
+    PlatoApp tPlatoApp(tMyComm);
+    Plato::MeanPlusVarianceMeasure tOperation(&tPlatoApp, tOperations);
+
+    // TEST DATA
+    ASSERT_EQ(Plato::data::SCALAR, tOperation.getDataLayout());
+    ASSERT_STREQ("Objective", tOperation.getOutputAlias().c_str());
+    ASSERT_STREQ("Objective Statistics", tOperation.getOperationName().c_str());
+    ASSERT_STREQ("Mean Plus StdDev", tOperation.getFunctionIdentifier().c_str());
+
+    std::vector<Plato::LocalArg> tLocalArguments;
+    tOperation.getArguments(tLocalArguments);
+    ASSERT_EQ(6u, tLocalArguments.size());
+    std::vector<std::string> tArgumentNames =
+            {"sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective",
+                    "Objective_MEAN", "Objective_STDDEV", "Objective_MEAN_PLUS_1_STDDEV"};
+    for(size_t tIndex = 0; tIndex < tArgumentNames.size(); tIndex++)
+    {
+        bool tFoundGoldValue =
+                std::find(tArgumentNames.begin(), tArgumentNames.end(), tLocalArguments[tIndex].mName) != tArgumentNames.end();
+        ASSERT_TRUE(tFoundGoldValue);
+    }
+
+    double tTolerance = 1e-6;
+    ASSERT_NEAR(0.5, tOperation.getProbability("sierra_sd1_lc1_objective"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getProbability("sierra_sd1_lc2_objective"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getProbability("sierra_sd1_lc3_objective"), tTolerance);
+    ASSERT_THROW(tOperation.getProbability("sierra_sd1_lc4_objective"), std::runtime_error);
+
+    std::vector<double> tMultipliers = tOperation.getStandardDeviationMultipliers();
+    ASSERT_EQ(1u, tMultipliers.size());
+    ASSERT_NEAR(1.0, tMultipliers[0], tTolerance);
+
+    ASSERT_STREQ("Objective_MEAN", tOperation.getOutputArgument("MEAN").c_str());
+    ASSERT_STREQ("Objective_STDDEV", tOperation.getOutputArgument("STDDEV").c_str());
+    ASSERT_STREQ("Objective_MEAN_PLUS_1_STDDEV", tOperation.getOutputArgument("MEAN_PLUS_1_STDDEV").c_str());
+    ASSERT_THROW(tOperation.getOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
+}
+
+}
+// namespace MeanPlusVarianceMeasureTest
