@@ -432,6 +432,14 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("MeanPlusStdDev");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::MeanPlusVarianceMeasure(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             std::stringstream tMessage;
             tMessage << "Cannot find specified Function: " << tStrFunction << std::endl;
             tMessage << "Available Functions: " << std::endl;

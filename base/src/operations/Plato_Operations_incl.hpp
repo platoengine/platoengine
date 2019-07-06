@@ -20,6 +20,7 @@
 #include "Plato_InitializeValues.hpp"
 #include "Plato_WriteGlobalValue.hpp"
 #include "Plato_OperationsUtilities.hpp"
+#include "Plato_MeanPlusVarianceMeasure.hpp"
 #include "Plato_NormalizeObjectiveValue.hpp"
 #include "Plato_ReciprocateObjectiveValue.hpp"
 #include "Plato_NormalizeObjectiveGradient.hpp"
