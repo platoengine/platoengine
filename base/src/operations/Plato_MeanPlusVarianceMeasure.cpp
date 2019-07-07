@@ -226,7 +226,7 @@ void MeanPlusVarianceMeasure::setMySigmaValue(const std::string & aStatisticMeas
     }
 
     std::vector<std::string> tStringList;
-    this->split(aStatisticMeasure, tStringList);
+    Plato::split(aStatisticMeasure, tStringList);
     if(tStringList.size() > 1u)
     {
         if(tStringList.size() < 3u)
@@ -332,7 +332,7 @@ void MeanPlusVarianceMeasure::computeMeanNodeField()
     const std::string& tOutputArgumentName = mStatisticsToOutArgument["MEAN"];
     const size_t tLength = mPlatoApp->getNodeFieldLength(tOutputArgumentName);
     double* tOutputData = mPlatoApp->getNodeFieldData(tOutputArgumentName);
-    this->zero(tLength, tOutputData);
+    Plato::zero(tLength, tOutputData);
 
     for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
     {
@@ -352,7 +352,7 @@ void MeanPlusVarianceMeasure::computeMeanElementField()
     const size_t tLocalNumElements = mPlatoApp->getLocalNumElements();
     const std::string& tOutputArgumentName = mStatisticsToOutArgument["MEAN"];
     double* tOutputData = mPlatoApp->getElementFieldData(tOutputArgumentName);
-    this->zero(tLocalNumElements, tOutputData);
+    Plato::zero(tLocalNumElements, tOutputData);
 
     for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
     {
@@ -417,7 +417,7 @@ void MeanPlusVarianceMeasure::computeStandardDeviationNodeField()
     double* tOutputSigmaData = mPlatoApp->getNodeFieldData(tOutputArgumentStdDev);
 
     const size_t tLocalLength = mPlatoApp->getNodeFieldLength(tOutputArgumentMean);
-    this->zero(tLocalLength, tOutputSigmaData);
+    Plato::zero(tLocalLength, tOutputSigmaData);
 
     for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
     {
@@ -440,7 +440,7 @@ void MeanPlusVarianceMeasure::computeStandardDeviationElementField()
     double* tOutputMeanData = mPlatoApp->getElementFieldData(tOutputArgumentMean);
     const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STDDEV"];
     double* tOutputSigmaData = mPlatoApp->getElementFieldData(tOutputArgumentStdDev);
-    this->zero(tLocalNumElements, tOutputSigmaData);
+    Plato::zero(tLocalNumElements, tOutputSigmaData);
 
     for(auto tIterator = mInArgumentToProbability.begin(); tIterator != mInArgumentToProbability.end(); ++tIterator)
     {
@@ -531,24 +531,6 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevElementField()
             tOutMeanPlusSigmaData[tIndex] = tOutputMeanData[tIndex]
                     + (tOuterIterator->second * tOutputSigmaData[tIndex]); // tIterator->second = sigma multiplier
         }
-    }
-}
-
-void MeanPlusVarianceMeasure::zero(const size_t& aLength, double* aData)
-{
-    for(size_t tIndex = 0; tIndex < aLength; tIndex++)
-    {
-        aData[tIndex] = 0.0;
-    }
-}
-
-void MeanPlusVarianceMeasure::split(const std::string & aInput, std::vector<std::string> & aOutput)
-{
-    std::string tSegment;
-    std::stringstream tArgument(aInput);
-    while(std::getline(tArgument, tSegment, '_'))
-    {
-       aOutput.push_back(tSegment);
     }
 }
 

@@ -83,5 +83,19 @@ Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layo
 **********************************************************************************/
 Plato::data::layout_t getLayout(const Plato::InputData& aNode);
 
+/******************************************************************************//**
+ * @brief Split collection of strings separated by the '_' delimiter.
+ * @param [in] aInput input string
+ * @param [in/out] aOutput list of strings
+**********************************************************************************/
+void split(const std::string & aInput, std::vector<std::string> & aOutput);
+
+/******************************************************************************//**
+ * @brief Zero all entries
+ * @param [in] aLength container's length
+ * @param [in/out] aData container's data
+**********************************************************************************/
+void zero(const size_t& aLength, double* aData);
+
 }
 // namespace Plato

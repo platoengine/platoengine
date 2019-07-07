@@ -268,20 +268,6 @@ private:
     **********************************************************************************/
     void computeMeanPlusStdDevElementField();
 
-    /******************************************************************************//**
-     * @brief Zero all entries
-     * @param [in] aLength container's length
-     * @param [in/out] aData container's data
-    **********************************************************************************/
-    void zero(const size_t& aLength, double* aData);
-
-    /******************************************************************************//**
-     * @brief Split collection of strings separated by the '_' delimiter.
-     * @param [in] aInput input string
-     * @param [in/out] aOutput list of strings
-    **********************************************************************************/
-    void split(const std::string & aInput, std::vector<std::string> & aOutput);
-
 private:
     std::string mOutputAlias; /*!< alias used for output QoI */
     std::string mOperationName; /*!< user defined function name */

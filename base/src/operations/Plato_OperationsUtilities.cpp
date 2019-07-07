@@ -107,5 +107,23 @@ Plato::data::layout_t getLayout(const Plato::InputData& aNode)
     return (Plato::getLayout(tLayoutString));
 }
 
+void zero(const size_t& aLength, double* aData)
+{
+    for(size_t tIndex = 0; tIndex < aLength; tIndex++)
+    {
+        aData[tIndex] = 0.0;
+    }
+}
+
+void split(const std::string & aInput, std::vector<std::string> & aOutput)
+{
+    std::string tSegment;
+    std::stringstream tArgument(aInput);
+    while(std::getline(tArgument, tSegment, '_'))
+    {
+       aOutput.push_back(tSegment);
+    }
+}
+
 }
 // namespace Plato
