@@ -40,6 +40,8 @@
  //@HEADER
  */
 
+#pragma once
+
 #include "lightmp.hpp"
 
 #include "Plato_LocalOperation.hpp"

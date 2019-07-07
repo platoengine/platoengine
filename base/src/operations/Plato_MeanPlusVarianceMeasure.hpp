@@ -214,39 +214,9 @@ private:
     void computeMean();
 
     /******************************************************************************//**
-     * @brief Compute mean measure for a scalar value
-    **********************************************************************************/
-    void computeMeanScalarValue();
-
-    /******************************************************************************//**
-     * @brief Compute mean measure for a node field
-    **********************************************************************************/
-    void computeMeanNodeField();
-
-    /******************************************************************************//**
-     * @brief Compute mean measure for an element field
-    **********************************************************************************/
-    void computeMeanElementField();
-
-    /******************************************************************************//**
      * @brief Compute standard deviation measure
     **********************************************************************************/
     void computeStandardDeviation();
-
-    /******************************************************************************//**
-     * @brief Compute standard deviation measure for a scalar value
-    **********************************************************************************/
-    void computeStandardDeviationScalarValue();
-
-    /******************************************************************************//**
-     * @brief Compute standard deviation measure for a node field
-    **********************************************************************************/
-    void computeStandardDeviationNodeField();
-
-    /******************************************************************************//**
-     * @brief Compute standard deviation measure for an element field
-    **********************************************************************************/
-    void computeStandardDeviationElementField();
 
     /******************************************************************************//**
      * @brief Compute mean plus standard deviation measure
@@ -276,7 +246,7 @@ private:
     std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
 
     std::map<std::string, double> mInArgumentToProbability; /*!< sample to probability map */
-    std::map<std::string, double> mOutArgumentToSigma; /*!< output argument name to standard deviation multiplier map */
+    std::map<std::string, double> mOutArgumentToStdDevMultiplier; /*!< output argument name to standard deviation multiplier map */
     std::map<std::string, std::string> mStatisticsToOutArgument; /*!< statistics to output argument name map */
 
 };

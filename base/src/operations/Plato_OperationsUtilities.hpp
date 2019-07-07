@@ -48,6 +48,8 @@
 
 #pragma once
 
+#include "Plato_SharedData.hpp"
+
 namespace Plato
 {
 
