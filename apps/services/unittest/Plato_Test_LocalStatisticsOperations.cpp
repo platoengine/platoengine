@@ -555,5 +555,102 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     ASSERT_THROW(tOperation.getOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
 }
 
+TEST(PlatoTest, MeanPlusVarianceGradient)
+{
+    Plato::InputData tOperations("Operation");
+    tOperations.add<std::string>("Function", "MeanPlusStdDevGradient");
+    tOperations.add<std::string>("Name", "Stochastic Objective Gradient");
+    tOperations.add<std::string>("Layout", "Nodal Field");
+
+    Plato::InputData tCriteriaValue("CriteriaValue");
+    Plato::InputData tInput1("Input");
+    tInput1.add<std::string>("ArgumentName", "sierra_sd1_lc1_objective");
+    tInput1.add<std::string>("Probability", "0.5");
+    tCriteriaValue.add<Plato::InputData>("Input", tInput1);
+    Plato::InputData tInput2("Input");
+    tInput2.add<std::string>("ArgumentName", "sierra_sd1_lc2_objective");
+    tInput2.add<std::string>("Probability", "0.25");
+    tCriteriaValue.add<Plato::InputData>("Input", tInput2);
+    Plato::InputData tInput3("Input");
+    tInput3.add<std::string>("ArgumentName", "sierra_sd1_lc3_objective");
+    tInput3.add<std::string>("Probability", "0.25");
+    tCriteriaValue.add<Plato::InputData>("Input", tInput3);
+
+    Plato::InputData tOutput1("Output");
+    tOutput1.add<std::string>("Statistic", "mean");
+    tOutput1.add<std::string>("ArgumentName", "objective_mean");
+    tCriteriaValue.add<Plato::InputData>("Output", tOutput1);
+    Plato::InputData tOutput2("Output");
+    tOutput2.add<std::string>("Statistic", "std_dev");
+    tOutput2.add<std::string>("ArgumentName", "objective_std_dev");
+    tCriteriaValue.add<Plato::InputData>("Output", tOutput2);
+    tOperations.add<Plato::InputData>("CriteriaValue", tCriteriaValue);
+
+    Plato::InputData tCriteriaGradient("CriteriaGradient");
+    Plato::InputData tInput11("Input");
+    tInput11.add<std::string>("ArgumentName", "sierra_sd1_lc1_objective_gradient");
+    tInput11.add<std::string>("Probability", "0.5");
+    tCriteriaGradient.add<Plato::InputData>("Input", tInput11);
+    Plato::InputData tInput12("Input");
+    tInput12.add<std::string>("ArgumentName", "sierra_sd1_lc2_objective_gradient");
+    tInput12.add<std::string>("Probability", "0.25");
+    tCriteriaGradient.add<Plato::InputData>("Input", tInput12);
+    Plato::InputData tInput13("Input");
+    tInput13.add<std::string>("ArgumentName", "sierra_sd1_lc3_objective_gradient");
+    tInput13.add<std::string>("Probability", "0.25");
+    tCriteriaGradient.add<Plato::InputData>("Input", tInput13);
+
+    Plato::InputData tOutput11("Output");
+    tOutput11.add<std::string>("Statistic", "mean_plus_1_std_dev");
+    tOutput11.add<std::string>("ArgumentName", "objective_mean_plus_1_std_dev_gradient");
+    tCriteriaGradient.add<Plato::InputData>("Output", tOutput11);
+    tOperations.add<Plato::InputData>("CriteriaGradient", tCriteriaGradient);
+
+    // TEST THAT INPUT DATA IS PARSED
+    MPI_Comm tMyComm = MPI_COMM_WORLD;
+    PlatoApp tPlatoApp(tMyComm);
+    Plato::MeanPlusVarianceGradient tOperation(&tPlatoApp, tOperations);
+
+    // TEST DATA
+    ASSERT_EQ(Plato::data::SCALAR, tOperation.getDataLayout());
+    ASSERT_STREQ("Stochastic Objective Value", tOperation.getOperationName().c_str());
+    ASSERT_STREQ("MeanPlusStdDev", tOperation.getFunctionIdentifier().c_str());
+
+    std::vector<Plato::LocalArg> tLocalArguments;
+    tOperation.getArguments(tLocalArguments);
+    ASSERT_EQ(9u, tLocalArguments.size());
+    std::vector<std::string> tArgumentNames =
+        { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_mean",
+                "objective_std_dev", "sierra_sd1_lc1_objective_gradient", "sierra_sd1_lc2_objective_gradient",
+                "sierra_sd1_lc3_objective_gradient", "objective_mean_plus_1_std_dev_gradient" };
+    for(size_t tIndex = 0; tIndex < tArgumentNames.size(); tIndex++)
+    {
+        bool tFoundGoldValue = std::find(tArgumentNames.begin(), tArgumentNames.end(), tLocalArguments[tIndex].mName)
+                != tArgumentNames.end();
+        ASSERT_TRUE(tFoundGoldValue);
+    }
+
+    double tTolerance = 1e-6;
+    ASSERT_NEAR(0.5, tOperation.getCriterionProbability("sierra_sd1_lc1_objective"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getCriterionProbability("sierra_sd1_lc2_objective"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getCriterionProbability("sierra_sd1_lc3_objective"), tTolerance);
+    ASSERT_THROW(tOperation.getCriterionProbability("sierra_sd1_lc4_objective"), std::runtime_error);
+    ASSERT_THROW(tOperation.getCriterionProbability("sierra_sd1_lc1_objective_gradient"), std::runtime_error);
+    ASSERT_NEAR(0.5, tOperation.getCriterionGradientProbability("sierra_sd1_lc1_objective_gradient"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getCriterionGradientProbability("sierra_sd1_lc2_objective_gradient"), tTolerance);
+    ASSERT_NEAR(0.25, tOperation.getCriterionGradientProbability("sierra_sd1_lc3_objective_gradient"), tTolerance);
+    ASSERT_THROW(tOperation.getCriterionGradientProbability("sierra_sd1_lc4_objective_gradient"), std::runtime_error);
+    ASSERT_THROW(tOperation.getCriterionGradientProbability("sierra_sd1_lc1_objective"), std::runtime_error);
+
+    double tMultiplier = tOperation.getStandardDeviationMultipliers();
+    ASSERT_NEAR(1.0, tMultiplier, tTolerance);
+
+    ASSERT_STREQ("objective_mean", tOperation.getCriterionOutputArgument("MEAN").c_str());
+    ASSERT_STREQ("objective_std_dev", tOperation.getCriterionOutputArgument("STD_DEV").c_str());
+    ASSERT_THROW(tOperation.getCriterionOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
+    ASSERT_STREQ("objective_mean_plus_1_std_dev_gradient", tOperation.getCriterionGradientOutputArgument("MEAN_PLUS_1_STD_DEV").c_str());
+    ASSERT_THROW(tOperation.getCriterionGradientOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
+}
+
 }
 // namespace MeanPlusVarianceMeasureTest
