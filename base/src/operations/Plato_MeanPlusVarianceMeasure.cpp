@@ -83,11 +83,6 @@ void MeanPlusVarianceMeasure::getArguments(std::vector<LocalArg>& aLocalArgs)
     aLocalArgs = mLocalArguments;
 }
 
-std::string MeanPlusVarianceMeasure::getOutputAlias() const
-{
-    return (mOutputAlias);
-}
-
 std::string MeanPlusVarianceMeasure::getOperationName() const
 {
     return (mOperationName);
@@ -137,7 +132,7 @@ std::string MeanPlusVarianceMeasure::getOutputArgument(const std::string& aInput
     }
     else
     {
-        const std::string tError = std::string("INPUT STATISTIC'S MEASURE NAME = ") + aInput
+        std::string tError = std::string("INPUT STATISTIC'S MEASURE NAME = ") + aInput
                 + " IS NOT DEFINED.\n";
         THROWERR(tError);
     }
@@ -146,7 +141,6 @@ std::string MeanPlusVarianceMeasure::getOutputArgument(const std::string& aInput
 void MeanPlusVarianceMeasure::initialize(const Plato::InputData& aOperationNode)
 {
     this->parseName(aOperationNode);
-    this->parseAlias(aOperationNode);
     this->parseFunction(aOperationNode);
     this->parseDataLayout(aOperationNode);
     this->parseInputs(aOperationNode);
@@ -169,17 +163,6 @@ void MeanPlusVarianceMeasure::parseFunction(const Plato::InputData& aOperationNo
     if(mFunctionIdentifier.empty() == true)
     {
         const std::string tError = std::string("FUNCTION IS NOT DEFINED IN OPERATION = ") + mOperationName + ".\n";
-        THROWERR(tError);
-    }
-}
-
-void MeanPlusVarianceMeasure::parseAlias(const Plato::InputData& aOperationNode)
-{
-    mOutputAlias = Plato::Get::String(aOperationNode, "Alias");
-    if(mOutputAlias.empty() == true)
-    {
-        const std::string tOperationName = Plato::Get::String(aOperationNode, "Name");
-        const std::string tError = std::string("ALIAS IS NOT DEFINED IN OPERATION = ") + tOperationName + ".\n";
         THROWERR(tError);
     }
 }
@@ -211,10 +194,10 @@ void MeanPlusVarianceMeasure::parseOutputs(const Plato::InputData& aOperationNod
 {
     for(auto tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
     {
-        std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "ArgumentName", true);
-        this->setOutputArgumentName(tStatisticMeasure);
+        std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "Statistic", true);
+        std::string tOutputArgumentName = Plato::Get::String(tOutputNode, "ArgumentName");
+        this->setStatisticsToOutputArgumentNameMap(tStatisticMeasure, tOutputArgumentName);
         this->setMySigmaValue(tStatisticMeasure);
-        const std::string& tOutputArgumentName = mStatisticsToOutArgument.find(tStatisticMeasure)->second;
         this->setMyLocalArgument(tOutputArgumentName);
     }
 }
@@ -228,14 +211,8 @@ void MeanPlusVarianceMeasure::setMySigmaValue(const std::string & aStatisticMeas
 
     std::vector<std::string> tStringList;
     Plato::split(aStatisticMeasure, tStringList);
-    if(tStringList.size() > 1u)
+    if(tStringList.size() > 2u)
     {
-        if(tStringList.size() < 3u)
-        {
-            const std::string tError = std::string("STATISTIC MEASURE ARGUMENT IS NOT PROPERLY FORMATED. ")
-                    + "THE STATISTIC'S MEASURE FORMAT IS EXPECTED TO BE: MEAN_PLUS_#_STDDEV. "
-                    + "THE USER PROVIDED THE FOLLOWING FORMAT INSTEAD: " + aStatisticMeasure + ".\n";
-        }
         const double tMySigmaValue = this->getMySigmaValue(tStringList[2]);
         const std::string& tOutputArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
         mOutArgumentToStdDevMultiplier[tOutputArgumentName] = tMySigmaValue;
@@ -255,14 +232,18 @@ double MeanPlusVarianceMeasure::getMySigmaValue(const std::string& aInput)
     }
 }
 
-void MeanPlusVarianceMeasure::setOutputArgumentName(const std::string & aStatisticMeasure)
+void MeanPlusVarianceMeasure::setStatisticsToOutputArgumentNameMap
+(const std::string & aStatisticMeasure, const std::string & aOutputArgumentName)
 {
     if(aStatisticMeasure.empty() == true)
     {
-        THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
+        THROWERR("STATISTIC KEYWORD IS EMPTY, I.E. STATISTIC MEASURE IS NOT DEFINED.\n");
     }
-    std::string tOutputArgumentName = mOutputAlias + "_" + aStatisticMeasure;
-    mStatisticsToOutArgument[aStatisticMeasure] = tOutputArgumentName;
+    if(aOutputArgumentName.empty() == true)
+    {
+        THROWERR("OUTPUT ARGUMENT NAME KEYWORD IS EMPTY, I.E. OUTPUT ARGUMENT NAME IS NOT DEFINED.\n");
+    }
+    mStatisticsToOutArgument[aStatisticMeasure] = aOutputArgumentName;
 }
 
 double MeanPlusVarianceMeasure::getMyProbability(const Plato::InputData& aInputNode)
@@ -361,7 +342,7 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevScalarValue()
 {
     const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
     std::vector<double>* tOutputMeanData = mPlatoApp->getValue(tOutputArgumentMean);
-    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STDDEV"];
+    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STD_DEV"];
     std::vector<double>* tOutputSigmaData = mPlatoApp->getValue(tOutputArgumentStdDev);
 
     for(auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
@@ -376,7 +357,7 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevNodeField()
 {
     const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
     double* tOutputMeanData = mPlatoApp->getNodeFieldData(tOutputArgumentMean);
-    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STDDEV"];
+    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STD_DEV"];
     double* tOutputSigmaData = mPlatoApp->getNodeFieldData(tOutputArgumentStdDev);
 
     const size_t tLocalLength = mPlatoApp->getNodeFieldLength(tOutputArgumentStdDev);
@@ -398,7 +379,7 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevElementField()
 {
     const std::string& tOutputArgumentMean = mStatisticsToOutArgument["MEAN"];
     double* tOutputMeanData = mPlatoApp->getElementFieldData(tOutputArgumentMean);
-    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STDDEV"];
+    const std::string& tOutputArgumentStdDev = mStatisticsToOutArgument["STD_DEV"];
     double* tOutputSigmaData = mPlatoApp->getElementFieldData(tOutputArgumentStdDev);
 
     const size_t tLocalNumElements = mPlatoApp->getLocalNumElements();

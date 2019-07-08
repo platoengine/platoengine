@@ -48,6 +48,7 @@
 
 #include <cmath>
 
+#include "Plato_Macros.hpp"
 #include "Plato_OperationsUtilities.hpp"
 #include "Plato_StatisticsOperationsUtilities.hpp"
 
@@ -68,7 +69,14 @@ void compute_scalar_value_mean(const std::map<std::string, double>& aSampleProbM
 
     double tGlobalValue = 0.;
     aPlatoApp->reduceScalarValue(tLocalValue, tGlobalValue);
-    const std::string& tOutputArgumentName = aStatsArgumentNameMap.find("MEAN")->second;
+    auto tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tOutputArgumentName = tIterator->second;
     std::vector<double>* tOutputValue = aPlatoApp->getValue(tOutputArgumentName);
     (*tOutputValue)[0] = tGlobalValue;
 }
@@ -78,13 +86,20 @@ void compute_node_field_mean(const std::map<std::string, double>& aSampleProbMap
                              const std::map<std::string, std::string>& aStatsArgumentNameMap,
                              PlatoApp* aPlatoApp)
 {
-    const std::string& tOutputArgumentName = aStatsArgumentNameMap.find("MEAN")->second;
+    auto tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tOutputArgumentName = tIterator->second;
     const size_t tLength = aPlatoApp->getNodeFieldLength(tOutputArgumentName);
     double* tOutputData = aPlatoApp->getNodeFieldData(tOutputArgumentName);
     Plato::zero(tLength, tOutputData);
 
     // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         double* tInputData = aPlatoApp->getNodeFieldData(tIterator->first);
         for(size_t tIndex = 0; tIndex < tLength; tIndex++)
@@ -101,13 +116,20 @@ void compute_element_field_mean(const std::map<std::string, double>& aSampleProb
                                 const std::map<std::string, std::string>& aStatsArgumentNameMap,
                                 PlatoApp* aPlatoApp)
 {
-    const size_t tLocalNumElements = aPlatoApp->getLocalNumElements();
-    const std::string& tOutputArgumentName = aStatsArgumentNameMap.find("MEAN")->second;
+    auto tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tOutputArgumentName = tIterator->second;
     double* tOutputData = aPlatoApp->getElementFieldData(tOutputArgumentName);
+    const size_t tLocalNumElements = aPlatoApp->getLocalNumElements();
     Plato::zero(tLocalNumElements, tOutputData);
 
     // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         double* tInputDataView = aPlatoApp->getElementFieldData(tIterator->first);
         for(size_t tIndex = 0; tIndex < tLocalNumElements; tIndex++)
@@ -125,7 +147,7 @@ void compute_scalar_value_standard_deviation(const std::map<std::string, double>
     // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
     double tLocalValue = 0;
     // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         std::vector<double>* tMySampleData = aPlatoApp->getValue(tIterator->first);
         tLocalValue += tIterator->second * std::pow((*tMySampleData)[0], 2.0);
@@ -136,10 +158,25 @@ void compute_scalar_value_standard_deviation(const std::map<std::string, double>
     aPlatoApp->reduceScalarValue(tLocalValue, tGlobalValue);
 
     // Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    const std::string& tArgumentMean = aStatsArgumentNameMap.find("MEAN")->second;
+    auto tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tArgumentMean = tIterator->second;
     std::vector<double>* tMean = aPlatoApp->getValue(tArgumentMean);
     const double tValue = tGlobalValue - std::pow((*tMean)[0], 2.0);
-    const std::string& tOutputArgumentStdDev = aStatsArgumentNameMap.find("STDDEV")->second;
+
+    tIterator = aStatsArgumentNameMap.find("STD_DEV");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tOutputArgumentStdDev = tIterator->second;
     std::vector<double>* tOutputSigmaData = aPlatoApp->getValue(tOutputArgumentStdDev);
     (*tOutputSigmaData)[0] = std::sqrt(tValue);
 }
@@ -150,14 +187,21 @@ void compute_node_field_standard_deviation(const std::map<std::string, double>& 
                                            PlatoApp* aPlatoApp)
 {
     // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    const std::string& tArgumentStdDev = aStatsArgumentNameMap.find("STDDEV")->second;
+    auto tIterator = aStatsArgumentNameMap.find("STD_DEV");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tArgumentStdDev = tIterator->second;
     double* tStandardDeviation = aPlatoApp->getNodeFieldData(tArgumentStdDev);
 
     // 1. Compute E(f(x)^2)
     const size_t tLocalLength = aPlatoApp->getNodeFieldLength(tArgumentStdDev);
     Plato::zero(tLocalLength, tStandardDeviation);
     // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         double* tMySample = aPlatoApp->getNodeFieldData(tIterator->first);
         for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
@@ -167,7 +211,14 @@ void compute_node_field_standard_deviation(const std::map<std::string, double>& 
     }
 
     // 2. Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    const std::string& tArgumentMean = aStatsArgumentNameMap.find("MEAN")->second;
+    tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tArgumentMean = tIterator->second;
     double* tMean = aPlatoApp->getNodeFieldData(tArgumentMean);
     for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
     {
@@ -185,14 +236,21 @@ void compute_element_field_standard_deviation(const std::map<std::string, double
                                               PlatoApp* aPlatoApp)
 {
     // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    const std::string& tArgumentStdDev = aStatsArgumentNameMap.find("STDDEV")->second;
+    auto tIterator = aStatsArgumentNameMap.find("STD_DEV");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tArgumentStdDev = tIterator->second;
     double* tStandardDeviation = aPlatoApp->getElementFieldData(tArgumentStdDev);
 
     // 1. Compute E(f(x)^2)
     const size_t tLocalLength = aPlatoApp->getLocalNumElements();
     Plato::zero(tLocalLength, tStandardDeviation);
     // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         double* tMySample = aPlatoApp->getElementFieldData(tIterator->first);
         for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
@@ -202,7 +260,14 @@ void compute_element_field_standard_deviation(const std::map<std::string, double
     }
 
     // 2. Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    const std::string& tArgumentMean = aStatsArgumentNameMap.find("MEAN")->second;
+    tIterator = aStatsArgumentNameMap.find("MEAN");
+    if(tIterator == aStatsArgumentNameMap.end())
+    {
+        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
+                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
+        THROWERR(tError)
+    }
+    const std::string& tArgumentMean = tIterator->second;
     double* tMean = aPlatoApp->getElementFieldData(tArgumentMean);
     for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
     {

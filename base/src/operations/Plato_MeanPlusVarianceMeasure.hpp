@@ -87,12 +87,6 @@ public:
     void getArguments(std::vector<LocalArg>& aLocalArgs);
 
     /******************************************************************************//**
-     * @brief Return output argument's alias
-     * @return output argument's alias
-    **********************************************************************************/
-    std::string getOutputAlias() const;
-
-    /******************************************************************************//**
      * @brief Return name used by the user to identify the function.
      * @return user-defined function name
     **********************************************************************************/
@@ -153,12 +147,6 @@ private:
     void parseFunction(const Plato::InputData& aOperationNode);
 
     /******************************************************************************//**
-     * @brief Parse output argument alias from input file
-     * @param [in] aOperationNode input data associated with the statistics XML node
-    **********************************************************************************/
-    void parseAlias(const Plato::InputData& aOperationNode);
-
-    /******************************************************************************//**
      * @brief Parse data layout from input file
      * @param [in] aOperationNode input data associated with the statistics XML node
     **********************************************************************************/
@@ -192,8 +180,10 @@ private:
     /******************************************************************************//**
      * @brief Set statistic to output argument map
      * @param [in] aStatisticMeasure statistic measure name
-    **********************************************************************************/
-    void setOutputArgumentName(const std::string & aStatisticMeasure);
+     * @param [in] aStatisticMeasure output argument name
+     **********************************************************************************/
+    void setStatisticsToOutputArgumentNameMap(const std::string & aStatisticMeasure,
+                                              const std::string & aOutputArgumentName);
 
     /******************************************************************************//**
      * @brief Return probability measure
@@ -239,7 +229,6 @@ private:
     void computeMeanPlusStdDevElementField();
 
 private:
-    std::string mOutputAlias; /*!< alias used for output QoI */
     std::string mOperationName; /*!< user defined function name */
     std::string mFunctionIdentifier; /*!< function identifier */
     Plato::data::layout_t mDataLayout; /*!< output/input data layout */
@@ -248,7 +237,6 @@ private:
     std::map<std::string, double> mInArgumentToProbability; /*!< sample to probability map */
     std::map<std::string, double> mOutArgumentToStdDevMultiplier; /*!< output argument name to standard deviation multiplier map */
     std::map<std::string, std::string> mStatisticsToOutArgument; /*!< statistics to output argument name map */
-
 };
 // class MeanPlusVarianceMeasure
 
