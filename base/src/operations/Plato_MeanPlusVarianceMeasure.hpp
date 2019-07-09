@@ -113,7 +113,7 @@ public:
     std::vector<double> getStandardDeviationMultipliers() const;
 
     /******************************************************************************//**
-     * @brief Return probability associated with input argument name
+     * @brief Return the probability associated with input argument name
      * @param [in] aInput input argument name
      * @return probability
     **********************************************************************************/
