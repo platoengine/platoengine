@@ -46,8 +46,7 @@
  *  Created on: Jul 6, 2019
  */
 
-#include <cmath>
-
+#include "PlatoApp.hpp"
 #include "Plato_Macros.hpp"
 #include "Plato_OperationsUtilities.hpp"
 #include "Plato_StatisticsOperationsUtilities.hpp"
@@ -59,16 +58,14 @@ void compute_scalar_value_mean(const std::map<std::string, double>& aSampleProbM
                                const std::map<std::string, std::string>& aStatsArgumentNameMap,
                                PlatoApp* aPlatoApp)
 {
-    double tLocalValue = 0;
+    double tMean = 0;
     // tIterator->first = Argument name & tIterator->second = Probability
     for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
     {
         std::vector<double>* tInputValue = aPlatoApp->getValue(tIterator->first);
-        tLocalValue += tIterator->second * (*tInputValue)[0];
+        tMean += tIterator->second * (*tInputValue)[0];
     }
 
-    double tGlobalValue = 0.;
-    aPlatoApp->reduceScalarValue(tLocalValue, tGlobalValue);
     auto tIterator = aStatsArgumentNameMap.find("MEAN");
     if(tIterator == aStatsArgumentNameMap.end())
     {
@@ -78,7 +75,7 @@ void compute_scalar_value_mean(const std::map<std::string, double>& aSampleProbM
     }
     const std::string& tOutputArgumentName = tIterator->second;
     std::vector<double>* tOutputValue = aPlatoApp->getValue(tOutputArgumentName);
-    (*tOutputValue)[0] = tGlobalValue;
+    (*tOutputValue)[0] = tMean;
 }
 // function compute_scalar_value_mean
 
@@ -145,17 +142,16 @@ void compute_scalar_value_standard_deviation(const std::map<std::string, double>
                                              PlatoApp* aPlatoApp)
 {
     // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    double tLocalValue = 0;
+
+    // 1. Compute E(f(x)^2)
+    double tExpectedValueOfSquaredCriterion = 0;
     // tIterator->first = Argument name & tIterator->second = Probability
     for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
     {
         std::vector<double>* tMySampleData = aPlatoApp->getValue(tIterator->first);
-        tLocalValue += tIterator->second * std::pow((*tMySampleData)[0], 2.0);
+        tExpectedValueOfSquaredCriterion += tIterator->second * std::pow((*tMySampleData)[0], 2.0);
     }
 
-    // Compute E(f(x)^2)
-    double tGlobalValue = 0.;
-    aPlatoApp->reduceScalarValue(tLocalValue, tGlobalValue);
 
     // Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
     auto tIterator = aStatsArgumentNameMap.find("MEAN");
@@ -167,7 +163,7 @@ void compute_scalar_value_standard_deviation(const std::map<std::string, double>
     }
     const std::string& tArgumentMean = tIterator->second;
     std::vector<double>* tMean = aPlatoApp->getValue(tArgumentMean);
-    const double tValue = tGlobalValue - std::pow((*tMean)[0], 2.0);
+    const double tExpectedValueOfSquaredCriterionMinusMean = tExpectedValueOfSquaredCriterion - std::pow((*tMean)[0], 2.0);
 
     tIterator = aStatsArgumentNameMap.find("STD_DEV");
     if(tIterator == aStatsArgumentNameMap.end())
@@ -178,7 +174,7 @@ void compute_scalar_value_standard_deviation(const std::map<std::string, double>
     }
     const std::string& tOutputArgumentStdDev = tIterator->second;
     std::vector<double>* tOutputSigmaData = aPlatoApp->getValue(tOutputArgumentStdDev);
-    (*tOutputSigmaData)[0] = std::sqrt(tValue);
+    (*tOutputSigmaData)[0] = std::sqrt(tExpectedValueOfSquaredCriterionMinusMean);
 }
 // function compute_scalar_value_standard_deviation
 
