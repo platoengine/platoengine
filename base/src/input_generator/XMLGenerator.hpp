@@ -68,6 +68,22 @@ public:
 
 protected:
 
+    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_document &aDoc,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aOwner,
+                                                   const std::string &aUser);
+    pugi::xml_node createSingleUserElementSharedData(pugi::xml_document &aDoc,
+                                                     const std::string &aName,
+                                                     const std::string &aType,
+                                                     const std::string &aOwner,
+                                                     const std::string &aUser);
+    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                    const std::string &aName,
+                                                    const std::string &aType,
+                                                    const std::string &aSize,
+                                                    const std::string &aOwner,
+                                                    const std::string &aUser);
     bool parseLoads(std::istream &fin);
     bool parseBCs(std::istream &fin);
     bool generateInterfaceXML();
@@ -84,6 +100,8 @@ protected:
     bool generatePlatoAnalyzeInputDecks();
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
+    void getUncertaintyFlags(bool &aHasUncertainties,
+                             bool &aRequestedVonMisesOutput);
     bool runSROMForUncertainVariables();
     bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();
@@ -104,12 +122,42 @@ protected:
                          const std::string &value);
     bool addChild(pugi::xml_node parent_node, const std::string &name, const std::string &value);
     bool outputVolumeStage(pugi::xml_document &doc);
+    void outputUpdateProblemStage(pugi::xml_document &doc);
+    void outputOutputToFileStage(pugi::xml_document &doc,
+                                 bool &aHasUncertainties,
+                                 bool &aRequestedVonMises);
+    void addStochasticObjectiveValueOperation(pugi::xml_document &aDoc);
+    void addStochasticObjectiveGradientOperation(pugi::xml_document &aDoc);
+    void addVonMisesStatisticsOperation(pugi::xml_document &aDoc);
+    void addFilterControlOperation(pugi::xml_document &aDoc);
+    void addFilterGradientOperation(pugi::xml_document &aDoc);
+    void addFilterHessianOperation(pugi::xml_document &aDoc);
+    void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
+                                     bool &aHasUncertainties,
+                                     bool &aRequestedVonMises);
+    void addEnforceBoundsOperation(pugi::xml_document &aDoc);
+    void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
+    void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
+    void addAggregateHessianOperation(pugi::xml_document &aDoc);
+    void addAggregateEnergyOperation(pugi::xml_document &aDoc);
+    void addAggregateGradientOperation(pugi::xml_document &aDoc);
+    void addComputeVolumeOperation(pugi::xml_document &aDoc);
+    void addDesignVolumeOperation(pugi::xml_document &aDoc);
+    void addUpdateProblemOperation(pugi::xml_document &aDoc);
+    void addFilterInfo(pugi::xml_document &aDoc);
+    void addInitializeFieldOperation(pugi::xml_document &aDoc);
+    void outputInitializeOptimizationDOFsStage(pugi::xml_document &doc);
     bool outputVolumeGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaStage(pugi::xml_document &doc);
+    void outputSetLowerBoundsStage(pugi::xml_document &doc);
+    void outputSetUpperBoundsStage(pugi::xml_document &doc);
+    void outputCacheStateStage(pugi::xml_document &doc);
     bool outputSurfaceAreaGradientStage(pugi::xml_document &doc);
+    void outputDesignVolumeStage(pugi::xml_document &doc);
     bool outputComputeStateStage(pugi::xml_document &doc);
-    bool outputInternalEnergyStage(pugi::xml_document &doc);
-    bool outputInternalEnergyGradientStage(pugi::xml_document &doc);
+    bool outputInternalEnergyStage(pugi::xml_document &doc, bool &aHasUncertainties);
+    bool outputInternalEnergyGradientStage(pugi::xml_document &doc,
+                                           bool &aHasUncertainties);
     bool outputInternalEnergyHessianStage(pugi::xml_document &doc);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);

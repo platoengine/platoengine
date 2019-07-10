@@ -178,6 +178,7 @@ struct InputData
     std::string optimization_algorithm;
     std::string check_gradient;
     std::string check_hessian;
+    std::string objective_number_standard_deviations;
 
     std::string restart_iteration;
     std::string initial_guess_filename;
@@ -235,6 +236,7 @@ struct InputData
     std::vector<std::string> fixed_block_ids;
     std::vector<std::string> fixed_sideset_ids;
     std::vector<std::string> fixed_nodeset_ids;
+    std::vector<std::string> mStandardDeviations;
 
     std::vector<XMLGen::LoadCase> load_cases;
     std::vector<XMLGen::BC> bcs;
