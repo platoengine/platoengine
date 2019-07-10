@@ -62,15 +62,15 @@ Plato::data::layout_t getLayout(const std::string & aLayoutStr)
 {
 
     Plato::data::layout_t tLayout;
-    if(aLayoutStr == "Nodal Field")
+    if(aLayoutStr == "NODAL FIELD" || aLayoutStr == "SCALAR FIELD")
     {
         tLayout = Plato::data::layout_t::SCALAR_FIELD;
     }
-    else if(aLayoutStr == "Element Field")
+    else if(aLayoutStr == "ELEMENT FIELD")
     {
         tLayout = Plato::data::layout_t::ELEMENT_FIELD;
     }
-    else if(aLayoutStr == "Value" || aLayoutStr == "Global" || aLayoutStr == "Scalar")
+    else if(aLayoutStr == "VALUE" || aLayoutStr == "GLOBAL" || aLayoutStr == "SCALAR")
     {
         tLayout = Plato::data::layout_t::SCALAR;
     }

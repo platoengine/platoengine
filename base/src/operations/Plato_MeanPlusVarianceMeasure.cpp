@@ -169,7 +169,7 @@ void MeanPlusVarianceMeasure::parseFunction(const Plato::InputData& aOperationNo
 
 void MeanPlusVarianceMeasure::parseDataLayout(const Plato::InputData& aOperationNode)
 {
-    const std::string tLayout = Plato::Get::String(aOperationNode, "Layout");
+    const std::string tLayout = Plato::Get::String(aOperationNode, "Layout", true);
     if(tLayout.empty() == true)
     {
         const std::string tOperationName = Plato::Get::String(aOperationNode, "Name");
