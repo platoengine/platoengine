@@ -87,7 +87,7 @@ Plato::data::layout_t getLayout(const std::string & aLayoutStr)
 
 Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout)
 {
-    auto tLayoutString = Plato::Get::String(aNode, "Layout");
+    auto tLayoutString = Plato::Get::String(aNode, "Layout", true);
     Plato::data::layout_t tLayout = aDefaultLayout;
     if(!tLayoutString.empty())
     {
@@ -98,7 +98,7 @@ Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layo
 
 Plato::data::layout_t getLayout(const Plato::InputData& aNode)
 {
-    auto tLayoutString = Plato::Get::String(aNode, "Layout");
+    auto tLayoutString = Plato::Get::String(aNode, "Layout", true);
     if(tLayoutString.empty())
     {
         Plato::ParsingException tParsingException(" PlatoApp: required 'Layout' not specified");
