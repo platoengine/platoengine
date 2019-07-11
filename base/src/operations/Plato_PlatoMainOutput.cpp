@@ -128,7 +128,7 @@ void PlatoMainOutput::extractIsoSurface(int aIteration)
             tOutputFields += ",";
         }
     }
-    if(ex.create_mesh_apis_read_from_file(&mPlatoApp->getComm(), // MPI_Comm
+    if(ex.create_mesh_apis_read_from_file((stk::ParallelMachine*)(&(mPlatoApp->getComm())), // MPI_Comm
                     input_filename,// input filename
                     output_filename,// output filename
                     "Topology",// iso field name

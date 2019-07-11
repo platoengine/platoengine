@@ -345,7 +345,7 @@ double InitializeField::evaluateSwissCheeseLevelSet(const double &aX,
 }
 
 /******************************************************************************/
-void InitializeField::getInitialValuesForSwissCheeseLevelSet(const DistributedVector &field, std::vector<double> &tValues)
+void InitializeField::getInitialValuesForSwissCheeseLevelSet(const DistributedVector &field, std::vector<double> &aValues)
 /******************************************************************************/
 {
 #ifdef STK_ENABLED
@@ -477,7 +477,7 @@ void InitializeField::getInitialValuesForSwissCheeseLevelSet(const DistributedVe
     {
         int tGlobalID = field.getAssemblyEpetraVector()->Map().GID(tIndex);
         stk::mesh::Entity tEntity = tBulkData->get_entity(stk::topology::NODE_RANK, tGlobalID);
-        double* tValues = stk::mesh::field_data(*tCoordsField, tEntity);
+        double* tCoords = stk::mesh::field_data(*tCoordsField, tEntity);
         double tAverageElemLength=tGlobalAverageDistance;
         double tVal;
         if(tNodeSetGlobalIds.find(tGlobalID) != tNodeSetGlobalIds.end())
@@ -488,7 +488,7 @@ void InitializeField::getInitialValuesForSwissCheeseLevelSet(const DistributedVe
         {
             if(mCreateSpheres)
             {
-                tVal = -1.0 * evaluateSwissCheeseLevelSet(tValues[0], tValues[1], tValues[2],
+                tVal = -1.0 * evaluateSwissCheeseLevelSet(tCoords[0], tCoords[1], tCoords[2],
                         tLowerCoordBoundsOfDomain,
                         tUpperCoordBoundsOfDomain,
                         tAverageElemLength);
@@ -498,7 +498,7 @@ void InitializeField::getInitialValuesForSwissCheeseLevelSet(const DistributedVe
         }
         double* tValues2 = stk::mesh::field_data(tTempField, tEntity);
         tValues2[0] = tVal;
-        tValues.push_back(tVal);
+        aValues.push_back(tVal);
     }
 
     delete tBulkData;
@@ -618,7 +618,7 @@ void InitializeField::getInitialValuesForPrimitivesLevelSet(const DistributedVec
 #endif // STK_ENABLED
 }
 
-void InitializeField::getInitialValuesForRestart(const DistributedVector &field, std::vector<double> &tValues)
+void InitializeField::getInitialValuesForRestart(const DistributedVector &field, std::vector<double> &aValues)
 {
 #ifdef STK_ENABLED
     bool IsInputFileSpread = true;
@@ -661,7 +661,7 @@ void InitializeField::getInitialValuesForRestart(const DistributedVector &field,
         int tGlobalID = field.getAssemblyEpetraVector()->Map().GID(tIndex);
         stk::mesh::Entity tEntity = tBulkData->get_entity(stk::topology::NODE_RANK, tGlobalID);
         double* tValues = stk::mesh::field_data(*tIsoField, tEntity);
-        tValues.push_back(*tValues);
+        aValues.push_back(*tValues);
     }
 
     delete tBulkData;
