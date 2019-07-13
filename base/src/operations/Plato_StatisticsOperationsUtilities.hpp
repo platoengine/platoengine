@@ -48,57 +48,72 @@
 
 #pragma once
 
-#include "PlatoApp.hpp"
+#include <vector>
+#include <string>
+
+class PlatoApp
 
 namespace Plato
 {
 
-/******************************************************************************//**
- * @brief Compute mean measure for a scalar value
- * @param [in] aSampleProbMap sample argument name to probability map
- * @param [in] aStatsArgumentNameMap statistics name to output argument name map
- * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
-void compute_scalar_value_mean(const std::map<std::string, double>& aSampleProbMap,
-                               const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                               PlatoApp* aPlatoApp);
+template<typename SampleType, typename ProbabilityType>
+struct SampleProbPair
+{
+    size_t mLength;
+    SampleType mSample;
+    ProbabilityType mProbability;
+};
 
 /******************************************************************************//**
- * @brief Compute mean measure for a node field
- * @param [in] aSampleProbMap sample argument name to probability map
- * @param [in] aStatsArgumentNameMap statistics name to output argument name map
- * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
-void compute_node_field_mean(const std::map<std::string, double>& aSampleProbMap,
-                             const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                             PlatoApp* aPlatoApp);
+ * @brief Compute the mean of the sample set
+ * @param [in] aPairs sample-probability pairs
+ * @return sample set mean
+ **********************************************************************************/
+double compute_sample_set_mean(const std::vector<Plato::SampleProbPair<double, double>>& aPairs)
 
 /******************************************************************************//**
- * @brief Compute mean measure for an element field
- * @param [in] aSampleProbMap sample argument name to probability map
- * @param [in] aStatsArgumentNameMap statistics name to output argument name map
- * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
-void compute_element_field_mean(const std::map<std::string, double>& aSampleProbMap,
-                                const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                PlatoApp* aPlatoApp);
+ * @brief Compute the mean of the sample set
+ * NOTE: aOutput values are set to zero inside the function.
+ * @param [in] aPairs sample-probability pairs
+ * @param [out] aOutput output array
+ **********************************************************************************/
+void compute_sample_set_mean(const std::vector<Plato::SampleProbPair<double*, double>>& aPairs, double* aOutput);
 
 /******************************************************************************//**
- * @brief Compute the standard deviation measure of a scalar value
- * @param [in] aSampleProbMap sample argument name to probability map
- * @param [in] aStatsArgumentNameMap statistics name to output argument name map
- * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
-void compute_scalar_value_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
-                                             const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                             PlatoApp* aPlatoApp);
+ * @brief Compute the standard deviation of the sample set
+ * @param [in] aMean sample set mean
+ * @param [in] aPairs sample-probability pairs
+ * @return standard deviation
+ **********************************************************************************/
+double compute_sample_set_standard_deviation(const double& aMean,
+                                             const std::vector<Plato::SampleProbPair<double, double>>& aPairs);
+
+/******************************************************************************//**
+ * @brief Compute the gradient of the mean plus standard deviation criterion, i.e
+ * compute \f$\frac{\partial{J}(x)}{\partial{x}}, where J(x) = E(f(x)) + k*Std(f(x))\f$.
+ * Here, \f$f(x)\f$ denotes a criterion, \f$E\f$ denotes expectation and \f$Std\f$
+ * denotes standard deviation.
+ * NOTE: aOutput values are set to zero inside the function.
+ * @param [in] aCriterionMean sample set mean
+ * @param [in] aCriterionStdDev sample set standard deviation
+ * @param [in] aStdDevMultiplier standard deviation multiplier
+ * @param [in] aCriterionValPairs criterion value sample-probability pairs
+ * @param [in] aCriterionGradPairs criterion gradient sample-probability pairs
+ * @param [out] aOutput output gradient
+ **********************************************************************************/
+void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
+                                                   const double& aCriterionStdDev,
+                                                   const double& aStdDevMultiplier,
+                                                   const std::vector<Plato::SampleProbPair<double, double>>& aCriterionValPairs,
+                                                   const std::vector<Plato::SampleProbPair<double*, double>>& aCriterionGradPairs,
+                                                   double* aOutput)
 
 /******************************************************************************//**
  * @brief Compute the standard deviation measure of a node field
  * @param [in] aSampleProbMap sample argument name to probability map
  * @param [in] aStatsArgumentNameMap statistics name to output argument name map
  * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
+ **********************************************************************************/
 void compute_node_field_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
                                            const std::map<std::string, std::string>& aStatsArgumentNameMap,
                                            PlatoApp* aPlatoApp);
@@ -108,7 +123,7 @@ void compute_node_field_standard_deviation(const std::map<std::string, double>& 
  * @param [in] aSampleProbMap sample argument name to probability map
  * @param [in] aStatsArgumentNameMap statistics name to output argument name map
  * @param [in] aPlatoApp PLATO application interface
-**********************************************************************************/
+ **********************************************************************************/
 void compute_element_field_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
                                               const std::map<std::string, std::string>& aStatsArgumentNameMap,
                                               PlatoApp* aPlatoApp);

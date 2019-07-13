@@ -49,6 +49,7 @@
 #pragma once
 
 #include "Plato_LocalOperation.hpp"
+#include "Plato_StatisticsOperationsUtilities.hpp"
 
 class PlatoApp;
 
@@ -172,6 +173,38 @@ private:
     void parseFunction(const Plato::InputData& aOperationNode);
 
     /******************************************************************************//**
+     * @brief Set criterion value sample-probability pairs
+    **********************************************************************************/
+    void setCriterionValueSampleProbabilityPairs();
+
+    /******************************************************************************//**
+     * @brief Set criterion gradient sample-probability pairs
+    **********************************************************************************/
+    void setCriterionGradientSampleProbabilityPairs();
+
+    /******************************************************************************//**
+     * @brief Set criterion gradient sample-probability pairs (node-based data)
+    **********************************************************************************/
+    void setNodeFieldGradientSampleProbabilityPairs();
+
+    /******************************************************************************//**
+     * @brief Set criterion gradient sample-probability pairs (element-based data)
+    **********************************************************************************/
+    void setElementFieldGradientSampleProbabilityPairs();
+
+    /******************************************************************************//**
+     * @brief Increase the capacity of the criterion gradient's set of sample-probability
+     *    pairs to the number of samples.
+    **********************************************************************************/
+    void reserveCriterionGradSampleProbabilityPairs()
+
+    /******************************************************************************//**
+     * @brief Increase the capacity of the criterion value's set of sample-probability
+     *    pairs to the number of samples.
+    **********************************************************************************/
+    void reserveCriterionValueSampleProbabilityPairs()
+
+    /******************************************************************************//**
      * @brief Parse data layout from input file
      * @param [in] aOperationNode operation input data
      * @param [in] aCriteriaName criteria name
@@ -179,10 +212,24 @@ private:
     Plato::data::layout_t parseDataLayout(const Plato::InputData& aOperationNode, const std::string& aCriteriaName);
 
     /******************************************************************************//**
+     * @brief Return pointer to output data associated with the criterion gradient
+     * @param [in] aStatisticMeasure string statistic measure
+     * @return pointer to output data
+    **********************************************************************************/
+    double* getCriterionGradientOutputData(const std::string& aStatisticMeasure);
+
+    /******************************************************************************//**
+     * @brief Return pointer to output data associated with the criterion value
+     * @param [in] aStatisticMeasure string statistic measure
+     * @return pointer to output data
+    **********************************************************************************/
+    std::vector<double>* getCriterionValueOutputData(const std::string& aStatisticMeasure);
+
+    /******************************************************************************//**
      * @brief Parse input arguments from XML files
      * @param [in] aDataLayout data layout for input sample set
      * @param [in] aInput input arguments
-     * @param [in] aOutput input argument name to probability map
+     * @param [out] aOutput input argument name to probability map
     **********************************************************************************/
     void parseInputs(const Plato::data::layout_t& aDataLayout,
                      const Plato::InputData& aInput,
@@ -256,38 +303,48 @@ private:
     void addLocalArgument(const Plato::data::layout_t& aDataLayout, const std::string & aArgumentName);
 
     /******************************************************************************//**
-     * @brief Compute the gradient of the mean criterion
+     * @brief Compute criterion gradient sample set's mean
     **********************************************************************************/
-    void computeMeanCriterionGradient();
+    void computeMeanCriterionGradientSampleSet();
+
+    /******************************************************************************//**
+     * @brief Compute criterion value sample set's mean and standard deviation
+    **********************************************************************************/
+    void computeMeanAndStdDevCriterionValueSampleSet();
 
     /******************************************************************************//**
      * @brief Compute the gradient of the mean plus standard deviation criterion
     **********************************************************************************/
-    void computeMeanPlusStandardDeviationCriterionGradient();
+    void computeGradientMeanPlusStandardDeviationCriterion();
 
     /******************************************************************************//**
      * @brief Compute the gradient of the mean plus standard deviation criterion -
      *     node field gradient type
     **********************************************************************************/
-    void computeMeanPlusStdDevCriterionGradientNodeField();
+    void computeGradientMeanPlusStdDevCriterionForNodeField();
 
     /******************************************************************************//**
      * @brief Compute the gradient of the mean plus standard deviation criterion -
      *     element field gradient type
     **********************************************************************************/
-    void computeMeanPlusStdDevCriterionGradientElementField();
+    void computeGradientMeanPlusStdDevCriterionForElementField();
 
 private:
     double mStdDevMultiplier; /*!< standard deviation multiplier */
     std::string mOperationName; /*!< user defined function name */
     std::string mFunctionIdentifier; /*!< function identifier */
     std::string mOutputGradientArgumentName; /*!< output criterion gradient argument name */
+
     Plato::data::layout_t mCriterionValueDataLayout; /*!< criteria value data layout */
     Plato::data::layout_t mCriterionGradientDataLayout; /*!< criteria gradient data layout */
-    std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
 
-    std::map<std::string, double> mCriterionSamplesArgNameToProbability; /*!< criterion value samples to probability map */
+    std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
+    std::vector<Plato::SampleProbPair<double, double>> mCriterionValueSamplesToProbability; /*!< criterion value samples to probability pairs */
+    std::vector<Plato::SampleProbPair<double*, double>> mCriterionGradSamplesToProbability; /*!< criterion gradient samples to probability pairs */
+
+    std::map<std::string, double> mCriterionValueSamplesArgNameToProbability; /*!< criterion value samples to probability map */
     std::map<std::string, double> mCriterionGradSamplesArgNameToProbability; /*!< criterion gradient samples to probability map */
+
     std::map<std::string, std::string> mCriterionValueStatisticsToOutputName; /*!< criterion value statistics to output argument name map */
     std::map<std::string, std::string> mCriterionGradientStatisticsToOutputName; /*!< criterion gradient statistics to output argument name map */
 };

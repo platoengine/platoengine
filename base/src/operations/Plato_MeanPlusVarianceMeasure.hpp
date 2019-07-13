@@ -234,7 +234,7 @@ private:
     Plato::data::layout_t mDataLayout; /*!< output/input data layout */
     std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
 
-    std::map<std::string, double> mInArgumentToProbability; /*!< sample to probability map */
+    std::map<std::string, double> mSampleArgumentNameToProbability; /*!< sample argument name to probability map */
     std::map<std::string, double> mOutArgumentToStdDevMultiplier; /*!< output argument name to standard deviation multiplier map */
     std::map<std::string, std::string> mStatisticsToOutArgument; /*!< statistics to output argument name map */
 };

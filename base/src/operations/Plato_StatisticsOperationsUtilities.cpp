@@ -54,129 +54,115 @@
 namespace Plato
 {
 
-void compute_scalar_value_mean(const std::map<std::string, double>& aSampleProbMap,
-                               const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                               PlatoApp* aPlatoApp)
+double compute_sample_set_mean(const std::vector<Plato::SampleProbPair<double, double>>& aPairs)
 {
+    if(aPairs.empty() == true)
+    {
+        THROWERR("INPUT CONTAINER OF SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
+    }
+
     double tMean = 0;
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++ tIterator)
+    for(auto tIterator = aPairs.begin(); tIterator != aPairs.end(); ++ tIterator)
     {
-        std::vector<double>* tInputValue = aPlatoApp->getValue(tIterator->first);
-        tMean += tIterator->second * (*tInputValue)[0];
+        tMean += tIterator->mProbability * tIterator->mSample;
     }
-
-    auto tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tOutputArgumentName = tIterator->second;
-    std::vector<double>* tOutputValue = aPlatoApp->getValue(tOutputArgumentName);
-    (*tOutputValue)[0] = tMean;
+    return (tMean);
 }
-// function compute_scalar_value_mean
+// function compute_sample_set_mean
 
-void compute_node_field_mean(const std::map<std::string, double>& aSampleProbMap,
-                             const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                             PlatoApp* aPlatoApp)
+void compute_sample_set_mean(const std::vector<Plato::SampleProbPair<double*, double>>& aPairs, double* aOutput)
 {
-    auto tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
+    if(aPairs.empty() == true)
     {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
+        THROWERR("INPUT CONTAINER OF SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
     }
-    const std::string& tOutputArgumentName = tIterator->second;
-    const size_t tLength = aPlatoApp->getNodeFieldLength(tOutputArgumentName);
-    double* tOutputData = aPlatoApp->getNodeFieldData(tOutputArgumentName);
-    Plato::zero(tLength, tOutputData);
 
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
+    Plato::zero(aPairs[0].mLength, aOutput);
+    for(auto tIterator = aPairs.begin(); tIterator != aPairs.end(); ++tIterator)
     {
-        double* tInputData = aPlatoApp->getNodeFieldData(tIterator->first);
-        for(size_t tIndex = 0; tIndex < tLength; tIndex++)
+        for(size_t tIndex = 0; tIndex < tIterator->mLength; tIndex++)
         {
-            tOutputData[tIndex] += tIterator->second * tInputData[tIndex];
-        }
-    }
-
-    aPlatoApp->compressAndUpdateNodeField(tOutputArgumentName);
-}
-// function compute_node_field_mean
-
-void compute_element_field_mean(const std::map<std::string, double>& aSampleProbMap,
-                                const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                PlatoApp* aPlatoApp)
-{
-    auto tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tOutputArgumentName = tIterator->second;
-    double* tOutputData = aPlatoApp->getElementFieldData(tOutputArgumentName);
-    const size_t tLocalNumElements = aPlatoApp->getLocalNumElements();
-    Plato::zero(tLocalNumElements, tOutputData);
-
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
-    {
-        double* tInputDataView = aPlatoApp->getElementFieldData(tIterator->first);
-        for(size_t tIndex = 0; tIndex < tLocalNumElements; tIndex++)
-        {
-            tOutputData[tIndex] += tIterator->second * tInputDataView[tIndex];
+            aOutput[tIndex] += tIterator->mProbability * tIterator->mSample[tIndex];
         }
     }
 }
-// function compute_element_field_mean
+// function compute_sample_set_mean
 
-void compute_scalar_value_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
-                                             const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                             PlatoApp* aPlatoApp)
+double compute_sample_set_standard_deviation(const double& aMean, const std::vector<Plato::SampleProbPair<double, double>>& aPairs)
 {
+    if(aPairs.empty() == true)
+    {
+        THROWERR("INPUT CONTAINER OF SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
+    }
+
+    if(std::isfinite(aMean) == false)
+    {
+        THROWERR("MEAN = " + std::to_string(aMean) + " IS NOT A FINITE NUMBER.\n")
+    }
+
     // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-
-    // 1. Compute E(f(x)^2)
     double tExpectedValueOfSquaredCriterion = 0;
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
+    for(auto tIterator = aPairs.begin(); tIterator != aPairs.end(); ++tIterator)
     {
-        std::vector<double>* tMySampleData = aPlatoApp->getValue(tIterator->first);
-        tExpectedValueOfSquaredCriterion += tIterator->second * std::pow((*tMySampleData)[0], 2.0);
+        tExpectedValueOfSquaredCriterion += tIterator->mProbability * std::pow(tIterator->mSample, 2.0);
     }
 
-
-    // Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    auto tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tArgumentMean = tIterator->second;
-    std::vector<double>* tMean = aPlatoApp->getValue(tArgumentMean);
-    const double tExpectedValueOfSquaredCriterionMinusMean = tExpectedValueOfSquaredCriterion - std::pow((*tMean)[0], 2.0);
-
-    tIterator = aStatsArgumentNameMap.find("STD_DEV");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tOutputArgumentStdDev = tIterator->second;
-    std::vector<double>* tOutputSigmaData = aPlatoApp->getValue(tOutputArgumentStdDev);
-    (*tOutputSigmaData)[0] = std::sqrt(tExpectedValueOfSquaredCriterionMinusMean);
+    const double tExpectedValueOfSquaredCriterionMinusMean = tExpectedValueOfSquaredCriterion - std::pow(aMean, 2.0);
+    const double tOutput = std::sqrt(tExpectedValueOfSquaredCriterionMinusMean);
+    return (tOutput);
 }
-// function compute_scalar_value_standard_deviation
+// function compute_sample_set_standard_deviation
+
+void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
+                                                   const double& aCriterionStdDev,
+                                                   const double& aStdDevMultiplier,
+                                                   const std::vector<Plato::SampleProbPair<double, double>>& aCriterionValPairs,
+                                                   const std::vector<Plato::SampleProbPair<double*, double>>& aCriterionGradPairs,
+                                                   double* aOutput)
+{
+    if(aCriterionValPairs.empty() == true)
+    {
+        THROWERR("INPUT CONTAINER OF CRITERION VALUE SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
+    }
+
+    if(aCriterionGradPairs.empty() == true)
+    {
+        THROWERR("INPUT CONTAINER OF CRITERION GRADIENT SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
+    }
+
+    if(aCriterionValPairs.size() == aCriterionGradPairs.size())
+    {
+        THROWERR("CRITERION VALUE AND CRITERION GRADIENT CONTAINERS SHOULD HAVE THE SAME SIZE.\n")
+    }
+
+    if(std::isfinite(aCriterionMean) == false)
+    {
+        THROWERR("MEAN = " + std::to_string(aCriterionMean) + " IS NOT A FINITE NUMBER.\n")
+    }
+
+    if(std::isfinite(aCriterionStdDev) == false)
+    {
+        THROWERR("STANDARD DEVIATION = " + std::to_string(aCriterionStdDev) + " IS NOT A FINITE NUMBER.\n")
+    }
+
+    auto tValueIter = aCriterionValPairs.begin();
+    Plato::zero(aCriterionGradPairs[0].mLength, aOutput);
+    for(auto tGradientIter = aCriterionGradPairs.begin(); tGradientIter != aCriterionGradPairs.end(); ++tGradientIter)
+    {
+        auto tMultiplierOverStdDev = aStdDevMultiplier / aCriterionStdDev;
+        auto tMultiplier = tGradientIter->mProbability + ( tMultiplierOverStdDev *
+                tGradientIter->mProbability * ( tValueIter->mSample - aCriterionMean ) );
+
+        for(size_t tIndex = 0; tIndex < tGradientIter->mLength; tIndex++)
+        {
+            aOutput[tIndex] += tMultiplier * tGradientIter->mSample[tIndex];
+        }
+
+        ++tValueIter;
+    }
+}
+// function compute_sample_set_mean_plus_std_dev_gradient
+
 
 void compute_node_field_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
                                            const std::map<std::string, std::string>& aStatsArgumentNameMap,

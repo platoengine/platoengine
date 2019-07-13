@@ -111,8 +111,8 @@ std::vector<double> MeanPlusVarianceMeasure::getStandardDeviationMultipliers() c
 
 double MeanPlusVarianceMeasure::getProbability(const std::string& aInput) const
 {
-    auto tIterator = mInArgumentToProbability.find(aInput);
-    if(tIterator != mInArgumentToProbability.end())
+    auto tIterator = mSampleArgumentNameToProbability.find(aInput);
+    if(tIterator != mSampleArgumentNameToProbability.end())
     {
         return(tIterator->second);
     }
@@ -186,7 +186,7 @@ void MeanPlusVarianceMeasure::parseInputs(const Plato::InputData& aOperationNode
         std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         this->setMyLocalArgument(tInputArgumentName);
         double tProbability = this->getMyProbability(tInputNode);
-        mInArgumentToProbability[tInputArgumentName] = tProbability;
+        mSampleArgumentNameToProbability[tInputArgumentName] = tProbability;
     }
 }
 
@@ -273,15 +273,15 @@ void MeanPlusVarianceMeasure::computeMean()
 {
     if(mDataLayout == Plato::data::ELEMENT_FIELD)
     {
-        Plato::compute_element_field_mean(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_sample_set_mean(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else if(mDataLayout == Plato::data::SCALAR_FIELD)
     {
-        Plato::compute_node_field_mean(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_node_field_mean(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else if(mDataLayout == Plato::data::SCALAR)
     {
-        Plato::compute_scalar_value_mean(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_scalar_value_mean(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else
     {
@@ -292,19 +292,38 @@ void MeanPlusVarianceMeasure::computeMean()
     }
 }
 
+void MeanPlusVarianceMeasure::setSampleDataToProbabilityPairs(std::vector<Plato::SampleProbPair<double*, double>>& aPairs)
+{
+    for(auto tItr = mSampleArgumentNameToProbability.begin(); tItr != mSampleArgumentNameToProbability.end(); ++tItr)
+    {
+        aPairs.push_back(Plato::SampleProbPair<double*, double>{});
+        aPairs.rbegin()->mProbability = tItr->second;
+        aPairs.rbegin()->mLength = mPlatoApp->getLocalNumElements();
+        aPairs.rbegin()->mSample = mPlatoApp->getElementFieldData(tItr->first);
+    }
+}
+
+void MeanPlusVarianceMeasure::computeMeanElementFieldQoI()
+{
+    std::vector<Plato::SampleProbPair<double*, double>> tSampleDataToProbabilityPairs;
+    this->setSampleDataToProbabilityPairs(tSampleDataToProbabilityPairs);
+    // tIterator->first = sample's argument name & tIterator->second = probability
+
+}
+
 void MeanPlusVarianceMeasure::computeStandardDeviation()
 {
     if(mDataLayout == Plato::data::ELEMENT_FIELD)
     {
-        Plato::compute_element_field_standard_deviation(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_element_field_standard_deviation(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else if(mDataLayout == Plato::data::SCALAR_FIELD)
     {
-        Plato::compute_node_field_standard_deviation(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_node_field_standard_deviation(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else if(mDataLayout == Plato::data::SCALAR)
     {
-        Plato::compute_scalar_value_standard_deviation(mInArgumentToProbability, mStatisticsToOutArgument, mPlatoApp);
+        Plato::compute_scalar_value_standard_deviation(mSampleArgumentNameToProbability, mStatisticsToOutArgument, mPlatoApp);
     }
     else
     {
