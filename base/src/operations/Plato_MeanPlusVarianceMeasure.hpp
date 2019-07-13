@@ -49,6 +49,7 @@
 #pragma once
 
 #include "Plato_LocalOperation.hpp"
+#include "Plato_StatisticsOperationsUtilities.hpp"
 
 class PlatoApp;
 
@@ -171,11 +172,22 @@ private:
     void setMySigmaValue(const std::string & aStatisticMeasure);
 
     /******************************************************************************//**
-     * @brief Convert string standard deviation multiplier to double
-     * @param [in] aInput string standard deviation multiplier
-     * @return double standard deviation multiplier
+     * @brief Set sample-probability pairs for an node based quantity of interest
+     * @param [in] aPairs sample-probability pairs
     **********************************************************************************/
-    double getMySigmaValue(const std::string& aInput);
+    void setSampleProbabilityPairsNodeQoI(std::vector<Plato::SampleProbPair<double*, double>>& aPairs);
+
+    /******************************************************************************//**
+     * @brief Set sample-probability pairs for an element based quantity of interest
+     * @param [in] aPairs sample-probability pairs
+    **********************************************************************************/
+    void setSampleProbabilityPairsElementQoI(std::vector<Plato::SampleProbPair<double*, double>>& aPairs);
+
+    /******************************************************************************//**
+     * @brief Set sample-probability pairs for a global/scalar quantity of interest
+     * @param [in] aPairs sample-probability pairs
+    **********************************************************************************/
+    void setSampleProbabilityPairsGlobalQoI(std::vector<Plato::SampleProbPair<double, double>>& aPairs);
 
     /******************************************************************************//**
      * @brief Set statistic to output argument map
@@ -186,27 +198,50 @@ private:
                                               const std::string & aOutputArgumentName);
 
     /******************************************************************************//**
-     * @brief Return probability measure
-     * @param [in] aInputNode input data XML node
-     * @return return probability measure
-    **********************************************************************************/
-    double getMyProbability(const Plato::InputData& aInputNode);
-
-    /******************************************************************************//**
      * @brief Add argument to local argument list
      * @param [in] aArgumentName argument name
     **********************************************************************************/
     void setMyLocalArgument(const std::string & aArgumentName);
 
     /******************************************************************************//**
-     * @brief Compute mean measure
+     * @brief Compute the mean of a specific quantity of interest
     **********************************************************************************/
-    void computeMean();
+    void computeMeanQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the mean associated with a global quantity of interest
+    **********************************************************************************/
+    void computeMeanGlobalQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the mean associated with a node-based quantity of interest
+    **********************************************************************************/
+    void computeMeanNodeFieldQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the mean associated with an element-based quantity of interest
+    **********************************************************************************/
+    void computeMeanElementFieldQoI();
 
     /******************************************************************************//**
      * @brief Compute standard deviation measure
     **********************************************************************************/
-    void computeStandardDeviation();
+    void computeStandardDeviationQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the standard deviation associated with a global quantity of interest
+    **********************************************************************************/
+    void computeStdDevGlobalQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the standard deviation associated with a node-based quantity of interest
+    **********************************************************************************/
+    void computeStdDevNodeFieldQoI();
+
+    /******************************************************************************//**
+     * @brief Compute the standard deviation associated with an element-based quantity of interest
+    **********************************************************************************/
+    void computeStdDevElementFieldQoI();
 
     /******************************************************************************//**
      * @brief Compute mean plus standard deviation measure
@@ -214,19 +249,47 @@ private:
     void computeMeanPlusStdDev();
 
     /******************************************************************************//**
-     * @brief Compute mean plus standard deviation measure for a scalar value
+     * @brief Compute mean plus standard deviation measure associated with a global quantity of interest
     **********************************************************************************/
-    void computeMeanPlusStdDevScalarValue();
+    void computeMeanPlusStdDevGlobalQoI();
 
     /******************************************************************************//**
-     * @brief Compute mean plus standard deviation measure for a node field
+     * @brief Compute mean plus standard deviation measure associated with a node-based quantity of interest
     **********************************************************************************/
-    void computeMeanPlusStdDevNodeField();
+    void computeMeanPlusStdDevNodeFieldQoI();
 
     /******************************************************************************//**
-     * @brief Compute mean plus standard deviation measure for an element field
+     * @brief Compute mean plus standard deviation measure associated with an element-based quantity of interest
     **********************************************************************************/
-    void computeMeanPlusStdDevElementField();
+    void computeMeanPlusStdDevElementFieldQoI();
+
+    /******************************************************************************//**
+     * @brief Convert string standard deviation multiplier to double
+     * @param [in] aInput string standard deviation multiplier
+     * @return double standard deviation multiplier
+    **********************************************************************************/
+    double getMySigmaValue(const std::string& aInput);
+
+    /******************************************************************************//**
+     * @brief Return probability measure
+     * @param [in] aInputNode input data XML node
+     * @return return probability measure
+    **********************************************************************************/
+    double getMyProbability(const Plato::InputData& aInputNode);
+
+    /******************************************************************************//**
+     * @brief Get output data for an element or node based quantity of interest (QoI)
+     * @param [in] aStatisticMeasure statistic measure string, e.g. MEAN, STD_DEFV, etc.
+     * @return return pointer to output data
+    **********************************************************************************/
+    double* getOutputDataFieldQoI(const std::string& aStatisticMeasure);
+
+    /******************************************************************************//**
+     * @brief Get output data for a global/scalar quantity of interest (QoI)
+     * @param [in] aStatisticMeasure statistic measure string, e.g. MEAN, STD_DEFV, etc.
+     * @return return pointer to output data
+    **********************************************************************************/
+    std::vector<double>* getOutputDataGlobalQoI(const std::string& aStatisticMeasure);
 
 private:
     std::string mOperationName; /*!< user defined function name */

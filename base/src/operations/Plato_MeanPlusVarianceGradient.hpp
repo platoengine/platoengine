@@ -196,13 +196,13 @@ private:
      * @brief Increase the capacity of the criterion gradient's set of sample-probability
      *    pairs to the number of samples.
     **********************************************************************************/
-    void reserveCriterionGradSampleProbabilityPairs()
+    void reserveCriterionGradSampleProbabilityPairs();
 
     /******************************************************************************//**
      * @brief Increase the capacity of the criterion value's set of sample-probability
      *    pairs to the number of samples.
     **********************************************************************************/
-    void reserveCriterionValueSampleProbabilityPairs()
+    void reserveCriterionValueSampleProbabilityPairs();
 
     /******************************************************************************//**
      * @brief Parse data layout from input file

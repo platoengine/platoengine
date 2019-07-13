@@ -46,6 +46,9 @@
  *  Created on: Jul 6, 2019
  */
 
+#include <cmath>
+#include <vector>
+
 #include "PlatoApp.hpp"
 #include "Plato_Macros.hpp"
 #include "Plato_OperationsUtilities.hpp"
@@ -100,16 +103,45 @@ double compute_sample_set_standard_deviation(const double& aMean, const std::vec
         THROWERR("MEAN = " + std::to_string(aMean) + " IS NOT A FINITE NUMBER.\n")
     }
 
-    // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    double tExpectedValueOfSquaredCriterion = 0;
+    // STD_DEV(X) = sqrt( E( (X - E(X))^2 )
+    double tVariance = 0;
     for(auto tIterator = aPairs.begin(); tIterator != aPairs.end(); ++tIterator)
     {
-        tExpectedValueOfSquaredCriterion += tIterator->mProbability * std::pow(tIterator->mSample, 2.0);
+        auto tSampleMinusMean = tIterator->mSample - aMean;
+        tVariance += tIterator->mProbability * std::pow(tSampleMinusMean, 2.0);
     }
 
-    const double tExpectedValueOfSquaredCriterionMinusMean = tExpectedValueOfSquaredCriterion - std::pow(aMean, 2.0);
-    const double tOutput = std::sqrt(tExpectedValueOfSquaredCriterionMinusMean);
+    const double tOutput = std::sqrt(tVariance);
     return (tOutput);
+}
+// function compute_sample_set_standard_deviation
+
+void compute_sample_set_standard_deviation(const double* aMean,
+                                           const std::vector<Plato::SampleProbPair<double*, double>>& aPairs,
+                                           double* aOutput)
+{
+    // STD_DEV(X) = sqrt( E( (X - E(X))^2 )
+    if(aPairs.empty() == true)
+    {
+        THROWERR("INPUT CONTAINER OF SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
+    }
+
+    // 1. COMPUTE VARIANCE = E( (X - E(X))^2 )
+    for(auto tIterator = aPairs.begin(); tIterator != aPairs.end(); ++tIterator)
+    {
+        for(size_t tIndex = 0; tIndex < tIterator->mLength; tIndex++)
+        {
+            auto tSampleMinusMean = tIterator->mSample[tIndex] - aMean[tIndex];
+            aOutput[tIndex] += tIterator->mProbability * std::pow(tSampleMinusMean, 2.0);
+        }
+    }
+
+    // 1. COMPUTE STANDARD DEVIATION = SQRT(VARIANCE)
+    for(size_t tIndex = 0; tIndex < aPairs.begin()->mLength; tIndex++)
+    {
+        auto tStdDev = std::sqrt(aOutput[tIndex]);
+        aOutput[tIndex] = tStdDev;
+    }
 }
 // function compute_sample_set_standard_deviation
 
@@ -149,115 +181,18 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
     Plato::zero(aCriterionGradPairs[0].mLength, aOutput);
     for(auto tGradientIter = aCriterionGradPairs.begin(); tGradientIter != aCriterionGradPairs.end(); ++tGradientIter)
     {
-        auto tMultiplierOverStdDev = aStdDevMultiplier / aCriterionStdDev;
-        auto tMultiplier = tGradientIter->mProbability + ( tMultiplierOverStdDev *
-                tGradientIter->mProbability * ( tValueIter->mSample - aCriterionMean ) );
+        auto tStdDevMultOverStdDev = aStdDevMultiplier / aCriterionStdDev;
+        auto tMultiplier = static_cast<double>(1.0) + (tStdDevMultOverStdDev * (tValueIter->mSample - aCriterionMean));
 
         for(size_t tIndex = 0; tIndex < tGradientIter->mLength; tIndex++)
         {
-            aOutput[tIndex] += tMultiplier * tGradientIter->mSample[tIndex];
+            aOutput[tIndex] += tMultiplier * tGradientIter->mProbability * tGradientIter->mSample[tIndex];
         }
 
         ++tValueIter;
     }
 }
 // function compute_sample_set_mean_plus_std_dev_gradient
-
-
-void compute_node_field_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
-                                           const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                           PlatoApp* aPlatoApp)
-{
-    // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    auto tIterator = aStatsArgumentNameMap.find("STD_DEV");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tArgumentStdDev = tIterator->second;
-    double* tStandardDeviation = aPlatoApp->getNodeFieldData(tArgumentStdDev);
-
-    // 1. Compute E(f(x)^2)
-    const size_t tLocalLength = aPlatoApp->getNodeFieldLength(tArgumentStdDev);
-    Plato::zero(tLocalLength, tStandardDeviation);
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
-    {
-        double* tMySample = aPlatoApp->getNodeFieldData(tIterator->first);
-        for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
-        {
-            tStandardDeviation[tIndex] += tIterator->second * std::pow(tMySample[tIndex], 2.0);
-        }
-    }
-
-    // 2. Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tArgumentMean = tIterator->second;
-    double* tMean = aPlatoApp->getNodeFieldData(tArgumentMean);
-    for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
-    {
-        double tValue = tStandardDeviation[tIndex] - std::pow(tMean[tIndex], 2.0);
-        tStandardDeviation[tIndex] = std::sqrt(tValue);
-    }
-
-    // 3. Resolve shared data across processes
-    aPlatoApp->compressAndUpdateNodeField(tArgumentStdDev);
-}
-// function compute_node_field_standard_deviation
-
-void compute_element_field_standard_deviation(const std::map<std::string, double>& aSampleProbMap,
-                                              const std::map<std::string, std::string>& aStatsArgumentNameMap,
-                                              PlatoApp* aPlatoApp)
-{
-    // STD_DEV(f(x)) = sqrt( E(f(x)^2) - E(f(x))^2 )
-    auto tIterator = aStatsArgumentNameMap.find("STD_DEV");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'STD_DEV' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'STD_DEV' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tArgumentStdDev = tIterator->second;
-    double* tStandardDeviation = aPlatoApp->getElementFieldData(tArgumentStdDev);
-
-    // 1. Compute E(f(x)^2)
-    const size_t tLocalLength = aPlatoApp->getLocalNumElements();
-    Plato::zero(tLocalLength, tStandardDeviation);
-    // tIterator->first = Argument name & tIterator->second = Probability
-    for(auto tIterator = aSampleProbMap.begin(); tIterator != aSampleProbMap.end(); ++tIterator)
-    {
-        double* tMySample = aPlatoApp->getElementFieldData(tIterator->first);
-        for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
-        {
-            tStandardDeviation[tIndex] += tIterator->second * std::pow(tMySample[tIndex], 2.0);
-        }
-    }
-
-    // 2. Compute standard deviation, i.e. sqrt( E(f(x)^2) - E(f(x))^2 )
-    tIterator = aStatsArgumentNameMap.find("MEAN");
-    if(tIterator == aStatsArgumentNameMap.end())
-    {
-        std::string tError = std::string("THE 'MEAN' KEYWORD WAS NOT FOUND IN STATS TO OUTPUT ARGUMENT NAME MAP. ") +
-                "THE USER MOST LIKELY MISSPELLED THE WORD 'MEAN' WHILE DEFINING THE STATISTIC KEYWORD IN THE XML FILE.\n";
-        THROWERR(tError)
-    }
-    const std::string& tArgumentMean = tIterator->second;
-    double* tMean = aPlatoApp->getElementFieldData(tArgumentMean);
-    for(size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
-    {
-        double tValue = tStandardDeviation[tIndex] - std::pow(tMean[tIndex], 2.0);
-        tStandardDeviation[tIndex] = std::sqrt(tValue);
-    }
-}
-// function compute_element_field_standard_deviation
 
 }
 // namespace Plato
