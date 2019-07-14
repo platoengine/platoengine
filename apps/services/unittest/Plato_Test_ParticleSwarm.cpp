@@ -72,7 +72,7 @@ namespace ParticleSwarmTest
 **********************************************************************************/
 std::vector<double> get_target_thrust_profile()
 {
-    std::vector<double> tTargetThrustProfile =
+    std::vector<double> tTargetThrustProfile = // @suppress("Invalid arguments")
         { 0, 6796.7769344285716215, 6867.4666589320704588, 6938.7140813601199625, 7010.5222074219882415,
                 7082.8940515426593265, 7155.8326368664666006, 7229.3409952607416926, 7303.4221673194269897,
                 7378.0792023667154353, 7453.3151584606503093, 7529.1331023967359215, 7605.5361097115401208,
@@ -546,7 +546,7 @@ TEST(PlatoTest, PSO_computeBestObjFunStatistics)
     tFactory->allocateObjFuncValues(tNumParticles);
     tFactory->allocateControl(tNumControls, tNumParticles);
 
-    std::vector<double> tData =
+    std::vector<double> tData = // @suppress("Invalid arguments")
         { 2.47714e-10, 1.85455e-10, 6.77601e-09, 1.31141e-09, 0.00147344, 4.75417e-07, 4.00712e-09, 2.52841e-10,
                 3.88818e-10, 0.000664043, 5.2746e-10, 3.68332e-07, 1.21143e-09, 8.75453e-10, 1.81673e-10, 1.42615e-08,
                 5.58984e-10, 2.70975e-08, 3.36991e-10, 1.55175e-09 };
@@ -570,7 +570,7 @@ TEST(PlatoTest, PSO_findBestParticlePositions_BoundConstrainedStageMng)
 
     Plato::ParticleSwarmDataMng<double> tDataMng(tFactory);
     tDataMng.setCurrentGlobalBestObjFunValue(0.000423009);
-    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 };
+    std::vector<double> tData = { 0.00044607, 0.0639247, 3.9283e-05, 0.0318453, 0.000420515 }; // @suppress("Invalid arguments")
     Plato::StandardVector<double> tCurrentObjFuncValues(tData);
     tDataMng.setCurrentObjFuncValues(tCurrentObjFuncValues);
 
@@ -1244,9 +1244,6 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle)
     tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
-    tInputs.mOutputSolution = true;
-    tInputs.mOutputSolution = true;
-    tInputs.mOutputParticleDiagnostics = true;
     Plato::OutputDataBCPSO<double> tOutputs;
     Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
 
@@ -1434,7 +1431,7 @@ TEST(PlatoTest, PSO_SolveALPSO_HimmelblauObj_ShiftedEllipseConstr)
 
     std::cout << tOutputs.mStopCriterion << "\n";
 
-    std::vector<double> tGold = { -3.77931, -3.28319 };
+    std::vector<double> tGold = { -3.77931, -3.28319 }; // @suppress("Invalid arguments")
     for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
     {
         std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
