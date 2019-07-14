@@ -7,7 +7,7 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"  type="string"  value="Elastostatics"/>
-    <Parameter name="Objective"       type="string"  value="Stress Constraint General"/>
+    <Parameter name="Objective"       type="string"  value="My Stress Constraint General"/>
 
     <ParameterList name="Elastostatics">
       <ParameterList name="Penalty Function">
@@ -17,7 +17,9 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Stress Constraint">
+    <ParameterList name="My Stress Constraint General">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Stress Constraint General'/>
       <Parameter name="Stress Limit" type="double" value="3e6"/>
       <Parameter name="Initial Penalty" type="double" value="1"/>
       <Parameter name="Penalty Upper Bound" type="double" value="10000"/>

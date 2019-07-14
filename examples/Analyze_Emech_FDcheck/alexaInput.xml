@@ -7,20 +7,24 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Electromechanical"/>
     <Parameter name="PDE Constraint"     type="string"  value="Electroelastostatics"/>
-    <Parameter name="Linear Constraint"  type="string"  value="Volume"/>
-    <Parameter name="Objective"          type="string"  value="Internal Electroelastic Energy"/>
+    <!--Parameter name="Constraint"  type="string"  value="My Volume"/-->
+    <Parameter name="Objective"          type="string"  value="My Internal Electroelastic Energy"/>
 
     <Parameter name="Self-Adjoint"       type="bool"    value="false"/>
 
-    <ParameterList name="Volume">
+    <!--ParameterList name="My Volume">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Volume'/>
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="1.0"/>
         <Parameter name="Minimum Value" type="double" value="0.0"/>
       </ParameterList>
-    </ParameterList>
+    </ParameterList-->
 
-    <ParameterList name="Internal Electroelastic Energy">
+    <ParameterList name="My Internal Electroelastic Energy">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Internal Electroelastic Energy'/>
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="3.0"/>

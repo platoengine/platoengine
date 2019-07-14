@@ -108,7 +108,7 @@ public:
 
 private:
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentObjFuncValues; /*!< current objective function values */
-    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective; /*!< grad-free objective function interface */
+    std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> mObjective; /*!< interface for grad-free objective function */
 
 private:
     ParticleSwarmStageMngBCPSO(const Plato::ParticleSwarmStageMngBCPSO<ScalarType, OrdinalType>&);

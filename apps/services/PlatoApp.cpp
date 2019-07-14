@@ -42,6 +42,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 
 #ifdef ENABLE_ISO
 #include "STKExtract.hpp"
