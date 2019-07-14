@@ -447,11 +447,7 @@ expy_get_elem_var(PyObject *self, PyObject *args)
 
   values = (double*) calloc(num_elems, sizeof(double));
 
-<<<<<<< HEAD
-  ex_get_elem_var(exoid, time_step, var_index, block_id, num_elems, values);
-=======
   ex_get_var(exoid, time_step, EX_ELEM_BLOCK, var_index, block_id, num_elems, values);
->>>>>>> pso
 
   pyvalues = list_from_double_array(values, num_elems);
 
@@ -475,11 +471,7 @@ expy_get_nodal_var(PyObject *self, PyObject *args)
 
   values = (double*) calloc(num_nodes, sizeof(double));
 
-<<<<<<< HEAD
-  ex_get_nodal_var(exoid, time_step, var_index, num_nodes, values);
-=======
   ex_get_var(exoid, time_step, EX_NODAL, var_index, 1, num_nodes, values);
->>>>>>> pso
 
   pyvalues = list_from_double_array(values, num_nodes);
 
@@ -501,11 +493,7 @@ expy_get_node_num_map(PyObject *self, PyObject *args)
 
   map = (int*) calloc(num_nodes, sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_node_num_map(exoid, map);
-=======
   ex_get_id_map(exoid, EX_NODE_MAP, map);
->>>>>>> pso
 
   pymap = list_from_int_array(map, num_nodes);
 
@@ -527,11 +515,7 @@ expy_get_elem_num_map(PyObject *self, PyObject *args)
 
   map = (int*) calloc(num_elems, sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_elem_num_map(exoid, map);
-=======
   ex_get_id_map(exoid, EX_ELEM_MAP, map);
->>>>>>> pso
 
   pymap = list_from_int_array(map, num_elems);
 
@@ -586,13 +570,9 @@ expy_get_var_names(PyObject *self, PyObject *args)
         for(i=0;i<num_vars;i++) 
           names[i] = (char*)calloc((MAX_STR_LENGTH+1),sizeof(char));
   
-<<<<<<< HEAD
-  ex_get_var_names(exoid, var_type, num_vars, names);
-=======
   ex_entity_type obj_type = get_enum_from_var_type(var_type);
 
   ex_get_variable_names(exoid, obj_type, num_vars, names);
->>>>>>> pso
 
         for(i=0;i<num_vars;i++) 
           PyList_SetItem(pynames,i,Py_BuildValue("s",names[i]));
@@ -781,13 +761,8 @@ expy_get_elem_block(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "ii", &exoid, &elem_blk_id))
     return NULL;
 
-<<<<<<< HEAD
-  ex_get_elem_block(exoid, elem_blk_id, elem_type,
-                    &num_elem_this_blk, &num_nodes_per_elem, &num_attr);
-=======
   ex_get_block(exoid, EX_ELEM_BLOCK, elem_blk_id, elem_type,
                     &num_elem_this_blk, &num_nodes_per_elem, NULL, NULL, &num_attr);
->>>>>>> pso
 
   py_elem_type = Py_BuildValue("s",elem_type);
   py_num_elem_this_blk = Py_BuildValue("i",num_elem_this_blk);
@@ -837,11 +812,7 @@ expy_get_elem_blk_ids(PyObject *self, PyObject *args)
 
   elem_blk_ids = (int*)calloc(num_elem_blks,sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_elem_blk_ids(exoid, elem_blk_ids);
-=======
   ex_get_ids(exoid, EX_ELEM_BLOCK, elem_blk_ids);
->>>>>>> pso
 
   py_elem_blk_ids = list_from_int_array(elem_blk_ids, num_elem_blks);
 
@@ -866,11 +837,7 @@ expy_get_elem_conn(PyObject *self, PyObject *args)
   connect_length = num_elem_this_blk*num_nodes_per_elem;
   connect = (int*)calloc(connect_length,sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_elem_conn(exoid, elem_blk_id, connect);
-=======
   ex_get_conn(exoid, EX_ELEM_BLOCK, elem_blk_id, connect, 0, 0);
->>>>>>> pso
 
   py_connect = list_from_int_array(connect, connect_length);
   free(connect);
@@ -937,12 +904,7 @@ expy_get_node_set_param(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "ii", &exoid, &node_set_id))
     return NULL;
 
-<<<<<<< HEAD
-  ex_get_node_set_param(exoid, node_set_id, &num_nodes_in_set,
-=======
-  ex_get_set_param(exoid, EX_NODE_SET, node_set_id, &num_nodes_in_set,
->>>>>>> pso
-                                              &num_dist_in_set);
+	ex_get_set_param(exoid, EX_NODE_SET, node_set_id, &num_nodes_in_set, &num_dist_in_set);
 
   py_num_nodes_in_set = Py_BuildValue("i",num_nodes_in_set);
   py_num_dist_in_set = Py_BuildValue("i",num_dist_in_set);
@@ -964,11 +926,7 @@ expy_get_node_set_ids(PyObject *self, PyObject *args)
 
   node_set_ids = (int*)calloc(num_node_sets, sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_node_set_ids(exoid, node_set_ids);
-=======
   ex_get_ids(exoid, EX_NODE_SET, node_set_ids);
->>>>>>> pso
 
         py_node_set_ids = list_from_int_array(node_set_ids, num_node_sets);
         free(node_set_ids);
@@ -1012,11 +970,7 @@ expy_get_node_set(PyObject *self, PyObject *args)
          
   node_set_node_list = (int*)calloc(num_nodes_in_set,sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_node_set(exoid, node_set_id, node_set_node_list);
-=======
   ex_get_set(exoid, EX_NODE_SET, node_set_id, node_set_node_list, NULL);
->>>>>>> pso
 
   py_node_set_node_list = list_from_int_array(node_set_node_list, num_nodes_in_set);
   free(node_set_node_list);
@@ -1036,12 +990,7 @@ expy_get_side_set_param(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "ii", &exoid, &side_set_id))
     return NULL;
 
-<<<<<<< HEAD
-  ex_get_side_set_param(exoid, side_set_id, &num_side_in_set,
-=======
-  ex_get_set_param(exoid, EX_SIDE_SET, side_set_id, &num_side_in_set,
->>>>>>> pso
-                                        &num_dist_in_set);
+  ex_get_set_param(exoid, EX_SIDE_SET, side_set_id, &num_side_in_set, &num_dist_in_set);
 
   py_num_side_in_set = Py_BuildValue("i",num_side_in_set);
   py_num_dist_in_set = Py_BuildValue("i",num_dist_in_set);
@@ -1063,11 +1012,7 @@ expy_get_side_set_ids(PyObject *self, PyObject *args)
 
   side_set_ids = (int*)calloc(num_side_sets, sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_side_set_ids(exoid, side_set_ids);
-=======
   ex_get_ids(exoid, EX_SIDE_SET, side_set_ids);
->>>>>>> pso
 
   py_side_set_ids = list_from_int_array(side_set_ids, num_side_sets);
   free(side_set_ids);
@@ -1091,12 +1036,7 @@ expy_get_side_set(PyObject *self, PyObject *args)
   side_set_elem_list = (int*)calloc(num_sides_in_set,sizeof(int));
   side_set_side_list = (int*)calloc(num_sides_in_set,sizeof(int));
 
-<<<<<<< HEAD
-  ex_get_side_set(exoid, side_set_id, side_set_elem_list,
-=======
-  ex_get_set(exoid, EX_SIDE_SET, side_set_id, side_set_elem_list,
->>>>>>> pso
-                                  side_set_side_list);
+  ex_get_set(exoid, EX_SIDE_SET, side_set_id, side_set_elem_list, side_set_side_list);
 
   py_side_set_elem_list = list_from_int_array(side_set_elem_list, num_sides_in_set);
   py_side_set_side_list = list_from_int_array(side_set_side_list, num_sides_in_set);
