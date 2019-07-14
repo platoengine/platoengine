@@ -162,19 +162,24 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
         THROWERR("INPUT CONTAINER OF CRITERION GRADIENT SAMPLE-PROBABILITY PAIRS IS EMPTY.\n")
     }
 
-    if(aCriterionValPairs.size() == aCriterionGradPairs.size())
+    if(aCriterionValPairs.size() != aCriterionGradPairs.size())
     {
-        THROWERR("CRITERION VALUE AND CRITERION GRADIENT CONTAINERS SHOULD HAVE THE SAME SIZE.\n")
+        THROWERR("CRITERION VALUE AND CRITERION GRADIENT CONTAINERS DO NOT HAVE THE SAME SIZE.\n")
     }
 
     if(std::isfinite(aCriterionMean) == false)
     {
-        THROWERR("MEAN = " + std::to_string(aCriterionMean) + " IS NOT A FINITE NUMBER.\n")
+        THROWERR("MEAN, MU = " + std::to_string(aCriterionMean) + ", IS NOT A FINITE NUMBER.\n")
     }
 
     if(std::isfinite(aCriterionStdDev) == false)
     {
-        THROWERR("STANDARD DEVIATION = " + std::to_string(aCriterionStdDev) + " IS NOT A FINITE NUMBER.\n")
+        THROWERR("STANDARD DEVIATION, SIGMA = " + std::to_string(aCriterionStdDev) + ", IS NOT A FINITE NUMBER.\n")
+    }
+
+    if(std::isfinite(aStdDevMultiplier) == false)
+    {
+        THROWERR("STANDARD DEVIATION MULTIPLIER, k = " + std::to_string(aStdDevMultiplier) + ", IS NOT A FINITE NUMBER.\n")
     }
 
     auto tValueIter = aCriterionValPairs.begin();

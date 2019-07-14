@@ -597,5 +597,334 @@ TEST(PlatoTest, MeanPlusVarianceGradient_getStatisticMeasure_Error)
     ASSERT_THROW(Plato::MeanPlusVarianceGradient tOperation(&tPlatoApp, tOperations), std::runtime_error);
 }
 
+TEST(PlatoTest, compute_sample_set_mean_global_value)
+{
+    std::vector<Plato::SampleProbPair<double, double>> tPairs;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[0].mLength = 1;
+    tPairs[0].mProbability = 0.2;
+    tPairs[0].mSample = 5;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[1].mLength = 1;
+    tPairs[1].mProbability = 0.1;
+    tPairs[1].mSample = 2;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[2].mLength = 1;
+    tPairs[2].mProbability = 0.3;
+    tPairs[2].mSample = 3;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[3].mLength = 1;
+    tPairs[3].mProbability = 0.15;
+    tPairs[3].mSample = 4;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[4].mLength = 1;
+    tPairs[4].mProbability = 0.25;
+    tPairs[4].mSample = 1;
+
+    double tTolerance = 1e-6;
+    auto tMean = Plato::compute_sample_set_mean(tPairs);
+    ASSERT_NEAR(2.95, tMean, tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_mean_field_value)
+{
+    std::vector<Plato::SampleProbPair<double*, double>> tPairs;
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[0].mLength = 2;
+    tPairs[0].mProbability = 0.2;
+    std::vector<double> tSample1 = {1, 3};
+    tPairs[0].mSample = tSample1.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[1].mLength = 2;
+    tPairs[1].mProbability = 0.1;
+    std::vector<double> tSample2 = {2, 3};
+    tPairs[1].mSample = tSample2.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[2].mLength = 2;
+    tPairs[2].mProbability = 0.3;
+    std::vector<double> tSample3 = {4, 5};
+    tPairs[2].mSample = tSample3.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[3].mLength = 2;
+    tPairs[3].mProbability = 0.15;
+    std::vector<double> tSample4 = {3, 8};
+    tPairs[3].mSample = tSample4.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[4].mLength = 2;
+    tPairs[4].mProbability = 0.25;
+    std::vector<double> tSample5 = {8, 11};
+    tPairs[4].mSample = tSample5.data();
+
+    double tTolerance = 1e-6;
+    std::vector<double> tMean = {8, 11};
+    Plato::compute_sample_set_mean(tPairs, tMean.data());
+    ASSERT_NEAR(4.05, tMean[0], tTolerance);
+    ASSERT_NEAR(6.35, tMean[1], tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_standard_deviation_global_value)
+{
+    std::vector<Plato::SampleProbPair<double, double>> tPairs;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[0].mLength = 1;
+    tPairs[0].mProbability = 0.2;
+    tPairs[0].mSample = 5;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[1].mLength = 1;
+    tPairs[1].mProbability = 0.1;
+    tPairs[1].mSample = 2;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[2].mLength = 1;
+    tPairs[2].mProbability = 0.3;
+    tPairs[2].mSample = 3;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[3].mLength = 1;
+    tPairs[3].mProbability = 0.15;
+    tPairs[3].mSample = 4;
+    tPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tPairs[4].mLength = 1;
+    tPairs[4].mProbability = 0.25;
+    tPairs[4].mSample = 1;
+
+    double tTolerance = 1e-6;
+    auto tMean = Plato::compute_sample_set_mean(tPairs);
+    ASSERT_NEAR(2.95, tMean, tTolerance);
+    auto tStdDev = Plato::compute_sample_set_standard_deviation(tMean, tPairs);
+    ASSERT_NEAR(1.430908802125419, tStdDev, tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_standard_deviation_field_value)
+{
+    std::vector<Plato::SampleProbPair<double*, double>> tPairs;
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[0].mLength = 2;
+    tPairs[0].mProbability = 0.2;
+    std::vector<double> tSample1 = {1, 3};
+    tPairs[0].mSample = tSample1.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[1].mLength = 2;
+    tPairs[1].mProbability = 0.1;
+    std::vector<double> tSample2 = {2, 3};
+    tPairs[1].mSample = tSample2.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[2].mLength = 2;
+    tPairs[2].mProbability = 0.3;
+    std::vector<double> tSample3 = {4, 5};
+    tPairs[2].mSample = tSample3.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[3].mLength = 2;
+    tPairs[3].mProbability = 0.15;
+    std::vector<double> tSample4 = {3, 8};
+    tPairs[3].mSample = tSample4.data();
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[4].mLength = 2;
+    tPairs[4].mProbability = 0.25;
+    std::vector<double> tSample5 = {8, 11};
+    tPairs[4].mSample = tSample5.data();
+
+    double tTolerance = 1e-6;
+    std::vector<double> tMean = {0, 0};
+    Plato::compute_sample_set_mean(tPairs, tMean.data());
+    ASSERT_NEAR(4.05, tMean[0], tTolerance);
+    ASSERT_NEAR(6.35, tMean[1], tTolerance);
+    std::vector<double> tStdDev = {0, 0};
+    Plato::compute_sample_set_standard_deviation(tMean.data(), tPairs, tStdDev.data());
+    ASSERT_NEAR(2.519424537468824, tStdDev[0], tTolerance);
+    ASSERT_NEAR(3.118894034750139, tStdDev[1], tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_mean_plus_std_dev_gradient)
+{
+    // SET OBJCTIVE PAIRS
+    std::vector<Plato::SampleProbPair<double, double>> tFvalPairs;
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[0].mLength = 1;
+    tFvalPairs[0].mProbability = 0.2;
+    tFvalPairs[0].mSample = 5;
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[1].mLength = 1;
+    tFvalPairs[1].mProbability = 0.1;
+    tFvalPairs[1].mSample = 2;
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[2].mLength = 1;
+    tFvalPairs[2].mProbability = 0.3;
+    tFvalPairs[2].mSample = 3;
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[3].mLength = 1;
+    tFvalPairs[3].mProbability = 0.15;
+    tFvalPairs[3].mSample = 4;
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[4].mLength = 1;
+    tFvalPairs[4].mProbability = 0.25;
+    tFvalPairs[4].mSample = 1;
+
+    // SET GRADIENT PAIRS
+    std::vector<Plato::SampleProbPair<double*, double>> tGradPairs;
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[0].mLength = 2;
+    tGradPairs[0].mProbability = 0.2;
+    std::vector<double> tSample1 = {1, 3};
+    tGradPairs[0].mSample = tSample1.data();
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[1].mLength = 2;
+    tGradPairs[1].mProbability = 0.1;
+    std::vector<double> tSample2 = {2, 3};
+    tGradPairs[1].mSample = tSample2.data();
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[2].mLength = 2;
+    tGradPairs[2].mProbability = 0.3;
+    std::vector<double> tSample3 = {4, 5};
+    tGradPairs[2].mSample = tSample3.data();
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[3].mLength = 2;
+    tGradPairs[3].mProbability = 0.15;
+    std::vector<double> tSample4 = {3, 8};
+    tGradPairs[3].mSample = tSample4.data();
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[4].mLength = 2;
+    tGradPairs[4].mProbability = 0.25;
+    std::vector<double> tSample5 = {8, 11};
+    tGradPairs[4].mSample = tSample5.data();
+
+    const double tTolerance = 1e-6;
+    const double tStdDevMultiplier = 2;
+    auto tFvalMean = Plato::compute_sample_set_mean(tFvalPairs);
+    auto tFvalStdDev = Plato::compute_sample_set_standard_deviation(tFvalMean, tFvalPairs);
+    std::vector<double> tGradient = {0, 0};
+    Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                         tFvalStdDev,
+                                                         tStdDevMultiplier,
+                                                         tFvalPairs,
+                                                         tGradPairs,
+                                                         tGradient.data());
+    ASSERT_NEAR(-0.349302031442980, tGradient[0], tTolerance);
+    ASSERT_NEAR(2.041549321072921, tGradient[1], tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_mean_global_value_error)
+{
+    // EMPTY INPUT
+    std::vector<Plato::SampleProbPair<double, double>> tPairs;
+    ASSERT_THROW(Plato::compute_sample_set_mean(tPairs), std::runtime_error);
+}
+
+TEST(PlatoTest, compute_sample_set_mean_field_value_error)
+{
+    // EMPTY INPUT
+    std::vector<double> tMean = {0, 0};
+    std::vector<Plato::SampleProbPair<double*, double>> tPairs;
+    ASSERT_THROW(Plato::compute_sample_set_mean(tPairs, tMean.data()), std::runtime_error);
+
+    // NEGATIVE LENGTH
+    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tPairs[0].mLength = -1;
+    tPairs[0].mProbability = 0.2;
+    std::vector<double> tSample1 = {1, 3};
+}
+
+TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_error)
+{
+    // EMPTY INPUT
+    double tMean = 1;
+    std::vector<Plato::SampleProbPair<double, double>> tPairs;
+    ASSERT_THROW(Plato::compute_sample_set_standard_deviation(tMean, tPairs), std::runtime_error);
+
+    // NON-FINITE MEAN
+    tMean = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_THROW(Plato::compute_sample_set_standard_deviation(tMean, tPairs), std::runtime_error);
+}
+
+TEST(PlatoTest, compute_sample_set_standard_deviation_field_value_error)
+{
+    // EMPTY INPUT
+    std::vector<double> tMean = {1, 2};
+    std::vector<double> tStdDev = {0, 0};
+    std::vector<Plato::SampleProbPair<double*, double>> tPairs;
+    ASSERT_THROW(Plato::compute_sample_set_standard_deviation(tMean.data(), tPairs, tStdDev.data()), std::runtime_error);
+}
+
+TEST(PlatoTest, compute_sample_set_mean_plus_std_dev_gradient_error)
+{
+    // SET INPUT
+    double tFvalMean = 1;
+    double tFvalStdDev = 1;
+    double tStdDevMultiplier = 1;
+    std::vector<double> tGradient = {0, 0};
+    std::vector<Plato::SampleProbPair<double, double>> tFvalPairs;
+    std::vector<Plato::SampleProbPair<double*, double>> tGradPairs;
+
+    // 1. INPUT CONTAINER OF CRITERION VALUE SAMPLE-PROBABILITY PAIRS IS EMPTY
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+
+    // 2. INPUT CONTAINER OF CRITERION GRADIENT SAMPLE-PROBABILITY PAIRS IS EMPTY
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[0].mLength = 1;
+    tFvalPairs[0].mProbability = 0.2;
+    tFvalPairs[0].mSample = 5;
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+
+    // 3. MEAN IS NOT A FINITE NUMBER
+    tGradPairs.push_back(Plato::SampleProbPair<double*, double>{});
+    tGradPairs[0].mLength = 2;
+    tGradPairs[0].mProbability = 0.2;
+    std::vector<double> tSample1 = {1, 3};
+    tGradPairs[0].mSample = tSample1.data();
+    tFvalMean = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+
+    // 4. STANDARD DEVIATION IS NOT A FINITE NUMBER
+    tFvalMean = 1;
+    tFvalStdDev = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+
+    // 5. STANDARD DEVIATION MULTIPLIER IS NOT A FINITE NUMBER
+    tFvalStdDev = 1;
+    tStdDevMultiplier = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+
+    // 6. CRITERION VALUE AND CRITERION GRADIENT CONTAINERS SHOULD HAVE THE SAME SIZE
+    tFvalPairs.push_back(Plato::SampleProbPair<double, double>{});
+    tFvalPairs[1].mLength = 1;
+    tFvalPairs[1].mProbability = 0.1;
+    tFvalPairs[1].mSample = 2;
+    ASSERT_THROW(Plato::compute_sample_set_mean_plus_std_dev_gradient(tFvalMean,
+                                                                      tFvalStdDev,
+                                                                      tStdDevMultiplier,
+                                                                      tFvalPairs,
+                                                                      tGradPairs,
+                                                                      tGradient.data()),
+                 std::runtime_error);
+}
+
 }
 // namespace MeanPlusVarianceMeasureTest
