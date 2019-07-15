@@ -590,7 +590,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mAlgoOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
-                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream);
             }
         }
     }
@@ -699,7 +699,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream);
         }
     }
 
@@ -778,7 +778,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mAlgorithmDiagnostics);
+            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream);
         }
     }
 

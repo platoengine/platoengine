@@ -55,8 +55,10 @@
 #include <cassert>
 #include <sstream>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Parser.hpp"
 #include "Plato_Interface.hpp"
+#include "Plato_HostBounds.hpp"
 #include "Plato_Diagnostics.hpp"
 #include "Plato_CommWrapper.hpp"
 #include "Plato_AlgebraFactory.hpp"
@@ -66,7 +68,6 @@
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_OptimizerUtilities.hpp"
 #include "Plato_OptimizerEngineStageData.hpp"
-#include "Plato_HostBounds.hpp"
 
 namespace Plato
 {

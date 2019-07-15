@@ -191,10 +191,8 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
 {
     std::ofstream tFile1;
     Plato::DiagnosticsBCPSO<double> tData;
-    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::pso::print_bcpso_diagnostics(tData, tFile1), std::runtime_error);
 }
 
 TEST(PlatoTest, PSO_PrintParticleData)
@@ -372,14 +370,11 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsALPSO)
 {
     std::ofstream tFile1;
     Plato::DiagnosticsALPSO<double> tDataALPSO;
-    ASSERT_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_diagnostics_header(tDataALPSO, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::pso::print_alpso_outer_diagnostics(tDataALPSO, tFile1), std::runtime_error);
 
     Plato::DiagnosticsBCPSO<double> tDataPSO;
-    ASSERT_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::pso::print_alpso_inner_diagnostics(tDataPSO, tFile1), std::runtime_error);
 }
 
 TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)

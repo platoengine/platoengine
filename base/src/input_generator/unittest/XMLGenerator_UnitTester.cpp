@@ -312,7 +312,7 @@ std::string XMLGenerator_UnitTester::getLoadDirectionX(const std::string &aLoadI
     {
         if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.load_cases[j].loads[aLoadIndex].x;
+            return m_InputData.load_cases[j].loads[aLoadIndex].values[0];
         }
     }
     return "";
@@ -324,7 +324,7 @@ std::string XMLGenerator_UnitTester::getLoadDirectionY(const std::string &aLoadI
     {
         if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.load_cases[j].loads[aLoadIndex].y;
+            return m_InputData.load_cases[j].loads[aLoadIndex].values[1];
         }
     }
     return "";
@@ -336,7 +336,7 @@ std::string XMLGenerator_UnitTester::getLoadDirectionZ(const std::string &aLoadI
     {
         if(m_InputData.load_cases[j].id == aLoadID)
         {
-            return m_InputData.load_cases[j].loads[aLoadIndex].z;
+            return m_InputData.load_cases[j].loads[aLoadIndex].values[2];
         }
     }
     return "";

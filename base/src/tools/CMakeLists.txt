@@ -16,6 +16,7 @@ set(${LIB_NAME}_SOURCES Plato_Parser.cpp
                         Plato_AppErrorChecks.cpp
                         )
 set(${LIB_NAME}_HEADERS Plato_Parser.hpp
+                        Plato_Macros.hpp
                         Plato_InputData.hpp
                         Plato_OptimizerEngineStageData.hpp
                         Plato_OperationInputDataMng.hpp

@@ -57,6 +57,7 @@
 #include <algorithm>
 
 #include "Plato_Types.hpp"
+#include "Plato_Macros.hpp"
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_MultiVector.hpp"
@@ -323,7 +324,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mOutputStream.open("plato_ksbc_algorithm_diagnostics.txt");
-                Plato::print_ksbc_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::print_ksbc_diagnostics_header(mOutputData, mOutputStream);
             }
         }
     }
@@ -357,7 +358,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::print_ksbc_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::print_ksbc_diagnostics(mOutputData, mOutputStream);
         }
     }
 
@@ -376,7 +377,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::print_ksal_inner_diagnostics(mOutputData, aOutputStream, mPrintDiagnostics);
+            Plato::print_ksal_inner_diagnostics(mOutputData, aOutputStream);
         }
     }
 
@@ -453,8 +454,7 @@ private:
         }
         catch(const std::invalid_argument & tError)
         {
-            std::cout << tError.what() << std::flush;
-            throw tError;
+            THROWERR(tError.what())
         }
     }
 

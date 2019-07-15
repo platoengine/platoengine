@@ -648,7 +648,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mAlgoOutputStream.open("plato_alpso_algorithm_diagnostics.txt");
-                Plato::pso::print_alpso_diagnostics_header(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+                Plato::pso::print_alpso_diagnostics_header(mOutputData, mAlgoOutputStream);
             }
         }
     }
@@ -763,7 +763,7 @@ private:
         {
             this->cacheObjFuncOutputData();
             this->cacheConstraintOutputData();
-            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+            Plato::pso::print_alpso_outer_diagnostics(mOutputData, mAlgoOutputStream);
         }
     }
 

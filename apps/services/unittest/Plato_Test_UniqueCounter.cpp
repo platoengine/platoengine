@@ -11,27 +11,36 @@ namespace Plato
 
 TEST(UniqueCounter,simple)
 {
-    // make counter
-    UniqueCounter counter;
+    // make tCounter
+    Plato::UniqueCounter tCounter;
 
     // mark some values, expect new
-    EXPECT_EQ(0, counter.mark(1u));
-    EXPECT_EQ(0, counter.mark(3u));
-    EXPECT_EQ(0, counter.mark(5u));
+    ASSERT_EQ(0, tCounter.mark(1u));
+    ASSERT_EQ(0, tCounter.mark(3u));
+    ASSERT_EQ(0, tCounter.mark(5u));
     // expect remember
-    EXPECT_EQ(1, counter.mark(1u));
+    ASSERT_EQ(1, tCounter.mark(1u));
 
     // get some unique values
-    EXPECT_EQ(0u, counter.assign_next_unique());
-    EXPECT_EQ(2u, counter.assign_next_unique());
-    EXPECT_EQ(4u, counter.assign_next_unique());
-    EXPECT_EQ(6u, counter.assign_next_unique());
-    EXPECT_EQ(7u, counter.assign_next_unique());
+    ASSERT_EQ(0u, tCounter.assignNextUnique());
+    ASSERT_EQ(2u, tCounter.assignNextUnique());
+    ASSERT_EQ(4u, tCounter.assignNextUnique());
+    ASSERT_EQ(6u, tCounter.assignNextUnique());
+    ASSERT_EQ(7u, tCounter.assignNextUnique());
 
     // (re)-mark already assigned index
-    EXPECT_EQ(1, counter.mark(6u));
+    ASSERT_EQ(1, tCounter.mark(6u));
     // mark, expect new
-    EXPECT_EQ(0, counter.mark(256u));
+    ASSERT_EQ(0, tCounter.mark(256u));
+
+    std::vector<size_t> tAssignIndices = tCounter.list();
+    std::vector<size_t> tGold = {0, 1, 2, 3, 4, 5, 6, 7, 256};
+    ASSERT_EQ(tGold.size(), tAssignIndices.size());
+
+    for(size_t tIndex = 0; tIndex < tGold.size(); tIndex++)
+    {
+        ASSERT_EQ(tGold[tIndex], tAssignIndices[tIndex]);
+    }
 }
 
 }

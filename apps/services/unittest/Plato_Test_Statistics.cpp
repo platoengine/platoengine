@@ -366,7 +366,7 @@ TEST(PlatoTest, stats_stddev_one_value)
 
 TEST(PlatoTest, ComputeMonteCarloDataErrors)
 {
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -376,18 +376,16 @@ TEST(PlatoTest, ComputeMonteCarloDataErrors)
 
     Plato::StandardVector<double> tCDF_1(tStatsInputs.mNumSamples);
     Plato::StandardVector<double> tSamples_1(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_1, tCDF_1), std::runtime_error);
 
     Plato::StandardVector<double> tCDF_2(tStatsInputs.mNumSamples + 1);
     Plato::StandardVector<double> tSamples_2(tStatsInputs.mNumSamples);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_monte_carlo_data(tStatsInputs.mNumSamples, tDistribution, tSamples_2, tCDF_2), std::runtime_error);
 }
 
 TEST(PlatoTest, ComputeMonteCarloData)
 {
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -417,8 +415,7 @@ TEST(PlatoTest, ComputeUnnormalizedSamples)
 
     Plato::StandardVector<double> VecOne(tValues);
     Plato::StandardVector<double> VecTwo(9 /* size */);
-    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo), std::invalid_argument);
-    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::compute_unnormalized_samples(tLowerBound, tUpperBound, VecOne, VecTwo), std::runtime_error);
 
     Plato::StandardVector<double> tNormalized(tValues);
     Plato::StandardVector<double> tUnnormalized(tValues.size());
@@ -472,24 +469,20 @@ TEST(PlatoTest, OutputCumulativeDistributionFunctionErrors)
     Plato::StandardVector<double> tSamples(tSize);
     Plato::StandardVector<double> tSromCDF(tSize);
     Plato::StandardVector<double> tMonteCarloCDF(tSize);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples), std::runtime_error);
     tCommWrapper.useDefaultComm();
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tSromCDF_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF_1, tMonteCarloCDF, tSamples), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tSamples_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples_1), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 
     Plato::StandardVector<double> tMonteCarloCDF_1(tSize + 1u);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples), std::invalid_argument);
-    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples, true /* print error */), std::invalid_argument);
+    ASSERT_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF_1, tSamples), std::runtime_error);
     ASSERT_NO_THROW(Plato::output_cumulative_distribution_function(tCommWrapper, tSromCDF, tMonteCarloCDF, tSamples));
 }
 
@@ -638,7 +631,7 @@ TEST(PlatoTest, SromCDF)
     EXPECT_NEAR(tGold, tOutput, tTolerance);
 }
 
-TEST(PlatoTest, SromMoments)
+TEST(PlatoTest, RawMoments)
 {
     Plato::StandardVector<double> tSamples(4, 0.);
     tSamples[0] = 0.276806509167094;
@@ -655,7 +648,7 @@ TEST(PlatoTest, SromMoments)
     for(size_t tIndex = 0; tIndex < tMoments.size(); tIndex++)
     {
         double tOrder = tIndex + static_cast<size_t>(1);
-        tMoments[tIndex] = Plato::compute_srom_moment<double>(tOrder, tSamples, tSampleProbabilities);
+        tMoments[tIndex] = Plato::compute_raw_moment(tOrder, tSamples, tSampleProbabilities);
     }
 
     Plato::StandardVector<double> tGold(4, 0.);
@@ -663,6 +656,34 @@ TEST(PlatoTest, SromMoments)
     tGold[1] = 0.078186314972017;
     tGold[2] = 0.028149028892565;
     tGold[3] = 0.010734332952929;
+    PlatoTest::checkVectorData(tMoments, tGold);
+}
+
+TEST(PlatoTest, CentralMoments)
+{
+    Plato::StandardVector<double> tSamples(4, 0.);
+    tSamples[0] = 0.276806509167094;
+    tSamples[1] = 0.431107226622461;
+    tSamples[2] = 0.004622102620248;
+    tSamples[3] = 0.224162021074166;
+    Plato::StandardVector<double> tSampleProbabilities(4, 0.);
+    tSampleProbabilities[0] = 0.25;
+    tSampleProbabilities[1] = 0.25;
+    tSampleProbabilities[2] = 0.25;
+    tSampleProbabilities[3] = 0.25;
+
+    Plato::StandardVector<double> tMoments(4, 0.);
+    for(size_t tIndex = 0; tIndex < tMoments.size(); tIndex++)
+    {
+        double tOrder = tIndex + static_cast<size_t>(1);
+        tMoments[tIndex] = Plato::compute_central_moment(tOrder, tSamples, tSampleProbabilities);
+    }
+
+    Plato::StandardVector<double> tGold(4, 0.);
+    tGold[0] = 0.0;
+    tGold[1] = 0.023348634974401761;
+    tGold[2] = -0.00109551777743925;
+    tGold[3] = 0.001071021123917853;
     PlatoTest::checkVectorData(tMoments, tGold);
 }
 
@@ -870,7 +891,7 @@ TEST(PlatoTest, PlotBetaCDF)
     }
 
     // POSE SROM PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double> tStatsInputs;
+    Plato::SromInputs<double> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
@@ -880,10 +901,10 @@ TEST(PlatoTest, PlotBetaCDF)
     tStatsInputs.mMaxNumDistributionMoments = 4;
 
     // SOLVE SROM PROBLEM
+    Plato::SromDiagnostics<double> tDiagnostics;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // GATHER OUTPUT FROM SROM PROBLEM
     Plato::StandardVector<double> tSromCDF(tLength);
@@ -1214,12 +1235,12 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     }
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_beta)
+TEST(PlatoTest, solve_srom_problem_beta)
 {
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
@@ -1230,9 +1251,9 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
@@ -1252,12 +1273,12 @@ TEST(PlatoTest, solveUncertaintyProblem_beta)
     EXPECT_NEAR(tTotalProbability, 1.0000028690386313, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_uniform)
+TEST(PlatoTest, solve_srom_problem_uniform)
 {
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
     tStatsInputs.mMean = 0.;
     tStatsInputs.mUpperBound = 75.;
@@ -1268,9 +1289,9 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
@@ -1289,12 +1310,12 @@ TEST(PlatoTest, solveUncertaintyProblem_uniform)
     EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
 }
 
-TEST(PlatoTest, solveUncertaintyProblem_normal)
+TEST(PlatoTest, solve_srom_problem_normal)
 {
     const double tTol = 1e-6;
 
     // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::UncertaintyInputStruct<double, size_t> tStatsInputs;
+    Plato::SromInputs<double, size_t> tStatsInputs;
     tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 0.;
@@ -1305,9 +1326,9 @@ TEST(PlatoTest, solveUncertaintyProblem_normal)
 
     // SOLVE
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
-    std::vector<Plato::UncertaintyOutputStruct<double>> tOutput;
-    Plato::solve_uncertainty(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+    Plato::SromDiagnostics<double> tDiagnostics;
+    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
     ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
@@ -1327,7 +1348,7 @@ TEST(PlatoTest, OutputSromDiagnostics)
     Plato::AlgorithmOutputsKSAL<double> tAlgorithmOutput;
     tAlgorithmOutput.mObjFuncValue = 1e-3;
     tAlgorithmOutput.mConstraints = std::make_shared<Plato::StandardVector<double>>(1 /* length */, 5e-4 /* base value */);
-    Plato::SromProblemDiagnosticsStruct<double> tDiagnostics;
+    Plato::SromDiagnostics<double> tDiagnostics;
     tDiagnostics.mCumulativeDistributionFunctionError = 0.01;
     tDiagnostics.mMomentErrors.resize(4);
     tDiagnostics.mMomentErrors[0] = 0.020;

@@ -59,30 +59,28 @@ struct DistrubtionName
 {
     enum type_t
     {
-        beta = 0,
-        normal = 1,
-        uniform = 2,
+        beta = 0, normal = 1, uniform = 2, undefined = 3
     };
 };
 // struct DistrubtionName
 
 template<typename ScalarType, typename OrdinalType = size_t>
-struct UncertaintyInputStruct
+struct SromInputs
 {
-    DistrubtionName::type_t mDistribution;
-    ScalarType mMean;
-    ScalarType mLowerBound;
-    ScalarType mUpperBound;
-    ScalarType mVariance;
+    DistrubtionName::type_t mDistribution; /*!< distribution type, options: beta, normal, uniform */
+    ScalarType mMean; /*!< distribution's mean */
+    ScalarType mLowerBound; /*!< distribution's lower bound */
+    ScalarType mUpperBound; /*!< distribution's upper bound */
+    ScalarType mVariance; /*!< distribution's variance */
 
-    ScalarType mMomentErrorCriterionWeight;
-    ScalarType mCumulativeDistributionFuncErrorWeight;
+    ScalarType mMomentErrorCriterionWeight; /*!< weight on moment misfit term in the SROM objective function */
+    ScalarType mCumulativeDistributionFuncErrorWeight; /*!< weight on cumulative distribution function misfit term in the SROM objective function */
 
-    OrdinalType mNumSamples;
-    OrdinalType mNumMonteCarloSamples;
-    OrdinalType mMaxNumDistributionMoments; // if zero, then use default
+    OrdinalType mNumSamples; /*!< number of SROM samples */
+    OrdinalType mNumMonteCarloSamples; /*!< number of Monte Carlo samples */
+    OrdinalType mMaxNumDistributionMoments;/*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */
 
-    UncertaintyInputStruct() :   // default Constructor
+    SromInputs() :   // default Constructor
             mDistribution(DistrubtionName::type_t::beta),
             mMean(0.),
             mLowerBound(0.),
@@ -99,24 +97,24 @@ struct UncertaintyInputStruct
 // struct UncertaintyInputStruct
 
 template<typename ScalarType>
-struct UncertaintyOutputStruct
+struct SromOutputs
 {
     // Primary outputs
-    ScalarType mSampleValue;
-    ScalarType mSampleWeight;
+    ScalarType mSampleValue; /*!< sample value */
+    ScalarType mSampleWeight; /*!< sample probability */
 };
 // struct UncertaintyOutputStruct
 
 template<typename ScalarType>
-struct SromProblemDiagnosticsStruct
+struct SromDiagnostics
 {
     // Diagnostics - secondary outputs
-    std::vector<ScalarType> mSromCDF;
-    std::vector<ScalarType> mTrueCDF;
-    std::vector<ScalarType> mSromMoments;
-    std::vector<ScalarType> mTrueMoments;
-    std::vector<ScalarType> mMomentErrors;
-    ScalarType mCumulativeDistributionFunctionError;
+    std::vector<ScalarType> mSromCDF; /*!< cumulative distribution function estimate */
+    std::vector<ScalarType> mTrueCDF; /*!< true cumulative distribution function */
+    std::vector<ScalarType> mSromMoments; /*!< raw moments estimates */
+    std::vector<ScalarType> mTrueMoments; /*!< true raw moments */
+    std::vector<ScalarType> mMomentErrors; /*!< misfit between true and raw moment estimates */
+    ScalarType mCumulativeDistributionFunctionError; /*!< misfit between true and cumulative distribution function estimate */
 };
 // struct SromProblemOutputStruct
 

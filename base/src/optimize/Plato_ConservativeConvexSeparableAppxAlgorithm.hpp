@@ -56,6 +56,7 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_ErrorChecks.hpp"
 #include "Plato_MultiVector.hpp"
@@ -415,7 +416,7 @@ private:
                 mOutputData.mConstraints.clear();
                 mOutputData.mConstraints.resize(tNumConstraints);
                 mOutputStream.open("plato_ccsa_algorithm_diagnostics.txt");
-                Plato::print_ccsa_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::print_ccsa_diagnostics_header(mOutputData, mOutputStream);
             }
         }
     }
@@ -464,7 +465,7 @@ private:
                 mOutputData.mConstraints[tIndex] = mDataMng->getCurrentConstraintValue(tDUAL_VECTOR_INDEX, tIndex);
             }
 
-            Plato::print_ccsa_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::print_ccsa_diagnostics(mOutputData, mOutputStream);
         }
     }
 
@@ -549,8 +550,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
     }
 
@@ -566,8 +566,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         try
@@ -579,8 +578,7 @@ private:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
-            std::cout << tErrorMsg.what() << std::flush;
-            std::abort();
+            THROWERR(tErrorMsg.what())
         }
 
         const Plato::MultiVector<ScalarType, OrdinalType> & tControl = mDataMng->getCurrentControl();

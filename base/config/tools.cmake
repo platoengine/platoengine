@@ -204,6 +204,34 @@ function( Plato_add_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX INPUT_MES
 endfunction( Plato_add_test )
 
 ###############################################################################
+## Plato_add_xmlgen_test( 
+## )
+###############################################################################
+
+function( Plato_add_xmlgen_test TEST_NAME XMLGEN_COMMAND NUM_PROCS IO_COMM_INDEX OUTPUT_MESH )
+
+#    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
+  set( RUN_COMMAND "source ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source" )
+
+    add_test(NAME ${TEST_NAME}
+           COMMAND ${CMAKE_COMMAND} 
+           -DTEST_COMMAND=${RUN_COMMAND}
+           -DTEST_NAME=${TEST_NAME} 
+           -DNUM_PROCS=${NUM_PROCS}
+           -DXMLGEN_COMMAND=${XMLGEN_COMMAND}
+           -DSEACAS_EPU=${SEACAS_EPU} 
+           -DSEACAS_EXODIFF=${SEACAS_EXODIFF} 
+           -DSEACAS_DECOMP=${SEACAS_DECOMP}
+           -DDATA_DIR=${CMAKE_CURRENT_SOURCE_DIR} 
+           -DIO_COMM_INDEX=${IO_COMM_INDEX}
+           -DOUTPUT_MESH=${OUTPUT_MESH}
+           -P ${CMAKE_SOURCE_DIR}/base/config/runxmlgentest.cmake)
+
+    set_tests_properties(${TEST_NAME} PROPERTIES REQUIRED_FILES "${SEACAS_EPU};${SEACAS_EXODIFF}")
+
+endfunction( Plato_add_xmlgen_test )
+
+###############################################################################
 ## Plato_add_simple_test( 
 ##    TEST_NAME      == test name
 ##    NUM_PROCS      == number of processors to use for test

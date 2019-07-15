@@ -55,6 +55,7 @@
 #include <cassert>
 #include <algorithm>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Parser.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_OptimizerEngineStageData.hpp"
@@ -124,12 +125,12 @@ inline void initialize(Plato::Interface* aInterface, Plato::OptimizerEngineStage
             else // (!tAbsoluteWasSet && !tNormalizedWasSet)
             {
                 // If neither was set we have a problem.
-                std::cout << "\n\nERROR: A constraint target value was not specified.\n\n";
+                THROWERR("A CONSTRAINT TARGET VALUE WAS NOT SPECIFIED.\n")
             }
         }
         else
         {
-            std::cout << "\n\nERROR: A constraint reference value was not specified or calculated by a stage.\n\n";
+            THROWERR("A CONSTRAINT REFERENCE VALUE WAS NOT SPECIFIED OR CALCULATED BY A STAGE.\n")
         }
     }
 }

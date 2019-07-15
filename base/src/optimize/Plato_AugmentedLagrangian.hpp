@@ -48,6 +48,7 @@
 
 #pragma once
 
+#include "Plato_Macros.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
@@ -604,7 +605,7 @@ private:
                 mOutputData.mConstraintValues.clear();
                 mOutputData.mConstraintValues.resize(tNumConstraints);
                 mOutputStream.open("plato_ksal_algorithm_diagnostics.txt");
-                Plato::print_ksal_diagnostics_header(mOutputData, mOutputStream, mPrintDiagnostics);
+                Plato::print_ksal_diagnostics_header(mOutputData, mOutputStream);
             }
         }
     }
@@ -675,7 +676,7 @@ private:
                         mStageMng->getCurrentConstraintValues(tCONSTRAINT_VECTOR_INDEX, tIndex);
             }
 
-            Plato::print_ksal_outer_diagnostics(mOutputData, mOutputStream, mPrintDiagnostics);
+            Plato::print_ksal_outer_diagnostics(mOutputData, mOutputStream);
         }
     }
 

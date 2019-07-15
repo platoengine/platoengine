@@ -53,6 +53,7 @@
 #include <memory>
 #include <sstream>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Interface.hpp"
 #include "Plato_KokkosVector.hpp"
 #include "Plato_StandardVector.hpp"
@@ -98,10 +99,9 @@ public:
 
             if( tInputData.size<Plato::Interface>("Optimizer") > 1 )
             {
-                std::stringstream tMsg;
-                tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                        << ", LINE = " << __LINE__ << ", MESSAGE: MULTIPLE 'Optimizer' DEFINITIONS\n\n";
-                Plato::ParsingException tParsingException(tMsg.str());
+                std::string tError("MULTIPLE 'Optimizer' DEFINITIONS\n");
+                PRINTERR("MULTIPLE 'Optimizer' DEFINITIONS");
+                Plato::ParsingException tParsingException(tError);
                 aInterface->registerException(tParsingException);
             }
             auto tOptimizerNode = tInputData.get<Plato::InputData>("Optimizer");
@@ -160,13 +160,9 @@ public:
             }
             else
             {
-                std::stringstream tMsg;
-                tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                        << ", LINE = " << __LINE__ << ", MESSAGE: User Specified Algebra: " << tAlgebra << ", Unknown."
-                        << std::endl << "Valid options are\n"
-                        << "\t GPU ... Graphics Processing Units (GPU) Accelerated Algebra\n"
-                        << "\t Serial ... Serial Algebra\n" << "\t Distributed ... Distributed Algebra\n" << std::endl;
-                throw Plato::ParsingException(tMsg.str());
+                std::string tError = "UNDEFINED ALGEBRA TYPE: " + tAlgebra + ". OPTIONS ARE: GPU, SERIAL AND DISTRIBUTED\n";
+                PRINTERR(tError);
+                throw Plato::ParsingException(tError);
             }
 
         }
@@ -188,10 +184,9 @@ public:
 
             if( tInputData.size<Plato::Interface>("Optimizer") > 1 )
             {
-                std::stringstream tMsg;
-                tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                        << ", LINE = " << __LINE__ << ", MESSAGE: MULTIPLE 'Optimizer' DEFINITIONS\n\n";
-                Plato::ParsingException tParsingException(tMsg.str());
+                std::string tError("MULTIPLE 'Optimizer' DEFINITIONS\n");
+                PRINTERR("MULTIPLE 'Optimizer' DEFINITIONS");
+                Plato::ParsingException tParsingException(tError);
                 aInterface->registerException(tParsingException);
             }
             auto tOptimizerNode = tInputData.get<Plato::InputData>("Optimizer");
@@ -250,13 +245,9 @@ public:
             }
             else
             {
-                std::stringstream tMsg;
-                tMsg << "\n\n ********** PLATO ERROR: FILE = " << __FILE__ << ", FUNCTION = " << __PRETTY_FUNCTION__
-                        << ", LINE = " << __LINE__ << ", MESSAGE: User Specified Algebra: " << tAlgebra << ", Unknown."
-                        << std::endl << "Valid options are\n"
-                        << "\t GPU ... Graphics Processing Units (GPU) Accelerated Algebra\n"
-                        << "\t Serial ... Serial Algebra\n" << "\t Distributed ... Distributed Algebra\n" << std::endl;
-                throw Plato::ParsingException(tMsg.str());
+                std::string tError = "UNDEFINED ALGEBRA TYPE: " + tAlgebra + ". OPTIONS ARE: GPU, SERIAL AND DISTRIBUTED\n";
+                PRINTERR(tError);
+                throw Plato::ParsingException(tError);
             }
 
         }

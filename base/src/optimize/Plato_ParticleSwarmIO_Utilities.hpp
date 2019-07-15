@@ -52,6 +52,7 @@
 #include <iomanip>
 #include <fstream>
 
+#include "Plato_Macros.hpp"
 #include "Plato_ParticleSwarmIO_BCPSO.hpp"
 #include "Plato_ParticleSwarmIO_ALPSO.hpp"
 
@@ -72,7 +73,7 @@ inline void is_file_open(const Type & aOutputFile)
     {
         if(aOutputFile.is_open() == false)
         {
-            throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
+            throw std::invalid_argument("OUTPUT FILE IS NOT OPEN.\n");
         }
     }
     catch(const std::invalid_argument & tError)
@@ -93,7 +94,7 @@ inline void is_vector_empty(const std::vector<ScalarType>& aInput)
     {
         if(aInput.empty() == true)
         {
-            throw std::invalid_argument("\n\n ******** MESSAGE: CONTAINER SIZE IS 0. ABORT! ******** \n\n");;
+            throw std::invalid_argument("CONTAINER SIZE IS 0.\n");;
         }
     }
     catch(const std::invalid_argument & tError)
@@ -149,13 +150,12 @@ inline void get_stop_criterion(const Plato::particle_swarm::stop_t & aCriterion,
 
 /******************************************************************************//**
  * @brief Print header for bound constrained Particle Swarm Optimization (BCPSO) diagnostics file
+ * @param [in] aData diagnostic data
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_bcpso_diagnostics_header(const Plato::DiagnosticsBCPSO<ScalarType, OrdinalType>& aData,
-                                           std::ofstream& aOutputFile,
-                                           bool aPrint = false)
+                                           std::ofstream& aOutputFile)
 {
     try
     {
@@ -163,16 +163,7 @@ inline void print_bcpso_diagnostics_header(const Plato::DiagnosticsBCPSO<ScalarT
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
@@ -185,12 +176,10 @@ inline void print_bcpso_diagnostics_header(const Plato::DiagnosticsBCPSO<ScalarT
  * @brief Print diagnostics for bound constrained Particle Swarm Optimization (PSO) algorithm.
  * @param [in] aData diagnostic data PSO algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_bcpso_diagnostics(const Plato::DiagnosticsBCPSO<ScalarType, OrdinalType>& aData,
-                                    std::ofstream& aOutputFile,
-                                    bool aPrint = false)
+                                    std::ofstream& aOutputFile)
 {
     try
     {
@@ -198,15 +187,7 @@ inline void print_bcpso_diagnostics(const Plato::DiagnosticsBCPSO<ScalarType, Or
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__ << ", LINE: "
-                << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
@@ -246,12 +227,10 @@ inline void print_alpso_constraint_headers(const Plato::DiagnosticsALPSO<ScalarT
  *        algorithm's diagnostic file.
  * @param [in] aData diagnostic data for ALPSO algorithm
  * @param [in,out] aOutputFile output/diagnostics file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_diagnostics_header(const Plato::DiagnosticsALPSO<ScalarType, OrdinalType>& aData,
-                                           std::ofstream& aOutputFile,
-                                           bool aPrint = false)
+                                           std::ofstream& aOutputFile)
 {
     try
     {
@@ -266,16 +245,7 @@ inline void print_alpso_diagnostics_header(const Plato::DiagnosticsALPSO<ScalarT
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-        << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
@@ -311,12 +281,10 @@ inline void print_alpso_outer_constraint_diagnostics(const Plato::DiagnosticsALP
  * @brief Print diagnostics for augmented Lagrangian Particle Swarm Optimization (ALPSO) algorithm.
  * @param [in] aData diagnostics data for ALPSO algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_outer_diagnostics(const Plato::DiagnosticsALPSO<ScalarType, OrdinalType>& aData,
-                                          std::ofstream& aOutputFile,
-                                          bool aPrint = false)
+                                          std::ofstream& aOutputFile)
 {
     try
     {
@@ -331,15 +299,7 @@ inline void print_alpso_outer_diagnostics(const Plato::DiagnosticsALPSO<ScalarTy
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-                << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // ******** PRINT DIAGNOSTICS ********
@@ -377,12 +337,10 @@ inline void print_alpso_inner_constraint_diagnostics(const Plato::DiagnosticsBCP
  *        Optimization (ALPSO) algorithm.
  * @param [in] aData diagnostics data for bound constrained PSO algorithm
  * @param [in,out] aOutputFile output/diagnostics file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void print_alpso_inner_diagnostics(const Plato::DiagnosticsBCPSO<ScalarType, OrdinalType>& aData,
-                                          std::ofstream& aOutputFile,
-                                          bool aPrint = false)
+                                          std::ofstream& aOutputFile)
 {
     try
     {
@@ -390,15 +348,7 @@ inline void print_alpso_inner_diagnostics(const Plato::DiagnosticsBCPSO<ScalarTy
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-        << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********

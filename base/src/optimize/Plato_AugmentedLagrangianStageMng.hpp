@@ -53,6 +53,7 @@
 #include <vector>
 #include <memory>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_StateData.hpp"
 #include "Plato_Criterion.hpp"
@@ -328,9 +329,7 @@ public:
         assert(mLagrangeMultipliers->getNumVectors() > static_cast<OrdinalType>(0));
         if(aInput < static_cast<ScalarType>(0))
         {
-            std::cout << "\n\n**** ERROR IN: " << __FILE__ << ", FUNCTION:" << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
-                      << ", MESSAGE: NEGATIVE INPUT LAGRANGE MULTIPLIER. ABORT. ****\n\n";
-            std::abort();
+            THROWERR("NEGATIVE LAGRANGE MULTIPLIERS DETECTED.\n")
         }
         OrdinalType tNumVectors = mLagrangeMultipliers->getNumVectors();
         for(OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
@@ -353,9 +352,7 @@ public:
         mLagrangeMultipliers->operator ()(aVectorIndex, aConstraintIndex).fill(aValue);
         if(aValue < static_cast<ScalarType>(0))
         {
-            std::cout << "\n\n**** ERROR IN: " << __FILE__ << ", FUNCTION:" << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
-                      << ", MESSAGE: NEGATIVE INPUT LAGRANGE MULTIPLIER. ABORT. ****\n\n";
-            std::abort();
+            THROWERR("NEGATIVE LAGRANGE MULTIPLIERS DETECTED.\n")
         }
     }
 
@@ -373,9 +370,9 @@ public:
         {
             if(aInput[tIndex] < static_cast<ScalarType>(0))
             {
-                std::cout << "\n\n**** ERROR IN: " << __FILE__ << ", FUNCTION:" << __PRETTY_FUNCTION__ << ", LINE: " << __LINE__
-                << ", MESSAGE: NEGATIVE INPUT LAGRANGE MULTIPLIER WITH INDEX " << tIndex << " WAS DETECTED. ABORT. ****\n\n";
-                std::abort();
+                std::string tError = "LAGRANGE MULTIPLIER WITH INDEX = " + std::to_string(tIndex) + " IS NEGATIVE. "
+                        + "LAGRANGE MULTIPLIERS HOULD BE POSITIVE.\n";
+                THROWERR(tError)
             }
         }
         mLagrangeMultipliers->operator [](aVectorIndex).update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0));

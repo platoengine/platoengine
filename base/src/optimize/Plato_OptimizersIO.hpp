@@ -57,6 +57,8 @@
 #include <exception>
 #include <stdexcept>
 
+#include "Plato_Macros.hpp"
+
 namespace Plato
 {
 
@@ -76,7 +78,7 @@ void is_file_open(const Type& aOutputFile)
     {
         if(aOutputFile.is_open() == false)
         {
-            throw std::invalid_argument("\n\n ******** MESSAGE: OUTPUT FILE IS NOT OPEN. ABORT! ******** \n\n");
+            throw std::invalid_argument("OUTPUT FILE IS NOT OPEN.\n");
         }
     }
     catch(const std::invalid_argument & tError)
@@ -98,7 +100,7 @@ void is_vector_empty(const std::vector<ScalarType>& aInput)
     {
         if(aInput.empty() == true)
         {
-            throw std::invalid_argument("\n\n ******** MESSAGE: CONTAINER SIZE IS 0. ABORT! ******** \n\n");;
+            throw std::invalid_argument("CONTAINER SIZE IS 0.\n");
         }
     }
     catch(const std::invalid_argument & tError)
@@ -237,12 +239,10 @@ struct OutputDataKSAL
 /******************************************************************************//**
  * @brief Print header for Kelley-Sachs-Bound-Constrained (KSBC) diagnostics file
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksbc_diagnostics_header(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
-                                   std::ofstream& aOutputFile,
-                                   bool aPrint = false)
+                                   std::ofstream& aOutputFile)
 {
     try
     {
@@ -250,16 +250,7 @@ void print_ksbc_diagnostics_header(const Plato::OutputDataKSBC<ScalarType, Ordin
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // PRIMARY DIAGNOSTICS  (OUTER-LOOP)
@@ -296,12 +287,10 @@ void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, O
  * @brief Print header for CCSA diagnostics file
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
-                                   std::ofstream& aOutputFile,
-                                   bool aPrint = false)
+                                   std::ofstream& aOutputFile)
 {
     try
     {
@@ -309,16 +298,7 @@ void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, Ordin
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
     assert(aData.mConstraints.size() > static_cast<OrdinalType>(0));
 
@@ -347,12 +327,10 @@ void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, Ordin
  * @brief Print diagnostics for CCSA algorithm
  * @param [in] aData diagnostic data for ccsa algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
-                            std::ofstream& aOutputFile,
-                            bool aPrint = false)
+                            std::ofstream& aOutputFile)
 {
     try
     {
@@ -360,15 +338,7 @@ void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
     assert(aData.mConstraints.size() > static_cast<OrdinalType>(0));
 
@@ -391,12 +361,10 @@ void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>
  * @brief Print header for Optimality Criteria (OC) diagnostics file
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalType>& aData,
-                                 std::ofstream& aOutputFile,
-                                 bool aPrint = false)
+                                 std::ofstream& aOutputFile)
 {
     try
     {
@@ -405,16 +373,7 @@ void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalTy
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
@@ -441,12 +400,10 @@ void print_oc_diagnostics_header(const Plato::OutputDataOC<ScalarType, OrdinalTy
  * @brief Print diagnostics for Optimality Criteria (OC) algorithm
  * @param [in] aData diagnostic data for optimality criteria algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aData,
-                          std::ofstream& aOutputFile,
-                          bool aPrint = false)
+                          std::ofstream& aOutputFile)
 {
     try
     {
@@ -455,15 +412,7 @@ void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aD
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
     assert(aData.mConstraints.size() > static_cast<OrdinalType>(0));
 
@@ -485,12 +434,10 @@ void print_oc_diagnostics(const Plato::OutputDataOC<ScalarType, OrdinalType>& aD
  * @brief Print diagnostics for Kelley-Sachs-Bound-Constrained (KSBC) algorithm
  * @param [in] aData diagnostic data for Kelley-Sachs-Bound-Constrained algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
-                            std::ofstream& aOutputFile,
-                            bool aPrint = false)
+                            std::ofstream& aOutputFile)
 {
     try
     {
@@ -498,15 +445,7 @@ void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-        << ", LINE: " << __LINE__ << " ******** \n\n";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // PRIMARY DIAGNOSTICS  (OUTER-LOOP)
@@ -526,12 +465,10 @@ void print_ksbc_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>
  *        diagnostic file.
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData,
-                                   std::ofstream& aOutputFile,
-                                   bool aPrint = false)
+                                   std::ofstream& aOutputFile)
 {
     try
     {
@@ -540,16 +477,7 @@ void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, Ordin
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-        << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // ******** AUGMENTED LAGRANGIAN DIAGNOSTICS (OUTER-LOOP) ********
@@ -584,12 +512,10 @@ void print_ksal_diagnostics_header(const Plato::OutputDataKSAL<ScalarType, Ordin
  * @brief Print outer-loop diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksal_outer_diagnostics(const Plato::OutputDataKSAL<ScalarType, OrdinalType>& aData,
-                                  std::ofstream& aOutputFile,
-                                  bool aPrint = false)
+                                  std::ofstream& aOutputFile)
 {
     try
     {
@@ -598,15 +524,7 @@ void print_ksal_outer_diagnostics(const Plato::OutputDataKSAL<ScalarType, Ordina
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-        << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what())
     }
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********
@@ -637,12 +555,10 @@ void print_ksal_outer_diagnostics(const Plato::OutputDataKSAL<ScalarType, Ordina
  * @brief Print inner-loop diagnostics for Kelley-Sachs-Augmented-Legrangian (KSAL) algorithm
  * @param [in] aData diagnostic data for KSAL algorithm
  * @param [in,out] aOutputFile output file
- * @param [in] aPrint flag use to enable/disable output (default = disabled)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 void print_ksal_inner_diagnostics(const Plato::OutputDataKSBC<ScalarType, OrdinalType>& aData,
-                                  std::ofstream& aOutputFile,
-                                  bool aPrint = false)
+                                  std::ofstream& aOutputFile)
 {
     try
     {
@@ -650,15 +566,7 @@ void print_ksal_inner_diagnostics(const Plato::OutputDataKSBC<ScalarType, Ordina
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
-        std::ostringstream tMessage;
-        tMessage << "\n\n ********\n ERROR IN FILE: " << __FILE__ << "\n FUNCTION: " << __PRETTY_FUNCTION__
-        << "\n LINE: " << __LINE__ << "\n ********";
-        tMessage << tErrorMsg.what();
-        if(aPrint == true)
-        {
-            std::cout << tMessage.str().c_str() << std::flush;
-        }
-        throw std::invalid_argument(tMessage.str().c_str());
+        THROWERR(tErrorMsg.what());
     }
 
     // ******** DIAGNOSTICS FOR CONSTRAINTS ********
