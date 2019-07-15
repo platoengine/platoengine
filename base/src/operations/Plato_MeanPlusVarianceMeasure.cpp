@@ -266,7 +266,10 @@ void MeanPlusVarianceMeasure::setMyLocalArgument(const std::string & aArgumentNa
     {
         THROWERR("INPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
     }
-    mLocalArguments.push_back(Plato::LocalArg { mDataLayout, aArgumentName });
+    if(mDataLayout == Plato::data::SCALAR)
+        mLocalArguments.push_back(Plato::LocalArg { mDataLayout, aArgumentName, 1 });
+    else
+        mLocalArguments.push_back(Plato::LocalArg { mDataLayout, aArgumentName });
 }
 
 void MeanPlusVarianceMeasure::computeMeanQoI()

@@ -5775,13 +5775,17 @@ void XMLGenerator::addStochasticObjectiveValueOperation(pugi::xml_document &aDoc
     }
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "Statistic", "mean");
-    addChild(tmp_node1, "Argument Name", "objective_mean");
+    addChild(tmp_node1, "ArgumentName", "objective_mean");
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "Statistic", "std_dev");
-    addChild(tmp_node1, "Argument Name", "objective_std_dev");
+    addChild(tmp_node1, "ArgumentName", "objective_std_dev");
 
     tmp_node1 = tmp_node.append_child("Output");
-    std::string tFieldName = "Objective Mean Plus ";
+    std::string tFieldName = "mean_plus_";
+    tFieldName += m_InputData.objective_number_standard_deviations;
+    tFieldName += "_std_dev";
+    addChild(tmp_node1, "Statistic", tFieldName);
+    tFieldName = "Objective Mean Plus ";
     tFieldName += m_InputData.objective_number_standard_deviations;
     tFieldName += " StdDev";
     addChild(tmp_node1, "ArgumentName", tFieldName);
@@ -6352,10 +6356,10 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
     }
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Statistic", "mean");
-    addChild(tmp_node2, "Argument Name", "objective_mean");
+    addChild(tmp_node2, "ArgumentName", "objective_mean");
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Statistic", "std_dev");
-    addChild(tmp_node2, "Argument Name", "objective_std_dev");
+    addChild(tmp_node2, "ArgumentName", "objective_std_dev");
 
     tmp_node1 = tmp_node.append_child("CriteriaValue");
     addChild(tmp_node1, "Layout", "Nodal Field");
@@ -7422,7 +7426,7 @@ bool XMLGenerator::generateInterfaceXML()
     outputUpdateProblemStage(doc);
 
     // Cache State Stage
-    outputCacheStateStage(doc);
+    outputCacheStateStage(doc, tHasUncertainties);
 
     // Set Lower Bounds Stage
     outputSetLowerBoundsStage(doc);
@@ -7589,7 +7593,8 @@ bool XMLGenerator::generateInterfaceXML()
 }
 
 /**********************************************************************************/
-void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc)
+void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc,
+                                         bool &aHasUncertainties)
 /**********************************************************************************/
 {
     pugi::xml_node op_node, output_node;
@@ -7612,7 +7617,13 @@ void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc)
             op_node = cur_parent.append_child("Operation");
             addChild(op_node, "Name", "Cache State");
             addChild(op_node, "PerformerName", cur_obj.performer_name);
-            if(cur_obj.multi_load_case == "true")
+            if(aHasUncertainties)
+            {
+                output_node = op_node.append_child("Output");
+                addChild(output_node, "ArgumentName", "vonmises0");
+                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
+            }
+            else if(cur_obj.multi_load_case == "true")
             {
                 for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
                 {
@@ -7842,7 +7853,14 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        if(cur_obj.multi_load_case == "true")
+        if(aHasUncertainties)
+        {
+            input_node = op_node.append_child("Input");
+            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
+            addChild(input_node, "ArgumentName", tmp_buf);
+            addChild(input_node, "SharedDataName", tmp_buf);
+        }
+        else if(cur_obj.multi_load_case == "true")
         {
             for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
             {

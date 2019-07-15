@@ -151,7 +151,7 @@ protected:
     bool outputSurfaceAreaStage(pugi::xml_document &doc);
     void outputSetLowerBoundsStage(pugi::xml_document &doc);
     void outputSetUpperBoundsStage(pugi::xml_document &doc);
-    void outputCacheStateStage(pugi::xml_document &doc);
+    void outputCacheStateStage(pugi::xml_document &doc, bool &aHasUncertainties);
     bool outputSurfaceAreaGradientStage(pugi::xml_document &doc);
     void outputDesignVolumeStage(pugi::xml_document &doc);
     bool outputComputeStateStage(pugi::xml_document &doc);
