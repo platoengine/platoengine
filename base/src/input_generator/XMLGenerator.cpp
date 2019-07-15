@@ -6339,7 +6339,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
     addChild(tmp_node, "Function", "MeanPlusStdDevGradient");
     addChild(tmp_node, "Name", "Stochastic Objective Gradient");
 
-    tmp_node1 = tmp_node.append_child("CriteriaValue");
+    tmp_node1 = tmp_node.append_child("CriterionValue");
     addChild(tmp_node1, "Layout", "Global");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
@@ -6361,7 +6361,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
     addChild(tmp_node2, "Statistic", "std_dev");
     addChild(tmp_node2, "ArgumentName", "objective_std_dev");
 
-    tmp_node1 = tmp_node.append_child("CriteriaValue");
+    tmp_node1 = tmp_node.append_child("CriterionGradient");
     addChild(tmp_node1, "Layout", "Nodal Field");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {

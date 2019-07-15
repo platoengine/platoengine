@@ -503,17 +503,17 @@ void MeanPlusVarianceGradient::computeMeanAndStdDevCriterionValueSampleSet()
 
 void MeanPlusVarianceGradient::computeGradientMeanPlusStandardDeviationCriterion()
 {
-    if(mCriterionValueDataLayout == Plato::data::ELEMENT_FIELD)
+    if(mCriterionGradientDataLayout == Plato::data::ELEMENT_FIELD)
     {
         this->computeGradientMeanPlusStdDevCriterionForElementField();
     }
-    else if(mCriterionValueDataLayout == Plato::data::SCALAR_FIELD)
+    else if(mCriterionGradientDataLayout == Plato::data::SCALAR_FIELD)
     {
         this->computeGradientMeanPlusStdDevCriterionForNodeField();
     }
     else
     {
-        const std::string tParsedLayout = Plato::getLayout(mCriterionValueDataLayout);
+        const std::string tParsedLayout = Plato::getLayout(mCriterionGradientDataLayout);
         const std::string tError = std::string("MEAN PLUS STANDARD DEVIATION CRITERION GRADIENT CAN ONLY BE COMPUTED FOR ")
                 + "NODAL AND ELEMENT FIELD QoIs. " + "INVALID INPUT DATA LAYOUT = " + tParsedLayout + ".\n";
         THROWERR(tError)
