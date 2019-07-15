@@ -203,6 +203,7 @@ private:
 
             aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
             aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mRandomNumMultiplier = this->randomNumberMultiplier(tOptionsNode);
             aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
             aData.mMeanBestAugLagFuncTolerance = this->meanBestAugLagFuncTolerance(tOptionsNode);
             aData.mPenaltyExpansionMultiplier = this->penaltyExpansionMultiplier(tOptionsNode);
@@ -240,6 +241,7 @@ private:
 
             aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
             aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mRandomNumMultiplier = this->randomNumberMultiplier(tOptionsNode);
             aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
             aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
             aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
@@ -577,7 +579,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Parse tolerance on the global best augmented Lagrangian function
+     * @brief Parse inertia multiplier
      * @param [in] aOptimizerNode data structure with optimization related input options
     **********************************************************************************/
     ScalarType inertiaMultiplier(const Plato::InputData & aOptionsNode)
@@ -586,6 +588,20 @@ private:
         if(aOptionsNode.size<std::string>("InertiaMultiplier"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "InertiaMultiplier");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse random number multiplier (used to fin an unique particle position)
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    ScalarType randomNumberMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.1;
+        if(aOptionsNode.size<std::string>("RandomNumMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "RandomNumMultiplier");
         }
         return (tOutput);
     }

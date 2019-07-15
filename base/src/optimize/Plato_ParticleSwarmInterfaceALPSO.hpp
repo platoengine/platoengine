@@ -86,6 +86,7 @@ inline void set_alpso_algorithm_inputs(const Plato::InputDataALPSO<ScalarType,Or
     aAlgorithm.setLowerBounds(*aInputs.mParticlesLowerBounds);
     aAlgorithm.setUpperBounds(*aInputs.mParticlesUpperBounds);
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
+    aAlgorithm.setRandomNumMultiplier(aInputs.mRandomNumMultiplier);
     aAlgorithm.setMeanAugLagFuncTolerance(aInputs.mMeanBestAugLagFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);
     aAlgorithm.setStdDevAugLagFuncTolerance(aInputs.mStdDevBestAugLagFuncTolerance);

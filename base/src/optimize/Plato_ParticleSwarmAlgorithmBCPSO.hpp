@@ -70,25 +70,25 @@ public:
      * @brief Constructor
      * @param [in] aFactory PSO algorithm data factory
      * @param [in] aObjective gradient free objective function interface
-    **********************************************************************************/
-    explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
-                                 const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> & aObjective) :
-            mRestart(false),
-            mParticleDiagnostics(false),
-            mAlgorithmDiagnostics(false),
-            mStdDevStoppingTolActive(true),
-            mNumIterations(0),
-            mNumObjFuncEvals(0),
-            mMaxNumIterations(1000),
-            mMeanBestObjFuncTolerance(5e-4),
-            mStdDevBestObjFuncTolerance(1e-6),
-            mGlobalBestObjFuncTolerance(1e-10),
-            mTrustRegionMultiplierTolerance(1e-8),
-            mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
-            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
-            mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
-            mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
-            mStageMng(std::make_shared<Plato::ParticleSwarmStageMngBCPSO<ScalarType, OrdinalType>>(aFactory, aObjective))
+     **********************************************************************************/
+    explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
+                                         const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> &aObjective) :
+        mRestart(false),
+        mParticleDiagnostics(false),
+        mAlgorithmDiagnostics(false),
+        mStdDevStoppingTolActive(true),
+        mNumIterations(0),
+        mNumObjFuncEvals(0),
+        mMaxNumIterations(1000),
+        mMeanBestObjFuncTolerance(5e-4),
+        mStdDevBestObjFuncTolerance(1e-6),
+        mGlobalBestObjFuncTolerance(1e-10),
+        mTrustRegionMultiplierTolerance(1e-8),
+        mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+        mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
+        mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
+        mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
+        mStageMng(std::make_shared<Plato::ParticleSwarmStageMngBCPSO<ScalarType, OrdinalType>>(aFactory, aObjective))
     {
     }
 
@@ -96,24 +96,25 @@ public:
      * @brief Constructor
      * @param [in] aFactory PSO algorithm data factory
      * @param [in] aStageMng stage manager (i.e. core interface to criteria evaluations)
-    **********************************************************************************/
-    explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
-                                 const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> & aStageMng) :
-            mParticleDiagnostics(false),
-            mAlgorithmDiagnostics(false),
-            mStdDevStoppingTolActive(true),
-            mNumIterations(0),
-            mNumObjFuncEvals(0),
-            mMaxNumIterations(1000),
-            mMeanBestObjFuncTolerance(5e-4),
-            mStdDevBestObjFuncTolerance(1e-6),
-            mGlobalBestObjFuncTolerance(1e-10),
-            mTrustRegionMultiplierTolerance(1e-98),
-            mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
-            mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
-            mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
-            mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
-            mStageMng(aStageMng)
+     **********************************************************************************/
+    explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
+                                         const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> &aStageMng) :
+        mRestart(false),
+        mParticleDiagnostics(false),
+        mAlgorithmDiagnostics(false),
+        mStdDevStoppingTolActive(true),
+        mNumIterations(0),
+        mNumObjFuncEvals(0),
+        mMaxNumIterations(1000),
+        mMeanBestObjFuncTolerance(5e-4),
+        mStdDevBestObjFuncTolerance(1e-6),
+        mGlobalBestObjFuncTolerance(1e-10),
+        mTrustRegionMultiplierTolerance(1e-98),
+        mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
+        mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
+        mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
+        mOperations(std::make_shared<Plato::ParticleSwarmOperations<ScalarType, OrdinalType>>(aFactory)),
+        mStageMng(aStageMng)
     {
     }
 
@@ -235,6 +236,16 @@ public:
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mOperations->setInertiaMultiplier(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set random number multiplier used to update the particle positions.
+     * The random number multiplier is used to find an unique particle.
+     * @param [in] aInput random number multiplier
+    **********************************************************************************/
+    void setRandomNumMultiplier(const ScalarType & aInput)
+    {
+        mOperations->setRandomNumMultiplier(aInput);
     }
 
     /******************************************************************************//**

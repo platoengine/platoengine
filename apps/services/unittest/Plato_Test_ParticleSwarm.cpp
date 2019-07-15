@@ -102,6 +102,60 @@ std::vector<double> get_target_thrust_profile()
     return (tTargetThrustProfile);
 }
 
+TEST(PlatoTest, IsParticleUnique)
+{
+    // SET DATA MANAGER
+    std::shared_ptr<Plato::DataFactory<double>> tFactory = std::make_shared<Plato::DataFactory<double>>();
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 5;
+    tFactory->allocateObjFuncValues(tNumParticles);
+    tFactory->allocateControl(tNumControls, tNumParticles);
+    Plato::ParticleSwarmDataMng<double> tDataMng(tFactory);
+
+    // SET PARTICLE SETS: CURRENT AND BEST PARTICLE SETS
+    std::vector<double> tData = {0, 0};
+    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+    tData = {2,3};
+    tCurrentParticleSet.setData(0, tData);
+    tData = {3,3};
+    tCurrentParticleSet.setData(1, tData);
+    tData = {5,3};
+    tCurrentParticleSet.setData(2, tData);
+    tData = {2,1};
+    tCurrentParticleSet.setData(3, tData);
+    tData = {2,2};
+    tCurrentParticleSet.setData(4, tData);
+    tDataMng.setCurrentParticles(tCurrentParticleSet);
+
+    Plato::StandardMultiVector<double> tBestParticleSet(tNumParticles, tData);
+    tData = {23,33};
+    tBestParticleSet.setData(0, tData);
+    tData = {32,32};
+    tBestParticleSet.setData(1, tData);
+    tData = {51,31};
+    tBestParticleSet.setData(2, tData);
+    tData = {12,11};
+    tBestParticleSet.setData(3, tData);
+    tData = {23,22};
+    tBestParticleSet.setData(4, tData);
+    tDataMng.setBestParticlePositions(tBestParticleSet);
+
+    // PARTICLE IS NOT UNIQUE - IT IS DEFINED IN THE CURRENT PARTICLE SET
+    tData = {2, 1};
+    Plato::StandardVector<double> tNewParticle1(tData);
+    ASSERT_FALSE(tDataMng.isParticleUnique(tNewParticle1));
+
+    // PARTICLE IS NOT UNIQUE - IT IS DEFINED IN THE BEST PARTICLE SET
+    tData = {51, 31};
+    Plato::StandardVector<double> tNewParticle2(tData);
+    ASSERT_FALSE(tDataMng.isParticleUnique(tNewParticle2));
+
+    // PARTICLE IS UNIQUE
+    tData = {11, 8};
+    Plato::StandardVector<double> tNewParticle3(tData);
+    ASSERT_TRUE(tDataMng.isParticleUnique(tNewParticle3));
+}
+
 TEST(PlatoTest, PSO_DataMng)
 {
     // ********* Allocate Core Optimization Data Templates *********
@@ -754,6 +808,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -778,6 +833,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -797,6 +853,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
+    tOptions.add<std::string>("RandomNumMultiplier", "0.05");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
     tOptions.add<std::string>("MeanBestObjFuncTolerance", "0.001");
@@ -821,6 +878,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.05, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.85, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-3, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -856,6 +914,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_NEAR(0.75, tInputsTwoPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsTwoPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsTwoPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsTwoPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.001, tInputsTwoPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -891,6 +950,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
@@ -921,6 +981,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
@@ -944,6 +1005,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
     tOptions.add<std::string>("InertiaMultiplier", "0.55");
+    tOptions.add<std::string>("RandomNumMultiplier", "0.5");
     tOptions.add<std::string>("ParticleVelocityTimeStep", "0.75");
     tOptions.add<std::string>("SocialBehaviorMultiplier", "0.85");
     tOptions.add<std::string>("MeanBestAugLagFuncTolerance", "0.001");
@@ -982,6 +1044,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_NEAR(0.75, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsPSO.mInertiaMultiplier, tTolerance);
+    EXPECT_NEAR(0.5, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.85, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(1e-3, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
     EXPECT_NEAR(0.6, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);

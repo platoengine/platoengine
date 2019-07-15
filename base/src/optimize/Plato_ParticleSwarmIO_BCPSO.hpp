@@ -144,6 +144,7 @@ struct InputDataBCPSO
             mGlobalBestObjFuncTolerance(1e-10),
             mTrustRegionMultiplierTolerance(1e-8),
             mInertiaMultiplier(0.9),
+            mRandomNumMultiplier(0.1),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
             mTrustRegionExpansionMultiplier(4.0),
@@ -185,6 +186,7 @@ struct InputDataBCPSO
     ScalarType mGlobalBestObjFuncTolerance; /*!< best objective function stopping tolerance */
     ScalarType mTrustRegionMultiplierTolerance; /*!< stopping tolerance on the trust region multiplier */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
+    ScalarType mRandomNumMultiplier; /*!< random number multiplier (used to find an unique particle position) */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognite behavior multiplier */
     ScalarType mTrustRegionExpansionMultiplier; /*!< trust region expansion multiplier */
