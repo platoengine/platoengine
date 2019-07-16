@@ -100,6 +100,7 @@ public:
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> &aStageMng) :
         mWriteRestartFile(false),
+        mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
         mNumIterations(0),
