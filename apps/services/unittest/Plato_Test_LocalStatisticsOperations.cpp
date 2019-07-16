@@ -92,6 +92,14 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     tOutput4.add<std::string>("Statistic", "mean_plus_5_std_dev");
     tOutput4.add<std::string>("ArgumentName", "objective_Mean_Plus_5_StdDev");
     tOperations.add<Plato::InputData>("Output", tOutput4);
+    Plato::InputData tOutput5("Output");
+    tOutput5.add<std::string>("Statistic", "mean_plus_-1_std_dev");
+    tOutput5.add<std::string>("ArgumentName", "objective_Mean_Plus_-1_StdDev");
+    tOperations.add<Plato::InputData>("Output", tOutput5);
+    Plato::InputData tOutput6("Output");
+    tOutput6.add<std::string>("Statistic", "mean_plus_-5_std_dev");
+    tOutput6.add<std::string>("ArgumentName", "objective_Mean_Plus_-5_StdDev");
+    tOperations.add<Plato::InputData>("Output", tOutput6);
 
     // TEST THAT INPUT DATA IS PARSED
     MPI_Comm tMyComm = MPI_COMM_WORLD;
@@ -105,10 +113,9 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
 
     std::vector<Plato::LocalArg> tLocalArguments;
     tOperation.getArguments(tLocalArguments);
-    ASSERT_EQ(7u, tLocalArguments.size());
-    std::vector<std::string> tArgumentNames =
-        { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_Mean",
-                "objective_Std_Dev", "objective_Mean_Plus_1_StdDev", "objective_Mean_Plus_5_StdDev" };
+    ASSERT_EQ(9u, tLocalArguments.size());
+    std::vector<std::string> tArgumentNames = { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_Mean",
+        "objective_Std_Dev", "objective_Mean_Plus_1_StdDev", "objective_Mean_Plus_5_StdDev", "objective_Mean_Plus_-1_StdDev", "objective_Mean_Plus_-5_StdDev" };
     for(size_t tIndex = 0; tIndex < tArgumentNames.size(); tIndex++)
     {
         bool tFoundGoldValue = std::find(tArgumentNames.begin(), tArgumentNames.end(), tLocalArguments[tIndex].mName)
@@ -123,14 +130,18 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     ASSERT_THROW(tOperation.getProbability("sierra_sd1_lc4_objective"), std::runtime_error);
 
     std::vector<double> tMultipliers = tOperation.getStandardDeviationMultipliers();
-    ASSERT_EQ(2u, tMultipliers.size());
-    ASSERT_NEAR(1.0, tMultipliers[0], tTolerance);
-    ASSERT_NEAR(5.0, tMultipliers[1], tTolerance);
+    ASSERT_EQ(4u, tMultipliers.size());
+    ASSERT_NEAR(-5.0, tMultipliers[0], tTolerance);
+    ASSERT_NEAR(-1.0, tMultipliers[1], tTolerance);
+    ASSERT_NEAR(1.0, tMultipliers[2], tTolerance);
+    ASSERT_NEAR(5.0, tMultipliers[3], tTolerance);
 
     ASSERT_STREQ("objective_Mean", tOperation.getOutputArgument("MEAN").c_str());
     ASSERT_STREQ("objective_Std_Dev", tOperation.getOutputArgument("STD_DEV").c_str());
     ASSERT_STREQ("objective_Mean_Plus_1_StdDev", tOperation.getOutputArgument("MEAN_PLUS_1_STD_DEV").c_str());
     ASSERT_STREQ("objective_Mean_Plus_5_StdDev", tOperation.getOutputArgument("MEAN_PLUS_5_STD_DEV").c_str());
+    ASSERT_STREQ("objective_Mean_Plus_-1_StdDev", tOperation.getOutputArgument("MEAN_PLUS_-1_STD_DEV").c_str());
+    ASSERT_STREQ("objective_Mean_Plus_-5_StdDev", tOperation.getOutputArgument("MEAN_PLUS_-5_STD_DEV").c_str());
     ASSERT_THROW(tOperation.getOutputArgument("MEAN_PLUS_2_STDDEV"), std::runtime_error);
 }
 
