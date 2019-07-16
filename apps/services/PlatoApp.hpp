@@ -246,7 +246,6 @@ public:
         {return mMLS;}
 #endif
 
-private:
     /******************************************************************************//**
      * @brief Import data operation
      * @param [in] aArgumentName name used to identify data
@@ -263,6 +262,7 @@ private:
     template<typename SharedDataT>
     void exportDataT(const std::string& aArgumentName, SharedDataT& aExportData);
 
+private:
     /******************************************************************************//**
      * @brief Parsing exception handler
      * @param [in] aName input data name

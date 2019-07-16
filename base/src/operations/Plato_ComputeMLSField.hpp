@@ -48,7 +48,6 @@
 
 #pragma once
 
-#include "PlatoApp.hpp"
 #include "Plato_MLS.hpp"
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
