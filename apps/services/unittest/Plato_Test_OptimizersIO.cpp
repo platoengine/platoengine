@@ -103,16 +103,12 @@ TEST(PlatoTest, PrintCCSAdiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
     Plato::OutputDataCCSA<double> tData;
-    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::runtime_error);
 
     tFile1.open("MyFile1.txt");
-    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::runtime_error);
     tFile1.close();
     std::system("rm -f MyFile1.txt");
 }
@@ -246,24 +242,18 @@ TEST(PlatoTest, PrintOptimalityCriteriaDiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
     Plato::OutputDataOC<double> tData;
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1), std::runtime_error);
 
     tFile1.open("MyFile1.txt");
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1), std::runtime_error);
     tFile1.close();
     std::system("rm -f MyFile1.txt");
 
     std::ofstream tFile2;
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile2), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile2, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile2), std::invalid_argument);
-    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile2, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile2), std::runtime_error);
+    ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile2), std::runtime_error);
 }
 
 TEST(PlatoTest, PrintDiagnosticsOneConstraintsOC)
@@ -362,10 +352,8 @@ TEST(PlatoTest, PrintKsbcDiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
     Plato::OutputDataKSBC<double> tData;
-    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tData, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksbc_diagnostics(tData, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksbc_diagnostics(tData, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksbc_diagnostics_header(tData, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_ksbc_diagnostics(tData, tFile1), std::runtime_error);
 }
 
 TEST(PlatoTest, PrintDiagnosticsKSBC)
@@ -632,14 +620,11 @@ TEST(PlatoTest, PrintKsalDiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
     Plato::OutputDataKSAL<double> tDataKSAL;
-    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tFile1, true /* print message */), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_diagnostics_header(tDataKSAL, tFile1), std::runtime_error);
+    ASSERT_THROW(Plato::print_ksal_outer_diagnostics(tDataKSAL, tFile1), std::runtime_error);
 
     Plato::OutputDataKSBC<double> tDataKSBC;
-    ASSERT_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tFile1), std::invalid_argument);
-    ASSERT_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tFile1, true /* print message */), std::invalid_argument);
+    ASSERT_THROW(Plato::print_ksal_inner_diagnostics(tDataKSBC, tFile1), std::runtime_error);
 }
 
 TEST(PlatoTest, TestStoppingCriterionOutputAlgorithm)

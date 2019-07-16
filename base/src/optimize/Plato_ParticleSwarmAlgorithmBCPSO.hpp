@@ -100,7 +100,6 @@ public:
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> &aStageMng) :
         mWriteRestartFile(false),
-        mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
         mNumIterations(0),
@@ -601,7 +600,7 @@ private:
             if(tMyCommWrapper.myProcID() == 0)
             {
                 mAlgoOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
-                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream);
             }
         }
     }
@@ -710,7 +709,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream, mAlgorithmDiagnostics);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream);
         }
     }
 
@@ -789,7 +788,7 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream, mAlgorithmDiagnostics);
+            Plato::pso::print_alpso_inner_diagnostics(mOutputData, aOutputStream);
         }
     }
 

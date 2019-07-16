@@ -156,10 +156,7 @@ public:
             default:
             case ROL::Elementwise::EReductionType::REDUCE_AND:
             {
-                std::ostringstream tErrorMsg;
-                tErrorMsg << "****** ERROR IN " << __FILE__ << ", FUNCTION: " << __FUNCTION__ << ", LINE: " << __LINE__
-                          << ", LOGICAL REDUCE AND IS NOT IMPLEMENTED ******\n" << std::flush;
-                std::runtime_error(tErrorMsg.str().c_str());
+                THROWERR("LOGICAL REDUCE AND OPERATION IS NOT IMPLEMENTED.\n")
                 break;
             }
         }
@@ -185,10 +182,7 @@ public:
             default:
             case Teuchos::EReductionType::REDUCE_AND:
             {
-                std::ostringstream tErrorMsg;
-                tErrorMsg << "****** ERROR IN " << __FILE__ << ", FUNCTION: " << __FUNCTION__ << ", LINE: " << __LINE__
-                          << ", LOGICAL REDUCE AND IS NOT IMPLEMENTED ******\n" << std::flush;
-                std::runtime_error(tErrorMsg.str().c_str());
+                THROWERR("LOGICAL REDUCE AND OPERATION IS NOT IMPLEMENTED.\n")
                 break;
             }
         }

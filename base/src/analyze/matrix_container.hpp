@@ -193,7 +193,7 @@ class DistributedVector : public DistributedEntity
 
     void ExtractView(Real** data){ assemblyVector->ExtractView(data); }
 
-    int MyLength(){ return assemblyVector->MyLength(); }
+    int MyLength() const { return assemblyVector->MyLength(); }
 
     const vector<VarIndex>& getDataIndices() const { return plotIndices; }
  

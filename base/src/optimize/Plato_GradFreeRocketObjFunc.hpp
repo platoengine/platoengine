@@ -48,6 +48,7 @@
 
 #pragma once
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_GradFreeCriterion.hpp"
@@ -146,11 +147,8 @@ public:
         catch(const std::invalid_argument& tErrorMsg)
         {
 
-            std::ostringstream tMessage;
-            tMessage << "\n\n ******** ERROR IN FILE: " << __FILE__ << ", FUNCTION: " << __PRETTY_FUNCTION__
-            << ", LINE: " << __LINE__ << " ******** \n\n";
-            tMessage << tErrorMsg.what();
-            throw std::invalid_argument(tMessage.str().c_str());
+            PRINTERR(tErrorMsg.what());
+            throw tErrorMsg;
         }
 
         const OrdinalType tNumParticles = aControls.getNumVectors();
@@ -222,7 +220,7 @@ private:
         {
             if(mTargetThrustProfileSet == false)
             {
-                throw std::invalid_argument("\n\n ******** MESSAGE: TARGET THRUST PROFILE IS NOT SET. ABORT! ******** \n\n");
+                throw std::invalid_argument("TARGET THRUST PROFILE IS NOT SET.\n");
             }
         }
         catch(const std::invalid_argument & tError)

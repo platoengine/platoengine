@@ -2157,16 +2157,6 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check applying to correct mesh type
-    stringInput =
-            "begin loads\n"
-            "traction nodeset 1 value 0 0 1 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
     // check for direction keyword
     stringInput =
             "begin loads\n"

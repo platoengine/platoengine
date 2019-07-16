@@ -30,6 +30,8 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_Vector3DVariations.cpp
 							 Plato_Test_UniqueCounter.cpp
 							 Plato_Test_SimpleRocketOptimization.cpp
+							 Plato_Test_UncertainLoadGeneratorXML.cpp
+							 Plato_Test_LocalStatisticsOperations.cpp
 							 PSL_Test_Triangle.cpp  
 							 PSL_Test_OverhangFilter.cpp  
 							 PSL_Test_KernelThenHeavisideFilter.cpp  
@@ -83,9 +85,12 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/tpls/gtest/include
                        ${CMAKE_SOURCE_DIR}/apps/services/unittest
                        ${CMAKE_SOURCE_DIR}/base/src/analyze
                        ${CMAKE_SOURCE_DIR}/base/src/interface
+                       ${CMAKE_SOURCE_DIR}/base/src/input_generator
                        ${CMAKE_SOURCE_DIR}/base/src/data_layer
                        ${CMAKE_SOURCE_DIR}/base/src/Filters
                        ${CMAKE_SOURCE_DIR}/base/src/tools
+                       ${CMAKE_SOURCE_DIR}/base/src/optimize
+                       ${CMAKE_SOURCE_DIR}/base/src/operations
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/AbstractInterface
                        ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/ActivationFunction

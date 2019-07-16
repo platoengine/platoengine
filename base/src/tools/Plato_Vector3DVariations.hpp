@@ -7,25 +7,58 @@ namespace Plato
 
 namespace axis3D
 {
+
 enum axis3D
 {
     x, y, z
 };
-}
-void axis3D_stringToEnum(const std::string& string_axis, axis3D::axis3D& enum_axis);
+// enum axis3D
 
+}
+// namespace axis3D
+
+/******************************************************************************//**
+ * @brief Return gradient free objective function stage name
+ * @param [in] aOptimizerNode data structure with optimization related input options
+ * @return gradient free objective function stage name
+ **********************************************************************************/
 struct Vector3D
 {
-    double x;
-    double y;
-    double z;
+    double mX; /*!< x-direction value */
+    double mY; /*!< y-direction value */
+    double mZ; /*!< z-direction value */
 
-    // default constructor
-    Vector3D(double a_x = 0., double a_y = 0., double a_z = 0.);
+    /******************************************************************************//**
+     * @brief Default constructor
+     * @param [in] aX x-direction value
+     * @param [in] aY y-direction value
+     * @param [in] aZ z-direction value
+    **********************************************************************************/
+    Vector3D(double aX = 0., double aY = 0., double aZ = 0.) :
+            mX(aX),
+            mY(aY),
+            mZ(aZ)
+    {
+    }
 };
+// struct Vector3D
 
-void rotate_vector_by_axis(Vector3D& vector_to_vary,
-                           const axis3D::axis3D& axis_name,
-                           const double& angle_in_degrees);
+/******************************************************************************//**
+ * @brief Return rotation axis
+ * @param [in] aStringAxis rotation axis
+ * @param [out] aEnumAxis rotation axis
+**********************************************************************************/
+void axis3D_stringToEnum(const std::string & aStringAxis, Plato::axis3D::axis3D & aEnumAxis);
+
+/******************************************************************************//**
+ * @brief Return rotation axis
+ * @param [in] aAxisName rotation axis
+ * @param [in] aAngleInDegrees angle of rotation in degrees
+ * @param [out] aVectorToVary vector to rotate
+**********************************************************************************/
+void rotate_vector_by_axis(Plato::Vector3D & aVectorToVary,
+                           const axis3D::axis3D & aAxisName,
+                           const double & aAngleInDegrees);
 
 }
+// namespace Plato
