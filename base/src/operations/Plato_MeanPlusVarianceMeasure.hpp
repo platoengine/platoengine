@@ -114,6 +114,13 @@ public:
     std::vector<double> getStandardDeviationMultipliers() const;
 
     /******************************************************************************//**
+     * @brief Return local number elements, i.e. container's length.
+     * @param [in] aArgumentName argument name
+     * @return local number elements
+    **********************************************************************************/
+    size_t getLocalLength(const std::string &aArgumentName) const;
+
+    /******************************************************************************//**
      * @brief Return the probability associated with input argument name
      * @param [in] aInput input argument name
      * @return probability
@@ -254,14 +261,10 @@ private:
     void computeMeanPlusStdDevGlobalQoI();
 
     /******************************************************************************//**
-     * @brief Compute mean plus standard deviation measure associated with a node-based quantity of interest
+     * @brief Compute mean plus standard deviation measure associated with a node- or
+     * element-based quantity of interest
     **********************************************************************************/
-    void computeMeanPlusStdDevNodeFieldQoI();
-
-    /******************************************************************************//**
-     * @brief Compute mean plus standard deviation measure associated with an element-based quantity of interest
-    **********************************************************************************/
-    void computeMeanPlusStdDevElementFieldQoI();
+    void computeMeanPlusStdDevFieldQoI();
 
     /******************************************************************************//**
      * @brief Convert string standard deviation multiplier to double

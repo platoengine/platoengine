@@ -486,11 +486,6 @@ void MeanPlusVarianceGradient::computeMeanCriterionGradientSampleSet()
 {
     double* tOutputData = this->getCriterionGradientOutputData("MEAN");
     Plato::compute_sample_set_mean(mCriterionGradSamplesToProbability, tOutputData);
-    if(mCriterionGradientDataLayout == Plato::data::SCALAR_FIELD)
-    {
-        const std::string tOutputArgument = this->getCriterionGradientOutputArgument("MEAN");
-        mPlatoApp->compressAndUpdateNodeField(tOutputArgument);
-    }
 }
 
 void MeanPlusVarianceGradient::computeMeanAndStdDevCriterionValueSampleSet()
@@ -531,7 +526,6 @@ void MeanPlusVarianceGradient::computeGradientMeanPlusStdDevCriterionForNodeFiel
                                                          mCriterionValueSamplesToProbability,
                                                          mCriterionGradSamplesToProbability,
                                                          tOutputGradient);
-    mPlatoApp->compressAndUpdateNodeField(mOutputGradientArgumentName);
 }
 
 void MeanPlusVarianceGradient::computeGradientMeanPlusStdDevCriterionForElementField()
