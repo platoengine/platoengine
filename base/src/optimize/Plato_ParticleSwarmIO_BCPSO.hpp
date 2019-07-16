@@ -202,7 +202,7 @@ struct InputDataBCPSO
 
     std::shared_ptr<Plato::CustomOutput<ScalarType,OrdinalType>> mCustomOutput;  /*!< custom output interface */
 
-    /*!< operations which require communication across processors, e.g. max, min, global sum */
+    /*!< operations that require communication across processors, e.g. max, min, global sum */
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mControlReductions;
     std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> mCriteriaReductions;
 };

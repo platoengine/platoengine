@@ -73,7 +73,7 @@ public:
      **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> &aObjective) :
-        mRestart(false),
+        mWriteRestartFile(false),
         mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
@@ -99,7 +99,7 @@ public:
      **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> &aStageMng) :
-        mRestart(false),
+        mWriteRestartFile(false),
         mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
@@ -808,7 +808,7 @@ private:
     }
 
 private:
-    bool mRestart; /*!< flag - print restart data (default = false) */
+    bool mWriteRestartFile; /*!< flag - write restart file (default = false) */
     bool mParticleDiagnostics; /*!< flag - print particle diagnostics (default = false) */
     bool mAlgorithmDiagnostics; /*!< flag - print algorithm diagnostics (default = false) */
     bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
