@@ -114,7 +114,7 @@ TEST(PlatoTest, MeanPlusVarianceMeasure)
     std::vector<Plato::LocalArg> tLocalArguments;
     tOperation.getArguments(tLocalArguments);
     ASSERT_EQ(9u, tLocalArguments.size());
-    std::vector<std::string> tArgumentNames = { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_Mean",
+    std::vector<std::string> tArgumentNames = { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_Mean", // @suppress("Invalid arguments")
         "objective_Std_Dev", "objective_Mean_Plus_1_StdDev", "objective_Mean_Plus_5_StdDev", "objective_Mean_Plus_-1_StdDev", "objective_Mean_Plus_-5_StdDev" };
     for(size_t tIndex = 0; tIndex < tArgumentNames.size(); tIndex++)
     {
@@ -209,7 +209,7 @@ TEST(PlatoTest, MeanPlusVarianceGradient)
     std::vector<Plato::LocalArg> tLocalArguments;
     tOperation.getArguments(tLocalArguments);
     ASSERT_EQ(9u, tLocalArguments.size());
-    std::vector<std::string> tArgumentNames =
+    std::vector<std::string> tArgumentNames = // @suppress("Invalid arguments")
         { "sierra_sd1_lc1_objective", "sierra_sd1_lc2_objective", "sierra_sd1_lc3_objective", "objective_mean",
                 "objective_std_dev", "sierra_sd1_lc1_objective_gradient", "sierra_sd1_lc2_objective_gradient",
                 "sierra_sd1_lc3_objective_gradient", "objective_mean_plus_1_std_dev_gradient" };

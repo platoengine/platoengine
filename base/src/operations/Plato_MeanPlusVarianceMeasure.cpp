@@ -377,6 +377,8 @@ void MeanPlusVarianceMeasure::computeMeanNodeFieldQoI()
     this->setSampleProbabilityPairsNodeQoI(tSampleDataToProbabilityPairs);
     double *tOutput = this->getOutputDataFieldQoI("MEAN");
     Plato::compute_sample_set_mean(tSampleDataToProbabilityPairs, tOutput);
+    const std::string tOutputArgument = this->getOutputArgument("MEAN");
+    mPlatoApp->compressAndUpdateNodeField(tOutputArgument);
 }
 
 void MeanPlusVarianceMeasure::computeMeanElementFieldQoI()
@@ -403,6 +405,8 @@ void MeanPlusVarianceMeasure::computeStdDevNodeFieldQoI()
     double *tMean = this->getOutputDataFieldQoI("MEAN");
     double *tStdDev = this->getOutputDataFieldQoI("STD_DEV");
     Plato::compute_sample_set_standard_deviation(tMean, tSampleDataToProbabilityPairs, tStdDev);
+    const std::string tOutputArgument = this->getOutputArgument("STD_DEV");
+    mPlatoApp->compressAndUpdateNodeField(tOutputArgument);
 }
 
 void MeanPlusVarianceMeasure::computeStdDevElementFieldQoI()
