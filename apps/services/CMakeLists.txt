@@ -21,12 +21,11 @@ endif()
 
 
 if (PLATO_ENABLE_SERVICES_PYTHON)
-    find_package(PythonLibs)
-    find_package(PythonInterp)
+    find_package(Python2 COMPONENTS Development Interpreter)
     add_library( PlatoServices SHARED PlatoApp.cpp ServicesPythonModule.cpp )
-    target_include_directories(PlatoServices PRIVATE ${PYTHON_INCLUDE_DIRS} )
+    target_include_directories(PlatoServices PRIVATE ${Python2_INCLUDE_DIRS} )
     target_link_libraries( PlatoServices ${PLATO_LIBRARIES} ${PLATO_LIBRARIES} ${Trilinos_LIBRARIES} 
-                           ${Trilinos_TPL_LIBRARIES} ${PYTHON_LIBRARIES} )
+                           ${Trilinos_TPL_LIBRARIES} ${Python2_LIBRARIES} )
     set_target_properties( PlatoServices PROPERTIES PREFIX "" )
     target_compile_options( PlatoServices PRIVATE "-lmpi" )
 
