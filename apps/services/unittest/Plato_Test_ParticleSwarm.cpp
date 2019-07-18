@@ -63,6 +63,94 @@
 
 #include "Plato_UnitTestUtils.hpp"
 
+namespace Plato
+{
+
+template<typename ScalarType, typename OrdinalType>
+void output_restart_data_multivector(const Plato::MultiVector<ScalarType, OrdinalType>& aData,
+                                     const std::string& aMessage,
+                                     std::ofstream& aRestartFile)
+{
+    if(aRestartFile.is_open() == false)
+    {
+        THROWERR("RESTART FILE IS NOT OPEN.\n")
+    }
+
+    if(aMessage.empty() == true)
+    {
+        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+    }
+
+    if(aData.getNumVectors() <= static_cast<OrdinalType>(0))
+    {
+        THROWERR("RESTART INPUT MULTI-VECTOR IS EMPTY.\n")
+    }
+
+    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    for(OrdinalType tVecIndex = 0; tVecIndex < aData.getNumVectors(); tVecIndex++)
+    {
+        const Plato::Vector<ScalarType, OrdinalType> & tVector = aData[tVecIndex];
+        for(OrdinalType tDataIndex = 0; tDataIndex < tVector.size(); tDataIndex++)
+        {
+            aRestartFile << tVector[tDataIndex] << " ";
+        }
+        aRestartFile << "\n";
+    }
+    aRestartFile << "\n";
+}
+
+template<typename ScalarType, typename OrdinalType>
+void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aData,
+                                const std::string& aMessage,
+                                std::ofstream& aRestartFile)
+{
+    if(aRestartFile.is_open() == false)
+    {
+        THROWERR("RESTART FILE IS NOT OPEN.\n")
+    }
+
+    if(aMessage.empty() == true)
+    {
+        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+    }
+
+    if(aData.size() <= static_cast<OrdinalType>(0))
+    {
+        THROWERR("RESTART INPUT VECTOR IS EMPTY.\n")
+    }
+
+    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    for(OrdinalType tDataIndex = 0; tDataIndex < aData.size(); tDataIndex++)
+    {
+        aRestartFile << aData[tDataIndex] << " ";
+    }
+    aRestartFile << "\n\n";
+}
+
+template<typename DataType>
+void output_restart_data_value(const DataType& aData, const std::string& aMessage, std::ofstream& aRestartFile)
+{
+    if(aRestartFile.is_open() == false)
+    {
+        THROWERR("RESTART FILE IS NOT OPEN.\n")
+    }
+
+    if(aMessage.empty() == true)
+    {
+        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+    }
+
+    if(std::isfinite(aData) == false)
+    {
+        THROWERR("RESTART DATA IS NOT A FINITE NUMBER.\n")
+    }
+
+    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    aRestartFile << aData << "\n\n";
+}
+
+}
+
 namespace ParticleSwarmTest
 {
 
@@ -100,6 +188,134 @@ std::vector<double> get_target_thrust_profile()
                 16584.718093777799368, 16723.909825187685783, 16863.988043630397442 };
 
     return (tTargetThrustProfile);
+}
+
+TEST(PlatoTest, output_restart_data_multivector)
+{
+    // ****** OPEN OUTPUT FILE ******
+    std::ofstream tRestartFile;
+    tRestartFile.open("MyFile.txt");
+
+    // ****** SET DATA ******
+    const size_t tNumParticles = 5;
+    std::vector<double> tData = {0, 0};
+    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+    tData = {23,33};
+    tCurrentParticleSet.setData(0, tData);
+    tData = {32,32};
+    tCurrentParticleSet.setData(1, tData);
+    tData = {51,31};
+    tCurrentParticleSet.setData(2, tData);
+    tData = {12,11};
+    tCurrentParticleSet.setData(3, tData);
+    tData = {23,22};
+    tCurrentParticleSet.setData(4, tData);
+    std::string tID("CURRENT PARTICLES");
+    Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tRestartFile);
+
+    Plato::StandardMultiVector<double> tPreviousParticleSet(tNumParticles, tData);
+    tData = {3,1};
+    tPreviousParticleSet.setData(0, tData);
+    tData = {2,4};
+    tPreviousParticleSet.setData(1, tData);
+    tData = {1,2};
+    tPreviousParticleSet.setData(2, tData);
+    tData = {2,2};
+    tPreviousParticleSet.setData(3, tData);
+    tData = {1,5};
+    tPreviousParticleSet.setData(4, tData);
+    tID = "PREVIOUS VELOCITIES";
+
+    // ****** OUTPUT RESTART DATA ******
+    Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tRestartFile);
+    tRestartFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tInputFile;
+    tInputFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tInputFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tInputFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold("CURRENTPARTICLES23333232513112112322PREVIOUSVELOCITIES3124122215");
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, output_restart_data_vector)
+{
+    // ****** OPEN OUTPUT FILE ******
+    std::ofstream tRestartFile;
+    tRestartFile.open("MyFile.txt");
+
+    // ****** SET DATA ******
+    std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
+    Plato::StandardVector<double> tCurrentFval(tData);
+    std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
+    Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
+
+    Plato::StandardVector<double> tCurrentBestFval(tData);
+    tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
+    tData = {0.1, 0.21, 0.15, 0.14, 0.01};
+
+    // ****** OUTPUT RESTART DATA ******
+    Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
+    tRestartFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tInputFile;
+    tInputFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tInputFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tInputFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold("CURRENTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05CURRENTBESTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05");
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, output_restart_data_value)
+{
+    // ****** OPEN OUTPUT FILE ******
+    std::ofstream tRestartFile;
+    tRestartFile.open("MyFile.txt");
+
+    // ****** SET DATA ******
+    size_t tRank = 0;
+    std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
+    Plato::output_restart_data_value(tRank, tID, tRestartFile);
+
+    size_t tParticleIndex = 1;
+    tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
+    Plato::output_restart_data_value(tParticleIndex, tID, tRestartFile);
+
+    double tGlobalBestFval = 0.12;
+    tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
+    Plato::output_restart_data_value(tGlobalBestFval, tID, tRestartFile);
+    tRestartFile.close();
+
+    // ****** TEST OUTPUT DATA ******
+    std::ifstream tInputFile;
+    tInputFile.open("MyFile.txt");
+    std::string tInputString;
+    std::stringstream tReadData;
+    while(tInputFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tInputFile.close();
+    std::system("rm -f MyFile.txt");
+
+    std::stringstream tGold("CURRENTGLOBALBESTPARTICLERANK0CURRENTGLOBALBESTPARTICLEINDEX1CURRENTGLOBALBESTOBJECTIVEVALUE0.12");
+    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, IsParticleUnique)
