@@ -100,7 +100,7 @@ static PyObject* list_from_int_array(int* array, int array_length)
   PyObject *newlist = PyList_New(array_length);
 
   for(i=0; i<array_length; i++)
-    PyList_SetItem(newlist, i, PyInt_FromLong(array[i]));
+    PyList_SetItem(newlist, i, PyLong_FromLong(array[i]));
 
   return newlist;
   
@@ -114,11 +114,11 @@ static void string_array_from_list(PyObject* list, char** array) {
   int length = PyList_Size(list);
   for(i = 0; i < length; i++) {
     PyObject *v = PyList_GetItem(list,i);
-    if(!PyString_Check(v)) {
+    if(!PyMapping_Check(v)) {
       PyErr_SetString(PyExc_TypeError, "list must contain only strings");
       return;
     }
-    array[i] = PyString_AsString(v);
+    array[i] = PyBytes_AsString(v);
   }
 }
 
@@ -131,11 +131,11 @@ static void int_array_from_list(PyObject* list, int* array) {
   int length = PyList_Size(list);
   for(i = 0; i < length; i++) {
     PyObject *v = PyList_GetItem(list,i);
-    if(!PyInt_Check(v)) {
+    if(!PySet_Check(v)) {
       PyErr_SetString(PyExc_TypeError, "list must contain only integers");
       return;
     }
-    array[i] = (int)PyInt_AsLong(v);
+    array[i] = (int)PyLong_AsLong(v);
   }
 }
 
@@ -173,7 +173,7 @@ expy_open(PyObject *self, PyObject *args)
 
   file_id = ex_open(path, imode, &comp_ws, &io_ws, &ver);
 
-  return PyInt_FromLong(file_id);
+  return PyLong_FromLong(file_id);
         
 }
 
@@ -192,7 +192,7 @@ expy_create(PyObject *self, PyObject *args)
 
   genesis_id = ex_create(path, EX_CLOBBER, &comp_ws, &io_ws);
 
-  return PyInt_FromLong(genesis_id);
+  return PyLong_FromLong(genesis_id);
 }
 
 /******************************************************************************/
@@ -207,7 +207,7 @@ expy_close(PyObject *self, PyObject *args)
 
   return_value = ex_close(exoid);
 
-  return PyInt_FromLong(return_value);
+  return PyLong_FromLong(return_value);
 }
 
 /******************************************************************************/
@@ -222,7 +222,7 @@ expy_update(PyObject *self, PyObject *args)
 
   return_value = ex_update(exoid);
 
-  return PyInt_FromLong(return_value);
+  return PyLong_FromLong(return_value);
 }
 
 
