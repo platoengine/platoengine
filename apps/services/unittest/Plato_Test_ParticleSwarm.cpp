@@ -68,25 +68,31 @@ namespace Plato
 
 template<typename ScalarType, typename OrdinalType>
 void output_restart_data_multivector(const Plato::MultiVector<ScalarType, OrdinalType>& aData,
-                                     const std::string& aMessage,
+                                     const std::string& aDataID,
                                      std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
-        THROWERR("RESTART FILE IS NOT OPEN.\n")
+        THROWERR("RESTART FILE IS NOT OPENED.\n")
     }
 
-    if(aMessage.empty() == true)
+    if(aDataID.empty() == true)
     {
-        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+        THROWERR("RESTART DATA IDENTIFIER IS NOT DEFINED.\n")
     }
 
     if(aData.getNumVectors() <= static_cast<OrdinalType>(0))
     {
-        THROWERR("RESTART INPUT MULTI-VECTOR IS EMPTY.\n")
+        THROWERR("RESTART MULTI-VECTOR CONTAINER WITH ID '" + aDataID + "' IS EMPTY.\n")
     }
 
-    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    const ScalarType tDotValue = Plato::dot(aData, aData);
+    if(std::isfinite(tDotValue) == false)
+    {
+        THROWERR("RESTART MULTI-VECTOR CONTAINER WITH ID '" + aDataID + "' HAS CORRUPTED DATA, I.E. NON-FINITE NUMBERS.\n")
+    }
+
+    aRestartFile << std::setprecision(16) << aDataID.c_str() << "\n";
     for(OrdinalType tVecIndex = 0; tVecIndex < aData.getNumVectors(); tVecIndex++)
     {
         const Plato::Vector<ScalarType, OrdinalType> & tVector = aData[tVecIndex];
@@ -101,25 +107,31 @@ void output_restart_data_multivector(const Plato::MultiVector<ScalarType, Ordina
 
 template<typename ScalarType, typename OrdinalType>
 void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aData,
-                                const std::string& aMessage,
+                                const std::string& aDataID,
                                 std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
-        THROWERR("RESTART FILE IS NOT OPEN.\n")
+        THROWERR("RESTART FILE IS NOT OPENED.\n")
     }
 
-    if(aMessage.empty() == true)
+    if(aDataID.empty() == true)
     {
-        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+        THROWERR("RESTART DATA IDENTIFIER IS NOT DEFINED.\n")
     }
 
     if(aData.size() <= static_cast<OrdinalType>(0))
     {
-        THROWERR("RESTART INPUT VECTOR IS EMPTY.\n")
+        THROWERR("RESTART VECTOR CONTAINER WITH ID '" + aDataID + "' IS EMPTY.\n")
     }
 
-    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    const ScalarType tDotValue = aData.dot(aData);
+    if(std::isfinite(tDotValue) == false)
+    {
+        THROWERR("RESTART VECTOR CONTAINER WITH ID '" + aDataID + "' HAS CORRUPTED DATA, I.E. NON-FINITE NUMBERS.\n")
+    }
+
+    aRestartFile << std::setprecision(16) << aDataID.c_str() << "\n";
     for(OrdinalType tDataIndex = 0; tDataIndex < aData.size(); tDataIndex++)
     {
         aRestartFile << aData[tDataIndex] << " ";
@@ -128,24 +140,24 @@ void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aD
 }
 
 template<typename DataType>
-void output_restart_data_value(const DataType& aData, const std::string& aMessage, std::ofstream& aRestartFile)
+void output_restart_data_value(const DataType& aData, const std::string& aDataID, std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
-        THROWERR("RESTART FILE IS NOT OPEN.\n")
+        THROWERR("RESTART FILE IS NOT OPENED.\n")
     }
 
-    if(aMessage.empty() == true)
+    if(aDataID.empty() == true)
     {
-        THROWERR("RESTART DATA IDENTIFIER IS EMPTY.\n")
+        THROWERR("RESTART DATA IDENTIFIER IS NOT DEFINED.\n")
     }
 
     if(std::isfinite(aData) == false)
     {
-        THROWERR("RESTART DATA IS NOT A FINITE NUMBER.\n")
+        THROWERR("RESTART DATA WITH ID '" + aDataID + "' IS NOT A FINITE NUMBER.\n")
     }
 
-    aRestartFile << std::setprecision(16) << aMessage.c_str() << "\n";
+    aRestartFile << std::setprecision(16) << aDataID.c_str() << "\n";
     aRestartFile << aData << "\n\n";
 }
 
@@ -188,6 +200,87 @@ std::vector<double> get_target_thrust_profile()
                 16584.718093777799368, 16723.909825187685783, 16863.988043630397442 };
 
     return (tTargetThrustProfile);
+}
+
+TEST(PlatoTest, output_restart_data_multivector_error)
+{
+    // ERROR - RESTART FILE IS NOT OPEN
+    std::string tID;
+    std::ofstream tRestartFile;
+    const size_t tNumParticles = 5;
+    std::vector<double> tData = {0, 0};
+    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+    ASSERT_THROW(Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY RESTART DATA IDENTIFIER, I.E. DATA ID
+    tRestartFile.open("MyFile.txt");
+    ASSERT_THROW(Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY CONTAINER
+    tID = "CURRENT PARTICLES";
+    Plato::StandardMultiVector<double> tEmptyParticleSet;
+    ASSERT_THROW(Plato::output_restart_data_multivector(tEmptyParticleSet, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - CORRUPTED DATA
+    Plato::StandardMultiVector<double> tCorruptedParticleSet(tNumParticles, tData);
+    tData = {3,1};
+    tCorruptedParticleSet.setData(0, tData);
+    tData = {2,4};
+    tCorruptedParticleSet.setData(1, tData);
+    tData = {1,std::numeric_limits<double>::quiet_NaN()};
+    tCorruptedParticleSet.setData(2, tData);
+    tData = {2,2};
+    tCorruptedParticleSet.setData(3, tData);
+    tData = {1,5};
+    tCorruptedParticleSet.setData(4, tData);
+    ASSERT_THROW(Plato::output_restart_data_multivector(tCorruptedParticleSet, tID, tRestartFile), std::runtime_error);
+
+    tRestartFile.close();
+}
+
+TEST(PlatoTest, output_restart_data_vector_error)
+{
+    // ERROR - RESTART FILE IS NOT OPEN
+    std::string tID;
+    std::ofstream tRestartFile;
+    std::vector<double> tData = {0, 0};
+    Plato::StandardVector<double> tCurrentFval(tData);
+    ASSERT_THROW(Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY RESTART DATA IDENTIFIER, I.E. DATA ID
+    tRestartFile.open("MyFile.txt");
+    ASSERT_THROW(Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY CONTAINER
+    tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
+    Plato::StandardVector<double> tEmptyFval;
+    ASSERT_THROW(Plato::output_restart_data_vector(tEmptyFval, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - CORRUPTED DATA
+    tData = {0, std::numeric_limits<double>::quiet_NaN()};
+    Plato::StandardVector<double> tCorruptedFval(tData);
+    ASSERT_THROW(Plato::output_restart_data_vector(tCorruptedFval, tID, tRestartFile), std::runtime_error);
+
+    tRestartFile.close();
+}
+
+TEST(PlatoTest, output_restart_data_value_error)
+{
+    // ERROR - RESTART FILE IS NOT OPEN
+    std::string tID;
+    double tBestFval = 0;
+    std::ofstream tRestartFile;
+    ASSERT_THROW(Plato::output_restart_data_value(tBestFval, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY RESTART DATA IDENTIFIER, I.E. DATA ID
+    tRestartFile.open("MyFile.txt");
+    ASSERT_THROW(Plato::output_restart_data_value(tBestFval, tID, tRestartFile), std::runtime_error);
+
+    // ERROR - EMPTY CONTAINER
+    tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
+    tBestFval = std::numeric_limits<double>::quiet_NaN();
+    ASSERT_THROW(Plato::output_restart_data_value(tBestFval, tID, tRestartFile), std::runtime_error);
+    tRestartFile.close();
 }
 
 TEST(PlatoTest, output_restart_data_multivector)
