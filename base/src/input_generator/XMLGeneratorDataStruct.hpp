@@ -75,6 +75,7 @@ struct Objective
     std::string raleigh_damping_alpha;
     std::string raleigh_damping_beta;
     std::string wtmass_scale_factor;
+    std::string normalize_objective;
 
     // type: "compliance and volume min"
     std::string volume_misfit_target;
