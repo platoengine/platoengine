@@ -161,6 +161,39 @@ void output_restart_data_value(const DataType& aData, const std::string& aDataID
     aRestartFile << aData << "\n\n";
 }
 
+template<typename ScalarType, typename OrdinalType>
+void read_restart_data_vector(const std::string& aDataID,
+                              std::ifstream& aRestartFile,
+                              Plato::Vector<ScalarType, OrdinalType>& aData)
+{
+    int tOffset;
+    std::string tLine;
+    std::vector<double> tData;
+
+    while(!aRestartFile.eof())
+    {
+        getline(aRestartFile, tLine);
+        if(std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
+        {
+            std::string tNextLine;
+            std::getline(aRestartFile, tNextLine);
+
+            std::string tToken;
+            std::istringstream tTokenStream(tNextLine);
+            while(std::getline(tTokenStream, tToken, ' '))
+            {
+                tData.push_back(std::stod(tToken));
+            }
+            break;
+        }
+    }
+
+    for(size_t tIndex = 0; tIndex < tData.size(); tIndex++)
+    {
+        aData[tIndex] = tData[tIndex];
+    }
+}
+
 }
 
 namespace ParticleSwarmTest
@@ -409,6 +442,45 @@ TEST(PlatoTest, output_restart_data_value)
 
     std::stringstream tGold("CURRENTGLOBALBESTPARTICLERANK0CURRENTGLOBALBESTPARTICLEINDEX1CURRENTGLOBALBESTOBJECTIVEVALUE0.12");
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+}
+
+TEST(PlatoTest, read_restart_file)
+{
+    // ****** OPEN OUTPUT FILE ******
+    std::ofstream tRestartFile;
+    tRestartFile.open("MyRestartFile.txt");
+
+    // ****** SET DATA ******
+    std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
+    Plato::StandardVector<double> tCurrentFval(tData);
+    std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
+    Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
+
+    tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
+    tData = {0.1, 0.21, 0.15, 0.14, 0.01};
+    Plato::StandardVector<double> tCurrentBestFval(tData);
+
+    // ****** OUTPUT RESTART DATA ******
+    Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
+    tRestartFile.close();
+
+    // ****** READ RESTART FILE ******
+    std::ifstream tInputFile;
+    tInputFile.open("MyRestartFile.txt");
+    Plato::StandardVector<double> tRestartCurrentBestFval(tCurrentBestFval.size());
+    Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval);
+
+    Plato::StandardVector<double> tRestartCurrentFval(tCurrentFval.size());
+    Plato::read_restart_data_vector("CURRENT OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentFval);
+
+    // ****** TEST RESTART DATA ******
+    PlatoTest::checkVectorData(tCurrentFval, tRestartCurrentFval);
+    PlatoTest::checkVectorData(tCurrentBestFval, tRestartCurrentBestFval);
+
+    tInputFile.close();
+
+
+    std::system("rm -f MyRestartFile.txt");
 }
 
 TEST(PlatoTest, IsParticleUnique)
