@@ -95,7 +95,6 @@ build_distrubtion(const Plato::SromInputs<ScalarType, OrdinalType>& aInput)
         default:
         {
             THROWERR("UNDEFINED DISTRIBUTION. OPTIONS ARE: BETA, NORMAL AND UNIFORM\n")
-            break;
         }
     }
 
