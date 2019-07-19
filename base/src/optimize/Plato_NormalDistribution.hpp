@@ -146,7 +146,6 @@ inline ScalarType normal_moment(const OrdinalType & aOrder, const ScalarType & a
         {
             std::string tError = std::string("MOMENT OF ORDER = ") + std::to_string(aOrder) + " IS NOT DEFINED.\n";
             THROWERR(tError)
-            break;
         }
     }
     return (tOutput);
