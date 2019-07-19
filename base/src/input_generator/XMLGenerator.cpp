@@ -893,11 +893,22 @@ bool XMLGenerator::generateSalinasInputDecks()
     bool levelset = false;
     if(m_InputData.discretization.compare("levelset") == 0)
         levelset = true;
+
+    bool tHasUncertainties = false;
+    bool tRequestedVonMisesOutput = false;
+    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
+
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
+        XMLGen::Objective& cur_obj = m_InputData.objectives[i];
         if(!cur_obj.code_name.compare("sierra_sd"))
         {
+            // Check for reasons for turning local objective normalization off.
+            if(tHasUncertainties)
+                cur_obj.normalize_objective = "false";
+            if(cur_obj.type == "stress constrained mass minimization")
+                cur_obj.normalize_objective = "false";
+
             bool frf = false;
             if(cur_obj.type.compare("match frf data") == 0)
                 frf = true;
@@ -1339,6 +1350,8 @@ bool XMLGenerator::generateSalinasInputDecks()
                     }
                     fprintf(fp, "\n");
                 }
+                if(cur_obj.normalize_objective == "false")
+                    fprintf(fp, "  objective_normalization false\n");
                 fprintf(fp, "END\n");
                 fprintf(fp, "FILE\n");
                 fprintf(fp, "  geometry_file '%s'\n", m_InputData.run_mesh_name.c_str());
@@ -2470,6 +2483,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
             {
                 XMLGen::Objective new_objective;
                 new_objective.weight="1";
+                new_objective.normalize_objective = "true";
                 // found an objective. parse it.
                 // parse the rest of the objective
                 while (!fin.eof())
