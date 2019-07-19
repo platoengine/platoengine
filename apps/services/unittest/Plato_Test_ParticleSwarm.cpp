@@ -67,9 +67,9 @@ namespace Plato
 {
 
 template<typename ScalarType, typename OrdinalType>
-void output_restart_data_multivector(const Plato::MultiVector<ScalarType, OrdinalType>& aData,
-                                     const std::string& aDataID,
-                                     std::ofstream& aRestartFile)
+inline void output_restart_data_multivector(const Plato::MultiVector<ScalarType, OrdinalType>& aData,
+                                            const std::string& aDataID,
+                                            std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
@@ -106,9 +106,9 @@ void output_restart_data_multivector(const Plato::MultiVector<ScalarType, Ordina
 }
 
 template<typename ScalarType, typename OrdinalType>
-void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aData,
-                                const std::string& aDataID,
-                                std::ofstream& aRestartFile)
+inline void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aData,
+                                       const std::string& aDataID,
+                                       std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
@@ -140,7 +140,7 @@ void output_restart_data_vector(const Plato::Vector<ScalarType, OrdinalType>& aD
 }
 
 template<typename DataType>
-void output_restart_data_value(const DataType& aData, const std::string& aDataID, std::ofstream& aRestartFile)
+inline void output_restart_data_value(const DataType& aData, const std::string& aDataID, std::ofstream& aRestartFile)
 {
     if(aRestartFile.is_open() == false)
     {
@@ -162,10 +162,25 @@ void output_restart_data_value(const DataType& aData, const std::string& aDataID
 }
 
 template<typename ScalarType, typename OrdinalType>
-void read_restart_data_vector(const std::string& aDataID,
-                              std::ifstream& aRestartFile,
-                              Plato::Vector<ScalarType, OrdinalType>& aData)
+inline void read_restart_data_vector(const std::string& aDataID,
+                                     std::ifstream& aRestartFile,
+                                     Plato::Vector<ScalarType, OrdinalType>& aData)
 {
+    if(aRestartFile.is_open() == false)
+    {
+        THROWERR("RESTART FILE IS NOT OPENED.\n")
+    }
+
+    if(aDataID.empty() == true)
+    {
+        THROWERR("RESTART DATA IDENTIFIER IS NOT DEFINED.\n")
+    }
+
+    if(aData.size() <= static_cast<OrdinalType>(0))
+    {
+        THROWERR("RESTART VECTOR CONTAINER WITH ID '" + aDataID + "' IS EMPTY.\n")
+    }
+
     int tOffset;
     std::string tLine;
     std::vector<double> tData;
@@ -186,6 +201,15 @@ void read_restart_data_vector(const std::string& aDataID,
             }
             break;
         }
+    }
+
+    if(tData.size() != std::size_t(aData.size()))
+    {
+        std::string tMsg = "RESTART INPUT, I.E. READ FROM RESTART FILE, DATA CONTAINER WITH ID '" + aDataID
+                           + "' AND OUTPUT CONTAINER DIMENSIONS DO NOT MATCH." + " INPUT CONTAINER DIM = "
+                           + std::to_string(tData.size()) + " AND OUTPUT CONTAINER DIM = "
+                           + std::to_string(aData.size());
+        THROWERR(tMsg)
     }
 
     for(size_t tIndex = 0; tIndex < tData.size(); tIndex++)
