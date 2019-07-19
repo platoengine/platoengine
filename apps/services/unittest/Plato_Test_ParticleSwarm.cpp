@@ -470,6 +470,7 @@ TEST(PlatoTest, read_restart_file)
     Plato::StandardVector<double> tRestartCurrentBestFval(tCurrentBestFval.size());
     Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval);
 
+    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
     Plato::StandardVector<double> tRestartCurrentFval(tCurrentFval.size());
     Plato::read_restart_data_vector("CURRENT OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentFval);
 
@@ -478,7 +479,6 @@ TEST(PlatoTest, read_restart_file)
     PlatoTest::checkVectorData(tCurrentBestFval, tRestartCurrentBestFval);
 
     tInputFile.close();
-
 
     std::system("rm -f MyRestartFile.txt");
 }
