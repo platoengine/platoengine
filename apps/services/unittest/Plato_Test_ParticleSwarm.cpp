@@ -122,7 +122,7 @@ inline void is_restart_vector_data_finite(const std::string& aDataID, const Plat
 }
 
 template<typename DataType>
-inline void is_restart_vector_data_finite(const std::string& aDataID, const DataType& aData)
+inline void is_restart_data_finite(const std::string& aDataID, const DataType& aData)
 {
 
     if(std::isfinite(aData) == false)
@@ -177,7 +177,7 @@ inline void output_restart_data_value(const DataType& aData, const std::string& 
 {
     Plato::is_restart_file_opened(aRestartFile);
     Plato::is_restart_data_identifier_defined(aDataID);
-    Plato::is_restart_vector_data_finite(aDataID, aData);
+    Plato::is_restart_data_finite(aDataID, aData);
 
     aRestartFile << std::setprecision(16) << aDataID.c_str() << "\n";
     aRestartFile << aData << "\n\n";
@@ -198,7 +198,7 @@ inline void read_restart_data_vector(const std::string& aDataID,
 
     while(!aRestartFile.eof())
     {
-        getline(aRestartFile, tLine);
+        std::getline(aRestartFile, tLine);
         if(std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
         {
             std::string tNextLine;
@@ -234,8 +234,8 @@ inline void read_restart_data_multivector(const std::string& aDataID,
     std::string tLine;
     while(!aRestartFile.eof())
     {
-        getline(aRestartFile, tLine);
-        if(std::size_t(tOffset = tLine.find("CURRENT PARTICLES", 0)) != std::string::npos)
+        std::getline(aRestartFile, tLine);
+        if(std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
         {
             for(OrdinalType tVecIndex = 0; tVecIndex < aData.getNumVectors(); tVecIndex++)
             {
@@ -256,6 +256,31 @@ inline void read_restart_data_multivector(const std::string& aDataID,
     }
 
     Plato::is_restart_multivector_data_finite(aDataID, aData);
+}
+
+template<typename DataType>
+inline void read_restart_data_value(const std::string &aDataID,
+                                    std::ifstream &aRestartFile,
+                                    DataType &aData)
+{
+    Plato::is_restart_file_opened(aRestartFile);
+    Plato::is_restart_data_identifier_defined(aDataID);
+
+    int tOffset;
+    std::string tLine;
+    while (!aRestartFile.eof())
+    {
+        std::getline(aRestartFile, tLine);
+        if (std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
+        {
+            std::string tNextLine;
+            std::getline(aRestartFile, tNextLine);
+            aData = std::stod(tNextLine);
+            break;
+        }
+    }
+
+    Plato::is_restart_data_finite(aDataID, aData);
 }
 
 }
@@ -429,6 +454,8 @@ TEST(PlatoTest, output_restart_data_multivector)
     {
         tReadData << tInputString.c_str();
     }
+
+    // ****** CLOSE AND DELETE FILE ******
     tInputFile.close();
     std::system("rm -f MyFile.txt");
 
@@ -465,6 +492,8 @@ TEST(PlatoTest, output_restart_data_vector)
     {
         tReadData << tInputString.c_str();
     }
+
+    // ****** CLOSE AND DELETE FILE ******
     tInputFile.close();
     std::system("rm -f MyFile.txt");
 
@@ -501,6 +530,8 @@ TEST(PlatoTest, output_restart_data_value)
     {
         tReadData << tInputString.c_str();
     }
+
+    // ****** CLOSE AND DELETE FILE ******
     tInputFile.close();
     std::system("rm -f MyFile.txt");
 
@@ -537,6 +568,8 @@ TEST(PlatoTest, read_restart_data_vector)
     tInputFile.seekg(0 /*offset*/, tInputFile.beg);
     Plato::StandardVector<double> tRestartCurrentFval(tCurrentFval.size());
     Plato::read_restart_data_vector("CURRENT OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentFval);
+
+    // ****** CLOSE AND DELETE FILE ******
     tInputFile.close();
     std::system("rm -f MyRestartFile.txt");
 
@@ -585,6 +618,7 @@ TEST(PlatoTest, read_restart_data_multivector)
     Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tOutputFile);
     tOutputFile.close();
 
+    // ****** READ RESTART DATA ******
     std::ifstream tInputFile;
     tInputFile.open("MyRestartFile.txt");
     Plato::StandardMultiVector<double> tRestartCurrentParticleSet(tNumParticles, tData);
@@ -594,12 +628,56 @@ TEST(PlatoTest, read_restart_data_multivector)
     Plato::StandardMultiVector<double> tRestartPreviousParticleSet(tNumParticles, tData);
     Plato::read_restart_data_multivector("PREVIOUS VELOCITIES", tInputFile, tRestartPreviousParticleSet);
 
+    // ****** CLOSE AND DELETE FILE ******
     tInputFile.close();
     std::system("rm -f MyRestartFile.txt");
 
     // ****** TEST RESTART DATA ******
     PlatoTest::checkMultiVectorData(tCurrentParticleSet, tRestartCurrentParticleSet);
-    PlatoTest::checkMultiVectorData(tCurrentParticleSet, tRestartPreviousParticleSet);
+    PlatoTest::checkMultiVectorData(tPreviousParticleSet, tRestartPreviousParticleSet);
+}
+
+TEST(PlatoTest, read_restart_data_value)
+{
+    // ****** OPEN OUTPUT FILE ******
+    std::ofstream tOutputFile;
+    tOutputFile.open("MyRestartFile.txt");
+
+    // ****** SET DATA ******
+    size_t tRank = 0;
+    std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
+    Plato::output_restart_data_value(tRank, tID, tOutputFile);
+
+    size_t tParticleIndex = 1;
+    tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
+    Plato::output_restart_data_value(tParticleIndex, tID, tOutputFile);
+
+    double tGlobalBestFval = 0.12;
+    tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
+    Plato::output_restart_data_value(tGlobalBestFval, tID, tOutputFile);
+    tOutputFile.close();
+
+    // ****** READ AND TEST RESTART DATA ******
+    std::ifstream tInputFile;
+    tInputFile.open("MyRestartFile.txt");
+    int tRestartRank = -1;
+    Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", tInputFile, tRestartRank);
+    ASSERT_EQ(tRank, tRestartRank);
+
+    int tRestartParticleIndex = -1;
+    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+    Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE INDEX", tInputFile, tRestartParticleIndex);
+    ASSERT_EQ(tParticleIndex, tRestartParticleIndex);
+
+    double tRestartGlobalBestFval = -1;
+    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+    Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE VALUE", tInputFile, tRestartGlobalBestFval);
+    const double tTolernace = 1e-6;
+    ASSERT_NEAR(tGlobalBestFval, tRestartGlobalBestFval, tTolernace);
+
+    // ****** CLOSE AND DELETE FILE ******
+    tInputFile.close();
+    std::system("rm -f MyRestartFile.txt");
 }
 
 TEST(PlatoTest, IsParticleUnique)
