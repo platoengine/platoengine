@@ -320,6 +320,10 @@ TEST(PlatoTest, compute_random_variable_statistics_error)
     tSromInputs.mDistribution = Plato::DistrubtionName::undefined;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
     ASSERT_FALSE(Plato::compute_random_variable_statistics(tSromInputs, tSromOutputs));
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, compute_random_variable_statistics)
@@ -344,6 +348,10 @@ TEST(PlatoTest, compute_random_variable_statistics)
         ASSERT_NEAR(tGoldProbabilities[tIndex], tSromOutputs[tIndex].mSampleWeight, tTolerance);
     }
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
@@ -387,6 +395,10 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
     }
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
@@ -462,6 +474,10 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
     }
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_distribution)
@@ -2356,6 +2372,10 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
 
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
@@ -2553,6 +2573,10 @@ TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
     ASSERT_EQ(tInputData.objectives[0].load_case_weights.size(), 256u);
     ASSERT_EQ(tInputData.objectives[1].load_case_weights.size(), 1u);
     ASSERT_EQ(tInputData.objectives[2].load_case_weights.size(), 16u);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_parsed_data)
@@ -2724,6 +2748,10 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
 
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, generate_load_sroms_only_random_loads)
@@ -2822,6 +2850,10 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
 
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, expand_load_cases)
