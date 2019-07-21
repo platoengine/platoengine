@@ -79,7 +79,6 @@ AbstractKernelThenFilter::AbstractKernelThenFilter() :
         mAdvanceContinuationIteration(0),
         mStartIteration(0),
         mUpdateInterval(1),
-        mProblemUpdateFrequency(1),
         mAdditiveContinuation(false),
         m_filter(NULL),
         m_authority(NULL),
