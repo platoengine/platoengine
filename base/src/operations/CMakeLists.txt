@@ -48,6 +48,11 @@ set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_StatisticsOperationsUtilities.hpp
                         )
                         
+if( ENABLE_ISO )
+  message( "-- Compiling PlatoIso " )
+  add_definitions(-DENABLE_ISO)
+endif()
+
 if( GEOMETRY )
                         
 set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
@@ -59,11 +64,13 @@ set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
                         
 endif()
 
-INCLUDE_DIRECTORIES(${PLATO_INCLUDES} ${CMAKE_SOURCE_DIR}/apps/services)
+INCLUDE_DIRECTORIES(${PLATO_INCLUDES} ${CMAKE_SOURCE_DIR}/apps/services
+                                      ${CMAKE_SOURCE_DIR}/base/src/iso/main)
 
 FOREACH(PLATO_LIB ${LIB_NAMES})
   add_library(Plato${PLATO_LIB}     ${${PLATO_LIB}_SOURCES}     ${${PLATO_LIB}_HEADERS}     )
   target_link_libraries(Plato${PLATO_LIB} PlatoApp)
+  target_link_libraries(Plato${PLATO_LIB} IsoExtract)
   set(ADD_PLATO_LIBRARIES ${ADD_PLATO_LIBRARIES} Plato${PLATO_LIB})
 ENDFOREACH()
 set(PLATO_LIBRARIES ${PLATO_LIBRARIES} ${ADD_PLATO_LIBRARIES} PARENT_SCOPE)

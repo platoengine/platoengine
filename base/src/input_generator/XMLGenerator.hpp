@@ -84,6 +84,7 @@ protected:
                                                     const std::string &aSize,
                                                     const std::string &aOwner,
                                                     const std::string &aUser);
+    void generateAMGXInput();
     bool parseLoads(std::istream &fin);
     bool parseBCs(std::istream &fin);
     bool generateInterfaceXML();

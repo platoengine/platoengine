@@ -1929,15 +1929,30 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
             {
                 addNTVParameter(n2, "Physics", "string", "Mechanical");
                 addNTVParameter(n2, "PDE Constraint", "string", "Elastostatics");
-                addNTVParameter(n2, "Objective", "string", "Internal Elastic Energy");
+                addNTVParameter(n2, "Constraint", "string", "My Volume");
+                addNTVParameter(n2, "Objective", "string", "My Internal Elastic Energy");
                 addNTVParameter(n2, "Self-Adjoint", "bool", "true");
-                // Internal Elastic Energy
+
+                // Volume Constraint
                 n3 = n2.append_child("ParameterList");
-                n3.append_attribute("name") = "Internal Elastic Energy";
+                n3.append_attribute("name") = "My Volume";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Volume");
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "1.0");
+                addNTVParameter(n4, "Minimum Value", "double", "0.0");
+                // Internal Elastic Energy Objective
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "My Internal Elastic Energy";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Internal Elastic Energy");
                 n4 = n3.append_child("ParameterList");
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "3.0");
+                addNTVParameter(n4, "Minimum Value", "double", "1.0e-9");
                 // Elastostatics
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Elastostatics";
@@ -1945,7 +1960,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "3.0");
-                addNTVParameter(n4, "Minimum Value", "double", "1e-3");
+                addNTVParameter(n4, "Minimum Value", "double", "1e-9");
                 // Material model
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Material Model";
@@ -2067,15 +2082,29 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
             {
                 addNTVParameter(n2, "Physics", "string", "Thermal");
                 addNTVParameter(n2, "PDE Constraint", "string", "Thermostatics");
-                addNTVParameter(n2, "Objective", "string", "Internal Thermal Energy");
+                addNTVParameter(n2, "Constraint", "string", "My Volume");
+                addNTVParameter(n2, "Objective", "string", "My Internal Thermal Energy");
                 addNTVParameter(n2, "Self-Adjoint", "bool", "true");
-                // Internal Thermal Energy
+                // Volume Constraint
                 n3 = n2.append_child("ParameterList");
-                n3.append_attribute("name") = "Internal Thermal Energy";
+                n3.append_attribute("name") = "My Volume";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Volume");
                 n4 = n3.append_child("ParameterList");
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "1.0");
+                addNTVParameter(n4, "Minimum Value", "double", "0.0");
+                // Internal Elastic Energy Objective
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "My Internal Thermal Energy";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Internal Thermal Energy");
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "3.0");
+                addNTVParameter(n4, "Minimum Value", "double", "1.0e-9");
                 // Thermostatics
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Thermostatics";
@@ -2083,7 +2112,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                 n4.append_attribute("name") = "Penalty Function";
                 addNTVParameter(n4, "Type", "string", "SIMP");
                 addNTVParameter(n4, "Exponent", "double", "1.0");
-                addNTVParameter(n4, "Minimum Value", "double", "1e-3");
+                addNTVParameter(n4, "Minimum Value", "double", "1e-9");
                 // Material Model
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Material Model";
@@ -5356,8 +5385,75 @@ bool XMLGenerator::generatePerformerOperationsXML()
     generateAlbanyOperationsXML();
     generateLightMPOperationsXML();
     generatePlatoAnalyzeOperationsXML();
+    generateAMGXInput();
     return true;
 }
+
+/******************************************************************************/
+void XMLGenerator::generateAMGXInput()
+/******************************************************************************/
+{
+    int num_plato_analyze_objs = 0;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        if(!m_InputData.objectives[i].code_name.compare("plato_analyze"))
+        {
+            num_plato_analyze_objs++;
+        }
+    }
+
+    if(num_plato_analyze_objs)
+    {
+        FILE *fp = fopen("amgx.json", "w");
+        if(fp)
+        {
+            fprintf(fp, "{\n");
+            fprintf(fp, "\"config_version\": 2,\n");
+            fprintf(fp, "\"solver\": {\n");
+            fprintf(fp, "\"preconditioner\": {\n");
+            fprintf(fp, "\"print_grid_stats\": 1,\n");
+            fprintf(fp, "\"algorithm\": \"AGGREGATION\",\n");
+            fprintf(fp, "\"print_vis_data\": 0,\n");
+            fprintf(fp, "\"max_matching_iterations\": 50,\n");
+            fprintf(fp, "\"max_unassigned_percentage\": 0.01,\n");
+            fprintf(fp, "\"solver\": \"AMG\",\n");
+            fprintf(fp, "\"smoother\": {\n");
+            fprintf(fp, "\"relaxation_factor\": 0.78,\n");
+            fprintf(fp, "\"scope\": \"jacobi\",\n");
+            fprintf(fp, "\"solver\": \"BLOCK_JACOBI\",\n");
+            fprintf(fp, "\"monitor_residual\": 0,\n");
+            fprintf(fp, "\"print_solve_stats\": 0\n");
+            fprintf(fp, "},\n");
+            fprintf(fp, "\"print_solve_stats\": 0,\n");
+            fprintf(fp, "\"dense_lu_num_rows\": 64,\n");
+            fprintf(fp, "\"presweeps\": 1,\n");
+            fprintf(fp, "\"selector\": \"SIZE_8\",\n");
+            fprintf(fp, "\"coarse_solver\": \"DENSE_LU_SOLVER\",\n");
+            fprintf(fp, "\"coarsest_sweeps\": 2,\n");
+            fprintf(fp, "\"max_iters\": 1,\n");
+            fprintf(fp, "\"monitor_residual\": 0,\n");
+            fprintf(fp, "\"store_res_history\": 0,\n");
+            fprintf(fp, "\"scope\": \"amg\",\n");
+            fprintf(fp, "\"max_levels\": 100,\n");
+            fprintf(fp, "\"postsweeps\": 1,\n");
+            fprintf(fp, "\"cycle\": \"W\"\n");
+            fprintf(fp, "},\n");
+            fprintf(fp, "\"solver\": \"PBICGSTAB\",\n");
+            fprintf(fp, "\"print_solve_stats\": 0,\n");
+            fprintf(fp, "\"obtain_timings\": 0,\n");
+            fprintf(fp, "\"max_iters\": 1000,\n");
+            fprintf(fp, "\"monitor_residual\": 1,\n");
+            fprintf(fp, "\"convergence\": \"ABSOLUTE\",\n");
+            fprintf(fp, "\"scope\": \"main\",\n");
+            fprintf(fp, "\"tolerance\": 1e-12,\n");
+            fprintf(fp, "\"norm\": \"L2\"\n");
+            fprintf(fp, "}\n");
+            fprintf(fp, "}\n");
+            fclose(fp);
+        }
+    }
+}
+
 /******************************************************************************/
 bool XMLGenerator::generateLightMPOperationsXML()
 /******************************************************************************/
@@ -5550,17 +5646,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
             addChild(tmp_node, "Name", "Compute Objective Gradient");
             tmp_node1 = tmp_node.append_child("Input");
             addChild(tmp_node1, "ArgumentName", "Topology");
-            tmp_node1 = tmp_node.append_child("Output");
-            addChild(tmp_node1, "ArgumentName", "Objective Gradient");
-
-            // ComputeObjective
-            tmp_node = doc.append_child("Operation");
-            addChild(tmp_node, "Function", "ComputeObjective");
-            addChild(tmp_node, "Name", "Compute Objective");
-            tmp_node1 = tmp_node.append_child("Input");
-            addChild(tmp_node1, "ArgumentName", "Topology");
-            tmp_node1 = tmp_node.append_child("Output");
-            addChild(tmp_node1, "ArgumentName", "Objective Value");
             tmp_node1 = tmp_node.append_child("Output");
             addChild(tmp_node1, "ArgumentName", "Objective Gradient");
 
