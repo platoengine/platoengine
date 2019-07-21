@@ -116,6 +116,16 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Returns the local number of controls
+     * @return local number of controls
+     **********************************************************************************/
+    OrdinalType getNumControls() const
+    {
+        assert(static_cast<OrdinalType>(mCurrentParticles.use_count()) > static_cast<OrdinalType>(0));
+        return (mLowerBounds->size());
+    }
+
+    /******************************************************************************//**
      * @brief Returns the rank that owns the current global best particle
      * @return rank that owns the current global best particle
      **********************************************************************************/

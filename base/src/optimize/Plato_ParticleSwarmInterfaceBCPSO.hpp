@@ -67,6 +67,16 @@ inline void set_bcpso_algorithm_inputs(const Plato::InputDataBCPSO<ScalarType,Or
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mReadRestartFile == true)
+    {
+        aAlgorithm.readRestardData();
+    }
+
+    if(aInputs.mWriteRestartFile == true)
+    {
+        aAlgorithm.writeRestartData();
+    }
+
     if(aInputs.mOutputParticleDiagnostics == true)
     {
         aAlgorithm.enableParticleDiagnostics();

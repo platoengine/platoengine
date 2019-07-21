@@ -230,7 +230,8 @@ private:
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
-            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mReadRestartFile = this->readRestartFile(tOptionsNode);
+            aData.mWriteRestartFile = this->writeRestartFile(tOptionsNode);
             aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
@@ -336,6 +337,34 @@ private:
         if(aOptionsNode.size<std::string>("OutputSolution"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputSolution");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse read restart file keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool readRestartFile(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("ReadRestartFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "ReadRestartFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse write restart file keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool writeRestartFile(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("WriteRestartFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "WriteRestartFile");
         }
         return (tOuput);
     }

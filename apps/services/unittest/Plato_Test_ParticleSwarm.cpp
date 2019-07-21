@@ -57,7 +57,6 @@
 #include "Plato_GradFreeShiftedEllipse.hpp"
 #include "Plato_GradFreeGoldsteinPrice.hpp"
 
-#include "Plato_RestartFileUtilities.hpp"
 #include "Plato_ParticleSwarmInterfaceBCPSO.hpp"
 #include "Plato_ParticleSwarmInterfaceALPSO.hpp"
 #include "Plato_ParticleSwarmParser.hpp"
@@ -1250,6 +1249,8 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
+    EXPECT_FALSE(tInputsPSO.mReadRestartFile);
+    EXPECT_FALSE(tInputsPSO.mWriteRestartFile);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
@@ -1276,6 +1277,8 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_TRUE(tOptions.empty());
     tParserPSO.parse(tOptions, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputSolution);
+    EXPECT_FALSE(tInputsPSO.mReadRestartFile);
+    EXPECT_FALSE(tInputsPSO.mWriteRestartFile);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsPSO.mDisableStdDevStoppingTol);
@@ -1302,6 +1305,8 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tOptions.add<std::string>("MaxNumConsecutiveFailures", "7");
     tOptions.add<std::string>("MaxNumConsecutiveSuccesses", "8");
     tOptions.add<std::string>("OutputSolution", "true");
+    tOptions.add<std::string>("ReadRestartFile", "true");
+    tOptions.add<std::string>("WriteRestartFile", "true");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptions.add<std::string>("OutputParticleDiagnosticsToFile", "true");
     tOptions.add<std::string>("DisableStdDevStoppingTolerance", "true");
@@ -1322,6 +1327,8 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptimizerNodeOne, tInputsPSO);
     EXPECT_FALSE(tInputsPSO.mOutputDiagnostics);
     EXPECT_TRUE(tInputsPSO.mOutputSolution);
+    EXPECT_TRUE(tInputsPSO.mReadRestartFile);
+    EXPECT_TRUE(tInputsPSO.mWriteRestartFile);
     EXPECT_TRUE(tInputsPSO.mOutputParticleDiagnostics);
     EXPECT_TRUE(tInputsPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsPSO.mNumParticles);
@@ -1357,7 +1364,9 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     tParserPSO.parse(tOptimizerNodeTwo, tInputsTwoPSO);
 
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
-    EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_FALSE(tInputsTwoPSO.mReadRestartFile);
+    EXPECT_FALSE(tInputsTwoPSO.mWriteRestartFile);
+    EXPECT_FALSE(tInputsTwoPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
@@ -1779,6 +1788,67 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle)
                 ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
                 << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
     }
+}
+
+TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
+{
+    // ********* ALLOCATE CRITERION *********
+    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
+            std::make_shared<Plato::GradFreeCircle<double>>();
+
+    // ********* ALLOCATE CORE DATA STRUCTURES *********
+    const size_t tNumControls = 2;
+    const size_t tNumParticles = 10;
+    Plato::InputDataBCPSO<double> tInputs;
+    tInputs.mMaxNumIterations = 50;
+    tInputs.mWriteRestartFile = true;
+    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesLowerBounds->fill(-6);
+    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+    tInputs.mParticlesUpperBounds->fill(6);
+    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM FOR 50 ITERATIONS *********
+    Plato::OutputDataBCPSO<double> tOutputs;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+
+    // ********* RESTART AND SOLVE OPTIMIZATION PROBLEM *********
+    tInputs.mReadRestartFile = true;
+    tInputs.mMaxNumIterations = 1e3;
+    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
+            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+    std::cout << tOutputs.mStopCriterion << "\n";
+
+    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    {
+        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
+                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
+                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+    }
+
+    // ********* DIAGNOSTICS *********
+    const double tTolerance = 1e-3;
+    EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
+
+    std::system("rm -f plato_bcpso_restart_data.txt");
 }
 
 TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
