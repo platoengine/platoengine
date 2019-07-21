@@ -88,7 +88,6 @@ private:
     int  mAdvanceContinuationIteration;
     int  mStartIteration;
     int  mUpdateInterval;
-    int  mProblemUpdateFrequency;
     bool mAdditiveContinuation;
 
 protected:
