@@ -1366,7 +1366,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     EXPECT_FALSE(tInputsTwoPSO.mOutputSolution);
     EXPECT_FALSE(tInputsTwoPSO.mReadRestartFile);
     EXPECT_FALSE(tInputsTwoPSO.mWriteRestartFile);
-    EXPECT_FALSE(tInputsTwoPSO.mOutputDiagnostics);
+    EXPECT_TRUE(tInputsTwoPSO.mOutputDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mOutputParticleDiagnostics);
     EXPECT_FALSE(tInputsTwoPSO.mDisableStdDevStoppingTol);
     EXPECT_EQ(20u, tInputsTwoPSO.mNumParticles);
