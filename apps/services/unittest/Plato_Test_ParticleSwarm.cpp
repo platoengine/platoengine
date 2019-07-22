@@ -494,11 +494,11 @@ TEST(PlatoTest, read_restart_data_value)
     tOutputFile.open("MyRestartFile.txt");
 
     // ****** SET DATA ******
-    size_t tRank = 0;
+    int tRank = 0;
     std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
     Plato::output_restart_data_value(tRank, tID, tOutputFile);
 
-    size_t tParticleIndex = 1;
+    int tParticleIndex = 1;
     tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
     Plato::output_restart_data_value(tParticleIndex, tID, tOutputFile);
 
