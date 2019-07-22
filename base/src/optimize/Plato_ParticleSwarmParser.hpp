@@ -232,6 +232,7 @@ private:
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
             aData.mReadRestartFile = this->readRestartFile(tOptionsNode);
             aData.mWriteRestartFile = this->writeRestartFile(tOptionsNode);
+            aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
             aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
 
