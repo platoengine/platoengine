@@ -59,7 +59,7 @@ namespace Plato
 
 /******************************************************************************//**
  * @brief Core operations for the Particle Swarm Optimization (PSO) algorithms
-**********************************************************************************/
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ParticleSwarmOperations
 {
@@ -67,26 +67,28 @@ public:
     /******************************************************************************//**
      * @brief Constructor
      * @param [in] aFactory data factory for class member data
-    **********************************************************************************/
-    explicit ParticleSwarmOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory) :
-            mNumConsecutiveFailures(0),
-            mNumConsecutiveSuccesses(0),
-            mMaxNumConsecutiveFailures(10),
-            mMaxNumConsecutiveSuccesses(10),
-            mInertiaMultiplier(0.9),
-            mSocialBehaviorMultiplier(0.8),
-            mCognitiveBehaviorMultiplier(0.8),
-            mTrustRegionMultiplier(1),
-            mTrustRegionExpansionMultiplier(4.0),
-            mTrustRegionContractionMultiplier(0.75),
-            mControlWorkVector()
+     **********************************************************************************/
+    explicit ParticleSwarmOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory) :
+        mNumConsecutiveFailures(0),
+        mNumConsecutiveSuccesses(0),
+        mMaxNumConsecutiveFailures(10),
+        mMaxNumConsecutiveSuccesses(10),
+        mRandomNumMultiplier(0.1),
+        mInertiaMultiplier(0.9),
+        mSocialBehaviorMultiplier(0.8),
+        mCognitiveBehaviorMultiplier(0.8),
+        mTrustRegionMultiplier(1),
+        mTrustRegionExpansionMultiplier(4.0),
+        mTrustRegionContractionMultiplier(0.75),
+        mTrialControl(),
+        mTrialVelocity()
     {
         this->initialize(*aFactory);
     }
 
     /******************************************************************************//**
      * @brief Destructor
-    **********************************************************************************/
+     **********************************************************************************/
     virtual ~ParticleSwarmOperations()
     {
     }
@@ -94,16 +96,26 @@ public:
     /******************************************************************************//**
      * @brief Return inertia multiplier
      * @return inertia multiplier
-    **********************************************************************************/
+     **********************************************************************************/
     ScalarType getInertiaMultiplier() const
     {
         return (mInertiaMultiplier);
     }
 
     /******************************************************************************//**
+     * @brief Return random number multiplier used to update the particle positions.
+     * The random number multiplier is used to find an unique particle.
+     * @return random number multiplier
+     **********************************************************************************/
+    ScalarType getRandomNumMultiplier() const
+    {
+        return (mRandomNumMultiplier);
+    }
+
+    /******************************************************************************//**
      * @brief Return trust region multiplier
      * @return trust region multiplier
-    **********************************************************************************/
+     **********************************************************************************/
     ScalarType getTrustRegionMultiplier() const
     {
         return (mTrustRegionMultiplier);
@@ -112,17 +124,27 @@ public:
     /******************************************************************************//**
      * @brief Set inertia multiplier
      * @param [in] aInput inertia multiplier
-    **********************************************************************************/
-    void setInertiaMultiplier(const ScalarType & aInput)
+     **********************************************************************************/
+    void setInertiaMultiplier(const ScalarType &aInput)
     {
         mInertiaMultiplier = aInput;
     }
 
     /******************************************************************************//**
+     * @brief Set random number multiplier used to update the particle positions.
+     * The random number multiplier is used to find an unique particle.
+     * @param [in] aInput random number multiplier
+     **********************************************************************************/
+    void setRandomNumMultiplier(const ScalarType &aInput)
+    {
+        mRandomNumMultiplier = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Set cognitive behavior multiplier
      * @param [in] aInput cognitive behavior multiplier
-    **********************************************************************************/
-    void setCognitiveBehaviorMultiplier(const ScalarType & aInput)
+     **********************************************************************************/
+    void setCognitiveBehaviorMultiplier(const ScalarType &aInput)
     {
         mCognitiveBehaviorMultiplier = aInput;
     }
@@ -130,8 +152,8 @@ public:
     /******************************************************************************//**
      * @brief Set social behavior multiplier
      * @param [in] aInput social behavior multiplier
-    **********************************************************************************/
-    void setSocialBehaviorMultiplier(const ScalarType & aInput)
+     **********************************************************************************/
+    void setSocialBehaviorMultiplier(const ScalarType &aInput)
     {
         mSocialBehaviorMultiplier = aInput;
     }
@@ -139,8 +161,8 @@ public:
     /******************************************************************************//**
      * @brief Set trust region expansion multiplier
      * @param [in] aInput trust region expansion multiplier
-    **********************************************************************************/
-    void setTrustRegionExpansionMultiplier(const ScalarType & aInput)
+     **********************************************************************************/
+    void setTrustRegionExpansionMultiplier(const ScalarType &aInput)
     {
         mTrustRegionExpansionMultiplier = aInput;
     }
@@ -148,8 +170,8 @@ public:
     /******************************************************************************//**
      * @brief Set trust region contraction multiplier
      * @param [in] aInput trust region contraction multiplier
-    **********************************************************************************/
-    void setTrustRegionContractionMultiplier(const ScalarType & aInput)
+     **********************************************************************************/
+    void setTrustRegionContractionMultiplier(const ScalarType &aInput)
     {
         mTrustRegionContractionMultiplier = aInput;
     }
@@ -159,8 +181,8 @@ public:
      *        = f(x_{i-1}) \f$, where i denotes the optimization iteration and \f$ f
      *        \f$ is the objective function.
      * @param [in] aInput number of consecutive failures
-    **********************************************************************************/
-    void setNumConsecutiveFailures(const OrdinalType & aInput)
+     **********************************************************************************/
+    void setNumConsecutiveFailures(const OrdinalType &aInput)
     {
         mNumConsecutiveFailures = aInput;
     }
@@ -170,8 +192,8 @@ public:
      *        < f(x_{i-1}) \f$, where i denotes the optimization iteration and \f$ f
      *        \f$ is the objective function.
      * @param [in] aInput number of consecutive successes
-    **********************************************************************************/
-    void setNumConsecutiveSuccesses(const OrdinalType & aInput)
+     **********************************************************************************/
+    void setNumConsecutiveSuccesses(const OrdinalType &aInput)
     {
         mNumConsecutiveSuccesses = aInput;
     }
@@ -181,8 +203,8 @@ public:
      *        \f$ f(x_i) = f(x_{i-1}) \f$, where i denotes the optimization iteration
      *        and \f$ f \f$ is the objective function.
      * @param [in] aInput maximum number of consecutive failures
-    **********************************************************************************/
-    void setMaxNumConsecutiveFailures(const OrdinalType & aInput)
+     **********************************************************************************/
+    void setMaxNumConsecutiveFailures(const OrdinalType &aInput)
     {
         mMaxNumConsecutiveFailures = aInput;
     }
@@ -192,41 +214,41 @@ public:
      *        \f$ f(x_i) = f(x_{i-1}) \f$, where i denotes the optimization iteration
      *        and \f$ f \f$ is the objective function.
      * @param [in] aInput maximum number of consecutive successes
-    **********************************************************************************/
-    void setMaxNumConsecutiveSuccesses(const OrdinalType & aInput)
+     **********************************************************************************/
+    void setMaxNumConsecutiveSuccesses(const OrdinalType &aInput)
     {
         mMaxNumConsecutiveSuccesses = aInput;
     }
 
     /******************************************************************************//**
      * @brief Check if inertia multiplier is between theoretical bounds
-    **********************************************************************************/
+     **********************************************************************************/
     bool checkInertiaMultiplier()
     {
         const ScalarType tUpperBound = 1.0;
-        const ScalarType tLowerBound = (static_cast<ScalarType>(0.5)
-                * (mCognitiveBehaviorMultiplier + mSocialBehaviorMultiplier)) - static_cast<ScalarType>(1.0);
+        const ScalarType tLowerBound = (static_cast<ScalarType>(0.5) * (mCognitiveBehaviorMultiplier + mSocialBehaviorMultiplier))
+            - static_cast<ScalarType>(1.0);
         const bool tMultiplierOutsideBounds = (mInertiaMultiplier < tLowerBound) || (mInertiaMultiplier > tUpperBound);
-        if(tMultiplierOutsideBounds == true)
+        if (tMultiplierOutsideBounds == true)
         {
             // use default values
             mInertiaMultiplier = 0.9;
             mSocialBehaviorMultiplier = 0.8;
             mCognitiveBehaviorMultiplier = 0.8;
         }
-        return(tMultiplierOutsideBounds);
+        return (tMultiplierOutsideBounds);
     }
 
     /******************************************************************************//**
      * @brief Update trust region multiplier
-    **********************************************************************************/
+     **********************************************************************************/
     void updateTrustRegionMultiplier()
     {
-        if(mNumConsecutiveSuccesses >= mMaxNumConsecutiveSuccesses)
+        if (mNumConsecutiveSuccesses >= mMaxNumConsecutiveSuccesses)
         {
             mTrustRegionMultiplier *= mTrustRegionExpansionMultiplier;
         }
-        else if(mNumConsecutiveFailures >= mMaxNumConsecutiveFailures)
+        else if (mNumConsecutiveFailures >= mMaxNumConsecutiveFailures)
         {
             mTrustRegionMultiplier *= mTrustRegionContractionMultiplier;
         }
@@ -235,8 +257,8 @@ public:
     /******************************************************************************//**
      * @brief Update particle velocities and find global best particle velocity
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateParticleVelocities(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void updateParticleVelocities(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
         aDataMng.cachePreviousVelocities();
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
@@ -246,9 +268,9 @@ public:
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
 
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
-        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if( (tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank) )
+            if ((tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank))
             {
                 this->updateGlobalBestParticleVelocity(tDistribution, aDataMng);
             }
@@ -262,37 +284,37 @@ public:
     /******************************************************************************//**
      * @brief Update particle positions and find global best particle position
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void updateParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
         const OrdinalType tMyProcID = aDataMng.getCommWrapper().myProcID();
         const OrdinalType tCurrentGlobalBestParticleRank = aDataMng.getCurrentGlobalBestParticleRank();
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
 
         const OrdinalType tNumParticles = aDataMng.getNumParticles();
-        for(OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumParticles; tIndex++)
         {
-            if( (tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank) )
+            if ((tIndex == tCurrentGlobalBestParticleIndex) && (tMyProcID == tCurrentGlobalBestParticleRank))
             {
-                this->updateGlobalBestParticlePosition(aDataMng);
+                this->findUniqueGlobalBestParticlePositions(aDataMng);
             }
             else
             {
-                this->updateParticlePosition(tIndex, aDataMng);
+                this->findUniqueParticlePositions(tIndex, aDataMng);
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Check success rate: Did the PSO algorithm find a new minimum in the last iteration?
+     * @brief Check success rate: i.e. did the PSO algorithm find a new minimum in the last iteration?
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void checkGlobalBestParticleUpdateSuccessRate(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void checkGlobalBestParticleUpdateSuccessRate(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
         const ScalarType tCurrentGlobalBestObjFunValue = aDataMng.getCurrentGlobalBestObjFuncValue();
         const ScalarType tPreviousGlobalBestObjFunValue = aDataMng.getPreviousGlobalBestObjFuncValue();
 
-        if(tCurrentGlobalBestObjFunValue < tPreviousGlobalBestObjFunValue)
+        if (tCurrentGlobalBestObjFunValue < tPreviousGlobalBestObjFunValue)
         {
             mNumConsecutiveSuccesses++;
             mNumConsecutiveFailures = 0;
@@ -308,11 +330,12 @@ private:
     /******************************************************************************//**
      * @brief Allocate class member containers
      * @param [in] aFactory PSO data factory
-    **********************************************************************************/
-    void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aFactory)
+     **********************************************************************************/
+    void initialize(const Plato::DataFactory<ScalarType, OrdinalType> &aFactory)
     {
         const OrdinalType tPARTICLE_INDEX = 0;
-        mControlWorkVector = aFactory.control(tPARTICLE_INDEX).create();
+        mTrialControl = aFactory.control(tPARTICLE_INDEX).create();
+        mTrialVelocity = aFactory.control(tPARTICLE_INDEX).create();
     }
 
     /******************************************************************************//**
@@ -320,18 +343,18 @@ private:
      * @param [in] aParticleIndex particle index
      * @param [in] aDistribution uniform distribution sample generator
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateParticleVelocity(const OrdinalType & aParticleIndex,
-                                std::uniform_real_distribution<ScalarType> & aDistribution,
-                                Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void updateParticleVelocity(const OrdinalType &aParticleIndex,
+                                std::uniform_real_distribution<ScalarType> &aDistribution,
+                                Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
-        const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(aParticleIndex);
-        const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticle = aDataMng.getCurrentParticle(aParticleIndex);
-        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
-        const Plato::Vector<ScalarType, OrdinalType> & tBestParticlePosition = aDataMng.getBestParticlePosition(aParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tPreviousVel = aDataMng.getPreviousVelocity(aParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tCurrentParticle = aDataMng.getCurrentParticle(aParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
+        const Plato::Vector<ScalarType, OrdinalType> &tBestParticlePosition = aDataMng.getBestParticlePosition(aParticleIndex);
 
         const OrdinalType tNumControls = tPreviousVel.size();
-        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
             // inertia contribution
             const ScalarType tInertiaValue = mInertiaMultiplier * tPreviousVel[tIndex];
@@ -344,91 +367,116 @@ private:
             const ScalarType tSocialMultiplier = tRandomNumTwo * mSocialBehaviorMultiplier;
             const ScalarType tSocialValue = tSocialMultiplier * (tGlobalBestParticlePosition[tIndex] - tCurrentParticle[tIndex]);
             // set new velocity
-            (*mControlWorkVector)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
+            (*mTrialVelocity)[tIndex] = tInertiaValue + tCognitiveValue + tSocialValue;
         }
 
-        aDataMng.setCurrentVelocity(aParticleIndex, *mControlWorkVector);
+        aDataMng.setCurrentVelocity(aParticleIndex, *mTrialVelocity);
     }
 
     /******************************************************************************//**
      * @brief Update global best particle velocity
      * @param [in] aDistribution uniform distribution sample generator
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> & aDistribution,
-                                          Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void updateGlobalBestParticleVelocity(std::uniform_real_distribution<ScalarType> &aDistribution,
+                                          Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
-        const Plato::Vector<ScalarType, OrdinalType> & tPreviousVel = aDataMng.getPreviousVelocity(tCurrentGlobalBestParticleIndex);
-        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
-        const Plato::Vector<ScalarType, OrdinalType> & tCurrentParticlePosition = aDataMng.getCurrentParticle(tCurrentGlobalBestParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tPreviousVel = aDataMng.getPreviousVelocity(tCurrentGlobalBestParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
+        const Plato::Vector<ScalarType, OrdinalType> &tCurrentParticlePosition = aDataMng.getCurrentParticle(tCurrentGlobalBestParticleIndex);
 
         const OrdinalType tNumControls = tPreviousVel.size();
-        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
             const ScalarType tRandomNum = aDistribution(mGenerator);
-            const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
-                    * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
-            (*mControlWorkVector)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
-                    + (mInertiaMultiplier * tPreviousVel[tIndex]) + tStochasticTrustRegionMultiplier;
+            const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
+            (*mTrialVelocity)[tIndex] = (static_cast<ScalarType>(-1) * tCurrentParticlePosition[tIndex]) + tGlobalBestParticlePosition[tIndex]
+                + (mInertiaMultiplier * tPreviousVel[tIndex]) + tStochasticTrustRegionMultiplier;
         }
 
-        aDataMng.setCurrentVelocity(tCurrentGlobalBestParticleIndex, *mControlWorkVector);
+        aDataMng.setCurrentVelocity(tCurrentGlobalBestParticleIndex, *mTrialVelocity);
     }
 
     /******************************************************************************//**
-     * @brief Update particle position
+     * @brief Update particle position. The new particle is required to be unique.
      * @param [in] aParticleIndex particle index
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateParticlePosition(const OrdinalType & aParticleIndex,
-                                Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void findUniqueParticlePositions(const OrdinalType &aParticleIndex,
+                                     Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
         const ScalarType tTimeStep = aDataMng.getTimeStep();
-        const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getLowerBounds();
-        const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
-        const Plato::Vector<ScalarType, OrdinalType> & tParticleVel = aDataMng.getCurrentVelocity(aParticleIndex);
-        const Plato::Vector<ScalarType, OrdinalType> & tParticlePosition = aDataMng.getCurrentParticle(aParticleIndex);
-        mControlWorkVector->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
+        const Plato::Vector<ScalarType, OrdinalType> &tLowerBounds = aDataMng.getLowerBounds();
+        const Plato::Vector<ScalarType, OrdinalType> &tUpperBounds = aDataMng.getUpperBounds();
+        const Plato::Vector<ScalarType, OrdinalType> &tParticleVel = aDataMng.getCurrentVelocity(aParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tParticlePosition = aDataMng.getCurrentParticle(aParticleIndex);
+        mTrialControl->update(static_cast<ScalarType>(1), tParticlePosition, static_cast<ScalarType>(0));
 
         const OrdinalType tNumControls = tParticleVel.size();
-        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mControlWorkVector)[tIndex] = (*mControlWorkVector)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
-            (*mControlWorkVector)[tIndex] = std::max((*mControlWorkVector)[tIndex], tLowerBounds[tIndex]);
-            (*mControlWorkVector)[tIndex] = std::min((*mControlWorkVector)[tIndex], tUpperBounds[tIndex]);
+            (*mTrialControl)[tIndex] = (*mTrialControl)[tIndex] + (tTimeStep * tParticleVel[tIndex]);
+            (*mTrialControl)[tIndex] = std::max((*mTrialControl)[tIndex], tLowerBounds[tIndex]);
+            (*mTrialControl)[tIndex] = std::min((*mTrialControl)[tIndex], tUpperBounds[tIndex]);
         }
 
-        aDataMng.setCurrentParticle(aParticleIndex, *mControlWorkVector);
+        this->findUniqueParticleAndUpdate(aParticleIndex, aDataMng);
     }
 
     /******************************************************************************//**
-     * @brief Update global best particle position
+     * @brief Update global best particle position. The new particle is required to be unique.
      * @param [in] aDataMng PSO data manager
-    **********************************************************************************/
-    void updateGlobalBestParticlePosition(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> & aDataMng)
+     **********************************************************************************/
+    void findUniqueGlobalBestParticlePositions(Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
     {
-        const Plato::Vector<ScalarType, OrdinalType> & tLowerBounds = aDataMng.getLowerBounds();
-        const Plato::Vector<ScalarType, OrdinalType> & tUpperBounds = aDataMng.getUpperBounds();
+        const Plato::Vector<ScalarType, OrdinalType> &tLowerBounds = aDataMng.getLowerBounds();
+        const Plato::Vector<ScalarType, OrdinalType> &tUpperBounds = aDataMng.getUpperBounds();
         const OrdinalType tCurrentGlobalBestParticleIndex = aDataMng.getCurrentGlobalBestParticleIndex();
-        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticleVel = aDataMng.getCurrentVelocity(tCurrentGlobalBestParticleIndex);
-        const Plato::Vector<ScalarType, OrdinalType> & tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
+        const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticleVel = aDataMng.getCurrentVelocity(tCurrentGlobalBestParticleIndex);
+        const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
 
         std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
         const ScalarType tRandomNum = tDistribution(mGenerator);
-        const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier
-                * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
+        const ScalarType tStochasticTrustRegionMultiplier = mTrustRegionMultiplier * (static_cast<ScalarType>(1) - static_cast<ScalarType>(2) * tRandomNum);
 
         const OrdinalType tNumControls = tGlobalBestParticlePosition.size();
-        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
         {
-            (*mControlWorkVector)[tIndex] = tGlobalBestParticlePosition[tIndex]
-                    + (mInertiaMultiplier * tGlobalBestParticleVel[tIndex]) + tStochasticTrustRegionMultiplier;
-            (*mControlWorkVector)[tIndex] = std::max((*mControlWorkVector)[tIndex], tLowerBounds[tIndex]);
-            (*mControlWorkVector)[tIndex] = std::min((*mControlWorkVector)[tIndex], tUpperBounds[tIndex]);
+            (*mTrialControl)[tIndex] = tGlobalBestParticlePosition[tIndex] + (mInertiaMultiplier * tGlobalBestParticleVel[tIndex])
+                + tStochasticTrustRegionMultiplier;
+            (*mTrialControl)[tIndex] = std::max((*mTrialControl)[tIndex], tLowerBounds[tIndex]);
+            (*mTrialControl)[tIndex] = std::min((*mTrialControl)[tIndex], tUpperBounds[tIndex]);
         }
 
-        aDataMng.setCurrentParticle(tCurrentGlobalBestParticleIndex, *mControlWorkVector);
+        this->findUniqueParticleAndUpdate(tCurrentGlobalBestParticleIndex, aDataMng);
+    }
+
+    /******************************************************************************//**
+     * @brief Update particle position, finds a unique particle if the current trial
+     * particle is not unique.
+     * @param [in] aParticleIndex index of particle to update
+     * @param [in/out] aDataMng PSO data manager
+     **********************************************************************************/
+    void findUniqueParticleAndUpdate(const OrdinalType &aParticleIndex,
+                                     Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
+    {
+
+        bool tIsParticleUnique = aDataMng.isParticleUnique(*mTrialControl);
+        if (tIsParticleUnique == true)
+        {
+            aDataMng.setCurrentParticle(aParticleIndex, *mTrialControl);
+        }
+        else
+        {
+            std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
+            const ScalarType tRandomNum = tDistribution(mGenerator) * mRandomNumMultiplier;
+            mTrialControl->fill(tRandomNum);
+
+            const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
+            mTrialControl->update(1.0, tGlobalBestParticlePosition, 1.0);
+            aDataMng.setCurrentParticle(aParticleIndex, *mTrialControl);
+        }
     }
 
 private:
@@ -439,6 +487,7 @@ private:
     OrdinalType mMaxNumConsecutiveFailures; /*!< maximum number of consecutive failures, \f$ F(x_i) = F(x_{i-1}) \f$ */
     OrdinalType mMaxNumConsecutiveSuccesses; /*!< maximum number of consecutive successes, \f$ F(x_i) < F(x_{i-1}) \f$ */
 
+    ScalarType mRandomNumMultiplier; /*!< random number multiplier (used to find unique particle position - see function findUniqueParticleAndUpdate) */
     ScalarType mInertiaMultiplier; /*!< inertia multiplier */
     ScalarType mSocialBehaviorMultiplier; /*!< social behavior multiplier */
     ScalarType mCognitiveBehaviorMultiplier; /*!< cognitive behavior multiplier */
@@ -447,12 +496,13 @@ private:
     ScalarType mTrustRegionExpansionMultiplier; /*!< trust region expansion multiplier */
     ScalarType mTrustRegionContractionMultiplier; /*!< trust region contraction multiplier */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector; /*!< controls/particles work vector */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTrialControl; /*!< trial control vector */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mTrialVelocity; /*!< trial velocity vector */
 
 private:
     ParticleSwarmOperations(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
-    Plato::ParticleSwarmOperations<ScalarType, OrdinalType> & operator=(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
+    Plato::ParticleSwarmOperations<ScalarType, OrdinalType>& operator=(const Plato::ParticleSwarmOperations<ScalarType, OrdinalType>&);
 };
 // class ParticleSwarmOperations
 
-} // namespace Plato
+}// namespace Plato

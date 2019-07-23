@@ -83,7 +83,7 @@ void checkVectorData(const Plato::Vector<ScalarType, OrdinalType> & aInput,
     OrdinalType tNumElements = aInput.size();
     for(OrdinalType tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
     {
-        EXPECT_NEAR(aInput[tElemIndex], aGold[tElemIndex], aTolerance);
+        ASSERT_NEAR(aInput[tElemIndex], aGold[tElemIndex], aTolerance);
     }
 }
 
@@ -99,7 +99,7 @@ void checkMultiVectorData(const Plato::MultiVector<ScalarType, OrdinalType> & aI
         OrdinalType tNumElements = aInput[tVectorIndex].size();
         for(OrdinalType tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
         {
-            EXPECT_NEAR(aInput(tVectorIndex,tElemIndex), aGold(tVectorIndex,tElemIndex), aTolerance);
+            ASSERT_NEAR(aInput(tVectorIndex,tElemIndex), aGold(tVectorIndex,tElemIndex), aTolerance);
         }
     }
 }

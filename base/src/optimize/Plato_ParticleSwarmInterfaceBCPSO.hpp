@@ -67,6 +67,16 @@ inline void set_bcpso_algorithm_inputs(const Plato::InputDataBCPSO<ScalarType,Or
         aAlgorithm.enableDiagnostics();
     }
 
+    if(aInputs.mReadRestartFile == true)
+    {
+        aAlgorithm.readRestardData();
+    }
+
+    if(aInputs.mWriteRestartFile == true)
+    {
+        aAlgorithm.writeRestartData();
+    }
+
     if(aInputs.mOutputParticleDiagnostics == true)
     {
         aAlgorithm.enableParticleDiagnostics();
@@ -85,6 +95,7 @@ inline void set_bcpso_algorithm_inputs(const Plato::InputDataBCPSO<ScalarType,Or
     aAlgorithm.setLowerBounds(*aInputs.mParticlesLowerBounds);
     aAlgorithm.setUpperBounds(*aInputs.mParticlesUpperBounds);
     aAlgorithm.setInertiaMultiplier(aInputs.mInertiaMultiplier);
+    aAlgorithm.setRandomNumMultiplier(aInputs.mInertiaMultiplier);
     aAlgorithm.setMeanBestObjFuncTolerance(aInputs.mMeanBestObjFuncTolerance);
     aAlgorithm.setStdDevBestObjFuncTolerance(aInputs.mStdDevBestObjFuncTolerance);
     aAlgorithm.setSocialBehaviorMultiplier(aInputs.mSocialBehaviorMultiplier);

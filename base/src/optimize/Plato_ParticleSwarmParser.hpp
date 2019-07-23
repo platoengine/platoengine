@@ -203,6 +203,7 @@ private:
 
             aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
             aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mRandomNumMultiplier = this->randomNumberMultiplier(tOptionsNode);
             aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
             aData.mMeanBestAugLagFuncTolerance = this->meanBestAugLagFuncTolerance(tOptionsNode);
             aData.mPenaltyExpansionMultiplier = this->penaltyExpansionMultiplier(tOptionsNode);
@@ -229,6 +230,8 @@ private:
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mOutputSolution = this->outputSolution(tOptionsNode);
+            aData.mReadRestartFile = this->readRestartFile(tOptionsNode);
+            aData.mWriteRestartFile = this->writeRestartFile(tOptionsNode);
             aData.mOutputDiagnostics = this->outputDiagnostics(tOptionsNode);
             aData.mOutputParticleDiagnostics = this->outputParticleDiagnostics(tOptionsNode);
             aData.mDisableStdDevStoppingTol = this->disableStdDevStoppingTolerance(tOptionsNode);
@@ -240,6 +243,7 @@ private:
 
             aData.mTimeStep = this->particleVelocityTimeStep(tOptionsNode);
             aData.mInertiaMultiplier = this->inertiaMultiplier(tOptionsNode);
+            aData.mRandomNumMultiplier = this->randomNumberMultiplier(tOptionsNode);
             aData.mSocialBehaviorMultiplier = this->socialBehaviorMultiplier(tOptionsNode);
             aData.mMeanBestObjFuncTolerance = this->meanBestObjFuncTolerance(tOptionsNode);
             aData.mGlobalBestObjFuncTolerance = this->globalBestObjFuncTolerance(tOptionsNode);
@@ -334,6 +338,34 @@ private:
         if(aOptionsNode.size<std::string>("OutputSolution"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputSolution");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse read restart file keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool readRestartFile(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("ReadRestartFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "ReadRestartFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse write restart file keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    bool writeRestartFile(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("WriteRestartFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "WriteRestartFile");
         }
         return (tOuput);
     }
@@ -577,7 +609,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Parse tolerance on the global best augmented Lagrangian function
+     * @brief Parse inertia multiplier
      * @param [in] aOptimizerNode data structure with optimization related input options
     **********************************************************************************/
     ScalarType inertiaMultiplier(const Plato::InputData & aOptionsNode)
@@ -586,6 +618,20 @@ private:
         if(aOptionsNode.size<std::string>("InertiaMultiplier"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "InertiaMultiplier");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse random number multiplier (used to fin an unique particle position)
+     * @param [in] aOptimizerNode data structure with optimization related input options
+    **********************************************************************************/
+    ScalarType randomNumberMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.1;
+        if(aOptionsNode.size<std::string>("RandomNumMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "RandomNumMultiplier");
         }
         return (tOutput);
     }

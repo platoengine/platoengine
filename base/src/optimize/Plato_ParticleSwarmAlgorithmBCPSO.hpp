@@ -51,6 +51,7 @@
 #include <string>
 
 #include "Plato_DataFactory.hpp"
+#include "Plato_RestartFileUtilities.hpp"
 #include "Plato_ParticleSwarmDataMng.hpp"
 #include "Plato_ParticleSwarmOperations.hpp"
 #include "Plato_ParticleSwarmIO_Utilities.hpp"
@@ -73,7 +74,8 @@ public:
      **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::GradFreeCriterion<ScalarType, OrdinalType>> &aObjective) :
-        mRestart(false),
+        mReadRestartFile(false),
+        mWriteRestartFile(false),
         mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
@@ -99,7 +101,8 @@ public:
      **********************************************************************************/
     explicit ParticleSwarmAlgorithmBCPSO(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aFactory,
                                          const std::shared_ptr<Plato::ParticleSwarmStageMng<ScalarType, OrdinalType>> &aStageMng) :
-        mRestart(false),
+        mReadRestartFile(false),
+        mWriteRestartFile(false),
         mParticleDiagnostics(false),
         mAlgorithmDiagnostics(false),
         mStdDevStoppingTolActive(true),
@@ -109,7 +112,7 @@ public:
         mMeanBestObjFuncTolerance(5e-4),
         mStdDevBestObjFuncTolerance(1e-6),
         mGlobalBestObjFuncTolerance(1e-10),
-        mTrustRegionMultiplierTolerance(1e-98),
+        mTrustRegionMultiplierTolerance(1e-8),
         mStopCriterion(Plato::particle_swarm::DID_NOT_CONVERGE),
         mCustomOutput(std::make_shared<Plato::CustomOutput<ScalarType, OrdinalType>>()),
         mDataMng(std::make_shared<Plato::ParticleSwarmDataMng<ScalarType, OrdinalType>>(aFactory)),
@@ -123,6 +126,22 @@ public:
     **********************************************************************************/
     ~ParticleSwarmAlgorithmBCPSO()
     {
+    }
+
+    /******************************************************************************//**
+     * @brief Allow algorithm to read restart data from file.
+    **********************************************************************************/
+    void readRestardData()
+    {
+        mReadRestartFile = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Allow algorithm to write restart data to file.
+    **********************************************************************************/
+    void writeRestartData()
+    {
+        mWriteRestartFile = true;
     }
 
     /******************************************************************************//**
@@ -236,6 +255,16 @@ public:
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mOperations->setInertiaMultiplier(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set random number multiplier used to update the particle positions.
+     * The random number multiplier is used to find an unique particle.
+     * @param [in] aInput random number multiplier
+    **********************************************************************************/
+    void setRandomNumMultiplier(const ScalarType & aInput)
+    {
+        mOperations->setRandomNumMultiplier(aInput);
     }
 
     /******************************************************************************//**
@@ -467,6 +496,7 @@ public:
         assert(static_cast<OrdinalType>(mDataMng.use_count()) > static_cast<OrdinalType>(0));
         assert(static_cast<OrdinalType>(mStageMng.use_count()) > static_cast<OrdinalType>(0));
 
+        this->readRestartFile();
         this->openOutputFiles();
         this->initialize();
 
@@ -478,7 +508,7 @@ public:
             mStageMng->findBestParticlePositions(*mDataMng);
             mDataMng->computeCurrentBestObjFuncStatistics();
 
-            this->outputDiagnostics();
+            this->writeDiagnostics();
             if(this->checkStoppingCriteria())
             {
                 mDataMng->computeCurrentBestParticlesStatistics();
@@ -572,26 +602,104 @@ private:
     }
 
     /******************************************************************************//**
+     * @brief Read BCPSO algorithm's restart file.
+    **********************************************************************************/
+    void readRestartFile()
+    {
+        if (mReadRestartFile == true)
+        {
+            std::ifstream tRestartFile;
+            tRestartFile.open("plato_bcpso_restart_data.txt");
+            this->readRestartDataValues(tRestartFile);
+            this->readRestartDataVectorValues(tRestartFile);
+            this->readRestartDataMultiVectorValues(tRestartFile);
+            tRestartFile.close();
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - values
+     * @param [in] aRestartFile input restart file
+    **********************************************************************************/
+    void readRestartDataValues(std::ifstream& aRestartFile)
+    {
+        OrdinalType tParticleRank = 0;
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", aRestartFile, tParticleRank);
+        mDataMng->setCurrentGlobalBestParticleRank(tParticleRank);
+
+        OrdinalType tParticleIndex = 0;
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE INDEX", aRestartFile, tParticleIndex);
+        mDataMng->setCurrentGlobalBestParticleIndex(tParticleIndex);
+
+        ScalarType tGlobalBestFval = 0;
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE FUNCTION VALUE", aRestartFile, tGlobalBestFval);
+        mDataMng->setCurrentGlobalBestObjFunValue(tGlobalBestFval);
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - vectors
+     * @param [in] aRestartFile input restart file
+    **********************************************************************************/
+    void readRestartDataVectorValues(std::ifstream& aRestartFile)
+    {
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tObjectiveWork = mDataMng->getCurrentBestObjFuncValues().create();
+        Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", aRestartFile, *tObjectiveWork);
+        mDataMng->setCurrentBestObjFuncValues(*tObjectiveWork);
+
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tControlWork = mDataMng->getGlobalBestParticlePosition().create();
+        Plato::read_restart_data_vector("CURRENT GLOBAL BEST PARTICLE VALUES", aRestartFile, *tControlWork);
+        mDataMng->setGlobalBestParticlePosition(*tControlWork);
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - multi-vectors
+     * @param [in] aRestartFile input restart file
+    **********************************************************************************/
+    void readRestartDataMultiVectorValues(std::ifstream& aRestartFile)
+    {
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tControlWork = mDataMng->getBestParticlePositions().create();
+        Plato::read_restart_data_multivector("CURRENT BEST PARTICLE VALUES", aRestartFile, *tControlWork);
+        mDataMng->setBestParticlePositions(*tControlWork);
+
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        Plato::read_restart_data_multivector("CURRENT PARTICLE VALUES", aRestartFile, *tControlWork);
+        mDataMng->setCurrentParticles(*tControlWork);
+
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        Plato::read_restart_data_multivector("CURRENT PARTICLE VELOCITIES", aRestartFile, *tControlWork);
+        mDataMng->setCurrentVelocities(*tControlWork);
+
+        aRestartFile.seekg(0 /*offset*/, aRestartFile.beg);
+        Plato::read_restart_data_multivector("PREVIOUS PARTICLE VELOCITIES", aRestartFile, *tControlWork);
+        mDataMng->setPreviousVelocities(*tControlWork);
+    }
+
+    /******************************************************************************//**
      * @brief Open diagnostic files
     **********************************************************************************/
     void openOutputFiles()
     {
-        this->openAlgoOutputFile();
-        this->openParticleOutputFiles();
+        this->openAlgoDiagnosticsFile();
+        this->openParticleHistoryFiles();
     }
 
     /******************************************************************************//**
      * @brief Open diagnostics file for BCPSO algorithm
     **********************************************************************************/
-    void openAlgoOutputFile()
+    void openAlgoDiagnosticsFile()
     {
         if(mAlgorithmDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mAlgoOutputStream.open("plato_bcpso_algorithm_diagnostics.txt");
-                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mAlgoOutputStream);
+                mDiagnosticsStream.open("plato_bcpso_algorithm_diagnostics.txt");
+                Plato::pso::print_bcpso_diagnostics_header(mOutputData, mDiagnosticsStream);
             }
         }
     }
@@ -599,7 +707,7 @@ private:
     /******************************************************************************//**
      * @brief Open ALPSO particle history files (i.e. particle sets diagnostics files)
     **********************************************************************************/
-    void openParticleOutputFiles()
+    void openParticleHistoryFiles()
     {
         if(mParticleDiagnostics == true)
         {
@@ -621,29 +729,29 @@ private:
     **********************************************************************************/
     void closeOutputFiles()
     {
-        this->closeAlgoOutputFiles();
-        this->closeParticleOutputFiles();
+        this->closeAlgoDiagnosticsFiles();
+        this->closeParticleHistoryFiles();
     }
 
     /******************************************************************************//**
-     * @brief Close BCPSO algorithm diagnostics file
+     * @brief Close BCPSO algorithm's diagnostics file
     **********************************************************************************/
-    void closeAlgoOutputFiles()
+    void closeAlgoDiagnosticsFiles()
     {
         if(mAlgorithmDiagnostics == true)
         {
             const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
             if(tMyCommWrapper.myProcID() == 0)
             {
-                mAlgoOutputStream.close();
+                mDiagnosticsStream.close();
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Close BCPSO particle history/diagnostics files
+     * @brief Close BCPSO particle's history/diagnostics files
     **********************************************************************************/
-    void closeParticleOutputFiles()
+    void closeParticleHistoryFiles()
     {
         if(mParticleDiagnostics == true)
         {
@@ -669,26 +777,87 @@ private:
             {
                 std::string tReason;
                 Plato::pso::get_stop_criterion(mStopCriterion, tReason);
-                mAlgoOutputStream << tReason.c_str();
+                mDiagnosticsStream << tReason.c_str();
             }
         }
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics particle swarm bound constrained optimization algorithm.
+     * @brief Write diagnostics particle swarm bound constrained optimization algorithm.
     **********************************************************************************/
-    void outputDiagnostics()
+    void writeDiagnostics()
     {
-        this->outputAlgoDiagnostics();
-        this->outputBestParticleDiagnostics();
-        this->outputTrialParticleDiagnostics();
-        this->outputGlobalBestParticleDiagnostics();
+        this->writeRestartFile();
+        this->writeDiagnosticsBCPSO();
+        this->writeBestParticleDiagnostics();
+        this->writeTrialParticleDiagnostics();
+        this->writeGlobalBestParticleDiagnostics();
     }
 
     /******************************************************************************//**
-     * @brief Output diagnostics for ALPSO algorithm
+     * @brief Write restart data for BCPSO algorithm
     **********************************************************************************/
-    void outputAlgoDiagnostics()
+    void writeRestartFile()
+    {
+        if(mWriteRestartFile == false)
+        {
+            return;
+        }
+
+        std::ofstream tRestartFile;
+        tRestartFile.open("plato_bcpso_restart_data.txt");
+        this->writeRestartDataValues(tRestartFile);
+        this->writeRestartDataVectorValues(tRestartFile);
+        this->writeRestartDataMultiVectorValues(tRestartFile);
+        tRestartFile.close();
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - values
+     * @param [in] aRestartFile output restart file
+    **********************************************************************************/
+    void writeRestartDataValues(std::ofstream& aRestartFile)
+    {
+        const OrdinalType tParticleRank = mDataMng->getCurrentGlobalBestParticleRank();
+        Plato::output_restart_data_value(tParticleRank, "CURRENT GLOBAL BEST PARTICLE RANK", aRestartFile);
+        const OrdinalType tParticleIndex = mDataMng->getCurrentGlobalBestParticleIndex();
+        Plato::output_restart_data_value(tParticleIndex, "CURRENT GLOBAL BEST PARTICLE INDEX", aRestartFile);
+        const ScalarType tGlobalBestFval = mDataMng->getCurrentGlobalBestObjFuncValue();
+        Plato::output_restart_data_value(tGlobalBestFval, "CURRENT GLOBAL BEST OBJECTIVE FUNCTION VALUE", aRestartFile);
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - vectors
+     * @param [in] aRestartFile output restart file
+    **********************************************************************************/
+    void writeRestartDataVectorValues(std::ofstream& aRestartFile)
+    {
+        const Plato::Vector<ScalarType, OrdinalType>& tCurrentBestFvals = mDataMng->getCurrentBestObjFuncValues();
+        Plato::output_restart_data_vector(tCurrentBestFvals, "CURRENT BEST OBJECTIVE FUNCTION VALUES", aRestartFile);
+        const Plato::Vector<ScalarType, OrdinalType>& tCurrentGlobalBestParticles = mDataMng->getGlobalBestParticlePosition();
+        Plato::output_restart_data_vector(tCurrentGlobalBestParticles, "CURRENT GLOBAL BEST PARTICLE VALUES", aRestartFile);
+    }
+
+    /******************************************************************************//**
+     * @brief Read restart data - multi-vectors
+     * @param [in] aRestartFile output restart file
+    **********************************************************************************/
+    void writeRestartDataMultiVectorValues(std::ofstream& aRestartFile)
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType>& tCurrentBestParticleValues = mDataMng->getBestParticlePositions();
+        Plato::output_restart_data_multivector(tCurrentBestParticleValues, "CURRENT BEST PARTICLE VALUES", aRestartFile);
+        const Plato::MultiVector<ScalarType, OrdinalType>& tCurrentParticleValues = mDataMng->getCurrentParticles();
+        Plato::output_restart_data_multivector(tCurrentParticleValues, "CURRENT PARTICLE VALUES", aRestartFile);
+        const Plato::MultiVector<ScalarType, OrdinalType>& tCurrentVel = mDataMng->getCurrentVelocities();
+        Plato::output_restart_data_multivector(tCurrentVel, "CURRENT PARTICLE VELOCITIES", aRestartFile);
+        const Plato::MultiVector<ScalarType, OrdinalType>& tPreviousVel = mDataMng->getPreviousVelocities();
+        Plato::output_restart_data_multivector(tPreviousVel, "PREVIOUS PARTICLE VELOCITIES", aRestartFile);
+    }
+
+    /******************************************************************************//**
+     * @brief Write diagnostics for BCPSO algorithm
+    **********************************************************************************/
+    void writeDiagnosticsBCPSO()
     {
         if(mAlgorithmDiagnostics == false)
         {
@@ -700,14 +869,14 @@ private:
         if(tMyCommWrapper.myProcID() == 0)
         {
             this->cacheOutputData();
-            Plato::pso::print_bcpso_diagnostics(mOutputData, mAlgoOutputStream);
+            Plato::pso::print_bcpso_diagnostics(mOutputData, mDiagnosticsStream);
         }
     }
 
     /******************************************************************************//**
-     * @brief Output diagnostics for best particle set
+     * @brief Write diagnostics for best particle set
     **********************************************************************************/
-    void outputBestParticleDiagnostics()
+    void writeBestParticleDiagnostics()
     {
         if(mParticleDiagnostics == false)
         {
@@ -725,9 +894,9 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Output diagnostics for trial particle set
+     * @brief Write diagnostics for trial particle set
     **********************************************************************************/
-    void outputTrialParticleDiagnostics()
+    void writeTrialParticleDiagnostics()
     {
         if(mParticleDiagnostics == false)
         {
@@ -745,9 +914,9 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Output diagnostics for global best particle
+     * @brief Write diagnostics for global best particle
     **********************************************************************************/
-    void outputGlobalBestParticleDiagnostics()
+    void writeGlobalBestParticleDiagnostics()
     {
         if(mParticleDiagnostics == false)
         {
@@ -766,7 +935,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics particle swarm constrained optimization algorithm.
+     * @brief Write diagnostics particle swarm constrained optimization algorithm.
     **********************************************************************************/
     void outputDiagnostics(std::ofstream & aOutputStream)
     {
@@ -798,12 +967,13 @@ private:
     }
 
 private:
-    bool mRestart; /*!< flag - print restart data (default = false) */
+    bool mReadRestartFile; /*!< flag - read restart file (default = false) */
+    bool mWriteRestartFile; /*!< flag - write restart file (default = false) */
     bool mParticleDiagnostics; /*!< flag - print particle diagnostics (default = false) */
     bool mAlgorithmDiagnostics; /*!< flag - print algorithm diagnostics (default = false) */
     bool mStdDevStoppingTolActive; /*!< activate standard deviation stopping tolerance (default = true) */
 
-    std::ofstream mAlgoOutputStream; /*!< output stream for BCPSO algorithm diagnostics */
+    std::ofstream mDiagnosticsStream; /*!< output stream for BCPSO algorithm diagnostics */
     std::ofstream mBestParticlesStream; /*!< output stream for best particles */
     std::ofstream mTrialParticlesStream; /*!< output stream for trial particles */
     std::ofstream mGlobalBestParticlesStream; /*!< output stream for global best particles */

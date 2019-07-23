@@ -51,6 +51,7 @@
 #include <string>
 
 #include "Plato_DataFactory.hpp"
+#include "Plato_CommWrapper.hpp"
 #include "Plato_ParticleSwarmDataMng.hpp"
 #include "Plato_ParticleSwarmOperations.hpp"
 #include "Plato_ParticleSwarmIO_Utilities.hpp"
@@ -178,6 +179,16 @@ public:
     void setInertiaMultiplier(const ScalarType & aInput)
     {
         mOptimizer->setInertiaMultiplier(aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Set random number multiplier used to update the particle positions.
+     * The random number multiplier is used to find an unique particle.
+     * @param [in] aInput random number multiplier
+    **********************************************************************************/
+    void setRandomNumMultiplier(const ScalarType & aInput)
+    {
+        mOptimizer->setRandomNumMultiplier(aInput);
     }
 
     /******************************************************************************//**
