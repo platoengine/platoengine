@@ -6,10 +6,10 @@
 
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
-    <Parameter name="PDE Constraint"  type="string"  value="Elastostatics"/>
+    <Parameter name="PDE Constraint"  type="string"  value="Elliptic"/>
     <Parameter name="Objective"       type="string"  value="My Stress Constraint"/>
 
-    <ParameterList name="Elastostatics">
+    <ParameterList name="Elliptic">
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="3.0"/>

@@ -7,7 +7,7 @@
   </ParameterList>
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
-    <Parameter name="PDE Constraint"  type="string"  value="Elastostatics"/>
+    <Parameter name="PDE Constraint"  type="string"  value="Elliptic"/>
     <Parameter name="Objective"       type="string"  value="Internal Elastic Energy"/>
     <Parameter name="Self-Adjoint"    type="bool"    value="false"/>
     <ParameterList name="Internal Elastic Energy">
@@ -16,7 +16,7 @@
         <Parameter name="Exponent" type="double" value="1.0"/>
       </ParameterList>
     </ParameterList>
-    <ParameterList name="Elastostatics">
+    <ParameterList name="Elliptic">
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="1.0"/>

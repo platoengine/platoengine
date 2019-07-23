@@ -8,7 +8,7 @@ Plato_no_src_build()
 # Advertise that we support shared libs (cmake squawks otherwise)
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-add_compile_options(-Wall -Werror)
+add_compile_options(-Wall -Werror -Wno-unused-result)
 
 ##################################################################
 ## Load config.cmake                                            ##
