@@ -217,7 +217,7 @@ private:
     }
 
 private:
-    std::vector<std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>>> mList;
+    std::vector<std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>>> mList; /*!< multi-vector list */
 
 private:
     MultiVectorList(const Plato::MultiVectorList<ScalarType, OrdinalType>&);

@@ -69,6 +69,7 @@ public:
     **********************************************************************************/
     explicit StateData(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory) :
             mCurrentCriterionValue(std::numeric_limits<ScalarType>::max()),
+            mCurrentOuterIteration(0),
             mCurrentControl(aDataFactory.control().create()),
             mPreviousControl(aDataFactory.control().create()),
             mCurrentTrialStep(aDataFactory.control().create()),
@@ -208,12 +209,14 @@ public:
     }
 
 private:
-    ScalarType mCurrentCriterionValue;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControl;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControl;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentTrialStep;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentCriterionGradient;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousCriterionGradient;
+    ScalarType mCurrentCriterionValue; /*!< current criterion value */
+    OrdinalType mCurrentOuterIteration; /*!< current outer optimization iteration */
+
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControl; /*!< current controls */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControl; /*!< previous controls */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentTrialStep; /*!< current trial step */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentCriterionGradient; /*!< current criterion gradient */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousCriterionGradient; /*!< previous criterion gradient */
 
 private:
     StateData(const Plato::StateData<ScalarType, OrdinalType>&);

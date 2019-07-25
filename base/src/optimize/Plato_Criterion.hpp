@@ -68,7 +68,7 @@ public:
     //! Directive to cache any criterion specific data once trial control is accepted.
     virtual void cacheData() = 0;
 
-    /*! Allows save continuation on application based parameters.
+    /*! Allows continuation on application based parameters.
      *  Parameters:
      *    \param In
      *          aControl: control variables
@@ -78,7 +78,7 @@ public:
     /*!
      * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}
      * \rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables. This criterion
-     * is typically associated with nonlinear programming optimization problems. For instance, PDE constrasize_t
+     * is typically associated with nonlinear programming optimization problems. For instance, PDE constraint
      * optimization problems.
      *  Parameters:
      *    \param In
