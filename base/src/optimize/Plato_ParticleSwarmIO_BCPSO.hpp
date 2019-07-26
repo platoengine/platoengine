@@ -146,7 +146,7 @@ struct InputDataBCPSO
         mGlobalBestObjFuncTolerance(1e-10),
         mTrustRegionMultiplierTolerance(1e-8),
         mInertiaMultiplier(0.9),
-        mRandomNumMultiplier(0.1),
+        mRandomNumMultiplier(0.2),
         mSocialBehaviorMultiplier(0.8),
         mCognitiveBehaviorMultiplier(0.8),
         mTrustRegionExpansionMultiplier(4.0),
