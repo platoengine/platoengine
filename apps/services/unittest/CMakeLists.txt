@@ -18,7 +18,6 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_OptimizersIO.cpp
 							 Plato_Test_OptimalityCriteria.cpp
 							 Plato_Test_DataFactory.cpp
-							 Plato_Test_MMA.cpp
 							 Plato_Test_KelleySachsBounds.cpp
 							 Plato_Test_ConservativeConvexSeparableApproximation.cpp
 							 Plato_Test_AugmentedLagrangian.cpp
