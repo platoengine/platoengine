@@ -185,64 +185,73 @@ TEST(PlatoTest, output_restart_data_value_error)
 
 TEST(PlatoTest, output_restart_data_multivector)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tRestartFile;
-    tRestartFile.open("MyFile.txt");
-
-    // ****** SET DATA ******
-    const size_t tNumParticles = 5;
-    std::vector<double> tData = {0, 0};
-    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
-    tData = {23,33};
-    tCurrentParticleSet.setData(0, tData);
-    tData = {32,32};
-    tCurrentParticleSet.setData(1, tData);
-    tData = {51,31};
-    tCurrentParticleSet.setData(2, tData);
-    tData = {12,11};
-    tCurrentParticleSet.setData(3, tData);
-    tData = {23,22};
-    tCurrentParticleSet.setData(4, tData);
-    std::string tID("CURRENT PARTICLES");
-    Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tRestartFile);
-
-    Plato::StandardMultiVector<double> tPreviousParticleSet(tNumParticles, tData);
-    tData = {3,1};
-    tPreviousParticleSet.setData(0, tData);
-    tData = {2,4};
-    tPreviousParticleSet.setData(1, tData);
-    tData = {1,2};
-    tPreviousParticleSet.setData(2, tData);
-    tData = {2,2};
-    tPreviousParticleSet.setData(3, tData);
-    tData = {1,5};
-    tPreviousParticleSet.setData(4, tData);
-    tID = "PREVIOUS VELOCITIES";
-
-    // ****** OUTPUT RESTART DATA ******
-    Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tRestartFile);
-    tRestartFile.close();
-
-    // ****** TEST OUTPUT DATA ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyFile.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tInputFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tRestartFile;
+        tRestartFile.open("MyFile.txt");
+
+        // ****** SET DATA ******
+        const size_t tNumParticles = 5;
+        std::vector<double> tData = { 0, 0 };
+        Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+        tData = { 23, 33 };
+        tCurrentParticleSet.setData(0, tData);
+        tData = { 32, 32 };
+        tCurrentParticleSet.setData(1, tData);
+        tData = { 51, 31 };
+        tCurrentParticleSet.setData(2, tData);
+        tData = { 12, 11 };
+        tCurrentParticleSet.setData(3, tData);
+        tData = { 23, 22 };
+        tCurrentParticleSet.setData(4, tData);
+        std::string tID("CURRENT PARTICLES");
+        Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tRestartFile);
+
+        Plato::StandardMultiVector<double> tPreviousParticleSet(tNumParticles, tData);
+        tData = { 3, 1 };
+        tPreviousParticleSet.setData(0, tData);
+        tData = { 2, 4 };
+        tPreviousParticleSet.setData(1, tData);
+        tData = { 1, 2 };
+        tPreviousParticleSet.setData(2, tData);
+        tData = { 2, 2 };
+        tPreviousParticleSet.setData(3, tData);
+        tData = { 1, 5 };
+        tPreviousParticleSet.setData(4, tData);
+        tID = "PREVIOUS VELOCITIES";
+
+        // ****** OUTPUT RESTART DATA ******
+        Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tRestartFile);
+        tRestartFile.close();
+
+        // ****** TEST OUTPUT DATA ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while (tInputFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold("CURRENTPARTICLES23333232513112112322PREVIOUSVELOCITIES3124122215");
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
     }
-
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyFile.txt");
-
-    std::stringstream tGold("CURRENTPARTICLES23333232513112112322PREVIOUSVELOCITIES3124122215");
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, output_restart_data_vector)
 {
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if(tMySize <= 1)
+    {
     // ****** OPEN OUTPUT FILE ******
     std::ofstream tRestartFile;
     tRestartFile.open("MyFile.txt");
@@ -277,286 +286,322 @@ TEST(PlatoTest, output_restart_data_vector)
 
     std::stringstream tGold("CURRENTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05CURRENTBESTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05");
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, output_restart_data_value)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tRestartFile;
-    tRestartFile.open("MyFile.txt");
-
-    // ****** SET DATA ******
-    size_t tRank = 0;
-    std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
-    Plato::output_restart_data_value(tRank, tID, tRestartFile);
-
-    size_t tParticleIndex = 1;
-    tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
-    Plato::output_restart_data_value(tParticleIndex, tID, tRestartFile);
-
-    double tGlobalBestFval = 0.12;
-    tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
-    Plato::output_restart_data_value(tGlobalBestFval, tID, tRestartFile);
-    tRestartFile.close();
-
-    // ****** TEST OUTPUT DATA ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyFile.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tInputFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tRestartFile;
+        tRestartFile.open("MyFile.txt");
+
+        // ****** SET DATA ******
+        size_t tRank = 0;
+        std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
+        Plato::output_restart_data_value(tRank, tID, tRestartFile);
+
+        size_t tParticleIndex = 1;
+        tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
+        Plato::output_restart_data_value(tParticleIndex, tID, tRestartFile);
+
+        double tGlobalBestFval = 0.12;
+        tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
+        Plato::output_restart_data_value(tGlobalBestFval, tID, tRestartFile);
+        tRestartFile.close();
+
+        // ****** TEST OUTPUT DATA ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while (tInputFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold("CURRENTGLOBALBESTPARTICLERANK0CURRENTGLOBALBESTPARTICLEINDEX1CURRENTGLOBALBESTOBJECTIVEVALUE0.12");
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
     }
-
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyFile.txt");
-
-    std::stringstream tGold("CURRENTGLOBALBESTPARTICLERANK0CURRENTGLOBALBESTPARTICLEINDEX1CURRENTGLOBALBESTOBJECTIVEVALUE0.12");
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
 }
 
 TEST(PlatoTest, read_restart_data_vector)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tRestartFile;
-    tRestartFile.open("MyRestartFile.txt");
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tRestartFile;
+        tRestartFile.open("MyRestartFile.txt");
 
-    // ****** SET DATA ******
-    std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
-    Plato::StandardVector<double> tCurrentFval(tData);
-    std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
-    Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
+        // ****** SET DATA ******
+        std::vector<double> tData = { 0.1, 0.34, 0.5, 0.4, 0.05 };
+        Plato::StandardVector<double> tCurrentFval(tData);
+        std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
+        Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
 
-    tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
-    tData = {0.1, 0.21, 0.15, 0.14, 0.01};
-    Plato::StandardVector<double> tCurrentBestFval(tData);
+        tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
+        tData = { 0.1, 0.21, 0.15, 0.14, 0.01 };
+        Plato::StandardVector<double> tCurrentBestFval(tData);
 
-    // ****** OUTPUT RESTART DATA ******
-    Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
-    tRestartFile.close();
+        // ****** OUTPUT RESTART DATA ******
+        Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
+        tRestartFile.close();
 
-    // ****** READ RESTART FILE ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyRestartFile.txt");
-    Plato::StandardVector<double> tRestartCurrentBestFval(tCurrentBestFval.size());
-    Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval);
+        // ****** READ RESTART FILE ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyRestartFile.txt");
+        Plato::StandardVector<double> tRestartCurrentBestFval(tCurrentBestFval.size());
+        Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval);
 
-    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
-    Plato::StandardVector<double> tRestartCurrentFval(tCurrentFval.size());
-    Plato::read_restart_data_vector("CURRENT OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentFval);
+        tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+        Plato::StandardVector<double> tRestartCurrentFval(tCurrentFval.size());
+        Plato::read_restart_data_vector("CURRENT OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentFval);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
 
-    // ****** TEST RESTART DATA ******
-    PlatoTest::checkVectorData(tCurrentFval, tRestartCurrentFval);
-    PlatoTest::checkVectorData(tCurrentBestFval, tRestartCurrentBestFval);
+        // ****** TEST RESTART DATA ******
+        PlatoTest::checkVectorData(tCurrentFval, tRestartCurrentFval);
+        PlatoTest::checkVectorData(tCurrentBestFval, tRestartCurrentBestFval);
+    }
 }
 
 TEST(PlatoTest, read_restart_data_vector_error)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tRestartFile;
-    tRestartFile.open("MyRestartFile.txt");
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tRestartFile;
+        tRestartFile.open("MyRestartFile.txt");
 
-    // ****** SET DATA ******
-    std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
-    Plato::StandardVector<double> tCurrentFval(tData);
-    std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
-    Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
+        // ****** SET DATA ******
+        std::vector<double> tData = { 0.1, 0.34, 0.5, 0.4, 0.05 };
+        Plato::StandardVector<double> tCurrentFval(tData);
+        std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
+        Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
 
-    // ****** ERROR - INPUT FILE IS NOT OPENED ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyRestartFile.txt");
-    Plato::StandardVector<double> tRestartCurrentBestFval;
-    ASSERT_THROW(Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval), std::runtime_error);
+        // ****** ERROR - INPUT FILE IS NOT OPENED ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyRestartFile.txt");
+        Plato::StandardVector<double> tRestartCurrentBestFval;
+        ASSERT_THROW(Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval), std::runtime_error);
 
-    // ****** ERROR - IDENTIFIER IS NOT DEFINED ******
-    tID.clear();
-    ASSERT_THROW(Plato::read_restart_data_vector(tID, tInputFile, tRestartCurrentBestFval), std::runtime_error);
+        // ****** ERROR - IDENTIFIER IS NOT DEFINED ******
+        tID.clear();
+        ASSERT_THROW(Plato::read_restart_data_vector(tID, tInputFile, tRestartCurrentBestFval), std::runtime_error);
 
-    // ****** ERROR - CONTAINER IS NOT ALLOCATED ******
-    ASSERT_THROW(Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval), std::runtime_error);
+        // ****** ERROR - CONTAINER IS NOT ALLOCATED ******
+        ASSERT_THROW(Plato::read_restart_data_vector("CURRENT BEST OBJECTIVE FUNCTION VALUES", tInputFile, tRestartCurrentBestFval), std::runtime_error);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
+    }
 }
 
 TEST(PlatoTest, read_restart_data_multivector)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyRestartFile.txt");
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyRestartFile.txt");
 
-    // ****** SET DATA ******
-    const size_t tNumParticles = 5;
-    std::vector<double> tData = {0, 0};
-    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
-    tData = {23,33};
-    tCurrentParticleSet.setData(0, tData);
-    tData = {32,32};
-    tCurrentParticleSet.setData(1, tData);
-    tData = {51,31};
-    tCurrentParticleSet.setData(2, tData);
-    tData = {12,11};
-    tCurrentParticleSet.setData(3, tData);
-    tData = {23,22};
-    tCurrentParticleSet.setData(4, tData);
-    std::string tID("CURRENT PARTICLES");
-    Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tOutputFile);
+        // ****** SET DATA ******
+        const size_t tNumParticles = 5;
+        std::vector<double> tData = { 0, 0 };
+        Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+        tData = { 23, 33 };
+        tCurrentParticleSet.setData(0, tData);
+        tData = { 32, 32 };
+        tCurrentParticleSet.setData(1, tData);
+        tData = { 51, 31 };
+        tCurrentParticleSet.setData(2, tData);
+        tData = { 12, 11 };
+        tCurrentParticleSet.setData(3, tData);
+        tData = { 23, 22 };
+        tCurrentParticleSet.setData(4, tData);
+        std::string tID("CURRENT PARTICLES");
+        Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tOutputFile);
 
-    Plato::StandardMultiVector<double> tPreviousParticleSet(tNumParticles, tData);
-    tData = {3,1};
-    tPreviousParticleSet.setData(0, tData);
-    tData = {2,4};
-    tPreviousParticleSet.setData(1, tData);
-    tData = {1,2};
-    tPreviousParticleSet.setData(2, tData);
-    tData = {2,2};
-    tPreviousParticleSet.setData(3, tData);
-    tData = {1,5};
-    tPreviousParticleSet.setData(4, tData);
-    tID = "PREVIOUS VELOCITIES";
+        Plato::StandardMultiVector<double> tPreviousParticleSet(tNumParticles, tData);
+        tData = { 3, 1 };
+        tPreviousParticleSet.setData(0, tData);
+        tData = { 2, 4 };
+        tPreviousParticleSet.setData(1, tData);
+        tData = { 1, 2 };
+        tPreviousParticleSet.setData(2, tData);
+        tData = { 2, 2 };
+        tPreviousParticleSet.setData(3, tData);
+        tData = { 1, 5 };
+        tPreviousParticleSet.setData(4, tData);
+        tID = "PREVIOUS VELOCITIES";
 
-    // ****** OUTPUT RESTART DATA ******
-    Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tOutputFile);
-    tOutputFile.close();
+        // ****** OUTPUT RESTART DATA ******
+        Plato::output_restart_data_multivector(tPreviousParticleSet, tID, tOutputFile);
+        tOutputFile.close();
 
-    // ****** READ RESTART DATA ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyRestartFile.txt");
-    Plato::StandardMultiVector<double> tRestartCurrentParticleSet(tNumParticles, tData);
-    Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet);
+        // ****** READ RESTART DATA ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyRestartFile.txt");
+        Plato::StandardMultiVector<double> tRestartCurrentParticleSet(tNumParticles, tData);
+        Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet);
 
-    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
-    Plato::StandardMultiVector<double> tRestartPreviousParticleSet(tNumParticles, tData);
-    Plato::read_restart_data_multivector("PREVIOUS VELOCITIES", tInputFile, tRestartPreviousParticleSet);
+        tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+        Plato::StandardMultiVector<double> tRestartPreviousParticleSet(tNumParticles, tData);
+        Plato::read_restart_data_multivector("PREVIOUS VELOCITIES", tInputFile, tRestartPreviousParticleSet);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
 
-    // ****** TEST RESTART DATA ******
-    PlatoTest::checkMultiVectorData(tCurrentParticleSet, tRestartCurrentParticleSet);
-    PlatoTest::checkMultiVectorData(tPreviousParticleSet, tRestartPreviousParticleSet);
+        // ****** TEST RESTART DATA ******
+        PlatoTest::checkMultiVectorData(tCurrentParticleSet, tRestartCurrentParticleSet);
+        PlatoTest::checkMultiVectorData(tPreviousParticleSet, tRestartPreviousParticleSet);
+    }
 }
 
 TEST(PlatoTest, read_restart_data_multivector_error)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyRestartFile.txt");
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyRestartFile.txt");
 
-    // ****** SET DATA ******
-    const size_t tNumParticles = 5;
-    std::vector<double> tData = {0, 0};
-    Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
-    tData = {23,33};
-    tCurrentParticleSet.setData(0, tData);
-    tData = {32,32};
-    tCurrentParticleSet.setData(1, tData);
-    tData = {51,31};
-    tCurrentParticleSet.setData(2, tData);
-    tData = {12,11};
-    tCurrentParticleSet.setData(3, tData);
-    tData = {23,22};
-    tCurrentParticleSet.setData(4, tData);
-    std::string tID("CURRENT PARTICLES");
-    Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tOutputFile);
-    tOutputFile.close();
+        // ****** SET DATA ******
+        const size_t tNumParticles = 5;
+        std::vector<double> tData = { 0, 0 };
+        Plato::StandardMultiVector<double> tCurrentParticleSet(tNumParticles, tData);
+        tData = { 23, 33 };
+        tCurrentParticleSet.setData(0, tData);
+        tData = { 32, 32 };
+        tCurrentParticleSet.setData(1, tData);
+        tData = { 51, 31 };
+        tCurrentParticleSet.setData(2, tData);
+        tData = { 12, 11 };
+        tCurrentParticleSet.setData(3, tData);
+        tData = { 23, 22 };
+        tCurrentParticleSet.setData(4, tData);
+        std::string tID("CURRENT PARTICLES");
+        Plato::output_restart_data_multivector(tCurrentParticleSet, tID, tOutputFile);
+        tOutputFile.close();
 
-    // ****** ERROR - INPUT FILE IS NOT OPENED ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyRestartFile.txt");
-    Plato::StandardMultiVector<double> tRestartCurrentParticleSet;
-    ASSERT_THROW(Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet), std::runtime_error);
+        // ****** ERROR - INPUT FILE IS NOT OPENED ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyRestartFile.txt");
+        Plato::StandardMultiVector<double> tRestartCurrentParticleSet;
+        ASSERT_THROW(Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet), std::runtime_error);
 
-    // ****** ERROR - IDENTIFIER IS NOT DEFINED ******
-    tID.clear();
-    ASSERT_THROW(Plato::read_restart_data_multivector(tID, tInputFile, tRestartCurrentParticleSet), std::runtime_error);
+        // ****** ERROR - IDENTIFIER IS NOT DEFINED ******
+        tID.clear();
+        ASSERT_THROW(Plato::read_restart_data_multivector(tID, tInputFile, tRestartCurrentParticleSet), std::runtime_error);
 
-    // ****** ERROR - CONTAINER IS NOT ALLOCATED ******
-    ASSERT_THROW(Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet), std::runtime_error);
+        // ****** ERROR - CONTAINER IS NOT ALLOCATED ******
+        ASSERT_THROW(Plato::read_restart_data_multivector("CURRENT PARTICLES", tInputFile, tRestartCurrentParticleSet), std::runtime_error);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
+    }
 }
 
 TEST(PlatoTest, read_restart_data_value)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyRestartFile.txt");
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyRestartFile.txt");
 
-    // ****** SET DATA ******
-    int tRank = 0;
-    std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
-    Plato::output_restart_data_value(tRank, tID, tOutputFile);
+        // ****** SET DATA ******
+        int tRank = 0;
+        std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
+        Plato::output_restart_data_value(tRank, tID, tOutputFile);
 
-    int tParticleIndex = 1;
-    tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
-    Plato::output_restart_data_value(tParticleIndex, tID, tOutputFile);
+        int tParticleIndex = 1;
+        tID = "CURRENT GLOBAL BEST PARTICLE INDEX";
+        Plato::output_restart_data_value(tParticleIndex, tID, tOutputFile);
 
-    double tGlobalBestFval = 0.12;
-    tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
-    Plato::output_restart_data_value(tGlobalBestFval, tID, tOutputFile);
-    tOutputFile.close();
+        double tGlobalBestFval = 0.12;
+        tID = "CURRENT GLOBAL BEST OBJECTIVE VALUE";
+        Plato::output_restart_data_value(tGlobalBestFval, tID, tOutputFile);
+        tOutputFile.close();
 
-    // ****** READ AND TEST RESTART DATA ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyRestartFile.txt");
-    int tRestartRank = -1;
-    Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", tInputFile, tRestartRank);
-    ASSERT_EQ(tRank, tRestartRank);
+        // ****** READ AND TEST RESTART DATA ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyRestartFile.txt");
+        int tRestartRank = -1;
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", tInputFile, tRestartRank);
+        ASSERT_EQ(tRank, tRestartRank);
 
-    int tRestartParticleIndex = -1;
-    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
-    Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE INDEX", tInputFile, tRestartParticleIndex);
-    ASSERT_EQ(tParticleIndex, tRestartParticleIndex);
+        int tRestartParticleIndex = -1;
+        tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE INDEX", tInputFile, tRestartParticleIndex);
+        ASSERT_EQ(tParticleIndex, tRestartParticleIndex);
 
-    double tRestartGlobalBestFval = -1;
-    tInputFile.seekg(0 /*offset*/, tInputFile.beg);
-    Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE VALUE", tInputFile, tRestartGlobalBestFval);
-    const double tTolernace = 1e-6;
-    ASSERT_NEAR(tGlobalBestFval, tRestartGlobalBestFval, tTolernace);
+        double tRestartGlobalBestFval = -1;
+        tInputFile.seekg(0 /*offset*/, tInputFile.beg);
+        Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE VALUE", tInputFile, tRestartGlobalBestFval);
+        const double tTolernace = 1e-6;
+        ASSERT_NEAR(tGlobalBestFval, tRestartGlobalBestFval, tTolernace);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
+    }
 }
 
 TEST(PlatoTest, read_restart_data_value_error)
 {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyRestartFile.txt");
-    // ****** SET DATA ******
-    int tRank = 1;
-    std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
-    ASSERT_NO_THROW(Plato::output_restart_data_value(tRank, tID, tOutputFile));
-    tOutputFile.close();
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
+    {
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyRestartFile.txt");
+        // ****** SET DATA ******
+        int tRank = 1;
+        std::string tID("CURRENT GLOBAL BEST PARTICLE RANK");
+        ASSERT_NO_THROW(Plato::output_restart_data_value(tRank, tID, tOutputFile));
+        tOutputFile.close();
 
-    // ****** ERROR - INPUT FILE IS NOT OPENED ******
-    int tRestartRank = -1;
-    std::ifstream tInputFile;
-    ASSERT_THROW(Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", tInputFile, tRestartRank), std::runtime_error);
+        // ****** ERROR - INPUT FILE IS NOT OPENED ******
+        int tRestartRank = -1;
+        std::ifstream tInputFile;
+        ASSERT_THROW(Plato::read_restart_data_value("CURRENT GLOBAL BEST PARTICLE RANK", tInputFile, tRestartRank), std::runtime_error);
 
-    // ****** ERROR - DATA ID IS EMPTY ******
-    std::string tRestartDataID;
-    tInputFile.open("MyRestartFile.txt");
-    ASSERT_THROW(Plato::read_restart_data_value(tRestartDataID, tInputFile, tRestartRank), std::runtime_error);
+        // ****** ERROR - DATA ID IS EMPTY ******
+        std::string tRestartDataID;
+        tInputFile.open("MyRestartFile.txt");
+        ASSERT_THROW(Plato::read_restart_data_value(tRestartDataID, tInputFile, tRestartRank), std::runtime_error);
 
-    // ****** ERROR - RESTART DATA IS NOT DEFINED IN INPUT FILE ******
-    ASSERT_THROW(Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE VALUE", tInputFile, tRestartRank), std::runtime_error);
+        // ****** ERROR - RESTART DATA IS NOT DEFINED IN INPUT FILE ******
+        ASSERT_THROW(Plato::read_restart_data_value("CURRENT GLOBAL BEST OBJECTIVE VALUE", tInputFile, tRestartRank), std::runtime_error);
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyRestartFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyRestartFile.txt");
+    }
 }
 
 TEST(PlatoTest, IsParticleUnique)
@@ -708,85 +753,103 @@ TEST(PlatoTest, PSO_PrintDiagnosticsInvalidArgumentsPSO)
 
 TEST(PlatoTest, PSO_PrintParticleData)
 {
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyFile.txt");
-    Plato::pso::print_particle_data_header(tOutputFile);
-
-    const size_t tNumParticles = 3;
-    const size_t tNumControls = 2;
-    Plato::StandardVector<double> tObjValues(tNumParticles);
-    tObjValues[0] = 1; tObjValues[1] = 2; tObjValues[2] = 3;
-    Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
-    tParticles(0,0) = 1.1; tParticles(1,0) = 2.1; tParticles(2,0) = 3.1;
-    tParticles(1,1) = 1.2; tParticles(1,1) = 2.2; tParticles(2,1) = 3.2;
-    size_t tIteration = 1;
-    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
-    tIteration = 2;
-    Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
-    tOutputFile.close();
-
-    // ****** TEST OUTPUT DATA ******
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile.txt");
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyFile.txt");
+        Plato::pso::print_particle_data_header(tOutputFile);
 
-    std::stringstream tGold;
-    tGold << "OUTPUTFORMAT:(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
-    tGold << "Thesubscriptidenotestheparticleindexandthesuperscriptjdenotesthedesignvariableindex.";
-    tGold << "Eachparticleisassociatedwithacriterion(F_i(X))andasetofdesignvariables(X).";
-    tGold << "ThetotalnumberofparticlesanddesignvariablesisdenotedbyuppercaselettersIandJ,respectively.";
-    tGold << "Iter(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
-    tGold << "1(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
-    tGold << "2(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        const size_t tNumParticles = 3;
+        const size_t tNumControls = 2;
+        Plato::StandardVector<double> tObjValues(tNumParticles);
+        tObjValues[0] = 1;
+        tObjValues[1] = 2;
+        tObjValues[2] = 3;
+        Plato::StandardMultiVector<double> tParticles(tNumParticles, tNumControls);
+        tParticles(0, 0) = 1.1;
+        tParticles(1, 0) = 2.1;
+        tParticles(2, 0) = 3.1;
+        tParticles(1, 1) = 1.2;
+        tParticles(1, 1) = 2.2;
+        tParticles(2, 1) = 3.2;
+        size_t tIteration = 1;
+        Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+        tIteration = 2;
+        Plato::pso::print_particle_data(tIteration, tObjValues, tParticles, tOutputFile);
+        tOutputFile.close();
+
+        // ****** TEST OUTPUT DATA ******
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while (tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold;
+        tGold << "OUTPUTFORMAT:(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+        tGold << "Thesubscriptidenotestheparticleindexandthesuperscriptjdenotesthedesignvariableindex.";
+        tGold << "Eachparticleisassociatedwithacriterion(F_i(X))andasetofdesignvariables(X).";
+        tGold << "ThetotalnumberofparticlesanddesignvariablesisdenotedbyuppercaselettersIandJ,respectively.";
+        tGold << "Iter(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
+        tGold << "1(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+        tGold << "2(1.000000e+00,1.100000e+00,0.000000e+00)(2.000000e+00,2.100000e+00,2.200000e+00)(3.000000e+00,3.100000e+00,3.200000e+00)";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_PrintGlobalBestParticleData)
 {
-    std::ofstream tOutputFile;
-    tOutputFile.open("MyFile.txt");
-    Plato::pso::print_global_best_particle_data_header(tOutputFile);
-
-    const size_t tNumControls = 2;
-    Plato::StandardVector<double> tControls(tNumControls);
-    tControls[0] = 1.1; tControls[1] = 1.2;
-    size_t tIndex = 2;
-    size_t tIteration = 1;
-    double tObjValue = 1;
-    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
-    tIndex = 1;
-    tIteration = 2;
-    tObjValue = 0.5;
-    tControls[0] = 2.1; tControls[1] = 2.2;
-    Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
-    tOutputFile.close();
-
-    // ****** TEST OUTPUT DATA ******
-    std::ifstream tReadFile;
-    tReadFile.open("MyFile.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tReadFile >> tInputString)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
     {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    std::system("rm -f MyFile.txt");
+        std::ofstream tOutputFile;
+        tOutputFile.open("MyFile.txt");
+        Plato::pso::print_global_best_particle_data_header(tOutputFile);
 
-    std::stringstream tGold;
-    tGold << "OUTPUTFORMAT:(F(X),X^j,...,X^J)Thesuperscriptjdenotesthedesignvariableindex.";
-    tGold << "Eachparticleisassociatedwithasetofdesignvariables(X).";
-    tGold << "ThetotalnumberofdesignvariablesisdenotedbytheuppercaseletterJ.IterParticleIndex(F(X),X^j,...,X^J)";
-    tGold << "12(1.000000e+00,1.100000e+00,1.200000e+00)";
-    tGold << "21(5.000000e-01,2.100000e+00,2.200000e+00)";
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        const size_t tNumControls = 2;
+        Plato::StandardVector<double> tControls(tNumControls);
+        tControls[0] = 1.1;
+        tControls[1] = 1.2;
+        size_t tIndex = 2;
+        size_t tIteration = 1;
+        double tObjValue = 1;
+        Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+        tIndex = 1;
+        tIteration = 2;
+        tObjValue = 0.5;
+        tControls[0] = 2.1;
+        tControls[1] = 2.2;
+        Plato::pso::print_global_best_particle_data(tIteration, tIndex, tObjValue, tControls, tOutputFile);
+        tOutputFile.close();
+
+        // ****** TEST OUTPUT DATA ******
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while (tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile.txt");
+
+        std::stringstream tGold;
+        tGold << "OUTPUTFORMAT:(F(X),X^j,...,X^J)Thesuperscriptjdenotesthedesignvariableindex.";
+        tGold << "Eachparticleisassociatedwithasetofdesignvariables(X).";
+        tGold << "ThetotalnumberofdesignvariablesisdenotedbytheuppercaseletterJ.IterParticleIndex(F(X),X^j,...,X^J)";
+        tGold << "12(1.000000e+00,1.100000e+00,1.200000e+00)";
+        tGold << "21(5.000000e-01,2.100000e+00,2.200000e+00)";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
 }
 
 TEST(PlatoTest, PSO_PrintDiagnostics)
@@ -1792,63 +1855,65 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle)
 
 TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
 {
-    // ********* ALLOCATE CRITERION *********
-    std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective =
-            std::make_shared<Plato::GradFreeCircle<double>>();
-
-    // ********* ALLOCATE CORE DATA STRUCTURES *********
-    const size_t tNumControls = 2;
-    const size_t tNumParticles = 10;
-    Plato::InputDataBCPSO<double> tInputs;
-    tInputs.mMaxNumIterations = 50;
-    tInputs.mWriteRestartFile = true;
-    tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
-    tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
-    tInputs.mParticlesLowerBounds->fill(-6);
-    tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
-    tInputs.mParticlesUpperBounds->fill(6);
-    tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
-
-    // ********* SOLVE OPTIMIZATION PROBLEM FOR 50 ITERATIONS *********
-    Plato::OutputDataBCPSO<double> tOutputs;
-    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
-
-    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
-    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
-            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
-
-    std::cout << tOutputs.mStopCriterion << "\n";
-
-    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+    int tMySize = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
+    if (tMySize <= 1)
     {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
-                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
-                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+        // ********* ALLOCATE CRITERION *********
+        std::shared_ptr<Plato::GradFreeCriterion<double>> tObjective = std::make_shared<Plato::GradFreeCircle<double>>();
+
+        // ********* ALLOCATE CORE DATA STRUCTURES *********
+        const size_t tNumControls = 2;
+        const size_t tNumParticles = 10;
+        Plato::InputDataBCPSO<double> tInputs;
+        tInputs.mMaxNumIterations = 50;
+        tInputs.mWriteRestartFile = true;
+        tInputs.mCriteriaEvals = std::make_shared<Plato::StandardVector<double>>(tNumParticles);
+        tInputs.mParticlesLowerBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+        tInputs.mParticlesLowerBounds->fill(-6);
+        tInputs.mParticlesUpperBounds = std::make_shared<Plato::StandardVector<double>>(tNumControls);
+        tInputs.mParticlesUpperBounds->fill(6);
+        tInputs.mParticles = std::make_shared<Plato::StandardMultiVector<double>>(tNumParticles, tNumControls);
+
+        // ********* SOLVE OPTIMIZATION PROBLEM FOR 50 ITERATIONS *********
+        Plato::OutputDataBCPSO<double> tOutputs;
+        Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+        std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue << ", STDDEV = "
+            << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+        std::cout << tOutputs.mStopCriterion << "\n";
+
+        for (size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+        {
+            std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] << ", MEAN = "
+                << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = " << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+        }
+
+        // ********* RESTART AND SOLVE OPTIMIZATION PROBLEM *********
+        tInputs.mReadRestartFile = true;
+        tInputs.mMaxNumIterations = 1e3;
+        Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
+
+        std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
+        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue << ", STDDEV = "
+            << tOutputs.mStdDevBestObjFuncValue << "\n";
+
+        std::cout << tOutputs.mStopCriterion << "\n";
+
+        for (size_t tIndex = 0; tIndex < tNumControls; tIndex++)
+        {
+            std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] << ", MEAN = "
+                << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = " << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
+        }
+
+        // ********* DIAGNOSTICS *********
+        const double tTolerance = 1e-3;
+        EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
+
+        std::system("rm -f plato_bcpso_restart_data.txt");
     }
-
-    // ********* RESTART AND SOLVE OPTIMIZATION PROBLEM *********
-    tInputs.mReadRestartFile = true;
-    tInputs.mMaxNumIterations = 1e3;
-    Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
-
-    std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
-    std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = "
-            << tOutputs.mMeanBestObjFuncValue << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
-
-    std::cout << tOutputs.mStopCriterion << "\n";
-
-    for(size_t tIndex = 0; tIndex < tNumControls; tIndex++)
-    {
-        std::cout << "CONTROL[" << tIndex << "]: BEST = " << (*tOutputs.mGlobalBestParticles)[tIndex] <<
-                ", MEAN = " << (*tOutputs.mMeanBestParticles)[tIndex] << ", STDDEV = "
-                << (*tOutputs.mStdDevBestParticles)[tIndex] << "\n";
-    }
-
-    // ********* DIAGNOSTICS *********
-    const double tTolerance = 1e-3;
-    EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
-
-    std::system("rm -f plato_bcpso_restart_data.txt");
 }
 
 TEST(PlatoTest, PSO_SolveBCPSO_Rocket)
