@@ -1,10 +1,4 @@
 /*
- * Plato_StateData.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 //@HEADER
 */
 
+/*
+ * Plato_StateData.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
 #ifndef PLATO_STATEDATA_HPP_
 #define PLATO_STATEDATA_HPP_
 
@@ -68,13 +68,16 @@ public:
      * @param [in] aDataFactory linear algebra factory
     **********************************************************************************/
     explicit StateData(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory) :
-            mCurrentCriterionValue(std::numeric_limits<ScalarType>::max()),
             mCurrentOuterIteration(0),
+            mCurrentCriterionValue(std::numeric_limits<ScalarType>::max()),
+            mCurrentNormalizationConstant(std::numeric_limits<ScalarType>::max()),
             mCurrentControl(aDataFactory.control().create()),
             mPreviousControl(aDataFactory.control().create()),
             mCurrentTrialStep(aDataFactory.control().create()),
             mCurrentCriterionGradient(aDataFactory.control().create()),
-            mPreviousCriterionGradient(aDataFactory.control().create())
+            mPreviousCriterionGradient(aDataFactory.control().create()),
+            mCurrentControlLowerBounds(aDataFactory.control().create()),
+            mCurrentControlUpperBounds(aDataFactory.control().create())
     {
     }
 
@@ -104,26 +107,44 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return current normalization constant
+     * @return current normalization constant
+    **********************************************************************************/
+    ScalarType getCurrentNormalizationConstant() const
+    {
+        return (mCurrentNormalizationConstant);
+    }
+
+    /******************************************************************************//**
+     * @brief Set current normalization constant
+     * @param [in] aInput current normalization constant
+    **********************************************************************************/
+    void setCurrentNormalizationConstant(const ScalarType & aInput)
+    {
+        mCurrentNormalizationConstant = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Return current optimization iteration
      * @return current optimization iteration
     **********************************************************************************/
-    ScalarType getCurrentOptimizationIteration() const
+    OrdinalType getCurrentOptimizationIteration() const
     {
         return (mCurrentOuterIteration);
     }
 
     /******************************************************************************//**
-     * @brief Set current optimization iteration
-     * @param [in] aInput current optimization iteration
+     * @brief Set current outer optimization iteration
+     * @param [in] aInput current outer optimization iteration
     **********************************************************************************/
-    void setCurrentOptimizationIteration(const ScalarType & aInput)
+    void setCurrentOptimizationIteration(const OrdinalType & aInput)
     {
         mCurrentOuterIteration = aInput;
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to current control multi-vector
-     * @return current control multi-vector
+     * @brief Return constant reference to 2D container of current controls
+     * @return constant reference to 2D container of current controls
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentControl() const
     {
@@ -143,8 +164,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to previous control multi-vector
-     * @return previous control multi-vector
+     * @brief Return constant reference to 2D container of previous controls
+     * @return constant reference to 2D container of previous controls
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousControl() const
     {
@@ -153,8 +174,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Set previous control multi-vector
-     * @param [in] aInput previous control multi-vector
+     * @brief Set 2D container of previous controls
+     * @param [in] aInput previous controls
     **********************************************************************************/
     void setPreviousControl(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
@@ -164,8 +185,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to current descent direction
-     * @return current descent direction
+     * @brief Return constant reference to 2D container of current descent direction
+     * @return constant reference to 2D container of current descent direction
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentTrialStep() const
     {
@@ -185,8 +206,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to current criterion gradient
-     * @return current criterion gradient
+     * @brief Return constant reference to 2D container of current criterion gradient
+     * @return constant reference to 2D container of current criterion gradient
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentCriterionGradient() const
     {
@@ -206,8 +227,8 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Return constant reference to previous criterion gradient
-     * @return previous criterion gradient
+     * @brief Return constant reference to 2D container of previous criterion gradient
+     * @return constant reference to 2D container of previous criterion gradient
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & getPreviousCriterionGradient() const
     {
@@ -226,15 +247,60 @@ public:
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), mPreviousCriterionGradient.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Return constant reference to 2D container of current control lower bounds
+     * @return constant reference to 2D container of current control lower bounds
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentControlLowerBounds() const
+    {
+        assert(mCurrentControlLowerBounds.get() != nullptr);
+        return (*mCurrentControlLowerBounds);
+    }
+
+    /******************************************************************************//**
+     * @brief Set current control lower bounds
+     * @param [in] aInput current control lower bounds
+    **********************************************************************************/
+    void setCurrentControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
+    {
+        assert(mCurrentControlLowerBounds.get() != nullptr);
+        assert(aInput.getNumVectors() == mCurrentControlLowerBounds->getNumVectors());
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentControlLowerBounds);
+    }
+
+    /******************************************************************************//**
+     * @brief Return constant reference to 2D container of current control upper bounds
+     * @return constant reference to 2D container of current control upper bounds
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType> & getCurrentControlUpperBounds() const
+    {
+        assert(mCurrentControlUpperBounds.get() != nullptr);
+        return (*mCurrentControlUpperBounds);
+    }
+
+    /******************************************************************************//**
+     * @brief Set current control upper bounds
+     * @param [in] aInput current control upper bounds
+    **********************************************************************************/
+    void setCurrentControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
+    {
+        assert(mCurrentControlUpperBounds.get() != nullptr);
+        assert(aInput.getNumVectors() == mCurrentControlUpperBounds->getNumVectors());
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentControlUpperBounds);
+    }
+
 private:
-    ScalarType mCurrentCriterionValue; /*!< current criterion value */
     OrdinalType mCurrentOuterIteration; /*!< current outer optimization iteration */
+    ScalarType mCurrentCriterionValue; /*!< current criterion value */
+    ScalarType mCurrentNormalizationConstant; /*!< current normalization constant */
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControl; /*!< current controls */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControl; /*!< previous controls */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentTrialStep; /*!< current trial step */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentCriterionGradient; /*!< current criterion gradient */
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousCriterionGradient; /*!< previous criterion gradient */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControlLowerBounds; /*!< current control lower bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControlUpperBounds; /*!< current control upper bounds */
 
 private:
     StateData(const Plato::StateData<ScalarType, OrdinalType>&);
@@ -242,6 +308,7 @@ private:
 };
 // class StateData
 
-} // namespace Plato
+}
+// namespace Plato
 
 #endif /* PLATO_STATEDATA_HPP_ */

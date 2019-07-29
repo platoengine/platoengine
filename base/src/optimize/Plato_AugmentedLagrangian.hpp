@@ -434,6 +434,16 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Get control solution
+     * param [in/out] aSolution solution to optimization problem
+    **********************************************************************************/
+    void getSolution(Plato::MultiVector<ScalarType, OrdinalType> &aSolution) const
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = mDataMng->getCurrentControl();
+        Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(1), aSolution);
+    }
+
+    /******************************************************************************//**
      * @brief Return number of outer optimization iterations
      * @return number of outer optimization iterations
     **********************************************************************************/

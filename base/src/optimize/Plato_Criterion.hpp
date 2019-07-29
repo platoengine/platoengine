@@ -77,7 +77,7 @@ public:
     virtual void cacheData() = 0;
 
     /******************************************************************************//**
-     * Allows continuation on parameters owned by the application.
+     * Perform continuation on parameters owned by the application.
      * @param [in] aControl: control, i.e. design, variables
     ***********************************************************************************/
     virtual void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) { return; }
