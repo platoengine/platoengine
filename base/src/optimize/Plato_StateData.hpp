@@ -104,6 +104,24 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return current optimization iteration
+     * @return current optimization iteration
+    **********************************************************************************/
+    ScalarType getCurrentOptimizationIteration() const
+    {
+        return (mCurrentOuterIteration);
+    }
+
+    /******************************************************************************//**
+     * @brief Set current optimization iteration
+     * @param [in] aInput current optimization iteration
+    **********************************************************************************/
+    void setCurrentOptimizationIteration(const ScalarType & aInput)
+    {
+        mCurrentOuterIteration = aInput;
+    }
+
+    /******************************************************************************//**
      * @brief Return constant reference to current control multi-vector
      * @return current control multi-vector
     **********************************************************************************/

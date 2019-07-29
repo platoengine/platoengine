@@ -20,6 +20,213 @@ namespace Plato
 namespace experimental
 {
 
+/******************************************************************************//**
+ * Criterion interface for the approximation function used to solve the Method of
+ * Moving Asymptotes (MMA) subproblem.
+ *
+ * The approximation function for the MMA subproblem is defined as
+ * /f$\sum_{j=1}^{N}\left( \frac{p_{ij}^{k}}{u_j^k - x_j} + \frac{q_{ij}^{k}}{x_j - l_j}
+ * + r_{i} \right)/f$
+ *
+ * where
+ *
+ * /f$r_i = f_i(\mathbf{x}^k) - \sum_{j=1}^{N}\left( \frac{p_{ij}^{k}}{u_j^k - x_j^k}
+ * + \frac{q_{ij}^{k}}{x_j^k - l_j} \right)/f$
+ *
+ * /f$p_{ij} = (x_j^k - l_j)^2\left( \alpha_{1}\left(\frac{\partial{f}_i}{\partial{x}_j}
+ * (\mathbf{x}^k)\right)^{+} + \alpha_{2}\left(\frac{\partial{f}_i}{\partial{x}_j}
+ * (\mathbf{x}^k)\right)^{-} + \frac{\epsilon}{x_j^{\max} - x_j^{\min}}\right)/f$
+ *
+ * /f$q_{ij} = (x_j^k - l_j)^2\left( \alpha_{2}\left(\frac{\partial{f}_i}{\partial{x}_j}
+ * (\mathbf{x}^k)\right)^{+} + \alpha_{1}\left(\frac{\partial{f}_i}{\partial{x}_j}
+ * (\mathbf{x}^k)\right)^{-} + \frac{\epsilon}{x_j^{\max} - x_j^{\min}}\right)/f$
+ *
+ * /f$\frac{\partial{f}_i}{\partial{x}_j}(\mathbf{x}^k)\right)^{+} = \max\left(
+ * \frac{\partial{f}_i}{\partial{x}_j}, 0 \right)/f$
+ *
+ * /f$\frac{\partial{f}_i}{\partial{x}_j}(\mathbf{x}^k)\right)^{-} = \max\left(
+ * -\frac{\partial{f}_i}{\partial{x}_j}, 0 \right)/f$
+ *
+ * Nomenclature:
+ *
+ * /f$x_j/f$: trial control j-th value
+ * /f$x_j^{\max}/f$: j-th value for control upper bound
+ * /f$x_j^{\min}/f$: j-th value for control lower bound
+ * /f$u_j/f$: upper asymptote j-th value
+ * /f$l_j/f$: lower asymptote j-th value
+ * /f$\epsilon/f$: positive coefficient
+ * /f$\alpha_{1}, \alpha_{2}/f$: positive coefficients
+ * /f$\mathbf{x}^k/f$: current controls
+ * /f$f_i(\mathbf{x}^k)/f$: current criterion value
+ * /f$\frac{\partial{f}_i}{\partial{x}_j}(\mathbf{x}^k)/f$: current criterion gradient
+ *
+***********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+class MethodMovingAsymptotesCriterion : public Plato::Criterion<ScalarType, OrdinalType>
+{
+public:
+    explicit MethodMovingAsymptotesCriterion(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+        mInitialAymptoteScale(0.5),
+        mCurrentNormalizedCriterionValue(0)
+    {
+    }
+
+    ~MethodMovingAsymptotesCriterion()
+    {
+    }
+
+    /******************************************************************************//**
+     * Safely cache application specific data after a new trial control is accepted.
+     ***********************************************************************************/
+    void cacheData()
+    {
+        return;
+    }
+
+    /******************************************************************************//**
+     * Evaluate approximation function.
+     * @param [in] aControl: control, i.e. design, variables
+     * @return approximation function value
+     ***********************************************************************************/
+    ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> &aControl)
+    {
+        const ScalarType tOutput = this->evaluateApproximationFunction(aControl);
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * Compute approximation function gradient.
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in/out] aOutput: approximation function gradient
+     ***********************************************************************************/
+    void gradient(const Plato::MultiVector<ScalarType, OrdinalType> &aControl,
+                  Plato::MultiVector<ScalarType, OrdinalType> &aOutput)
+    {
+        this->computeApproximationFunctionGradient(aControl, aOutput);
+    }
+
+    /******************************************************************************//**
+     * Apply vector to approximation function Hessian.
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in] aVector: descent direction
+     * @param [in/out] aOutput: approximation function gradient
+     ***********************************************************************************/
+    void hessian(const Plato::MultiVector<ScalarType, OrdinalType> &aControl,
+                 const Plato::MultiVector<ScalarType, OrdinalType> &aVector,
+                 Plato::MultiVector<ScalarType, OrdinalType> &aOutput)
+    {
+        this->computeApproximationFunctionHessTimesVec(aControl, aVector, aOutput);
+    }
+
+private:
+    void updateAsymptotes(const Plato::StateData<ScalarType, OrdinalType> &aData)
+    {
+        const OrdinalType tCurrentOptimizationIteration = aData.getCurrentOptimizationIteration();
+        if (tCurrentOptimizationIteration >= static_cast<OrdinalType>(2))
+        {
+            this->updateCurrentAsymptotes();
+        }
+        else
+        {
+            this->updateInitialAsymptotes(aData);
+        }
+    }
+
+    void updateInitialAsymptotes(const Plato::StateData<ScalarType, OrdinalType> &aData)
+    {
+        // TODO: I NEED TO SUBTRACT LOWER BOUNDS FROM UPPER BOUNDS
+        Plato::update(static_cast<ScalarType>(1), aData.getCurrentControl(), static_cast<ScalarType>(0), *mLowerAsymptotes);
+        Plato::update(-mInitialAymptoteScale, *mUpperMinusLowerBounds, static_cast<ScalarType>(1), *mLowerAsymptotes);
+
+        Plato::update(static_cast<ScalarType>(1), aData.getCurrentControl(), static_cast<ScalarType>(0), *mUpperAsymptotes);
+        Plato::update(mInitialAymptoteScale, *mUpperMinusLowerBounds, static_cast<ScalarType>(1), *mUpperAsymptotes);
+    }
+
+    ScalarType evaluateApproximationFunction(const Plato::MultiVector<ScalarType, OrdinalType> &aControls)
+    {
+        mControlWork1->fill(static_cast<ScalarType>(0));
+        mControlWork2->fill(static_cast<ScalarType>(0));
+
+        const OrdinalType tNumVectors = aControls.getNumVectors();
+        for(OrdinalType tVecIndex = 0; tVecIndex < tNumVectors; tVecIndex++)
+        {
+            const OrdinalType tNumControls = aControls[tVecIndex].size();
+            for(OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                ScalarType tValueOne = (*mAppxFunctionP)(tVecIndex, tControlIndex)
+                    / ((*mUpperAsymptotes)(tVecIndex, tControlIndex) - aControls(tVecIndex, tControlIndex));
+                ScalarType tValueTwo = (*mAppxFunctionQ)(tVecIndex, tControlIndex)
+                    / (aControls(tVecIndex, tControlIndex) - (*mLowerAsymptotes)(tVecIndex, tControlIndex));
+                (*mControlWork1)[tControlIndex] += tValueOne + tValueTwo;
+
+                tValueOne = (*mAppxFunctionP)(tVecIndex, tControlIndex)
+                    / ((*mUpperAsymptotes)(tVecIndex, tControlIndex) - (*mCurrentControls)(tVecIndex, tControlIndex));
+                tValueTwo = (*mAppxFunctionQ)(tVecIndex, tControlIndex)
+                    / ((*mCurrentControls)(tVecIndex, tControlIndex) - (*mLowerAsymptotes)(tVecIndex, tControlIndex));
+                (*mControlWork2)[tControlIndex] += tValueOne + tValueTwo;
+            }
+        }
+
+        const ScalarType tTermOne = mReductionOperations->sum(*mControlWork1);
+        const ScalarType tTermTwo = mReductionOperations->sum(*mControlWork2);
+        const ScalarType tOutput = tTermOne + mCurrentNormalizedCriterionValue - tTermTwo;
+
+        return (tOutput);
+    }
+
+    void computeApproximationFunctionGradient(const Plato::MultiVector<ScalarType, OrdinalType> &aControls,
+                                              Plato::MultiVector<ScalarType, OrdinalType> &aGradient)
+    {
+        const OrdinalType tNumVectors = aControls.getNumVectors();
+        for (OrdinalType tVecIndex = 0; tVecIndex < tNumVectors; tVecIndex++)
+        {
+            const OrdinalType tNumControls = aControls[tVecIndex].size();
+            for (OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                ScalarType tDenominatorValue = (*mUpperAsymptotes)(tVecIndex, tControlIndex) - aControls(tVecIndex, tControlIndex);
+                ScalarType tDenominator = tDenominatorValue * tDenominatorValue
+                ScalarType tValueOne = (*mAppxFunctionP)(tVecIndex, tControlIndex) / tDenominator;
+                ScalarType tValueTwo = (*mAppxFunctionQ)(tVecIndex, tControlIndex) / tDenominator;
+                aGradient(tVecIndex, tControlIndex) = tValueOne + tValueTwo;
+            }
+        }
+    }
+
+    void computeApproximationFunctionHessTimesVec(const Plato::MultiVector<ScalarType, OrdinalType> &aControls,
+                                                  const Plato::MultiVector<ScalarType, OrdinalType> &aVector,
+                                                  Plato::MultiVector<ScalarType, OrdinalType> &aHessTimesVec)
+    {
+        const OrdinalType tNumVectors = aControls.getNumVectors();
+        for (OrdinalType tVecIndex = 0; tVecIndex < tNumVectors; tVecIndex++)
+        {
+            const OrdinalType tNumControls = aControls[tVecIndex].size();
+            for (OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                ScalarType tDenominatorValue = (*mUpperAsymptotes)(tVecIndex, tControlIndex) - aControls(tVecIndex, tControlIndex);
+                ScalarType tDenominator = tDenominatorValue * tDenominatorValue * tDenominatorValue;
+                ScalarType tValueOne = (*mAppxFunctionP)(tVecIndex, tControlIndex) / tDenominator;
+                ScalarType tValueTwo = (*mAppxFunctionQ)(tVecIndex, tControlIndex) / tDenominator;
+                aHessTimesVec(tVecIndex, tControlIndex) = static_cast<ScalarType>(2) * (tValueOne + tValueTwo) * aVector(tVecIndex, tControlIndex);
+            }
+        }
+    }
+
+private:
+    ScalarType mInitialAymptoteScale;
+    ScalarType mCurrentNormalizedCriterionValue;
+
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork1;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork2;
+
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionP;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionQ;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes;
+
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReductionOperations;
+};
+
 template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotes
 {
@@ -205,6 +412,8 @@ private:
     ScalarType mCurrentObjectiveValue;
     ScalarType mPreviousObjectiveValue;
 
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork1;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork2;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintLimits;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentConstraintValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousConstraintValues;
@@ -238,6 +447,7 @@ private:
     std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
     std::shared_ptr<Plato::AugmentedLagrangian<ScalarType, OrdinalType>> mOptimizer;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReductionOperations;
 };
 // class MethodMovingAsymptotes
 

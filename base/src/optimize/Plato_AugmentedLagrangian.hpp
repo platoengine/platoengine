@@ -50,6 +50,7 @@
 
 #include "Plato_Macros.hpp"
 #include "Plato_DataFactory.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
 #include "Plato_KelleySachsBoundConstrained.hpp"
