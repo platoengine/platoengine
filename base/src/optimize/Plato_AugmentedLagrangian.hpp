@@ -113,7 +113,7 @@ public:
             mOutputData(),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
-            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, aDataMng, aStageMng))
+            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, aDataMng, mStageMng))
     {
         this->initialize();
     }
@@ -654,7 +654,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics for Kelley-Sachs augmented Lagrangian algorithm
+     * @brief Print diagnostics for Kelley-Sachs augmented Lagrangian optimization algorithm
     **********************************************************************************/
     void outputDiagnostics()
     {

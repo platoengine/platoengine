@@ -120,11 +120,11 @@ public:
             mObjective(aObjective),
             mConstraints(aConstraints),
             mPreconditioner(std::make_shared<Plato::IdentityPreconditioner<ScalarType, OrdinalType>>()),
-            mObjFuncHessian(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(aObjective)),
-            mConstraintHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aConstraints)),
+            mObjFuncHessian(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(mObjective)),
+            mConstraintHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(mConstraints)),
             mDualReductionOperations(aFactory->getDualReductionOperations().create()),
-            mObjectiveGradOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(aObjective)),
-            mConstraintGradientOperator(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(aConstraints))
+            mObjectiveGradOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(mObjective)),
+            mConstraintGradientOperator(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(mConstraints))
     /****************************************************************************************************************/
     {
         this->initialize();
