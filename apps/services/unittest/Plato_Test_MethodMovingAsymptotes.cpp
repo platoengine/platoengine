@@ -42,6 +42,12 @@ public:
     {
     }
 
+    OrdinalType getNumConstraints() const
+    {
+        const OrdinalType tNumConstraints = mCurrentConstraintValues->size();
+        return tNumConstraints;
+    }
+
     ScalarType getCurrentObjectiveValue() const
     {
         return mCurrentObjectiveValue;
@@ -568,8 +574,48 @@ private:
         this->updateAsymptotes();
         this->updateSubProblemBounds();
         this->updateObjectiveApproximationFunctionData();
+        this->updateObjectiveApproximationFunction();
         this->updateConstraintApproximationFunctionsData();
-        // TODO: UPDATE APPROXIMATION FUNCTIONS
+        this->updateConstraintApproximationFunctions();
+    }
+
+    void updateObjectiveApproximationFunction()
+    {
+        mMMAData.mCurrentNormalizedCriterionValue = 1;
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getCurrentControls(), static_cast<ScalarType>(0), mMMAData.mCurrentControls);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getLowerAsymptotes(), static_cast<ScalarType>(0), mMMAData.mLowerAsymptotes);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getUpperAsymptotes(), static_cast<ScalarType>(0), mMMAData.mUpperAsymptotes);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getObjFuncAppxFunctionP(), static_cast<ScalarType>(0), mMMAData.mAppxFunctionP);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getObjFuncAppxFunctionQ(), static_cast<ScalarType>(0), mMMAData.mAppxFunctionQ);
+
+        mObjAppxFunc->update(mMMAData);
+    }
+
+    void updateConstraintApproximationFunctions()
+    {
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getCurrentControls(), static_cast<ScalarType>(0), mMMAData.mCurrentControls);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getLowerAsymptotes(), static_cast<ScalarType>(0), mMMAData.mLowerAsymptotes);
+        Plato::update(static_cast<ScalarType>(1), mDataMng->getUpperAsymptotes(), static_cast<ScalarType>(0), mMMAData.mUpperAsymptotes);
+
+        const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            const ScalarType tConstraintValue = mDataMng->getCurrentConstraintValue(tIndex);
+            const ScalarType tConstraintLimit = mDataMng->getCurrentConstraintLimit(tIndex);
+            mMMAData.mCurrentNormalizedCriterionValue = tConstraintValue / tConstraintLimit;
+            Plato::update(static_cast<ScalarType>(1), mDataMng->getConstraintAppxFunctionP(), static_cast<ScalarType>(0), mMMAData.mAppxFunctionP);
+            Plato::update(static_cast<ScalarType>(1), mDataMng->getConstraintAppxFunctionQ(), static_cast<ScalarType>(0), mMMAData.mAppxFunctionQ);
+            mConstrAppxFuncs[tIndex]->update(mMMAData);
+        }
+    }
+
+    void updateObjectiveApproximationFunctionData()
+    {
+        const ScalarType tObjFuncValue = mDataMng->getCurrentObjectiveValue();
+        const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentObjGrad = mDataMng->getCurrentObjectiveGradient();
+        Plato::MultiVector<ScalarType, OrdinalType> &tAppxFunctionP = mDataMng->getObjFuncAppxFunctionP();
+        Plato::MultiVector<ScalarType, OrdinalType> &tAppxFunctionQ = mDataMng->getObjFuncAppxFunctionQ();
+        this->computeApproxFuncCoefficients(tObjFuncValue, tCurrentObjGrad, tAppxFunctionP, tAppxFunctionQ);
     }
 
     void updateConstraintApproximationFunctionsData()
@@ -583,15 +629,6 @@ private:
             Plato::MultiVector<ScalarType, OrdinalType> &tMyAppxFunctionQ = mDataMng->getConstraintAppxFunctionQ(tIndex);
             this->computeApproxFuncCoefficients(tLimitValue, tCurrentConstraintGrad, tMyAppxFunctionP, tMyAppxFunctionQ);
         }
-    }
-
-    void updateObjectiveApproximationFunctionData()
-    {
-        const ScalarType tObjFuncValue = mDataMng->getCurrentObjectiveValue();
-        const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentObjGrad = mDataMng->getCurrentObjectiveGradient();
-        Plato::MultiVector<ScalarType, OrdinalType> &tAppxFunctionP = mDataMng->getObjFuncAppxFunctionP();
-        Plato::MultiVector<ScalarType, OrdinalType> &tAppxFunctionQ = mDataMng->getObjFuncAppxFunctionQ();
-        this->computeApproxFuncCoefficients(tObjFuncValue, tCurrentObjGrad, tAppxFunctionP, tAppxFunctionQ);
     }
 
     void solveSubProblem()
@@ -739,12 +776,12 @@ private:
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperMinusLowerBounds;
 
-    Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType> mDataMng;
-
     std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
 
+    Plato::ApproximationFunctionData<ScalarType, OrdinalType> mMMAData;
     std::shared_ptr<Plato::AugmentedLagrangian<ScalarType, OrdinalType>> mSubProblemSolver;
+    std::shared_ptr<Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>> mDataMng;
     std::shared_ptr<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>> mObjAppxFunc;
     std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs;
 };
