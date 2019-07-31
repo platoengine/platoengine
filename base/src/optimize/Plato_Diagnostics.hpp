@@ -1,10 +1,4 @@
 /*
- * Plato_Diagnostics.hpp
- *
- *  Created on: Jan 9, 2018
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_DIAGNOSTICS_HPP_
-#define PLATO_DIAGNOSTICS_HPP_
+/*
+ * Plato_Diagnostics.hpp
+ *
+ *  Created on: Jan 9, 2018
+ */
+
+#pragma once
 
 #include <cmath>
 #include <vector>
@@ -66,10 +65,17 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Class use to access the diagnostics tools needed to check the analytical
+ * criterion gradients and Hessians.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class Diagnostics
 {
 public:
+    /******************************************************************************//**
+     * @brief Default constructor
+    **********************************************************************************/
     Diagnostics() :
         mDidHessianTestPassed(false),
         mDidGradientTestPassed(false),
@@ -82,50 +88,103 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~Diagnostics()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Returns flag used to specify if the Hessian test passed
+     * @return flag (true = pass & false = did not pass)
+    **********************************************************************************/
     bool didHessianTestPassed() const
     {
         return (mDidHessianTestPassed);
     }
 
+    /******************************************************************************//**
+     * @brief Returns flag used to specify if the gradient test passed
+     * @return flag (true = pass & false = did not pass)
+    **********************************************************************************/
     bool didGradientTestPassed() const
     {
         return (mDidGradientTestPassed);
     }
 
+    /******************************************************************************//**
+     * @brief Set tolerance on finite difference test measure used to specify if the
+     * Hessian test passed.  Default value is set to 1e-5.
+     * @param [in] aInput finite difference test measure
+    **********************************************************************************/
     void setHessianTestBound(const ScalarType & aInput)
     {
         mHessianTestAccuracyBound = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set tolerance on finite difference test measure used to specify if
+     * gradient test passed.  Default value is set to 1e-5.
+     * @param [in] aInput finite difference test measure
+    **********************************************************************************/
     void setGradientTestBound(const ScalarType & aInput)
     {
         mGradientTestAccuracyBound = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set lower bound on random number generator.  Basically, the random number
+     * generator will generate number between the random number generator lower and
+     * upper bounds.
+     * @param [in] aInput lower bound on random numbers
+    **********************************************************************************/
     void setRandomNumberLowerBound(const ScalarType & aInput)
     {
         mRandomNumLowerBound = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set upper bound on random number generator.  Basically, the random number
+     * generator will generate number between the random number generator lower and
+     * upper bounds.
+     * @param [in] aInput upper bound on random numbers
+    **********************************************************************************/
     void setRandomNumberUpperBound(const ScalarType & aInput)
     {
         mRandomNumUpperBound = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set superscript on measure used to compute the final finite difference step.
+     * The measure is defined as /f$10^{\alpha}/f$, where $\alpha$ denotes the superscript.
+     * @param [in] aInput superscript used to compute the finite difference step
+    **********************************************************************************/
     void setFinalSuperscript(const int & aInput)
     {
         mFinalSuperscript = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set superscript on measure used to compute the initial finite difference step.
+     * The measure is defined as /f$10^{\alpha}/f$, where $\alpha$ denotes the superscript.
+     * @param [in] aInput superscript used to compute the finite difference step
+    **********************************************************************************/
     void setInitialSuperscript(const int & aInput)
     {
         mInitialSuperscript = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Check if criterion's analytical gradient is correctly implemented by the
+     * application.  The test is based on a four-point finite difference approximation.
+     * @param [in] aCriterion interface to application's criterion
+     * @param [in] aControl design variables - automatically initialized in the
+     *   function by default.
+     * @param [in] aOutputMsg output string stream with diagnostics
+     * @param [in] aUseInitialGuess used initial control guess provided by the users -
+     *   default = false, i.e. controls are randomly generated.
+    **********************************************************************************/
     void checkCriterionGradient(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
                                 Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                 std::ostringstream & aOutputMsg,
@@ -200,6 +259,16 @@ public:
         mDidGradientTestPassed = tMinError < mGradientTestAccuracyBound ? true : false;
     }
 
+    /******************************************************************************//**
+     * @brief Check if criterion's analytical Hessian is correctly implemented by the
+     * application.  The test is based on a four-point finite difference approximation.
+     * @param [in] aCriterion interface to application's criterion
+     * @param [in] aControl design variables - automatically initialized in the
+     *   function by default.
+     * @param [in] aOutputMsg output string stream with diagnostics
+     * @param [in] aUseInitialGuess used initial control guess provided by the users -
+     *   default = false, i.e. controls are randomly generated.
+    **********************************************************************************/
     void checkCriterionHessian(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
                                Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                                std::ostringstream & aOutputMsg,
@@ -294,6 +363,12 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Fill input 2D container with random numbers between lower and upper bounds.
+     * @param [in] aLowerBound lower bound on random numbers
+     * @param [in] aUpperBound upper bound on random numbers
+     * @param [in/out] aInput 2D container
+    **********************************************************************************/
     void random(const ScalarType & aLowerBound, const ScalarType & aUpperBound, Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         const OrdinalType tNumVectors = aInput.getNumVectors();
@@ -311,6 +386,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate criterion's analytical gradient
+     * @param [in] aControl 2D container of control, i.e. optimization, variables
+     * @param [in/out] aGradient 2D container with analytical gradient values
+     * @param [in/out] aCriterion interface to application's criterion
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aGradient,
                   Plato::Criterion<ScalarType, OrdinalType> & aCriterion)
@@ -322,22 +403,23 @@ private:
     }
 
 private:
-    bool mDidHessianTestPassed;
-    bool mDidGradientTestPassed;
+    bool mDidHessianTestPassed; /*!< flag: true = Hessian check passed & false = Hessian check did not pass */
+    bool mDidGradientTestPassed; /*!< flag: true = gradient check passed & false = gradient check did not pass */
 
-    int mFinalSuperscript;
-    int mInitialSuperscript;
+    int mFinalSuperscript; /*!< superscript on measure used to compute the final finite difference step */
+    int mInitialSuperscript; /*!< superscript on measure used to compute the initial finite difference step */
 
-    ScalarType mRandomNumLowerBound;
-    ScalarType mRandomNumUpperBound;
-    ScalarType mHessianTestAccuracyBound;
-    ScalarType mGradientTestAccuracyBound;
+    ScalarType mRandomNumLowerBound; /*!< lower bound on random number generator */
+    ScalarType mRandomNumUpperBound; /*!< upper bound on random number generator */
+    ScalarType mHessianTestAccuracyBound; /*!< tolerance on finite difference Hessian test measure - used to specify if test passed */
+    ScalarType mGradientTestAccuracyBound; /*!< tolerance on finite difference gradient test measure - used to specify if test passed */
 
 private:
     Diagnostics(const Plato::Diagnostics<ScalarType, OrdinalType> & aRhs);
     Plato::Diagnostics<ScalarType, OrdinalType> & operator=(const Plato::Diagnostics<ScalarType, OrdinalType> & aRhs);
 };
+// class Diagnostics
 
-} // namespace Plato
+}
+// namespace Plato
 
-#endif /* PLATO_DIAGNOSTICS_HPP_ */

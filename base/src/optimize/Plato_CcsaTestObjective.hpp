@@ -1,10 +1,4 @@
 /*
- * Plato_CcsaTestObjective.hpp
- *
- *  Created on: Nov 4, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,6 +39,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_CcsaTestObjective.hpp
+ *
+ *  Created on: Nov 4, 2017
+ */
 
 #ifndef PLATO_CCSATESTOBJECTIVE_HPP_
 #define PLATO_CCSATESTOBJECTIVE_HPP_
