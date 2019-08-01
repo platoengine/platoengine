@@ -156,7 +156,7 @@ public:
     **********************************************************************************/
     void allocateObjFuncValues(const OrdinalType & aNumElements)
     {
-        if(mNumCriterionValues <= static_cast<ScalarType>(0))
+        if(aNumElements <= static_cast<ScalarType>(0))
         {
             THROWERR("INPUT ARGUMENT SHOULD BE A POSITIVE NUMBER GREATER THAN ZERO. THE INPUT VALUE IS SET TO " + std::to_string(aNumElements) + "\n")
         }

@@ -73,7 +73,7 @@ public:
         mNumConsecutiveSuccesses(0),
         mMaxNumConsecutiveFailures(10),
         mMaxNumConsecutiveSuccesses(10),
-        mRandomNumMultiplier(0.2),
+        mRandomNumMultiplier(0.1),
         mInertiaMultiplier(0.9),
         mSocialBehaviorMultiplier(0.8),
         mCognitiveBehaviorMultiplier(0.8),
