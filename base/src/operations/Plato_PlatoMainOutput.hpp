@@ -91,9 +91,18 @@ private:
      **********************************************************************************/
     void extractIsoSurface(int aIteration);
 
+    /******************************************************************************//**
+     * @brief build a string based on the current iteration
+     * @param [in] aCurIteration current optimization iteration
+     * @param [out] aString output iteration string
+     **********************************************************************************/
+    void buildIterationNumberString(const int &aCurIteration,
+                                    std::string &aString);
+
 private:
     std::vector<Plato::LocalArg> mOutputData; /*!< set of output data */
     int mOutputFrequency; /*!< output frequency */
+    int mMaxIterations; /*!< max iterations */
     int mOutputMethod; /*!< epu output data - distributed or serial */
     std::string mDiscretization; /*!< topology representation, density or levelset */
     bool mWriteRestart; /*!< flag - write restart file */

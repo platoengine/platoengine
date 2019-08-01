@@ -250,21 +250,22 @@ TEST(PlatoTest, output_restart_data_vector)
 {
     int tMySize = 0;
     MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
-    if (tMySize <= 1)
+    if(tMySize <= 1)
     {
         // ****** OPEN OUTPUT FILE ******
         std::ofstream tRestartFile;
         tRestartFile.open("MyFile.txt");
 
         // ****** SET DATA ******
-        std::vector<double> tData = { 0.1, 0.34, 0.5, 0.4, 0.05 };
+        std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
         Plato::StandardVector<double> tCurrentFval(tData);
         std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
         Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
 
         Plato::StandardVector<double> tCurrentBestFval(tData);
         tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
-        tData = { 0.1, 0.21, 0.15, 0.14, 0.01 };
+        tData =
+        {   0.1, 0.21, 0.15, 0.14, 0.01};
 
         // ****** OUTPUT RESTART DATA ******
         Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
@@ -275,7 +276,7 @@ TEST(PlatoTest, output_restart_data_vector)
         tInputFile.open("MyFile.txt");
         std::string tInputString;
         std::stringstream tReadData;
-        while (tInputFile >> tInputString)
+        while(tInputFile >> tInputString)
         {
             tReadData << tInputString.c_str();
         }
@@ -1881,7 +1882,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
 
         std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
         std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue
-            << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+                  << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
 
         std::cout << tOutputs.mStopCriterion << "\n";
 
@@ -1898,7 +1899,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
 
         std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
         std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue
-            << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
+                  << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
 
         std::cout << tOutputs.mStopCriterion << "\n";
 

@@ -76,12 +76,15 @@ PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
 
     // configure iso surface output
     //
+    mMaxIterations = 100;
     mOutputFrequency = 5;
     mOutputMethod = 2;
     mWriteRestart = Plato::Get::Bool(aNode, "WriteRestart");
     Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
     if(aNode.size<std::string>("OutputFrequency"))
         mOutputFrequency = Plato::Get::Int(aNode, "OutputFrequency");
+    if(aNode.size<std::string>("MaxIterations"))
+        mMaxIterations = Plato::Get::Int(aNode, "MaxIterations");
     if(tSurfaceExtractionNode.size<std::string>("OutputMethod"))
     {
         std::string tMethod = Plato::Get::String(tSurfaceExtractionNode, "OutputMethod");
@@ -128,28 +131,32 @@ void PlatoMainOutput::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
     aLocalArgs = mOutputData;
 }
 
+void PlatoMainOutput::buildIterationNumberString(const int &aCurIteration,
+                                                 std::string &aString)
+{
+    aString = "";
+    std::string tMaxNumIterationsString = std::to_string(mMaxIterations);
+    int tNumDigitsInMaxString = tMaxNumIterationsString.length();
+    std::string tCurIterationString = std::to_string(aCurIteration);
+    int tNumDigitsInCurString = tCurIterationString.length();
+    int tNumZeros = tNumDigitsInMaxString - tNumDigitsInCurString;
+    for(int i=0; i<tNumZeros; ++i)
+        aString += "0";
+    aString += tCurIterationString;
+}
+
 void PlatoMainOutput::extractIsoSurface(int aIteration)
 {
 #ifdef ENABLE_ISO
     std::string output_filename = "";
-    char tmp_str[200];
-    if(aIteration < 10)
-    {
-        sprintf(tmp_str, "00%d", aIteration);
-    }
-    else if(aIteration < 100)
-    {
-        sprintf(tmp_str, "0%d", aIteration);
-    }
-    else if(aIteration < 1000)
-    {
-        sprintf(tmp_str, "%d", aIteration);
-    }
+
+    std::string tIterationNumberString = "";
+    buildIterationNumberString(aIteration, tIterationNumberString);
 
     output_filename = mBaseName;
     if( mAppendIterationCount )
     {
-        output_filename += tmp_str;
+        output_filename += tIterationNumberString;
     }
     output_filename += ".exo";
     iso::STKExtract ex;
@@ -193,7 +200,7 @@ void PlatoMainOutput::extractIsoSurface(int aIteration)
         FILE *fp = fopen("last_time_step.txt", "w");
         if(fp)
         {
-            fprintf(fp, "%s\n", tmp_str);
+            fprintf(fp, "%s\n", tIterationNumberString.c_str());
             fclose(fp);
             system("ls Iteration*.exo >> last_time_step.txt");
         }
@@ -256,20 +263,9 @@ void PlatoMainOutput::operator()()
                     fscanf(tFile, "%s", tLastHistFileName);
                     fclose(tFile);
                     std::string tNewFilename = "Iteration";
-                    char tTMP_STRING[200];
-                    if(tIntegerTime < 10)
-                    {
-                        sprintf(tTMP_STRING, "00%d", tIntegerTime);
-                    }
-                    else if(tIntegerTime < 100)
-                    {
-                        sprintf(tTMP_STRING, "0%d", tIntegerTime);
-                    }
-                    else if(tIntegerTime < 1000)
-                    {
-                        sprintf(tTMP_STRING, "%d", tIntegerTime);
-                    }
-                    tNewFilename += tTMP_STRING;
+                    std::string tIterationString = "";
+                    buildIterationNumberString(tIntegerTime, tIterationString);
+                    tNewFilename += tIterationString;
                     tNewFilename += ".exo";
                     std::string tCopyCommand = "cp ";
                     tCopyCommand += tLastHistFileName;
@@ -280,7 +276,7 @@ void PlatoMainOutput::operator()()
                     tFile = fopen("last_time_step.txt", "w");
                     if(tFile)
                     {
-                        fprintf(tFile, "%s\n", tTMP_STRING);
+                        fprintf(tFile, "%s\n", tIterationString.c_str());
                         fclose(tFile);
                         system("ls Iteration*.exo >> last_time_step.txt");
                     }
