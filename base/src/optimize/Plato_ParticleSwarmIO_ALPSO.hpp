@@ -196,7 +196,7 @@ struct InputDataALPSO
             mGlobalBestAugLagFuncTolerance(1e-10),
             mTrustRegionMultiplierTolerance(1e-8),
             mInertiaMultiplier(0.9),
-            mRandomNumMultiplier(0.2),
+            mRandomNumMultiplier(0.1),
             mSocialBehaviorMultiplier(0.8),
             mCognitiveBehaviorMultiplier(0.8),
             mPenaltyExpansionMultiplier(2),

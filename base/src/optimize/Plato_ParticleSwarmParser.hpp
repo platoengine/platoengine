@@ -628,7 +628,7 @@ private:
     **********************************************************************************/
     ScalarType randomNumberMultiplier(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 0.2;
+        ScalarType tOutput = 0.1;
         if(aOptionsNode.size<std::string>("RandomNumMultiplier"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "RandomNumMultiplier");
