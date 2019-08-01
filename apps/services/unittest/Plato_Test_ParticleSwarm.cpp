@@ -1326,7 +1326,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
-    EXPECT_NEAR(0.2, tInputsPSO.mRandomNumMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -1353,7 +1353,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
-    EXPECT_NEAR(0.2, tInputsPSO.mRandomNumMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -1440,7 +1440,7 @@ TEST(PlatoTest, PSO_ParserBCPSO)
 
     EXPECT_NEAR(0.75, tInputsTwoPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.55, tInputsTwoPSO.mInertiaMultiplier, tTolerance);
-    EXPECT_NEAR(0.2, tInputsTwoPSO.mRandomNumMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsTwoPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsTwoPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.001, tInputsTwoPSO.mMeanBestObjFuncTolerance, tTolerance);
     EXPECT_NEAR(0.6, tInputsTwoPSO.mCognitiveBehaviorMultiplier, tTolerance);
@@ -1476,7 +1476,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
     const double tTolerance = 1e-6;
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
-    EXPECT_NEAR(0.2, tInputsPSO.mRandomNumMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
@@ -1507,7 +1507,7 @@ TEST(PlatoTest, PSO_ParserALPSO)
 
     EXPECT_NEAR(1.0, tInputsPSO.mTimeStep, tTolerance);
     EXPECT_NEAR(0.9, tInputsPSO.mInertiaMultiplier, tTolerance);
-    EXPECT_NEAR(0.2, tInputsPSO.mRandomNumMultiplier, tTolerance);
+    EXPECT_NEAR(0.1, tInputsPSO.mRandomNumMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mSocialBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(0.8, tInputsPSO.mCognitiveBehaviorMultiplier, tTolerance);
     EXPECT_NEAR(5e-4, tInputsPSO.mMeanBestAugLagFuncTolerance, tTolerance);
