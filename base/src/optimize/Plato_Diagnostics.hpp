@@ -58,6 +58,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Criterion.hpp"
 #include "Plato_MultiVector.hpp"
 #include "Plato_LinearAlgebra.hpp"
@@ -190,13 +191,15 @@ public:
                                 std::ostringstream & aOutputMsg,
                                 bool aUseInitialGuess = false)
     {
+        this->checkDimensions(aControl, "CONTROLS");
+
         mDidGradientTestPassed = false;
         aOutputMsg << std::right << std::setw(18) << "\nStep Size" << std::setw(20) << "Grad'*Step" << std::setw(18) << "FD Approx"
                    << std::setw(20) << "abs(Error)" << "\n";
 
-        assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tStep = aControl.create();
-        assert(tStep.get() != nullptr);
+        this->checkDimensions(*tStep, "STEP");
+
         // NOTE: Think how to syncronize random number generator if working with owned and shared data
         unsigned int tRANDOM_SEED = 1;
         std::srand(tRANDOM_SEED);
@@ -209,13 +212,15 @@ public:
         aCriterion.value(aControl);
         aCriterion.cacheData();
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tGradient = aControl.create();
-        assert(tGradient.get() != nullptr);
+        this->checkDimensions(*tGradient, "GRADIENT");
         aCriterion.gradient(aControl, *tGradient);
+        this->checkValues(*tGradient, "CRITERION GRADIENT");
 
         std::vector<ScalarType> tApproximationErrors;
         const ScalarType tGradientDotStep = Plato::dot(*tGradient, *tStep);
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWork = aControl.create();
-        assert(tWork.get() != nullptr);
+        this->checkDimensions(*tWork, "CONTROL WORK");
+
         for(int tIndex = mInitialSuperscript; tIndex <= mFinalSuperscript; tIndex++)
         {
             // Compute \hat{x} = x + \epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
@@ -224,24 +229,28 @@ public:
             Plato::update(static_cast<ScalarType>(1), aControl, static_cast<ScalarType>(0), *tWork);
             Plato::update(tEpsilon, *tStep, static_cast<ScalarType>(1), *tWork);
             ScalarType tObjectiveValueAtPlusEpsilon = aCriterion.value(*tWork);
+            this->checkValues(tObjectiveValueAtPlusEpsilon, "CRITERION VALUE");
 
             // Compute \hat{x} = x - \epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
             Plato::update(static_cast<ScalarType>(1), aControl, static_cast<ScalarType>(0), *tWork);
             ScalarType tMultiplier = static_cast<ScalarType>(-1) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             ScalarType tObjectiveValueAtMinusEpsilon = aCriterion.value(*tWork);
+            this->checkValues(tObjectiveValueAtMinusEpsilon, "CRITERION VALUE");
 
             // Compute \hat{x} = x + 2\epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
             Plato::update(static_cast<ScalarType>(1), aControl, static_cast<ScalarType>(0), *tWork);
             tMultiplier = static_cast<ScalarType>(2) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             ScalarType tObjectiveValueAtPlusTwoEpsilon = aCriterion.value(*tWork);
+            this->checkValues(tObjectiveValueAtPlusTwoEpsilon, "CRITERION VALUE");
 
             // Compute \hat{x} = x - 2\epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
             Plato::update(static_cast<ScalarType>(1), aControl, static_cast<ScalarType>(0), *tWork);
             tMultiplier = static_cast<ScalarType>(-2) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             ScalarType tObjectiveValueAtMinusTwoEpsilon = aCriterion.value(*tWork);
+            this->checkValues(tObjectiveValueAtMinusTwoEpsilon, "CRITERION VALUE");
 
             // Compute objective value approximation via a five point stencil finite difference procedure
             ScalarType tObjectiveAppx = (-tObjectiveValueAtPlusTwoEpsilon
@@ -274,13 +283,14 @@ public:
                                std::ostringstream & aOutputMsg,
                                bool aUseInitialGuess = false)
     {
+        this->checkDimensions(aControl, "CONTROL");
+
         mDidHessianTestPassed = false;
         aOutputMsg << std::right << std::setw(18) << "\nStep Size" << std::setw(20) << "Hess*Step " << std::setw(18) << "FD Approx"
                    << std::setw(20) << "abs(Error)" << "\n";
 
-        assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tStep = aControl.create();
-        assert(tStep.get() != nullptr);
+        this->checkDimensions(*tStep, "STEP");
         // NOTE: Think how to syncronize random number generator if working with owned and shared data
         unsigned int tRANDOM_SEED = 1;
         std::srand(tRANDOM_SEED);
@@ -289,19 +299,20 @@ public:
 
         // Compute true Hessian times Step and corresponding norm value
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tHessianTimesStep = aControl.create();
-        assert(tHessianTimesStep.get() != nullptr);
+        this->checkDimensions(*tHessianTimesStep, "HESSIAN TIMES STEP");
         aCriterion.hessian(aControl, *tStep, *tHessianTimesStep);
+        this->checkValues(*tHessianTimesStep, "CRITERION HESSIAN TIMES STEP");
         const ScalarType tNormHesianTimesStep = Plato::norm(*tHessianTimesStep);
 
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tGradient = aControl.create();
-        assert(tGradient.get() != nullptr);
+        this->checkDimensions(*tGradient, "GRADIENT");
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tAppxHessianTimesStep = aControl.create();
-        assert(tAppxHessianTimesStep.get() != nullptr);
+        this->checkDimensions(*tAppxHessianTimesStep, "APPROXIMATION HESSIAN TIMES STEP");
 
         // Compute 5-point stencil finite difference approximation
         std::vector<ScalarType> tApproximationErrors;
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWork = aControl.create();
-        assert(tWork.get() != nullptr);
+        this->checkDimensions(*tWork, "CONTROL WORK");
         for(int tIndex = mInitialSuperscript; tIndex <= mFinalSuperscript; tIndex++)
         {
             // Compute \hat{x} = x + \epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
@@ -310,6 +321,7 @@ public:
             Plato::update(static_cast<ScalarType>(1), aControl, static_cast<ScalarType>(0), *tWork);
             Plato::update(tEpsilon, *tStep, static_cast<ScalarType>(1), *tWork);
             this->gradient(*tWork, *tGradient, aCriterion);
+            this->checkValues(*tGradient, "CRITERION GRADIENT");
             Plato::update(static_cast<ScalarType>(8), *tGradient, static_cast<ScalarType>(0), *tAppxHessianTimesStep);
 
             // Compute \hat{x} = x - \epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
@@ -317,6 +329,7 @@ public:
             ScalarType tMultiplier = static_cast<ScalarType>(-1) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             this->gradient(*tWork, *tGradient, aCriterion);
+            this->checkValues(*tGradient, "CRITERION GRADIENT");
             Plato::update(static_cast<ScalarType>(-8), *tGradient, static_cast<ScalarType>(1), *tAppxHessianTimesStep);
 
             // Compute \hat{x} = x + 2\epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
@@ -324,6 +337,7 @@ public:
             tMultiplier = static_cast<ScalarType>(2) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             this->gradient(*tWork, *tGradient, aCriterion);
+            this->checkValues(*tGradient, "CRITERION GRADIENT");
             Plato::update(static_cast<ScalarType>(-1), *tGradient, static_cast<ScalarType>(1), *tAppxHessianTimesStep);
 
             // Compute \hat{x} = x - 2\epsilon\Delta{x}, where x denotes the control vector and \Delta{x} denotes the step.
@@ -331,6 +345,7 @@ public:
             tMultiplier = static_cast<ScalarType>(-2) * tEpsilon;
             Plato::update(tMultiplier, *tStep, static_cast<ScalarType>(1), *tWork);
             this->gradient(*tWork, *tGradient, aCriterion);
+            this->checkValues(*tGradient, "CRITERION GRADIENT");
             Plato::update(static_cast<ScalarType>(1), *tGradient, static_cast<ScalarType>(1), *tAppxHessianTimesStep);
 
             // Comptute \frac{F(x)}{12}, where F(x) denotes the finite difference approximation of \nabla_{x}^{2}f(x)\Delta{x}
@@ -352,14 +367,6 @@ public:
 
         ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
         mDidHessianTestPassed = tMinError < mHessianTestAccuracyBound ? true : false;
-        if(mDidHessianTestPassed)
-        {
-            aOutputMsg << "Derivative checker believes it passed.\n";
-        }
-        else
-        {
-            aOutputMsg << "Derivative checker believes it failed.\n";
-        }
     }
 
 private:
@@ -400,6 +407,46 @@ private:
         aCriterion.value(aControl);
         aCriterion.cacheData();
         aCriterion.gradient(aControl, aGradient);
+    }
+
+    /******************************************************************************//**
+     * @brief Check dimensions of 2D container
+     * @param [in] aInput 2D container
+     * @param [in] aName container's name
+    **********************************************************************************/
+    void checkDimensions(const Plato::MultiVector<ScalarType, OrdinalType> & aInput, const std::string & aName)
+    {
+        if(aInput.getNumVectors() <= static_cast<OrdinalType>(0))
+        {
+            THROWERR("INPUT CONTAINER WITH NAME = " + aName + "IS EMPTY\n")
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Check if values of 2D container are finite
+     * @param [in] aInput 2D container
+     * @param [in] aName container's name
+    **********************************************************************************/
+    void checkValues(const Plato::MultiVector<ScalarType, OrdinalType> & aInput, const std::string & aName)
+    {
+        ScalarType tValue = Plato::dot(aInput, aInput);
+        if(std::isfinite(tValue) == false)
+        {
+            THROWERR("INPUT CONTAINER WITH NAME = " + aName + " HAS NONE FINITE NUMBERS\n")
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Check if the number is finite
+     * @param [in] aInput scalar number
+     * @param [in] aName scalar name
+    **********************************************************************************/
+    void checkValues(const ScalarType & aInput, const std::string & aName)
+    {
+        if(std::isfinite(aInput) == false)
+        {
+            THROWERR("INPUT SCALAR WITH NAME = " + aName + " HAS NONE FINITE NUMBERS\n")
+        }
     }
 
 private:

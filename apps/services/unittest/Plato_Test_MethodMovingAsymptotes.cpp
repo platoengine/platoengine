@@ -55,6 +55,8 @@ public:
         mCurrentNormalizedConstraintValue(aDataFactory->dual(0 /* vector index */).create()),
         mCurrentObjectiveGradient(aDataFactory->control().create()),
         mPreviousObjectiveGradient(aDataFactory->control().create()),
+        mCurrentConstraintGradients(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
+        mPreviousConstraintGradients(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
         mCurrentControls(aDataFactory->control().create()),
         mPreviousControls(aDataFactory->control().create()),
         mAntepenultimateControls(aDataFactory->control().create()),
@@ -66,6 +68,8 @@ public:
         mSubProblemControlUpperBounds(aDataFactory->control().create()),
         mObjFuncAppxFunctionP(aDataFactory->control().create()),
         mObjFuncAppxFunctionQ(aDataFactory->control().create()),
+        mConstrAppxFunctionP(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
+        mConstrAppxFunctionQ(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
         mControlReductionOps(aDataFactory->getControlReductionOperations().create())
     {
         this->initialize(*aDataFactory);
@@ -91,7 +95,7 @@ public:
         return mCurrentObjectiveValue;
     }
 
-    void setCurrentObjectiveValue(const ScalarType &aValue) const
+    void setCurrentObjectiveValue(const ScalarType &aValue)
     {
         mCurrentObjectiveValue = aValue;
     }
@@ -101,7 +105,7 @@ public:
         return mPreviousObjectiveValue;
     }
 
-    void setPreviousObjectiveValue(const ScalarType &aValue) const
+    void setPreviousObjectiveValue(const ScalarType &aValue)
     {
         mPreviousObjectiveValue = aValue;
     }
@@ -111,7 +115,7 @@ public:
         return ((*mConstraintLimits)[aIndex]);
     }
 
-    void setConstraintLimit(const OrdinalType &aIndex, const ScalarType &aValue) const
+    void setConstraintLimit(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mConstraintLimits)[aIndex] = aValue;
     }
@@ -121,7 +125,7 @@ public:
         return ((*mCurrentConstraintValues)[aIndex]);
     }
 
-    void setCurrentConstraintValue(const OrdinalType &aIndex, const ScalarType &aValue) const
+    void setCurrentConstraintValue(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mCurrentConstraintValues)[aIndex] = aValue;
     }
@@ -131,7 +135,7 @@ public:
         return ((*mPreviousConstraintValues)[aIndex]);
     }
 
-    void setPreviousConstraintValues(const OrdinalType &aIndex, const ScalarType &aValue) const
+    void setPreviousConstraintValues(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mPreviousConstraintValues)[aIndex] = aValue;
     }
@@ -146,6 +150,11 @@ public:
         return (*mLowerAsymptotes);
     }
 
+    void setLowerAsymptotes(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mLowerAsymptotes);
+    }
+
     Plato::MultiVector<ScalarType, OrdinalType>& getUpperAsymptotes()
     {
         return (*mUpperAsymptotes);
@@ -154,6 +163,11 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType>& getUpperAsymptotes() const
     {
         return (*mUpperAsymptotes);
+    }
+
+    void setUpperAsymptotes(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mUpperAsymptotes);
     }
 
     Plato::MultiVector<ScalarType, OrdinalType>& getObjFuncAppxFunctionP()
@@ -206,6 +220,11 @@ public:
         return (*mCurrentControls);
     }
 
+    void setCurrentControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentControls);
+    }
+
     Plato::MultiVector<ScalarType, OrdinalType>& getPreviousControls()
     {
         return (*mPreviousControls);
@@ -214,6 +233,11 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType>& getPreviousControls() const
     {
         return (*mPreviousControls);
+    }
+
+    void setPreviousControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mPreviousControls);
     }
 
     Plato::MultiVector<ScalarType, OrdinalType>& getAntepenultimateControls()
@@ -226,6 +250,11 @@ public:
         return (*mAntepenultimateControls);
     }
 
+    void setAntepenultimateControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mAntepenultimateControls);
+    }
+
     Plato::MultiVector<ScalarType, OrdinalType>& getControlLowerBounds()
     {
         return (*mControlLowerBounds);
@@ -236,6 +265,11 @@ public:
         return (*mControlLowerBounds);
     }
 
+    void setControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mControlLowerBounds);
+    }
+
     Plato::MultiVector<ScalarType, OrdinalType>& getControlUpperBounds()
     {
         return (*mControlUpperBounds);
@@ -244,6 +278,11 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType>& getControlUpperBounds() const
     {
         return (*mControlUpperBounds);
+    }
+
+    void setControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mControlUpperBounds);
     }
 
     Plato::MultiVector<ScalarType, OrdinalType>& getSubProblemControlLowerBounds()
@@ -274,6 +313,11 @@ public:
     const Plato::MultiVector<ScalarType, OrdinalType>& getCurrentObjectiveGradient() const
     {
         return (*mCurrentObjectiveGradient);
+    }
+
+    void setCurrentObjectiveGradient(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
+    {
+        Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentObjectiveGradient);
     }
 
     Plato::MultiVector<ScalarType, OrdinalType>& getPreviousObjectiveGradient()
@@ -395,7 +439,7 @@ private:
 };
 
 /******************************************************************************//**
- * Criterion interface for the approximation function used to solve the Method of
+ * Criterion interface to the approximation function used to solve the Method of
  * Moving Asymptotes (MMA) subproblem.
  *
  * The approximation function for the MMA subproblem is defined as
@@ -439,6 +483,10 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesCriterion : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * Constructor
+     * @param [in] aDataFactory constant reference to the core data factory shared pointer.
+    ***********************************************************************************/
     explicit MethodMovingAsymptotesCriterion(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mCurrentNormalizedCriterionValue(0),
         mControlWork1(aDataFactory->control(0 /* vector index */).create()),
@@ -452,13 +500,16 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * Destructor
+    ***********************************************************************************/
     ~MethodMovingAsymptotesCriterion()
     {
     }
 
     /******************************************************************************//**
      * Safely cache application specific data after a new trial control is accepted.
-     ***********************************************************************************/
+    ***********************************************************************************/
     void cacheData()
     {
         return;
@@ -611,12 +662,23 @@ public:
         mSubProblemBoundsScaling(0.1),
         mApproxFuncScalingOne(1.001),
         mApproxFuncScalingTwo(0.001),
-        mUpperMinusLowerBounds(aDataFactory->control().create())
+        mUpperMinusLowerBounds(aDataFactory->control().create()),
+        mCurrentAsymptotesMultipliers(aDataFactory->control().create())
     {
     }
 
     ~MethodMovingAsymptotesOperations()
     {
+    }
+
+    void getUpperMinusLowerBounds(Plato::MultiVector<ScalarType, OrdinalType> &aData)
+    {
+        Plato::update(static_cast<ScalarType>(1), *mUpperMinusLowerBounds, static_cast<ScalarType>(0), aData);
+    }
+
+    void getCurrentAsymptotesMultipliers(Plato::MultiVector<ScalarType, OrdinalType> &aData)
+    {
+        Plato::update(static_cast<ScalarType>(1), *mCurrentAsymptotesMultipliers, static_cast<ScalarType>(0), aData);
     }
 
     void initialize(const Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
@@ -639,6 +701,27 @@ public:
         Plato::update(mInitialAymptoteScaling, *mUpperMinusLowerBounds, static_cast<ScalarType>(1), tUpperAsymptotes);
     }
 
+    void updateCurrentAsymptotesMultipliers(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
+        const Plato::MultiVector<ScalarType, OrdinalType> &tPreviousControls = aDataMng.getPreviousControls();
+        const Plato::MultiVector<ScalarType, OrdinalType> &tAntepenultimateControls = aDataMng.getAntepenultimateControls();
+
+        const OrdinalType tNumVectors = tCurrentControls.getNumVectors();
+        for (OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
+        {
+            const OrdinalType tNumControls = tCurrentControls[tVectorIndex].size();
+            for (OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
+            {
+                const ScalarType tMeasure = (tCurrentControls(tVectorIndex, tControlIndex) - tPreviousControls(tVectorIndex, tControlIndex))
+                    * (tPreviousControls(tVectorIndex, tControlIndex) - tAntepenultimateControls(tVectorIndex, tControlIndex));
+                ScalarType tGammaValue = tMeasure > static_cast<ScalarType>(0) ? mAsymptoteExpansion : mAsymptoteContraction;
+                (*mCurrentAsymptotesMultipliers)(tVectorIndex, tControlIndex) =
+                        std::abs(tGammaValue) <= std::numeric_limits<ScalarType>::min() ? static_cast<ScalarType>(1) : tGammaValue;
+            }
+        }
+    }
+
     void updateCurrentAsymptotes(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
@@ -653,15 +736,12 @@ public:
             const OrdinalType tNumControls = tCurrentControls[tVectorIndex].size();
             for (OrdinalType tControlIndex = 0; tControlIndex < tNumControls; tControlIndex++)
             {
-                const ScalarType tMeasure = (tCurrentControls(tVectorIndex, tControlIndex) * tPreviousControls(tVectorIndex, tControlIndex))
-                    * (tPreviousControls(tVectorIndex, tControlIndex) * tAntepenultimateControls(tVectorIndex, tControlIndex));
-                ScalarType tGammaValue = tMeasure > static_cast<ScalarType>(0) ? mAsymptoteExpansion : mAsymptoteContraction;
-                tGammaValue = std::abs(tGammaValue) <= std::numeric_limits<ScalarType>::min() ? static_cast<ScalarType>(1) : tGammaValue;
-
                 tLowerAsymptotes(tVectorIndex, tControlIndex) = tCurrentControls(tVectorIndex, tControlIndex)
-                    - (tGammaValue * (tPreviousControls(tVectorIndex, tControlIndex) - tLowerAsymptotes(tVectorIndex, tControlIndex)));
+                    - ((*mCurrentAsymptotesMultipliers)(tVectorIndex, tControlIndex)
+                            * (tPreviousControls(tVectorIndex, tControlIndex) - tLowerAsymptotes(tVectorIndex, tControlIndex)));
                 tUpperAsymptotes(tVectorIndex, tControlIndex) = tCurrentControls(tVectorIndex, tControlIndex)
-                    + (tGammaValue * (tUpperAsymptotes(tVectorIndex, tControlIndex) - tPreviousControls(tVectorIndex, tControlIndex)));
+                    + ((*mCurrentAsymptotesMultipliers)(tVectorIndex, tControlIndex)
+                            * (tUpperAsymptotes(tVectorIndex, tControlIndex) - tPreviousControls(tVectorIndex, tControlIndex)));
             }
         }
     }
@@ -750,7 +830,7 @@ private:
                                        Plato::MultiVector<ScalarType, OrdinalType> &aAppxFunctionP,
                                        Plato::MultiVector<ScalarType, OrdinalType> &aAppxFunctionQ)
     {
-        const OrdinalType tAbsNormalization = std::abs(aNormalization);
+        const ScalarType tAbsNormalization = std::abs(aNormalization);
         const OrdinalType tNumVectors = aCriterionGrad.getNumVectors();
         for (OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
         {
@@ -763,14 +843,14 @@ private:
 
                 aAppxFunctionP(tVectorIndex, tControlIndex) = (mApproxFuncScalingOne * tGradValuePlus) + (mApproxFuncScalingTwo * tGradValueMinus)
                     + (mApproxFuncEpsilon / (*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex));
-                const ScalarType tUpperAsymmMinusCurrentControlSquared = aUpperAsymptotes(tVectorIndex, tControlIndex)
+                ScalarType tUpperAsymmMinusCurrentControlSquared = aUpperAsymptotes(tVectorIndex, tControlIndex)
                     - aCurrentControls(tVectorIndex, tControlIndex);
                 tUpperAsymmMinusCurrentControlSquared *= tUpperAsymmMinusCurrentControlSquared;
                 aAppxFunctionP(tVectorIndex, tControlIndex) *= tUpperAsymmMinusCurrentControlSquared;
 
                 aAppxFunctionQ(tVectorIndex, tControlIndex) = (mApproxFuncScalingTwo * tGradValuePlus) + (mApproxFuncScalingOne * tGradValueMinus)
                     + (mApproxFuncEpsilon / (*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex));
-                const ScalarType tCurrentControlMinusLowerAsymmSquared = aCurrentControls(tVectorIndex, tControlIndex)
+                ScalarType tCurrentControlMinusLowerAsymmSquared = aCurrentControls(tVectorIndex, tControlIndex)
                     - aLowerAsymptotes(tVectorIndex, tControlIndex);
                 tCurrentControlMinusLowerAsymmSquared *= tCurrentControlMinusLowerAsymmSquared;
                 aAppxFunctionQ(tVectorIndex, tControlIndex) *= tCurrentControlMinusLowerAsymmSquared;
@@ -789,6 +869,7 @@ private:
     ScalarType mSubProblemBoundsScaling;
 
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperMinusLowerBounds;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentAsymptotesMultipliers;
 };
 
 template<typename ScalarType, typename OrdinalType = size_t>
@@ -885,6 +966,7 @@ private:
     {
         if(mIterationCount >= static_cast<OrdinalType>(2))
         {
+            mOperations->updateCurrentAsymptotesMultipliers(*mDataMng);
             mOperations->updateCurrentAsymptotes(*mDataMng);
         }
         else
@@ -1017,6 +1099,229 @@ TEST(PlatoTest, MethodMovingAsymptotesCriterion)
     {
         std::cout << tHessDiagnosticMsg.str().c_str();
     }
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_initialize)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(0.25, tData);
+    tDataMng.setControlLowerBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlLowerBounds(), tData);
+    Plato::fill(1., tData);
+    tDataMng.setControlUpperBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlUpperBounds(), tData);
+
+    // CALL FUNCTION
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+
+    // TEST OUTPUT
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 0.75);
+    tOperations.getUpperMinusLowerBounds(tData);
+    PlatoTest::checkMultiVectorData(tData, tGold);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateInitialAsymptotes)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(1.0, tData);
+    tDataMng.setCurrentControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentControls(), tData);
+    Plato::fill(0.25, tData);
+    tDataMng.setControlLowerBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlLowerBounds(), tData);
+    Plato::fill(1., tData);
+    tDataMng.setControlUpperBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlUpperBounds(), tData);
+
+    // CALL FUNCTION
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+    tOperations.updateInitialAsymptotes(tDataMng);
+
+    // TEST OUTPUT
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 0.625);
+    PlatoTest::checkMultiVectorData(tDataMng.getLowerAsymptotes(), tGold);
+    Plato::fill(1.375, tGold);
+    PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tGold);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateCurrentAsymptotesMultipliers)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(1.0, tData);
+    tDataMng.setCurrentControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentControls(), tData);
+    Plato::fill(0.75, tData);
+    tDataMng.setPreviousControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getPreviousControls(), tData);
+    Plato::fill(0.65, tData);
+    tDataMng.setAntepenultimateControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getAntepenultimateControls(), tData);
+
+    // CASE 1: EXPANSION PARAMETER IS CHOSEN
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+    tOperations.updateCurrentAsymptotesMultipliers(tDataMng);
+
+    // TEST OUTPUT
+    tOperations.getCurrentAsymptotesMultipliers(tData);
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 1.2);
+    PlatoTest::checkMultiVectorData(tData, tGold);
+
+    // CASE 2: CONTRACTION PARAMETER IS CHOSEN
+    Plato::fill(0.55, tData);
+    tDataMng.setPreviousControls(tData);
+    tOperations.updateCurrentAsymptotesMultipliers(tDataMng);
+
+    // TEST OUTPUT
+    tOperations.getCurrentAsymptotesMultipliers(tData);
+    Plato::fill(0.7, tGold);
+    PlatoTest::checkMultiVectorData(tData, tGold);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateCurrentAsymptotes)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(0.625, tData);
+    tDataMng.setLowerAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getLowerAsymptotes(), tData);
+    Plato::fill(1.375, tData);
+    tDataMng.setUpperAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tData);
+    Plato::fill(1.0, tData);
+    tDataMng.setCurrentControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentControls(), tData);
+    Plato::fill(0.75, tData);
+    tDataMng.setPreviousControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getPreviousControls(), tData);
+    Plato::fill(0.65, tData);
+    tDataMng.setAntepenultimateControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getAntepenultimateControls(), tData);
+
+    // CASE 1: EXPANSION PARAMETER IS CHOSEN
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+    tOperations.updateCurrentAsymptotesMultipliers(tDataMng);
+    tOperations.updateCurrentAsymptotes(tDataMng);
+
+    // TEST OUTPUT
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 0.85);
+    PlatoTest::checkMultiVectorData(tDataMng.getLowerAsymptotes(), tGold);
+    Plato::fill(1.75, tGold);
+    PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tGold);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateSubProblemBounds)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(0.625, tData);
+    tDataMng.setLowerAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getLowerAsymptotes(), tData);
+    Plato::fill(1.375, tData);
+    tDataMng.setUpperAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tData);
+    Plato::fill(1.0, tData);
+    tDataMng.setCurrentControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentControls(), tData);
+    Plato::fill(0.25, tData);
+    tDataMng.setControlLowerBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlLowerBounds(), tData);
+    Plato::fill(1., tData);
+    tDataMng.setControlUpperBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlUpperBounds(), tData);
+
+    // CASE 1: EXPANSION PARAMETER IS CHOSEN
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+    tOperations.updateSubProblemBounds(tDataMng);
+
+    // TEST OUTPUT
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 0.6625);
+    PlatoTest::checkMultiVectorData(tDataMng.getSubProblemControlLowerBounds(), tGold);
+    Plato::fill(1., tGold);
+    PlatoTest::checkMultiVectorData(tDataMng.getSubProblemControlUpperBounds(), tGold);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateObjectiveApproximationFunctionData)
+{
+    const size_t tNumControls = 5;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateControl(tNumControls);
+
+    // CREATE MEANINGFUL CRITERION
+    Plato::CcsaTestObjective<double> tCriterion;
+    Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
+    Plato::fill(1.0, tData);
+    double tObjFuncValue = tCriterion.value(tData);
+    Plato::StandardMultiVector<double> tGradient(1 /* number of vectors */, tNumControls);
+    tCriterion.gradient(tData, tGradient);
+
+    // SET DATA
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
+    tDataMng.setCurrentObjectiveValue(tObjFuncValue);
+    const double tTolerance = 1e-6;
+    ASSERT_NEAR(0.312, tDataMng.getCurrentObjectiveValue(), tTolerance);
+    tDataMng.setCurrentObjectiveGradient(tGradient);
+    Plato::StandardMultiVector<double> tGold(1 /* number of vectors */, tNumControls, 0.0624 /* initial value */);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentObjectiveGradient(), tGold);
+
+    Plato::fill(0.625, tData);
+    tDataMng.setLowerAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getLowerAsymptotes(), tData);
+    Plato::fill(1.375, tData);
+    tDataMng.setUpperAsymptotes(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tData);
+    Plato::fill(1.0, tData);
+    tDataMng.setCurrentControls(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getCurrentControls(), tData);
+    Plato::fill(0.25, tData);
+    tDataMng.setControlLowerBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlLowerBounds(), tData);
+    Plato::fill(1., tData);
+    tDataMng.setControlUpperBounds(tData);
+    PlatoTest::checkMultiVectorData(tDataMng.getControlUpperBounds(), tData);
+
+    // CASE 1: EXPANSION PARAMETER IS CHOSEN
+    Plato::MethodMovingAsymptotesOperations<double> tOperations(tDataFactory);
+    tOperations.initialize(tDataMng);
+    tOperations.updateObjectiveApproximationFunctionData(tDataMng);
+
+    // TEST OUTPUT
+    Plato::fill(0.028155, tGold);
+    PlatoTest::checkMultiVectorData(tDataMng.getObjFuncAppxFunctionP(), tGold);
+    Plato::fill(3e-5, tGold);
+    PlatoTest::checkMultiVectorData(tDataMng.getObjFuncAppxFunctionQ(), tGold);
 }
 
 }

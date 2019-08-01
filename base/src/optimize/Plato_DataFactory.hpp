@@ -1,10 +1,4 @@
 /*
- * Plato_DataFactory.hpp
- *
- *  Created on: Oct 17, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,11 +40,17 @@
 //@HEADER
 */
 
-#ifndef PLATO_DATAFACTORY_HPP_
-#define PLATO_DATAFACTORY_HPP_
+/*
+ * Plato_DataFactory.hpp
+ *
+ *  Created on: Oct 17, 2017
+ */
+
+#pragma once
 
 #include <cassert>
 
+#include "Plato_Macros.hpp"
 #include "Plato_CommWrapper.hpp"
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_StandardVectorReductionOperations.hpp"
@@ -102,7 +102,10 @@ public:
     **********************************************************************************/
     OrdinalType getNumControls() const
     {
-        assert(mNumControls > static_cast<ScalarType>(0));
+        if(mNumControls <= static_cast<ScalarType>(0))
+        {
+            THROWERR("NUMBER OF CONTROLS IS NOT SET\n")
+        }
         return (mNumControls);
     }
 
@@ -112,7 +115,10 @@ public:
     **********************************************************************************/
     OrdinalType getNumCriterionValues() const
     {
-        assert(mNumCriterionValues > static_cast<ScalarType>(0));
+        if(mNumCriterionValues <= static_cast<ScalarType>(0))
+        {
+            THROWERR("NUMBER OF CRITERION VALUES IS NOT SET\n")
+        }
         return (mNumCriterionValues);
     }
 
@@ -150,7 +156,10 @@ public:
     **********************************************************************************/
     void allocateObjFuncValues(const OrdinalType & aNumElements)
     {
-        assert(aNumElements > static_cast<OrdinalType>(0));
+        if(mNumCriterionValues <= static_cast<ScalarType>(0))
+        {
+            THROWERR("INPUT ARGUMENT SHOULD BE A POSITIVE NUMBER GREATER THAN ZERO. THE INPUT VALUE IS SET TO " + std::to_string(aNumElements) + "\n")
+        }
 
         if(mObjFuncValues.use_count() != 0)
         {
@@ -166,7 +175,10 @@ public:
     **********************************************************************************/
     void allocateObjFuncValues(const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.size() > static_cast<OrdinalType>(0));
+        if(aInput.size() <= static_cast<OrdinalType>(0))
+        {
+            THROWERR("INPUT CONTAINER'S LENGTH IS ZERO\n")
+        }
 
         if(mObjFuncValues.use_count() != 0)
         {
@@ -196,12 +208,16 @@ public:
     **********************************************************************************/
     void allocateDual(const OrdinalType & aNumElements, OrdinalType aNumVectors = 1)
     {
+        if(aNumElements <= static_cast<ScalarType>(0))
+        {
+            THROWERR("INPUT LENGTH SHOULD BE A POSITIVE NUMBER GREATER THAN ZERO. THE INPUT LENGTH IS SET TO " + std::to_string(aNumElements) + "\n")
+        }
+
         if(mDual.use_count() != 0)
         {
             mDual.reset();
         }
 
-        assert(aNumElements > static_cast<OrdinalType>(0));
         mNumDuals = aNumElements;
         Plato::StandardVector<ScalarType, OrdinalType> tVector(aNumElements);
         mDual = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(aNumVectors, tVector);
@@ -213,7 +229,11 @@ public:
     **********************************************************************************/
     void allocateDual(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
-        assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
+        if(aInput.getNumVectors() <= static_cast<OrdinalType>(0))
+        {
+            THROWERR("NUMBER OF INPUT VECTORS SHOULD BE A POSITIVE NUMBER GREATER THAN ZERO. THE NUMBER OF INPUT VECTORS IS SET TO " + std::to_string(aInput.getNumVectors()) + "\n")
+        }
+
         const OrdinalType tVectorIndex = 0;
         mNumDuals = aInput[tVectorIndex].size();
         assert(mNumDuals > static_cast<OrdinalType>(0));
@@ -352,7 +372,10 @@ public:
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & dual() const
     {
-        assert(mDual.get() != nullptr);
+        if(mDual.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF DUAL VARIABLES IS NOT DEFINED.\n")
+        }
         return (mDual.operator*());
     }
 
@@ -363,10 +386,18 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & dual(const OrdinalType & aVectorIndex) const
     {
-        assert(mDual.get() != nullptr);
-        assert(aVectorIndex < mDual->getNumVectors());
+        if(mDual.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF DUAL VARIABLES IS NOT DEFINED.\n")
+        }
+        if(aVectorIndex >= mDual->getNumVectors())
+        {
+            std::string tMsg = std::string("INPUT VECTOR WITH INDEX = ") + std::to_string(aVectorIndex)
+                               + " IS GREATER THAN THE TOTAL NUMBER OF VECTORS, " + std::to_string(mDual->getNumVectors()) + "\n";
+            THROWERR(tMsg)
+        }
 
-        return (mDual.operator *().operator [](aVectorIndex));
+        return ((*mDual)[aVectorIndex]);
     }
 
     /******************************************************************************//**
@@ -376,6 +407,10 @@ public:
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getDualReductionOperations() const
     {
         assert(mDualReductionOperations.get() != nullptr);
+        if(mDualReductionOperations.get() == nullptr)
+        {
+            THROWERR("DUAL REDUCTION OPERATIONS ARE NOT ALLOCATED.\n")
+        }
         return (mDualReductionOperations.operator *());
     }
 
@@ -385,7 +420,10 @@ public:
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & state() const
     {
-        assert(mState.get() != nullptr);
+        if(mState.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF STATE VARIABLES IS NOT DEFINED.\n")
+        }
         return (mState.operator *());
     }
 
@@ -396,8 +434,16 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & state(const OrdinalType & aVectorIndex) const
     {
-        assert(mState.get() != nullptr);
-        assert(aVectorIndex < mState->getNumVectors());
+        if(mState.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF STATE VARIABLES IS NOT DEFINED.\n")
+        }
+        if(aVectorIndex >= mState->getNumVectors())
+        {
+            std::string tMsg = std::string("INPUT VECTOR WITH INDEX = ") + std::to_string(aVectorIndex)
+                               + " IS GREATER THAN THE TOTAL NUMBER OF VECTORS, " + std::to_string(mDual->getNumVectors()) + "\n";
+            THROWERR(tMsg)
+        }
 
         return (mState.operator *().operator [](aVectorIndex));
     }
@@ -408,7 +454,10 @@ public:
     **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getStateReductionOperations() const
     {
-        assert(mStateReductionOperations.get() != nullptr);
+        if(mStateReductionOperations.get() == nullptr)
+        {
+            THROWERR("STATE REDUCTION OPERATIONS ARE NOT ALLOCATED.\n")
+        }
         return (mStateReductionOperations.operator *());
     }
 
@@ -418,7 +467,10 @@ public:
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & control() const
     {
-        assert(mControl.get() != nullptr);
+        if(mControl.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF STATE VARIABLES IS NOT DEFINED.\n")
+        }
         return (mControl.operator *());
     }
 
@@ -429,8 +481,16 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & control(const OrdinalType & aVectorIndex) const
     {
-        assert(mControl.get() != nullptr);
-        assert(aVectorIndex < mControl->getNumVectors());
+        if(mControl.get() == nullptr)
+        {
+            THROWERR("2D CONTAINER OF STATE VARIABLES IS NOT DEFINED.\n")
+        }
+        if(aVectorIndex >= mControl->getNumVectors())
+        {
+            std::string tMsg = std::string("INPUT VECTOR WITH INDEX = ") + std::to_string(aVectorIndex)
+                               + " IS GREATER THAN THE TOTAL NUMBER OF VECTORS, " + std::to_string(mDual->getNumVectors()) + "\n";
+            THROWERR(tMsg)
+        }
 
         return (mControl.operator *().operator [](aVectorIndex));
     }
@@ -441,7 +501,10 @@ public:
     **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getControlReductionOperations() const
     {
-        assert(mControlReductionOperations.get() != nullptr);
+        if(mControlReductionOperations.get() == nullptr)
+        {
+            THROWERR("CONTROL REDUCTION OPERATIONS ARE NOT ALLOCATED.\n")
+        }
         return (mControlReductionOperations.operator *());
     }
 
@@ -451,7 +514,10 @@ public:
     **********************************************************************************/
     const Plato::Vector<ScalarType, OrdinalType> & objective() const
     {
-        assert(mObjFuncValues.get() != nullptr);
+        if(mObjFuncValues.get() == nullptr)
+        {
+            THROWERR("1D CONTAINER OF OBJECTIVE VALUES IS NOT DEFINED.\n")
+        }
         return (mObjFuncValues.operator*());
     }
 
@@ -461,38 +527,39 @@ public:
     **********************************************************************************/
     const Plato::ReductionOperations<ScalarType, OrdinalType> & getObjFuncReductionOperations() const
     {
-        assert(mObjFuncReductionOperations.get() != nullptr);
+        if(mObjFuncReductionOperations.get() == nullptr)
+        {
+            THROWERR("OBJECTIVE VALUES REDUCTION OPERATIONS ARE NOT ALLOCATED.\n")
+        }
         return (mObjFuncReductionOperations.operator *());
     }
 
 private:
-    OrdinalType mNumDuals;
-    OrdinalType mNumStates;
-    OrdinalType mNumControls;
-    OrdinalType mNumCriterionValues;
+    OrdinalType mNumDuals; /*!< number of dual variables */
+    OrdinalType mNumStates; /*!< number of state variables */
+    OrdinalType mNumControls; /*!< number of control variables */
+    OrdinalType mNumCriterionValues; /*!< number of objective variables */
+    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space flag, e.g. HOST, DEVICE, ETC */
 
-    Plato::MemorySpace::type_t mMemorySpace;
+    std::shared_ptr<Plato::CommWrapper> mCommWrapper; /*!< MPI wrapper  */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mObjFuncValues; /*!< 1D container template for objective values */
 
-    std::shared_ptr<Plato::CommWrapper> mCommWrapper;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDual; /*!< 2D container template for dual values */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mState; /*!< 2D container template for state values */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControl; /*!< 2D container template for control values */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerBoundVector; /*!< 2D container template for control lower bounds */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperBoundVector; /*!< 2D container template for control upper bounds */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mObjFuncValues;
-
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mDual;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mState;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControl;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerBoundVector;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperBoundVector;
-
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mStateReductionOperations;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mObjFuncReductionOperations;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOperations; /*!< dual reduction operations template */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mStateReductionOperations; /*!< state reduction operations template */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations; /*!< control reduction operations template */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mObjFuncReductionOperations; /*!< objective function reduction operations template */
 
 private:
     DataFactory(const Plato::DataFactory<ScalarType, OrdinalType>&);
     Plato::DataFactory<ScalarType, OrdinalType> & operator=(const Plato::DataFactory<ScalarType, OrdinalType>&);
 };
+// class DataFactory
 
 }
-
-#endif /* PLATO_DATAFACTORY_HPP_ */
+// namespace Plato
