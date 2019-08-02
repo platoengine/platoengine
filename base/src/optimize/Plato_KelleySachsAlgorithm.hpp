@@ -495,6 +495,7 @@ public:
                                      Plato::KelleySachsStepMng<ScalarType, OrdinalType> & aStepMng)
     {
         ScalarType tTrustRegionRadius = -1.;
+
         // different methods for setting initial radius
         const bool tHaveScaleOfUnitControlForInitialTrustRegionRadius =
                 (static_cast<ScalarType>(0) < mScaleOfUnitControlForInitialTrustRegionRadius);

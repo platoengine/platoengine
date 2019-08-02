@@ -62,24 +62,42 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class TrustRegionStageMng
 {
 public:
+    /******************************************************************************//**
+     * Constructor
+    ***********************************************************************************/
     TrustRegionStageMng() :
         mHaveHessian(true)
     {
     }
 
+    /******************************************************************************//**
+     * Destructor
+    ***********************************************************************************/
     virtual ~TrustRegionStageMng()
     {
     }
 
+    /******************************************************************************//**
+     * Set flag to true if Hessian information is available, false otherwise.
+     * @param [in] aInput flag
+    ***********************************************************************************/
     void setHaveHessian(const bool& aInput)
     {
         mHaveHessian = aInput;
     }
+
+    /******************************************************************************//**
+     * Returns true if Hessian information is available, false otherwise.
+     * @return if Hessian information is available
+    ***********************************************************************************/
     bool getHaveHessian() const
     {
         return mHaveHessian;
     }
 
+    /******************************************************************************//**
+     * Allows application to save app-specific data when a new trial control is accepted.
+    ***********************************************************************************/
     virtual void cacheData() = 0;
 
     /******************************************************************************//**

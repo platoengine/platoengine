@@ -113,7 +113,7 @@ public:
             mOutputData(),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
-            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, aDataMng, mStageMng))
+            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, mDataMng, mStageMng))
     {
         this->initialize();
     }
@@ -459,6 +459,15 @@ public:
     Plato::algorithm::stop_t getStoppingCriterion() const
     {
         return (mStoppingCriterion);
+    }
+
+    /******************************************************************************//**
+     * @brief Reset optimizer parameters to initial values, i.e. values at iteration 0.
+    **********************************************************************************/
+    void resetParameters()
+    {
+        mNumAugLagIter = 0;
+        mOptimizer->resetParameters();
     }
 
     /******************************************************************************//**

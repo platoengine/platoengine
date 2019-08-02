@@ -76,7 +76,7 @@ public:
      * @brief Constructor
     **********************************************************************************/
     CcsaTestObjective() :
-            mConstant(0.0624),
+            mWeightConstant(0.0624),
             mReduction(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType,OrdinalType>>())
     {
     }
@@ -86,6 +86,15 @@ public:
     **********************************************************************************/
     virtual ~CcsaTestObjective()
     {
+    }
+
+    /******************************************************************************//**
+     * @brief Set weight constant
+     * @param [in] aInput weight constant
+    **********************************************************************************/
+    void setWeightConstant(const ScalarType& aInput)
+    {
+        mWeightConstant = aInput;
     }
 
     /******************************************************************************//**
@@ -114,7 +123,7 @@ public:
         }
         const ScalarType tInitialValue = 0;
         ScalarType tSum = std::accumulate(tStorage.begin(), tStorage.end(), tInitialValue);
-        ScalarType tOutput = mConstant * tSum;
+        ScalarType tOutput = mWeightConstant * tSum;
 
         return (tOutput);
     }
@@ -127,7 +136,7 @@ public:
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
-        Plato::fill(mConstant, aOutput);
+        Plato::fill(mWeightConstant, aOutput);
     }
 
     /******************************************************************************//**
@@ -146,7 +155,7 @@ public:
     }
 
 private:
-    ScalarType mConstant; /*!< scalar constant used in objective function */
+    ScalarType mWeightConstant; /*!< scalar constant used in objective function */
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReduction; /*!< interface to reduction operations */
 
 private:

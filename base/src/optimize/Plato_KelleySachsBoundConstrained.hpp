@@ -241,6 +241,14 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Reset optimizer parameters to initial values, i.e. values at iteration 0.
+    **********************************************************************************/
+    void resetParameters()
+    {
+        mStepMng->setInitialTrustRegionRadiusSetToNormProjectedGradient(true);
+    }
+
+    /******************************************************************************//**
      * @brief Solve bound constrained optimization problem
     **********************************************************************************/
     void solve()
@@ -427,13 +435,16 @@ private:
     {
         mStepMng->setNumTrustRegionSubProblemItrDone(0);
         this->initializeMaxTrustRegionRadius(*mStepMng);
+
         const Plato::MultiVector<ScalarType, OrdinalType> & tCurrentControl = mDataMng->getCurrentControl();
         ScalarType tTolerance = mStepMng->getObjectiveInexactnessTolerance();
         ScalarType tCurrentObjFuncValue = mStageMng->evaluateObjective(tCurrentControl, tTolerance);
         mDataMng->setCurrentObjectiveFunctionValue(tCurrentObjFuncValue);
         mStageMng->cacheData();
+
         mStageMng->computeGradient(tCurrentControl, *mGradient);
         mDataMng->setCurrentGradient(*mGradient);
+
         mDataMng->computeActiveAndInactiveSet();
         mDataMng->computeNormProjectedGradient();
         this->initializeTrustRegionRadius(*mDataMng, *mStepMng);
