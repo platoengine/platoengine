@@ -440,7 +440,7 @@ public:
     void getSolution(Plato::MultiVector<ScalarType, OrdinalType> &aSolution) const
     {
         const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = mDataMng->getCurrentControl();
-        Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(1), aSolution);
+        Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), aSolution);
     }
 
     /******************************************************************************//**
@@ -467,7 +467,7 @@ public:
     void resetParameters()
     {
         mNumAugLagIter = 0;
-        mStageMng->resetParameters();
+        //mStageMng->resetParameters();
         mOptimizer->resetParameters();
     }
 

@@ -104,7 +104,7 @@ public:
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
-            mInitialPenaltyParameter(0.05),
+            mInitialPenaltyParameter(mPenaltyParameter),
             mPenaltyParameterLowerBound(1e-5),
             mPenaltyParameterScaleFactor(2),
             mDefaultInitialLagrangeMultiplierValue(0.5),
