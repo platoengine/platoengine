@@ -947,8 +947,8 @@ public:
             this->evaluateObjective();
             this->evaluateConstraints();
             mDataMng->cacheState();
-            std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue()
-            << ", constraint = " << mDataMng->getCurrentConstraintValue(0) << "\n";
+            std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue() << ", constraint = "
+                << mDataMng->getCurrentConstraintValue(0) << "\n";
             this->updateSubProblem();
             this->solveSubProblem();
 

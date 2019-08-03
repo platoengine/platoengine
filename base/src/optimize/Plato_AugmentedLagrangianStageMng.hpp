@@ -82,6 +82,9 @@ class AugmentedLagrangianStageMng : public Plato::TrustRegionStageMng<ScalarType
 public:
     /******************************************************************************//**
      * @brief Default constructor
+     * @param [in] aFactory optimization data factory
+     * @param [in] aObjective objective function interface
+     * @param [in] aConstraints list of constraint interface
      **********************************************************************************/
     AugmentedLagrangianStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
@@ -101,8 +104,10 @@ public:
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
+            mInitialPenaltyParameter(0.05),
             mPenaltyParameterLowerBound(1e-5),
             mPenaltyParameterScaleFactor(2),
+            mDefaultInitialLagrangeMultiplierValue(0.5),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintHessianEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -143,6 +148,15 @@ public:
     void enableMeanNorm()
     {
         mIsMeanNormEnabled = true;
+    }
+
+    /******************************************************************************//**
+     * @brief Reset penalty and lagrange multipliers to initial default values.
+    **********************************************************************************/
+    void resetParameters()
+    {
+        mPenaltyParameter = mInitialPenaltyParameter;
+        Plato::fill(mDefaultInitialLagrangeMultiplierValue, *mLagrangeMultipliers);
     }
 
     /******************************************************************************//**
@@ -253,6 +267,7 @@ public:
     void setPenaltyParameter(const ScalarType & aInput)
     {
         mPenaltyParameter = aInput;
+        mInitialPenaltyParameter = mPenaltyParameter;
     }
 
     /******************************************************************************//**
@@ -759,8 +774,7 @@ private:
             mPreviousCostraintGrad->add(*mControlWorkVec);
         }
 
-        const ScalarType tInitialLagrangeMultipliers = 0.5;
-        Plato::fill(tInitialLagrangeMultipliers, *mLagrangeMultipliers);
+        Plato::fill(mDefaultInitialLagrangeMultiplierValue, *mLagrangeMultipliers);
     }
 
     /******************************************************************************//**
@@ -962,8 +976,10 @@ private:
     ScalarType mNormObjFuncGrad;
     ScalarType mNormAugLagFuncGrad;
     ScalarType mPenaltyParameter;
+    ScalarType mInitialPenaltyParameter;
     ScalarType mPenaltyParameterLowerBound;
     ScalarType mPenaltyParameterScaleFactor;
+    ScalarType mDefaultInitialLagrangeMultiplierValue;
 
     std::vector<OrdinalType> mNumConstraintEvaluations;
     std::vector<OrdinalType> mNumConstraintGradientEvaluations;

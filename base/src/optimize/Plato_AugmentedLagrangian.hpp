@@ -467,6 +467,7 @@ public:
     void resetParameters()
     {
         mNumAugLagIter = 0;
+        mStageMng->resetParameters();
         mOptimizer->resetParameters();
     }
 
