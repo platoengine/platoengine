@@ -4,18 +4,32 @@
  *  Created on: Jul 21, 2019
  */
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include <stddef.h>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
+#include "../../../base/src/optimize/Plato_AugmentedLagrangian.hpp"
+#include "../../../base/src/optimize/Plato_CcsaTestInequality.hpp"
+#include "../../../base/src/optimize/Plato_CcsaTestObjective.hpp"
+#include "../../../base/src/optimize/Plato_CommWrapper.hpp"
+#include "../../../base/src/optimize/Plato_Criterion.hpp"
+#include "../../../base/src/optimize/Plato_CriterionList.hpp"
+#include "../../../base/src/optimize/Plato_DataFactory.hpp"
+#include "../../../base/src/optimize/Plato_Diagnostics.hpp"
+#include "../../../base/src/optimize/Plato_LinearAlgebra.hpp"
+#include "../../../base/src/optimize/Plato_MultiVector.hpp"
+#include "../../../base/src/optimize/Plato_MultiVectorList.hpp"
+#include "../../../base/src/optimize/Plato_ReductionOperations.hpp"
+#include "../../../base/src/optimize/Plato_StandardMultiVector.hpp"
+#include "../../../base/src/optimize/Plato_Types.hpp"
+#include "../../../base/src/optimize/Plato_Vector.hpp"
+#include "../../../base/src/tools/Plato_Macros.hpp"
 #include "Plato_UnitTestUtils.hpp"
-
-#include "Plato_DataFactory.hpp"
-#include "Plato_Diagnostics.hpp"
-#include "Plato_CriterionList.hpp"
-#include "Plato_LinearAlgebra.hpp"
-#include "Plato_MultiVectorList.hpp"
-#include "Plato_CcsaTestObjective.hpp"
-#include "Plato_CcsaTestInequality.hpp"
-#include "Plato_AugmentedLagrangian.hpp"
 
 namespace Plato
 {
@@ -671,10 +685,10 @@ public:
         mApproxFuncEpsilon(1e-5),
         mAsymptoteExpansion(1.2),
         mAsymptoteContraction(0.7),
-        mInitialAymptoteScaling(0.5),
-        mSubProblemBoundsScaling(0.1),
         mApproxFuncScalingOne(1.001),
         mApproxFuncScalingTwo(0.001),
+        mInitialAymptoteScaling(0.5),
+        mSubProblemBoundsScaling(0.1),
         mUpperMinusLowerBounds(aDataFactory->control().create()),
         mCurrentAsymptotesMultipliers(aDataFactory->control().create())
     {
@@ -741,7 +755,6 @@ public:
         Plato::MultiVector<ScalarType, OrdinalType> &tUpperAsymptotes = aDataMng.getUpperAsymptotes();
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
         const Plato::MultiVector<ScalarType, OrdinalType> &tPreviousControls = aDataMng.getPreviousControls();
-        const Plato::MultiVector<ScalarType, OrdinalType> &tAntepenultimateControls = aDataMng.getAntepenultimateControls();
 
         const OrdinalType tNumVectors = tCurrentControls.getNumVectors();
         for (OrdinalType tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
@@ -906,14 +919,34 @@ public:
         this->initialize(aDataFactory);
     }
 
+    void setControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
+    {
+        mDataMng->setControlLowerBounds(aInput);
+    }
+
+    void setControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
+    {
+        mDataMng->setControlUpperBounds(aInput);
+    }
+
+    void setInitialGuess(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
+    {
+        mDataMng->setCurrentControls(aInput);
+    }
+
+    void setConstraintLimit(const OrdinalType & aIndex, const ScalarType & aValue)
+    {
+        mDataMng->setConstraintLimit(aIndex, aValue);
+    }
+
     void solve()
     {
         mOperations->initialize(*mDataMng);
         while(true)
         {
-            mDataMng->cacheState();
             this->evaluateObjective();
             this->evaluateConstraints();
+            mDataMng->cacheState();
             std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue()
             << ", constraint = " << mDataMng->getCurrentConstraintValue(0) << "\n";
             this->updateSubProblem();
@@ -1437,6 +1470,14 @@ TEST(PlatoTest, MethodMovingAsymptotes_solve)
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
     Plato::MethodMovingAsymptotes<double> tAlgorithm(tObjective, tConstraintList, tDataFactory);
+    const size_t tNumVectors = 1;
+    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, 5.0 /* values */);
+    tAlgorithm.setInitialGuess(tData);
+    Plato::fill(0.0, tData);
+    tAlgorithm.setControlLowerBounds(tData);
+    Plato::fill(10.0, tData);
+    tAlgorithm.setControlUpperBounds(tData);
+    tAlgorithm.setConstraintLimit(0, 1);
     tAlgorithm.solve();
 }
 
