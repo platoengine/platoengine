@@ -1810,4 +1810,51 @@ TEST(PlatoTest, MethodMovingAsymptotes_GoldsteinPriceShiftedEllipse)
     PlatoTest::printMultiVector(tData);
 }
 
+TEST(PlatoTest, MethodMovingAsymptotes_CircleRadius)
+{
+    // ********* SET DATA FACTORY *********
+    const size_t tNumControls = 2;
+    const size_t tNumConstraints = 1;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateDual(tNumConstraints);
+    tDataFactory->allocateControl(tNumControls);
+
+    // ********* SET OBJECTIVE AND COSNTRAINT *********
+    std::shared_ptr<Plato::Circle<double>> tObjective = std::make_shared<Plato::Circle<double>>();
+    std::shared_ptr<Plato::Radius<double>> tConstraint = std::make_shared<Plato::Radius<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
+    tConstraintList->add(tConstraint);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::MethodMovingAsymptotesNew<double> tAlgorithm(tObjective, tConstraintList, tDataFactory);
+    const size_t tNumVectors = 1;
+    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, 0.5 /* values */);
+    tAlgorithm.setInitialGuess(tData);
+    Plato::fill(0.0, tData);
+    tAlgorithm.setControlLowerBounds(tData);
+    Plato::fill(2.0, tData);
+    tAlgorithm.setControlUpperBounds(tData);
+    tAlgorithm.setConstraintNormalization(0, 0.5);
+    tAlgorithm.solve();
+
+    // ********* TEST SOLUTION *********
+    const double tTolerance = 1e-4;
+    ASSERT_EQ(18u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(2.67798, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
+    tAlgorithm.getSolution(tData);
+    Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
+    tGold(0,0) = 0.3129487804; tGold(0,1) = 0.9497764126;
+    PlatoTest::checkMultiVectorData(tGold, tData, tTolerance);
+
+    // ********* PRINT SOLUTION *********
+    std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
+    const double tBestObjFuncValue = tAlgorithm.getOptimalObjectiveValue();
+    std::cout << "BEST OBJECTIVE VALUE = " << tBestObjFuncValue << "\n" << std::flush;
+    const double tBestConstraint = tAlgorithm.getOptimalConstraintValue(0);
+    std::cout << "BEST CONSTRAINT VALUE = " << tBestConstraint << "\n" << std::flush;
+    std::cout << "SOLUTION\n" << std::flush;
+    PlatoTest::printMultiVector(tData);
+}
+
 }
