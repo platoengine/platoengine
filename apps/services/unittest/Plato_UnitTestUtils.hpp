@@ -68,7 +68,7 @@ void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput
     {
         for(size_t tElementIndex = 0; tElementIndex < aInput[tVectorIndex].size(); tElementIndex++)
         {
-            std::cout << "X(" << tVectorIndex << ", " << tElementIndex << ") = "
+            std::cout << std::setprecision(10) << "X(" << tVectorIndex << ", " << tElementIndex << ") = "
             << aInput(tVectorIndex, tElementIndex) << "\n" << std::flush;
         }
     }

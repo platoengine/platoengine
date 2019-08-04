@@ -1718,11 +1718,18 @@ TEST(PlatoTest, MethodMovingAsymptotes_HimmelblauShiftedEllipse)
     tAlgorithm.setControlLowerBounds(tData);
     Plato::fill(-1.0, tData);
     tAlgorithm.setControlUpperBounds(tData);
-    tAlgorithm.setConstraintNormalization(0, 2);
-    tAlgorithm.setMoveLimit(0.5);
+    tAlgorithm.setConstraintNormalization(0, 0.5);
     tAlgorithm.solve();
 
+    // ********* TEST SOLUTION *********
+    const double tTolerance = 1e-4;
+    ASSERT_EQ(26u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(11.804, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
     tAlgorithm.getSolution(tData);
+    Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
+    tGold(0,0) = -3.99832678; tGold(0,1) = -2.878447094;
+    PlatoTest::checkMultiVectorData(tGold, tData);
 
     // ********* PRINT SOLUTION *********
     std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
