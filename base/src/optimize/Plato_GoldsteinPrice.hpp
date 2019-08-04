@@ -71,6 +71,9 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Safely cache application data after a trial control has been accepted.
+    **********************************************************************************/
     void cacheData()
     {
         return;

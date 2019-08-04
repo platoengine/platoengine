@@ -18,9 +18,10 @@
 #include "Plato_Circle.hpp"
 #include "Plato_Rosenbrock.hpp"
 #include "Plato_Himmelblau.hpp"
+#include "Plato_GoldsteinPrice.hpp"
 #include "Plato_ShiftedEllipse.hpp"
-#include "Plato_CcsaTestInequality.hpp"
 #include "Plato_CcsaTestObjective.hpp"
+#include "Plato_CcsaTestInequality.hpp"
 
 #include "Plato_AugmentedLagrangian.hpp"
 #include "Plato_CommWrapper.hpp"
@@ -94,6 +95,7 @@ public:
         mObjFuncAppxFunctionQ(aDataFactory->control().create()),
         mConstrAppxFunctionP(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
         mConstrAppxFunctionQ(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
+        mComm(aDataFactory->getCommWrapper().create()),
         mControlReductionOps(aDataFactory->getControlReductionOperations().create())
     {
         this->initialize(*aDataFactory);
@@ -101,6 +103,15 @@ public:
 
     ~MethodMovingAsymptotesNewDataMng()
     {
+    }
+
+    /******************************************************************************//**
+     * @brief Return a const reference to the distributed memory communication wrapper
+     * @return const reference to the distributed memory communication wrapper
+    **********************************************************************************/
+    const Plato::CommWrapper& getCommWrapper() const
+    {
+        return (mComm.operator*());
     }
 
     OrdinalType getNumConstraints() const
@@ -471,6 +482,7 @@ private:
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionP;
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionQ;
 
+    std::shared_ptr<Plato::CommWrapper> mComm;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps;
 };
 
@@ -1146,8 +1158,17 @@ private:
         this->evaluateObjective();
         this->evaluateConstraints();
         mDataMng->cacheState();
-        std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue() << ", constraint = "
-            << mDataMng->getCurrentConstraintValue(0) << "\n";
+        this->printDiagnostics();
+    }
+
+    void printDiagnostics()
+    {
+        const Plato::CommWrapper &tComm = mDataMng->getCommWrapper();
+        if (tComm.myProcID() == 0)
+        {
+            std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue() << ", constraint = "
+                << mDataMng->getCurrentConstraintValue(0) << "\n";
+        }
     }
 
     void updateAsymptotes()
@@ -1730,6 +1751,54 @@ TEST(PlatoTest, MethodMovingAsymptotes_HimmelblauShiftedEllipse)
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
     tGold(0,0) = -3.99832678; tGold(0,1) = -2.878447094;
     PlatoTest::checkMultiVectorData(tGold, tData);
+
+    // ********* PRINT SOLUTION *********
+    std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
+    const double tBestObjFuncValue = tAlgorithm.getOptimalObjectiveValue();
+    std::cout << "BEST OBJECTIVE VALUE = " << tBestObjFuncValue << "\n" << std::flush;
+    const double tBestConstraint = tAlgorithm.getOptimalConstraintValue(0);
+    std::cout << "BEST CONSTRAINT VALUE = " << tBestConstraint << "\n" << std::flush;
+    std::cout << "SOLUTION\n" << std::flush;
+    PlatoTest::printMultiVector(tData);
+}
+
+TEST(PlatoTest, MethodMovingAsymptotes_GoldsteinPriceShiftedEllipse)
+{
+    // ********* SET DATA FACTORY *********
+    const size_t tNumControls = 2;
+    const size_t tNumConstraints = 1;
+    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
+    tDataFactory->allocateDual(tNumConstraints);
+    tDataFactory->allocateControl(tNumControls);
+
+    // ********* SET OBJECTIVE AND COSNTRAINT *********
+    std::shared_ptr<Plato::GoldsteinPrice<double>> tObjective = std::make_shared<Plato::GoldsteinPrice<double>>();
+    std::shared_ptr<Plato::ShiftedEllipse<double>> tConstraint = std::make_shared<Plato::ShiftedEllipse<double>>();
+    tConstraint->specify(0., 1., .5, 1.5);
+    std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
+    tConstraintList->add(tConstraint);
+
+    // ********* SOLVE OPTIMIZATION PROBLEM *********
+    Plato::MethodMovingAsymptotesNew<double> tAlgorithm(tObjective, tConstraintList, tDataFactory);
+    const size_t tNumVectors = 1;
+    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, -0.4 /* values */);
+    tAlgorithm.setInitialGuess(tData);
+    Plato::fill(-3.0, tData);
+    tAlgorithm.setControlLowerBounds(tData);
+    Plato::fill(0.0, tData);
+    tAlgorithm.setControlUpperBounds(tData);
+    tAlgorithm.setConstraintNormalization(0, 0.5);
+    tAlgorithm.solve();
+
+    // ********* TEST SOLUTION *********
+    const double tTolerance = 1e-4;
+    ASSERT_EQ(18u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(3, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 5e-4);
+    tAlgorithm.getSolution(tData);
+    Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
+    tGold(0,0) = 0.0; tGold(0,1) = -1.0;
+    PlatoTest::checkMultiVectorData(tGold, tData, tTolerance);
 
     // ********* PRINT SOLUTION *********
     std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
