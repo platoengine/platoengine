@@ -966,9 +966,17 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesNew
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aObjective objective criterion interface
+     * @param [in] aConstraints list of constraint criteria interfaces
+     * @param [in] aDataFactory data factory used to allocate core data structure
+    **********************************************************************************/
     MethodMovingAsymptotesNew(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> &aObjective,
-                           const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> &aConstraints,
-                           const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+                              const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> &aConstraints,
+                              const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+        mPrintDiagnostics(false),
+        mOutputStream(),
         mIterationCount(0),
         mMaxNumIterations(500),
         mProblemUpdateFrequency(0),
@@ -986,6 +994,22 @@ public:
         mConstrAppxFuncList(std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>())
     {
         this->initialize(aDataFactory);
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~MethodMovingAsymptotesNew()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Print algorithm's diagnostics (i.e. optimization problem status)
+     * @param [in] aInput print diagnostics if true; if false, do not print diagnostics.
+    **********************************************************************************/
+    void enableDiagnostics(const bool & aInput)
+    {
+        mPrintDiagnostics = aInput;
     }
 
     void setMaxNumIterations(const OrdinalType& aInput)
@@ -1079,6 +1103,9 @@ public:
         return (mDataMng->getCurrentConstraintValue(aIndex));
     }
 
+    /******************************************************************************//**
+     * @brief Solve optimization problem using the Method of Moving Asymptotes (MMA).
+    **********************************************************************************/
     void solve()
     {
         mOperations->initialize(*mDataMng);
@@ -1099,12 +1126,18 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize core internal operations and data structures.
+    **********************************************************************************/
     void initialize(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
     {
         this->initializeApproximationFunctions(aDataFactory);
         this->initializeSubProblemSolver(aDataFactory);
     }
 
+    /******************************************************************************//**
+     * @brief Initialize solver for Method of Moving Asymptotes (MMA) subproblem.
+    **********************************************************************************/
     void initializeSubProblemSolver(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
     {
         mSubProblemSolver = std::make_shared<Plato::AugmentedLagrangian<ScalarType, OrdinalType>>(mObjAppxFunc, mConstrAppxFuncList, aDataFactory);
@@ -1116,6 +1149,9 @@ private:
         mSubProblemSolver->setMaxNumTrustRegionSubProblemIterations(mNumTrustRegionIterations);
     }
 
+    /******************************************************************************//**
+     * @brief Initialize Method of Moving Asymptotes (MMA) approximation functions.
+    **********************************************************************************/
     void initializeApproximationFunctions(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
     {
         mObjAppxFunc = std::make_shared<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>(aDataFactory);
@@ -1127,6 +1163,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate objective criterion and its gradient.
+    **********************************************************************************/
     void evaluateObjective()
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = mDataMng->getCurrentControls();
@@ -1136,6 +1175,9 @@ private:
         mObjective->gradient(tCurrentControls, tCurrentObjGrad);
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate constraint criteria and respective gradients.
+    **********************************************************************************/
     void evaluateConstraints()
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = mDataMng->getCurrentControls();
@@ -1149,6 +1191,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update Method of Moving Asymptotes (MMA) subproblem.
+    **********************************************************************************/
     void updateSubProblem()
     {
         this->updateAsymptotes();
@@ -1159,6 +1204,10 @@ private:
         this->updateConstraintApproximationFunctions();
     }
 
+    /******************************************************************************//**
+     * @brief Update current optimization state after a trial set of design variables
+     * has been accepted.
+    **********************************************************************************/
     void updateState()
     {
         this->evaluateObjective();
@@ -1168,6 +1217,9 @@ private:
         this->printDiagnostics();
     }
 
+    /******************************************************************************//**
+     * @brief Print algorithmic diagnostics.
+    **********************************************************************************/
     void printDiagnostics()
     {
         const Plato::CommWrapper &tComm = mDataMng->getCommWrapper();
@@ -1178,6 +1230,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief If active, safely allow application to perform continuation on its data.
+    **********************************************************************************/
     void performContinuation()
     {
         const bool tIsContinuationEnabled = mProblemUpdateFrequency > static_cast<OrdinalType>(0);
@@ -1193,6 +1248,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update moving asymptotes.
+    **********************************************************************************/
     void updateAsymptotes()
     {
         if(mIterationCount >= static_cast<OrdinalType>(2))
@@ -1206,6 +1264,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update approximation functions associated with the objective criterion.
+    **********************************************************************************/
     void updateObjectiveApproximationFunction()
     {
         mMMAData->mCurrentNormalizedCriterionValue = 1;
@@ -1218,6 +1279,9 @@ private:
         mObjAppxFunc->update(*mMMAData);
     }
 
+    /******************************************************************************//**
+     * @brief Update approximation functions associated with the constraint criteria
+    **********************************************************************************/
     void updateConstraintApproximationFunctions()
     {
         Plato::update(static_cast<ScalarType>(1), mDataMng->getCurrentControls(), static_cast<ScalarType>(0), *mMMAData->mCurrentControls);
@@ -1236,6 +1300,9 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Solve Method of Moving Asymptotes (MMA) subproblem
+    **********************************************************************************/
     void solveSubProblem()
     {
         mSubProblemSolver->resetParameters();
@@ -1271,6 +1338,9 @@ private:
     }
 
 private:
+    bool mPrintDiagnostics; /*!< flag to enable output (default=false) */
+    std::ofstream mOutputStream; /*!< output string stream with diagnostics */
+
     OrdinalType mIterationCount; /*!< number of optimization iterations */
     OrdinalType mMaxNumIterations; /*!< maximum number of optimization iterations */
     OrdinalType mProblemUpdateFrequency; /*!< problem update, i.e. continuation, frequency */
