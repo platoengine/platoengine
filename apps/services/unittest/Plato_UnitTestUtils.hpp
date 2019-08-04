@@ -49,9 +49,11 @@
 #ifndef PLATO_UNITTESTUTILS_HPP_
 #define PLATO_UNITTESTUTILS_HPP_
 
+#include <string>
 #include <cassert>
 #include <iostream>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
 
@@ -61,14 +63,13 @@ namespace PlatoTest
 template<typename ScalarType, typename OrdinalType>
 void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
 {
-    std::cout << "\nPRINT MULTI-VECTOR\n" << std::flush;
     const OrdinalType tNumVectors = aInput.getNumVectors();
     for(size_t tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
         for(size_t tElementIndex = 0; tElementIndex < aInput[tVectorIndex].size(); tElementIndex++)
         {
-            std::cout << "VectorIndex = " << tVectorIndex << ", Data(" << tVectorIndex << ", " << tElementIndex
-                    << ") = " << aInput(tVectorIndex, tElementIndex) << "\n" << std::flush;
+            std::cout << "X(" << tVectorIndex << ", " << tElementIndex << ") = "
+            << aInput(tVectorIndex, tElementIndex) << "\n" << std::flush;
         }
     }
 }
@@ -78,7 +79,13 @@ void checkVectorData(const Plato::Vector<ScalarType, OrdinalType> & aInput,
                      const Plato::Vector<ScalarType, OrdinalType> & aGold,
                      ScalarType aTolerance = 1e-6)
 {
-    assert(aInput.size() == aGold.size());
+    if(aInput.size() != aGold.size())
+    {
+        std::string tMsg = std::string("DIMENSION MISMATCH. INPUT AND GOLD VECTORS DIMENSIONS DO NOT MATCH")
+                + "INPUT SIZE IS " + std::to_string(aInput.size()) + " AND GOLD SIZE IS "
+                + std::to_string(aInput.size()) + ".\n";
+        THROWERR (tMsg)
+    }
 
     OrdinalType tNumElements = aInput.size();
     for(OrdinalType tElemIndex = 0; tElemIndex < tNumElements; tElemIndex++)
