@@ -971,6 +971,7 @@ public:
                            const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mIterationCount(0),
         mMaxNumIterations(500),
+        mProblemUpdateFrequency(0),
         mNumTrustRegionIterations(50),
         mInitialAugLagPenalty(1),
         mAugLagPenaltyReduction(1.1),
@@ -992,7 +993,12 @@ public:
         mMaxNumIterations = aInput;
     }
 
-    void setmNumTrustRegionIterations(const OrdinalType& aInput)
+    void setProblemUpdateFrequency(const OrdinalType& aInput)
+    {
+        mProblemUpdateFrequency = aInput;
+    }
+
+    void setNumTrustRegionIterations(const OrdinalType& aInput)
     {
         mNumTrustRegionIterations = aInput;
     }
@@ -1157,6 +1163,7 @@ private:
     {
         this->evaluateObjective();
         this->evaluateConstraints();
+        this->performContinuation();
         mDataMng->cacheState();
         this->printDiagnostics();
     }
@@ -1168,6 +1175,21 @@ private:
         {
             std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue() << ", constraint = "
                 << mDataMng->getCurrentConstraintValue(0) << "\n";
+        }
+    }
+
+    void performContinuation()
+    {
+        const bool tIsContinuationEnabled = mProblemUpdateFrequency > static_cast<OrdinalType>(0);
+        bool tPerformContinuation = tIsContinuationEnabled ? (mIterationCount % mProblemUpdateFrequency) == static_cast<OrdinalType>(0) : false;
+        if (tPerformContinuation)
+        {
+            mObjective->updateProblem(mDataMng->getCurrentControls());
+            const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+            for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+            {
+                (*mConstraints)[tIndex].updateProblem(mDataMng->getCurrentControls());
+            }
         }
     }
 
@@ -1249,27 +1271,28 @@ private:
     }
 
 private:
-    OrdinalType mIterationCount;
-    OrdinalType mMaxNumIterations;
-    OrdinalType mNumTrustRegionIterations;
+    OrdinalType mIterationCount; /*!< number of optimization iterations */
+    OrdinalType mMaxNumIterations; /*!< maximum number of optimization iterations */
+    OrdinalType mProblemUpdateFrequency; /*!< problem update, i.e. continuation, frequency */
+    OrdinalType mNumTrustRegionIterations; /*!< maximum number of trust region subproblem iterations */
 
-    ScalarType mInitialAugLagPenalty;
-    ScalarType mAugLagPenaltyReduction;
+    ScalarType mInitialAugLagPenalty; /*!< initial augmented Lagragian penalty parameter */
+    ScalarType mAugLagPenaltyReduction; /*!< augmented Lagragian penalty reduction parameter */
     ScalarType mControlStagnationTol; /*!< control stagnation tolerance - secondary stopping tolerance */
-    ScalarType mFeasibilityTolerance;
+    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
     Plato::algorithm::stop_t mStoppingCriterion; /*!< stopping criterion */
 
-    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective;
-    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints;
+    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective; /*!< objective criterion interface */
+    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints; /*!< constraint criteria interface */
 
-    std::shared_ptr<Plato::ApproximationFunctionData<ScalarType, OrdinalType>> mMMAData;
-    std::shared_ptr<Plato::AugmentedLagrangian<ScalarType, OrdinalType>> mSubProblemSolver;
-    std::shared_ptr<Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>> mDataMng;
-    std::shared_ptr<Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType>> mOperations;
+    std::shared_ptr<Plato::ApproximationFunctionData<ScalarType, OrdinalType>> mMMAData; /*!< structure with approximation function's data */
+    std::shared_ptr<Plato::AugmentedLagrangian<ScalarType, OrdinalType>> mSubProblemSolver; /*!< MMA subproblem solver */
+    std::shared_ptr<Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>> mDataMng; /*!< MMA data manager */
+    std::shared_ptr<Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType>> mOperations; /*!< interface to MMA core operations */
 
-    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstrAppxFuncList;
-    std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>> mObjAppxFunc;
-    std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs;
+    std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstrAppxFuncList; /*!< list of constraint criteria */
+    std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>> mObjAppxFunc; /*!< objective criterion approximation function */
+    std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs; /*!< list of constraint criteria approximation function */
 };
 // class MethodMovingAsymptotesNew
 
