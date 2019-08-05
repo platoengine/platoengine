@@ -445,6 +445,7 @@ private:
             THROWERR(std::string("INVALID NUMBER OF CONSTRAINTS ") + std::to_string(tNumConstraints) + ". THE NUMBER OF CONSTRAINTS SHOULD BE ZERO OR A POSITIVE NUMBER.\n")
         }
 
+        mConstraintNormalization->fill(1.0);
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             mConstrAppxFunctionP->add(aDataFactory.control().create());
