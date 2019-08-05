@@ -115,11 +115,11 @@ void is_vector_empty(const std::vector<ScalarType>& aInput)
 
 /******************************************************************************//**
  *
- * @brief Diagnostic data for Conservative Convex Separable Approximation algorithms (CCSA)
+ * @brief Diagnostic data for the Method of Moving Asymptotes (MMA) algorithm.
  *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-struct OutputDataCCSA
+struct OutputDataMMA
 {
     OrdinalType mNumIter;  /*!< number of outer iterations */
     OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
@@ -132,7 +132,7 @@ struct OutputDataCCSA
     ScalarType mObjectiveStagnationMeasure;  /*!< measures stagnation in two subsequent objective function evaluations */
     std::vector<ScalarType> mConstraints;  /*!< residual value for each constraint */
 };
-// struct OutputDataCCSA
+// struct OutputDataMMA
 
 /******************************************************************************//**
  *
@@ -269,7 +269,7 @@ void print_ksbc_diagnostics_header(const Plato::OutputDataKSBC<ScalarType, Ordin
  * @param [in] aOutputFile output file
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
+void check_for_ccsa_diagnostics_errors(const Plato::OutputDataMMA<ScalarType, OrdinalType>& aData,
                                        const std::ofstream& aOutputFile)
 {
     try
@@ -289,7 +289,7 @@ void check_for_ccsa_diagnostics_errors(const Plato::OutputDataCCSA<ScalarType, O
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
+void print_ccsa_diagnostics_header(const Plato::OutputDataMMA<ScalarType, OrdinalType>& aData,
                                    std::ofstream& aOutputFile)
 {
     try
@@ -329,7 +329,7 @@ void print_ccsa_diagnostics_header(const Plato::OutputDataCCSA<ScalarType, Ordin
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-void print_ccsa_diagnostics(const Plato::OutputDataCCSA<ScalarType, OrdinalType>& aData,
+void print_ccsa_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType>& aData,
                             std::ofstream& aOutputFile)
 {
     try
