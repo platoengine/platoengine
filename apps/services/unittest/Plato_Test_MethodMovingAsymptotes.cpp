@@ -992,38 +992,72 @@ private:
 };
 
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesNew
+class NullConstraint : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
-     * @brief Constructor
-     * @param [in] aObjective objective criterion interface
-     * @param [in] aDataFactory data factory used to allocate core data structure
-    **********************************************************************************/
-    MethodMovingAsymptotesNew(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> &aObjective,
-                              const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
-        mPrintDiagnostics(false),
-        mOutputStream(),
-        mIterationCount(0),
-        mMaxNumIterations(100),
-        mProblemUpdateFrequency(0),
-        mNumTrustRegionIterations(50),
-        mMaxNumSubProblemIterations(100),
-        mInitialAugLagPenalty(1),
-        mAugLagPenaltyReduction(1.1),
-        mControlStagnationTol(1e-6),
-        mFeasibilityTolerance(1e-4),
-        mStoppingCriterion(Plato::algorithm::stop_t::NOT_CONVERGED),
-        mObjective(aObjective),
-        mConstraints(std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>()),
-        mMMAData(std::make_shared<Plato::ApproximationFunctionData<ScalarType, OrdinalType>>(aDataFactory)),
-        mDataMng(std::make_shared<Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>>(aDataFactory)),
-        mOperations(std::make_shared<Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType>>(aDataFactory)),
-        mConstrAppxFuncList(std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>())
+     * Contructor
+    ***********************************************************************************/
+    NullConstraint()
     {
-        this->initialize(aDataFactory);
     }
 
+    /******************************************************************************//**
+     * Destructor
+    ***********************************************************************************/
+    virtual ~NullConstraint()
+    {
+    }
+
+    /******************************************************************************//**
+     * Safely cache application specific data after a new trial control is accepted.
+     * For instance, the state solution, i.e. solution to Partial Differential Equation,
+     * can be safely cached via the cacheData function.
+    ***********************************************************************************/
+    void cacheData()
+    {
+        return;
+    }
+
+    /******************************************************************************//**
+     * Evaluate criterion function
+     * @param [in] aControl: control, i.e. design, variables
+     * @return criterion value
+    ***********************************************************************************/
+    ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
+    {
+        return (0.0);
+    }
+
+    /******************************************************************************//**
+     * Evaluate criterion function gradient
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in/out] aOutput: function gradient
+    ***********************************************************************************/
+    void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+    {
+        Plato::fill(0.0, aOutput);
+    }
+
+    /******************************************************************************//**
+     * Evaluate criterion function gradient
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in] aVector: descent direction
+     * @param [in/out] aOutput: function gradient
+    ***********************************************************************************/
+    void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+                         const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
+                         Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+    {
+        Plato::fill(0.0, aOutput);
+    }
+};
+
+template<typename ScalarType, typename OrdinalType = size_t>
+class MethodMovingAsymptotesNew
+{
+public:
     /******************************************************************************//**
      * @brief Constructor
      * @param [in] aObjective objective criterion interface
@@ -1069,6 +1103,16 @@ public:
     void enableDiagnostics(const bool & aInput)
     {
         mPrintDiagnostics = aInput;
+    }
+
+    void enableBoundConstrainedOptimization()
+    {
+        const OrdinalType tNumConstraints = mConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            mConstrAppxFuncs[tIndex]->setAlpha(0.0);
+            mConstrAppxFuncs[tIndex]->setBeta(0.0);
+        }
     }
 
     void setMaxNumIterations(const OrdinalType& aInput)
@@ -1853,7 +1897,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateConstraintApproximatio
     PlatoTest::checkMultiVectorData(tDataMng.getConstraintAppxFunctionQ(tContraintIndex), tGold);
 }
 
-/*TEST(PlatoTest, MethodMovingAsymptotes_Rosenbrock)
+TEST(PlatoTest, MethodMovingAsymptotes_Rosenbrock)
 {
     // ********* SET DATA FACTORY *********
     const size_t tNumControls = 2;
@@ -1862,18 +1906,32 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateConstraintApproximatio
 
     // ********* SET OBJECTIVE *********
     std::shared_ptr<Plato::Rosenbrock<double>> tObjective = std::make_shared<Plato::Rosenbrock<double>>();
+    std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
+    std::shared_ptr<Plato::NullConstraint<double>> tConstraint = std::make_shared<Plato::NullConstraint<double>>();
+    tConstraintList->add(tConstraint);
 
     // ********* SOLVE OPTIMIZATION PROBLEM *********
-    Plato::MethodMovingAsymptotesNew<double> tAlgorithm(tObjective, tDataFactory);
+    Plato::MethodMovingAsymptotesNew<double> tAlgorithm(tObjective, tConstraintList, tDataFactory);
+    tAlgorithm.enableBoundConstrainedOptimization();
     const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, 2.0  values );
+    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, 1.5 );
     tAlgorithm.setInitialGuess(tData);
-    Plato::fill(-10.0, tData);
+    Plato::fill(0.0, tData);
     tAlgorithm.setControlLowerBounds(tData);
-    Plato::fill(10.0, tData);
+    Plato::fill(2.0, tData);
     tAlgorithm.setControlUpperBounds(tData);
     tAlgorithm.solve();
-}*/
+
+    // ********* PRINT SOLUTION *********
+    std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
+    const double tBestObjFuncValue = tAlgorithm.getOptimalObjectiveValue();
+    std::cout << "BEST OBJECTIVE VALUE = " << tBestObjFuncValue << "\n" << std::flush;
+    const double tBestConstraint = tAlgorithm.getOptimalConstraintValue(0);
+    std::cout << "BEST CONSTRAINT VALUE = " << tBestConstraint << "\n" << std::flush;
+    std::cout << "SOLUTION\n" << std::flush;
+    tAlgorithm.getSolution(tData);
+    PlatoTest::printMultiVector(tData);
+}
 
 TEST(PlatoTest, MethodMovingAsymptotes_5Bars)
 {
@@ -2169,7 +2227,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
     tAlgorithm.solve();
 
     // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-4;
+    const double tTolerance = 1e-2;
     ASSERT_EQ(50u, tAlgorithm.getNumIterations());
     ASSERT_NEAR(0.1485850316, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < tTolerance);
