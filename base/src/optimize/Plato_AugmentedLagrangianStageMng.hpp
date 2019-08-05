@@ -165,8 +165,7 @@ public:
     **********************************************************************************/
     OrdinalType getNumConstraints() const
     {
-        const OrdinalType tVECTOR_INDEX = 0;
-        const OrdinalType tNumConstraints = mCurrentConstraintValues->operator[](tVECTOR_INDEX).size();
+        const OrdinalType tNumConstraints = mConstraints->size();
         return (tNumConstraints);
     }
 
@@ -442,7 +441,7 @@ public:
     {
         Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkMultiVec);
 
-        const OrdinalType tNumVectors = mCurrentConstraintValues->getNumVectors();
+        const OrdinalType tNumVectors = mDualWorkMultiVec->getNumVectors();
         std::vector<ScalarType> tContainer(tNumVectors);
         for(OrdinalType tIndex = 0; tIndex < tNumVectors; ++tIndex)
         {
