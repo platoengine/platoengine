@@ -49,6 +49,81 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Print header for MMA diagnostics file
+ * @param [in] aData diagnostic data for mma algorithm
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+/*template<typename ScalarType, typename OrdinalType>
+void print_mma_diagnostics_header(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
+                                  std::ofstream &aOutputFile)
+{
+    try
+    {
+        Plato::check_for_ccsa_diagnostics_errors(aData, aOutputFile);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        THROWERR(tErrorMsg.what())
+    }
+
+    if(aData.mConstraints.size() <= static_cast<OrdinalType>(0))
+    {
+        THROWERR("CONTAINER WITH CONSTRAINT VALUES IS EMPTY.\n")
+    }
+
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << "Iter" << std::setw(10) << "F-count"
+            << std::setw(14) << "F(X)" << std::setw(16) << "Norm(F')" << std::setw(10);
+
+    const OrdinalType tNumConstraints = aData.mConstraints.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        if(tIndex != static_cast<OrdinalType>(0))
+        {
+            aOutputFile << "H" << tIndex + static_cast<OrdinalType>(1) << "(X)" << std::setw(13);
+        }
+        else
+        {
+            const OrdinalType tWidth = tNumConstraints > static_cast<OrdinalType>(1) ? 11 : 13;
+            aOutputFile << "H" << tIndex + static_cast<OrdinalType>(1) << "(X)" << std::setw(tWidth);
+        }
+    }
+
+    aOutputFile << std::setw(15) << "abs(dX)" << "\n" << std::flush;
+}*/
+
+/******************************************************************************//**
+ * @brief Print diagnostics for MMA algorithm
+ * @param [in] aData diagnostic data for mma algorithm
+ * @param [in,out] aOutputFile output file
+**********************************************************************************/
+/*template<typename ScalarType, typename OrdinalType>
+void print_mma_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
+                           std::ofstream &aOutputFile)
+{
+    try
+    {
+        Plato::check_for_ccsa_diagnostics_errors(aData, aOutputFile);
+    }
+    catch(const std::invalid_argument& tErrorMsg)
+    {
+        THROWERR(tErrorMsg.what())
+    }
+    assert(aData.mConstraints.size() > static_cast<OrdinalType>(0));
+
+    aOutputFile << std::scientific << std::setprecision(6) << std::right << aData.mNumIter << std::setw(10)
+            << aData.mObjFuncCount << std::setw(20) << aData.mObjFuncValue << std::setw(15) << aData.mNormObjFuncGrad
+            << std::setw(15);
+
+    const OrdinalType tNumConstraints = aData.mConstraints.size();
+    for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+    {
+        aOutputFile << aData.mConstraints[tIndex] << std::setw(15);
+    }
+
+    aOutputFile << aData.mControlStagnationMeasure << "\n" << std::flush;
+}*/
+
 template<typename ScalarType, typename OrdinalType = size_t>
 struct ApproximationFunctionData
 {
@@ -75,6 +150,7 @@ class MethodMovingAsymptotesNewDataMng
 {
 public:
     explicit MethodMovingAsymptotesNewDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+        mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
         mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
         mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
         mControlStagnationMeasure(std::numeric_limits<ScalarType>::max()),
@@ -124,6 +200,11 @@ public:
     {
         const OrdinalType tNumConstraints = mCurrentConstraintValues->size();
         return tNumConstraints;
+    }
+
+    ScalarType getNormObjectiveGradient() const
+    {
+        return mNormObjectiveGradient;
     }
 
     ScalarType getControlStagnationMeasure() const
@@ -436,6 +517,11 @@ public:
         mControlStagnationMeasure = *std::max_element(tStorage.begin(), tStorage.end());
     }
 
+    void computeNormObjectiveGradient()
+    {
+        mNormObjectiveGradient = Plato::norm(*mCurrentObjectiveGradient);
+    }
+
 private:
     void initialize(const Plato::DataFactory<ScalarType, OrdinalType> &aDataFactory)
     {
@@ -456,6 +542,7 @@ private:
     }
 
 private:
+    ScalarType mNormObjectiveGradient;
     ScalarType mCurrentObjectiveValue;
     ScalarType mPreviousObjectiveValue;
     ScalarType mControlStagnationMeasure;
@@ -1435,6 +1522,7 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
+        mDataMng->computeNormObjectiveGradient();
         mDataMng->computeControlStagnationMeasure();
         const ScalarType tControlStagnation = mDataMng->getControlStagnationMeasure();
 
@@ -1895,42 +1983,6 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateConstraintApproximatio
     PlatoTest::checkMultiVectorData(tDataMng.getConstraintAppxFunctionP(tContraintIndex), tGold);
     Plato::fill(0.000089625, tGold);
     PlatoTest::checkMultiVectorData(tDataMng.getConstraintAppxFunctionQ(tContraintIndex), tGold);
-}
-
-TEST(PlatoTest, MethodMovingAsymptotes_Rosenbrock)
-{
-    // ********* SET DATA FACTORY *********
-    const size_t tNumControls = 2;
-    std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
-    tDataFactory->allocateControl(tNumControls);
-
-    // ********* SET OBJECTIVE *********
-    std::shared_ptr<Plato::Rosenbrock<double>> tObjective = std::make_shared<Plato::Rosenbrock<double>>();
-    std::shared_ptr<Plato::CriterionList<double>> tConstraintList = std::make_shared<Plato::CriterionList<double>>();
-    std::shared_ptr<Plato::NullConstraint<double>> tConstraint = std::make_shared<Plato::NullConstraint<double>>();
-    tConstraintList->add(tConstraint);
-
-    // ********* SOLVE OPTIMIZATION PROBLEM *********
-    Plato::MethodMovingAsymptotesNew<double> tAlgorithm(tObjective, tConstraintList, tDataFactory);
-    tAlgorithm.enableBoundConstrainedOptimization();
-    const size_t tNumVectors = 1;
-    Plato::StandardMultiVector<double> tData(tNumVectors, tNumControls, 1.5 );
-    tAlgorithm.setInitialGuess(tData);
-    Plato::fill(0.0, tData);
-    tAlgorithm.setControlLowerBounds(tData);
-    Plato::fill(2.0, tData);
-    tAlgorithm.setControlUpperBounds(tData);
-    tAlgorithm.solve();
-
-    // ********* PRINT SOLUTION *********
-    std::cout << "NUMBER OF ITERATIONS = " << tAlgorithm.getNumIterations() << "\n" << std::flush;
-    const double tBestObjFuncValue = tAlgorithm.getOptimalObjectiveValue();
-    std::cout << "BEST OBJECTIVE VALUE = " << tBestObjFuncValue << "\n" << std::flush;
-    const double tBestConstraint = tAlgorithm.getOptimalConstraintValue(0);
-    std::cout << "BEST CONSTRAINT VALUE = " << tBestConstraint << "\n" << std::flush;
-    std::cout << "SOLUTION\n" << std::flush;
-    tAlgorithm.getSolution(tData);
-    PlatoTest::printMultiVector(tData);
 }
 
 TEST(PlatoTest, MethodMovingAsymptotes_5Bars)
