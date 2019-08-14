@@ -453,7 +453,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Update particle position, finds a unique particle if the current trial
+     * @brief Update particle position, finds an unique particle if the current trial
      * particle is not unique.
      * @param [in] aParticleIndex index of particle to update
      * @param [in/out] aDataMng PSO data manager
@@ -469,13 +469,49 @@ private:
         }
         else
         {
-            std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
-            const ScalarType tRandomNum = tDistribution(mGenerator) * mRandomNumMultiplier;
-            mTrialControl->fill(tRandomNum);
+            this->computeUniqueParticle(aParticleIndex, aDataMng);
+        }
+    }
 
-            const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
-            mTrialControl->update(1.0, tGlobalBestParticlePosition, 1.0);
-            aDataMng.setCurrentParticle(aParticleIndex, *mTrialControl);
+    /******************************************************************************//**
+     * @brief Compute an unique particle that satisfies bounds.
+     * @param [in] aParticleIndex index of particle to update
+     * @param [in/out] aDataMng PSO data manager
+     **********************************************************************************/
+    void computeUniqueParticle(const OrdinalType &aParticleIndex,
+                               Plato::ParticleSwarmDataMng<ScalarType, OrdinalType> &aDataMng)
+    {
+        this->computeRandomStep(aDataMng.getLowerBounds(), aDataMng.getUpperBounds(), *mTrialControl);
+        const Plato::Vector<ScalarType, OrdinalType> &tGlobalBestParticlePosition = aDataMng.getGlobalBestParticlePosition();
+        mTrialControl->update(static_cast<ScalarType>(1), tGlobalBestParticlePosition, static_cast<ScalarType>(1));
+        const OrdinalType tNumControls = tGlobalBestParticlePosition.size();
+        for (OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        {
+            (*mTrialControl)[tIndex] = std::max((*mTrialControl)[tIndex], aDataMng.getLowerBounds()[tIndex]);
+            (*mTrialControl)[tIndex] = std::min((*mTrialControl)[tIndex], aDataMng.getUpperBounds()[tIndex]);
+        }
+        aDataMng.setCurrentParticle(aParticleIndex, *mTrialControl);
+    }
+
+    /******************************************************************************//**
+     * @brief Compute random step
+     * @param [in] aLowerBounds lower bounds
+     * @param [in] aUpperBounds upper bounds
+     * @param [in/out] aOutput random step
+     **********************************************************************************/
+    void computeRandomStep(const Plato::Vector<ScalarType, OrdinalType> & aLowerBounds,
+                           const Plato::Vector<ScalarType, OrdinalType> & aUpperBounds,
+                           Plato::Vector<ScalarType, OrdinalType> & aOutput)
+    {
+        std::uniform_real_distribution<ScalarType> tDistribution(0.0 /* lower bound */, 1.0 /* upper bound */);
+        aOutput.update(static_cast<ScalarType>(1), aLowerBounds, static_cast<ScalarType>(0));
+        aOutput.update(static_cast<ScalarType>(-1), aUpperBounds, static_cast<ScalarType>(1));
+
+        const OrdinalType tNumControls = aOutput.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumControls; tIndex++)
+        {
+            const ScalarType tRandomNum = tDistribution(mGenerator) * mRandomNumMultiplier;
+            aOutput[tIndex] *= tRandomNum;
         }
     }
 

@@ -22,7 +22,7 @@ endif()
 
 if (PLATO_ENABLE_SERVICES_PYTHON)
     find_package(Python2 COMPONENTS Development Interpreter)
-    add_library( PlatoServices PlatoApp.cpp ServicesPythonModule.cpp )
+    add_library( PlatoServices SHARED PlatoApp.cpp ServicesPythonModule.cpp )
     target_include_directories(PlatoServices SYSTEM PRIVATE ${Python2_INCLUDE_DIRS} )
     target_link_libraries( PlatoServices ${PLATO_LIBRARIES} ${PLATO_LIBRARIES} ${Trilinos_LIBRARIES} 
                            ${Trilinos_TPL_LIBRARIES} ${Python2_LIBRARIES} )

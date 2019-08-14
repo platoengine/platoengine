@@ -6382,10 +6382,11 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
         }
     }
 
-    addChild(tmp_node, "WriteRestart", m_InputData.write_restart_file.c_str());
-    addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency.c_str());
+    addChild(tmp_node, "WriteRestart", m_InputData.write_restart_file);
+    addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency);
+    addChild(tmp_node, "MaxIterations", m_InputData.max_iterations);
     tmp_node1 = tmp_node.append_child("SurfaceExtraction");
-    addChild(tmp_node1, "OutputMethod", m_InputData.output_method.c_str());
+    addChild(tmp_node1, "OutputMethod", m_InputData.output_method);
     addChild(tmp_node1, "Discretization", m_InputData.discretization);
     pugi::xml_node tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Format", "Exodus");
