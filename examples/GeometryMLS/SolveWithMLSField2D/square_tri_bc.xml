@@ -11,13 +11,15 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"     type="string"  value="Elastostatics"/>
-    <Parameter name="Linear Constraint"  type="string"  value="Volume"/>
-    <Parameter name="Objective"          type="string"  value="Internal Elastic Energy"/>
+    <Parameter name="Linear Constraint"  type="string"  value="My Volume"/>
+    <Parameter name="Objective"          type="string"  value="My Internal Elastic Energy"/>
 
     <Parameter name="Self-Adjoint"       type="bool"    value="true"/>
 
 
-    <ParameterList name="Volume">
+    <ParameterList name="My Volume">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Volume'/>
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="1.0"/>
@@ -25,7 +27,9 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Internal Elastic Energy">
+    <ParameterList name="My Internal Elastic Energy">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="3.0"/>

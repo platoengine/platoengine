@@ -252,7 +252,45 @@ public:
      * @param [in] aImportData data
     **********************************************************************************/
     template<typename SharedDataT>
-    void importDataT(const std::string& aArgumentName, const SharedDataT& aImportData);
+    void importDataT(const std::string& aArgumentName, const SharedDataT& aImportData)
+    {
+        if(aImportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
+        {
+            DistributedVector* tLocalData = getNodeField(aArgumentName);
+
+            int tMyLength = tLocalData->getEpetraVector()->MyLength();
+            assert(tMyLength == aImportData.size());
+            std::vector<double> tImportData(tMyLength);
+            aImportData.getData(tImportData);
+
+            double* tDataView;
+            tLocalData->getEpetraVector()->ExtractView(&tDataView);
+            std::copy(tImportData.begin(), tImportData.end(), tDataView);
+
+            tLocalData->Import();
+            tLocalData->DisAssemble();
+        }
+        else if(aImportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
+        {
+            auto dataContainer = mLightMp->getDataContainer();
+            double* tDataView;
+            dataContainer->getVariable(getElementField(aArgumentName), tDataView);
+            int tMyLength = mLightMp->getMesh()->getNumElems();
+
+            assert(tMyLength == aImportData.size());
+
+            std::vector<double> tImportData(tMyLength);
+            aImportData.getData(tImportData);
+
+            std::copy(tImportData.begin(), tImportData.end(), tDataView);
+        }
+        else if(aImportData.myLayout() == Plato::data::layout_t::SCALAR)
+        {
+            std::vector<double>* tLocalData = getValue(aArgumentName);
+            tLocalData->resize(aImportData.size());
+            aImportData.getData(*tLocalData);
+        }
+    }
 
     /******************************************************************************//**
      * @brief Export local data operation
@@ -260,7 +298,54 @@ public:
      * @param [in/out] aExportData data
     **********************************************************************************/
     template<typename SharedDataT>
-    void exportDataT(const std::string& aArgumentName, SharedDataT& aExportData);
+    void exportDataT(const std::string& aArgumentName, SharedDataT& aExportData)
+    {
+        if(aExportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
+        {
+            DistributedVector* tLocalData = getNodeField(aArgumentName);
+
+            tLocalData->LocalExport();
+            double* tDataView;
+            tLocalData->getEpetraVector()->ExtractView(&tDataView);
+
+            int tMyLength = tLocalData->getEpetraVector()->MyLength();
+            assert(tMyLength == aExportData.size());
+            std::vector<double> tExportData(tMyLength);
+            std::copy(tDataView, tDataView + tMyLength, tExportData.begin());
+
+            aExportData.setData(tExportData);
+        }
+        else if(aExportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
+        {
+            auto dataContainer = mLightMp->getDataContainer();
+            double* tDataView;
+            dataContainer->getVariable(getElementField(aArgumentName), tDataView);
+            int tMyLength = mLightMp->getMesh()->getNumElems();
+
+            assert(tMyLength == aExportData.size());
+            std::vector<double> tExportData(tMyLength);
+            std::copy(tDataView, tDataView + tMyLength, tExportData.begin());
+
+            aExportData.setData(tExportData);
+        }
+        else if(aExportData.myLayout() == Plato::data::layout_t::SCALAR)
+        {
+            std::vector<double>* tLocalData = getValue(aArgumentName);
+            if(int(tLocalData->size()) == aExportData.size())
+            {
+                aExportData.setData(*tLocalData);
+            }
+            else if(tLocalData->size() == 1u)
+            {
+                std::vector<double> retVec(aExportData.size(), (*tLocalData)[0]);
+                aExportData.setData(retVec);
+            }
+            else
+            {
+                throw Plato::ParsingException("SharedValued length mismatch.");
+            }
+        }
+    }
 
 private:
     /******************************************************************************//**
@@ -269,7 +354,19 @@ private:
      * @param [in] aValueMap name-data map
     **********************************************************************************/
     template<typename ValueType>
-    void throwParsingException(const std::string & aName, const std::map<std::string, ValueType> & aValueMap);
+    void throwParsingException(const std::string & aName, const std::map<std::string, ValueType> & aValueMap)
+    {
+        std::stringstream tMessage;
+        tMessage << "Cannot find specified Argument: " << aName.c_str() << std::endl;
+        tMessage << "Available Arguments: " << std::endl;
+        for(auto tIterator : aValueMap)
+        {
+            tMessage << tIterator.first << std::endl;
+        }
+        Plato::ParsingException tParsingException(tMessage.str());
+        throw tParsingException;
+    }
+
 
     /******************************************************************************//**
      * @brief Create local operation

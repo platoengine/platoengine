@@ -3,7 +3,7 @@ Plato_add_test_files( "${testFiles}" )
 
 Plato_new_test(TEST_NAME)
 
-set( TEST_COMMAND "${PYTHON_EXECUTABLE} computeMLSField.py" )
+set( TEST_COMMAND "${Python2_EXECUTABLE} computeMLSField.py" )
 set( OUTPUT_MESH "MLS_Field.exo" )
 
 Plato_add_serial_test( ${TEST_COMMAND} ${TEST_NAME} ${OUTPUT_MESH} )

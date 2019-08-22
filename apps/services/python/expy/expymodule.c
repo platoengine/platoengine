@@ -114,7 +114,7 @@ static void string_array_from_list(PyObject* list, char** array) {
   int length = PyList_Size(list);
   for(i = 0; i < length; i++) {
     PyObject *v = PyList_GetItem(list,i);
-    if(!PyMapping_Check(v)) {
+    if(!PyString_Check(v)) {
       PyErr_SetString(PyExc_TypeError, "list must contain only strings");
       return;
     }
@@ -131,7 +131,7 @@ static void int_array_from_list(PyObject* list, int* array) {
   int length = PyList_Size(list);
   for(i = 0; i < length; i++) {
     PyObject *v = PyList_GetItem(list,i);
-    if(!PySet_Check(v)) {
+    if(!PyLong_Check(v)) {
       PyErr_SetString(PyExc_TypeError, "list must contain only integers");
       return;
     }
