@@ -507,6 +507,6 @@
     <NormalizedTargetValue>0.2</NormalizedTargetValue>
   </Constraint>
   <Convergence>
-    <MaxIterations>100</MaxIterations>
+    <MaxIterations>30</MaxIterations>
   </Convergence>
 </Optimizer>
