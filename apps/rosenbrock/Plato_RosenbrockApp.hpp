@@ -115,7 +115,7 @@ public:
             std::ostringstream tErrorMsg;
             tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
                       << ", MESSAGE: OPERATION NAME = '" << aOperationName.c_str()
-                      << "' IS NOT DEFINE IN THE OPERATION MAP. ABORT! *********\n\n";
+                      << "' IS NOT DEFINED IN THE OPERATION MAP. ABORT! *********\n\n";
             std::perror(tErrorMsg.str().c_str());
         }
     }
