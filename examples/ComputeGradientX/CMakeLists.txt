@@ -6,7 +6,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/InternalEnergyGradX.osh DESTINATION ${CMAK
 
 Plato_new_test(TEST_NAME)
 
-set( TEST_COMMAND "${PYTHON_EXECUTABLE} computeGradientX.py" )
+set( TEST_COMMAND "${Python2_EXECUTABLE} computeGradientX.py" )
 set( OUTPUT_MESH "InternalEnergyGradX.exo" )
 
 Plato_add_serial_test( ${TEST_COMMAND} ${TEST_NAME} ${OUTPUT_MESH} )

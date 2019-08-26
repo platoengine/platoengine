@@ -6,7 +6,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/square_tri_bc.osh DESTINATION ${CMAKE_CURR
 
 Plato_new_test(TEST_NAME)
 
-set( TEST_COMMAND "${PYTHON_EXECUTABLE} solveWithMLSField2D.py" )
+set( TEST_COMMAND "${Python2_EXECUTABLE} solveWithMLSField2D.py" )
 set( OUTPUT_MESH "MLS_Field.exo" )
 
 Plato_add_serial_test( ${TEST_COMMAND} ${TEST_NAME} ${OUTPUT_MESH} )

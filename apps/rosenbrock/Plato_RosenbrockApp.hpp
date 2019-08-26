@@ -115,9 +115,8 @@ public:
             std::ostringstream tErrorMsg;
             tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
                       << ", MESSAGE: OPERATION NAME = '" << aOperationName.c_str()
-                      << "' IS NOT DEFINE IN APPLICATION DATA MAP. ABORT! *********\n\n";
+                      << "' IS NOT DEFINED IN THE OPERATION MAP. ABORT! *********\n\n";
             std::perror(tErrorMsg.str().c_str());
-            std::abort();
         }
     }
     /****************************************************************************************/
@@ -139,9 +138,8 @@ public:
             {
                 std::ostringstream tErrorMsg;
                 tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
-                          << ", MESSAGE: DATA LAYOUT IS NOT SUPPORTED BY APPLICATION. ABORT! *********\n\n";
+                          << ", MESSAGE: DATA LAYOUT IS NOT SUPPORTED BY THE APPLICATION. ABORT! *********\n\n";
                 std::perror(tErrorMsg.str().c_str());
-                std::abort();
                 break;
             }
         }
@@ -165,9 +163,8 @@ public:
             {
                 std::ostringstream tErrorMsg;
                 tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
-                          << ", MESSAGE: DATA LAYOUT IS NOT SUPPORTED BY APPLICATION. ABORT! *********\n\n";
+                          << ", MESSAGE: DATA LAYOUT IS NOT SUPPORTED BY THE APPLICATION. ABORT! *********\n\n";
                 std::perror(tErrorMsg.str().c_str());
-                std::abort();
                 break;
             }
         }
@@ -219,9 +216,8 @@ private:
             std::ostringstream tErrorMsg;
             tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
                       << ", MESSAGE: IMPORT ARGUMENT NAME = '" << aArgumentName.c_str()
-                      << "' IS NOT DEFINE IN APPLICATION DATA MAP. ABORT! *********\n\n";
+                      << "' IS NOT DEFINED IN THE DATA MAP. ABORT! *********\n\n";
             std::perror(tErrorMsg.str().c_str());
-            std::abort();
         }
 
         const OrdinalType tVECTOR_INDEX = 0;
@@ -244,9 +240,8 @@ private:
             std::ostringstream tErrorMsg;
             tErrorMsg << "\n\n********* ERROR IN " << __FILE__ << ", FUNCTION: " << __func__ << ", LINE: " << __LINE__
                     << ", MESSAGE: EXPORT ARGUMENT NAME = '" << aArgumentName.c_str()
-                    << "' IS NOT DEFINE IN APPLICATION DATA MAP. ABORT! *********\n\n";
+                    << "' IS NOT DEFINED IN THE DATA MAP. ABORT! *********\n\n";
             std::perror(tErrorMsg.str().c_str());
-            std::abort();
         }
 
         const OrdinalType tVECTOR_INDEX = 0;
