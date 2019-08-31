@@ -126,7 +126,18 @@ add_compile_options(-Wall -Werror -Wno-unused-result)
 endif()
 
 if( GEOMETRY )
+  message( "-- Compiling Cogent " )
   add_definitions( -DGEOMETRY )
+endif()
+
+if( STK_ENABLED )
+  message( "-- Compiling with STK " )
+  add_definitions( -DSTK_ENABLED )
+endif()
+
+if( ENABLE_ISO )
+  message( "-- Compiling PlatoIso " )
+  add_definitions(-DENABLE_ISO)
 endif()
 
 if( XTK_ENABLED )
@@ -175,14 +186,10 @@ endif()
 
 
 if( ENABLE_ISO )
-  message( "-- Compiling PlatoIso " )
-  add_definitions(-DENABLE_ISO)
   add_subdirectory(base/src/iso/main)
 endif()
 
 if( STK_ENABLED )
-  message( "-- Compiling with STK " )
-  add_definitions(-DSTK_ENABLED)
   add_subdirectory(base/src/support_structure)
   add_subdirectory(base/src/support_structure/main)
 endif()
@@ -213,7 +220,6 @@ if(EXPY)
 endif()
 
 if(GEOMETRY)
-  message( "-- Compiling Cogent " )
   add_subdirectory(apps/cogent)
 endif()
 
