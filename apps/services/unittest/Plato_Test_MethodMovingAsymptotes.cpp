@@ -50,17 +50,81 @@ namespace Plato
 {
 
 /******************************************************************************//**
+ * @brief Check inputs for MMA algorithm diagnostics
+ * @param [in] aData diagnostic data for MMA algorithm
+ * @param [in] aOutputFile output file
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+void check_mma_inputs(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
+                      const std::ofstream &aOutputFile)
+{
+    try
+    {
+        Plato::error::is_file_open(aOutputFile);
+        Plato::error::is_vector_empty(aData.mConstraints);
+    }
+    catch(const std::invalid_argument& tError)
+    {
+        throw tError;
+    }
+}
+
+/******************************************************************************//**
+ * @brief Output a brief sentence explaining why the CCSA optimizer stopped.
+ * @param [in] aStopCriterion stopping criterion flag
+ * @param [in,out] aOutput string with brief description
+**********************************************************************************/
+inline void print_mma_stop_criterion(const Plato::algorithm::stop_t & aStopCriterion, std::string & aOutput)
+{
+    aOutput.clear();
+    switch(aStopCriterion)
+    {
+        case Plato::algorithm::stop_t::OBJECTIVE_STAGNATION:
+        {
+            aOutput = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
+            break;
+        }
+        case Plato::algorithm::stop_t::CONTROL_STAGNATION:
+        {
+            aOutput = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+            break;
+        }
+        case Plato::algorithm::stop_t::MAX_NUMBER_ITERATIONS:
+        {
+            aOutput = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+            break;
+        }
+        case Plato::algorithm::stop_t::OPTIMALITY_AND_FEASIBILITY:
+        {
+            aOutput = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+            break;
+        }
+        case Plato::algorithm::stop_t::NOT_CONVERGED:
+        {
+            aOutput = "\n\n****** Optimization algorithm did not converge. ******\n\n";
+            break;
+        }
+        default:
+        {
+            aOutput = "\n\n****** ERROR: Optimization algorithm stopping due to undefined behavior. ******\n\n";
+            break;
+        }
+    }
+}
+
+
+/******************************************************************************//**
  * @brief Print header for MMA diagnostics file
  * @param [in] aData diagnostic data for mma algorithm
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
-/*template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType>
 void print_mma_diagnostics_header(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
                                   std::ofstream &aOutputFile)
 {
     try
     {
-        Plato::check_for_ccsa_diagnostics_errors(aData, aOutputFile);
+        Plato::check_mma_inputs(aData, aOutputFile);
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
@@ -89,21 +153,21 @@ void print_mma_diagnostics_header(const Plato::OutputDataMMA<ScalarType, Ordinal
         }
     }
 
-    aOutputFile << std::setw(15) << "abs(dX)" << "\n" << std::flush;
-}*/
+    aOutputFile << std::setw(15) << "abs(dX)" << std::setw(15) << "abs(dF)" << "\n" << std::flush;
+}
 
 /******************************************************************************//**
  * @brief Print diagnostics for MMA algorithm
  * @param [in] aData diagnostic data for mma algorithm
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
-/*template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType>
 void print_mma_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
                            std::ofstream &aOutputFile)
 {
     try
     {
-        Plato::check_for_ccsa_diagnostics_errors(aData, aOutputFile);
+        Plato::check_mma_inputs(aData, aOutputFile);
     }
     catch(const std::invalid_argument& tErrorMsg)
     {
@@ -121,8 +185,8 @@ void print_mma_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType> &
         aOutputFile << aData.mConstraints[tIndex] << std::setw(15);
     }
 
-    aOutputFile << aData.mControlStagnationMeasure << "\n" << std::flush;
-}*/
+    aOutputFile << aData.mControlStagnationMeasure << std::setw(15) << aData.mObjectiveStagnationMeasure << "\n" << std::flush;
+}
 
 template<typename ScalarType, typename OrdinalType = size_t>
 struct ApproximationFunctionData
@@ -150,12 +214,15 @@ class MethodMovingAsymptotesNewDataMng
 {
 public:
     explicit MethodMovingAsymptotesNewDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+        mFeasibilityMeasure(std::numeric_limits<ScalarType>::max()),
         mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
         mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
         mPreviousObjectiveValue(std::numeric_limits<ScalarType>::max()),
         mControlStagnationMeasure(std::numeric_limits<ScalarType>::max()),
+        mObjectiveStagnationMeasure(std::numeric_limits<ScalarType>::max()),
         mCurrentNormalizedObjectiveValue(std::numeric_limits<ScalarType>::max()),
         mControlWork(aDataFactory->control(0 /* vector index */).create()),
+        mConstraintWork(aDataFactory->dual(0 /* vector index */).create()),
         mConstraintNormalization(aDataFactory->dual(0 /* vector index */).create()),
         mCurrentConstraintValues(aDataFactory->dual(0 /* vector index */).create()),
         mPreviousConstraintValues(aDataFactory->dual(0 /* vector index */).create()),
@@ -178,6 +245,7 @@ public:
         mConstrAppxFunctionP(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
         mConstrAppxFunctionQ(std::make_shared<MultiVectorList<ScalarType, OrdinalType>>()),
         mComm(aDataFactory->getCommWrapper().create()),
+        mDualReductionOps(aDataFactory->getDualReductionOperations().create()),
         mControlReductionOps(aDataFactory->getControlReductionOperations().create())
     {
         this->initialize(*aDataFactory);
@@ -202,6 +270,11 @@ public:
         return tNumConstraints;
     }
 
+    ScalarType getFeasibilityMeasure() const
+    {
+        return mFeasibilityMeasure;
+    }
+
     ScalarType getNormObjectiveGradient() const
     {
         return mNormObjectiveGradient;
@@ -210,6 +283,11 @@ public:
     ScalarType getControlStagnationMeasure() const
     {
         return mControlStagnationMeasure;
+    }
+
+    ScalarType getObjectiveStagnationMeasure() const
+    {
+        return mObjectiveStagnationMeasure;
     }
 
     ScalarType getCurrentObjectiveValue() const
@@ -503,6 +581,26 @@ public:
         }
     }
 
+    void computeStoppingMeasures()
+    {
+        this->computeFeasibilityMeasure();
+        this->computeNormObjectiveGradient();
+        this->computeControlStagnationMeasure();
+        this->computeObjectiveStagnationMeasure();
+    }
+
+    void computeFeasibilityMeasure()
+    {
+        mConstraintWork->update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0));
+        mConstraintWork->modulus();
+        mFeasibilityMeasure = mDualReductionOps->max(*mConstraintWork);
+    }
+
+    void computeNormObjectiveGradient()
+    {
+        mNormObjectiveGradient = Plato::norm(*mCurrentObjectiveGradient);
+    }
+
     void computeControlStagnationMeasure()
     {
         OrdinalType tNumVectors = mCurrentControls->getNumVectors();
@@ -517,9 +615,10 @@ public:
         mControlStagnationMeasure = *std::max_element(tStorage.begin(), tStorage.end());
     }
 
-    void computeNormObjectiveGradient()
+    void computeObjectiveStagnationMeasure()
     {
-        mNormObjectiveGradient = Plato::norm(*mCurrentObjectiveGradient);
+        mObjectiveStagnationMeasure = mCurrentObjectiveValue - mPreviousObjectiveValue;
+        mObjectiveStagnationMeasure = std::abs(mObjectiveStagnationMeasure);
     }
 
 private:
@@ -542,13 +641,16 @@ private:
     }
 
 private:
+    ScalarType mFeasibilityMeasure;
     ScalarType mNormObjectiveGradient;
     ScalarType mCurrentObjectiveValue;
     ScalarType mPreviousObjectiveValue;
     ScalarType mControlStagnationMeasure;
+    ScalarType mObjectiveStagnationMeasure;
     ScalarType mCurrentNormalizedObjectiveValue;
 
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintWork;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintNormalization;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentConstraintValues;
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousConstraintValues;
@@ -577,6 +679,7 @@ private:
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionQ;
 
     std::shared_ptr<Plato::CommWrapper> mComm;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOps;
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps;
 };
 
@@ -1157,14 +1260,17 @@ public:
         mPrintDiagnostics(false),
         mOutputStream(),
         mIterationCount(0),
+        mNumObjFuncEvals(0),
         mMaxNumIterations(100),
         mProblemUpdateFrequency(0),
         mNumTrustRegionIterations(50),
         mMaxNumSubProblemIterations(100),
         mInitialAugLagPenalty(1),
         mAugLagPenaltyReduction(1.1),
-        mControlStagnationTol(1e-6),
+        mOptimalityTolerance(1e-6),
         mFeasibilityTolerance(1e-4),
+        mControlStagnationTolerance(1e-6),
+        mObjectiveStagnationTolerance(1e-8),
         mStoppingCriterion(Plato::algorithm::stop_t::NOT_CONVERGED),
         mObjective(aObjective),
         mConstraints(aConstraints),
@@ -1259,7 +1365,12 @@ public:
 
     void setControlStagnationTolerance(const ScalarType& aInput)
     {
-        mControlStagnationTol = aInput;
+        mControlStagnationTolerance = aInput;
+    }
+
+    void setObjectiveStagnationTolerance(const ScalarType& aInput)
+    {
+        mObjectiveStagnationTolerance = aInput;
     }
 
     void setControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
@@ -1303,22 +1414,25 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Solve optimization problem using the Method of Moving Asymptotes (MMA).
+     * @brief Solve problem using the Method of Moving Asymptotes (MMA) algorithm.
     **********************************************************************************/
     void solve()
     {
+        this->openOutputFile();
         mOperations->initialize(*mDataMng);
         while(true)
         {
             this->updateState();
             this->updateSubProblem();
             this->solveSubProblem();
-
             mIterationCount++;
+
             bool tStop = this->checkStoppingCriteria();
             if(tStop == true)
             {
                 this->updateState();
+                this->printStoppingCriterion();
+                this->closeOutputFile();
                 break;
             }
         }
@@ -1343,7 +1457,7 @@ private:
         mSubProblemSolver->disablePostSmoothing();
         mSubProblemSolver->setPenaltyParameter(mInitialAugLagPenalty);
         mSubProblemSolver->setFeasibilityTolerance(mFeasibilityTolerance);
-        mSubProblemSolver->setControlStagnationTolerance(mControlStagnationTol);
+        mSubProblemSolver->setControlStagnationTolerance(mControlStagnationTolerance);
         mSubProblemSolver->setMaxNumOuterIterations(mMaxNumSubProblemIterations);
         mSubProblemSolver->setPenaltyParameterScaleFactor(mAugLagPenaltyReduction);
         mSubProblemSolver->setMaxNumTrustRegionSubProblemIterations(mNumTrustRegionIterations);
@@ -1364,12 +1478,98 @@ private:
     }
 
     /******************************************************************************//**
+     * @brief Open output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void openOutputFile()
+    {
+        if (mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper &tMyCommWrapper = mDataMng->getCommWrapper();
+        if (tMyCommWrapper.myProcID() == 0)
+        {
+            const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+            mOutputData.mConstraints.clear();
+            mOutputData.mConstraints.resize(tNumConstraints);
+            mOutputStream.open("plato_mma_algorithm_diagnostics.txt");
+            Plato::print_mma_diagnostics_header(mOutputData, mOutputStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Close output file (i.e. diagnostics file)
+    **********************************************************************************/
+    void closeOutputFile()
+    {
+        if (mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper &tMyCommWrapper = mDataMng->getCommWrapper();
+        if (tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputStream.close();
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print MMA diagnostics to file
+    **********************************************************************************/
+    void printDiagnostics()
+    {
+        if(mPrintDiagnostics == false)
+        {
+            return;
+        }
+
+        const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+        if(tMyCommWrapper.myProcID() == 0)
+        {
+            mOutputData.mNumIter = mIterationCount;
+            mOutputData.mObjFuncCount = mNumObjFuncEvals;
+            mOutputData.mObjFuncValue = mDataMng->getCurrentObjectiveValue();
+            mOutputData.mNormObjFuncGrad = mDataMng->getNormObjectiveGradient();
+            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
+            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+
+            const OrdinalType tNumConstraints = mDataMng->getNumConstraints();
+            for(OrdinalType tConstraintIndex = 0; tConstraintIndex < tNumConstraints; tConstraintIndex++)
+            {
+                mOutputData.mConstraints[tConstraintIndex] = mDataMng->getCurrentConstraintValue(tConstraintIndex);
+            }
+
+            Plato::print_mma_diagnostics(mOutputData, mOutputStream);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Print stopping criterion to diagnostics file.
+    **********************************************************************************/
+    void printStoppingCriterion()
+    {
+        if(mPrintDiagnostics == true)
+        {
+            const Plato::CommWrapper& tMyCommWrapper = mDataMng->getCommWrapper();
+            if(tMyCommWrapper.myProcID() == 0)
+            {
+                std::string tReason;
+                Plato::print_mma_stop_criterion(mStoppingCriterion, tReason);
+                mOutputStream << tReason.c_str();
+            }
+        }
+    }
+
+    /******************************************************************************//**
      * @brief Evaluate objective criterion and its gradient.
     **********************************************************************************/
     void evaluateObjective()
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = mDataMng->getCurrentControls();
         ScalarType tObjFuncValue = mObjective->value(tCurrentControls);
+        mNumObjFuncEvals++;
         mObjective->cacheData();
         mDataMng->setCurrentObjectiveValue(tObjFuncValue);
         Plato::MultiVector<ScalarType, OrdinalType> &tCurrentObjGrad = mDataMng->getCurrentObjectiveGradient();
@@ -1407,29 +1607,16 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Update current optimization state after a trial set of design variables
-     * has been accepted.
+     * @brief Update current state and stopping measures
     **********************************************************************************/
     void updateState()
     {
         this->evaluateObjective();
         this->evaluateConstraints();
         this->performContinuation();
+        mDataMng->computeStoppingMeasures();
         mDataMng->cacheState();
         this->printDiagnostics();
-    }
-
-    /******************************************************************************//**
-     * @brief Print algorithmic diagnostics.
-    **********************************************************************************/
-    void printDiagnostics()
-    {
-        const Plato::CommWrapper &tComm = mDataMng->getCommWrapper();
-        if (tComm.myProcID() == 0)
-        {
-            std::cout << "iteration = " << mIterationCount << ", objective = " << mDataMng->getCurrentObjectiveValue() << ", constraint = "
-                << mDataMng->getCurrentConstraintValue(0) << "\n";
-        }
     }
 
     /******************************************************************************//**
@@ -1522,18 +1709,29 @@ private:
     bool checkStoppingCriteria()
     {
         bool tStop = false;
-        mDataMng->computeNormObjectiveGradient();
-        mDataMng->computeControlStagnationMeasure();
+        const ScalarType tFeasibilityMeasure = mDataMng->getFeasibilityMeasure();
+        const ScalarType tOptimalityMeasure = mDataMng->getNormObjectiveGradient();
         const ScalarType tControlStagnation = mDataMng->getControlStagnationMeasure();
+        const ScalarType tObjectiveStagnation = mDataMng->getObjectiveStagnationMeasure();
 
         if(mIterationCount == mMaxNumIterations)
         {
             mStoppingCriterion = Plato::algorithm::MAX_NUMBER_ITERATIONS;
             tStop = true;
         }
-        else if(std::abs(tControlStagnation) <= mControlStagnationTol)
+        else if(tControlStagnation <= mControlStagnationTolerance)
         {
             mStoppingCriterion = Plato::algorithm::CONTROL_STAGNATION;
+            tStop = true;
+        }
+        else if(tObjectiveStagnation <= mObjectiveStagnationTolerance)
+        {
+            mStoppingCriterion = Plato::algorithm::OBJECTIVE_STAGNATION;
+            tStop = true;
+        }
+        else if(tOptimalityMeasure <= mOptimalityTolerance && tFeasibilityMeasure <= mFeasibilityTolerance)
+        {
+            mStoppingCriterion = Plato::algorithm::OPTIMALITY_AND_FEASIBILITY;
             tStop = true;
         }
 
@@ -1545,6 +1743,7 @@ private:
     std::ofstream mOutputStream; /*!< output string stream with diagnostics */
 
     OrdinalType mIterationCount; /*!< number of optimization iterations */
+    OrdinalType mNumObjFuncEvals; /*!< number of objective function evaluations */
     OrdinalType mMaxNumIterations; /*!< maximum number of optimization iterations */
     OrdinalType mProblemUpdateFrequency; /*!< problem update, i.e. continuation, frequency */
     OrdinalType mNumTrustRegionIterations; /*!< maximum number of trust region subproblem iterations */
@@ -1552,9 +1751,13 @@ private:
 
     ScalarType mInitialAugLagPenalty; /*!< initial augmented Lagragian penalty parameter */
     ScalarType mAugLagPenaltyReduction; /*!< augmented Lagragian penalty reduction parameter */
-    ScalarType mControlStagnationTol; /*!< control stagnation tolerance - secondary stopping tolerance */
-    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
+    ScalarType mOptimalityTolerance; /*!< tolerance on the norm of the objective gradient - primary stopping tolerance */
+    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance - primary stopping tolerance */
+    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance - secondary stopping tolerance */
+    ScalarType mObjectiveStagnationTolerance; /*!< objective stagnation tolerance - secondary stopping tolerance */
     Plato::algorithm::stop_t mStoppingCriterion; /*!< stopping criterion */
+
+    Plato::OutputDataMMA<ScalarType, OrdinalType> mOutputData; /*!< output data structure */
 
     std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mObjective; /*!< objective criterion interface */
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstraints; /*!< constraint criteria interface */
@@ -1604,6 +1807,139 @@ std::vector<double> get_topology_optimization_gold()
         0.1540314408, 0.922222503, 0.7825272514, 0.7965536156, 0.01444850231, 0.01, 0.01, 0.01, 0.01, 0.01016863972, 0.01175750541, 0.1550800289, 0.9349465177,
         1 };
     return tData;
+}
+
+TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsOneConstraints)
+{
+
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if (tComm.myProcID() == static_cast<int>(0))
+    {
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile1.txt");
+        Plato::OutputDataMMA<double> tData;
+        tData.mNumIter = 0;
+        tData.mObjFuncCount = 1;
+        tData.mObjFuncValue = 1.0;
+        tData.mNormObjFuncGrad = 4.5656e-3;
+        tData.mControlStagnationMeasure = 1.2345678e6;
+        tData.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
+        const size_t tNumConstraints = 1;
+        tData.mConstraints.resize(tNumConstraints);
+        tData.mConstraints[0] = 1.23e-5;
+
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics_header(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics(tData, tWriteFile));
+        tData.mNumIter = 1;
+        tData.mObjFuncCount = 3;
+        tData.mObjFuncValue = 0.298736;
+        tData.mNormObjFuncGrad = 3.45656e-1;
+        tData.mControlStagnationMeasure = 0.18743;
+        tData.mObjectiveStagnationMeasure = 0.7109;
+        tData.mConstraints[0] = 8.23e-2;
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics(tData, tWriteFile));
+        tWriteFile.close();
+        std::ifstream tReadFile;
+        tReadFile.open("MyFile1.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while (tReadFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
+        tReadFile.close();
+        std::system("rm -f MyFile1.txt");
+
+        std::stringstream tGold;
+        tGold << "IterF-countF(X)Norm(F')H1(X)abs(dX)abs(dF)";
+        tGold << "011.000000e+004.565600e-031.230000e-051.234568e+061.797693e+308";
+        tGold << "132.987360e-013.456560e-018.230000e-021.874300e-017.109000e-01";
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
+}
+
+TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsTwoConstraints)
+{
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if (tComm.myProcID() == static_cast<int>(0))
+    {
+        std::ofstream tWriteFile;
+        tWriteFile.open("MyFile1.txt");
+        Plato::OutputDataMMA<double> tData;
+        tData.mNumIter = 0;
+        tData.mObjFuncCount = 1;
+        tData.mObjFuncValue = 1.0;
+        tData.mNormObjFuncGrad = 4.5656e-3;
+        tData.mControlStagnationMeasure = 1.2345678e6;
+        tData.mObjectiveStagnationMeasure = std::numeric_limits<double>::max();
+        const size_t tNumConstraints = 2;
+        tData.mConstraints.resize(tNumConstraints);
+        tData.mConstraints[0] = 1.23e-5;
+        tData.mConstraints[1] = 3.33e-3;
+
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics_header(tData, tWriteFile));
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics(tData, tWriteFile));
+        tData.mNumIter = 1;
+        tData.mObjFuncCount = 3;
+        tData.mObjFuncValue = 0.298736;
+        tData.mNormObjFuncGrad = 3.45656e-1;
+        tData.mControlStagnationMeasure = 0.18743;
+        tData.mObjectiveStagnationMeasure = 0.7109;
+        tData.mConstraints[0] = 8.23e-2;
+        tData.mConstraints[1] = 8.33e-5;
+        ASSERT_NO_THROW(Plato::print_mma_diagnostics(tData, tWriteFile));
+        tWriteFile.close();
+
+         std::ifstream tReadFile;
+         tReadFile.open("MyFile1.txt");
+         std::string tInputString;
+         std::stringstream tReadData;
+         while(tReadFile >> tInputString)
+         {
+         tReadData << tInputString.c_str();
+         }
+         tReadFile.close();
+         std::system("rm -f MyFile1.txt");
+
+         std::stringstream tGold;
+         tGold << "IterF-countF(X)Norm(F')H1(X)H2(X)abs(dX)abs(dF)";
+         tGold << "011.000000e+004.565600e-031.230000e-053.330000e-031.234568e+061.797693e+308";
+         tGold << "132.987360e-013.456560e-018.230000e-028.330000e-051.874300e-017.109000e-01";
+         ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+    }
+}
+
+TEST(PlatoTest, MethodMovingAsymptotes_PrintStoppingCriterion)
+{
+    std::string tDescription;
+    Plato::algorithm::stop_t tFlag = Plato::algorithm::NOT_CONVERGED;
+    Plato::print_mma_stop_criterion(tFlag, tDescription);
+    std::string tGold("\n\n****** Optimization algorithm did not converge. ******\n\n");
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::OPTIMALITY_AND_FEASIBILITY;
+    Plato::print_mma_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to optimality and feasibility tolerance being met. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::MAX_NUMBER_ITERATIONS;
+    Plato::print_mma_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to exceeding maximum number of iterations. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::CONTROL_STAGNATION;
+    Plato::print_mma_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
+
+    tFlag = Plato::algorithm::OBJECTIVE_STAGNATION;
+    Plato::print_mma_stop_criterion(tFlag, tDescription);
+    tGold.clear();
+    tGold = "\n\n****** Optimization stopping due to objective stagnation. ******\n\n";
+    ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
 TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Objective)
