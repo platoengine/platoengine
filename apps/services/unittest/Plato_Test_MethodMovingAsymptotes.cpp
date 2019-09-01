@@ -2753,7 +2753,7 @@ private:
         ScalarType tOutput = 0.5;
         if(aOptionsNode.size<std::string>("MoveLimit"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "MoveLimit");
+            tOutput = Plato::Get::Double(aOptionsNode, "MoveLimit");
         }
         return (tOutput);
     }
@@ -2768,7 +2768,7 @@ private:
         ScalarType tOutput = 1.0;
         if(aOptionsNode.size<std::string>("InitialAugLagPenalty"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "InitialAugLagPenalty");
+            tOutput = Plato::Get::Double(aOptionsNode, "InitialAugLagPenalty");
         }
         return (tOutput);
     }
@@ -2783,7 +2783,7 @@ private:
         ScalarType tOutput = 1.2;
         if(aOptionsNode.size<std::string>("AsymptoteExpansion"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "AsymptoteExpansion");
+            tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteExpansion");
         }
         return (tOutput);
     }
@@ -2798,7 +2798,7 @@ private:
         ScalarType tOutput = 0.7;
         if(aOptionsNode.size<std::string>("AsymptoteContraction"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "AsymptoteContraction");
+            tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteContraction");
         }
         return (tOutput);
     }
@@ -2813,7 +2813,7 @@ private:
         ScalarType tOutput = 0.5;
         if(aOptionsNode.size<std::string>("InitialAymptoteScaling"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "InitialAymptoteScaling");
+            tOutput = Plato::Get::Double(aOptionsNode, "InitialAymptoteScaling");
         }
         return (tOutput);
     }
@@ -2828,7 +2828,7 @@ private:
         ScalarType tOutput = 0.1;
         if(aOptionsNode.size<std::string>("SubProblemBoundsScaling"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "SubProblemBoundsScaling");
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemBoundsScaling");
         }
         return (tOutput);
     }
@@ -2843,7 +2843,7 @@ private:
         ScalarType tOutput = 1e-6;
         if(aOptionsNode.size<std::string>("OptimalityTolerance"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "OptimalityTolerance");
+            tOutput = Plato::Get::Double(aOptionsNode, "OptimalityTolerance");
         }
         return (tOutput);
     }
@@ -2858,7 +2858,7 @@ private:
         ScalarType tOutput = 1e-4;
         if(aOptionsNode.size<std::string>("FeasibilityTolerance"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "FeasibilityTolerance");
+            tOutput = Plato::Get::Double(aOptionsNode, "FeasibilityTolerance");
         }
         return (tOutput);
     }
@@ -2873,7 +2873,7 @@ private:
         ScalarType tOutput = 1e-6;
         if(aOptionsNode.size<std::string>("ControlStagnationTolerance"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "ControlStagnationTolerance");
+            tOutput = Plato::Get::Double(aOptionsNode, "ControlStagnationTolerance");
         }
         return (tOutput);
     }
@@ -2888,7 +2888,7 @@ private:
         ScalarType tOutput = 1e-8;
         if(aOptionsNode.size<std::string>("ObjectiveStagnationTolerance"))
         {
-            tOutput = Plato::Get::Int(aOptionsNode, "ObjectiveStagnationTolerance");
+            tOutput = Plato::Get::Double(aOptionsNode, "ObjectiveStagnationTolerance");
         }
         return (tOutput);
     }
@@ -2935,9 +2935,134 @@ std::vector<double> get_topology_optimization_gold()
     return tData;
 }
 
+TEST(PlatoTest, MethodMovingAsymptotes_Parser)
+{
+    Plato::InputData tInputData;
+    EXPECT_TRUE(tInputData.empty());
+    ASSERT_STREQ("Input Data", tInputData.name().c_str());
+
+    Plato::MethodMovingAsymptotesParser<double> tParser;
+    Plato::AlgorithmInputsMMA<double> tInputsOne;
+    tParser.parse(tInputData, tInputsOne);
+
+    // ********* TEST: OPTIONS NODE NOT DEFINE -> USE DEFAULT PARAMETERS *********
+    EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
+    EXPECT_EQ(0u, tInputsOne.mUpdateFrequency);
+    EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
+    EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
+    EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
+
+    const double tTolerance = 1e-6;
+    EXPECT_NEAR(0.5, tInputsOne.mMoveLimit, tTolerance);
+    EXPECT_NEAR(1.2, tInputsOne.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.7, tInputsOne.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(1.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.5, tInputsOne.mInitialAymptoteScaling, tTolerance);
+    EXPECT_NEAR(0.1, tInputsOne.mSubProblemBoundsScaling, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsOne.mOptimalityTolerance, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsOne.mFeasibilityTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsOne.mControlStagnationTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
+
+    // ********* TEST: OPTIONS NODE DEFINED, BUT PARAMETERS NOT SPECIFIED -> USE DEFAULT PARAMETERS *********
+    Plato::InputData tOptions("Options");
+    EXPECT_TRUE(tOptions.empty());
+    tParser.parse(tOptions, tInputsOne);
+
+    EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
+    EXPECT_EQ(0u, tInputsOne.mUpdateFrequency);
+    EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
+    EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
+    EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
+
+    EXPECT_NEAR(0.5, tInputsOne.mMoveLimit, tTolerance);
+    EXPECT_NEAR(1.2, tInputsOne.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.7, tInputsOne.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(1.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.5, tInputsOne.mInitialAymptoteScaling, tTolerance);
+    EXPECT_NEAR(0.1, tInputsOne.mSubProblemBoundsScaling, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsOne.mOptimalityTolerance, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsOne.mFeasibilityTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsOne.mControlStagnationTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
+
+    // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptions.add<std::string>("UpdateFrequency", "5");
+    tOptions.add<std::string>("MaxNumSubProblemIter", "200");
+    tOptions.add<std::string>("MaxNumTrustRegionIter", "25");
+    tOptions.add<std::string>("MaxNumOuterIterations", "100");
+    tOptions.add<std::string>("MoveLimit", "0.55");
+    tOptions.add<std::string>("InitialAugLagPenalty", "2.0");
+    tOptions.add<std::string>("AsymptoteExpansion", "1.3");
+    tOptions.add<std::string>("AsymptoteContraction", "0.85");
+    tOptions.add<std::string>("InitialAymptoteScaling", "0.25");
+    tOptions.add<std::string>("SubProblemBoundsScaling", "0.2");
+    tOptions.add<std::string>("OptimalityTolerance", "1e-2");
+    tOptions.add<std::string>("FeasibilityTolerance", "1e-3");
+    tOptions.add<std::string>("ControlStagnationTolerance", "1e-5");
+    tOptions.add<std::string>("ObjectiveStagnationTolerance", "1e-4");
+    Plato::InputData tOptimizerNodeOne("OptimizerNode");
+    tOptimizerNodeOne.add<Plato::InputData>("Options", tOptions);
+
+    tParser.parse(tOptimizerNodeOne, tInputsOne);
+
+    EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
+    EXPECT_EQ(5u, tInputsOne.mUpdateFrequency);
+    EXPECT_EQ(100u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(25u, tInputsOne.mMaxNumTrustRegionIter);
+    EXPECT_EQ(200u, tInputsOne.mMaxNumSubProblemIter);
+    EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
+
+    EXPECT_NEAR(0.55, tInputsOne.mMoveLimit, tTolerance);
+    EXPECT_NEAR(1.3, tInputsOne.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.85, tInputsOne.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(2.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.25, tInputsOne.mInitialAymptoteScaling, tTolerance);
+    EXPECT_NEAR(0.2, tInputsOne.mSubProblemBoundsScaling, tTolerance);
+    EXPECT_NEAR(1e-2, tInputsOne.mOptimalityTolerance, tTolerance);
+    EXPECT_NEAR(1e-3, tInputsOne.mFeasibilityTolerance, tTolerance);
+    EXPECT_NEAR(1e-5, tInputsOne.mControlStagnationTolerance, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
+
+    // ********* TEST: SET A HANDFULL OF PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> A FEW DEFAULT VALUES ARE EXPECTED *********
+    Plato::InputData tOptionsTwo("Options");
+    tOptionsTwo.add<std::string>("OutputDiagnosticsToFile", "false");
+    tOptionsTwo.add<std::string>("UpdateFrequency", "5");
+    tOptionsTwo.add<std::string>("MaxNumSubProblemIter", "200");
+    tOptionsTwo.add<std::string>("MaxNumTrustRegionIter", "25");
+    tOptionsTwo.add<std::string>("MaxNumOuterIterations", "100");
+    tOptionsTwo.add<std::string>("MoveLimit", "0.55");
+    tOptionsTwo.add<std::string>("InitialAugLagPenalty", "2.0");
+    Plato::InputData tOptimizerNodeTwo("OptimizerNode");
+    tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
+    Plato::AlgorithmInputsMMA<double> tInputsTwo;
+
+    tParser.parse(tOptimizerNodeTwo, tInputsTwo);
+
+    EXPECT_FALSE(tInputsTwo.mPrintDiagnostics);
+    EXPECT_EQ(5u, tInputsTwo.mUpdateFrequency);
+    EXPECT_EQ(100u, tInputsTwo.mMaxNumSolverIter);
+    EXPECT_EQ(25u, tInputsTwo.mMaxNumTrustRegionIter);
+    EXPECT_EQ(200u, tInputsTwo.mMaxNumSubProblemIter);
+    EXPECT_EQ(Plato::MemorySpace::HOST, tInputsTwo.mMemorySpace);
+
+    EXPECT_NEAR(0.55, tInputsTwo.mMoveLimit, tTolerance);
+    EXPECT_NEAR(1.2, tInputsTwo.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.7, tInputsTwo.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(2.0, tInputsTwo.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.5, tInputsTwo.mInitialAymptoteScaling, tTolerance);
+    EXPECT_NEAR(0.1, tInputsTwo.mSubProblemBoundsScaling, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsTwo.mOptimalityTolerance, tTolerance);
+    EXPECT_NEAR(1e-4, tInputsTwo.mFeasibilityTolerance, tTolerance);
+    EXPECT_NEAR(1e-6, tInputsTwo.mControlStagnationTolerance, tTolerance);
+    EXPECT_NEAR(1e-8, tInputsTwo.mObjectiveStagnationTolerance, tTolerance);
+}
+
 TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsOneConstraints)
 {
-
     Plato::CommWrapper tComm(MPI_COMM_WORLD);
     if (tComm.myProcID() == static_cast<int>(0))
     {
