@@ -188,6 +188,10 @@ void print_mma_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType> &
     aOutputFile << aData.mControlStagnationMeasure << std::setw(15) << aData.mObjectiveStagnationMeasure << "\n" << std::flush;
 }
 
+/******************************************************************************//**
+ * @brief Metadata associated with approximation functions, see Svanberg, Krister.
+ * "MMA and GCMMA-two methods for nonlinear optimization." vol 1 (2007): 1-15.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct ApproximationFunctionData
 {
@@ -202,17 +206,25 @@ struct ApproximationFunctionData
     }
 
     ScalarType mCurrentNormalizedCriterionValue;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionP;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionQ;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionP; /*!< approximation function */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionQ; /*!< approximation function */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls; /*!< current optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes; /*!< current lower asymptotes */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes; /*!< current upper asymptotes */
 };
+// struct ApproximationFunctionData
 
+/******************************************************************************//**
+ * @brief Data manager for Method of Moving Asymptotes (MMA) optimization algorithm
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesNewDataMng
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory factory used to create internal data
+    **********************************************************************************/
     explicit MethodMovingAsymptotesNewDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mFeasibilityMeasure(std::numeric_limits<ScalarType>::max()),
         mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
@@ -250,7 +262,9 @@ public:
     {
         this->initialize(*aDataFactory);
     }
-
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~MethodMovingAsymptotesNewDataMng()
     {
     }
@@ -264,282 +278,519 @@ public:
         return (mComm.operator*());
     }
 
+    /******************************************************************************//**
+     * @brief Return number of constraints
+     * @return number of constraints
+    **********************************************************************************/
     OrdinalType getNumConstraints() const
     {
         const OrdinalType tNumConstraints = mCurrentConstraintValues->size();
         return tNumConstraints;
     }
 
+    /******************************************************************************//**
+     * @brief Return feasibility measure
+     * @return feasibility measure, maximum constraint residual
+    **********************************************************************************/
     ScalarType getFeasibilityMeasure() const
     {
         return mFeasibilityMeasure;
     }
 
+    /******************************************************************************//**
+     * @brief Return norm of the objective function
+     * @return norm of the objective function
+    **********************************************************************************/
     ScalarType getNormObjectiveGradient() const
     {
         return mNormObjectiveGradient;
     }
 
+    /******************************************************************************//**
+     * @brief Return control stagnation measure
+     * @return control stagnation measure
+    **********************************************************************************/
     ScalarType getControlStagnationMeasure() const
     {
         return mControlStagnationMeasure;
     }
 
+    /******************************************************************************//**
+     * @brief Return objective stagnation measure
+     * @return objective stagnation measure
+    **********************************************************************************/
     ScalarType getObjectiveStagnationMeasure() const
     {
         return mObjectiveStagnationMeasure;
     }
 
+    /******************************************************************************//**
+     * @brief Return current objective function value
+     * @return current objective function value
+    **********************************************************************************/
     ScalarType getCurrentObjectiveValue() const
     {
         return mCurrentObjectiveValue;
     }
 
+    /******************************************************************************//**
+     * @brief Set current objective function value
+     * @param [in] aValue current objective function value
+    **********************************************************************************/
     void setCurrentObjectiveValue(const ScalarType &aValue)
     {
         mCurrentObjectiveValue = aValue;
     }
 
+    /******************************************************************************//**
+     * @brief Return previous objective function value
+     * @return previous objective function value
+    **********************************************************************************/
     ScalarType getPreviousObjectiveValue() const
     {
         return mPreviousObjectiveValue;
     }
 
+    /******************************************************************************//**
+     * @brief Set previous objective function value
+     * @param [in] aValue previous objective function value
+    **********************************************************************************/
     void setPreviousObjectiveValue(const ScalarType &aValue)
     {
         mPreviousObjectiveValue = aValue;
     }
 
+    /******************************************************************************//**
+     * @brief Return constraint normalization value
+     * @param [in] aIndex constraint index
+     * @return constraint normalization value
+    **********************************************************************************/
     ScalarType getConstraintNormalization(const OrdinalType &aIndex) const
     {
         return ((*mConstraintNormalization)[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Set constraint normalization value
+     * @param [in] aIndex constraint index
+     * @param [in] aValue constraint normalization value
+    **********************************************************************************/
     void setConstraintNormalization(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mConstraintNormalization)[aIndex] = aValue;
     }
 
+    /******************************************************************************//**
+     * @brief Return current constraint value
+     * @param [in] aIndex constraint index
+     * @return current constraint value
+    **********************************************************************************/
     ScalarType getCurrentConstraintValue(const OrdinalType &aIndex) const
     {
         return ((*mCurrentConstraintValues)[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Set current constraint value
+     * @param [in] aIndex constraint index
+     * @param [in] aValue current constraint value
+    **********************************************************************************/
     void setCurrentConstraintValue(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mCurrentConstraintValues)[aIndex] = aValue;
     }
 
+    /******************************************************************************//**
+     * @brief Return previous constraint value
+     * @param [in] aIndex constraint index
+     * @return previous constraint value
+    **********************************************************************************/
     ScalarType getPreviousConstraintValues(const OrdinalType &aIndex) const
     {
         return ((*mPreviousConstraintValues)[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Set previous constraint value
+     * @param [in] aIndex constraint index
+     * @param [in] aValue previous constraint value
+    **********************************************************************************/
     void setPreviousConstraintValues(const OrdinalType &aIndex, const ScalarType &aValue)
     {
         (*mPreviousConstraintValues)[aIndex] = aValue;
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of lower asymptotes
+     * @return reference to 2D container of lower asymptotes
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getLowerAsymptotes()
     {
         return (*mLowerAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of lower asymptotes
+     * @return const reference to 2D container of lower asymptotes
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getLowerAsymptotes() const
     {
         return (*mLowerAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Set const reference to 2D container of lower asymptotes
+     * @param [in] aInput const reference to 2D container of lower asymptotes
+    **********************************************************************************/
     void setLowerAsymptotes(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mLowerAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of upper asymptotes
+     * @return reference to 2D container of upper asymptotes
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getUpperAsymptotes()
     {
         return (*mUpperAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of upper asymptotes
+     * @return const reference to 2D container of upper asymptotes
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getUpperAsymptotes() const
     {
         return (*mUpperAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Set const reference to 2D container of upper asymptotes
+     * @param [in] aInput const reference to 2D container of upper asymptotes
+    **********************************************************************************/
     void setUpperAsymptotes(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mUpperAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of objective approximation function one (P)
+     * @return reference to 2D container of objective approximation function one (P)
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getObjFuncAppxFunctionP()
     {
         return (*mObjFuncAppxFunctionP);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of objective approximation function one (P)
+     * @return const reference to 2D container of objective approximation function one (P)
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getObjFuncAppxFunctionP() const
     {
         return (*mObjFuncAppxFunctionP);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of objective approximation function two (Q)
+     * @return reference to 2D container of objective approximation function two (Q)
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getObjFuncAppxFunctionQ()
     {
         return (*mObjFuncAppxFunctionQ);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of objective approximation function two (Q)
+     * @return const reference to 2D container of objective approximation function two (Q)
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getObjFuncAppxFunctionQ() const
     {
         return (*mObjFuncAppxFunctionQ);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of constraint approximation function one (P)
+     * @param [in] aIndex constraint index
+     * @return reference to 2D container of constraint approximation function one (P)
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getConstraintAppxFunctionP(const OrdinalType & aIndex)
     {
         return (*mConstrAppxFunctionP)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of constraint approximation function one (P)
+     * @param [in] aIndex constraint index
+     * @return const reference to 2D container of constraint approximation function one (P)
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getConstraintAppxFunctionP(const OrdinalType & aIndex) const
     {
         return (*mConstrAppxFunctionP)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of constraint approximation function two (Q)
+     * @param [in] aIndex constraint index
+     * @return reference to 2D container of constraint approximation function two (Q)
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getConstraintAppxFunctionQ(const OrdinalType & aIndex)
     {
         return (*mConstrAppxFunctionQ)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of constraint approximation function two (Q)
+     * @param [in] aIndex constraint index
+     * @return const reference to 2D container of constraint approximation function two (Q)
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getConstraintAppxFunctionQ(const OrdinalType & aIndex) const
     {
         return (*mConstrAppxFunctionQ)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of current optimization variables
+     * @return reference to 2D container of current optimization variables
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getCurrentControls()
     {
         return (*mCurrentControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of current optimization variables
+     * @return const reference to 2D container of current optimization variables
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getCurrentControls() const
     {
         return (*mCurrentControls);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of current optimization variables
+     * @return const reference to 2D container of current optimization variables
+    **********************************************************************************/
     void setCurrentControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of previous optimization variables
+     * @return reference to 2D container of previous optimization variables
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getPreviousControls()
     {
         return (*mPreviousControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of previous optimization variables
+     * @return const reference to 2D container of previous optimization variables
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getPreviousControls() const
     {
         return (*mPreviousControls);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of previous optimization variables
+     * @return const reference to 2D container of previous optimization variables
+    **********************************************************************************/
     void setPreviousControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mPreviousControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of antepenultimate optimization variables
+     * @return reference to 2D container of antepenultimate optimization variables
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getAntepenultimateControls()
     {
         return (*mAntepenultimateControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of antepenultimate optimization variables
+     * @return const reference to 2D container of antepenultimate optimization variables
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getAntepenultimateControls() const
     {
         return (*mAntepenultimateControls);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of antepenultimate optimization variables
+     * @return const reference to 2D container of antepenultimate optimization variables
+    **********************************************************************************/
     void setAntepenultimateControls(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mAntepenultimateControls);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of lower bounds on optimization variables
+     * @return reference to 2D container of lower bounds on optimization variables
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getControlLowerBounds()
     {
         return (*mControlLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of lower bounds on optimization variables
+     * @return const reference to 2D container of lower bounds on optimization variables
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getControlLowerBounds() const
     {
         return (*mControlLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of lower bounds on optimization variables
+     * @return const reference to 2D container of lower bounds on optimization variables
+    **********************************************************************************/
     void setControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mControlLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of upper bounds on optimization variables
+     * @return reference to 2D container of upper bounds on optimization variables
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getControlUpperBounds()
     {
         return (*mControlUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of upper bounds on optimization variables
+     * @return const reference to 2D container of upper bounds on optimization variables
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getControlUpperBounds() const
     {
         return (*mControlUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of upper bounds on optimization variables
+     * @return const reference to 2D container of upper bounds on optimization variables
+    **********************************************************************************/
     void setControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mControlUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of lower bounds on optimization variables for MMA subproblem
+     * @return reference to 2D container of lower bounds on optimization variables for MMA subproblem
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getSubProblemControlLowerBounds()
     {
         return (*mSubProblemControlLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of lower bounds on optimization variables for MMA subproblem
+     * @return const reference to 2D container of lower bounds on optimization variables for MMA subproblem
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getSubProblemControlLowerBounds() const
     {
         return (*mSubProblemControlLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of upper bounds on optimization variables for MMA subproblem
+     * @return reference to 2D container of upper bounds on optimization variables for MMA subproblem
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getSubProblemControlUpperBounds()
     {
         return (*mSubProblemControlUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of upper bounds on optimization variables for MMA subproblem
+     * @return const reference to 2D container of upper bounds on optimization variables for MMA subproblem
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getSubProblemControlUpperBounds() const
     {
         return (*mSubProblemControlUpperBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of current objective function first-order sensitivities
+     * @return reference to 2D container of current objective function first-order sensitivities
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getCurrentObjectiveGradient()
     {
         return (*mCurrentObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of current objective function first-order sensitivities
+     * @return const reference to 2D container of current objective function first-order sensitivities
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getCurrentObjectiveGradient() const
     {
         return (*mCurrentObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of current objective function first-order sensitivities
+     * @return reference to 2D container ofcurrent  objective function first-order sensitivities
+    **********************************************************************************/
     void setCurrentObjectiveGradient(const Plato::MultiVector<ScalarType, OrdinalType>& aInput)
     {
         Plato::update(static_cast<ScalarType>(1), aInput, static_cast<ScalarType>(0), *mCurrentObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of previous objective function first-order sensitivities
+     * @return reference to 2D container of previous objective function first-order sensitivities
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getPreviousObjectiveGradient()
     {
         return (*mPreviousObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of previous objective function first-order sensitivities
+     * @return const reference to 2D container of previous objective function first-order sensitivities
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getPreviousObjectiveGradient() const
     {
         return (*mPreviousObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of current constraint first-order sensitivities
+     * @param [in] aIndex constraint index
+     * @return reference to 2D container of current constraint first-order sensitivities
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getCurrentConstraintGradient(const OrdinalType &aIndex)
     {
         return (*mCurrentConstraintGradients)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of current constraint first-order sensitivities
+     * @param [in] aIndex constraint index
+     * @return const reference to 2D container of current constraint first-order sensitivities
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getCurrentConstraintGradient(const OrdinalType &aIndex) const
     {
         return (*mCurrentConstraintGradients)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of current constraint first-order sensitivities
+     * @param [in] aIndex constraint index
+     * @param const reference to 2D container of current constraint first-order sensitivities
+    **********************************************************************************/
     void setCurrentConstraintGradient(const OrdinalType &aIndex, const Plato::MultiVector<ScalarType, OrdinalType>& aGradient)
     {
         if(aIndex >= mCurrentConstraintGradients->size())
@@ -552,16 +803,29 @@ public:
         Plato::update(static_cast<ScalarType>(1), aGradient, static_cast<ScalarType>(0), (*mCurrentConstraintGradients)[aIndex]);
     }
 
+    /******************************************************************************//**
+     * @brief Return reference to 2D container of previous constraint first-order sensitivities
+     * @param [in] aIndex constraint index
+     * @return reference to 2D container of previous constraint first-order sensitivities
+    **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType>& getPreviousConstraintGradient(const OrdinalType &aIndex)
     {
         return (*mPreviousConstraintGradients)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Return const reference to 2D container of previous constraint first-order sensitivities
+     * @param [in] aIndex constraint index
+     * @return const reference to 2D container of previous constraint first-order sensitivities
+    **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType>& getPreviousConstraintGradient(const OrdinalType &aIndex) const
     {
         return (*mPreviousConstraintGradients)[aIndex];
     }
 
+    /******************************************************************************//**
+     * @brief Cache current state, e.g. controls and objective and constraints values and gradients
+    **********************************************************************************/
     void cacheState()
     {
         Plato::update(static_cast<ScalarType>(1), *mPreviousControls, static_cast<ScalarType>(0), *mAntepenultimateControls);
@@ -581,6 +845,9 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Compute stopping measures
+    **********************************************************************************/
     void computeStoppingMeasures()
     {
         this->computeFeasibilityMeasure();
@@ -589,6 +856,9 @@ public:
         this->computeObjectiveStagnationMeasure();
     }
 
+    /******************************************************************************//**
+     * @brief Compute feasibility tolerance
+    **********************************************************************************/
     void computeFeasibilityMeasure()
     {
         mConstraintWork->update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0));
@@ -596,11 +866,17 @@ public:
         mFeasibilityMeasure = mDualReductionOps->max(*mConstraintWork);
     }
 
+    /******************************************************************************//**
+     * @brief Compute norm of the objective function gradient
+    **********************************************************************************/
     void computeNormObjectiveGradient()
     {
         mNormObjectiveGradient = Plato::norm(*mCurrentObjectiveGradient);
     }
 
+    /******************************************************************************//**
+     * @brief Compute control stagnation measure
+    **********************************************************************************/
     void computeControlStagnationMeasure()
     {
         OrdinalType tNumVectors = mCurrentControls->getNumVectors();
@@ -615,6 +891,9 @@ public:
         mControlStagnationMeasure = *std::max_element(tStorage.begin(), tStorage.end());
     }
 
+    /******************************************************************************//**
+     * @brief Compute objective stagnation measure
+    **********************************************************************************/
     void computeObjectiveStagnationMeasure()
     {
         mObjectiveStagnationMeasure = mCurrentObjectiveValue - mPreviousObjectiveValue;
@@ -622,6 +901,9 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Initialize internal metadata
+    **********************************************************************************/
     void initialize(const Plato::DataFactory<ScalarType, OrdinalType> &aDataFactory)
     {
         const OrdinalType tNumConstraints = this->getNumConstraints();
@@ -641,47 +923,52 @@ private:
     }
 
 private:
-    ScalarType mFeasibilityMeasure;
-    ScalarType mNormObjectiveGradient;
-    ScalarType mCurrentObjectiveValue;
-    ScalarType mPreviousObjectiveValue;
-    ScalarType mControlStagnationMeasure;
-    ScalarType mObjectiveStagnationMeasure;
-    ScalarType mCurrentNormalizedObjectiveValue;
+    ScalarType mFeasibilityMeasure; /*!< current feasibility measure */
+    ScalarType mNormObjectiveGradient; /*!< current norm of the objective function gradient */
+    ScalarType mCurrentObjectiveValue; /*!< current objective value */
+    ScalarType mPreviousObjectiveValue; /*!< previous objective value */
+    ScalarType mControlStagnationMeasure; /*!< current control stagnation measure */
+    ScalarType mObjectiveStagnationMeasure; /*!< current objective stagnation measure */
+    ScalarType mCurrentNormalizedObjectiveValue; /*!< current normalize objective value */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintWork;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintNormalization;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentConstraintValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousConstraintValues;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentNormalizedConstraintValue;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork; /*!< 1D container of optimization variables - work */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintWork; /*!< 1D container of constraint values - work */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mConstraintNormalization; /*!< 1D container of constraint normalization factors */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentConstraintValues; /*!< 1D container of current constraint values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mPreviousConstraintValues; /*!< 1D container of previous constraint values */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mCurrentNormalizedConstraintValue; /*!< 1D container of current normalized constraint values */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentObjectiveGradient;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousObjectiveGradient;
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mCurrentConstraintGradients;
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mPreviousConstraintGradients;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentObjectiveGradient; /*!< 2D container of current objective first-order sensitivities */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousObjectiveGradient; /*!< 2D container of previous objective first-order sensitivities */
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mCurrentConstraintGradients; /*!< 2D container of current constraint first-order sensitivities */
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mPreviousConstraintGradients; /*!< 2D container of previous constraint first-order sensitivities */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControls;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControls;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls; /*!< 2D container of current optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControls; /*!< 2D container of previous optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControls; /*!< 2D container of antepenultimate optimization variables */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes; /*!< 2D container of current lower asymptotes */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes; /*!< 2D container of current upper asymptotes */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlLowerBounds;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlUpperBounds;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mSubProblemControlLowerBounds;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mSubProblemControlUpperBounds;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlLowerBounds; /*!< 2D container of lower bounds on optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mControlUpperBounds; /*!< 2D container of upper bounds on optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mSubProblemControlLowerBounds; /*!< 2D container of lower bounds on optimization variables for MMA subproblem */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mSubProblemControlUpperBounds; /*!< 2D container of upper bounds on optimization variables for MMA subproblem */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjFuncAppxFunctionP;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjFuncAppxFunctionQ;
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionP;
-    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionQ;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjFuncAppxFunctionP; /*!< 2D container of objective approximation function one (P) */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mObjFuncAppxFunctionQ; /*!< 2D container of objective approximation function two (Q) */
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionP; /*!< 2D container of constraint approximation function one (P) */
+    std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mConstrAppxFunctionQ; /*!< 2D container of constraint approximation function two (Q) */
 
-    std::shared_ptr<Plato::CommWrapper> mComm;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOps;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps;
+    std::shared_ptr<Plato::CommWrapper> mComm; /*!< wrapper to MPI communicator */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mDualReductionOps; /*!< reduction operation interface for dual variables */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps; /*!< reduction operation interface for control variables */
+
+private:
+    MethodMovingAsymptotesNewDataMng(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & aRhs);
 };
+// class MethodMovingAsymptotesNewDataMng
 
 /******************************************************************************//**
  * Criterion interface to the approximation function used to solve the Method of
@@ -780,6 +1067,10 @@ public:
         return;
     }
 
+    /******************************************************************************//**
+     * Update approximation functions for the next subproblem iteration
+     * @param [in] aData struct with approximation function's data
+    ***********************************************************************************/
     void update(const Plato::ApproximationFunctionData<ScalarType, OrdinalType> &aData)
     {
         mCurrentNormalizedCriterionValue = aData.mCurrentNormalizedCriterionValue;
@@ -826,6 +1117,10 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * Evaluate approximation function
+     * @param [in] aControls optimization variables
+    ***********************************************************************************/
     ScalarType evaluateApproximationFunction(const Plato::MultiVector<ScalarType, OrdinalType> &aControls)
     {
         mControlWork1->fill(static_cast<ScalarType>(0));
@@ -866,6 +1161,11 @@ private:
         return (tOutput);
     }
 
+    /******************************************************************************//**
+     * Compute approximation function gradient
+     * @param [in] aControls optimization variables
+     * @param [out] aGradient approximation function gradient
+    ***********************************************************************************/
     void computeApproximationFunctionGradient(const Plato::MultiVector<ScalarType, OrdinalType> &aControls,
                                               Plato::MultiVector<ScalarType, OrdinalType> &aGradient)
     {
@@ -891,6 +1191,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * Compute approximation function gradient
+     * @param [in] aControls optimization variables
+     * @param [in] aVector descent direction
+     * @param [out] aHessTimesVec vector apply to approximation function's Hessian
+    ***********************************************************************************/
     void computeApproximationFunctionHessTimesVec(const Plato::MultiVector<ScalarType, OrdinalType> &aControls,
                                                   const Plato::MultiVector<ScalarType, OrdinalType> &aVector,
                                                   Plato::MultiVector<ScalarType, OrdinalType> &aHessTimesVec)
@@ -918,27 +1224,39 @@ private:
     }
 
 private:
-    ScalarType mAlpha;
-    ScalarType mBeta;
-    ScalarType mCurrentNormalizedCriterionValue;
+    ScalarType mAlpha; /*!< positive constant {0}\leq\alpha\leq{1} */
+    ScalarType mBeta; /*!< positive constant {0}\leq\beta\leq{1} */
+    ScalarType mCurrentNormalizedCriterionValue; /*!< current normalized objective function value */
 
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork1;
-    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork2;
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork1; /*!< optimization variables work vector one */
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWork2; /*!< optimization variables work vector two */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionP;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionQ;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionP; /*!< approximation function one (P) */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAppxFunctionQ; /*!< approximation function two (Q) */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControls; /*!< current optimization variables */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mLowerAsymptotes; /*!< current lower asymptotes */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperAsymptotes; /*!< current upper asymptotes */
 
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps;
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps; /*!< reduction operation interface for controls */
+
+private:
+    MethodMovingAsymptotesNewCriterion(const Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & aRhs);
 };
+// class MethodMovingAsymptotesNewCriterion
 
+/******************************************************************************//**
+ * @brief Main operations for the Method Moving Asymptotes (MMA) optimization algorithm
+ **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesOperations
 {
 public:
-    MethodMovingAsymptotesOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory factory used to allocate internal metadata
+     **********************************************************************************/
+    explicit MethodMovingAsymptotesOperations(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mMoveLimit(0.5),
         mApproxFuncEpsilon(1e-5),
         mAsymptoteExpansion(1.2),
@@ -952,40 +1270,71 @@ public:
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+     **********************************************************************************/
     ~MethodMovingAsymptotesOperations()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Set move limit
+     * @param [in] aInput move limit
+     **********************************************************************************/
     void setMoveLimit(const ScalarType& aInput)
     {
         mMoveLimit = aInput;
     }
 
-    void setAsymptoteExpansion(const ScalarType& aInput)
+    /******************************************************************************//**
+     * @brief Set moving asymptotes expansion parameter
+     * @param [in] aInput expansion parameter
+     **********************************************************************************/
+    void setAsymptoteExpansionParameter(const ScalarType& aInput)
     {
         mAsymptoteExpansion = aInput;
     }
 
-    void setAsymptoteContraction(const ScalarType& aInput)
+    /******************************************************************************//**
+     * @brief Set moving asymptotes contraction parameter
+     * @param [in] aInput contraction parameter
+     **********************************************************************************/
+    void setAsymptoteContractionParameter(const ScalarType& aInput)
     {
         mAsymptoteContraction = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set scaling for initial moving asymptotes
+     * @param [in] aInput scaling for initial moving asymptotes
+     **********************************************************************************/
     void setInitialAymptoteScaling(const ScalarType& aInput)
     {
         mInitialAymptoteScaling = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Gather 2D container of upper minus lower bounds
+     * @param [in] aData reference to 2D container
+     **********************************************************************************/
     void getUpperMinusLowerBounds(Plato::MultiVector<ScalarType, OrdinalType> &aData)
     {
         Plato::update(static_cast<ScalarType>(1), *mUpperMinusLowerBounds, static_cast<ScalarType>(0), aData);
     }
 
+    /******************************************************************************//**
+     * @brief Gather 2D container of current moving asymptotes multipliers
+     * @param [in] aData reference to 2D container of current moving asymptotes multipliers
+     **********************************************************************************/
     void getCurrentAsymptotesMultipliers(Plato::MultiVector<ScalarType, OrdinalType> &aData)
     {
         Plato::update(static_cast<ScalarType>(1), *mCurrentAsymptotesMultipliers, static_cast<ScalarType>(0), aData);
     }
 
+    /******************************************************************************//**
+     * @brief Set lower and upper bounds on the optimization variables
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void initialize(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tControlUpperBounds = aDataMng.getControlUpperBounds();
@@ -994,6 +1343,10 @@ public:
         Plato::update(static_cast<ScalarType>(-1), tControlLowerBounds, static_cast<ScalarType>(1), *mUpperMinusLowerBounds);
     }
 
+    /******************************************************************************//**
+     * @brief Update initial moving asymptotes
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateInitialAsymptotes(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
@@ -1006,6 +1359,10 @@ public:
         Plato::update(mInitialAymptoteScaling, *mUpperMinusLowerBounds, static_cast<ScalarType>(1), tUpperAsymptotes);
     }
 
+    /******************************************************************************//**
+     * @brief Update current moving asymptotes multipliers
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateCurrentAsymptotesMultipliers(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
@@ -1027,6 +1384,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update current moving asymptotes
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateCurrentAsymptotes(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
@@ -1050,6 +1411,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update current objective approximation functions
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateObjectiveApproximationFunctionData(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         ScalarType tNormalizationValue = std::abs(aDataMng.getCurrentObjectiveValue());
@@ -1074,6 +1439,10 @@ public:
                                             tAppxFunctionQ);
     }
 
+    /******************************************************************************//**
+     * @brief Update current constraint approximation functions
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateConstraintApproximationFunctionsData(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
@@ -1097,6 +1466,10 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Update subproblem upper and lower bounds
+     * @param [in] aDataMng MMA data manager interface
+     **********************************************************************************/
     void updateSubProblemBounds(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
@@ -1131,6 +1504,16 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Compute approximation functions
+     * @param [in] aNormalization normalization factor
+     * @param [in] aCurrentControls 2D container of current optimization variables
+     * @param [in] aLowerAsymptotes 2D container of current lower asymptotes
+     * @param [in] aUpperAsymptotes 2D container of current upper asymptotes
+     * @param [in] aCriterionGrad 2D container of current criterion gradient
+     * @param [in] aAppxFunctionP 2D container of the first approximation function values
+     * @param [in] aAppxFunctionQ 2D container of the second approximation function values
+     **********************************************************************************/
     void computeApproxFuncCoefficients(const ScalarType &aNormalization,
                                        const Plato::MultiVector<ScalarType, OrdinalType> &aCurrentControls,
                                        const Plato::MultiVector<ScalarType, OrdinalType> &aLowerAsymptotes,
@@ -1168,18 +1551,23 @@ private:
     }
 
 private:
-    ScalarType mMoveLimit;
-    ScalarType mApproxFuncEpsilon;
-    ScalarType mAsymptoteExpansion;
-    ScalarType mAsymptoteContraction;
-    ScalarType mApproxFuncScalingOne;
-    ScalarType mApproxFuncScalingTwo;
-    ScalarType mInitialAymptoteScaling;
-    ScalarType mSubProblemBoundsScaling;
+    ScalarType mMoveLimit; /*!< move limit */
+    ScalarType mApproxFuncEpsilon; /*!< approximation function epsilon */
+    ScalarType mAsymptoteExpansion; /*!< moving asymptotes expansion parameter */
+    ScalarType mAsymptoteContraction; /*!< moving asymptotes contraction parameter */
+    ScalarType mApproxFuncScalingOne; /*!< scaling factor for approximation function one */
+    ScalarType mApproxFuncScalingTwo; /*!< scaling factor for approximation function two */
+    ScalarType mInitialAymptoteScaling; /*!< scaling factor for initial moving asymptotes */
+    ScalarType mSubProblemBoundsScaling; /*!< scaling factor for subproblem upper and lower bounds */
 
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperMinusLowerBounds;
-    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentAsymptotesMultipliers;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mUpperMinusLowerBounds; /*!< 2D container */
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentAsymptotesMultipliers; /*!< 2D container of current moving asymptotes multipliers */
+
+private:
+    MethodMovingAsymptotesOperations(const Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType> & aRhs);
 };
+// class MethodMovingAsymptotesOperations
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class NullConstraint : public Plato::Criterion<ScalarType, OrdinalType>
@@ -1242,7 +1630,12 @@ public:
     {
         Plato::fill(0.0, aOutput);
     }
+
+private:
+    NullConstraint(const Plato::NullConstraint<ScalarType, OrdinalType> & aRhs);
+    Plato::NullConstraint<ScalarType, OrdinalType> & operator=(const Plato::NullConstraint<ScalarType, OrdinalType> & aRhs);
 };
+// class NullConstraint
 
 template<typename ScalarType, typename OrdinalType = size_t>
 class MethodMovingAsymptotesNew
@@ -1263,7 +1656,7 @@ public:
         mNumObjFuncEvals(0),
         mMaxNumIterations(100),
         mProblemUpdateFrequency(0),
-        mNumTrustRegionIterations(50),
+        mMaxNumTrustRegionIterations(50),
         mMaxNumSubProblemIterations(100),
         mInitialAugLagPenalty(1),
         mAugLagPenaltyReduction(1.1),
@@ -1290,6 +1683,34 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Return optimization iteration count
+     * @return optimization iteration count
+    **********************************************************************************/
+    OrdinalType getNumIterations() const
+    {
+        return mIterationCount;
+    }
+
+    /******************************************************************************//**
+     * @brief Return optimal objective function value
+     * @return optimal objective function value
+    **********************************************************************************/
+    ScalarType getOptimalObjectiveValue() const
+    {
+        return (mDataMng->getCurrentObjectiveValue());
+    }
+
+    /******************************************************************************//**
+     * @brief Return optimal constraint value
+     * @param constraint index
+     * @return optimal constraint value
+    **********************************************************************************/
+    ScalarType getOptimalConstraintValue(const OrdinalType& aIndex) const
+    {
+        return (mDataMng->getCurrentConstraintValue(aIndex));
+    }
+
+    /******************************************************************************//**
      * @brief Print algorithm's diagnostics (i.e. optimization problem status)
      * @param [in] aInput print diagnostics if true; if false, do not print diagnostics.
     **********************************************************************************/
@@ -1298,6 +1719,9 @@ public:
         mPrintDiagnostics = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Enable bound constraint optimization
+    **********************************************************************************/
     void enableBoundConstrainedOptimization()
     {
         const OrdinalType tNumConstraints = mConstraints->size();
@@ -1308,109 +1732,163 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of iterations
+     * @param [in] aInput maximum number of iterations
+    **********************************************************************************/
     void setMaxNumIterations(const OrdinalType& aInput)
     {
         mMaxNumIterations = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set update problem, i.e. continuation, frequency
+     * @param [in] aInput update problem, i.e. continuation, frequency
+    **********************************************************************************/
     void setProblemUpdateFrequency(const OrdinalType& aInput)
     {
         mProblemUpdateFrequency = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of subproblem iterations
+     * @param [in] aInput maximum number of subproblem iterations
+    **********************************************************************************/
     void setMaxNumSubProblemIterations(const OrdinalType& aInput)
     {
         mMaxNumSubProblemIterations = aInput;
     }
 
-    void setNumTrustRegionIterations(const OrdinalType& aInput)
+    void setMaxNumTrustRegionIterations(const OrdinalType& aInput)
     {
-        mNumTrustRegionIterations = aInput;
+        mMaxNumTrustRegionIterations = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of trust region iterations
+     * @param [in] aInput maximum number of trust region iterations
+    **********************************************************************************/
     void setMoveLimit(const ScalarType& aInput)
     {
         mOperations->setMoveLimit(aInput);
     }
 
-    void setAsymptoteExpansion(const ScalarType& aInput)
+    /******************************************************************************//**
+     * @brief Set moving asymptotes expansion parameter
+     * @param [in] aInput moving asymptotes expansion parameter
+    **********************************************************************************/
+    void setAsymptoteExpansionParameter(const ScalarType& aInput)
     {
-        mOperations->setAsymptoteExpansion(aInput);
+        mOperations->setAsymptoteExpansionParameter(aInput);
     }
 
-    void setAsymptoteContraction(const ScalarType& aInput)
+    /******************************************************************************//**
+     * @brief Set moving asymptotes contraction parameter
+     * @param [in] aInput moving asymptotes contraction parameter
+    **********************************************************************************/
+    void setAsymptoteContractionParameter(const ScalarType& aInput)
     {
-        mOperations->setAsymptoteContraction(aInput);
+        mOperations->setAsymptoteContractionParameter(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set scaling on initial moving asymptotes
+     * @param [in] aInput scaling on initial moving asymptotes
+    **********************************************************************************/
     void setInitialAymptoteScaling(const ScalarType& aInput)
     {
         mOperations->setInitialAymptoteScaling(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set initial penalty on Augmented Lagrangian function
+     * @param [in] aInput initial penalty on Augmented Lagrangian function
+    **********************************************************************************/
     void setInitialAugLagPenalty(const ScalarType& aInput)
     {
         mInitialAugLagPenalty = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set reduction parameter for augmented Lagrangian penalty
+     * @param [in] aInput reduction parameter for augmented Lagrangian penalty
+    **********************************************************************************/
     void setAugLagPenaltyReduction(const ScalarType& aInput)
     {
         mAugLagPenaltyReduction = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set feasibility tolerance
+     * @param [in] aInput feasibility tolerance
+    **********************************************************************************/
     void setFeasibilityTolerance(const ScalarType& aInput)
     {
         mFeasibilityTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set control stagnation tolerance
+     * @param [in] aInput control stagnation tolerance
+    **********************************************************************************/
     void setControlStagnationTolerance(const ScalarType& aInput)
     {
         mControlStagnationTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set objective function stagnation tolerance
+     * @param [in] aInput objective function stagnation tolerance
+    **********************************************************************************/
     void setObjectiveStagnationTolerance(const ScalarType& aInput)
     {
         mObjectiveStagnationTolerance = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of lower bound on optimization variables
+     * @param [in] aInput const reference 2D container of lower bound on optimization variables
+    **********************************************************************************/
     void setControlLowerBounds(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
     {
         mDataMng->setControlLowerBounds(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of upper bound on optimization variables
+     * @param [in] aInput const reference 2D container of upper bound on optimization variables
+    **********************************************************************************/
     void setControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
     {
         mDataMng->setControlUpperBounds(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set 2D container of initial optimization variables
+     * @param [in] aInput 2D container of initial optimization variables
+    **********************************************************************************/
     void setInitialGuess(const Plato::MultiVector<ScalarType, OrdinalType> &aInput)
     {
         mDataMng->setCurrentControls(aInput);
     }
 
+    /******************************************************************************//**
+     * @brief Set constraint normalization values
+     * @param [in] aIndex constraint index
+     * @param [in] aInput constraint normalization values
+    **********************************************************************************/
     void setConstraintNormalization(const OrdinalType & aIndex, const ScalarType & aValue)
     {
         mDataMng->setConstraintNormalization(aIndex, aValue);
     }
 
+    /******************************************************************************//**
+     * @brief Gather 2D container of optimal optimization variables
+     * @param [in] aInput 2D container of optimal optimization variables
+    **********************************************************************************/
     void getSolution(Plato::MultiVector<ScalarType, OrdinalType>& aInput) const
     {
         mSubProblemSolver->getSolution(aInput);
-    }
-
-    OrdinalType getNumIterations() const
-    {
-        return mIterationCount;
-    }
-
-    ScalarType getOptimalObjectiveValue() const
-    {
-        return (mDataMng->getCurrentObjectiveValue());
-    }
-
-    ScalarType getOptimalConstraintValue(const OrdinalType& aIndex) const
-    {
-        return (mDataMng->getCurrentConstraintValue(aIndex));
     }
 
     /******************************************************************************//**
@@ -1460,7 +1938,7 @@ private:
         mSubProblemSolver->setControlStagnationTolerance(mControlStagnationTolerance);
         mSubProblemSolver->setMaxNumOuterIterations(mMaxNumSubProblemIterations);
         mSubProblemSolver->setPenaltyParameterScaleFactor(mAugLagPenaltyReduction);
-        mSubProblemSolver->setMaxNumTrustRegionSubProblemIterations(mNumTrustRegionIterations);
+        mSubProblemSolver->setMaxNumTrustRegionSubProblemIterations(mMaxNumTrustRegionIterations);
     }
 
     /******************************************************************************//**
@@ -1746,7 +2224,7 @@ private:
     OrdinalType mNumObjFuncEvals; /*!< number of objective function evaluations */
     OrdinalType mMaxNumIterations; /*!< maximum number of optimization iterations */
     OrdinalType mProblemUpdateFrequency; /*!< problem update, i.e. continuation, frequency */
-    OrdinalType mNumTrustRegionIterations; /*!< maximum number of trust region subproblem iterations */
+    OrdinalType mMaxNumTrustRegionIterations; /*!< maximum number of trust region subproblem iterations */
     OrdinalType mMaxNumSubProblemIterations; /*!< maximum number of MMA subproblem iterations iterations */
 
     ScalarType mInitialAugLagPenalty; /*!< initial augmented Lagragian penalty parameter */
@@ -1770,6 +2248,10 @@ private:
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstrAppxFuncList; /*!< list of constraint criteria */
     std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>> mObjAppxFunc; /*!< objective criterion approximation function */
     std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs; /*!< list of constraint criteria approximation function */
+
+private:
+    MethodMovingAsymptotesNew(const Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aRhs);
 };
 // class MethodMovingAsymptotesNew
 
@@ -2350,12 +2832,12 @@ TEST(PlatoTest, MethodMovingAsymptotes_5Bars)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(27u, tAlgorithm.getNumIterations());
-    ASSERT_NEAR(1.34, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_EQ(28u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(1.33996, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
     tAlgorithm.getSolution(tData);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = 6.00792; tGold(0,1) = 5.3093769; tGold(0,2) = 4.4977; tGold(0,3) = 3.5053559; tGold(0,4) = 2.15340156;
+    tGold(0,0) = 6.007921063; tGold(0,1) = 5.309376913; tGold(0,2) = 4.497699841; tGold(0,3) = 3.505355435; tGold(0,4) = 2.15340137;
     PlatoTest::checkMultiVectorData(tGold, tData);
 
     // ********* PRINT SOLUTION *********
@@ -2398,7 +2880,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_RosenbrockRadius)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(35u, tAlgorithm.getNumIterations());
+    ASSERT_EQ(36u, tAlgorithm.getNumIterations());
     ASSERT_NEAR(0.0456733, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
     tAlgorithm.getSolution(tData);
@@ -2446,12 +2928,12 @@ TEST(PlatoTest, MethodMovingAsymptotes_HimmelblauShiftedEllipse)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(26u, tAlgorithm.getNumIterations());
-    ASSERT_NEAR(11.804, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_EQ(27u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(11.8039164, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
     tAlgorithm.getSolution(tData);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = -3.99832678; tGold(0,1) = -2.878447094;
+    tGold(0,0) = -3.99832364; tGold(0,1) = -2.878447094;
     PlatoTest::checkMultiVectorData(tGold, tData);
 
     // ********* PRINT SOLUTION *********
@@ -2494,7 +2976,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_GoldsteinPriceShiftedEllipse)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(18u, tAlgorithm.getNumIterations());
+    ASSERT_EQ(19u, tAlgorithm.getNumIterations());
     ASSERT_NEAR(3, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 5e-4);
     tAlgorithm.getSolution(tData);
@@ -2541,8 +3023,8 @@ TEST(PlatoTest, MethodMovingAsymptotes_CircleRadius)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(18u, tAlgorithm.getNumIterations());
-    ASSERT_NEAR(2.67798, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
+    ASSERT_EQ(19u, tAlgorithm.getNumIterations());
+    ASSERT_NEAR(2.677976067, tAlgorithm.getOptimalObjectiveValue(), tTolerance);
     ASSERT_TRUE(std::abs(tAlgorithm.getOptimalConstraintValue(0)) < 1e-4);
     tAlgorithm.getSolution(tData);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
@@ -2610,8 +3092,8 @@ TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
     tAlgorithm.setControlLowerBounds(tControlData);
     tAlgorithm.setMaxNumIterations(50);
     tAlgorithm.setConstraintNormalization(0, 4.0);
-    tAlgorithm.setAsymptoteExpansion(1.001);
-    tAlgorithm.setAsymptoteContraction(0.999);
+    tAlgorithm.setAsymptoteExpansionParameter(1.001);
+    tAlgorithm.setAsymptoteContractionParameter(0.999);
     tAlgorithm.solve();
 
     // ********* TEST SOLUTION *********
