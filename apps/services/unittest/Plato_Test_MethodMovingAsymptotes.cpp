@@ -94,6 +94,22 @@ namespace Plato
 {
 
 /******************************************************************************//**
+ * @brief Return memory space
+ * @param [in] aInput memory space keyword
+ * @return memory space, default = HOST
+**********************************************************************************/
+Plato::MemorySpace::type_t memory_space(const std::string& aInput)
+{
+    Plato::MemorySpace::type_t tOutput = Plato::MemorySpace::HOST;
+    if(std::strcmp(aInput.c_str(), "DEVICE") == 0)
+    {
+        tOutput = Plato::MemorySpace::DEVICE;
+    }
+    return (tOutput);
+}
+// function memory_space
+
+/******************************************************************************//**
  * @brief Check inputs for MMA algorithm diagnostics
  * @param [in] aData diagnostic data for MMA algorithm
  * @param [in] aOutputFile output file
@@ -2647,6 +2663,7 @@ private:
         if(aOptimizerNode.size<Plato::InputData>("Options"))
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mMemorySpace = this->memorySpace(tOptionsNode);
             aData.mPrintDiagnostics = this->outputDiagnostics(tOptionsNode);
 
             aData.mUpdateFrequency = this->updateFrequency(tOptionsNode);
@@ -2681,6 +2698,22 @@ private:
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
         }
         return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse memory space keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return memory space, default = HOST
+    **********************************************************************************/
+    Plato::MemorySpace::type_t memorySpace(const Plato::InputData & aOptionsNode)
+    {
+        std::string tInput("HOST");
+        if(aOptionsNode.size<std::string>("MemorySpace"))
+        {
+            tInput = Plato::Get::String(aOptionsNode, "MemorySpace", true);
+        }
+        Plato::MemorySpace::type_t tOutput = Plato::memory_space(tInput);
+        return (tOutput);
     }
 
     /******************************************************************************//**
@@ -2989,6 +3022,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(1e-8, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
 
     // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
+    tOptions.add<std::string>("MemorySpace", "Device");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptions.add<std::string>("UpdateFrequency", "5");
     tOptions.add<std::string>("MaxNumSubProblemIter", "200");
@@ -3014,7 +3048,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_EQ(100u, tInputsOne.mMaxNumSolverIter);
     EXPECT_EQ(25u, tInputsOne.mMaxNumTrustRegionIter);
     EXPECT_EQ(200u, tInputsOne.mMaxNumSubProblemIter);
-    EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
+    EXPECT_EQ(Plato::MemorySpace::DEVICE, tInputsOne.mMemorySpace);
 
     EXPECT_NEAR(0.55, tInputsOne.mMoveLimit, tTolerance);
     EXPECT_NEAR(1.3, tInputsOne.mAsymptoteExpansion, tTolerance);
