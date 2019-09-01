@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_Test_MethodMovingAsymptotesNew.cpp
+ * Plato_Test_MethodMovingAsymptotes.cpp
  *
  *  Created on: Jul 21, 2019
  */
@@ -117,9 +117,7 @@ Plato::MemorySpace::type_t memory_space(const std::string& aInput)
 // function memory_space
 
 /******************************************************************************//**
- *
  * @brief Diagnostic data for the Method of Moving Asymptotes (MMA) algorithm.
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct OutputDataMMA
@@ -304,14 +302,14 @@ struct ApproximationFunctionData
  * @brief Data manager for Method of Moving Asymptotes (MMA) optimization algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesNewDataMng
+class MethodMovingAsymptotesDataMng
 {
 public:
     /******************************************************************************//**
      * @brief Constructor
      * @param [in] aDataFactory factory used to create internal data
     **********************************************************************************/
-    explicit MethodMovingAsymptotesNewDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+    explicit MethodMovingAsymptotesDataMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mFeasibilityMeasure(std::numeric_limits<ScalarType>::max()),
         mNormObjectiveGradient(std::numeric_limits<ScalarType>::max()),
         mCurrentObjectiveValue(std::numeric_limits<ScalarType>::max()),
@@ -351,7 +349,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    ~MethodMovingAsymptotesNewDataMng()
+    ~MethodMovingAsymptotesDataMng()
     {
     }
 
@@ -1069,10 +1067,10 @@ private:
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps; /*!< reduction operation interface for control variables */
 
 private:
-    MethodMovingAsymptotesNewDataMng(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & aRhs);
-    Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType> & aRhs);
+    MethodMovingAsymptotesDataMng(const Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType> & aRhs);
 };
-// class MethodMovingAsymptotesNewDataMng
+// class MethodMovingAsymptotesDataMng
 
 /******************************************************************************//**
  * Criterion interface to the approximation function used to solve the Method of
@@ -1118,14 +1116,14 @@ private:
  *
 ***********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesNewCriterion : public Plato::Criterion<ScalarType, OrdinalType>
+class MethodMovingAsymptotesCriterion : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
      * Constructor
      * @param [in] aDataFactory constant reference to the core data factory shared pointer.
     ***********************************************************************************/
-    explicit MethodMovingAsymptotesNewCriterion(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
+    explicit MethodMovingAsymptotesCriterion(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mObjFuncAppxFuncMultiplier(1),
         mConstraintAppxFuncMultiplier(1),
         mCurrentNormalizedCriterionValue(0),
@@ -1143,7 +1141,7 @@ public:
     /******************************************************************************//**
      * Destructor
     ***********************************************************************************/
-    ~MethodMovingAsymptotesNewCriterion()
+    ~MethodMovingAsymptotesCriterion()
     {
     }
 
@@ -1346,10 +1344,10 @@ private:
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOps; /*!< reduction operation interface for controls */
 
 private:
-    MethodMovingAsymptotesNewCriterion(const Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & aRhs);
-    Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType> & aRhs);
+    MethodMovingAsymptotesCriterion(const Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType> & aRhs);
 };
-// class MethodMovingAsymptotesNewCriterion
+// class MethodMovingAsymptotesCriterion
 
 /******************************************************************************//**
  * @brief Main operations for the Method Moving Asymptotes (MMA) optimization algorithm
@@ -1450,7 +1448,7 @@ public:
      * @brief Set lower and upper bounds on the optimization variables
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void initialize(const Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void initialize(const Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tControlUpperBounds = aDataMng.getControlUpperBounds();
         Plato::update(static_cast<ScalarType>(1), tControlUpperBounds, static_cast<ScalarType>(0), *mUpperMinusLowerBounds);
@@ -1462,7 +1460,7 @@ public:
      * @brief Update initial moving asymptotes
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateInitialAsymptotes(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateInitialAsymptotes(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
         Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
@@ -1478,7 +1476,7 @@ public:
      * @brief Update current moving asymptotes multipliers
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateCurrentAsymptotesMultipliers(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateCurrentAsymptotesMultipliers(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
         const Plato::MultiVector<ScalarType, OrdinalType> &tPreviousControls = aDataMng.getPreviousControls();
@@ -1503,7 +1501,7 @@ public:
      * @brief Update current moving asymptotes
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateCurrentAsymptotes(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateCurrentAsymptotes(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
         Plato::MultiVector<ScalarType, OrdinalType> &tUpperAsymptotes = aDataMng.getUpperAsymptotes();
@@ -1530,7 +1528,7 @@ public:
      * @brief Update current objective approximation functions
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateObjectiveApproximationFunctionData(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateObjectiveApproximationFunctionData(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         ScalarType tNormalizationValue = std::abs(aDataMng.getCurrentObjectiveValue());
         if(tNormalizationValue <= std::numeric_limits<ScalarType>::epsilon())
@@ -1558,7 +1556,7 @@ public:
      * @brief Update current constraint approximation functions
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateConstraintApproximationFunctionsData(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateConstraintApproximationFunctionsData(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
         const Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
@@ -1585,7 +1583,7 @@ public:
      * @brief Update subproblem upper and lower bounds
      * @param [in] aDataMng MMA data manager interface
      **********************************************************************************/
-    void updateSubProblemBounds(Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>& aDataMng)
+    void updateSubProblemBounds(Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>& aDataMng)
     {
         const Plato::MultiVector<ScalarType, OrdinalType> &tCurrentControls = aDataMng.getCurrentControls();
         const Plato::MultiVector<ScalarType, OrdinalType> &tLowerAsymptotes = aDataMng.getLowerAsymptotes();
@@ -1753,7 +1751,7 @@ private:
 // class NullConstraint
 
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesNew
+class MethodMovingAsymptotes
 {
 public:
     /******************************************************************************//**
@@ -1762,7 +1760,7 @@ public:
      * @param [in] aConstraints list of constraint criteria interfaces
      * @param [in] aDataFactory data factory used to allocate core data structure
     **********************************************************************************/
-    MethodMovingAsymptotesNew(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> &aObjective,
+    MethodMovingAsymptotes(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> &aObjective,
                               const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> &aConstraints,
                               const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory) :
         mPrintDiagnostics(false),
@@ -1783,7 +1781,7 @@ public:
         mObjective(aObjective),
         mConstraints(aConstraints),
         mMMAData(std::make_shared<Plato::ApproximationFunctionData<ScalarType, OrdinalType>>(aDataFactory)),
-        mDataMng(std::make_shared<Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>>(aDataFactory)),
+        mDataMng(std::make_shared<Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>>(aDataFactory)),
         mOperations(std::make_shared<Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType>>(aDataFactory)),
         mConstrAppxFuncList(std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>())
     {
@@ -1793,7 +1791,7 @@ public:
     /******************************************************************************//**
      * @brief Destructor
     **********************************************************************************/
-    ~MethodMovingAsymptotesNew()
+    ~MethodMovingAsymptotes()
     {
     }
 
@@ -2142,11 +2140,11 @@ private:
     **********************************************************************************/
     void initializeApproximationFunctions(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
     {
-        mObjAppxFunc = std::make_shared<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>(aDataFactory);
+        mObjAppxFunc = std::make_shared<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>>(aDataFactory);
         const OrdinalType tNumConstraints = mConstraints->size();
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
-            mConstrAppxFuncs.push_back(std::make_shared<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>(aDataFactory));
+            mConstrAppxFuncs.push_back(std::make_shared<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>>(aDataFactory));
             mConstrAppxFuncList->add(mConstrAppxFuncs[tIndex]);
         }
     }
@@ -2438,18 +2436,18 @@ private:
 
     std::shared_ptr<Plato::ApproximationFunctionData<ScalarType, OrdinalType>> mMMAData; /*!< structure with approximation function's data */
     std::shared_ptr<Plato::AugmentedLagrangian<ScalarType, OrdinalType>> mSubProblemSolver; /*!< MMA subproblem solver */
-    std::shared_ptr<Plato::MethodMovingAsymptotesNewDataMng<ScalarType, OrdinalType>> mDataMng; /*!< MMA data manager */
+    std::shared_ptr<Plato::MethodMovingAsymptotesDataMng<ScalarType, OrdinalType>> mDataMng; /*!< MMA data manager */
     std::shared_ptr<Plato::MethodMovingAsymptotesOperations<ScalarType, OrdinalType>> mOperations; /*!< interface to MMA core operations */
 
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> mConstrAppxFuncList; /*!< list of constraint criteria */
-    std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>> mObjAppxFunc; /*!< objective criterion approximation function */
-    std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesNewCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs; /*!< list of constraint criteria approximation function */
+    std::shared_ptr<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>> mObjAppxFunc; /*!< objective criterion approximation function */
+    std::vector<std::shared_ptr<Plato::MethodMovingAsymptotesCriterion<ScalarType, OrdinalType>>> mConstrAppxFuncs; /*!< list of constraint criteria approximation function */
 
 private:
-    MethodMovingAsymptotesNew(const Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aRhs);
-    Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aRhs);
+    MethodMovingAsymptotes(const Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aRhs);
+    Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aRhs);
 };
-// class MethodMovingAsymptotesNew
+// class MethodMovingAsymptotes
 
 
 /******************************************************************************//**
@@ -2561,7 +2559,7 @@ struct AlgorithmInputsMMA
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
-                                     Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aAlgorithm)
+                                     Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm)
 {
     if(aInputs.mPrintDiagnostics == true)
     {
@@ -2598,7 +2596,7 @@ inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType,
  * @param [in,out] aOutputs Method of Moving Asymptotes algorithm outputs
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-inline void set_mma_algorithm_outputs(const Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> & aAlgorithm,
+inline void set_mma_algorithm_outputs(const Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm,
                                       Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
 {
     aAlgorithm.getSolution(*aOutputs.mSolution);
@@ -2639,7 +2637,7 @@ inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, Ordinal
     tDataFactory->allocateControlReductionOperations(*aInputs.mControlReductionOperations);
 
     // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE OPTIMIZATION PROBLEM *********
-    Plato::MethodMovingAsymptotesNew<ScalarType, OrdinalType> tAlgorithm(aObjective, aConstraints, tDataFactory);
+    Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> tAlgorithm(aObjective, aConstraints, tDataFactory);
     Plato::set_mma_algorithm_inputs(aInputs, tAlgorithm);
     tAlgorithm.solve();
 
@@ -3560,7 +3558,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_PrintStoppingCriterion)
     ASSERT_STREQ(tDescription.c_str(), tGold.c_str());
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Objective)
+TEST(PlatoTest, MethodMovingAsymptotesCriterion_Objective)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
@@ -3574,7 +3572,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Objective)
     Plato::fill(-5.0, *tAppxFuncCoreData.mLowerAsymptotes);
     tAppxFuncCoreData.mCurrentNormalizedCriterionValue = 1;
 
-    Plato::MethodMovingAsymptotesNewCriterion<double> tAppxFunction(tDataFactory);
+    Plato::MethodMovingAsymptotesCriterion<double> tAppxFunction(tDataFactory);
     tAppxFunction.setConstraintAppxFuncMultiplier(0.0);
     tAppxFunction.update(tAppxFuncCoreData);
 
@@ -3599,7 +3597,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Objective)
     }
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Constraint)
+TEST(PlatoTest, MethodMovingAsymptotesCriterion_Constraint)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
@@ -3613,7 +3611,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Constraint)
     Plato::fill(-5.0, *tAppxFuncCoreData.mLowerAsymptotes);
     tAppxFuncCoreData.mCurrentNormalizedCriterionValue = 1;
 
-    Plato::MethodMovingAsymptotesNewCriterion<double> tAppxFunction(tDataFactory);
+    Plato::MethodMovingAsymptotesCriterion<double> tAppxFunction(tDataFactory);
     tAppxFunction.update(tAppxFuncCoreData);
 
     // TEST GRADIENT
@@ -3637,14 +3635,14 @@ TEST(PlatoTest, MethodMovingAsymptotesNewCriterion_Constraint)
     }
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_initialize)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_initialize)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     tDataFactory->allocateControl(tNumControls);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(0.25, tData);
     tDataMng.setControlLowerBounds(tData);
@@ -3663,14 +3661,14 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_initialize)
     PlatoTest::checkMultiVectorData(tData, tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateInitialAsymptotes)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateInitialAsymptotes)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     tDataFactory->allocateControl(tNumControls);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(1.0, tData);
     tDataMng.setCurrentControls(tData);
@@ -3694,14 +3692,14 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateInitialAsymptotes)
     PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateCurrentAsymptotesMultipliers)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateCurrentAsymptotesMultipliers)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     tDataFactory->allocateControl(tNumControls);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(1.0, tData);
     tDataMng.setCurrentControls(tData);
@@ -3734,14 +3732,14 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateCurrentAsymptotesMulti
     PlatoTest::checkMultiVectorData(tData, tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateCurrentAsymptotes)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateCurrentAsymptotes)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     tDataFactory->allocateControl(tNumControls);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(0.625, tData);
     tDataMng.setLowerAsymptotes(tData);
@@ -3772,14 +3770,14 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateCurrentAsymptotes)
     PlatoTest::checkMultiVectorData(tDataMng.getUpperAsymptotes(), tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateSubProblemBounds)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateSubProblemBounds)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
     tDataFactory->allocateControl(tNumControls);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(0.625, tData);
     tDataMng.setLowerAsymptotes(tData);
@@ -3809,7 +3807,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateSubProblemBounds)
     PlatoTest::checkMultiVectorData(tDataMng.getSubProblemControlUpperBounds(), tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateObjectiveApproximationFunctionData)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateObjectiveApproximationFunctionData)
 {
     const size_t tNumControls = 5;
     std::shared_ptr<Plato::DataFactory<double>> tDataFactory = std::make_shared<Plato::DataFactory<double>>();
@@ -3824,7 +3822,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateObjectiveApproximation
     tCriterion.gradient(tData, tGradient);
 
     // SET DATA
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     tDataMng.setCurrentObjectiveValue(tObjFuncValue);
     const double tTolerance = 1e-6;
     ASSERT_NEAR(0.312, tDataMng.getCurrentObjectiveValue(), tTolerance);
@@ -3860,7 +3858,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateObjectiveApproximation
     PlatoTest::checkMultiVectorData(tDataMng.getObjFuncAppxFunctionQ(), tGold);
 }
 
-TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateConstraintApproximationFunctionsData)
+TEST(PlatoTest, MethodMovingAsymptotesOperations_updateConstraintApproximationFunctionsData)
 {
     const size_t tNumControls = 5;
     const size_t tNumConstraints = 2;
@@ -3870,7 +3868,7 @@ TEST(PlatoTest, MethodMovingAsymptotesNewOperations_updateConstraintApproximatio
 
     // CREATE MEANINGFUL CRITERION
     Plato::CcsaTestObjective<double> tCriterion;
-    Plato::MethodMovingAsymptotesNewDataMng<double> tDataMng(tDataFactory);
+    Plato::MethodMovingAsymptotesDataMng<double> tDataMng(tDataFactory);
     ASSERT_EQ(2u, tDataMng.getNumConstraints());
     Plato::StandardMultiVector<double> tData(1 /* number of vectors */, tNumControls);
     Plato::fill(1.0, tData);
