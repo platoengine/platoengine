@@ -60,10 +60,10 @@ namespace Plato
  * @param [in] aGradient gradient (\$f g \$f)
  * @param [out] aCauchyPoint Cauchy point () (\$f p_{C} \$f)
 **********************************************************************************/
-template<typename ScalarType>
+template<typename ScalarType, typename OrdinalType>
 void compute_cauchy_point(const ScalarType & aTrustRegionRadius,
-                          const Plato::MultiVector<ScalarType> & aGradient,
-                          Plato::MultiVector<ScalarType> & aCauchyPoint)
+                          const Plato::MultiVector<ScalarType, OrdinalType> & aGradient,
+                          Plato::MultiVector<ScalarType, OrdinalType> & aCauchyPoint)
 {
     // cauchy_point = -1.0 * Trust_Region_Radius * (gradient/norm(gradient))
     Plato::update(static_cast<ScalarType>(1), aGradient, static_cast<ScalarType>(0), aCauchyPoint);
