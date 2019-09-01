@@ -1,10 +1,4 @@
 /*
- * Plato_EngineObjective.hpp
- *
- *  Created on: Dec 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_ENGINEOBJECTIVE_HPP_
-#define PLATO_ENGINEOBJECTIVE_HPP_
+/*
+ * Plato_EngineObjective.hpp
+ *
+ *  Created on: Dec 21, 2017
+ */
+
+#pragma once
 
 #include <vector>
 #include <string>
@@ -68,6 +67,12 @@ template<typename ScalarType, typename OrdinalType = size_t>
 class EngineObjective : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aDataFactory PLATO data factory
+     * @param [in] aInputData PLATO Engine input data
+     * @param [in] aInterface PLATO Engine interface
+    **********************************************************************************/
     explicit EngineObjective(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
                              const Plato::OptimizerEngineStageData & aInputData,
                              Plato::Interface* aInterface = nullptr) :
@@ -80,20 +85,56 @@ public:
             mParameterList(std::make_shared<Teuchos::ParameterList>())
     {
     }
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aInputData PLATO Engine input data
+     * @param [in] aInterface PLATO Engine interface
+    **********************************************************************************/
+    explicit EngineObjective(const Plato::OptimizerEngineStageData & aInputData,
+                             Plato::Interface* aInterface = nullptr) :
+            mVector(),
+            mControl(),
+            mGradient(),
+            mHessianTimesVector(),
+            mInterface(aInterface),
+            mEngineInputData(aInputData),
+            mParameterList(std::make_shared<Teuchos::ParameterList>())
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~EngineObjective()
     {
     }
-    /*!
-     * Set pointer to Plato engine interface, which provides a link between the user's application and the
-     * Plato engine optimizer solving the optimization problem.
-     **/
+
+    /******************************************************************************//**
+     * @brief Allocate control containers needed during optimization
+     * @param [in] aNumControls number of controls
+    **********************************************************************************/
+    void allocateControlContainers(const OrdinalType& aNumControls)
+    {
+        mVector = std::vector<ScalarType>(aNumControls);
+        mControl = std::vector<ScalarType>(aNumControls);
+        mGradient = std::vector<ScalarType>(aNumControls);
+        mHessianTimesVector = std::vector<ScalarType>(aNumControls);
+    }
+
+    /******************************************************************************//**
+     * @brief Set PLATO Engine interface
+     * @param [in] aInterface PLATO Engine interface
+    **********************************************************************************/
     void setPlatoInterface(Plato::Interface* aInterface)
     {
         assert(aInterface != nullptr);
         mInterface = aInterface;
     }
 
-    //! Directive to cache any criterion specific data once trial control is accepted.
+    /******************************************************************************//**
+     * @brief Directive to third-party applications to cache app-based data
+    **********************************************************************************/
     void cacheData()
     {
         assert(mInterface != nullptr);
@@ -117,7 +158,10 @@ public:
         }
     }
 
-    //! Directive to update problem criterion.
+    /******************************************************************************//**
+     * @brief Enable third-party applications to perform continuation on app-based data
+     * @param [in] aControl const reference to 2D container of optimization variables
+    **********************************************************************************/
     void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mInterface != nullptr);
@@ -133,17 +177,10 @@ public:
         }
     }
 
-    /*!
-     * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}
-     * \rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables. This criterion
-     * is typically associated with nonlinear programming optimization problems. For instance, PDE constrasize_t
-     * optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables (i.e. design variables)
-     *
-     *  \return Objective function value
-     **/
+    /******************************************************************************//**
+     * @brief Evaluate one or multiple third-party application objective functions
+     * @param [in] aControl const reference to 2D container of optimization variables
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(mInterface != nullptr);
@@ -165,17 +202,13 @@ public:
 
         return (tObjectiveValue);
     }
-    /*!
-     * Computes the gradient of a criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}
-     * \times\mathbb{R}^{n_z}\rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables.
-     * This criterion is typically associated with nonlinear programming optimization problems. For instance, PDE
-     * constraint optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables (i.e. design variables)
-     *    \param Out
-     *          aOutput: gradient
-     **/
+
+    /******************************************************************************//**
+     * @brief Compute the gradient of one or multiple third-party application objectives
+     * @param [in] aControl const reference to 2D container of optimization variables
+     * @param [in] aOutput reference to 2D container of the gradient with respect to the
+     *                     optimization variables
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
@@ -196,19 +229,15 @@ public:
         mInterface->compute(tStageNames, *mParameterList);
         this->copy(mGradient, aOutput);
     }
-    /*!
-     * Computes the application of a vector to the Hessian of a criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})
-     * \colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}\rightarrow\mathbb{R}, where u denotes the state and z denotes the
-     * control variables. This criterion is typically associated with nonlinear programming optimization problems.
-     * For instance, PDE constraint optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables (i.e. design variables)
-     *    \param In
-     *          aVector:  vector
-     *    \param Out
-     *          aOutput:  Hessian times vector
-     **/
+
+    /******************************************************************************//**
+     * @brief Compute the application of a vector to the Hessian of one or multiple
+     *        third-party application objectives
+     * @param [in] aControl const reference to 2D container of optimization variables
+     * @param [in] aVector const reference to 2D container of descent directions
+     * @param [in] aOutput reference to 2D container of the application of a vector
+     *                     to the Hessian
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -293,5 +322,3 @@ private:
 }; // class EngineObjective
 
 } // namespace Plato
-
-#endif /* PLATO_ENGINEOBJECTIVE_HPP_ */

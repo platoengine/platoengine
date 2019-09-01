@@ -87,6 +87,13 @@
 #include "Plato_Macros.hpp"
 
 #include "Plato_Parser.hpp"
+#include "Plato_Interface.hpp"
+#include "Plato_AlgebraFactory.hpp"
+#include "Plato_EngineObjective.hpp"
+#include "Plato_EngineConstraint.hpp"
+#include "Plato_OptimizerParser.hpp"
+#include "Plato_OptimizerUtilities.hpp"
+#include "Plato_OptimizerInterface.hpp"
 
 #include "Plato_UnitTestUtils.hpp"
 
@@ -2461,6 +2468,7 @@ struct AlgorithmInputsMMA
             mOutputStageName(),
             mUpdateFrequency(0),
             mMaxNumSolverIter(500),
+            mNumControlVectors(1),
             mMaxNumSubProblemIter(100),
             mMaxNumTrustRegionIter(50),
             mMoveLimit(0.5),
@@ -2497,6 +2505,7 @@ struct AlgorithmInputsMMA
 
     OrdinalType mUpdateFrequency; /*!< continuation frequency (default = disabled = 0) */
     OrdinalType mMaxNumSolverIter; /*!< maximum number of outer iterations */
+    OrdinalType mNumControlVectors; /*!< number of control vectors (default = 1) */
     OrdinalType mMaxNumSubProblemIter; /*!< maximum number of trust region sub problem iterations */
     OrdinalType mMaxNumTrustRegionIter; /*!< maximum number of trust region iterations */
 
@@ -2625,7 +2634,7 @@ inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, Ordinal
  * @brief Method of Moving Asymptotes (MMA) algorithm parser
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesParser
+class MethodMovingAsymptotesParser : public Plato::OptimizerParser<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
@@ -2667,6 +2676,7 @@ private:
             aData.mPrintDiagnostics = this->outputDiagnostics(tOptionsNode);
 
             aData.mUpdateFrequency = this->updateFrequency(tOptionsNode);
+            aData.mNumControlVectors = this->numControlVectors(tOptionsNode);
             aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
             aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
             aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
@@ -2713,6 +2723,21 @@ private:
             tInput = Plato::Get::String(aOptionsNode, "MemorySpace", true);
         }
         Plato::MemorySpace::type_t tOutput = Plato::memory_space(tInput);
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse number of control vectors keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return number of control vectors, default = 1
+    **********************************************************************************/
+    OrdinalType numControlVectors(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 1;
+        if(aOptionsNode.size<std::string>("NumControlVectors"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "NumControlVectors");
+        }
         return (tOutput);
     }
 
@@ -2932,6 +2957,290 @@ private:
 };
 // class MethodMovingAsymptotesParser
 
+/******************************************************************************//**
+ * @brief PLATO Engine interface for Method of Moving AsymptotesEngine (MMA) algorithm
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+class MethodMovingAsymptotesEngine : public Plato::OptimizerInterface<ScalarType, OrdinalType>
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aInterface PLATO Engine interface
+     * @param [in] aComm local MPI communicator
+    **********************************************************************************/
+    explicit MethodMovingAsymptotesEngine(Plato::Interface *aInterface, const MPI_Comm &aComm) :
+        mComm(aComm),
+        mInterface(aInterface),
+        mObjFuncStageName(),
+        mObjFuncStageDataMng(),
+        mInputData(Plato::OptimizerEngineStageData())
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    virtual ~MethodMovingAsymptotesEngine()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Return the algorithm type
+     * @return algorithm type
+    **********************************************************************************/
+    Plato::optimizer::algorithm_t type() const
+    {
+        return (Plato::optimizer::algorithm_t::METHOD_OF_MOVING_ASYMPTOTES);
+    }
+
+    /******************************************************************************//**
+     * @brief Read Engine stage inputs
+    **********************************************************************************/
+    void initialize()
+    {
+        Plato::initialize<ScalarType, OrdinalType>(mInterface, mInputData);
+    }
+
+    /******************************************************************************//**
+     * @brief Notify PLATO Engine that optimization problem is done.
+    **********************************************************************************/
+    void finalize()
+    {
+        // OUTPUT SOLUTION
+        Plato::call_finalization_stage(mInterface, mInputData);
+
+        // DEALLOCATE MEMORY
+        mInterface->finalize();
+    }
+
+    /******************************************************************************//**
+     * @brief Solve optimization problem using the MMA optimization algorithm
+    **********************************************************************************/
+    void optimize()
+    {
+        mInterface->handleExceptions();
+
+        // PARSE INPUT DATA
+        Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> tInputs;
+        this->parseOptimizerOptions(tInputs);
+
+        // PARSE OBJECTIVE FUNCTION STAGE OPTIONS
+        this->parseObjFuncStageOptions();
+
+        // PARSE CONSTRAINT STAGE OPTIONS
+        this->parseConstraintStageOptions();
+
+        // ALLOCATE DATA CONTAINER TEMPLATES FOR OPTIMIZATION ALGORITHM
+        Plato::AlgebraFactory<ScalarType, OrdinalType> tAlgebraFactory;
+        this->allocateDataStructures(tAlgebraFactory, tInputs);
+
+        // SET UPPER AND LOWER BOUNDS
+        this->setLowerBounds(tInputs);
+        this->setUpperBounds(tInputs);
+
+        // SET INITIAL GUESS
+        this->setInitialGuess(tInputs);
+
+        // SET PROBLEM CRITERIA
+        std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tObjective;
+        const OrdinalType tNumConstraints = tInputs.mConstraintNormalizationParams->size();
+        std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints(tNumConstraints);
+        const OrdinalType tNumControls = (*tInputs.mUpperBounds)[0 /* vector index */].size();
+        this->setProblemCriteria(tNumControls, tObjective, tConstraints);
+
+        // SOLVE OPTIMIZATION PROBLEM
+        Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> tOutputs;
+        Plato::solve_mma<ScalarType, OrdinalType>(tObjective, tConstraints, tInputs, tOutputs);
+
+        this->finalize();
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Parse algorithmic options
+     * @param [in/out] aInputs MMA algorithm inputs
+    **********************************************************************************/
+    void parseOptimizerOptions(Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInput)
+    {
+        auto tInputData = mInterface->getInputData();
+        auto tOptimizerNode = tInputData.get<Plato::InputData>("Optimizer");
+        Plato::MethodMovingAsymptotesParser<ScalarType, OrdinalType> tParser;
+        mObjFuncStageName = tParser.getObjectiveStageName(tOptimizerNode);
+        mConstraintStageNames = tParser.getConstraintStageNames(tOptimizerNode);
+        mConstraintTargetValues = tParser.getConstraintTargetValues(tOptimizerNode);
+        mConstraintReferenceValues = tParser.getConstraintReferenceValues(tOptimizerNode);
+        tParser.parse(tOptimizerNode, aInput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse options for objective function stage
+    **********************************************************************************/
+    void parseObjFuncStageOptions()
+    {
+        auto tInputData = mInterface->getInputData();
+        auto tStages = tInputData.getByName<Plato::InputData>("Stage");
+        for(auto tStageNode = tStages.begin(); tStageNode != tStages.end(); ++tStageNode)
+        {
+            std::string tStageName = tStageNode->get<std::string>("Name");
+            if(tStageName == mObjFuncStageName)
+            {
+                Plato::Parse::parseStageData(*tStageNode, mObjFuncStageDataMng);
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Parse constraint stage options
+    **********************************************************************************/
+    void parseConstraintStageOptions()
+    {
+        auto tInputData = mInterface->getInputData();
+        auto tStages = tInputData.getByName<Plato::InputData>("Stage");
+
+        const OrdinalType tNumConstraints = mConstraintStageNames.size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            for(auto tStageNode = tStages.begin(); tStageNode != tStages.end(); ++tStageNode)
+            {
+                std::string tStageName = tStageNode->get<std::string>("Name");
+                if(tStageName == mConstraintStageNames[tIndex])
+                {
+                    mConstraintStageDataMng.push_back(Plato::StageInputDataMng());
+                    Plato::Parse::parseStageData(*tStageNode, mConstraintStageDataMng[tIndex]);
+                }
+            }
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Allocate control and dual container templates
+     * @param [in] aFactory linear algebra and parallel container factory
+     * @param [out] aData MMA algorithm input options
+    **********************************************************************************/
+    void allocateDataStructures(const Plato::AlgebraFactory<ScalarType, OrdinalType> &aFactory,
+                                Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        this->allocateControlSets(aFactory, aData);
+        const OrdinalType tNumConstraints = mConstraintStageNames.size();
+        aData.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<ScalarType>>(tNumConstraints);
+
+        aData.mCommWrapper = Plato::CommWrapper(mComm);
+        aData.mControlReductionOperations = aFactory.createReduction(mComm, mInterface);
+    }
+
+    /******************************************************************************//**
+     * @brief Allocate template used for optimization variable containers
+     * @param [in] aFactory linear algebra and parallel container factory
+     * @param [out] aData MMA algorithm input options
+    **********************************************************************************/
+    void allocateControlSets(const Plato::AlgebraFactory<ScalarType, OrdinalType> &aFactory,
+                             Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        Plato::StandardMultiVector<ScalarType, OrdinalType> tControlSet;
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < aData.mNumControlVectors; tVectorIndex++)
+        {
+            const std::string & tMySharedDataName = mObjFuncStageDataMng.getInput(mObjFuncStageName, tVectorIndex);
+            const OrdinalType tNumControls = mInterface->size(tMySharedDataName);
+            std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector =
+                    aFactory.createVector(mComm, tNumControls, mInterface);
+            tControlSet.add(tVector);
+        }
+        aData.mLowerBounds = tControlSet.create();
+        aData.mUpperBounds = tControlSet.create();
+        aData.mInitialGuess = tControlSet.create();
+    }
+
+    /******************************************************************************//**
+     * @brief Set bounds on optimization variables
+     * @param [in/out] aData MMA algorithm input options
+    **********************************************************************************/
+    void setLowerBounds(Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        const OrdinalType tNumControls = (*aData.mLowerBounds)[0 /* vector index */].size();
+        std::vector<ScalarType> tBoundsData(tNumControls);
+        Plato::getLowerBoundsInputData(mInputData, mInterface, tBoundsData);
+        for(OrdinalType tVecIndex = 0; tVecIndex < aData.mNumControlVectors; tVecIndex++)
+        {
+            Plato::copy(tBoundsData, (*aData.mLowerBounds)[tVecIndex]);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set bounds on optimization variables
+     * @param [in/out] aData MMA algorithm input options
+    **********************************************************************************/
+    void setUpperBounds(Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        const OrdinalType tNumControls = (*aData.mUpperBounds)[0 /* vector index */].size();
+        std::vector<ScalarType> tBoundsData(tNumControls);
+        Plato::getUpperBoundsInputData(mInputData, mInterface, tBoundsData);
+        for(OrdinalType tVecIndex = 0; tVecIndex < aData.mNumControlVectors; tVecIndex++)
+        {
+            Plato::copy(tBoundsData, (*aData.mUpperBounds)[tVecIndex]);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set initial optimization variables, i,e, initial guess
+     * @param [in/out] aData MMA algorithm input options
+    **********************************************************************************/
+    void setInitialGuess(Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        const OrdinalType tNumControls = (*aData.mInitialGuess)[0 /* vector index */].size();
+        std::vector<ScalarType> tData(tNumControls);
+        for(OrdinalType tVecIndex = 0; tVecIndex < aData.mNumControlVectors; tVecIndex++)
+        {
+            const std::string & tMySharedDataName = mObjFuncStageDataMng.getInput(mObjFuncStageName, tVecIndex);
+            Plato::getInitialGuessInputData(tMySharedDataName, mInputData, mInterface, tData);
+            Plato::copy(tData, (*aData.mInitialGuess)[tVecIndex]);
+            std::fill(tData.begin(), tData.end(), static_cast<ScalarType>(0));
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set optimization problem criteria
+     * @param [in] aNumControls number of controls per control vector
+     * @param [in/out] aObjective PLATO engine interface for the objective function
+     * @param [in/out] aConstraints PLATO engine interface for the constraints
+    **********************************************************************************/
+    void setProblemCriteria(const OrdinalType& aNumControls,
+                            std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>>& aObjective,
+                            std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>>& aConstraints)
+    {
+        // SET OBJECTIVE FUNCTION
+        aObjective = std::make_shared<Plato::EngineObjective<ScalarType, OrdinalType>>(mInputData, mInterface);
+        aObjective->allocateControlContainers(aNumControls);
+
+        // SET CONSTRAINTS
+        const OrdinalType tNumConstraints = aConstraints->size();
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tConstraint;
+            tConstraint = std::make_shared<Plato::EngineConstraint<ScalarType, OrdinalType>>(tIndex, mInputData, mInterface);
+            tConstraint->allocateControlContainers(aNumControls);
+            aConstraints->add(tConstraint);
+        }
+    }
+
+private:
+    std::string mObjFuncStageName; /*!< objective function stage name */
+    std::vector<std::string> mConstraintStageNames; /*!< list of stage names for all constraints */
+    std::vector<ScalarType> mConstraintTargetValues; /*!< list of target values for all constraints */
+    std::vector<ScalarType> mConstraintReferenceValues; /*!< list of reference values for all constraints */
+
+    MPI_Comm mComm; /*!< MPI communicator */
+    Plato::Interface* mInterface; /*!< PLATO Engine interface */
+    Plato::StageInputDataMng mObjFuncStageDataMng; /*!< objective function stage data manager */
+    std::vector<Plato::StageInputDataMng> mConstraintStageDataMng; /*!< constraint stage data manager */
+    Plato::OptimizerEngineStageData mInputData;
+
+private:
+    MethodMovingAsymptotesEngine(const Plato::MethodMovingAsymptotesEngine<ScalarType, OrdinalType>&);
+    Plato::MethodMovingAsymptotesEngine<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesEngine<ScalarType, OrdinalType>&);
+};
+// class MethodMovingAsymptotesEngine
+
 }
 // namespace Plato
 
@@ -2982,6 +3291,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
     EXPECT_EQ(0u, tInputsOne.mUpdateFrequency);
     EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(1u, tInputsOne.mNumControlVectors);
     EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
     EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
@@ -3006,6 +3316,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
     EXPECT_EQ(0u, tInputsOne.mUpdateFrequency);
     EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(1u, tInputsOne.mNumControlVectors);
     EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
     EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
@@ -3025,6 +3336,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     tOptions.add<std::string>("MemorySpace", "Device");
     tOptions.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptions.add<std::string>("UpdateFrequency", "5");
+    tOptions.add<std::string>("NumControlVectors", "2");
     tOptions.add<std::string>("MaxNumSubProblemIter", "200");
     tOptions.add<std::string>("MaxNumTrustRegionIter", "25");
     tOptions.add<std::string>("MaxNumOuterIterations", "100");
@@ -3046,6 +3358,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_FALSE(tInputsOne.mPrintDiagnostics);
     EXPECT_EQ(5u, tInputsOne.mUpdateFrequency);
     EXPECT_EQ(100u, tInputsOne.mMaxNumSolverIter);
+    EXPECT_EQ(2u, tInputsOne.mNumControlVectors);
     EXPECT_EQ(25u, tInputsOne.mMaxNumTrustRegionIter);
     EXPECT_EQ(200u, tInputsOne.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::DEVICE, tInputsOne.mMemorySpace);
@@ -3078,6 +3391,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
 
     EXPECT_FALSE(tInputsTwo.mPrintDiagnostics);
     EXPECT_EQ(5u, tInputsTwo.mUpdateFrequency);
+    EXPECT_EQ(1u, tInputsTwo.mNumControlVectors);
     EXPECT_EQ(100u, tInputsTwo.mMaxNumSolverIter);
     EXPECT_EQ(25u, tInputsTwo.mMaxNumTrustRegionIter);
     EXPECT_EQ(200u, tInputsTwo.mMaxNumSubProblemIter);
