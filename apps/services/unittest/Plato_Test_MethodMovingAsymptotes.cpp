@@ -117,6 +117,25 @@ Plato::MemorySpace::type_t memory_space(const std::string& aInput)
 // function memory_space
 
 /******************************************************************************//**
+ *
+ * @brief Diagnostic data for the Method of Moving Asymptotes (MMA) algorithm.
+ *
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+struct OutputDataMMA
+{
+    OrdinalType mNumIter;  /*!< number of outer iterations */
+    OrdinalType mObjFuncCount;  /*!< number of objective function evaluations */
+
+    ScalarType mObjFuncValue;  /*!< objective function value */
+    ScalarType mNormObjFuncGrad;  /*!< norm of the objective function gradient */
+    ScalarType mControlStagnationMeasure;  /*!< norm of the difference between two subsequent control fields */
+    ScalarType mObjectiveStagnationMeasure;  /*!< measures stagnation in two subsequent objective function evaluations */
+    std::vector<ScalarType> mConstraints;  /*!< residual value for each constraint */
+};
+// struct OutputDataMMA
+
+/******************************************************************************//**
  * @brief Check inputs for MMA algorithm diagnostics
  * @param [in] aData diagnostic data for MMA algorithm
  * @param [in] aOutputFile output file

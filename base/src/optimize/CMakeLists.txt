@@ -80,8 +80,6 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_LineSearch.hpp
                         Plato_LinearOperator.hpp
                         Plato_LinearOperatorList.hpp
-                        Plato_MethodMovingAsymptotes.hpp
-                        Plato_MethodMovingAsymptotesInterface.hpp
                         Plato_MultiVectorList.hpp
                         Plato_Preconditioner.hpp
                         Plato_PrimalProblemStageMng.hpp

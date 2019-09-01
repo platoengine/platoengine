@@ -750,7 +750,7 @@ private:
     std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mAntepenultimateControl; /*!< antepenultimate vector sigma coefficients */
     std::shared_ptr<Plato::MultiVectorList<ScalarType, OrdinalType>> mWorkMultiVectorList; /*!< constraint gradient(s) work vector */
 
-    Plato::OutputDataMMA<ScalarType, OrdinalType> mOutputData; /*!< output data structure */
+    Plato::OutputDataCCSA<ScalarType, OrdinalType> mOutputData; /*!< output data structure */
     std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> mDataMng; /*!< optimization problem data structure */
     std::shared_ptr<Plato::ConservativeConvexSeparableAppxStageMng<ScalarType, OrdinalType>> mStageMng; /*!< stage manager- evaluates criteria */
     std::shared_ptr<Plato::ConservativeConvexSeparableApproximation<ScalarType, OrdinalType>> mSubProblem; /*!< solves MMA subproblem */

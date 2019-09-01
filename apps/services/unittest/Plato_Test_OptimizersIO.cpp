@@ -78,7 +78,7 @@ TEST(PlatoTest, IsVectorEmpty)
 TEST(PlatoTest, CheckForCCSAdiagnosticsErrors)
 {
     std::ofstream tFile1;
-    Plato::OutputDataMMA<double> tData;
+    Plato::OutputDataCCSA<double> tData;
     ASSERT_THROW(Plato::check_for_ccsa_diagnostics_errors(tData, tFile1), std::invalid_argument);
 
     tFile1.open("MyFile1.txt");
@@ -102,7 +102,7 @@ TEST(PlatoTest, CheckForCCSAdiagnosticsErrors)
 TEST(PlatoTest, PrintCCSAdiagnosticsInvalidArguments)
 {
     std::ofstream tFile1;
-    Plato::OutputDataMMA<double> tData;
+    Plato::OutputDataCCSA<double> tData;
     ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::runtime_error);
     ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::runtime_error);
 
@@ -117,7 +117,7 @@ TEST(PlatoTest, PrintCCSAdiagnosticsHeader)
 {
     std::ofstream tWriteFile;
     tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataMMA<double> tData;
+    Plato::OutputDataCCSA<double> tData;
     const size_t tNumConstraints = 1;
     tData.mConstraints.resize(tNumConstraints);
     ASSERT_NO_THROW(Plato::print_ccsa_diagnostics_header(tData, tWriteFile));
@@ -142,7 +142,7 @@ TEST(PlatoTest, PrintDiagnosticsOneConstraintsCCSA)
 {
     std::ofstream tWriteFile;
     tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataMMA<double> tData;
+    Plato::OutputDataCCSA<double> tData;
     tData.mNumIter = 0;
     tData.mObjFuncCount = 1;
     tData.mObjFuncValue = 1.0;
@@ -191,7 +191,7 @@ TEST(PlatoTest, PrintDiagnosticsTwoConstraintsCCSA)
 {
     std::ofstream tWriteFile;
     tWriteFile.open("MyFile1.txt");
-    Plato::OutputDataMMA<double> tData;
+    Plato::OutputDataCCSA<double> tData;
     tData.mNumIter = 0;
     tData.mObjFuncCount = 1;
     tData.mObjFuncValue = 1.0;

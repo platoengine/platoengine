@@ -56,7 +56,6 @@
 #include "Plato_ParticleSwarmEngineBCPSO.hpp"
 #include "Plato_ParticleSwarmEngineALPSO.hpp"
 #include "Plato_OptimalityCriteriaInterface.hpp"
-#include "Plato_MethodMovingAsymptotesInterface.hpp"
 #include "Plato_KelleySachsBoundConstrainedInterface.hpp"
 #include "Plato_KelleySachsAugmentedLagrangianInterface.hpp"
 #include "Plato_GloballyConvergentMethodMovingAsymptotesInterface.hpp"
@@ -128,7 +127,7 @@ public:
        else if( tOptPackage == "MMA" )
        {
          try {
-           tOptimizer = new Plato::MethodMovingAsymptotesInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+           //tOptimizer = new Plato::MethodMovingAsymptotesInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
        else if( tOptPackage == "KSUC" )
