@@ -86,6 +86,8 @@
 #include "Plato_Vector.hpp"
 #include "Plato_Macros.hpp"
 
+#include "Plato_Parser.hpp"
+
 #include "Plato_UnitTestUtils.hpp"
 
 namespace Plato
@@ -2440,14 +2442,15 @@ struct AlgorithmInputsMMA
     **********************************************************************************/
     AlgorithmInputsMMA() :
             mPrintDiagnostics(false),
+            mOutputStageName(),
             mUpdateFrequency(0),
             mMaxNumSolverIter(500),
             mMaxNumSubProblemIter(100),
             mMaxNumTrustRegionIter(50),
             mMoveLimit(0.5),
-            mInitialAugLagPenalty(1),
             mAsymptoteExpansion(1.2),
             mAsymptoteContraction(0.7),
+            mInitialAugLagPenalty(1.0),
             mInitialAymptoteScaling(0.5),
             mSubProblemBoundsScaling(0.1),
             mOptimalityTolerance(1e-6),
@@ -2474,6 +2477,7 @@ struct AlgorithmInputsMMA
     }
 
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
+    std::string mOutputStageName; /*!< output stage name */
 
     OrdinalType mUpdateFrequency; /*!< continuation frequency (default = disabled = 0) */
     OrdinalType mMaxNumSolverIter; /*!< maximum number of outer iterations */
@@ -2481,9 +2485,9 @@ struct AlgorithmInputsMMA
     OrdinalType mMaxNumTrustRegionIter; /*!< maximum number of trust region iterations */
 
     ScalarType mMoveLimit; /*!< move limit */
-    ScalarType mInitialAugLagPenalty; /*!< initial penalty on augmented Lagrangian function */
     ScalarType mAsymptoteExpansion; /*!< moving asymptotes expansion factor */
     ScalarType mAsymptoteContraction; /*!< moving asymptotes' contraction factor */
+    ScalarType mInitialAugLagPenalty; /*!< initial penalty on augmented Lagrangian function */
     ScalarType mInitialAymptoteScaling; /*!< initial moving asymptotes' scale factor */
     ScalarType mSubProblemBoundsScaling; /*!< scaling on subproblem upper and lower bounds */
 
@@ -2600,6 +2604,300 @@ inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, Ordinal
     Plato::set_mma_algorithm_outputs(tAlgorithm, aOutputs);
 }
 // function solve_mma
+
+/******************************************************************************//**
+ * @brief Method of Moving Asymptotes (MMA) algorithm parser
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+class MethodMovingAsymptotesParser
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
+    MethodMovingAsymptotesParser()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
+    ~MethodMovingAsymptotesParser()
+    {
+    }
+
+    /******************************************************************************//**
+     * @brief Parse options for MMA algorithm
+     * @param [in] aOptimizerNode data structure with algorithmic options
+     * @param [out] aData data structure with MMA algorithmic options
+    **********************************************************************************/
+    void parse(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aData)
+    {
+        this->parseOptions(aOptimizerNode, aData);
+    }
+
+private:
+    /******************************************************************************//**
+     * @brief Parse optimizer options for bound constrained PSO algorithm
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @param [out] aData data structure with bound constrained PSO algorithm options
+    **********************************************************************************/
+    void parseOptions(const Plato::InputData & aOptimizerNode, Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aData)
+    {
+        if(aOptimizerNode.size<Plato::InputData>("Options"))
+        {
+            Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
+            aData.mPrintDiagnostics = this->outputDiagnostics(tOptionsNode);
+
+            aData.mUpdateFrequency = this->updateFrequency(tOptionsNode);
+            aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
+            aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
+            aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
+
+            aData.mMoveLimit = this->moveLimit(tOptionsNode);
+            aData.mAsymptoteExpansion = this->asymptoteExpansion(tOptionsNode);
+            aData.mAsymptoteContraction = this->asymptoteContraction(tOptionsNode);
+            aData.mInitialAugLagPenalty = this->initialAugLagPenalty(tOptionsNode);
+            aData.mInitialAymptoteScaling = this->initialAymptoteScaling(tOptionsNode);
+            aData.mSubProblemBoundsScaling = this->subProblemBoundsScaling(tOptionsNode);
+
+            aData.mOptimalityTolerance = this->optimalityTolerance(tOptionsNode);
+            aData.mFeasibilityTolerance = this->feasibilityTolerance(tOptionsNode);
+            aData.mControlStagnationTolerance = this->controlStagnationTolerance(tOptionsNode);
+            aData.mObjectiveStagnationTolerance = this->objectiveStagnationTolerance(tOptionsNode);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output diagnostics keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return output diagnostic flag, default = true
+    **********************************************************************************/
+    bool outputDiagnostics(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = true;
+        if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse update frequency keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return update frequency, default = 0
+    **********************************************************************************/
+    OrdinalType updateFrequency(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 0;
+        if(aOptionsNode.size<std::string>("UpdateFrequency"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "UpdateFrequency");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse maximum number of MMA subproblem iterations keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return maximum number of MMA subproblem iterations, default = 100
+    **********************************************************************************/
+    OrdinalType maxNumSubProblemIter(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 100;
+        if(aOptionsNode.size<std::string>("MaxNumSubProblemIter"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumSubProblemIter");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse maximum number of trust region iterations keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return maximum number of trust region iterations, default = 50
+    **********************************************************************************/
+    OrdinalType maxNumTrustRegionIter(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 50;
+        if(aOptionsNode.size<std::string>("MaxNumTrustRegionIter"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumTrustRegionIter");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse maximum number of outer iterations keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return maximum number of outer iterations, default = 500
+    **********************************************************************************/
+    OrdinalType maxNumOuterIterations(const Plato::InputData & aOptionsNode)
+    {
+        OrdinalType tOutput = 500;
+        if(aOptionsNode.size<std::string>("MaxNumOuterIterations"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MaxNumOuterIterations");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse move limit keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return maximum move limit, default = 500
+    **********************************************************************************/
+    ScalarType moveLimit(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.5;
+        if(aOptionsNode.size<std::string>("MoveLimit"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "MoveLimit");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse initial augmented Lagrangian penalty keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return initial augmented Lagrangian penalty, default = 1
+    **********************************************************************************/
+    ScalarType initialAugLagPenalty(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1.0;
+        if(aOptionsNode.size<std::string>("InitialAugLagPenalty"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "InitialAugLagPenalty");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse asymptotes expansion keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return initial asymptotes expansion, default = 1.2
+    **********************************************************************************/
+    ScalarType asymptoteExpansion(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1.2;
+        if(aOptionsNode.size<std::string>("AsymptoteExpansion"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "AsymptoteExpansion");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse asymptotes contraction keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return initial asymptotes contraction, default = 0.7
+    **********************************************************************************/
+    ScalarType asymptoteContraction(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.7;
+        if(aOptionsNode.size<std::string>("AsymptoteContraction"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "AsymptoteContraction");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse asymptotes contraction keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return initial asymptotes contraction, default = 0.5
+    **********************************************************************************/
+    ScalarType initialAymptoteScaling(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.5;
+        if(aOptionsNode.size<std::string>("InitialAymptoteScaling"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "InitialAymptoteScaling");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse sub problem bound scaling keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return sub problem bound scaling, default = 0.1
+    **********************************************************************************/
+    ScalarType subProblemBoundsScaling(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 0.1;
+        if(aOptionsNode.size<std::string>("SubProblemBoundsScaling"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "SubProblemBoundsScaling");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse optimality tolerance keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return optimality tolerance, default = 1e-6
+    **********************************************************************************/
+    ScalarType optimalityTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-6;
+        if(aOptionsNode.size<std::string>("OptimalityTolerance"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "OptimalityTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse feasibility tolerance keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return feasibility tolerance, default = 1e-4
+    **********************************************************************************/
+    ScalarType feasibilityTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-4;
+        if(aOptionsNode.size<std::string>("FeasibilityTolerance"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "FeasibilityTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse control stagnation tolerance keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return control stagnation tolerance, default = 1e-6
+    **********************************************************************************/
+    ScalarType controlStagnationTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-6;
+        if(aOptionsNode.size<std::string>("ControlStagnationTolerance"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "ControlStagnationTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse objective stagnation tolerance keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return objective stagnation tolerance, default = 1e-8
+    **********************************************************************************/
+    ScalarType objectiveStagnationTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-8;
+        if(aOptionsNode.size<std::string>("ObjectiveStagnationTolerance"))
+        {
+            tOutput = Plato::Get::Int(aOptionsNode, "ObjectiveStagnationTolerance");
+        }
+        return (tOutput);
+    }
+
+private:
+    MethodMovingAsymptotesParser(const Plato::MethodMovingAsymptotesParser<ScalarType, OrdinalType>&);
+    Plato::MethodMovingAsymptotesParser<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesParser<ScalarType, OrdinalType>&);
+};
+// class MethodMovingAsymptotesParser
 
 }
 // namespace Plato

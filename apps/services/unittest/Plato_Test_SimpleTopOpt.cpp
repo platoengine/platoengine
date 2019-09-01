@@ -65,7 +65,6 @@
 
 #include "Plato_Diagnostics.hpp"
 #include "Plato_OptimalityCriteriaLightInterface.hpp"
-#include "Plato_MethodMovingAsymptotesLightInterface.hpp"
 #include "Plato_KelleySachsAugmentedLagrangianLightInterface.hpp"
 #include "Plato_GloballyConvergentMethodMovingAsymptotesLightInterface.hpp"
 
