@@ -77,7 +77,7 @@ public:
     explicit EngineConstraint(const OrdinalType & aConstraintID,
                               const  Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
                               const Plato::OptimizerEngineStageData & aInputData,
-                              Plato::Interface* aInterface = nullptr) :
+                              Plato::Interface* aInterface) :
             mMyConstraintID(aConstraintID),
             mVector(std::vector<ScalarType>(aDataFactory.getNumControls())),
             mControl(std::vector<ScalarType>(aDataFactory.getNumControls())),
@@ -97,7 +97,7 @@ public:
     **********************************************************************************/
     explicit EngineConstraint(const OrdinalType & aConstraintID,
                               const Plato::OptimizerEngineStageData & aInputData,
-                              Plato::Interface* aInterface = nullptr) :
+                              Plato::Interface* aInterface) :
             mMyConstraintID(aConstraintID),
             mVector(),
             mControl(),
