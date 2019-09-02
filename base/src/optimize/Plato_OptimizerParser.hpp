@@ -48,6 +48,8 @@
 
 #pragma once
 
+#include <limits>
+
 #include "Plato_Parser.hpp"
 
 namespace Plato
@@ -136,8 +138,12 @@ public:
         auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
         for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
         {
-            const ScalarType tMyTargeteValue = Plato::Get::Double(*tNode, "TargetValue");
-            tOutput.push_back(tMyTargeteValue);
+            ScalarType tValue = Plato::Get::Double(*tNode, "TargetValue");
+            if(std::abs(tValue) <= std::numeric_limits<ScalarType>::epsilon())
+            {
+                tValue = Plato::Get::Double(*tNode, "NormalizedTargetValue");
+            }
+            tOutput.push_back(tValue);
         }
         return (tOutput);
     }

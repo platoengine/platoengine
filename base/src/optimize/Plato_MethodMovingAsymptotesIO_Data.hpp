@@ -83,6 +83,7 @@ struct AlgorithmInputsMMA
             mFeasibilityTolerance(1e-4),
             mControlStagnationTolerance(1e-6),
             mObjectiveStagnationTolerance(1e-8),
+            mConstraintNormalizationMultipliers(),
             mCommWrapper(),
             mMemorySpace(Plato::MemorySpace::HOST),
             mLowerBounds(nullptr),
@@ -122,6 +123,8 @@ struct AlgorithmInputsMMA
     ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
     ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
     ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+
+    std::vector<ScalarType> mConstraintNormalizationMultipliers; /*!< constraint normalization multipliers */
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
     Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */

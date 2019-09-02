@@ -124,6 +124,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
 
     const double tTolerance = 1e-6;
+    EXPECT_TRUE(tInputsOne.mConstraintNormalizationMultipliers.empty());
     EXPECT_NEAR(0.5, tInputsOne.mMoveLimit, tTolerance);
     EXPECT_NEAR(1.2, tInputsOne.mAsymptoteExpansion, tTolerance);
     EXPECT_NEAR(0.7, tInputsOne.mAsymptoteContraction, tTolerance);
@@ -158,6 +159,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(1e-4, tInputsOne.mFeasibilityTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsOne.mControlStagnationTolerance, tTolerance);
     EXPECT_NEAR(1e-8, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
+    EXPECT_TRUE(tInputsOne.mConstraintNormalizationMultipliers.empty());
 
     // ********* TEST: SET PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> NON-DEFAULT VALUES ARE EXPECTED *********
     tOptions.add<std::string>("MemorySpace", "Device");
@@ -177,6 +179,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     tOptions.add<std::string>("FeasibilityTolerance", "1e-3");
     tOptions.add<std::string>("ControlStagnationTolerance", "1e-5");
     tOptions.add<std::string>("ObjectiveStagnationTolerance", "1e-4");
+    tOptions.add<std::string>("ConstraintNormalizationMultipliers", "2");
     Plato::InputData tOptimizerNodeOne("OptimizerNode");
     tOptimizerNodeOne.add<Plato::InputData>("Options", tOptions);
 
@@ -200,6 +203,8 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(1e-3, tInputsOne.mFeasibilityTolerance, tTolerance);
     EXPECT_NEAR(1e-5, tInputsOne.mControlStagnationTolerance, tTolerance);
     EXPECT_NEAR(1e-4, tInputsOne.mObjectiveStagnationTolerance, tTolerance);
+    EXPECT_FALSE(tInputsOne.mConstraintNormalizationMultipliers.empty());
+    EXPECT_NEAR(2.0, tInputsOne.mConstraintNormalizationMultipliers[0], tTolerance);
 
     // ********* TEST: SET A HANDFULL OF PARAMETERS AND ADD OPTIONS NODE TO OPTIMIZER'S NODE -> A FEW DEFAULT VALUES ARE EXPECTED *********
     Plato::InputData tOptionsTwo("Options");
@@ -210,6 +215,8 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     tOptionsTwo.add<std::string>("MaxNumOuterIterations", "100");
     tOptionsTwo.add<std::string>("MoveLimit", "0.55");
     tOptionsTwo.add<std::string>("InitialAugLagPenalty", "2.0");
+    tOptionsTwo.add<std::string>("ConstraintNormalizationMultipliers", "2");
+    tOptionsTwo.add<std::string>("ConstraintNormalizationMultipliers", "3");
     Plato::InputData tOptimizerNodeTwo("OptimizerNode");
     tOptimizerNodeTwo.add<Plato::InputData>("Options", tOptionsTwo);
     Plato::AlgorithmInputsMMA<double> tInputsTwo;
@@ -234,6 +241,10 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(1e-4, tInputsTwo.mFeasibilityTolerance, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwo.mControlStagnationTolerance, tTolerance);
     EXPECT_NEAR(1e-8, tInputsTwo.mObjectiveStagnationTolerance, tTolerance);
+    EXPECT_FALSE(tInputsTwo.mConstraintNormalizationMultipliers.empty());
+    EXPECT_EQ(2u, tInputsTwo.mConstraintNormalizationMultipliers.size());
+    EXPECT_NEAR(2.0, tInputsTwo.mConstraintNormalizationMultipliers[0], tTolerance);
+    EXPECT_NEAR(3.0, tInputsTwo.mConstraintNormalizationMultipliers[1], tTolerance);
 }
 
 TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsOneConstraints)

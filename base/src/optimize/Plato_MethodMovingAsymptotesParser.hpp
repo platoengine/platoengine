@@ -112,6 +112,7 @@ private:
             aData.mInitialAugLagPenalty = this->initialAugLagPenalty(tOptionsNode);
             aData.mInitialAymptoteScaling = this->initialAymptoteScaling(tOptionsNode);
             aData.mSubProblemBoundsScaling = this->subProblemBoundsScaling(tOptionsNode);
+            aData.mConstraintNormalizationMultipliers = this->constraintNormalizationMultipliers(tOptionsNode);
 
             aData.mOptimalityTolerance = this->optimalityTolerance(tOptionsNode);
             aData.mFeasibilityTolerance = this->feasibilityTolerance(tOptionsNode);
@@ -313,6 +314,17 @@ private:
         {
             tOutput = Plato::Get::Double(aOptionsNode, "SubProblemBoundsScaling");
         }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse constraint normalization multipliers keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return standard vector of constraint normalization multiplier, default = 0.1
+    **********************************************************************************/
+    std::vector<ScalarType> constraintNormalizationMultipliers(const Plato::InputData & aOptionsNode)
+    {
+        std::vector<ScalarType> tOutput = Plato::Get::Doubles(aOptionsNode, "ConstraintNormalizationMultipliers");
         return (tOutput);
     }
 

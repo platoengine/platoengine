@@ -127,6 +127,7 @@ public:
     void optimize()
     {
         mInterface->handleExceptions();
+        this->initialize();
 
         // PARSE INPUT DATA
         Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> tInputs;
@@ -146,8 +147,9 @@ public:
         this->setLowerBounds(tInputs);
         this->setUpperBounds(tInputs);
 
-        // SET INITIAL GUESS
+        // SET INITIAL GUESS AND CONSTRAINT NORMALIZATION VALUES
         this->setInitialGuess(tInputs);
+        this->setConstraintNormalizationValues(tInputs);
 
         // SET PROBLEM CRITERIA
         std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints;
@@ -231,7 +233,6 @@ private:
         this->allocateControlSets(aFactory, aData);
         const OrdinalType tNumConstraints = mConstraintStageNames.size();
         aData.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<ScalarType>>(tNumConstraints);
-
         aData.mCommWrapper = Plato::CommWrapper(mComm);
         aData.mControlReductionOperations = aFactory.createReduction(mComm, mInterface);
     }
@@ -285,6 +286,25 @@ private:
         for(OrdinalType tVecIndex = 0; tVecIndex < aData.mNumControlVectors; tVecIndex++)
         {
             Plato::copy(tBoundsData, (*aData.mUpperBounds)[tVecIndex]);
+        }
+    }
+
+    /******************************************************************************//**
+     * @brief Set constraint normalization parameters
+     * @param [in/out] aData MMA algorithm input options
+    **********************************************************************************/
+    void setConstraintNormalizationValues(Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> &aData)
+    {
+        const OrdinalType tNumConstraints = aData.mConstraintNormalizationParams->size();
+        if(aData.mConstraintNormalizationMultipliers.empty() == true)
+        {
+            aData.mConstraintNormalizationMultipliers = std::vector<ScalarType>(tNumConstraints, 1.0);
+        }
+
+        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        {
+            (*aData.mConstraintNormalizationParams)[tIndex] =
+                    aData.mConstraintNormalizationMultipliers[tIndex] * mConstraintTargetValues[tIndex];
         }
     }
 
