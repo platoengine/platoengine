@@ -73,10 +73,14 @@ public:
      * @param [in] aComm local MPI communicator
     **********************************************************************************/
     explicit MethodMovingAsymptotesEngine(Plato::Interface *aInterface, const MPI_Comm &aComm) :
+        mObjFuncStageName(),
+        mConstraintStageNames(),
+        mConstraintTargetValues(),
+        mConstraintReferenceValues(),
         mComm(aComm),
         mInterface(aInterface),
-        mObjFuncStageName(),
         mObjFuncStageDataMng(),
+        mConstraintStageDataMng(),
         mInputData(Plato::OptimizerEngineStageData())
     {
     }
