@@ -189,7 +189,7 @@ private:
     **********************************************************************************/
     OrdinalType maxNumSubProblemIter(const Plato::InputData & aOptionsNode)
     {
-        OrdinalType tOutput = 100;
+        OrdinalType tOutput = 25;
         if(aOptionsNode.size<std::string>("MaxNumSubProblemIter"))
         {
             tOutput = Plato::Get::Int(aOptionsNode, "MaxNumSubProblemIter");
@@ -264,7 +264,7 @@ private:
     **********************************************************************************/
     ScalarType asymptoteExpansion(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 1.2;
+        ScalarType tOutput = 1.01;
         if(aOptionsNode.size<std::string>("AsymptoteExpansion"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteExpansion");
@@ -279,7 +279,7 @@ private:
     **********************************************************************************/
     ScalarType asymptoteContraction(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 0.7;
+        ScalarType tOutput = 0.99;
         if(aOptionsNode.size<std::string>("AsymptoteContraction"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteContraction");
