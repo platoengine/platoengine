@@ -134,7 +134,7 @@ public:
     ***********************************************************************************/
     Plato::LinearOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
@@ -145,7 +145,7 @@ public:
     ***********************************************************************************/
     const Plato::LinearOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
@@ -177,7 +177,7 @@ public:
     ***********************************************************************************/
     const std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return(mList[aIndex]);
     }

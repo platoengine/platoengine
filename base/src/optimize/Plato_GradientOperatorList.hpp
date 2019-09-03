@@ -59,14 +59,26 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Interface to a list of gradient operators. Each entry corresponds to a
+ * performance criterion, e.g. objective or constraint function.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class GradientOperatorList
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     GradientOperatorList() :
             mList()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aInput list of performance criteria
+    **********************************************************************************/
     explicit GradientOperatorList(const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aInput) :
             mList()
     {
@@ -76,30 +88,58 @@ public:
             mList.push_back(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(aInput->ptr(tIndex)));
         }
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~GradientOperatorList()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Returns the size of the list
+     * @return total number of elements
+    **********************************************************************************/
     OrdinalType size() const
     {
         return (mList.size());
     }
+
+    /******************************************************************************//**
+     * @brief Append a new gradient operator to the end of the list, after its current last element.
+     * @param [in] aInput gradient operator interface
+    **********************************************************************************/
     void add(const std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> & aInput)
     {
         mList.push_back(aInput);
     }
+
+    /******************************************************************************//**
+     * @brief Returns a reference to the element at position n in the vector container.
+     * @param [in] aInput position of an element in the list.
+    **********************************************************************************/
     Plato::GradientOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Returns a const reference to the element at position n in the vector container.
+     * @param [in] aInput position of an element in the list.
+    **********************************************************************************/
     const Plato::GradientOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
+
+    /******************************************************************************//**
+     * @brief Create a shared pointer copy of the list of gradient operator
+     * @return shared pointer to the the list of gradient operator
+    **********************************************************************************/
     std::shared_ptr<Plato::GradientOperatorList<ScalarType, OrdinalType>> create() const
     {
         assert(this->size() > static_cast<OrdinalType>(0));
@@ -116,21 +156,28 @@ public:
         }
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Returns a const shared pointer to the element at position n in the gradient operator list.
+     * @param [in] aInput position of an element in the list.
+    **********************************************************************************/
     const std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return(mList[aIndex]);
     }
 
 private:
-    std::vector<std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>>> mList;
+    std::vector<std::shared_ptr<Plato::GradientOperator<ScalarType, OrdinalType>>> mList; /*!< list of gradient operators */
 
 private:
     GradientOperatorList(const Plato::GradientOperatorList<ScalarType, OrdinalType>&);
     Plato::GradientOperatorList<ScalarType, OrdinalType> & operator=(const Plato::GradientOperatorList<ScalarType, OrdinalType>&);
 };
+// class GradientOperatorList
 
-} //namespace Plato
+}
+//namespace Plato
 
 #endif /* PLATO_GRADIENTOPERATORLIST_HPP_ */

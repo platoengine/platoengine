@@ -96,7 +96,7 @@ public:
      **********************************************************************************/
     void setData(const OrdinalType & aIndex, const std::vector<ScalarType> & aVec)
     {
-        assert(mData[aIndex]->size() == aVec.size());
+        assert(static_cast<OrdinalType>(mData[aIndex]->size()) == static_cast<OrdinalType>(aVec.size()));
         const OrdinalType tLength = mData[aIndex]->size();
         for(OrdinalType tIndex = 0; tIndex < tLength; tIndex++)
         {
@@ -111,7 +111,7 @@ public:
      **********************************************************************************/
     void getData(const OrdinalType & aIndex, std::vector<ScalarType> & aVec)
     {
-        assert(mData[aIndex]->size() == aVec.size());
+        assert(static_cast<OrdinalType>(mData[aIndex]->size()) == static_cast<OrdinalType>(aVec.size()));
         const OrdinalType tLength = mData[aIndex]->size();
         for(OrdinalType tIndex = 0; tIndex < tLength; tIndex++)
         {
@@ -214,12 +214,12 @@ private:
     }
     void initialize(const std::vector<std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>>> & aMultiVectorTemplate)
     {
-        assert(mData.size() > 0);
-        assert(aMultiVectorTemplate.size() > 0);
+        assert(static_cast<OrdinalType>(mData.size()) > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(aMultiVectorTemplate.size()) > static_cast<OrdinalType>(0));
         OrdinalType tNumVectors = aMultiVectorTemplate.size();
         for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
         {
-            assert(aMultiVectorTemplate[tIndex]->size() > 0);
+            assert(aMultiVectorTemplate[tIndex]->size() > static_cast<OrdinalType>(0));
             mData[tIndex] = aMultiVectorTemplate[tIndex]->create();
             mData[tIndex]->update(static_cast<ScalarType>(1.), *aMultiVectorTemplate[tIndex], static_cast<ScalarType>(0.));
         }

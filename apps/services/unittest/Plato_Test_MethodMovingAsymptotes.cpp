@@ -997,12 +997,13 @@ TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-2;
-    ASSERT_EQ(50u, tOutputs.mNumSolverIter);
+    ASSERT_EQ(50, tOutputs.mNumSolverIter);
     ASSERT_NEAR(0.1485850316, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     std::vector<double> tGoldData = PlatoTest::get_topology_optimization_gold();
     Plato::StandardMultiVector<double, int> tGold(tNumVectors, tGoldData);
-    tGold.setData(0, tGoldData);
+    int tIndex = 0;
+    tGold.setData(tIndex, tGoldData);
     PlatoTest::checkMultiVectorData(tGold, *tOutputs.mSolution, tTolerance);
 
     // ********* PRINT SOLUTION *********
