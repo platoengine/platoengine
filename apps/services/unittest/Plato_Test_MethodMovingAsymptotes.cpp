@@ -120,14 +120,14 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
     EXPECT_EQ(1u, tInputsOne.mNumControlVectors);
     EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
-    EXPECT_EQ(25u, tInputsOne.mMaxNumSubProblemIter);
+    EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
 
     const double tTolerance = 1e-6;
     EXPECT_TRUE(tInputsOne.mConstraintNormalizationMultipliers.empty());
     EXPECT_NEAR(0.5, tInputsOne.mMoveLimit, tTolerance);
-    EXPECT_NEAR(1.01, tInputsOne.mAsymptoteExpansion, tTolerance);
-    EXPECT_NEAR(0.99, tInputsOne.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(1.2, tInputsOne.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.7, tInputsOne.mAsymptoteContraction, tTolerance);
     EXPECT_NEAR(1.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
     EXPECT_NEAR(0.5, tInputsOne.mInitialAymptoteScaling, tTolerance);
     EXPECT_NEAR(0.1, tInputsOne.mSubProblemBoundsScaling, tTolerance);
@@ -146,12 +146,12 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_EQ(500u, tInputsOne.mMaxNumSolverIter);
     EXPECT_EQ(1u, tInputsOne.mNumControlVectors);
     EXPECT_EQ(50u, tInputsOne.mMaxNumTrustRegionIter);
-    EXPECT_EQ(25u, tInputsOne.mMaxNumSubProblemIter);
+    EXPECT_EQ(100u, tInputsOne.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsOne.mMemorySpace);
 
     EXPECT_NEAR(0.5, tInputsOne.mMoveLimit, tTolerance);
-    EXPECT_NEAR(1.01, tInputsOne.mAsymptoteExpansion, tTolerance);
-    EXPECT_NEAR(0.99, tInputsOne.mAsymptoteContraction, tTolerance);
+    EXPECT_NEAR(1.2, tInputsOne.mAsymptoteExpansion, tTolerance);
+    EXPECT_NEAR(0.7, tInputsOne.mAsymptoteContraction, tTolerance);
     EXPECT_NEAR(1.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
     EXPECT_NEAR(0.5, tInputsOne.mInitialAymptoteScaling, tTolerance);
     EXPECT_NEAR(0.1, tInputsOne.mSubProblemBoundsScaling, tTolerance);
@@ -210,7 +210,6 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     Plato::InputData tOptionsTwo("Options");
     tOptionsTwo.add<std::string>("OutputDiagnosticsToFile", "false");
     tOptionsTwo.add<std::string>("UpdateFrequency", "5");
-    tOptionsTwo.add<std::string>("MaxNumSubProblemIter", "200");
     tOptionsTwo.add<std::string>("MaxNumTrustRegionIter", "25");
     tOptionsTwo.add<std::string>("MaxNumOuterIterations", "100");
     tOptionsTwo.add<std::string>("MoveLimit", "0.55");
@@ -228,7 +227,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_EQ(1u, tInputsTwo.mNumControlVectors);
     EXPECT_EQ(100u, tInputsTwo.mMaxNumSolverIter);
     EXPECT_EQ(25u, tInputsTwo.mMaxNumTrustRegionIter);
-    EXPECT_EQ(200u, tInputsTwo.mMaxNumSubProblemIter);
+    EXPECT_EQ(25u, tInputsTwo.mMaxNumSubProblemIter);
     EXPECT_EQ(Plato::MemorySpace::HOST, tInputsTwo.mMemorySpace);
 
     EXPECT_NEAR(0.55, tInputsTwo.mMoveLimit, tTolerance);
