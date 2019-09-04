@@ -662,7 +662,8 @@ private:
         for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
             const ScalarType tConstraintValue = mDataMng->getCurrentConstraintValue(tIndex);
-            const ScalarType tConstraintNormalization = mDataMng->getConstraintNormalization(tIndex);
+            const ScalarType tValue = mDataMng->getConstraintNormalization(tIndex);
+            const ScalarType tConstraintNormalization = std::abs(tValue) <= std::numeric_limits<ScalarType>::epsilon() ? static_cast<ScalarType>(1) : tValue;
             mMMAData->mCurrentNormalizedCriterionValue = tConstraintValue / tConstraintNormalization;
             Plato::update(static_cast<ScalarType>(1), mDataMng->getConstraintAppxFunctionP(tIndex), static_cast<ScalarType>(0), *mMMAData->mAppxFunctionP);
             Plato::update(static_cast<ScalarType>(1), mDataMng->getConstraintAppxFunctionQ(tIndex), static_cast<ScalarType>(0), *mMMAData->mAppxFunctionQ);

@@ -301,10 +301,11 @@ private:
             aData.mConstraintNormalizationMultipliers = std::vector<ScalarType>(tNumConstraints, 1.0);
         }
 
-        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
+        for (OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
         {
+            ScalarType tValue = aData.mConstraintNormalizationMultipliers[tIndex] * mConstraintTargetValues[tIndex];
             (*aData.mConstraintNormalizationParams)[tIndex] =
-                    aData.mConstraintNormalizationMultipliers[tIndex] * mConstraintTargetValues[tIndex];
+                std::abs(tValue) <= std::numeric_limits<ScalarType>::epsilon() ? static_cast<ScalarType>(1) : tValue;
         }
     }
 
