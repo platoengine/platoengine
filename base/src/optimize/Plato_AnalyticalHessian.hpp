@@ -60,22 +60,43 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Analytical Hessian interface
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class AnalyticalHessian : public Plato::LinearOperator<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aCriterion problem criterion
+    **********************************************************************************/
     explicit AnalyticalHessian(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aCriterion) :
             mCriterion(aCriterion)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~AnalyticalHessian()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Update state-dependent data needed to compute the Hessian
+     * @param [in] aStateData state data, e.g. controls, gradient, etc.
+    **********************************************************************************/
     void update(const Plato::StateData<ScalarType, OrdinalType> & aStateData)
     {
         return;
     }
+
+    /******************************************************************************//**
+     * @brief Apply vector to analytical Hessian
+     * @param [in] aControl design variables
+     * @param [in] aOutput application of the input vector to analytical Hessian
+    **********************************************************************************/
     void apply(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -85,13 +106,15 @@ public:
     }
 
 private:
-    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mCriterion;
+    std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> mCriterion;  /*!< criterion interface */
 
 private:
     AnalyticalHessian(const Plato::AnalyticalHessian<ScalarType, OrdinalType> & aRhs);
     Plato::AnalyticalHessian<ScalarType, OrdinalType> & operator=(const Plato::AnalyticalHessian<ScalarType, OrdinalType> & aRhs);
 };
+// class AnalyticalHessian
 
-} // namespace Plato
+}
+// namespace Plato
 
 #endif /* PLATO_ANALYTICALHESSIAN_HPP_ */

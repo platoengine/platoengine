@@ -58,65 +58,13 @@
 #include <stdexcept>
 
 #include "Plato_Macros.hpp"
+#include "Plato_OptimizersIO_Utilities.hpp"
 
 namespace Plato
 {
 
-namespace error
-{
-
 /******************************************************************************//**
- *
- * @brief Check if output file is open. An error is thrown if output file is not open.
- * @param [in] aOutputFile output file
- *
-**********************************************************************************/
-template<typename Type>
-void is_file_open(const Type& aOutputFile)
-{
-    try
-    {
-        if(aOutputFile.is_open() == false)
-        {
-            throw std::invalid_argument("OUTPUT FILE IS NOT OPEN.\n");
-        }
-    }
-    catch(const std::invalid_argument & tError)
-    {
-        throw tError;
-    }
-}
-
-/******************************************************************************//**
- *
- * @brief Check if vector is empty. An error is thrown if vector is empty.
- * @param [in] aInput a vector
- *
-**********************************************************************************/
-template<typename ScalarType>
-void is_vector_empty(const std::vector<ScalarType>& aInput)
-{
-    try
-    {
-        if(aInput.empty() == true)
-        {
-            throw std::invalid_argument("CONTAINER SIZE IS 0.\n");
-        }
-    }
-    catch(const std::invalid_argument & tError)
-    {
-        throw tError;
-    }
-}
-
-} // namespace error
-
-// *********************************************** END NAMESPACE ERROR ***********************************************
-
-/******************************************************************************//**
- *
- * @brief Diagnostic data for Conservative Convex Separable Approximation algorithms (CCSA)
- *
+ * @brief Diagnostic data for the Method of Moving Asymptotes (MMA) algorithm.
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct OutputDataCCSA
@@ -135,9 +83,7 @@ struct OutputDataCCSA
 // struct OutputDataCCSA
 
 /******************************************************************************//**
- *
  * @brief Diagnostic data for Optimality Criteria (OC) algorithm
- *
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 struct OutputDataOC

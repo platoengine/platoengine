@@ -82,6 +82,9 @@ class AugmentedLagrangianStageMng : public Plato::TrustRegionStageMng<ScalarType
 public:
     /******************************************************************************//**
      * @brief Default constructor
+     * @param [in] aFactory optimization data factory
+     * @param [in] aObjective objective function interface
+     * @param [in] aConstraints list of constraint interface
      **********************************************************************************/
     AugmentedLagrangianStageMng(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aFactory,
                                 const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
@@ -101,8 +104,10 @@ public:
             mNormObjFuncGrad(std::numeric_limits<ScalarType>::max()),
             mNormAugLagFuncGrad(std::numeric_limits<ScalarType>::max()),
             mPenaltyParameter(0.05),
+            mInitialPenaltyParameter(mPenaltyParameter),
             mPenaltyParameterLowerBound(1e-5),
             mPenaltyParameterScaleFactor(2),
+            mDefaultInitialLagrangeMultiplierValue(0.5),
             mNumConstraintEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintGradientEvaluations(std::vector<OrdinalType>(aConstraints->size())),
             mNumConstraintHessianEvaluations(std::vector<OrdinalType>(aConstraints->size())),
@@ -120,11 +125,11 @@ public:
             mObjective(aObjective),
             mConstraints(aConstraints),
             mPreconditioner(std::make_shared<Plato::IdentityPreconditioner<ScalarType, OrdinalType>>()),
-            mObjFuncHessian(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(aObjective)),
-            mConstraintHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(aConstraints)),
+            mObjFuncHessian(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(mObjective)),
+            mConstraintHessians(std::make_shared<Plato::LinearOperatorList<ScalarType, OrdinalType>>(mConstraints)),
             mDualReductionOperations(aFactory->getDualReductionOperations().create()),
-            mObjectiveGradOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(aObjective)),
-            mConstraintGradientOperator(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(aConstraints))
+            mObjectiveGradOperator(std::make_shared<Plato::AnalyticalGradient<ScalarType, OrdinalType>>(mObjective)),
+            mConstraintGradientOperator(std::make_shared<Plato::GradientOperatorList<ScalarType, OrdinalType>>(mConstraints))
     /****************************************************************************************************************/
     {
         this->initialize();
@@ -146,13 +151,21 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Reset penalty and lagrange multipliers to initial default values.
+    **********************************************************************************/
+    void resetParameters()
+    {
+        mPenaltyParameter = mInitialPenaltyParameter;
+        Plato::fill(mDefaultInitialLagrangeMultiplierValue, *mLagrangeMultipliers);
+    }
+
+    /******************************************************************************//**
      * @brief Return number of constraints
      * @return number of constraints
     **********************************************************************************/
     OrdinalType getNumConstraints() const
     {
-        const OrdinalType tVECTOR_INDEX = 0;
-        const OrdinalType tNumConstraints = mCurrentConstraintValues->operator[](tVECTOR_INDEX).size();
+        const OrdinalType tNumConstraints = mConstraints->size();
         return (tNumConstraints);
     }
 
@@ -253,6 +266,7 @@ public:
     void setPenaltyParameter(const ScalarType & aInput)
     {
         mPenaltyParameter = aInput;
+        mInitialPenaltyParameter = mPenaltyParameter;
     }
 
     /******************************************************************************//**
@@ -427,7 +441,7 @@ public:
     {
         Plato::update(static_cast<ScalarType>(1), *mCurrentConstraintValues, static_cast<ScalarType>(0), *mDualWorkMultiVec);
 
-        const OrdinalType tNumVectors = mCurrentConstraintValues->getNumVectors();
+        const OrdinalType tNumVectors = mDualWorkMultiVec->getNumVectors();
         std::vector<ScalarType> tContainer(tNumVectors);
         for(OrdinalType tIndex = 0; tIndex < tNumVectors; ++tIndex)
         {
@@ -759,8 +773,7 @@ private:
             mPreviousCostraintGrad->add(*mControlWorkVec);
         }
 
-        const ScalarType tInitialLagrangeMultipliers = 0.5;
-        Plato::fill(tInitialLagrangeMultipliers, *mLagrangeMultipliers);
+        Plato::fill(mDefaultInitialLagrangeMultiplierValue, *mLagrangeMultipliers);
     }
 
     /******************************************************************************//**
@@ -962,8 +975,10 @@ private:
     ScalarType mNormObjFuncGrad;
     ScalarType mNormAugLagFuncGrad;
     ScalarType mPenaltyParameter;
+    ScalarType mInitialPenaltyParameter;
     ScalarType mPenaltyParameterLowerBound;
     ScalarType mPenaltyParameterScaleFactor;
+    ScalarType mDefaultInitialLagrangeMultiplierValue;
 
     std::vector<OrdinalType> mNumConstraintEvaluations;
     std::vector<OrdinalType> mNumConstraintGradientEvaluations;

@@ -60,7 +60,6 @@
 #include "Plato_DualProblemStageMng.hpp"
 #include "Plato_StandardMultiVector.hpp"
 #include "Plato_PrimalProblemStageMng.hpp"
-#include "Plato_MethodMovingAsymptotes.hpp"
 #include "Plato_StandardVectorReductionOperations.hpp"
 #include "Plato_ConservativeConvexSeparableAppxDataMng.hpp"
 #include "Plato_ConservativeConvexSeparableAppxAlgorithm.hpp"

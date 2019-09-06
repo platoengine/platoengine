@@ -50,6 +50,7 @@
 
 #include <vector>
 #include <cassert>
+#include <numeric>
 #include <algorithm>
 
 #include "Plato_Vector.hpp"

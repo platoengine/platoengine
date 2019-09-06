@@ -71,6 +71,9 @@ class StateData;
 template<typename ScalarType, typename OrdinalType>
 class MultiVector;
 
+/******************************************************************************//**
+ * @brief Linear operator interface, e.g. analytical Hessian interface
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class LinearOperator
 {
@@ -100,6 +103,7 @@ public:
 };
 // class LinearOperator
 
-} // namespace Plato
+}
+// namespace Plato
 
 #endif /* PLATO_LINEAROPERATOR_HPP_ */

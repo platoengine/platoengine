@@ -1,10 +1,4 @@
 /*
- * Plato_CcsaTestObjective.hpp
- *
- *  Created on: Nov 4, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_CCSATESTOBJECTIVE_HPP_
-#define PLATO_CCSATESTOBJECTIVE_HPP_
+/*
+ * Plato_CcsaTestObjective.hpp
+ *
+ *  Created on: Nov 4, 2017
+ */
+
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -63,23 +62,54 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Criterion used to test Method of Moving Asymptotes (MMA) optimizer. The
+ * criterion /f$ \f(x) /f$ is defined as /f$ \alpha\sum_{i=1}^{N} x_i /f$, where
+ * /f$ \alpha /f$ is a constant set to 0.0624 and N is the number of optimization
+ * variables.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class CcsaTestObjective : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     CcsaTestObjective() :
-            mConstant(0.0624),
+            mWeightConstant(0.0624),
             mReduction(std::make_shared<Plato::StandardVectorReductionOperations<ScalarType,OrdinalType>>())
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~CcsaTestObjective()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Set weight constant
+     * @param [in] aInput weight constant
+    **********************************************************************************/
+    void setWeightConstant(const ScalarType& aInput)
+    {
+        mWeightConstant = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Cache criterion specific data.
+    **********************************************************************************/
     void cacheData()
     {
         return;
     }
+
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+     * @param [in] aControl optimization variables
+     * @return objective function value
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
@@ -93,15 +123,28 @@ public:
         }
         const ScalarType tInitialValue = 0;
         ScalarType tSum = std::accumulate(tStorage.begin(), tStorage.end(), tInitialValue);
-        ScalarType tOutput = mConstant * tSum;
+        ScalarType tOutput = mWeightConstant * tSum;
 
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Compute objective function gradient
+     * @param [in] aControl optimization variables
+     * @param [in/out] aOutput objective function gradient
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
-        Plato::fill(mConstant, aOutput);
+        Plato::fill(mWeightConstant, aOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Apply descent direction to Hessian
+     * @param [in] aControl optimization variables
+     * @param [in] aVector descent direction
+     * @param [in/out] aOutput application of descent direction to Hessian
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -112,14 +155,14 @@ public:
     }
 
 private:
-    ScalarType mConstant;
-    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReduction;
+    ScalarType mWeightConstant; /*!< scalar constant used in objective function */
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mReduction; /*!< interface to reduction operations */
 
 private:
     CcsaTestObjective(const Plato::CcsaTestObjective<ScalarType, OrdinalType> & aRhs);
     Plato::CcsaTestObjective<ScalarType, OrdinalType> & operator=(const Plato::CcsaTestObjective<ScalarType, OrdinalType> & aRhs);
 };
+// class CcsaTestObjective
 
-} // namespace Plato
-
-#endif /* PLATO_CCSATESTOBJECTIVE_HPP_ */
+}
+// namespace Plato

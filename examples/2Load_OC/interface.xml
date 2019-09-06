@@ -525,12 +525,6 @@
   <CacheStage>
     <Name>Cache State</Name>
   </CacheStage>
-  <OC>
-    <MoveLimiter>1.0</MoveLimiter>
-    <StabilizationParameter>0.5</StabilizationParameter>
-    <UseNewtonSearch>True</UseNewtonSearch>
-    <ConstraintMaxIterations>25</ConstraintMaxIterations>
-  </OC>
   <OptimizationVariables>
     <ValueName>Optimization DOFs</ValueName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
@@ -547,36 +541,14 @@
     <Lower>0.0</Lower>
   </BoundConstraint>
   <Constraint>
-    <Equality>True</Equality>
-    <Linear>True</Linear>
     <ValueStageName>Volume</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT VALUE STAGE-->
     <ValueName>Volume</ValueName>
     <GradientStageName>Volume Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <GradientName>Volume Gradient</GradientName>
     <ReferenceValueName>Design Volume</ReferenceValueName>
     <NormalizedTargetValue>0.2</NormalizedTargetValue>
-    <Tolerance>1e-3</Tolerance>
   </Constraint>
   <Convergence>
     <MaxIterations>10</MaxIterations>
   </Convergence>
 </Optimizer>
-
-<mesh>
-  <type>unstructured</type>
-  <format>exodus</format>
-  <mesh>unsmesh.gen</mesh>
-  <block>
-    <index>1</index>
-    <integration>
-      <type>gauss</type>
-      <order>2</order>
-    </integration>
-    <material>1</material>
-  </block>
-</mesh>
-
-<output>
-  <file>plato</file>
-  <format>exodus</format>
-</output>

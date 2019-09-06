@@ -252,40 +252,41 @@ TEST(PlatoTest, output_restart_data_vector)
     MPI_Comm_size(MPI_COMM_WORLD, &tMySize);
     if(tMySize <= 1)
     {
-    // ****** OPEN OUTPUT FILE ******
-    std::ofstream tRestartFile;
-    tRestartFile.open("MyFile.txt");
+        // ****** OPEN OUTPUT FILE ******
+        std::ofstream tRestartFile;
+        tRestartFile.open("MyFile.txt");
 
-    // ****** SET DATA ******
-    std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
-    Plato::StandardVector<double> tCurrentFval(tData);
-    std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
-    Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
+        // ****** SET DATA ******
+        std::vector<double> tData = {0.1, 0.34, 0.5, 0.4, 0.05};
+        Plato::StandardVector<double> tCurrentFval(tData);
+        std::string tID("CURRENT OBJECTIVE FUNCTION VALUES");
+        Plato::output_restart_data_vector(tCurrentFval, tID, tRestartFile);
 
-    Plato::StandardVector<double> tCurrentBestFval(tData);
-    tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
-    tData = {0.1, 0.21, 0.15, 0.14, 0.01};
+        Plato::StandardVector<double> tCurrentBestFval(tData);
+        tID = "CURRENT BEST OBJECTIVE FUNCTION VALUES";
+        tData =
+        {   0.1, 0.21, 0.15, 0.14, 0.01};
 
-    // ****** OUTPUT RESTART DATA ******
-    Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
-    tRestartFile.close();
+        // ****** OUTPUT RESTART DATA ******
+        Plato::output_restart_data_vector(tCurrentBestFval, tID, tRestartFile);
+        tRestartFile.close();
 
-    // ****** TEST OUTPUT DATA ******
-    std::ifstream tInputFile;
-    tInputFile.open("MyFile.txt");
-    std::string tInputString;
-    std::stringstream tReadData;
-    while(tInputFile >> tInputString)
-    {
-        tReadData << tInputString.c_str();
-    }
+        // ****** TEST OUTPUT DATA ******
+        std::ifstream tInputFile;
+        tInputFile.open("MyFile.txt");
+        std::string tInputString;
+        std::stringstream tReadData;
+        while(tInputFile >> tInputString)
+        {
+            tReadData << tInputString.c_str();
+        }
 
-    // ****** CLOSE AND DELETE FILE ******
-    tInputFile.close();
-    std::system("rm -f MyFile.txt");
+        // ****** CLOSE AND DELETE FILE ******
+        tInputFile.close();
+        std::system("rm -f MyFile.txt");
 
-    std::stringstream tGold("CURRENTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05CURRENTBESTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05");
-    ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
+        std::stringstream tGold("CURRENTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05CURRENTBESTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05");
+        ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
     }
 }
 
@@ -1880,8 +1881,8 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
         Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
 
         std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
-        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue << ", STDDEV = "
-            << tOutputs.mStdDevBestObjFuncValue << "\n";
+        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue
+                  << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
 
         std::cout << tOutputs.mStopCriterion << "\n";
 
@@ -1897,8 +1898,8 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
         Plato::solve_bcpso<double>(tObjective, tInputs, tOutputs);
 
         std::cout << "\nNUM ITERATIONS = " << tOutputs.mNumOuterIter << "\n";
-        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue << ", STDDEV = "
-            << tOutputs.mStdDevBestObjFuncValue << "\n";
+        std::cout << "\nOBJECTIVE: BEST = " << tOutputs.mGlobalBestObjFuncValue << ", MEAN = " << tOutputs.mMeanBestObjFuncValue
+                  << ", STDDEV = " << tOutputs.mStdDevBestObjFuncValue << "\n";
 
         std::cout << tOutputs.mStopCriterion << "\n";
 

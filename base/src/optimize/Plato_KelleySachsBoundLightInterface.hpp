@@ -100,6 +100,7 @@ struct AlgorithmInputsKSBC
             mLimitedMemorySize(8),
             mMaxTrustRegionSubProblemIter(25),
             mMaxNumLineSearchIter(5),
+            mProblemUpdateFrequency(0),
             mPostSmoothingScale(1e-10),
             mMaxTrustRegionRadius(1e2),
             mMinTrustRegionRadius(1e-4),
@@ -139,6 +140,7 @@ struct AlgorithmInputsKSBC
     OrdinalType mLimitedMemorySize; /*!< limited memory size */
     OrdinalType mMaxTrustRegionSubProblemIter; /*!< maximum number of trust region sub problem iterations */
     OrdinalType mMaxNumLineSearchIter; /*!< maximum number of outer line search iterations */
+    OrdinalType mProblemUpdateFrequency; /*!< update frequency - how often to perform continuation */
 
     ScalarType mPostSmoothingScale; /*!< post smoothing operation scale factor */
     ScalarType mMaxTrustRegionRadius; /*!< maximum trust region radius */

@@ -57,6 +57,10 @@ namespace Plato
 template<typename ScalarType, typename OrdinalType>
 class MultiVector;
 
+/******************************************************************************//**
+ * Abstract criterion class. NOTE: All the user-defined criteria should derived
+ * from this abstract class.
+***********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class Criterion
 {
@@ -65,59 +69,47 @@ public:
     {
     }
 
-    //! Directive to cache any criterion specific data once trial control is accepted.
+    /******************************************************************************//**
+     * Safely cache application specific data after a new trial control is accepted.
+     * For instance, the state solution, i.e. solution to Partial Differential Equation,
+     * can be safely cached via the cacheData function.
+    ***********************************************************************************/
     virtual void cacheData() = 0;
 
-    /*! Allows save continuation on application based parameters.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables
-     * **/
+    /******************************************************************************//**
+     * Perform continuation on parameters owned by the application.
+     * @param [in] aControl: control, i.e. design, variables
+    ***********************************************************************************/
     virtual void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) { return; }
 
-    /*!
-     * Evaluates criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}
-     * \rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables. This criterion
-     * is typically associated with nonlinear programming optimization problems. For instance, PDE constrasize_t
-     * optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables
-     *
-     *  \return Objective function value
-     **/
+    /******************************************************************************//**
+     * Evaluate criterion function
+     * @param [in] aControl: control, i.e. design, variables
+     * @return criterion value
+    ***********************************************************************************/
     virtual ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl) = 0;
-    /*!
-     * Computes the gradient of a criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})\colon\mathbb{R}^{n_u}
-     * \times\mathbb{R}^{n_z}\rightarrow\mathbb{R}, where u denotes the state and z denotes the control variables.
-     * This criterion is typically associated with nonlinear programming optimization problems. For instance, PDE
-     * constraint optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables
-     *    \param Out
-     *          aOutput: gradient
-     **/
+
+    /******************************************************************************//**
+     * Evaluate criterion function gradient
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in/out] aOutput: function gradient
+    ***********************************************************************************/
     virtual void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                           Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
-    /*!
-     * Computes the application of a vector to the Hessian of a criterion of type f(\mathbf{u}(\mathbf{z}),\mathbf{z})
-     * \colon\mathbb{R}^{n_u}\times\mathbb{R}^{n_z}\rightarrow\mathbb{R}, where u denotes the state and z denotes the
-     * control variables. This criterion is typically associated with nonlinear programming optimization problems.
-     * For instance, PDE constraint optimization problems.
-     *  Parameters:
-     *    \param In
-     *          aControl: control variables
-     *    \param In
-     *          aVector:  direction vector
-     *    \param Out
-     *          aOutput:  Hessian times direction vector
-     **/
+
+    /******************************************************************************//**
+     * Evaluate criterion function gradient
+     * @param [in] aControl: control, i.e. design, variables
+     * @param [in] aVector: descent direction
+     * @param [in/out] aOutput: function gradient
+    ***********************************************************************************/
     virtual void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                          const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                          Plato::MultiVector<ScalarType, OrdinalType> & aOutput) = 0;
 };
+// class Criterion
 
 }
+// namespace Plato
 
 #endif /* PLATO_CRITERION_HPP_ */

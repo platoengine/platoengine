@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <PerformerID>0</PerformerID>
+</Performer> 
+
+<Performer> 
+  <Name>Proxy</Name>
+  <Code>TopoProxy</Code>
+  <PerformerID>1</PerformerID>
+</Performer> 
+
+<!---DEFINE OWNERS AND USERS OF SHARED DATA-->
+
+<SharedData>
+  <Name>Objective Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Constraint Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>Proxy</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Control</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>300</Size>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Proxy</UserName>
+</SharedData>
+
+<!---OBJECTIVE FUNCTION STAGE-->
+<Stage>
+  <Name>Compliance Value</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>Solve</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+  </Operation>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>Objective</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>InternalEnergy</ArgumentName>
+      <SharedDataName>Objective Value</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Objective Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---OBJECTIVE FUNCTION GRADIENT STAGE-->
+<Stage>
+  <Name>Compliance Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ObjectiveGradient</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+  </Operation>
+  
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>FilteredObjectiveGradient</Name>
+    <Output>
+      <ArgumentName>FilteredInternalEnergyGradient</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---CONSTRAINT FUNCTION STAGE-->
+<Stage>
+  <Name>Volume Value</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>Constraint</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Volume</ArgumentName>
+      <SharedDataName>Constraint Value</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Constraint Value</SharedDataName>
+  </Output>
+</Stage>
+
+<!---CONSTRAINT GRADIENT STAGE-->
+<Stage>
+  <Name>Volume Gradient</Name>
+  <Input>
+    <SharedDataName>Control</SharedDataName>
+  </Input>
+
+  <Operation>
+    <PerformerName>Proxy</PerformerName>
+    <Name>ConstraintGradient</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Control</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>VolumeGradient</ArgumentName>
+      <SharedDataName>Constraint Gradient</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Constraint Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!---SET OPTIMIZER'S OPTIONS-->
+<Optimizer>
+  <Package>MMA</Package>
+  <Options>
+    <MaxNumOuterIterations>50</MaxNumOuterIterations>
+    <ConstraintNormalizationMultipliers>4</ConstraintNormalizationMultipliers>
+  </Options>
+  <OptimizationVariables>
+    <ValueName>Control</ValueName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
+    <DescentDirectionName>Vector</DescentDirectionName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
+  </OptimizationVariables>
+  <Objective>
+    <ValueStageName>Compliance Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <ValueName>Objective Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <GradientStageName>Compliance Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <GradientName>Objective Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+  </Objective>
+  <Constraint>
+    <ValueStageName>Volume Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT FUNCTION STAGE-->
+    <ValueName>Constraint Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT FUNCTION STAGE-->
+    <GradientStageName>Volume Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+    <GradientName>Constraint Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+  </Constraint>
+  <BoundConstraint>
+    <Upper>1</Upper>
+    <Lower>1e-2</Lower>
+  </BoundConstraint>
+  <InitialGuess>
+    <Value>0.4</Value>
+  </InitialGuess>
+</Optimizer>

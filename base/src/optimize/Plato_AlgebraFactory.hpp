@@ -75,22 +75,37 @@ void copy(const std::vector<ScalarType> & aIn, Plato::Vector<ScalarType, Ordinal
     }
 }
 
+/******************************************************************************//**
+ * @brief Linear algebra factory to creates 1D and 2D container templates
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class AlgebraFactory
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     AlgebraFactory()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     ~AlgebraFactory()
     {
     }
 
-    /********************************************************************************************/
+    /******************************************************************************//**
+     * @brief Create 1D container and return a standard shared pointer to 1D container
+     * @param [in] aComm MPI communicator
+     * @param [in] aLength number of elements
+     * @param [in] aInterface PLATO Engine interface
+     * @return standard shared pointer to 1D container
+    **********************************************************************************/
     std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> createVector(const MPI_Comm & aComm,
                                                                          const OrdinalType & aLength,
                                                                          Plato::Interface* aInterface) const
-    /********************************************************************************************/
     {
         std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector;
         try
@@ -172,10 +187,16 @@ public:
         }
         return (tVector);
     }
-    /********************************************************************************************/
+
+    /******************************************************************************//**
+     * @brief Create interface to reduction operations and return a standard shared
+     *        pointer to reduction operations interface
+     * @param [in] aComm MPI communicator
+     * @param [in] aInterface PLATO Engine interface
+     * @return standard shared pointer to reduction operations interface
+    **********************************************************************************/
     std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> createReduction(const MPI_Comm & aComm,
                                                                                          Plato::Interface* aInterface) const
-    /********************************************************************************************/
     {
         std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductions;
         try
@@ -264,6 +285,7 @@ private:
 };
 // class AlgebraFactory
 
-} // namespace Plato
+}
+// namespace Plato
 
 #endif /* PLATO_ALGEBRAFACTORY_HPP_ */

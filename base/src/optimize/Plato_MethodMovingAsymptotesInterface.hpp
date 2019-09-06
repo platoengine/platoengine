@@ -1,10 +1,4 @@
 /*
- * Plato_MethodMovingAsymptotesInterface.hpp
- *
- *  Created on: Nov 4, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,285 +40,114 @@
 //@HEADER
 */
 
-#ifndef PLATO_METHODMOVINGASYMPTOTESINTERFACE_HPP_
-#define PLATO_METHODMOVINGASYMPTOTESINTERFACE_HPP_
+/*
+ * Plato_MethodMovingAsymptotesInterface.hpp
+ *
+ *  Created on: Sep 1, 2019
+ */
 
-#include <string>
-#include <memory>
+#pragma once
 
-#include "Plato_Parser.hpp"
-#include "Plato_Interface.hpp"
-#include "Plato_DataFactory.hpp"
-#include "Plato_AlgebraFactory.hpp"
-#include "Plato_StandardVector.hpp"
-#include "Plato_EngineObjective.hpp"
-#include "Plato_EngineConstraint.hpp"
-#include "Plato_OptimizerUtilities.hpp"
-#include "Plato_OptimizerInterface.hpp"
-#include "Plato_PrimalProblemStageMng.hpp"
 #include "Plato_MethodMovingAsymptotes.hpp"
-#include "Plato_OptimizerEngineStageData.hpp"
-#include "Plato_ConservativeConvexSeparableAppxDataMng.hpp"
-#include "Plato_ConservativeConvexSeparableAppxAlgorithm.hpp"
+#include "Plato_MethodMovingAsymptotesIO_Data.hpp"
 
 namespace Plato
 {
 
-template<typename ScalarType>
-struct DefaultParametersMMA
-{
-    DefaultParametersMMA() :
-            mMovingAsymptoteExpansionFactor(2),
-            mMovingAsymptoteUpperBoundScaleFactor(50),
-            mMovingAsymptoteLowerBoundScaleFactor(0.001875)
-    {
-    }
-
-    ScalarType mMovingAsymptoteExpansionFactor;
-    ScalarType mMovingAsymptoteUpperBoundScaleFactor;
-    ScalarType mMovingAsymptoteLowerBoundScaleFactor;
-};
-
+/******************************************************************************//**
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm inputs
+ * @param [in] aInputs Method of Moving Asymptotes algorithm inputs
+ * @param [in,out] aAlgorithm Method of Moving Asymptotes algorithm interface
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class MethodMovingAsymptotesInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
+inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                                     Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm)
 {
-public:
-    /******************************************************************************/
-    explicit MethodMovingAsymptotesInterface(Plato::Interface* aInterface, const MPI_Comm & aComm) :
-            mComm(aComm),
-            mInterface(aInterface),
-            mInputData(Plato::OptimizerEngineStageData())
-    /******************************************************************************/
+    if(aInputs.mPrintDiagnostics == true)
     {
+        aAlgorithm.enableDiagnostics(aInputs.mPrintDiagnostics);
     }
 
-    /******************************************************************************/
-    virtual ~MethodMovingAsymptotesInterface()
-    /******************************************************************************/
-    {
-    }
+    aAlgorithm.setInitialGuess(*aInputs.mInitialGuess);
+    aAlgorithm.setControlLowerBounds(*aInputs.mLowerBounds);
+    aAlgorithm.setControlUpperBounds(*aInputs.mUpperBounds);
+    aAlgorithm.setConstraintNormalizationParams(*aInputs.mConstraintNormalizationParams);
 
-    /******************************************************************************/
-    Plato::optimizer::algorithm_t type() const
-    /******************************************************************************/
-    {
-        return (Plato::optimizer::algorithm_t::METHOD_OF_MOVING_ASYMPTOTES);
-    }
+    aAlgorithm.setUpdateFrequency(aInputs.mUpdateFrequency);
+    aAlgorithm.setMaxNumIterations(aInputs.mMaxNumSolverIter);
+    aAlgorithm.setMaxNumSubProblemIterations(aInputs.mMaxNumSubProblemIter);
+    aAlgorithm.setMaxNumTrustRegionIterations(aInputs.mMaxNumTrustRegionIter);
 
-    /******************************************************************************/
-    void initialize()
-    /******************************************************************************/
-    {
-        Plato::initialize<ScalarType, OrdinalType>(mInterface, mInputData);
-    }
+    aAlgorithm.setMoveLimit(aInputs.mMoveLimit);
+    aAlgorithm.setInitialAugLagPenalty(aInputs.mInitialAugLagPenalty);
+    aAlgorithm.setInitialAymptoteScaling(aInputs.mInitialAymptoteScaling);
+    aAlgorithm.setAsymptoteExpansionParameter(aInputs.mAsymptoteExpansion);
+    aAlgorithm.setSubProblemBoundsScaling(aInputs.mSubProblemBoundsScaling);
+    aAlgorithm.setAsymptoteContractionParameter(aInputs.mAsymptoteContraction);
 
-    /******************************************************************************/
-    void optimize()
-    /******************************************************************************/
-    {
-        mInterface->handleExceptions();
+    aAlgorithm.setOptimalityTolerance(aInputs.mOptimalityTolerance);
+    aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
+    aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
+    aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+}
+// function set_mma_algorithm_inputs
 
-        this->initialize();
+/******************************************************************************//**
+ * @brief Set Method of Moving Asymptotes (MMA) algorithm outputs
+ * @param [in] aAlgorithm Method of Moving Asymptotes algorithm interface
+ * @param [in,out] aOutputs Method of Moving Asymptotes algorithm outputs
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void set_mma_algorithm_outputs(const Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm,
+                                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
+{
+    aAlgorithm.getSolution(*aOutputs.mSolution);
+    aAlgorithm.getOptimalConstraintValues(*aOutputs.mConstraints);
 
-        // ********* ALLOCATE LINEAR ALGEBRA FACTORY ********* //
-        Plato::AlgebraFactory<ScalarType, OrdinalType> tLinearAlgebraFactory;
+    aOutputs.mNumSolverIter = aAlgorithm.getNumIterations();
+    aOutputs.mNumObjFuncEval = aAlgorithm.getNumObjFuncEvals();
 
-        // ********* ALLOCATE OPTIMIZER'S BASELINE DATA STRUCTURES *********
-        std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
-                std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
-        this->allocateBaselineDataStructures(tLinearAlgebraFactory, *tDataFactory);
+    aOutputs.mObjFuncValue = aAlgorithm.getOptimalObjectiveValue();
+    aOutputs.mNormObjFuncGrad = aAlgorithm.getNormObjectiveGradient();
+    aOutputs.mControlStagnationMeasure = aAlgorithm.getControlStagnationMeasure();
+    aOutputs.mObjectiveStagnationMeasure = aAlgorithm.getObjectiveStagnationMeasure();
 
-        // ********* ALLOCATE OPTIMIZER'S DATA MANAGER *********
-        std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> tDataMng =
-                std::make_shared<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>>(tDataFactory);
+    Plato::print_mma_stop_criterion(aAlgorithm.getStoppingCriterion(), aOutputs.mStopCriterion);
+}
+// function set_mma_algorithm_outputs
 
-        // ********* SET LOWER AND UPPER BOUNDS FOR CONTROLS *********
-        this->setLowerBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
-        this->setUpperBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
+/******************************************************************************//**
+ * @brief Method of Moving Asymptotes (MMA) algorithm interface
+ * @param [in] aObjective user-defined objective function
+ * @param [in] aConstraints user-defined list of constraints
+ * @param [in] aInputs Method of Moving Asymptotes algorithm inputs
+ * @param [in,out] aOutputs Method of Moving Asymptotes algorithm outputs
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void solve_mma(const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & aObjective,
+                      const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraints,
+                      const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
+                      Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> & aOutputs)
+{
+    // ********* ALLOCATE DATA STRUCTURES *********
+    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
+    tDataFactory = std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
+    tDataFactory->setCommWrapper(aInputs.mCommWrapper);
+    tDataFactory->allocateControl(*aInputs.mInitialGuess);
+    tDataFactory->allocateDual(*aInputs.mConstraintNormalizationParams);
+    tDataFactory->allocateDualReductionOperations(*aInputs.mDualReductionOperations);
+    tDataFactory->allocateControlReductionOperations(*aInputs.mControlReductionOperations);
 
-        // ********* SET INITIAL GUESS *********
-        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
+    // ********* ALLOCATE OPTIMALITY CRITERIA ALGORITHM AND SOLVE OPTIMIZATION PROBLEM *********
+    Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> tAlgorithm(aObjective, aConstraints, tDataFactory);
+    Plato::set_mma_algorithm_inputs(aInputs, tAlgorithm);
+    tAlgorithm.solve();
 
-        // ********* SOLVE OPTIMIZATION PROBLEM *********
-        this->solveOptimizationProblem(tDataMng, tDataFactory);
+    aOutputs.mSolution = tDataFactory->control().create();
+    aOutputs.mConstraints = tDataFactory->dual(0 /* vector index */).create();
+    Plato::set_mma_algorithm_outputs(tAlgorithm, aOutputs);
+}
+// function solve_mma
 
-        // ********* OUTPUT SOLUTION *********
-        Plato::call_finalization_stage(mInterface, mInputData);
-
-        this->finalize();
-    }
-
-    /******************************************************************************/
-    void finalize()
-    /******************************************************************************/
-    {
-        mInterface->finalize();
-    }
-
-private:
-    /******************************************************************************/
-    void setUpperBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
-                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
-                        Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
-    {
-        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
-        std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
-        const OrdinalType tNumControls = mInterface->size(tControlName);
-        std::vector<ScalarType> tInputBoundsData(tNumControls);
-
-        // ********* GET UPPER BOUNDS INFORMATION *********
-        Plato::getUpperBoundsInputData(mInputData, mInterface, tInputBoundsData);
-
-        // ********* SET UPPER BOUNDS FOR OPTIMIZER *********
-        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tUpperBoundVector =
-                aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
-        aDataFactory.allocateUpperBoundVector(*tUpperBoundVector);
-        Plato::copy(tInputBoundsData, *tUpperBoundVector);
-        aDataMng.setControlUpperBounds(tCONTROL_VECTOR_INDEX, *tUpperBoundVector);
-    }
-
-    /******************************************************************************/
-    void setLowerBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
-                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
-                        Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
-    {
-        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
-        std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
-        const OrdinalType tNumControls = mInterface->size(tControlName);
-        std::vector<ScalarType> tInputBoundsData(tNumControls);
-
-        // ********* GET LOWER BOUNDS INFORMATION *********
-        Plato::getLowerBoundsInputData(mInputData, mInterface, tInputBoundsData);
-
-        // ********* SET LOWER BOUNDS FOR OPTIMIZER *********
-        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tLowerBoundVector =
-                aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
-        aDataFactory.allocateLowerBoundVector(*tLowerBoundVector);
-        Plato::copy(tInputBoundsData, *tLowerBoundVector);
-        aDataMng.setControlLowerBounds(tCONTROL_VECTOR_INDEX, *tLowerBoundVector);
-    }
-
-    /******************************************************************************/
-    void setInitialGuess(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
-                         Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType> & aDataMng)
-    /******************************************************************************/
-    {
-        // ********* Allocate Plato::Vector of controls *********
-        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
-        std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
-        const OrdinalType tNumControls = mInterface->size(tControlName);
-        std::vector<ScalarType> tInputIntitalGuessData(tNumControls);
-        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector =
-                aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
-
-        // ********* Set initial guess for each control vector *********
-        Plato::getInitialGuessInputData(tControlName, mInputData, mInterface, tInputIntitalGuessData);
-        Plato::copy(tInputIntitalGuessData, *tVector);
-        aDataMng.setInitialGuess(tCONTROL_VECTOR_INDEX, *tVector);
-    }
-
-    /******************************************************************************/
-    void allocateBaselineDataStructures(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
-                                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
-    /******************************************************************************/
-    {
-        const OrdinalType tNumDuals = mInputData.getNumConstraints();
-        Plato::StandardVector<ScalarType, OrdinalType> tDuals(tNumDuals);
-        aDataFactory.allocateDual(tDuals);
-
-        // ********* Allocate control vectors baseline data structures *********
-        const OrdinalType tNumVectors = mInputData.getNumControlVectors();
-        assert(tNumVectors > static_cast<OrdinalType>(0));
-        Plato::StandardMultiVector<ScalarType, OrdinalType> tMultiVector;
-        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
-        {
-            std::string tControlName = mInputData.getControlName(tIndex);
-            const OrdinalType tNumControls = mInterface->size(tControlName);
-            std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector =
-                    aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
-            tMultiVector.add(tVector);
-        }
-        aDataFactory.allocateControl(tMultiVector);
-        std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
-                aAlgebraFactory.createReduction(mComm, mInterface);
-        aDataFactory.allocateControlReductionOperations(*tReductionOperations);
-
-        Plato::CommWrapper tCommWrapper(mComm);
-        aDataFactory.setCommWrapper(tCommWrapper);
-    }
-
-    /******************************************************************************/
-    void solveOptimizationProblem(const std::shared_ptr<Plato::ConservativeConvexSeparableAppxDataMng<ScalarType, OrdinalType>> & aDataMng,
-                                  const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> & aDataFactory)
-    /******************************************************************************/
-    {
-        // ********* ALLOCATE OBJECTIVE FUNCTION ********* //
-        std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tObjective =
-                std::make_shared<Plato::EngineObjective<ScalarType, OrdinalType>>(*aDataFactory, mInputData, mInterface);
-
-        // ********* ALLOCATE LIST OF CONSTRAINTS ********* //
-        const OrdinalType tNumConstraints = mInputData.getNumConstraints();
-        std::vector<std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>>> tList(tNumConstraints);
-        for(OrdinalType tIndex = 0; tIndex < tNumConstraints; tIndex++)
-        {
-            tList[tIndex] = std::make_shared<Plato::EngineConstraint<ScalarType, OrdinalType>>(tIndex, *aDataFactory, mInputData, mInterface);
-        }
-        std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints =
-                std::make_shared<Plato::CriterionList<ScalarType, OrdinalType>>();
-        tConstraints->add(tList);
-
-        // ********* ALLOCATE PRIMAL PROBLEM STAGE MANAGER *********
-        std::shared_ptr<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>> tStageMng =
-                std::make_shared<Plato::PrimalProblemStageMng<ScalarType, OrdinalType>>(aDataFactory, tObjective, tConstraints);
-
-        // ********* ALLOCATE CCSA METHOD = METHOD OF MOVING ASYMPTOTES *********
-        std::shared_ptr<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>> tSubProblem =
-                std::make_shared<Plato::MethodMovingAsymptotes<ScalarType, OrdinalType>>(aDataFactory);
-
-        // ********* ALLOCATE CONSERVATIVE CONVEX SEPARABLE APPROXIMATION (CCSA) ALGORITHM *********
-        Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType> tAlgorithm(tStageMng, aDataMng, tSubProblem);
-        this->setParameters(tAlgorithm);
-        tAlgorithm.enableDiagnostics();
-        tAlgorithm.solve();
-    }
-
-    void setParameters(Plato::ConservativeConvexSeparableAppxAlgorithm<ScalarType, OrdinalType>& aAlgorithm)
-    {
-        // ********* Get User input ***************
-        OrdinalType tMaxNumIterations = mInputData.getMaxNumIterations();
-        aAlgorithm.setMaxNumIterations(tMaxNumIterations);
-        OrdinalType tUpdateProblemFreq = mInputData.getProblemUpdateFrequency();
-        aAlgorithm.setUpdateProblemFrequency(tUpdateProblemFreq);
-
-        ScalarType tKKTTolerance = mInputData.getCCSAOuterKKTTolerance();
-        aAlgorithm.setKarushKuhnTuckerConditionsTolerance(tKKTTolerance);
-        ScalarType tStationarityTolerance = mInputData.getCCSAOuterStationarityTolerance();
-        aAlgorithm.setStationarityTolerance(tStationarityTolerance);
-        ScalarType tControlStagnationTolerance = mInputData.getCCSAOuterControlStagnationTolerance();
-        aAlgorithm.setControlStagnationTolerance(tControlStagnationTolerance);
-        ScalarType tObjectiveStagnationTolerance = mInputData.getCCSAOuterObjectiveStagnationTolerance();
-        aAlgorithm.setObjectiveStagnationTolerance(tObjectiveStagnationTolerance);
-        ScalarType tInitialMovingAsymptoteScaleFactor = mInputData.getInitialMovingAsymptoteScaleFactor();
-        aAlgorithm.setInitialMovingAsymptoteScaleFactor(tInitialMovingAsymptoteScaleFactor);
-
-        Plato::DefaultParametersMMA<ScalarType> tDefaultParametersMMA;
-        aAlgorithm.setMovingAsymptoteExpansionFactor(tDefaultParametersMMA.mMovingAsymptoteExpansionFactor);
-        aAlgorithm.setMovingAsymptoteLowerBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteLowerBoundScaleFactor);
-        aAlgorithm.setMovingAsymptoteUpperBoundScaleFactor(tDefaultParametersMMA.mMovingAsymptoteUpperBoundScaleFactor);
-    }
-
-private:
-    MPI_Comm mComm;
-    Plato::Interface* mInterface;
-    Plato::OptimizerEngineStageData mInputData;
-
-private:
-    MethodMovingAsymptotesInterface(const Plato::MethodMovingAsymptotesInterface<ScalarType, OrdinalType>&);
-    Plato::MethodMovingAsymptotesInterface<ScalarType, OrdinalType> & operator=(const Plato::MethodMovingAsymptotesInterface<ScalarType, OrdinalType>&);
-};
-
-} // namespace Plato
-
-#endif /* PLATO_METHODMOVINGASYMPTOTESINTERFACE_HPP_ */
+}
+// namespace Plato

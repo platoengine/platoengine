@@ -55,7 +55,6 @@ namespace TopoProxy
 {
 
 std::vector<double> getGoldControlRolTest();
-std::vector<double> get_gold_control_mma_test();
 std::vector<double> get_gold_control_gcmma_test();
 std::vector<double> get_gold_control_ksbc_test();
 std::vector<double> get_gold_control_ksbc_lbfgs_test();

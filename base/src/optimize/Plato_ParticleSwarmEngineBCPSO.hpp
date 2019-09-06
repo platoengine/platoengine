@@ -103,7 +103,7 @@ public:
     }
 
     /******************************************************************************//**
-     * @brief Notifies PLATO Engine that optimization problem finished.
+     * @brief Notify PLATO Engine that optimization problem is done.
     **********************************************************************************/
     void finalize()
     {
@@ -144,7 +144,7 @@ public:
 
 private:
     /******************************************************************************//**
-     * @brief Parse objective function stage options
+     * @brief Parse options for objective function stage
     **********************************************************************************/
     void parseObjFuncStageOptions()
     {
@@ -213,9 +213,9 @@ private:
     {
         Plato::StandardMultiVector<ScalarType, OrdinalType> tParticlesSet;
 
-        for(OrdinalType tParticleIndex = 0; tParticleIndex < aInputs.mNumParticles; tParticleIndex++)
+        for(OrdinalType tVectorIndex = 0; tVectorIndex < aInputs.mNumParticles; tVectorIndex++)
         {
-            const std::string & tMySharedDataName = mStageDataMng.getInput(mObjFuncStageName, tParticleIndex);
+            const std::string & tMySharedDataName = mStageDataMng.getInput(mObjFuncStageName, tVectorIndex);
             const OrdinalType tNumControls = mInterface->size(tMySharedDataName);
             std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector =
                     aFactory.createVector(mComm, tNumControls, mInterface);

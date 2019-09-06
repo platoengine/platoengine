@@ -1,13 +1,3 @@
-#pragma once
-
-#include <cmath>
-#include <memory>
-#include <cassert>
-
-#include "Plato_Vector.hpp"
-#include "Plato_Criterion.hpp"
-#include "Plato_MultiVector.hpp"
-
 /*
 //@HEADER
 // *************************************************************************
@@ -49,23 +39,56 @@
 //@HEADER
 */
 
+#pragma once
+
+#include <cmath>
+#include <memory>
+#include <cassert>
+
+#include "Plato_Vector.hpp"
+#include "Plato_Criterion.hpp"
+#include "Plato_MultiVector.hpp"
+
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Evaluate unit shifted ellipse constraint, which is defined as
+ *   /f$ g(x) = \frac{(x - x_o)^2}{r_x^2} + \frac{(y - y_o)^2}{r_y^2} \leq \alpha /f$,
+ * where /f$ \alpha /f$ is the constraint's upper bound, /f$x_o/f$ and /f$y_o/f$
+ * are the ellipse's center x and y coordinates and /f$r_o/f$ and /f$r_o/f$ are
+ * the ellipse's x and y radius.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class ShiftedEllipse : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     ShiftedEllipse() :
             mXCenter(0.),
             mXRadius(1.),
             mYCenter(0.),
-            mYRadius(1.)
+            mYRadius(1.),
+            mUpperBound(1)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~ShiftedEllipse()
     {
     }
+
+    /******************************************************************************//**
+     * @brief Define criterion parameters
+     * @param [in] aXCenter ellipse center's x-coordinate
+     * @param [in] aXRadius ellipse radius in x-direction
+     * @param [in] aYCenter ellipse center's y-coordinate
+     * @param [in] aYRadius ellipse radius in y-direction
+    **********************************************************************************/
     void specify(ScalarType aXCenter, ScalarType aXRadius, ScalarType aYCenter, ScalarType aYRadius)
     {
         mXCenter = aXCenter;
@@ -74,11 +97,18 @@ public:
         mYRadius = aYRadius;
     }
 
+    /******************************************************************************//**
+     * @brief Safely cache application data after a trial control has been accepted.
+    **********************************************************************************/
     void cacheData()
     {
         return;
     }
 
+    /******************************************************************************//**
+     * @brief Evaluate objective function.
+     * @param [in] aControl optimization variables
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
@@ -86,9 +116,15 @@ public:
         const OrdinalType tVectorIndex = 0;
         ScalarType tOutput = ((aControl(tVectorIndex, 0) - mXCenter) * (aControl(tVectorIndex, 0) - mXCenter) / (mXRadius * mXRadius))
                              + ((aControl(tVectorIndex, 1) - mYCenter) * (aControl(tVectorIndex, 1) - mYCenter) / (mYRadius * mYRadius))
-                             - 1.;
+                             - mUpperBound;
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Compute objective function gradient.
+     * @param [in] aControl optimization variables
+     * @param [in/out] aOutput gradient
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
@@ -101,6 +137,13 @@ public:
         aOutput(tVectorIndex, 1) = (2. / (mYRadius * mYRadius)) * (aControl(tVectorIndex, 1) - mYCenter);
 
     }
+
+    /******************************************************************************//**
+     * @brief Apply descent direction to Hessian.
+     * @param [in] aControl optimization variables
+     * @param [in] aVector descent direction
+     * @param [in/out] aOutput application of input vector to Hessian
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -115,10 +158,11 @@ public:
     }
 
 private:
-    ScalarType mXCenter;
-    ScalarType mXRadius;
-    ScalarType mYCenter;
-    ScalarType mYRadius;
+    ScalarType mXCenter; /*!< ellipse center's x-coordinate */
+    ScalarType mXRadius; /*!< ellipse radius in x-direction */
+    ScalarType mYCenter; /*!< ellipse center's y-coordinate */
+    ScalarType mYRadius; /*!< ellipse radius in y-direction */
+    ScalarType mUpperBound; /*!< constraint upper bound */
 
 private:
     ShiftedEllipse(const Plato::ShiftedEllipse<ScalarType, OrdinalType> & aRhs);

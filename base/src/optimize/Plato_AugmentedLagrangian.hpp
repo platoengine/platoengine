@@ -50,6 +50,7 @@
 
 #include "Plato_Macros.hpp"
 #include "Plato_DataFactory.hpp"
+#include "Plato_OptimizersIO.hpp"
 #include "Plato_TrustRegionAlgorithmDataMng.hpp"
 #include "Plato_AugmentedLagrangianStageMng.hpp"
 #include "Plato_KelleySachsBoundConstrained.hpp"
@@ -112,7 +113,7 @@ public:
             mOutputData(),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
-            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, aDataMng, aStageMng))
+            mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, mDataMng, mStageMng))
     {
         this->initialize();
     }
@@ -433,6 +434,16 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Get control solution
+     * param [in/out] aSolution solution to optimization problem
+    **********************************************************************************/
+    void getSolution(Plato::MultiVector<ScalarType, OrdinalType> &aSolution) const
+    {
+        const Plato::MultiVector<ScalarType, OrdinalType> & tSolution = mDataMng->getCurrentControl();
+        Plato::update(static_cast<ScalarType>(1), tSolution, static_cast<ScalarType>(0), aSolution);
+    }
+
+    /******************************************************************************//**
      * @brief Return number of outer optimization iterations
      * @return number of outer optimization iterations
     **********************************************************************************/
@@ -448,6 +459,16 @@ public:
     Plato::algorithm::stop_t getStoppingCriterion() const
     {
         return (mStoppingCriterion);
+    }
+
+    /******************************************************************************//**
+     * @brief Reset optimizer parameters to initial values, i.e. values at iteration 0.
+    **********************************************************************************/
+    void resetParameters()
+    {
+        mNumAugLagIter = 0;
+        //mStageMng->resetParameters();
+        mOptimizer->resetParameters();
     }
 
     /******************************************************************************//**
@@ -643,7 +664,7 @@ private:
     }
 
     /******************************************************************************//**
-     * @brief Print diagnostics for Kelley-Sachs augmented Lagrangian algorithm
+     * @brief Print diagnostics for Kelley-Sachs augmented Lagrangian optimization algorithm
     **********************************************************************************/
     void outputDiagnostics()
     {

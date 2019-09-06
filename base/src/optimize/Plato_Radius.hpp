@@ -1,10 +1,4 @@
 /*
- * Plato_Radius.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_RADIUS_HPP_
-#define PLATO_RADIUS_HPP_
+/*
+ * Plato_Radius.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
+#pragma once
 
 #include <cmath>
 #include <memory>
@@ -60,29 +59,51 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Evaluate unit disc constraint, which is defined as
+ *   /f$ g(x) = x_1^2 + x_2^2 \leq \alpha /f$,
+ * where /f$ \alpha /f$ is the upper bound on the constraint.
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class Radius : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     Radius() :
             mLimit(1)
     {
     }
 
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~Radius()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Set upper bound on constraint
+     * @param [in] upper bound
+    **********************************************************************************/
     void setLimit(const ScalarType & aLimit)
     {
         mLimit = aLimit;
     }
 
+    /******************************************************************************//**
+     * @brief Safely cache application data after a trial control has been accepted.
+    **********************************************************************************/
     void cacheData()
     {
         return;
     }
-    /// \left(\mathbf{z}(0)\right)^2 + \left(\mathbf{z}(1)\right)^2 - limit
+
+    /******************************************************************************//**
+     * @brief Evaluate objective function.
+     * @param [in] aControl optimization variables
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
@@ -93,6 +114,12 @@ public:
         tOutput = tOutput - mLimit;
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * @brief Compute objective function gradient.
+     * @param [in] aControl optimization variables
+     * @param [in/out] aOutput gradient
+    **********************************************************************************/
     void gradient(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                   Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
     {
@@ -105,6 +132,13 @@ public:
         aOutput(tVectorIndex, 1) = static_cast<ScalarType>(2.) * aControl(tVectorIndex, 1);
 
     }
+
+    /******************************************************************************//**
+     * @brief Apply descent direction to Hessian.
+     * @param [in] aControl optimization variables
+     * @param [in] aVector descent direction
+     * @param [in/out] aOutput application of input vector to Hessian
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -119,13 +153,13 @@ public:
     }
 
 private:
-    ScalarType mLimit;
+    ScalarType mLimit;  /*!< upper bound on constraint */
 
 private:
     Radius(const Plato::Radius<ScalarType, OrdinalType> & aRhs);
     Plato::Radius<ScalarType, OrdinalType> & operator=(const Plato::Radius<ScalarType, OrdinalType> & aRhs);
 };
+// class Radius
 
-} // namespace Plato
-
-#endif /* PLATO_RADIUS_HPP_ */
+}
+// namespace Plato

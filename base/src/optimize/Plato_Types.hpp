@@ -1,10 +1,4 @@
 /*
- * Plato_Types.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -44,6 +38,12 @@
 // *************************************************************************
 //@HEADER
 */
+
+/*
+ * Plato_Types.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
 
 #ifndef Plato_TYPES_HPP_
 #define Plato_TYPES_HPP_

@@ -46,8 +46,7 @@
 //@HEADER
 */
 
-#ifndef PLATO_CCSATESTINEQUALITY_HPP_
-#define PLATO_CCSATESTINEQUALITY_HPP_
+#pragma once
 
 #include <cmath>
 #include <vector>
@@ -61,22 +60,48 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Inequality constraint from: Svanberg, Krister. "The method of moving
+ * asymptotes: A new method for structural optimization." International journal
+ * for numerical methods in engineering 24.2 (1987): 359-373.
+ *
+ * The constraint is given by:
+ *
+ * /f$ \frac{61}{x_1^3} + \frac{37}{x_2^3} + \frac{19}{x_3^3} + \frac{7}{x_4^3}
+ * + \frac{1}{x_5^3} \leq C_2 /f$, where /f$C_2 = 1/f$
+ *
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class CcsaTestInequality : public Plato::Criterion<ScalarType, OrdinalType>
 {
 public:
+    /******************************************************************************//**
+     * @brief Constructor
+    **********************************************************************************/
     CcsaTestInequality() :
-            mConstant(1)
+            mConstraintLimit(1)
     {
     }
+
+    /******************************************************************************//**
+     * @brief Destructor
+    **********************************************************************************/
     virtual ~CcsaTestInequality()
     {
     }
 
+    /******************************************************************************//**
+     * @brief Cache application-based data
+    **********************************************************************************/
     void cacheData()
     {
         return;
     }
+
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+     * @param [in] aControl 2D container of optimization variables
+    **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() > static_cast<OrdinalType>(0));
@@ -90,7 +115,7 @@ public:
         ScalarType tTermFour = static_cast<ScalarType>(7) / std::pow(tMyControl[3], static_cast<ScalarType>(3));
         ScalarType tTermFive = static_cast<ScalarType>(1) / std::pow(tMyControl[4], static_cast<ScalarType>(3));
         ScalarType tResidual = tTermOne + tTermTwo + tTermThree + tTermFour + tTermFive;
-        tResidual = tResidual - mConstant;
+        tResidual = tResidual - mConstraintLimit;
 
         return (tResidual);
     }
@@ -115,6 +140,14 @@ public:
         tMyGradient[4] = tScaleFactor
                 * (static_cast<ScalarType>(1) / std::pow(tMyControl[4], static_cast<ScalarType>(4)));
     }
+
+    /******************************************************************************//**
+     * @brief Apply vector to Hessian operator
+     * @param [in] aControl 2D container of optimization variables
+     * @param [in] aVector 2D container of descent directions
+     * @param [in/out] aOutput 2D container with the application of the input vector to
+     *   the Hessian
+    **********************************************************************************/
     void hessian(const Plato::MultiVector<ScalarType, OrdinalType> & aControl,
                  const Plato::MultiVector<ScalarType, OrdinalType> & aVector,
                  Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
@@ -125,13 +158,13 @@ public:
     }
 
 private:
-    ScalarType mConstant;
+    ScalarType mConstraintLimit; /*!< constraint upper bound, i.e. limit */
 
 private:
     CcsaTestInequality(const Plato::CcsaTestInequality<ScalarType, OrdinalType> & aRhs);
     Plato::CcsaTestInequality<ScalarType, OrdinalType> & operator=(const Plato::CcsaTestInequality<ScalarType, OrdinalType> & aRhs);
 };
+// namespace CcsaTestInequality
 
-} // namespace Plato
-
-#endif /* PLATO_CCSATESTINEQUALITY_HPP_ */
+}
+// namespace Plato

@@ -1,10 +1,4 @@
 /*
- * Plato_LinearOperatorList.hpp
- *
- *  Created on: Oct 21, 2017
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,13 +40,19 @@
 //@HEADER
 */
 
-#ifndef PLATO_LINEAROPERATORLIST_HPP_
-#define PLATO_LINEAROPERATORLIST_HPP_
+/*
+ * Plato_LinearOperatorList.hpp
+ *
+ *  Created on: Oct 21, 2017
+ */
+
+#pragma once
 
 #include <vector>
 #include <memory>
 #include <cassert>
 
+#include "Plato_Macros.hpp"
 #include "Plato_CriterionList.hpp"
 #include "Plato_LinearOperator.hpp"
 #include "Plato_IdentityHessian.hpp"
@@ -61,22 +61,38 @@
 namespace Plato
 {
 
+/*******************************************************************************//**
+ * @brief Class use to create a list of linear operators, e.g. Hessians.
+***********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class LinearOperatorList
 {
 public:
+    /*******************************************************************************//**
+     * @brief Default constructor
+    ***********************************************************************************/
     LinearOperatorList() :
             mList()
     {
     }
-    explicit LinearOperatorList(const OrdinalType & aNumCriterion) :
+
+    /*******************************************************************************//**
+     * @brief Constructor - sets all operators to the identity Hessian
+     * @param [in] aNumCriterion number of criteria
+    ***********************************************************************************/
+    explicit LinearOperatorList(const OrdinalType & aNumCriteria) :
             mList()
     {
-        for(OrdinalType tIndex = 0; tIndex < aNumCriterion; tIndex++)
+        for(OrdinalType tIndex = 0; tIndex < aNumCriteria; tIndex++)
         {
             mList.push_back(std::make_shared<Plato::IdentityHessian<ScalarType, OrdinalType>>());
         }
     }
+
+    /*******************************************************************************//**
+     * @brief Constructor - sets all operators to the analytical Hessian
+     * @param [in] aInput criterion interface
+    ***********************************************************************************/
     explicit LinearOperatorList(const std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aInput) :
             mList()
     {
@@ -86,30 +102,58 @@ public:
             mList.push_back(std::make_shared<Plato::AnalyticalHessian<ScalarType, OrdinalType>>(aInput->ptr(tIndex)));
         }
     }
+
+    /*******************************************************************************//**
+     * @brief Destructor
+    ***********************************************************************************/
     ~LinearOperatorList()
     {
     }
 
+    /*******************************************************************************//**
+     * @brief Return the number of linear operators
+     * @return number of linear operators
+    ***********************************************************************************/
     OrdinalType size() const
     {
         return (mList.size());
     }
+
+    /*******************************************************************************//**
+     * @brief Add linear operator to list
+     * @param [in] aInput linear operators
+    ***********************************************************************************/
     void add(const std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> & aInput)
     {
         mList.push_back(aInput);
     }
+
+    /*******************************************************************************//**
+     * @brief Return reference to linear operator
+     * @param [in] aIndex index
+    ***********************************************************************************/
     Plato::LinearOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
+
+    /*******************************************************************************//**
+     * @brief Return reference to linear operator
+     * @param [in] aIndex index
+    ***********************************************************************************/
     const Plato::LinearOperator<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex].operator*());
     }
+
+    /*******************************************************************************//**
+     * @brief Create a copy of this linear operator list
+     * @return a shared pointer to a new linear operator list
+    ***********************************************************************************/
     std::shared_ptr<Plato::LinearOperatorList<ScalarType, OrdinalType>> create() const
     {
         assert(this->size() > static_cast<OrdinalType>(0));
@@ -126,21 +170,26 @@ public:
         }
         return (tOutput);
     }
+
+    /*******************************************************************************//**
+     * @brief Return a constant reference to the linear operator shared pointer
+     * @return constant reference to the linear operator shared pointer
+    ***********************************************************************************/
     const std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return(mList[aIndex]);
     }
 
 private:
-    std::vector<std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>>> mList;
+    std::vector<std::shared_ptr<Plato::LinearOperator<ScalarType, OrdinalType>>> mList; /*!< linear operator list */
 
 private:
     LinearOperatorList(const Plato::LinearOperatorList<ScalarType, OrdinalType>&);
     Plato::LinearOperatorList<ScalarType, OrdinalType> & operator=(const Plato::LinearOperatorList<ScalarType, OrdinalType>&);
 };
+// class LinearOperatorList
 
 }
-
-#endif /* PLATO_LINEAROPERATORLIST_HPP_ */
+// namespace Plato

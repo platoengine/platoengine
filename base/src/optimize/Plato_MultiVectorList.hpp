@@ -59,6 +59,9 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * @brief Interface to a list of 2D containersS
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 class MultiVectorList
 {
@@ -124,7 +127,7 @@ public:
     **********************************************************************************/
     Plato::MultiVector<ScalarType, OrdinalType> & operator [](const OrdinalType & aInput)
     {
-        assert(aInput < mList.size());
+        assert(aInput < static_cast<OrdinalType>(mList.size()));
         assert(mList[aInput].get() != nullptr);
         return (mList[aInput].operator*());
     }
@@ -136,7 +139,7 @@ public:
     **********************************************************************************/
     const Plato::MultiVector<ScalarType, OrdinalType> & operator [](const OrdinalType & aInput) const
     {
-        assert(aInput < mList.size());
+        assert(aInput < static_cast<OrdinalType>(mList.size()));
         assert(mList[aInput].get() != nullptr);
         return (mList[aInput].operator*());
     }
@@ -150,7 +153,7 @@ public:
     Plato::Vector<ScalarType, OrdinalType> & operator ()(const OrdinalType & aElemIndex,
                                                          const OrdinalType & aVectorIndex)
     {
-        assert(aElemIndex < mList.size());
+        assert(aElemIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aElemIndex].get() != nullptr);
         return (mList[aElemIndex]->operator[](aVectorIndex));
     }
@@ -164,7 +167,7 @@ public:
     const Plato::Vector<ScalarType, OrdinalType> & operator ()(const OrdinalType & aElemIndex,
                                                                const OrdinalType & aVectorIndex) const
     {
-        assert(aElemIndex < mList.size());
+        assert(aElemIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aElemIndex].get() != nullptr);
         return (mList[aElemIndex]->operator[](aVectorIndex));
     }
@@ -195,7 +198,7 @@ public:
     **********************************************************************************/
     const std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
-        assert(aIndex < mList.size());
+        assert(aIndex < static_cast<OrdinalType>(mList.size()));
         assert(mList[aIndex].get() != nullptr);
         return (mList[aIndex]);
     }
@@ -207,7 +210,7 @@ private:
     **********************************************************************************/
     void initialize(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
-        assert(mList.size() > static_cast<OrdinalType>(0));
+        assert(static_cast<OrdinalType>(mList.size()) > static_cast<OrdinalType>(0));
 
         const OrdinalType tSize = mList.size();
         for(OrdinalType tIndex = 0; tIndex < tSize; tIndex++)
@@ -217,7 +220,7 @@ private:
     }
 
 private:
-    std::vector<std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>>> mList;
+    std::vector<std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>>> mList; /*!< multi-vector list */
 
 private:
     MultiVectorList(const Plato::MultiVectorList<ScalarType, OrdinalType>&);

@@ -160,7 +160,7 @@ public:
     **********************************************************************************/
     Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex)
     {
-        assert(aIndex < mCriterionList.size());
+        assert(aIndex < static_cast<OrdinalType>(mCriterionList.size()));
         assert(mCriterionList[aIndex].get() != nullptr);
         return (mCriterionList[aIndex].operator*());
     }
@@ -172,7 +172,7 @@ public:
     **********************************************************************************/
     const Plato::Criterion<ScalarType, OrdinalType> & operator [](const OrdinalType & aIndex) const
     {
-        assert(aIndex < mCriterionList.size());
+        assert(aIndex < static_cast<OrdinalType>(mCriterionList.size()));
         assert(mCriterionList[aIndex].get() != nullptr);
         return (mCriterionList[aIndex].operator*());
     }
@@ -204,7 +204,7 @@ public:
     **********************************************************************************/
     const std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> & ptr(const OrdinalType & aIndex) const
     {
-        assert(aIndex < mCriterionList.size());
+        assert(aIndex < static_cast<OrdinalType>(mCriterionList.size()));
         assert(mCriterionList[aIndex].get() != nullptr);
         return(mCriterionList[aIndex]);
     }

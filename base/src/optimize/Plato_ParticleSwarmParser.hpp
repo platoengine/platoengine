@@ -51,8 +51,8 @@
 #include <sstream>
 #include <algorithm>
 
-#include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
+#include "Plato_OptimizerParser.hpp"
 #include "Plato_ParticleSwarmIO_BCPSO.hpp"
 #include "Plato_ParticleSwarmIO_ALPSO.hpp"
 
@@ -63,7 +63,7 @@ namespace Plato
  * @brief Parser for Particle Swarm Optimization (PSO) algorithm
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
-class ParticleSwarmParser
+class ParticleSwarmParser : public Plato::OptimizerParser<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************//**
@@ -78,74 +78,6 @@ public:
     **********************************************************************************/
     ~ParticleSwarmParser()
     {
-    }
-
-    /******************************************************************************//**
-     * @brief Return gradient free objective function stage name
-     * @param [in] aOptimizerNode data structure with optimization related input options
-     * @return gradient free objective function stage name
-    **********************************************************************************/
-    std::string getObjectiveStageName(const Plato::InputData & aOptimizerNode) const
-    {
-        std::string tOutput("ObjFuncEval");
-        if(aOptimizerNode.size<Plato::InputData>("Objective"))
-        {
-            Plato::InputData tObjectiveNode = aOptimizerNode.get<Plato::InputData>("Objective");
-            tOutput = Plato::Get::String(tObjectiveNode, "ValueStageName");
-        }
-        return (tOutput);
-    }
-
-    /******************************************************************************//**
-     * @brief Return list of gradient free constraint stage names
-     * @param [in] aOptimizerNode data structure with optimization related input options
-     * @return list of gradient free constraint stage names
-    **********************************************************************************/
-    std::vector<std::string> getConstraintStageNames(const Plato::InputData & aOptimizerNode) const
-    {
-        std::vector<std::string> tNames;
-        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
-        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
-        {
-            std::string tMyStageName = Plato::Get::String(*tNode, "ValueStageName");
-            tNames.push_back(tMyStageName);
-        }
-        return (tNames);
-    }
-
-    /******************************************************************************//**
-     * @brief Return list of constraint reference values
-     * @param [in] aOptimizerNode data structure with optimization related input options
-     * @return list of constraint reference values
-    **********************************************************************************/
-    std::vector<ScalarType> getConstraintReferenceValues(const Plato::InputData & aOptimizerNode) const
-    {
-        std::vector<ScalarType> tOutput;
-        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
-        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
-        {
-            ScalarType tMyReferenceValue = Plato::Get::Double(*tNode, "ReferenceValue");
-            tMyReferenceValue = tMyReferenceValue <= static_cast<ScalarType>(0.0) ? static_cast<ScalarType>(1.0) : tMyReferenceValue;
-            tOutput.push_back(tMyReferenceValue);
-        }
-        return (tOutput);
-    }
-
-    /******************************************************************************//**
-     * @brief Return list of constraint target values
-     * @param [in] aOptimizerNode data structure with optimization related input options
-     * @return list of constraint target values
-    **********************************************************************************/
-    std::vector<ScalarType> getConstraintTargetValues(const Plato::InputData & aOptimizerNode) const
-    {
-        std::vector<ScalarType> tOutput;
-        auto tAllNodes = aOptimizerNode.getByName<Plato::InputData>("Constraint");
-        for(auto tNode = tAllNodes.begin(); tNode != tAllNodes.end(); ++tNode)
-        {
-            const ScalarType tMyTargeteValue = Plato::Get::Double(*tNode, "TargetValue");
-            tOutput.push_back(tMyTargeteValue);
-        }
-        return (tOutput);
     }
 
     /******************************************************************************//**

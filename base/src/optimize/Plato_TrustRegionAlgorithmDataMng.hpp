@@ -568,6 +568,12 @@ public:
 
         mControlUpperBounds->operator [](aVectorIndex).fill(aValue);
     }
+
+    /******************************************************************************//**
+     * @brief Set control upper bounds
+     * @param [in] aVectorIndex control vector index
+     * @param [in] aInput 1D container of control upper bounds
+    **********************************************************************************/
     void setControlUpperBounds(const OrdinalType & aVectorIndex, const Plato::Vector<ScalarType, OrdinalType> & aInput)
     {
         assert(mControlUpperBounds.get() != nullptr);
@@ -575,17 +581,27 @@ public:
 
         mControlUpperBounds->operator [](aVectorIndex).update(1., aInput, 0.);
     }
+
+    /******************************************************************************//**
+     * @brief Set control upper bounds
+     * @param [in] aInput 2D container of control upper bounds
+    **********************************************************************************/
     void setControlUpperBounds(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
     {
         assert(aInput.getNumVectors() == mControlUpperBounds->getNumVectors());
         Plato::update(1., aInput, 0., *mControlUpperBounds);
     }
 
-    // NOTE: OBJECTIVE AND GRADIENT INEXACTNESS VIOLATION FLAGS
+    /******************************************************************************//**
+     * @brief Returns true if the initial guess is set, false if not.
+     * @return is initial guess set flag
+    **********************************************************************************/
     bool isInitialGuessSet() const
     {
         return (mIsInitialGuessSet);
     }
+
+    // NOTE: OBJECTIVE AND GRADIENT INEXACTNESS VIOLATION FLAGS
     void setGradientInexactnessFlag(const bool & aInput)
     {
         mGradientInexactnessToleranceExceeded = aInput;

@@ -2,7 +2,8 @@ set(LIB_NAMES)
 
 set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
-set(${LIB_NAME}_SOURCES Plato_OptimizersIO.cpp
+set(${LIB_NAME}_SOURCES Plato_OptimizersIO_Utilities.cpp
+                        Plato_OptimizersIO.cpp
                         Plato_SromXML.cpp
                         )
                         
@@ -33,7 +34,19 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_ParticleSwarmInterfaceBCPSO.hpp
                         Plato_ParticleSwarmInterfaceALPSO.hpp
                         Plato_GradFreeCriteriaList.hpp
+                        Plato_MethodMovingAsymptotes.hpp
+                        Plato_MethodMovingAsymptotesIO.hpp
+                        Plato_MethodMovingAsymptotesEngine.hpp
+                        Plato_MethodMovingAsymptotesParser.hpp
+                        Plato_MethodMovingAsymptotesIO_Data.hpp
+                        Plato_MethodMovingAsymptotesDataMng.hpp
+                        Plato_MethodMovingAsymptotesCriterion.hpp
+                        Plato_MethodMovingAsymptotesInterface.hpp
+                        Plato_MethodMovingAsymptotesOperations.hpp
+                        Plato_NullConstraint.hpp
+                        Plato_OptimizerParser.hpp
                         Plato_OptimizerFactory.hpp
+                        Plato_OptimizersIO_Utilities.hpp
                         Plato_AugmentedLagrangian.hpp
                         Plato_TrustRegionUtilities.hpp
                         Plato_HostDualProbElementWise.hpp
@@ -79,9 +92,6 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         Plato_LineSearch.hpp
                         Plato_LinearOperator.hpp
                         Plato_LinearOperatorList.hpp
-                        Plato_MethodMovingAsymptotes.hpp
-                        Plato_MethodMovingAsymptotesInterface.hpp
-                        Plato_MethodMovingAsymptotesLightInterface.hpp
                         Plato_MultiVectorList.hpp
                         Plato_Preconditioner.hpp
                         Plato_PrimalProblemStageMng.hpp
