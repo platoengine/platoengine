@@ -36,6 +36,6 @@ set( LOCAL_COMM_ID 1 )
 Plato_add_simple_performer(PLATO_NEW_TEST ${TOPOPROXY_BINARY} ${PROXY_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE})
 
 # Add the test
-Plato_add_awk_test(${PLATO_NEW_TEST} ${TEST_NAME} ${NUM_PROCS} ${IO_COMM_INDEX})
+Plato_add_simple_test(${PLATO_NEW_TEST} ${TEST_NAME} ${NUM_PROCS} ${IO_COMM_INDEX})
 
 endif()
