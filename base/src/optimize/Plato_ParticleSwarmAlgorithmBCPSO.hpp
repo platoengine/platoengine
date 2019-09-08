@@ -504,7 +504,7 @@ public:
         while(1)
         {
             mNumIterations++;
-            mStageMng->evaluateObjective(*mDataMng);
+            this->evaluateObjective();
             mStageMng->findBestParticlePositions(*mDataMng);
             mDataMng->computeCurrentBestObjFuncStatistics();
 
@@ -561,6 +561,20 @@ public:
     }
 
 private:
+    /******************************************************************************//**
+     * @brief Evaluate objective function
+    **********************************************************************************/
+    void evaluateObjective()
+    {
+        bool tIsFirstOuterIteration = mNumIterations == static_cast<OrdinalType>(1);
+        if(tIsFirstOuterIteration && mReadRestartFile)
+        {
+            // Skip objective function evaluation at iteration one if restart is enabled.
+            return;
+        }
+        mStageMng->evaluateObjective(*mDataMng);
+    }
+
     /******************************************************************************//**
      * @brief Check stopping criteria
     **********************************************************************************/
