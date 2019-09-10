@@ -357,14 +357,14 @@ private:
                 const ScalarType tGradValueMinus = std::max(-tNormalizedGradValue, static_cast<ScalarType>(0));
 
                 aAppxFunctionP(tVectorIndex, tControlIndex) = (mApproxFuncScalingOne * tGradValuePlus) + (mApproxFuncScalingTwo * tGradValueMinus)
-                    + (mApproxFuncEpsilon / (*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex));
+                    + ( mApproxFuncEpsilon / ((*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex) + std::numeric_limits<ScalarType>::epsilon()) );
                 ScalarType tUpperAsymmMinusCurrentControlSquared = aUpperAsymptotes(tVectorIndex, tControlIndex)
                     - aCurrentControls(tVectorIndex, tControlIndex);
                 tUpperAsymmMinusCurrentControlSquared *= tUpperAsymmMinusCurrentControlSquared;
                 aAppxFunctionP(tVectorIndex, tControlIndex) *= tUpperAsymmMinusCurrentControlSquared;
 
                 aAppxFunctionQ(tVectorIndex, tControlIndex) = (mApproxFuncScalingTwo * tGradValuePlus) + (mApproxFuncScalingOne * tGradValueMinus)
-                    + (mApproxFuncEpsilon / (*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex));
+                    + ( mApproxFuncEpsilon / ((*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex) + std::numeric_limits<ScalarType>::epsilon()) );
                 ScalarType tCurrentControlMinusLowerAsymmSquared = aCurrentControls(tVectorIndex, tControlIndex)
                     - aLowerAsymptotes(tVectorIndex, tControlIndex);
                 tCurrentControlMinusLowerAsymmSquared *= tCurrentControlMinusLowerAsymmSquared;
