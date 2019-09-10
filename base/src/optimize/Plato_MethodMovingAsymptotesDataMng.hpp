@@ -771,9 +771,9 @@ private:
     void initialize(const Plato::DataFactory<ScalarType, OrdinalType> &aDataFactory)
     {
         const OrdinalType tNumConstraints = this->getNumConstraints();
-        if(tNumConstraints < static_cast<OrdinalType>(0))
+        if(tNumConstraints <= static_cast<OrdinalType>(0))
         {
-            THROWERR(std::string("INVALID NUMBER OF CONSTRAINTS ") + std::to_string(tNumConstraints) + ". THE NUMBER OF CONSTRAINTS SHOULD BE ZERO OR A POSITIVE NUMBER.\n")
+            THROWERR(std::string("INVALID NUMBER OF CONSTRAINTS ") + std::to_string(tNumConstraints) + ". THE NUMBER OF CONSTRAINTS SHOULD BE A POSITIVE NUMBER.\n")
         }
 
         mConstraintNormalization->fill(1.0);
