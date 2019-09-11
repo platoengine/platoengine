@@ -286,14 +286,14 @@ inline void read_restart_data_vector(const std::string& aDataID,
     Plato::is_restart_data_identifier_defined(aDataID);
     Plato::is_restart_vector_allocated(aDataID, aData);
 
-    int tOffset = 0;
     std::string tLine;
     bool tFoundData = false;
 
     while(!aRestartFile.eof())
     {
         std::getline(aRestartFile, tLine);
-        if(std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
+        int tOffset = tLine.find(aDataID, 0);
+        if(std::size_t(tOffset) != std::string::npos)
         {
             tFoundData = true;
             std::string tNextLine;
@@ -335,14 +335,14 @@ inline void read_restart_data_multivector(const std::string& aDataID,
     Plato::is_restart_data_identifier_defined(aDataID);
     Plato::is_restart_multivector_allocated(aDataID, aData);
 
-    int tOffset = 0;
     std::string tLine;
     bool tFoundData = false;
 
     while(!aRestartFile.eof())
     {
         std::getline(aRestartFile, tLine);
-        if(std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
+        int tOffset = tLine.find(aDataID, 0);
+        if(std::size_t(tOffset) != std::string::npos)
         {
             tFoundData = true;
             for(OrdinalType tVecIndex = 0; tVecIndex < aData.getNumVectors(); tVecIndex++)
@@ -383,14 +383,14 @@ inline void read_restart_data_value(const std::string &aDataID,
     Plato::is_restart_file_opened(aRestartFile);
     Plato::is_restart_data_identifier_defined(aDataID);
 
-    int tOffset = 0;
     std::string tLine;
     bool tFoundData = false;
 
     while (!aRestartFile.eof())
     {
         std::getline(aRestartFile, tLine);
-        if (std::size_t(tOffset = tLine.find(aDataID, 0)) != std::string::npos)
+        int tOffset = tLine.find(aDataID, 0);
+        if (std::size_t(tOffset) != std::string::npos)
         {
             tFoundData = true;
             std::string tNextLine;

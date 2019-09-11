@@ -537,6 +537,7 @@ public:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
+            PRINTERR(tErrorMsg.what())
             THROWERR(tErrorMsg.what())
         }
 
@@ -549,6 +550,7 @@ public:
         }
         catch(const std::invalid_argument & tErrorMsg)
         {
+            PRINTERR(tErrorMsg.what())
             THROWERR(tErrorMsg.what())
         }
 

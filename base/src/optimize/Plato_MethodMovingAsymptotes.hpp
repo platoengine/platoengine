@@ -226,6 +226,10 @@ public:
         mMaxNumSubProblemIterations = aInput;
     }
 
+    /******************************************************************************//**
+     * @brief Set maximum number of trust region iterations
+     * @param [in] aInput maximum number of trust region iterations
+    **********************************************************************************/
     void setMaxNumTrustRegionIterations(const OrdinalType& aInput)
     {
         mMaxNumTrustRegionIterations = aInput;
@@ -400,6 +404,8 @@ public:
     void solve()
     {
         this->openOutputFile();
+        this->setSubProblemOptions();
+
         mOperations->initialize(*mDataMng);
         while(true)
         {
@@ -426,15 +432,14 @@ private:
     void initialize(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
     {
         this->initializeApproximationFunctions(aDataFactory);
-        this->initializeSubProblemSolver(aDataFactory);
+        mSubProblemSolver = std::make_shared<Plato::AugmentedLagrangian<ScalarType, OrdinalType>>(mObjAppxFunc, mConstrAppxFuncList, aDataFactory);
     }
 
     /******************************************************************************//**
-     * @brief Initialize solver for Method of Moving Asymptotes (MMA) subproblem.
+     * @brief Set algorithmic options for Method Of Moving Asymptotes (MMA) subproblem
     **********************************************************************************/
-    void initializeSubProblemSolver(const std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> &aDataFactory)
+    void setSubProblemOptions()
     {
-        mSubProblemSolver = std::make_shared<Plato::AugmentedLagrangian<ScalarType, OrdinalType>>(mObjAppxFunc, mConstrAppxFuncList, aDataFactory);
         mSubProblemSolver->disablePostSmoothing();
         mSubProblemSolver->setPenaltyParameter(mInitialAugLagPenalty);
         mSubProblemSolver->setFeasibilityTolerance(mFeasibilityTolerance);

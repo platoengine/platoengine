@@ -322,6 +322,12 @@ public:
                     - (mSubProblemBoundsScaling * (tUpperAsymptotes(tVectorIndex, tControlIndex) - tCurrentControls(tVectorIndex, tControlIndex)));
                 tCriteria[2] = tCurrentControls(tVectorIndex, tControlIndex) + (mMoveLimit * (*mUpperMinusLowerBounds)(tVectorIndex, tControlIndex));
                 tSubProblemUpperBounds(tVectorIndex, tControlIndex) = *std::min_element(tCriteria.begin(), tCriteria.end());
+
+                if(tSubProblemLowerBounds(tVectorIndex, tControlIndex) > tSubProblemUpperBounds(tVectorIndex, tControlIndex))
+                {
+                    tSubProblemLowerBounds(tVectorIndex, tControlIndex) = tControlLowerBounds(tVectorIndex, tControlIndex);
+                    tSubProblemUpperBounds(tVectorIndex, tControlIndex) = tControlUpperBounds(tVectorIndex, tControlIndex);
+                }
             }
         }
     }
