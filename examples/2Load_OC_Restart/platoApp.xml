@@ -1,44 +1,30 @@
 <?xml version="1.0"?>
 
-<Filter>
-  <Name>Kernel</Name>
-  <Scale>4.48</Scale>
-  <Absolute>-1.0</Absolute>
-</Filter>
-
 <Operation>
   <Function>PlatoMainOutput</Function>
-  <OutputFrequency>1000</OutputFrequency>
   <Name>PlatoMainOutput</Name>
   <Input>
     <ArgumentName>Topology</ArgumentName>
-    <Alias>Topology</Alias>
   </Input>
-  <Input>
-    <ArgumentName>Unfiltered Topology</ArgumentName>
-    <Alias>OptDOFs</Alias>
-  </Input>
-  <Input>
-    <ArgumentName>Internal Energy Gradient</ArgumentName>
-    <Alias>Internal Energy Gradient</Alias>
-  </Input>
-  <Input>
-    <ArgumentName>Volume Gradient</ArgumentName>
-    <Alias>Volume Gradient</Alias>
-  </Input>
-  <Input>
-    <ArgumentName>Displacement X</ArgumentName>
-    <Alias>Displacement X</Alias>
-  </Input>
-  <Input>
-    <ArgumentName>Displacement Y</ArgumentName>
-    <Alias>Displacement Y</Alias>
-  </Input>
-  <Input>
-    <ArgumentName>Displacement Z</ArgumentName>
-    <Alias>Displacement Z</Alias>
-  </Input>
+  <WriteRestart>False</WriteRestart>
+  <OutputFrequency>5</OutputFrequency>
+  <SurfaceExtraction>
+    <OutputMethod>parallel write</OutputMethod>
+    <Discretization>density</Discretization>
+    <Output><Format>STL</Format></Output>
+    <Output><Format>Exodus</Format></Output>
+  </SurfaceExtraction>
 </Operation>
+
+<Filter>
+  <Name>Kernel</Name>
+  <Scale>1.48</Scale>
+  <Absolute>-1.0</Absolute>
+</Filter>
+
+<Timers>
+    <time>True</time>
+</Timers>
 
 <Operation>
   <Function>Filter</Function>
@@ -70,16 +56,14 @@
 <Operation>
   <Function>InitializeField</Function>
   <Name>Initialize Field</Name>
-  <Method>Uniform</Method>
+  <Method>FromFile</Method>
   <Output>
     <ArgumentName>Initialized Field</ArgumentName>
   </Output>
-  <Uniform>
-    <Value>0.50</Value>
-  </Uniform>
   <FromFile>
-    <Name>YoMama.exo</Name>
-    <VariableName>density</VariableName>
+    <Name>initialguess.exo</Name>
+    <VariableName>Topology</VariableName>
+    <Iteration>11</Iteration>
   </FromFile>
 </Operation>
 
@@ -120,6 +104,9 @@
     <Input>
       <ArgumentName>Value 1</ArgumentName>
     </Input>
+    <Input>
+      <ArgumentName>Value 2</ArgumentName>
+    </Input>
     <Output>
       <ArgumentName>Value</ArgumentName>
     </Output>
@@ -129,13 +116,19 @@
     <Input>
       <ArgumentName>Field 1</ArgumentName>
     </Input>
+    <Input>
+      <ArgumentName>Field 2</ArgumentName>
+    </Input>
     <Output>
       <ArgumentName>Field</ArgumentName>
     </Output>
   </Aggregate>
   <Weighting>
     <Weight>
-      <Value>1.00</Value>
+      <Value>0.50</Value>
+    </Weight>
+    <Weight>
+      <Value>0.50</Value>
     </Weight>
   </Weighting>
 </Operation>
@@ -161,4 +154,5 @@
     <ArgumentName>Upper Bound Vector</ArgumentName>
   </Output>
 </Operation>
+
 

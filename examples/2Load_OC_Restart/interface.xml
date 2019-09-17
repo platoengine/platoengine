@@ -7,58 +7,32 @@
 </Performer> 
 
 <Performer> 
-  <Name>Alexa</Name>
-  <Code>Alexa</Code>
+  <Name>LightMP_static_load1</Name>
+  <Code>LightMP</Code>
   <PerformerID>1</PerformerID>
 </Performer> 
 
-
-
-
-
-
-
-<SharedData>
-  <Name>Internal Energy Gradient 1</Name>
-  <Type>Scalar</Type>
-  <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa</OwnerName>
-  <UserName>PlatoMain</UserName>
-</SharedData>
-
-
-
-
-
-
+<Performer> 
+  <Name>LightMP_static_load2</Name>
+  <Code>LightMP</Code>
+  <PerformerID>2</PerformerID>
+</Performer> 
 
 <SharedData>
-  <Name>Displacement X</Name>
+  <Name>Internal Energy 1 Gradient</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa</OwnerName>
+  <OwnerName>LightMP_static_load1</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
 <SharedData>
-  <Name>Displacement Y</Name>
+  <Name>Internal Energy 2 Gradient</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa</OwnerName>
+  <OwnerName>LightMP_static_load2</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
-
-<SharedData>
-  <Name>Displacement Z</Name>
-  <Type>Scalar</Type>
-  <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa</OwnerName>
-  <UserName>PlatoMain</UserName>
-</SharedData>
-
-
-
-
 
 <SharedData>
   <Name>Internal Energy Gradient</Name>
@@ -82,9 +56,9 @@
   <Layout>Nodal Field</Layout>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
-  <UserName>Alexa</UserName>
+  <UserName>LightMP_static_load1</UserName>
+  <UserName>LightMP_static_load2</UserName>
 </SharedData>
-
 
 <SharedData>
   <Name>Topology</Name>
@@ -92,14 +66,15 @@
   <Layout>Nodal Field</Layout>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
-  <UserName>Alexa</UserName>
+  <UserName>LightMP_static_load1</UserName>
+  <UserName>LightMP_static_load2</UserName>
 </SharedData>
-
 
 <SharedData>
   <Name>Volume</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
+  <Size>1</Size>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
@@ -108,6 +83,7 @@
   <Name>Design Volume</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
+  <Size>1</Size>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
@@ -116,22 +92,25 @@
   <Name>Internal Energy 1</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
-  <OwnerName>Alexa</OwnerName>
+  <Size>1</Size>
+  <OwnerName>LightMP_static_load1</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
-
-
-
-
-
-
-
+<SharedData>
+  <Name>Internal Energy 2</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <Size>1</Size>
+  <OwnerName>LightMP_static_load2</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
 
 <SharedData>
   <Name>Internal Energy</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
+  <Size>1</Size>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
@@ -140,6 +119,7 @@
   <Name>Lower Bound Value</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
+  <Size>1</Size>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
@@ -148,6 +128,7 @@
   <Name>Upper Bound Value</Name>
   <Type>Scalar</Type>
   <Layout>Global</Layout>
+  <Size>1</Size>
   <OwnerName>PlatoMain</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
@@ -168,115 +149,25 @@
   <UserName>PlatoMain</UserName>
 </SharedData>
 
-<Stage>
-  <Name>Set Lower Bounds</Name>
-  <Input>
-    <SharedDataName>Lower Bound Value</SharedDataName>
-  </Input>
-  <Operation>
-    <Name>Calculate Lower Bounds</Name>
-    <PerformerName>PlatoMain</PerformerName>
-    <Input>
-      <ArgumentName>Lower Bound Value</ArgumentName>
-      <SharedDataName>Lower Bound Value</SharedDataName>
-    </Input>
-    <Output>
-      <ArgumentName>Lower Bound Vector</ArgumentName>
-      <SharedDataName>Lower Bound Vector</SharedDataName>
-    </Output>
-  </Operation>
-  <Output>
-    <SharedDataName>Lower Bound Vector</SharedDataName>
-  </Output>
-</Stage>
-
-<Stage>
-  <Name>Set Upper Bounds</Name>
-  <Input>
-    <SharedDataName>Upper Bound Value</SharedDataName>
-  </Input>
-  <Operation>
-    <Name>Calculate Upper Bounds</Name>
-    <PerformerName>PlatoMain</PerformerName>
-    <Input>
-      <ArgumentName>Upper Bound Value</ArgumentName>
-      <SharedDataName>Upper Bound Value</SharedDataName>
-    </Input>
-    <Output>
-      <ArgumentName>Upper Bound Vector</ArgumentName>
-      <SharedDataName>Upper Bound Vector</SharedDataName>
-    </Output>
-  </Operation>
-  <Output>
-    <SharedDataName>Upper Bound Vector</SharedDataName>
-  </Output>
-</Stage>
-
 
 <Stage>
   <Name>Cache State</Name>
 </Stage>
 
-
 <Stage>
-    <Name>Output To File</Name>
-
-    <Operation>
-      <Name>Write Output</Name>
-      <PerformerName>Alexa</PerformerName>
-      <Output>
-        <ArgumentName>Solution X</ArgumentName>
-        <SharedDataName>Displacement X</SharedDataName>
-      </Output>
-      <Output>
-        <ArgumentName>Solution Y</ArgumentName>
-        <SharedDataName>Displacement Y</SharedDataName>
-      </Output>
-      <Output>
-        <ArgumentName>Solution Z</ArgumentName>
-        <SharedDataName>Displacement Z</SharedDataName>
-      </Output>
-    </Operation>
-
-    <Operation>
-      <Name>PlatoMainOutput</Name>
-      <PerformerName>PlatoMain</PerformerName>
-      <Input>
-        <ArgumentName>Topology</ArgumentName>
-        <SharedDataName>Topology</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Unfiltered Topology</ArgumentName>
-        <SharedDataName>Optimization DOFs</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Internal Energy Gradient</ArgumentName>
-        <SharedDataName>Internal Energy Gradient</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Volume Gradient</ArgumentName>
-        <SharedDataName>Volume Gradient</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Displacement X</ArgumentName>
-        <SharedDataName>Displacement X</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Displacement Y</ArgumentName>
-        <SharedDataName>Displacement Y</SharedDataName>
-      </Input>
-      <Input>
-        <ArgumentName>Displacement Z</ArgumentName>
-        <SharedDataName>Displacement Z</SharedDataName>
-      </Input>
-    </Operation>
+  <Name>Output To File</Name>
+  <Operation>
+    <Name>PlatoMainOutput</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+  </Operation>
 </Stage>
 
 <Stage>
   <Name>Initialize Optimization DOFs</Name>
-  <Output>
-    <SharedDataName>Optimization DOFs</SharedDataName>
-  </Output>
   <Operation>
     <Name>Initialize Field</Name>
     <PerformerName>PlatoMain</PerformerName>
@@ -285,6 +176,9 @@
       <SharedDataName>Optimization DOFs</SharedDataName>
     </Output>
   </Operation>
+  <Output>
+    <SharedDataName>Optimization DOFs</SharedDataName>
+  </Output>
 </Stage>
 
 <Stage>
@@ -330,13 +224,15 @@
       <ArgumentName>Volume</ArgumentName>
       <SharedDataName>Volume</SharedDataName>
     </Output>
-    
+    <Output>
+      <ArgumentName>Volume Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
   </Operation>
   <Output>
     <SharedDataName>Volume</SharedDataName>
   </Output>
 </Stage>
-
 
 <Stage>
   <Name>Volume Gradient</Name>
@@ -363,6 +259,10 @@
       <SharedDataName>Topology</SharedDataName>
     </Input>
     <Output>
+      <ArgumentName>Volume</ArgumentName>
+      <SharedDataName>Volume</SharedDataName>
+    </Output>
+    <Output>
       <ArgumentName>Volume Gradient</ArgumentName>
       <SharedDataName>Volume Gradient</SharedDataName>
     </Output>
@@ -387,14 +287,11 @@
     <SharedDataName>Volume Gradient</SharedDataName>
   </Output>
 </Stage>
-
-
 <Stage>
   <Name>Internal Energy</Name>
   <Input>
     <SharedDataName>Optimization DOFs</SharedDataName>
   </Input>
-
   <Operation>
     <Name>FilterControl</Name>
     <PerformerName>PlatoMain</PerformerName>
@@ -407,20 +304,40 @@
       <SharedDataName>Topology</SharedDataName>
     </Output>
   </Operation>
-
   <Operation>
-    <PerformerName>Alexa</PerformerName>
-    <Name>Compute Objective Value</Name>
-    <Input>
-      <ArgumentName>Topology</ArgumentName>
-      <SharedDataName>Topology</SharedDataName>
-    </Input>
-    <Output>
-      <ArgumentName>Objective Value</ArgumentName>
-      <SharedDataName>Internal Energy 1</SharedDataName>
-    </Output>
+    <Operation>
+      <PerformerName>LightMP_static_load1</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 1</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+      </Output>
+    </Operation>
+    <Operation>
+      <PerformerName>LightMP_static_load2</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 2</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
+      </Output>
+    </Operation>
   </Operation>
-
   <Operation>
     <Name>AggregateEnergy</Name>
     <PerformerName>PlatoMain</PerformerName>
@@ -428,22 +345,36 @@
       <ArgumentName>Value 1</ArgumentName>
       <SharedDataName>Internal Energy 1</SharedDataName>
     </Input>
+    <Input>
+      <ArgumentName>Value 2</ArgumentName>
+      <SharedDataName>Internal Energy 2</SharedDataName>
+    </Input>
     <Output>
       <ArgumentName>Value</ArgumentName>
       <SharedDataName>Internal Energy</SharedDataName>
+    </Output>
+    <Input>
+      <ArgumentName>Field 1</ArgumentName>
+      <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Field 2</ArgumentName>
+      <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Internal Energy Gradient</SharedDataName>
     </Output>
   </Operation>
   <Output>
     <SharedDataName>Internal Energy</SharedDataName>
   </Output>
 </Stage>
-
 <Stage>
   <Name>Internal Energy Gradient</Name>
   <Input>
     <SharedDataName>Optimization DOFs</SharedDataName>
   </Input>
-
   <Operation>
     <Name>FilterControl</Name>
     <PerformerName>PlatoMain</PerformerName>
@@ -456,26 +387,62 @@
       <SharedDataName>Topology</SharedDataName>
     </Output>
   </Operation>
-
   <Operation>
-    <PerformerName>Alexa</PerformerName>
-    <Name>Compute Objective Gradient</Name>
-    <Input>
-      <ArgumentName>Topology</ArgumentName>
-      <SharedDataName>Topology</SharedDataName>
-    </Input>
-    <Output>
-      <ArgumentName>Objective Gradient</ArgumentName>
-      <SharedDataName>Internal Energy Gradient 1</SharedDataName>
-    </Output>
+    <Operation>
+      <PerformerName>LightMP_static_load1</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 1</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+      </Output>
+    </Operation>
+    <Operation>
+      <PerformerName>LightMP_static_load2</PerformerName>
+      <Name>Compute Internal Energy</Name>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Output>
+        <ArgumentName>Internal Energy</ArgumentName>
+        <SharedDataName>Internal Energy 2</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Internal Energy Gradient</ArgumentName>
+        <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
+      </Output>
+    </Operation>
   </Operation>
-
   <Operation>
     <Name>AggregateEnergy</Name>
     <PerformerName>PlatoMain</PerformerName>
     <Input>
+      <ArgumentName>Value 1</ArgumentName>
+      <SharedDataName>Internal Energy 1</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Value 2</ArgumentName>
+      <SharedDataName>Internal Energy 2</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Value</ArgumentName>
+      <SharedDataName>Internal Energy</SharedDataName>
+    </Output>
+    <Input>
       <ArgumentName>Field 1</ArgumentName>
-      <SharedDataName>Internal Energy Gradient 1</SharedDataName>
+      <SharedDataName>Internal Energy 1 Gradient</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Field 2</ArgumentName>
+      <SharedDataName>Internal Energy 2 Gradient</SharedDataName>
     </Input>
     <Output>
       <ArgumentName>Field</ArgumentName>
@@ -498,8 +465,55 @@
       <SharedDataName>Internal Energy Gradient</SharedDataName>
     </Output>
   </Operation>
+<!--
+  <Output>
+    <SharedDataName>Internal Energy</SharedDataName>
+  </Output>
+-->
   <Output>
     <SharedDataName>Internal Energy Gradient</SharedDataName>
+  </Output>
+</Stage>
+<Stage>
+  <Name>Set Lower Bounds</Name>
+  <Input>
+    <SharedDataName>Lower Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Calculate Lower Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Lower Bound Value</ArgumentName>
+      <SharedDataName>Lower Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Lower Bound Vector</ArgumentName>
+      <SharedDataName>Lower Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Lower Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+<Stage>
+  <Name>Set Upper Bounds</Name>
+  <Input>
+    <SharedDataName>Upper Bound Value</SharedDataName>
+  </Input>
+  <Operation>
+    <Name>Calculate Upper Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Upper Bound Value</ArgumentName>
+      <SharedDataName>Upper Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Upper Bound Vector</ArgumentName>
+      <SharedDataName>Upper Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  <Output>
+    <SharedDataName>Upper Bound Vector</SharedDataName>
   </Output>
 </Stage>
 
@@ -508,26 +522,23 @@
   <Output>
     <OutputStage>Output To File</OutputStage>
   </Output>
+  <CacheStage>
+    <Name>Cache State</Name>
+  </CacheStage>
   <OptimizationVariables>
     <ValueName>Optimization DOFs</ValueName>
     <InitializationStage>Initialize Optimization DOFs</InitializationStage>
     <FilteredName>Topology</FilteredName>
-    <LowerBoundValueName>Lower Bound Value</LowerBoundValueName>
-    <LowerBoundVectorName>Lower Bound Vector</LowerBoundVectorName>
-    <UpperBoundValueName>Upper Bound Value</UpperBoundValueName>
-    <UpperBoundVectorName>Upper Bound Vector</UpperBoundVectorName>
-    <SetLowerBoundsStage>Set Lower Bounds</SetLowerBoundsStage>
-    <SetUpperBoundsStage>Set Upper Bounds</SetUpperBoundsStage>
   </OptimizationVariables>
   <Objective>
-    <ValueName>Internal Energy</ValueName>
-    <ValueStageName>Internal Energy</ValueStageName>
-    <GradientName>Internal Energy Gradient</GradientName>
-    <GradientStageName>Internal Energy Gradient</GradientStageName>
+    <ValueStageName>Internal Energy</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <ValueName>Internal Energy</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <GradientStageName>Internal Energy Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <GradientName>Internal Energy Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE GRADIENT STAGE-->
   </Objective>
   <BoundConstraint>
     <Upper>1.0</Upper>
-    <Lower>1e-9</Lower>
+    <Lower>0.0</Lower>
   </BoundConstraint>
   <Constraint>
     <ValueStageName>Volume</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT VALUE STAGE-->
@@ -535,7 +546,7 @@
     <GradientStageName>Volume Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <GradientName>Volume Gradient</GradientName>
     <ReferenceValueName>Design Volume</ReferenceValueName>
-    <NormalizedTargetValue>0.25</NormalizedTargetValue>
+    <NormalizedTargetValue>0.2</NormalizedTargetValue>
   </Constraint>
   <Convergence>
     <MaxIterations>10</MaxIterations>

@@ -16,7 +16,7 @@
   </Input>
   <Input>
     <ArgumentName>Unfiltered Topology</ArgumentName>
-    <Alias>OptDOFs</Alias>
+    <Alias>DesignDOFs</Alias>
   </Input>
   <Input>
     <ArgumentName>Internal Energy Gradient</ArgumentName>
@@ -70,16 +70,14 @@
 <Operation>
   <Function>InitializeField</Function>
   <Name>Initialize Field</Name>
-  <Method>Uniform</Method>
+  <Method>FromFile</Method>
   <Output>
     <ArgumentName>Initialized Field</ArgumentName>
   </Output>
-  <Uniform>
-    <Value>0.50</Value>
-  </Uniform>
   <FromFile>
-    <Name>YoMama.exo</Name>
-    <VariableName>density</VariableName>
+    <Name>initialguess.exo</Name>
+    <VariableName>Unfiltered Topology</VariableName>
+    <Iteration>10</Iteration>
   </FromFile>
 </Operation>
 
