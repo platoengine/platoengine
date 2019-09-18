@@ -1067,22 +1067,20 @@ ExodusIO::readElemPlot(double* data, string name)
 void ExodusIO::GetExodusNodeIds(int * a_NodeIds, int a_MyFileId)
 {
 
-    if(myIgnoreNodeMap){   
-        int Nnp = myMesh->getNumNodes();
-        for( int iNode=0; iNode<Nnp; iNode++ ){
-            a_NodeIds[iNode] = iNode+1;
-        }
-    } else {
-       int map_count = ex_inquire_int(a_MyFileId, EX_INQ_NODE_MAP);
-       if(map_count == 1)
-       {
-           ex_get_num_map(a_MyFileId, EX_NODE_MAP, 1, a_NodeIds);
-       }
-       else
-       {
-           ex_get_id_map(a_MyFileId, EX_NODE_MAP, a_NodeIds);
-       }
-    }
+   int map_count = 0;
+   if(!myIgnoreNodeMap)
+   {
+      map_count = ex_inquire_int(a_MyFileId, EX_INQ_NODE_MAP);
+   }
+
+   if(map_count == 1)
+   {
+       ex_get_num_map(a_MyFileId, EX_NODE_MAP, 1, a_NodeIds);
+   }
+   else
+   {
+       ex_get_id_map(a_MyFileId, EX_NODE_MAP, a_NodeIds);
+   }
 }
 // ----------------------------------------------------------------------------------------------------------
 void ExodusIO::GetExodusElementIds(int * a_ElemIds, int a_MyField)

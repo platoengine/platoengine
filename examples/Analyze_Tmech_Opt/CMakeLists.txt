@@ -9,7 +9,7 @@ set( testFiles "interface.xml;alexaInput.xml;alexaApp.xml;platoApp.xml;platoMain
 Plato_add_test_files("${testFiles}")
 
 # Set number of processors for PlatoMain comm
-set( PLATOMAIN_NP 1 )
+set( PLATOMAIN_NP 4 )
 
 # Set number of processors for Performer comms
 set( ANALYZE_NP 1 )
