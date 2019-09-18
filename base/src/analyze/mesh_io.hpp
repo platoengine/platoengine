@@ -139,6 +139,8 @@ protected:
   virtual bool writeCoord();
   virtual bool writeConn();
   void GetExodusNodeIds(int * a_NodeIds, int a_MyFileId);
+  void GetSerialNodeIds(int * a_NodeIds, int a_MyFileId);
+  void GetParallelNodeIds(int * a_NodeIds, int a_MyFileId);
   void GetExodusElementIds(int * a_ElemIds, int a_MyField);
 private: //!no copy allowed
   ExodusIO(const ExodusIO&);
