@@ -1,0 +1,60 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 04/26/2019 09:23:38 AM
+## Command Options:
+#{shaft_radius=0.25}
+#{head_radius=0.5}
+#{mount_thickness=0.5}
+#{x=5}
+#{y=5}
+#{z=3}
+create brick x {x} y {y} z {z}
+create cylinder height 6 radius {shaft_radius}
+rotate volume 2 about y angle 90
+move volume 2 y 1.5
+volume 2 copy
+subtract volume 3 from volume 1
+move volume 2 y -3
+volume 2 copy
+subtract volume 4 from volume 1
+delete volume 2
+create cylinder height 6 radius {head_radius}
+rotate volume 5 about y angle 90
+move volume 5 y 1.5
+webcut volume 1 with tool volume 5
+move volume 5 y -3
+webcut volume 1 with tool volume 5
+delete volume 5
+webcut volume 6 7 with plane xplane offset {-x/2.0+mount_thickness}
+create cylinder height 4 radius {head_radius}
+move volume 10 x 1.5
+webcut volume 1 with tool volume 10
+delete volume 10
+create cylinder height 4 radius {shaft_radius}
+move volume 12 x 1.5
+subtract volume 12 from volume 11
+webcut volume 11 with plane zplane offset {mount_thickness/2.0}
+delete volume 11
+webcut volume 13 with plane zplane offset {-mount_thickness/2.0}
+delete volume 14
+delete volume 6 7
+imprint all
+merge all
+volume all size 0.2
+volume all scheme tetmesh
+mesh volume all
+block 1 volume 1
+block 2 volume 8 9 13
+sideset 1 surface 71
+sideset 1 name "ss_1"
+nodeset 1 surface 42
+nodeset 11 surface 29
+nodeset 1 name "ns_1"
+nodeset 11 name "ns_11"
+nodeset 2 surface 48
+nodeset 2 name "ns_2"
+nodeset 21 surface 35
+nodeset 21 name "ns_21"
+export mesh "tm2.exo" overwrite
