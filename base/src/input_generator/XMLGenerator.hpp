@@ -98,7 +98,7 @@ protected:
     bool generateLightMPOperationsXML();
     bool generatePhysicsInputDecks();
     bool generateSalinasInputDecks();
-    bool generatePlatoAnalyzeInputDecks();
+    bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
     void getUncertaintyFlags(bool &aHasUncertainties,

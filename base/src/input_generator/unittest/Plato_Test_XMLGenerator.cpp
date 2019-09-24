@@ -3069,4 +3069,31 @@ TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
     EXPECT_EQ(wasMaintained[4], true);
 }
 
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck1)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 1 7 3 4\n"
+            "    boundary condition ids 256\n"
+            "    code sierra_sd\n"
+            "    number processors 2\n"
+            "    multi load case true\n"
+            "    weight 1 \n"
+            "    distribute objective at most 9 processors\n"
+            "end objective\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+
+}
+
 } // end PlatoTestXMLGenerator namespace

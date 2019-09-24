@@ -64,6 +64,7 @@
 #include "Plato_FreeFunctions.hpp"
 #include "Plato_SromXMLUtils.hpp"
 #include "Plato_SromXML.hpp"
+#include "XMLG_Macros.hpp"
 
 const int MAX_CHARS_PER_LINE = 10000;
 const int MAX_TOKENS_PER_LINE = 5000;
@@ -1896,7 +1897,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
     return true;
 }
 /******************************************************************************/
-bool XMLGenerator::generatePlatoAnalyzeInputDecks()
+bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
     char tmp_buf[200];
@@ -2175,9 +2176,218 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks()
                     }
                 }
             }
+            else if(!cur_obj.type.compare("minimize thermoelastic energy"))
+            {
+                addNTVParameter(n2, "Physics", "string", "Thermomechanical");
+                addNTVParameter(n2, "PDE Constraint", "string", "Thermoelastostatics");
+                addNTVParameter(n2, "Constraint", "string", "My Volume");
+                addNTVParameter(n2, "Objective", "string", "My Internal Thermoelastic Energy");
+                addNTVParameter(n2, "Self-Adjoint", "bool", "false");
+                // Volume Constraint
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "My Volume";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Volume");
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "1.0");
+                addNTVParameter(n4, "Minimum Value", "double", "0.0");
+                // Internal Thermoelastic Energy Objective
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "My Internal Thermoelastic Energy";
+                addNTVParameter(n3, "Type", "string", "Scalar Function");
+                addNTVParameter(n3, "Scalar Function Type", "string", "Internal Thermoelastic Energy");
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "3.0");
+                // Thermoelastostatics
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Thermoelastostatics";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Penalty Function";
+                addNTVParameter(n4, "Type", "string", "SIMP");
+                addNTVParameter(n4, "Exponent", "double", "3.0");
+                addNTVParameter(n4, "Minimum Value", "double", "1e-3");
+                // Material Model
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Material Model";
+                n4 = n3.append_child("ParameterList");
+                n4.append_attribute("name") = "Isotropic Linear Thermoelastic";
+                addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
+                addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
+                addNTVParameter(n4, "Thermal Expansion Coefficient", "double", m_InputData.materials[0].thermal_expansion);
+                addNTVParameter(n4, "Thermal Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
+                addNTVParameter(n4, "Reference Temperature", "double", m_InputData.materials[0].reference_temperature);
+                // Mechanical Natural BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Mechanical Natural Boundary Conditions";
+                for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
+                {
+                    bool found = false;
+                    XMLGen::LoadCase cur_load_case;
+                    std::string cur_load_id = cur_obj.load_case_ids[j];
+                    for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                    {
+                        if(cur_load_id == m_InputData.load_cases[qq].id)
+                        {
+                            found = true;
+                            cur_load_case = m_InputData.load_cases[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        for(size_t e=0; e<cur_load_case.loads.size(); e++)
+                        {
+                            XMLGen::Load cur_load = cur_load_case.loads[e];
+                            if(cur_load.type == "traction")
+                            {
+                            	n4 = n3.append_child("ParameterList");
+                            	n4.append_attribute("name") = "Traction Vector Boundary Condition";
+                            	addNTVParameter(n4, "Type", "string", "Uniform");
+                            	double x = std::atof(cur_load.values[0].c_str());
+                            	double y = std::atof(cur_load.values[1].c_str());
+                            	double z = std::atof(cur_load.values[2].c_str());
+                            	sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
+                            	addNTVParameter(n4, "Values", "Array(double)", tmp_buf);
+                            	sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
+                            	addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                        }
+                    }
+                }
+                // Thermal Natural BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Thermal Natural Boundary Conditions";
+                for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
+                {
+                    bool found = false;
+                    XMLGen::LoadCase cur_load_case;
+                    std::string cur_load_id = cur_obj.load_case_ids[j];
+                    for(size_t qq=0; qq<m_InputData.load_cases.size(); ++qq)
+                    {
+                        if(cur_load_id == m_InputData.load_cases[qq].id)
+                        {
+                            found = true;
+                            cur_load_case = m_InputData.load_cases[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        for(size_t e=0; e<cur_load_case.loads.size(); e++)
+                        {
+                            XMLGen::Load cur_load = cur_load_case.loads[e];
+                            if(cur_load.type == "heat")
+                            {
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "Surface Flux Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Uniform");
+                                addNTVParameter(n4, "Value", "double", cur_load.values[0]);
+                                sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                        }
+                    }
+                }
+                // Essential BCs
+                n3 = n2.append_child("ParameterList");
+                n3.append_attribute("name") = "Essential Boundary Conditions";
+                for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
+                {
+                    bool found = false;
+                    XMLGen::BC cur_bc;
+                    std::string cur_bc_id = cur_obj.bc_ids[j];
+                    for(size_t qq=0; qq<m_InputData.bcs.size(); ++qq)
+                    {
+                        if(cur_bc_id == m_InputData.bcs[qq].bc_id)
+                        {
+                            found = true;
+                            cur_bc = m_InputData.bcs[qq];
+                        }
+                    }
+                    if(found)
+                    {
+                        if(cur_bc.type == "temperature")
+                        {
+                            n4 = n3.append_child("ParameterList");
+                            n4.append_attribute("name") = "Fixed Temperature Boundary Condition";
+                            addNTVParameter(n4, "Type", "string", "Zero Value");
+                            addNTVParameter(n4, "Index", "int", "3");
+                            sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                        }
+                        else if(cur_bc.type == "displacement")
+                        {
+                            if(cur_bc.dof.empty())
+                            {
+                                // apply in all 3 directions
+                                // X Displacement
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "0");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                // Y Displacement
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "1");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                // Z Displacement
+                                n4 = n3.append_child("ParameterList");
+                                n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                                addNTVParameter(n4, "Index", "int", "2");
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                            else
+                            {
+                                if(cur_bc.dof == "x")
+                                {
+                                    n4 = n3.append_child("ParameterList");
+                                    n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                    addNTVParameter(n4, "Type", "string", "Zero Value");
+                                    addNTVParameter(n4, "Index", "int", "0");
+                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                }
+                                else if(cur_bc.dof == "y")
+                                {
+                                    n4 = n3.append_child("ParameterList");
+                                    n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                    addNTVParameter(n4, "Type", "string", "Zero Value");
+                                    addNTVParameter(n4, "Index", "int", "1");
+                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                }
+                                else if(cur_bc.dof == "z")
+                                {
+                                    n4 = n3.append_child("ParameterList");
+                                    n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                    addNTVParameter(n4, "Type", "string", "Zero Value");
+                                    addNTVParameter(n4, "Index", "int", "2");
+                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            THROWERR("\nUnknown boundary condition type specified.");
+                        }
+                    }
+                }
+            }
 
-            // Write the file to disk
-            doc.save_file(buf, "  ");
+            // Write the file
+            if(aStringStream)
+                doc.save(*aStringStream);
+            else
+                doc.save_file(buf, "  ");
         }
     }
     return true;
@@ -3686,6 +3896,7 @@ bool XMLGenerator::parseBCs(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
                                 return false;
                             }
+                            new_bc.type = cur_token1;
 
                             j++;  // "nodeset" or "sideset"
                             std::string cur_token2 = tokens[j];
@@ -5063,6 +5274,24 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
                                 return false;
                             }
                             new_material.thermal_conductivity = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"thermal","expansion"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"thermal expansion\" keywords.\n";
+                                return false;
+                            }
+                            new_material.thermal_expansion = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"reference","temperature"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"reference temperature\" keywords.\n";
+                                return false;
+                            }
+                            new_material.reference_temperature = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"density"}, tStringValue))
                         {

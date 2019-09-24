@@ -41,6 +41,7 @@ struct LoadCase
 
 struct BC
 {
+    std::string type;     // temperature, displacement
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id
     std::string dof;
@@ -139,6 +140,8 @@ struct Material
     std::string poissons_ratio;
     std::string youngs_modulus;
     std::string thermal_conductivity;
+    std::string thermal_expansion;
+    std::string reference_temperature;
     std::string density;
     std::string penalty_exponent;
 };

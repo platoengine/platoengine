@@ -158,6 +158,13 @@ bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
+/******************************************************************************/
+{
+    return generatePlatoAnalyzeInputDecks(aStringStream);
+}
+
+/******************************************************************************/
 bool XMLGenerator_UnitTester::publicExpandUncertaintiesForGenerate()
 /******************************************************************************/
 {
