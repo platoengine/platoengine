@@ -570,7 +570,7 @@
 </Stage>
 
 <Optimizer>
-  <Package>MMA</Package>
+  <Package>GCMMA</Package>
 <!--
   <Package>DerivativeChecker</Package>
   <CheckHessian>false</CheckHessian>
