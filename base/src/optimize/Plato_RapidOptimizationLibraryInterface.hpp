@@ -135,6 +135,21 @@ public:
         Teuchos::RCP<ROL::BoundConstraint<ScalarType>> tControlBoundsMng =
                 Teuchos::rcp(new ROL::Bounds<ScalarType>(tControlLowerBounds, tControlUpperBounds));
 
+        // ********* ALLOCATE LINEAR ALGEBRA FACTORY ********* //
+        Plato::AlgebraFactory<ScalarType, OrdinalType> tLinearAlgebraFactory;
+
+        // ********* ALLOCATE OPTIMIZER'S BASELINE DATA STRUCTURES *********
+        std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory =
+                std::make_shared<Plato::DataFactory<ScalarType, OrdinalType>>();
+        this->allocateBaselineDataStructures(tLinearAlgebraFactory, *tDataFactory);
+        // ********* ALLOCATE OPTIMIZER'S DATA MANAGER *********
+        std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> tDataMng =
+                std::make_shared<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>>(tDataFactory);
+
+        // ********* SET LOWER AND UPPER BOUNDS FOR CONTROLS *********
+        this->setLowerBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
+        this->setUpperBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
+
         /******************************** SET CONTROL INITIAL GUESS *********************************/
         Teuchos::RCP<Plato::DistributedVectorROL<ScalarType>> tControls =
                 Teuchos::rcp(new Plato::DistributedVectorROL<ScalarType>(mComm, tMyNumControls));
@@ -157,10 +172,82 @@ public:
 
     void finalize()
     {
-        mInterface->getStage("Terminate");
+        mInterface->finalize();
     }
 
 private:
+    /******************************************************************************/
+    void allocateBaselineDataStructures(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
+                                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
+    /******************************************************************************/
+    {
+        const OrdinalType tNumDuals = mInputData.getNumConstraints();
+        Plato::StandardVector<ScalarType, OrdinalType> tDuals(tNumDuals);
+        aDataFactory.allocateDual(tDuals);
+
+        // ********* Allocate control vectors baseline data structures *********
+        const OrdinalType tNumVectors = mInputData.getNumControlVectors();
+        assert(tNumVectors > static_cast<OrdinalType>(0));
+        Plato::StandardMultiVector<ScalarType, OrdinalType> tMultiVector;
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            std::string tControlName = mInputData.getControlName(tIndex);
+            const OrdinalType tNumControls = mInterface->size(tControlName);
+            std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tVector =
+                    aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
+            tMultiVector.add(tVector);
+        }
+        aDataFactory.allocateControl(tMultiVector);
+        std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> tReductionOperations =
+                aAlgebraFactory.createReduction(mComm, mInterface);
+        aDataFactory.allocateControlReductionOperations(*tReductionOperations);
+
+        Plato::CommWrapper tCommWrapper(mComm);
+        aDataFactory.setCommWrapper(tCommWrapper);
+    }
+    /******************************************************************************/
+    void setUpperBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
+                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
+                        Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
+    /******************************************************************************/
+    {
+        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
+        std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
+        const OrdinalType tNumControls = mInterface->size(tControlName);
+        std::vector<ScalarType> tInputBoundsData(tNumControls);
+
+        // ********* GET UPPER BOUNDS INFORMATION *********
+        Plato::getUpperBoundsInputData(mInputData, mInterface, tInputBoundsData);
+
+        // ********* SET UPPER BOUNDS FOR OPTIMIZER *********
+        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tUpperBoundVector =
+                aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
+        aDataFactory.allocateUpperBoundVector(*tUpperBoundVector);
+        Plato::copy(tInputBoundsData, *tUpperBoundVector);
+        aDataMng.setControlUpperBounds(tCONTROL_VECTOR_INDEX, *tUpperBoundVector);
+    }
+
+    /******************************************************************************/
+    void setLowerBounds(const Plato::AlgebraFactory<ScalarType, OrdinalType> & aAlgebraFactory,
+                        Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory,
+                        Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType> & aDataMng)
+    /******************************************************************************/
+    {
+        const OrdinalType tCONTROL_VECTOR_INDEX = 0;
+        std::string tControlName = mInputData.getControlName(tCONTROL_VECTOR_INDEX);
+        const OrdinalType tNumControls = mInterface->size(tControlName);
+        std::vector<ScalarType> tInputBoundsData(tNumControls);
+
+        // ********* GET LOWER BOUNDS INFORMATION *********
+        Plato::getLowerBoundsInputData(mInputData, mInterface, tInputBoundsData);
+
+        // ********* SET LOWER BOUNDS FOR OPTIMIZER *********
+        std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> tLowerBoundVector =
+                aAlgebraFactory.createVector(mComm, tNumControls, mInterface);
+        aDataFactory.allocateLowerBoundVector(*tLowerBoundVector);
+        Plato::copy(tInputBoundsData, *tLowerBoundVector);
+        aDataMng.setControlLowerBounds(tCONTROL_VECTOR_INDEX, *tLowerBoundVector);
+    }
     /******************************************************************************/
     void output(const std::stringbuf & aBuffer)
     /******************************************************************************/

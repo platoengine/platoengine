@@ -73,7 +73,8 @@ public:
             mGradient(),
             mInterface(aInterface),
             mEngineInputData(aInputData),
-            mParameterList(std::make_shared<Teuchos::ParameterList>())
+            mParameterList(std::make_shared<Teuchos::ParameterList>()),
+            mStateHasBeenCalculated(false)
     {
         this->initialize();
     }
@@ -85,12 +86,6 @@ public:
     void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
     /********************************************************************************/
     {
-        // TODO: UNDERSTAND HOW TO CACHE STATE AND ADJOINT DATA WITH ROL. I THINK THE OBJECTIVE FUNCTION EVALUATION IS OUT OF SYNC INTERNALLY.
-/*        std::vector<std::string> tStageNames;
-        std::string tOutputStageName = mEngineStageData.getOutputStageName();
-        tStageNames.push_back(tOutputStageName);
-        mInterface->compute(tStageNames, *mParameterList);*/
-
         assert(mInterface != nullptr);
         std::vector<std::string> tStageNames;
         std::string tOutputStageName = mEngineInputData.getOutputStageName();
@@ -129,6 +124,21 @@ public:
     {
         assert(aControl.dimension() == aGradient.dimension());
 
+        if(!mStateHasBeenCalculated)
+        {
+            mStateHasBeenCalculated = true;
+            value(aControl, aTolerance);
+        }
+
+        // Tell performers to cache the state
+        std::vector<std::string> tStageNames;
+        std::string tCacheStageName = mEngineInputData.getCacheStageName();
+        if(tCacheStageName.empty() == false)
+        {
+            tStageNames.push_back(tCacheStageName);
+            mInterface->compute(tStageNames, *mParameterList);
+        }
+
         // ********* Set view to control vector ********* //
         const Plato::DistributedVectorROL<ScalarType> & tControl =
                 dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
@@ -145,7 +155,7 @@ public:
         mParameterList->set(tObjectiveGradientName, mGradient.data());
 
         // ********* Compute gradient vector ********* //
-        std::vector<std::string> tStageNames;
+        tStageNames.clear();
         tStageNames.push_back(tObjectiveGradientName);
         mInterface->compute(tStageNames, *mParameterList);
 
@@ -156,16 +166,19 @@ public:
         this->copy(mGradient, tOutputGradientData);
     }
     /********************************************************************************/
-    void hessVec(ROL::Vector<ScalarType> & aOutput,
-                 const ROL::Vector<ScalarType> & aVector,
-                 const ROL::Vector<ScalarType> & aControl,
-                 ScalarType & aTolerance)
+//    void hessVec(ROL::Vector<ScalarType> & aOutput,
+//                 const ROL::Vector<ScalarType> & aVector,
+//                 const ROL::Vector<ScalarType> & aControl,
+//                 ScalarType & aTolerance)
     /********************************************************************************/
+/*
     {
         assert(aVector.dimension() == aOutput.dimension());
         assert(aControl.dimension() == aOutput.dimension());
         aOutput.set(aVector);
     }
+*/
+
 
 private:
     /********************************************************************************/
@@ -184,7 +197,6 @@ private:
     void copy(const std::vector<ScalarType> & aFrom, std::vector<ScalarType> & aTo)
     /********************************************************************************/
     {
-        const size_t tVectorIndex = 0;
         assert(aTo.size() == aFrom.size());
         for(size_t tIndex = 0; tIndex < aFrom.size(); tIndex++)
         {
@@ -199,6 +211,8 @@ private:
     Plato::Interface* mInterface;
     Plato::OptimizerEngineStageData mEngineInputData;
     std::shared_ptr<Teuchos::ParameterList> mParameterList;
+
+    bool mStateHasBeenCalculated;
 
 private:
     ReducedObjectiveROL(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);

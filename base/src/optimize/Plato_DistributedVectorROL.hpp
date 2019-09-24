@@ -176,7 +176,6 @@ public:
     /******************************************************************************/
     {
         ScalarType tOutput = 0;
-#ifdef BUILD_IN_SIERRA // Handle different versions of Teuchos
         ROL::Elementwise::EReductionType tReductionType = aReductionOperations.reductionType();
         switch(tReductionType)
         {
@@ -202,33 +201,6 @@ public:
                 break;
             }
         }
-#else
-        Teuchos::EReductionType tReductionType = aReductionOperations.reductionType();
-        switch(tReductionType)
-        {
-            case Teuchos::EReductionType::REDUCE_SUM:
-            {
-                tOutput = this->sum();
-                break;
-            }
-            case Teuchos::EReductionType::REDUCE_MAX:
-            {
-                tOutput = this->max();
-                break;
-            }
-            case Teuchos::EReductionType::REDUCE_MIN:
-            {
-                tOutput = this->min();
-                break;
-            }
-            default:
-            case Teuchos::EReductionType::REDUCE_AND:
-            {
-                THROWERR("LOGICAL REDUCE AND OPERATION IS NOT IMPLEMENTED.\n")
-                break;
-            }
-        }
-#endif
         return (tOutput);
     }
 

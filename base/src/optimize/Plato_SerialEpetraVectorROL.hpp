@@ -140,6 +140,14 @@ public:
         return Teuchos::rcp(new Plato::SerialEpetraVectorROL<ScalarType>(tLength));
     }
 
+    Teuchos::RCP<ROL::Vector<ScalarType> > basis( const int i ) const
+    {
+        const size_t tLength = mData.Length();
+        Teuchos::RCP<Plato::SerialEpetraVectorROL<ScalarType>> e = Teuchos::rcp(new Plato::SerialEpetraVectorROL<ScalarType>(tLength));
+        e->vector()[i] = 1.0;
+        return e;
+    }
+
     int dimension() const override
     {
         assert(mData.Length() > static_cast<int>(0));
@@ -149,7 +157,6 @@ public:
     ScalarType reduce(const ROL::Elementwise::ReductionOp<ScalarType> & aReductionOperations) const override
     {
         ScalarType tOutput = 0;
-#ifdef BUILD_IN_SIERRA // Handle different versions of Teuchos
         ROL::Elementwise::EReductionType tReductionType = aReductionOperations.reductionType();
         switch(tReductionType)
         {
@@ -175,33 +182,6 @@ public:
                 break;
             }
         }
-#else
-        Teuchos::EReductionType tReductionType = aReductionOperations.reductionType();
-        switch(tReductionType)
-        {
-            case Teuchos::EReductionType::REDUCE_SUM:
-            {
-                tOutput = this->sum();
-                break;
-            }
-            case Teuchos::EReductionType::REDUCE_MAX:
-            {
-                tOutput = this->max();
-                break;
-            }
-            case Teuchos::EReductionType::REDUCE_MIN:
-            {
-                tOutput = this->min();
-                break;
-            }
-            default:
-            case Teuchos::EReductionType::REDUCE_AND:
-            {
-                THROWERR("LOGICAL REDUCE AND OPERATION IS NOT IMPLEMENTED.\n")
-                break;
-            }
-        }
-#endif
 
         return (tOutput);
     }

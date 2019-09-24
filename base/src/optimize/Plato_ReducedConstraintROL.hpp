@@ -157,7 +157,8 @@ public:
         const ScalarType tJacobianDotDirection = tJacobianVector->dot(aDirection);
         Plato::SerialVectorROL<ScalarType> & tJacobianTimesDirectionVector =
                 dynamic_cast<Plato::SerialVectorROL<ScalarType>&>(aJacobianTimesDirection);
-        tJacobianTimesDirectionVector.vector()[tMY_CONSTRAINT_INDEX] = tJacobianDotDirection;
+        const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
+        tJacobianTimesDirectionVector.vector()[tMY_CONSTRAINT_INDEX] = tJacobianDotDirection/tConstraintReferenceValue;
     }
     /********************************************************************************/
     void applyAdjointJacobian(ROL::Vector<ScalarType> & aAdjointJacobianTimesDirection,
@@ -197,20 +198,21 @@ public:
         const Plato::SerialVectorROL<ScalarType> & tDirection =
                 dynamic_cast<const Plato::SerialVectorROL<ScalarType>&>(aDirection);
         ScalarType tValue = tDirection.vector()[tMY_CONSTRAINT_INDEX];
-        tOutput.scale(tValue);
+        const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
+        tOutput.scale(tValue/tConstraintReferenceValue);
     }
-    /********************************************************************************/
-    void applyAdjointHessian(ROL::Vector<ScalarType> & aOutput,
-                             const ROL::Vector<ScalarType> & aDual,
-                             const ROL::Vector<ScalarType> & aVector,
-                             const ROL::Vector<ScalarType> & aControl,
-                             ScalarType & aTolerance)
-    /********************************************************************************/
-    {
-        assert(aVector.dimension() == aOutput.dimension());
-        assert(aControl.dimension() == aOutput.dimension());
-        aOutput.set(aVector);
-    }
+//    /********************************************************************************/
+//    void applyAdjointHessian(ROL::Vector<ScalarType> & aOutput,
+//                             const ROL::Vector<ScalarType> & aDual,
+//                             const ROL::Vector<ScalarType> & aVector,
+//                             const ROL::Vector<ScalarType> & aControl,
+//                             ScalarType & aTolerance)
+//    /********************************************************************************/
+//    {
+//        assert(aVector.dimension() == aOutput.dimension());
+//        assert(aControl.dimension() == aOutput.dimension());
+//        aOutput.set(aVector);
+//    }
 
 private:
     /********************************************************************************/
@@ -229,7 +231,6 @@ private:
     void copy(const std::vector<ScalarType> & aFrom, std::vector<ScalarType> & aTo)
     /********************************************************************************/
     {
-        const size_t tVectorIndex = 0;
         assert(aTo.size() == aFrom.size());
         for(size_t tIndex = 0; tIndex < aFrom.size(); tIndex++)
         {
