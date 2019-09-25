@@ -1967,8 +1967,11 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                 n3.append_attribute("name") = "Material Model";
                 n4 = n3.append_child("ParameterList");
                 n4.append_attribute("name") = "Isotropic Linear Elastic";
-                addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
-                addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
+                if(m_InputData.materials.size() > 0)
+                {
+                    addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
+                    addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
+                }
                 // Natural BCs
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Natural Boundary Conditions";
@@ -2119,7 +2122,10 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                 n3.append_attribute("name") = "Material Model";
                 n4 = n3.append_child("ParameterList");
                 n4.append_attribute("name") = "Isotropic Linear Thermal";
-                addNTVParameter(n4, "Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
+                if(m_InputData.materials.size() > 0)
+                {
+                    addNTVParameter(n4, "Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
+                }
                 // Natural BCs
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Natural Boundary Conditions";
@@ -2215,11 +2221,14 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                 n3.append_attribute("name") = "Material Model";
                 n4 = n3.append_child("ParameterList");
                 n4.append_attribute("name") = "Isotropic Linear Thermoelastic";
-                addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
-                addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
-                addNTVParameter(n4, "Thermal Expansion Coefficient", "double", m_InputData.materials[0].thermal_expansion);
-                addNTVParameter(n4, "Thermal Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
-                addNTVParameter(n4, "Reference Temperature", "double", m_InputData.materials[0].reference_temperature);
+                if(m_InputData.materials.size() > 0)
+                {
+                    addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio); // Assuming 1 material!!!
+                    addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
+                    addNTVParameter(n4, "Thermal Expansion Coefficient", "double", m_InputData.materials[0].thermal_expansion);
+                    addNTVParameter(n4, "Thermal Conductivity Coefficient", "double", m_InputData.materials[0].thermal_conductivity);
+                    addNTVParameter(n4, "Reference Temperature", "double", m_InputData.materials[0].reference_temperature);
+                }
                 // Mechanical Natural BCs
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Mechanical Natural Boundary Conditions";
@@ -4297,6 +4306,42 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.number_refines = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","move","limit"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma move limit\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAMoveLimit = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","asymptote","expansion"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma asymptote expansion\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAAsymptoteExpansion = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","asymptote","contraction"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma asymptote contraction\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAAsymptoteContraction = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","max","sub","problem","iterations"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma max sub problem iterations\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAMaxNumSubProblemIterations = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","max","trust","region","iterations"}, tStringValue))
                         {
@@ -7808,6 +7853,7 @@ bool XMLGenerator::generateInterfaceXML()
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
     this->setGCMMAoptions(tTmpNode);
+    this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
     this->setKelleySachsAlgorithmOptions(tTmpNode);
@@ -7892,8 +7938,11 @@ bool XMLGenerator::generateInterfaceXML()
         }
     }
 
-    tTmpNode = tMiscNode.append_child("Convergence");
-    addChild(tTmpNode, "MaxIterations", m_InputData.max_iterations);
+    if(m_InputData.optimization_algorithm != "mma")
+    {
+        tTmpNode = tMiscNode.append_child("Convergence");
+        addChild(tTmpNode, "MaxIterations", m_InputData.max_iterations);
+    }
 
     // mesh
     pugi::xml_node mesh_node = doc.append_child("mesh");
@@ -8458,6 +8507,33 @@ bool XMLGenerator::setGCMMAoptions(const pugi::xml_node & aXMLnode)
     if(m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA.size() > 0)
     {
         this->addChild(aXMLnode, "GCMMAInitialMovingAsymptoteScaleFactor", m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA);
+    }
+
+    return (true);
+}
+
+/**********************************************************************************/
+bool XMLGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
+{
+    if(m_InputData.max_iterations.size() > 0)
+    {
+        this->addChild(aXMLnode, "MaxNumOuterIterations", m_InputData.max_iterations);
+    }
+    if(m_InputData.mMMAMoveLimit.size() > 0)
+    {
+        this->addChild(aXMLnode, "MoveLimit", m_InputData.mMMAMoveLimit);
+    }
+    if(m_InputData.mMMAAsymptoteExpansion.size() > 0)
+    {
+        this->addChild(aXMLnode, "AsymptoteExpansion", m_InputData.mMMAAsymptoteExpansion);
+    }
+    if(m_InputData.mMMAAsymptoteContraction.size() > 0)
+    {
+        this->addChild(aXMLnode, "AsymptoteContraction", m_InputData.mMMAAsymptoteContraction);
+    }
+    if(m_InputData.mMMAMaxNumSubProblemIterations.size() > 0)
+    {
+        this->addChild(aXMLnode, "MaxNumSubProblemIter", m_InputData.mMMAMaxNumSubProblemIterations);
     }
 
     return (true);

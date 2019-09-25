@@ -3075,15 +3075,58 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck1)
     std::istringstream iss;
     std::string stringInput =
             "begin objective\n"
-            "    type maximize stiffness\n"
+            "    type minimize thermoelastic energy\n"
             "    load ids 1 7 3 4\n"
             "    boundary condition ids 256\n"
-            "    code sierra_sd\n"
+            "    code plato_analyze\n"
             "    number processors 2\n"
-            "    multi load case true\n"
-            "    weight 1 \n"
-            "    distribute objective at most 9 processors\n"
             "end objective\n";
+/*
+    std::string tGoldString =
+            "<?xml version=\"1.0\"?>\n"
+            "<ParameterList name=\"Problem\">\n"
+            "        <Parameter name=\"Physics\" type=\"string\" value=\"Plato Driver\" />\n"
+            "        <Parameter name=\"Spatial Dimension\" type=\"int\" value=\"3\" />\n"
+            "        <Parameter name=\"Input Mesh\" type=\"string\" value=\"\" />\n"
+            "        <ParameterList name=\"Plato Problem\">\n"
+            "                <Parameter name=\"Physics\" type=\"string\" value=\"Thermomechanical\" />\n"
+            "                <Parameter name=\"PDE Constraint\" type=\"string\" value=\"Thermoelastostatics\" />\n"
+            "                <Parameter name=\"Constraint\" type=\"string\" value=\"My Volume\" />\n"
+            "                <Parameter name=\"Objective\" type=\"string\" value=\"My Internal Thermoelastic Energy\" />\n"
+            "                <Parameter name=\"Self-Adjoint\" type=\"bool\" value=\"false\" />\n"
+            "                <ParameterList name=\"My Volume\">\n"
+            "                        <Parameter name=\"Type\" type=\"string\" value=\"Scalar Function\" />\n"
+            "                        <Parameter name=\"Scalar Function Type\" type=\"string\" value=\"Volume\" />\n"
+            "                        <ParameterList name=\"Penalty Function\">\n"
+            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
+            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"1.0\" />\n"
+            "                                <Parameter name=\"Minimum Value\" type=\"double\" value=\"0.0\" />\n"
+            "                        </ParameterList>\n"
+            "                </ParameterList>\n"
+            "                <ParameterList name=\"My Internal Thermoelastic Energy\">\n"
+            "                        <Parameter name=\"Type\" type=\"string\" value=\"Scalar Function\" />\n"
+            "                        <Parameter name=\"Scalar Function Type\" type=\"string\" value=\"Internal Thermoelastic Energy\" />\n"
+            "                        <ParameterList name=\"Penalty Function\">\n"
+            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
+            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"3.0\" />\n"
+            "                        </ParameterList>\n"
+            "                </ParameterList>\n"
+            "                <ParameterList name=\"Thermoelastostatics\">\n"
+            "                        <ParameterList name=\"Penalty Function\">\n"
+            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
+            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"3.0\" />\n"
+            "                                <Parameter name=\"Minimum Value\" type=\"double\" value=\"1e-3\" />\n"
+            "                        </ParameterList>\n"
+            "                </ParameterList>\n"
+            "                <ParameterList name=\"Material Model\">\n"
+            "                        <ParameterList name=\"Isotropic Linear Thermoelastic\" />\n"
+            "                </ParameterList>\n"
+            "                <ParameterList name=\"Mechanical Natural Boundary Conditions\" />\n"
+            "                <ParameterList name=\"Thermal Natural Boundary Conditions\" />\n"
+            "                <ParameterList name=\"Essential Boundary Conditions\" />\n"
+            "        </ParameterList>\n"
+            "</ParameterList>";
+*/
 
     // do parse
     iss.str(stringInput);
@@ -3093,6 +3136,8 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck1)
 
     std::ostringstream tOStringStream;
     EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+//    std::cout << tOStringStream.str() << std::endl;
+//    EXPECT_EQ(tOStringStream.str(), tGoldString);
 
 }
 
