@@ -144,6 +144,7 @@ struct Material
     std::string reference_temperature;
     std::string density;
     std::string penalty_exponent;
+    std::string specific_heat;
 };
 
 struct InputData

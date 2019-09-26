@@ -49,6 +49,7 @@
 #include <gtest/gtest.h>
 #include "XMLGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
+#include "XML_GoldValues.hpp"
 #include <cmath>
 
 const int MAX_CHARS_PER_LINE = 512;
@@ -1645,7 +1646,7 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseMaterials(iss), false);
     stringInput = "begin material 1\n"
-            "thermal conductivity\n"
+            "thermal conductivity coefficient\n"
             "end material\n";
     iss.str(stringInput);
     iss.clear();
@@ -1671,14 +1672,14 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
+            "thermal conductivity coefficient .02\n"
             "density .001\n"
             "end material\n"
             "begin material 388\n"
             "penalty exponent 5\n"
             "youngs modulus 1e7\n"
             "poissons ratio 0.34\n"
-            "thermal conductivity .03\n"
+            "thermal conductivity coefficient .03\n"
             "density .009\n"
             "end material\n";
     iss.str(stringInput);
@@ -3069,75 +3070,153 @@ TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
     EXPECT_EQ(wasMaintained[4], true);
 }
 
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck1)
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical)
 {
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
             "begin objective\n"
-            "    type minimize thermoelastic energy\n"
-            "    load ids 1 7 3 4\n"
-            "    boundary condition ids 256\n"
+            "    type maximize stiffness\n"
+            "    load ids 1\n"
+            "    boundary condition ids 1\n"
             "    code plato_analyze\n"
             "    number processors 2\n"
-            "end objective\n";
-/*
-    std::string tGoldString =
-            "<?xml version=\"1.0\"?>\n"
-            "<ParameterList name=\"Problem\">\n"
-            "        <Parameter name=\"Physics\" type=\"string\" value=\"Plato Driver\" />\n"
-            "        <Parameter name=\"Spatial Dimension\" type=\"int\" value=\"3\" />\n"
-            "        <Parameter name=\"Input Mesh\" type=\"string\" value=\"\" />\n"
-            "        <ParameterList name=\"Plato Problem\">\n"
-            "                <Parameter name=\"Physics\" type=\"string\" value=\"Thermomechanical\" />\n"
-            "                <Parameter name=\"PDE Constraint\" type=\"string\" value=\"Thermoelastostatics\" />\n"
-            "                <Parameter name=\"Constraint\" type=\"string\" value=\"My Volume\" />\n"
-            "                <Parameter name=\"Objective\" type=\"string\" value=\"My Internal Thermoelastic Energy\" />\n"
-            "                <Parameter name=\"Self-Adjoint\" type=\"bool\" value=\"false\" />\n"
-            "                <ParameterList name=\"My Volume\">\n"
-            "                        <Parameter name=\"Type\" type=\"string\" value=\"Scalar Function\" />\n"
-            "                        <Parameter name=\"Scalar Function Type\" type=\"string\" value=\"Volume\" />\n"
-            "                        <ParameterList name=\"Penalty Function\">\n"
-            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
-            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"1.0\" />\n"
-            "                                <Parameter name=\"Minimum Value\" type=\"double\" value=\"0.0\" />\n"
-            "                        </ParameterList>\n"
-            "                </ParameterList>\n"
-            "                <ParameterList name=\"My Internal Thermoelastic Energy\">\n"
-            "                        <Parameter name=\"Type\" type=\"string\" value=\"Scalar Function\" />\n"
-            "                        <Parameter name=\"Scalar Function Type\" type=\"string\" value=\"Internal Thermoelastic Energy\" />\n"
-            "                        <ParameterList name=\"Penalty Function\">\n"
-            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
-            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"3.0\" />\n"
-            "                        </ParameterList>\n"
-            "                </ParameterList>\n"
-            "                <ParameterList name=\"Thermoelastostatics\">\n"
-            "                        <ParameterList name=\"Penalty Function\">\n"
-            "                                <Parameter name=\"Type\" type=\"string\" value=\"SIMP\" />\n"
-            "                                <Parameter name=\"Exponent\" type=\"double\" value=\"3.0\" />\n"
-            "                                <Parameter name=\"Minimum Value\" type=\"double\" value=\"1e-3\" />\n"
-            "                        </ParameterList>\n"
-            "                </ParameterList>\n"
-            "                <ParameterList name=\"Material Model\">\n"
-            "                        <ParameterList name=\"Isotropic Linear Thermoelastic\" />\n"
-            "                </ParameterList>\n"
-            "                <ParameterList name=\"Mechanical Natural Boundary Conditions\" />\n"
-            "                <ParameterList name=\"Thermal Natural Boundary Conditions\" />\n"
-            "                <ParameterList name=\"Essential Boundary Conditions\" />\n"
-            "        </ParameterList>\n"
-            "</ParameterList>";
-*/
+            "end objective\n"
+            "begin loads\n"
+            "    traction sideset 2 value 0 -3e3 0 load id 1\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    poissons ratio 0.3\n"
+            "    youngs modulus 1e8\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed displacement nodeset 1 bc id 1\n"
+            "end boundary conditions\n";
 
     // do parse
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
 
     std::ostringstream tOStringStream;
     EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
 //    std::cout << tOStringStream.str() << std::endl;
-//    EXPECT_EQ(tOStringStream.str(), tGoldString);
+    EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
+
+}
+
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type maximize heat conduction\n"
+            "    load ids 1\n"
+            "    boundary condition ids 1 2\n"
+            "    code plato_analyze\n"
+            "    number processors 2\n"
+            "end objective\n"
+            "begin loads\n"
+            "    heat flux sideset 1 value -1e2 load id 1\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    density 2703\n"
+            "    specific heat 900\n"
+            "    thermal conductivity coefficient 210.0\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed temperature nodeset 1 bc id 1\n"
+            "    fixed temperature nodeset 2 bc id 2\n"
+            "end boundary conditions\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
+
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+//    std::cout << tOStringStream.str() << std::endl;
+    EXPECT_EQ(tOStringStream.str(), gThermalGoldString);
+
+}
+
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type minimize thermoelastic energy\n"
+            "    load ids 1 2\n"
+            "    boundary condition ids 1 2 3 4 5 6 7 8\n"
+            "    code plato_analyze\n"
+            "    number processors 2\n"
+            "end objective\n"
+            "begin loads\n"
+            "    traction sideset 1 value 0.0 1.0e5 0.0 load id 1\n"
+            "    heat flux sideset 1 value 0.0 load id 2\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    poissons ratio 0.3\n"
+            "    youngs modulus 1e11\n"
+            "    thermal expansion coefficient 1e-5\n"
+            "    thermal conductivity coefficient 910.0\n"
+            "    reference temperature 1e-2\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed displacement nodeset 1 y bc id 1\n"
+            "    fixed displacement nodeset 1 z bc id 2\n"
+            "    fixed temperature nodeset 1 bc id 3\n"
+            "    fixed displacement nodeset 11 x bc id 4\n"
+            "    fixed displacement nodeset 2 y bc id 5\n"
+            "    fixed displacement nodeset 2 z bc id 6\n"
+            "    fixed temperature nodeset 2 bc id 7\n"
+            "    fixed displacement nodeset 21 x bc id 8\n"
+            "end boundary conditions\n";
+
+
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
+
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+//    std::cout << tOStringStream.str() << std::endl;
+    EXPECT_EQ(tOStringStream.str(), gThermomechanicalGoldString);
 
 }
 
