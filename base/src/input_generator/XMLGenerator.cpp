@@ -5900,10 +5900,12 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
 /******************************************************************************/
 {
     int num_plato_analyze_objs = 0;
+    char tBuffer[1000];
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         if(!m_InputData.objectives[i].code_name.compare("plato_analyze"))
         {
+            Objective tCurObjective = m_InputData.objectives[i];
             num_plato_analyze_objs++;
 
             pugi::xml_document doc;
@@ -5944,12 +5946,12 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
             tmp_node = doc.append_child("Operation");
             addChild(tmp_node, "Function", "WriteOutput");
             addChild(tmp_node, "Name", "Write Output");
-            tmp_node1 = tmp_node.append_child("Output");
-            addChild(tmp_node1, "ArgumentName", "Solution X");
-            tmp_node1 = tmp_node.append_child("Output");
-            addChild(tmp_node1, "ArgumentName", "Solution Y");
-            tmp_node1 = tmp_node.append_child("Output");
-            addChild(tmp_node1, "ArgumentName", "Solution Z");
+            for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
+            {
+                sprintf(tBuffer, "%s_%s", tCurObjective.performer_name.c_str(), tCurObjective.output_for_plotting[j].c_str());
+                tmp_node1 = tmp_node.append_child("Output");
+                addChild(tmp_node1, "ArgumentName", tBuffer);
+            }
 
             char buf[200];
             sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
@@ -7846,7 +7848,7 @@ bool XMLGenerator::generateInterfaceXML()
     }
 
     // Compute State
-    outputComputeStateStage(doc);
+//    outputComputeStateStage(doc);
 
     // Internal Energy
     outputInternalEnergyStage(doc, tHasUncertainties);
@@ -7856,7 +7858,7 @@ bool XMLGenerator::generateInterfaceXML()
 
     // Internal Energy Hessian
     if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-            m_InputData.optimization_algorithm.compare("ksal") == 0)
+       m_InputData.optimization_algorithm.compare("ksal") == 0)
     {
         outputInternalEnergyHessianStage(doc);
     }
@@ -8156,32 +8158,28 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
     // We can't have it in hear because other performers won't
     // know how to execute this Alexa-specific operation.
     // *********************************************************
-    bool tAlexaRun = false;
-    std::string tPerformerName = "";
+    bool tFirstTime = true;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(cur_obj.code_name == "plato_analyze")
         {
-            tAlexaRun = true;
-            tPerformerName = cur_obj.performer_name;
-            break;
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+            {
+                if(tFirstTime)
+                {
+                    op_node = stage_node.append_child("Operation");
+                    addChild(op_node, "Name", "Write Output");
+                    addChild(op_node, "PerformerName", cur_obj.performer_name);
+                    tFirstTime = false;
+                }
+                // create shared data for objectives
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                output_node = op_node.append_child("Output");
+                addChild(output_node, "ArgumentName", tmp_buf);
+                addChild(output_node, "SharedDataName", tmp_buf);
+            }
         }
-    }
-    if(tAlexaRun)
-    {
-        op_node = stage_node.append_child("Operation");
-        addChild(op_node, "Name", "Write Output");
-        addChild(op_node, "PerformerName", tPerformerName.c_str());
-        output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "Solution X");
-        addChild(output_node, "SharedDataName", "plato_analyze_1_dispx");
-        output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "Solution Y");
-        addChild(output_node, "SharedDataName", "plato_analyze_1_dispy");
-        output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "Solution Z");
-        addChild(output_node, "SharedDataName", "plato_analyze_1_dispz");
     }
 
     // VonMises Statistics
@@ -8362,7 +8360,7 @@ bool XMLGenerator::setOptimalityCriteriaOptions(pugi::xml_node & aXMLnode)
 {
     if(m_InputData.optimization_algorithm.compare("oc") == 0)
     {
-        addChild(aXMLnode, "Package", "OC");
+//        addChild(aXMLnode, "Package", "OC");
         pugi::xml_node tTmpNode = aXMLnode.append_child("OC");
         addChild(tTmpNode, "MoveLimiter", "1.0");
         addChild(tTmpNode, "StabilizationParameter", "0.5");
