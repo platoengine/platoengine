@@ -136,7 +136,8 @@ protected:
     void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
                                      bool &aHasUncertainties,
                                      bool &aRequestedVonMises);
-    void addEnforceBoundsOperation(pugi::xml_document &aDoc);
+    void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
+    void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
     void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
     void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
     void addAggregateHessianOperation(pugi::xml_document &aDoc);
@@ -171,6 +172,7 @@ protected:
                                    const std::vector<std::string> &aUnLoweredTokens,
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
+    void lookForPlatoAnalyzePerformers();
 
     std::string m_InputFilename;
     bool m_UseLaunch;

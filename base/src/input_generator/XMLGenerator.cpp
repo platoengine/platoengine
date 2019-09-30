@@ -93,7 +93,6 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
         m_filterType_kernelThenTANH_XMLName("KernelThenTANH")
 /******************************************************************************/
 {
-
 }
 
 /******************************************************************************/
@@ -225,6 +224,8 @@ bool XMLGenerator::generate()
         return false;
     }
 
+    lookForPlatoAnalyzePerformers();
+
     if(!generateInterfaceXML())
     {
         std::cout << "Failed to generate interface.xml" << std::endl;
@@ -263,6 +264,21 @@ bool XMLGenerator::generate()
 
     std::cout << "Successfully wrote XML files." << std::endl;
     return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::lookForPlatoAnalyzePerformers()
+/******************************************************************************/
+{
+    m_InputData.mPlatoAnalyzePerformerExists = false;
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+        {
+            m_InputData.mPlatoAnalyzePerformerExists = true;
+            break;
+        }
+    }
 }
 
 /******************************************************************************/
@@ -6406,7 +6422,7 @@ void XMLGenerator::addSetUpperBoundsOperation(pugi::xml_document &aDoc)
 }
 
 /******************************************************************************/
-void XMLGenerator::addEnforceBoundsOperation(pugi::xml_document &aDoc)
+void XMLGenerator::addEnforceBoundsOperationToFile(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
     pugi::xml_node tmp_node = aDoc.append_child("Operation");
@@ -6420,6 +6436,27 @@ void XMLGenerator::addEnforceBoundsOperation(pugi::xml_document &aDoc)
     addChild(tmp_node1, "ArgumentName", "Topology");
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "ArgumentName", "Topology");
+}
+
+/******************************************************************************/
+void XMLGenerator::addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode)
+/******************************************************************************/
+{
+    pugi::xml_node tOperationNode = aStageNode.append_child("Operation");
+    addChild(tOperationNode, "Name", "EnforceBounds");
+    addChild(tOperationNode, "PerformerName", "PlatoMain");
+    pugi::xml_node tInputNode = tOperationNode.append_child("Input");
+    addChild(tInputNode, "ArgumentName", "Lower Bound Vector");
+    addChild(tInputNode, "SharedDataName", "Lower Bound Vector");
+    tInputNode = tOperationNode.append_child("Input");
+    addChild(tInputNode, "ArgumentName", "Upper Bound Vector");
+    addChild(tInputNode, "SharedDataName", "Upper Bound Vector");
+    tInputNode = tOperationNode.append_child("Input");
+    addChild(tInputNode, "ArgumentName", "Topology");
+    addChild(tInputNode, "SharedDataName", "Topology");
+    pugi::xml_node tOutputNode = tOperationNode.append_child("Output");
+    addChild(tOutputNode, "ArgumentName", "Topology");
+    addChild(tOutputNode, "SharedDataName", "Topology");
 }
 
 /******************************************************************************/
@@ -6830,7 +6867,8 @@ bool XMLGenerator::generatePlatoOperationsXML()
     }
     addSetLowerBoundsOperation(doc);
     addSetUpperBoundsOperation(doc);
-    addEnforceBoundsOperation(doc);
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToFile(doc);
 
     // Write the file to disk
     doc.save_file("plato_operations.xml", "  ");
@@ -6860,23 +6898,8 @@ bool XMLGenerator::outputVolumeGradientStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     // Compute current volume
     op_node = stage_node.append_child("Operation");
@@ -6937,23 +6960,8 @@ bool XMLGenerator::outputSurfaceAreaGradientStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     // Compute current surface area gradient
     op_node = stage_node.append_child("Operation");
@@ -7011,23 +7019,8 @@ bool XMLGenerator::outputVolumeStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     // Compute current volume operation
     op_node = stage_node.append_child("Operation");
@@ -7073,23 +7066,8 @@ bool XMLGenerator::outputSurfaceAreaStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     // Compute current surface area operation
     op_node = stage_node.append_child("Operation");
@@ -7131,23 +7109,8 @@ bool XMLGenerator::outputComputeStateStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     pugi::xml_node cur_parent = stage_node;
     if(m_InputData.objectives.size() > 1)
@@ -7195,23 +7158,8 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     pugi::xml_node cur_parent = stage_node;
     if(m_InputData.objectives.size() > 1)
@@ -7325,23 +7273,8 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     addChild(output_node, "SharedDataName", "Topology");
 
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     pugi::xml_node cur_parent = stage_node;
     if(m_InputData.objectives.size() > 1)
@@ -7480,23 +7413,8 @@ bool XMLGenerator::outputInternalEnergyHessianStage(pugi::xml_document &doc)
     addChild(output_node, "SharedDataName", "Topology");
     
     // Enforce Bounds operation
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "EnforceBounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Vector");
-    addChild(input_node, "SharedDataName", "Lower Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Vector");
-    addChild(input_node, "SharedDataName", "Upper Bound Vector");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-
-    output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Topology");
-    addChild(output_node, "SharedDataName", "Topology");
+    if(!m_InputData.mPlatoAnalyzePerformerExists)
+        addEnforceBoundsOperationToStage(stage_node);
 
     pugi::xml_node cur_parent = stage_node;
     if(m_InputData.objectives.size() > 1)
