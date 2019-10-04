@@ -1,10 +1,4 @@
 /*
- * Plato_ReducedConstraintROL.hpp
- *
- *  Created on: Feb 8, 2018
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_REDUCEDCONSTRAINTROL_HPP_
-#define PLATO_REDUCEDCONSTRAINTROL_HPP_
+/*
+ * Plato_ReducedConstraintROL.hpp
+ *
+ *  Created on: Feb 8, 2018
+ */
+
+#pragma once
 
 #include <string>
 #include <vector>
@@ -65,10 +64,19 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * \brief PLATO Engine interface to a ROL reduced constraint function
+ * \tparam scalar type, e.g. double, float, etc.
+**********************************************************************************/
 template<class ScalarType>
 class ReducedConstraintROL : public ROL::Constraint<ScalarType>
 {
 public:
+    /******************************************************************************//**
+     * \brief Constructor
+     * \param [in] aInputData XML input data
+     * \param [in] aInterface PLATO Engine interface
+    **********************************************************************************/
     explicit ReducedConstraintROL(const Plato::OptimizerEngineStageData & aInputData, Plato::Interface* aInterface = nullptr) :
             mControl(),
             mAdjointJacobian(),
@@ -78,13 +86,21 @@ public:
     {
         this->initialize();
     }
+
+    /******************************************************************************//**
+     * \brief Destructor.
+    **********************************************************************************/
     virtual ~ReducedConstraintROL()
     {
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * \brief Evaluate all constraint functions
+     * \param [in] aControl design variables
+     * \param [in] aTolerance objective function inexactness tolerance
+     * \return objective function value
+    **********************************************************************************/
     void value(ROL::Vector<ScalarType> & aConstraints, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
-    /********************************************************************************/
     {
         // ********* Set view to control vector ********* //
         const Plato::DistributedVectorROL<ScalarType> & tControl =
@@ -118,12 +134,18 @@ public:
         Plato::SerialVectorROL<ScalarType> & tConstraints = dynamic_cast<Plato::SerialVectorROL<ScalarType>&>(aConstraints);
         tConstraints.vector()[tMY_CONSTRAINT_INDEX] = tOutput;
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Apply vector to constraint Jacobian
+     * \param [in/out] aJacobianTimesDirection application of vector to constraint Jacobian
+     * \param [in] aDirection descent direction
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+    **********************************************************************************/
     void applyJacobian(ROL::Vector<ScalarType> & aJacobianTimesDirection,
                        const ROL::Vector<ScalarType> & aDirection,
                        const ROL::Vector<ScalarType> & aControl,
                        ScalarType & aTolerance)
-    /********************************************************************************/
     {
         assert(aControl.dimension() == aDirection.dimension());
         assert(aJacobianTimesDirection.dimension() == static_cast<int>(1));
@@ -160,14 +182,20 @@ public:
         const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
         tJacobianTimesDirectionVector.vector()[tMY_CONSTRAINT_INDEX] = tJacobianDotDirection/tConstraintReferenceValue;
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Apply dual vector to constraint Jacobian
+     * \param [in/out] aAdjointJacobianTimesDirection application of dual vector to adjoint of constraint Jacobian
+     * \param [in] aDual dual vector, i.e. Lagrange multipliers
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+    **********************************************************************************/
     void applyAdjointJacobian(ROL::Vector<ScalarType> & aAdjointJacobianTimesDirection,
-                              const ROL::Vector<ScalarType> & aDirection,
+                              const ROL::Vector<ScalarType> & aDual,
                               const ROL::Vector<ScalarType> & aControl,
                               ScalarType & aTolerance)
-    /********************************************************************************/
     {
-        assert(aDirection.dimension() == static_cast<int>(1));
+        assert(aDual.dimension() == static_cast<int>(1));
         assert(aAdjointJacobianTimesDirection.dimension() == aControl.dimension());
 
         // ********* Set view to control vector ********* //
@@ -196,18 +224,25 @@ public:
 
         // ********* Apply direction to adjoint Jacobian ********* //
         const Plato::SerialVectorROL<ScalarType> & tDirection =
-                dynamic_cast<const Plato::SerialVectorROL<ScalarType>&>(aDirection);
+                dynamic_cast<const Plato::SerialVectorROL<ScalarType>&>(aDual);
         ScalarType tValue = tDirection.vector()[tMY_CONSTRAINT_INDEX];
         const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
         tOutput.scale(tValue/tConstraintReferenceValue);
     }
-//    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Apply descent direction to adjoint constraint Hessian
+     * \param [in/out] aOutput application of descent direction to adjoint constraint Hessian
+     * \param [in] aDual dual vector, i.e. Lagrange multipliers
+     * \param [in] aVector descent direction
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+    **********************************************************************************/
 //    void applyAdjointHessian(ROL::Vector<ScalarType> & aOutput,
 //                             const ROL::Vector<ScalarType> & aDual,
 //                             const ROL::Vector<ScalarType> & aVector,
 //                             const ROL::Vector<ScalarType> & aControl,
 //                             ScalarType & aTolerance)
-//    /********************************************************************************/
 //    {
 //        assert(aVector.dimension() == aOutput.dimension());
 //        assert(aControl.dimension() == aOutput.dimension());
@@ -215,9 +250,10 @@ public:
 //    }
 
 private:
-    /********************************************************************************/
+    /******************************************************************************//**
+     * \brief Initialize member data
+    **********************************************************************************/
     void initialize()
-    /********************************************************************************/
     {
         const size_t tCONTROL_INDEX = 0;
         std::vector<std::string> tControlNames = mEngineInputData.getControlNames();
@@ -227,9 +263,13 @@ private:
         mControl.resize(tNumDesignVariables);
         mAdjointJacobian.resize(tNumDesignVariables);
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Copy data
+     * \param [in] aFrom data to copy
+     * \param [in] aTo copied data
+    **********************************************************************************/
     void copy(const std::vector<ScalarType> & aFrom, std::vector<ScalarType> & aTo)
-    /********************************************************************************/
     {
         assert(aTo.size() == aFrom.size());
         for(size_t tIndex = 0; tIndex < aFrom.size(); tIndex++)
@@ -239,18 +279,18 @@ private:
     }
 
 private:
-    std::vector<ScalarType> mControl;
-    std::vector<ScalarType> mAdjointJacobian;
+    std::vector<ScalarType> mControl; /*!< design variables */
+    std::vector<ScalarType> mAdjointJacobian; /*!< adjoint constraint Jacobian */
 
-    Plato::Interface* mInterface;
-    Plato::OptimizerEngineStageData mEngineInputData;
-    std::shared_ptr<Teuchos::ParameterList> mParameterList;
+    Plato::Interface* mInterface; /*!< PLATO Engine interface */
+    Plato::OptimizerEngineStageData mEngineInputData; /*!< XML input data */
+    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< parameter list used in-memory to transfer data through PLATO Engine */
 
 private:
     ReducedConstraintROL(const Plato::ReducedConstraintROL<ScalarType> & aRhs);
     Plato::ReducedConstraintROL<ScalarType> & operator=(const Plato::ReducedConstraintROL<ScalarType> & aRhs);
 };
+// class ReducedConstraintROL
 
-} //namespace Plato
-
-#endif /* PLATO_REDUCEDCONSTRAINTROL_HPP_ */
+}
+//namespace Plato

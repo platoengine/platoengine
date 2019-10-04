@@ -1,10 +1,4 @@
 /*
- * Plato_ReducedObjectiveROL.hpp
- *
- *  Created on: Feb 8, 2018
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -46,8 +40,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_REDUCEDOBJECTIVEROL_HPP_
-#define PLATO_REDUCEDOBJECTIVEROL_HPP_
+/*
+ * Plato_ReducedObjectiveROL.hpp
+ *
+ *  Created on: Feb 8, 2018
+ */
+
+#pragma once
 
 #include <string>
 #include <vector>
@@ -64,10 +63,19 @@
 namespace Plato
 {
 
+/******************************************************************************//**
+ * \brief PLATO Engine interface to a ROL reduced objective function
+ * \tparam scalar type, e.g. double, float, etc.
+**********************************************************************************/
 template<typename ScalarType>
 class ReducedObjectiveROL : public ROL::Objective<ScalarType>
 {
 public:
+    /******************************************************************************//**
+     * \brief Constructor
+     * \param [in] aInputData XML input data
+     * \param [in] aInterface PLATO Engine interface
+    **********************************************************************************/
     explicit ReducedObjectiveROL(const Plato::OptimizerEngineStageData & aInputData, Plato::Interface* aInterface = nullptr) :
             mControl(),
             mGradient(),
@@ -78,13 +86,21 @@ public:
     {
         this->initialize();
     }
+
+    /******************************************************************************//**
+     * \brief Destructor.
+    **********************************************************************************/
     virtual ~ReducedObjectiveROL()
     {
     }
 
-    /********************************************************************************/
+    /******************************************************************************//**
+     * \brief Enables continuation of app-based parameters.
+     * \param [in] aControl design variables
+     * \param [in] aFlag indicates if vector of design variables was updated
+     * \param [in] aIteration outer loop optimization iteration
+    **********************************************************************************/
     void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
-    /********************************************************************************/
     {
         assert(mInterface != nullptr);
         std::vector<std::string> tStageNames;
@@ -92,9 +108,14 @@ public:
         tStageNames.push_back(tOutputStageName);
         mInterface->compute(tStageNames, *mParameterList);
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Evaluate objective function
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+     * \return objective function value
+    **********************************************************************************/
     ScalarType value(const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
-    /********************************************************************************/
     {
         // ********* Set view to control vector ********* //
         const Plato::DistributedVectorROL<ScalarType> & tControl =
@@ -118,9 +139,14 @@ public:
 
         return (tObjectiveValue);
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Evaluate objective function gradient
+     * \param [in\out] aGradient objective function gradient
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+    **********************************************************************************/
     void gradient(ROL::Vector<ScalarType> & aGradient, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
-    /********************************************************************************/
     {
         assert(aControl.dimension() == aGradient.dimension());
 
@@ -165,12 +191,18 @@ public:
         std::vector<ScalarType> & tOutputGradientData = tOutputGradient.vector();
         this->copy(mGradient, tOutputGradientData);
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Apply descent direction vector to objective function Hessian
+     * \param [in\out] aOutput application of descent direction vector to objective function Hessian
+     * \param [in] aVector descent direction
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+    **********************************************************************************/
 //    void hessVec(ROL::Vector<ScalarType> & aOutput,
 //                 const ROL::Vector<ScalarType> & aVector,
 //                 const ROL::Vector<ScalarType> & aControl,
 //                 ScalarType & aTolerance)
-    /********************************************************************************/
 /*
     {
         assert(aVector.dimension() == aOutput.dimension());
@@ -179,11 +211,11 @@ public:
     }
 */
 
-
 private:
-    /********************************************************************************/
+    /******************************************************************************//**
+     * \brief Initialize member data
+    **********************************************************************************/
     void initialize()
-    /********************************************************************************/
     {
         const size_t tCONTROL_INDEX = 0;
         std::vector<std::string> tControlNames = mEngineInputData.getControlNames();
@@ -193,9 +225,13 @@ private:
         mControl.resize(tNumDesignVariables);
         mGradient.resize(tNumDesignVariables);
     }
-    /********************************************************************************/
+
+    /******************************************************************************//**
+     * \brief Copy data
+     * \param [in] aFrom data to copy
+     * \param [in] aTo copied data
+    **********************************************************************************/
     void copy(const std::vector<ScalarType> & aFrom, std::vector<ScalarType> & aTo)
-    /********************************************************************************/
     {
         assert(aTo.size() == aFrom.size());
         for(size_t tIndex = 0; tIndex < aFrom.size(); tIndex++)
@@ -205,20 +241,20 @@ private:
     }
 
 private:
-    std::vector<ScalarType> mControl;
-    std::vector<ScalarType> mGradient;
+    std::vector<ScalarType> mControl; /*!< design variables */
+    std::vector<ScalarType> mGradient; /*!< objective function gradient */
 
-    Plato::Interface* mInterface;
-    Plato::OptimizerEngineStageData mEngineInputData;
-    std::shared_ptr<Teuchos::ParameterList> mParameterList;
+    Plato::Interface* mInterface; /*!< PLATO Engine interface */
+    Plato::OptimizerEngineStageData mEngineInputData; /*!< XML input data */
+    std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< parameter list used in-memory to transfer data through PLATO Engine */
 
-    bool mStateHasBeenCalculated;
+    bool mStateHasBeenCalculated; /*!< flag - indicates if state has been computed */
 
 private:
     ReducedObjectiveROL(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);
     Plato::ReducedObjectiveROL<ScalarType> & operator=(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);
 };
+// class ReducedObjectiveROL
 
-} // namespace Plato
-
-#endif /* PLATO_REDUCEDOBJECTIVEROL_HPP_ */
+}
+// namespace Plato
