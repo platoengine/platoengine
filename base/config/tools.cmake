@@ -87,6 +87,18 @@ endif()
 endfunction( Plato_no_src_build )
 
 
+###############################################################################
+## Plato_add_text_to_file( 
+##    FILE_LIST    == Return variable containing filepath to executable.
+## )
+###############################################################################
+
+function( Plato_add_text_to_file FILE_TO_MODIFY STRING_TO_ADD )
+  
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${FILE_TO_MODIFY} ${STRING_TO_ADD})
+    
+endfunction(Plato_add_text_to_file)
+
 
 ###############################################################################
 ## Plato_add_test_files( 
