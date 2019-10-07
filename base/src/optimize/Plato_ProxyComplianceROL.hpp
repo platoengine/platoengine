@@ -71,7 +71,8 @@ public:
             mFirstObjective(-1),
             mFilteredGradient(Epetra_SerialDenseVector(aSolver->getNumDesignVariables())),
             mUnfilteredGradient(Epetra_SerialDenseVector(aSolver->getNumDesignVariables())),
-            mSolver(aSolver)
+            mSolver(aSolver),
+            mSolveHasBeenCalled(false)
     {
     }
     virtual ~ProxyComplianceROL()
@@ -106,6 +107,7 @@ public:
         mSolver->solve(tControl.vector());
         // Compute potential energy (i.e. compliance objective)
         ScalarType tOutput = mSolver->computeCompliance(tControl.vector());
+        mSolveHasBeenCalled = true;
         return (tOutput);
     }
 
@@ -115,6 +117,11 @@ public:
         assert(aOutput.dimension() == mFilteredGradient.Length());
         assert(aOutput.dimension() == mUnfilteredGradient.Length());
         assert(aOutput.dimension() == mSolver->getNumDesignVariables());
+
+        if(!mSolveHasBeenCalled)
+        {
+            value(aControl, aTolerance);
+        }
 
         // Get Epetra Serial Dense Vector
         Plato::SerialEpetraVectorROL<ScalarType> & tOutput = dynamic_cast<Plato::SerialEpetraVectorROL<ScalarType>&>(aOutput);
@@ -164,6 +171,7 @@ private:
     Epetra_SerialDenseVector mFilteredGradient;
     Epetra_SerialDenseVector mUnfilteredGradient;
     std::shared_ptr<Plato::StructuralTopologyOptimization> mSolver;
+    bool mSolveHasBeenCalled;
 
 private:
     ProxyComplianceROL(const Plato::ProxyComplianceROL<ScalarType> & aRhs);
