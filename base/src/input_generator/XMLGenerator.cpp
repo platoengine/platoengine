@@ -1989,6 +1989,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus);
                 }
                 // Natural BCs
+                int tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Natural Boundary Conditions";
                 for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
@@ -2012,7 +2013,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             if(cur_load.type == "traction")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Traction Vector Boundary Condition";
+                                sprintf(tmp_buf, "Traction Vector Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Uniform");
                                 double x = std::atof(cur_load.values[0].c_str());
                                 double y = std::atof(cur_load.values[1].c_str());
@@ -2026,6 +2028,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     }
                 }
                 // Essential BCs
+                tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Essential Boundary Conditions";
                 for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
@@ -2048,21 +2051,24 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             // apply in all 3 directions
                             // X Displacement
                             n4 = n3.append_child("ParameterList");
-                            n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                            sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
+                            n4.append_attribute("name") = tmp_buf;
                             addNTVParameter(n4, "Type", "string", "Zero Value");
                             addNTVParameter(n4, "Index", "int", "0");
                             sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                             addNTVParameter(n4, "Sides", "string", tmp_buf);
                             // Y Displacement
                             n4 = n3.append_child("ParameterList");
-                            n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                            sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
+                            n4.append_attribute("name") = tmp_buf;
                             addNTVParameter(n4, "Type", "string", "Zero Value");
                             addNTVParameter(n4, "Index", "int", "1");
                             sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                             addNTVParameter(n4, "Sides", "string", tmp_buf);
                             // Z Displacement
                             n4 = n3.append_child("ParameterList");
-                            n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                            sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
+                            n4.append_attribute("name") = tmp_buf;
                             addNTVParameter(n4, "Type", "string", "Zero Value");
                             addNTVParameter(n4, "Index", "int", "2");
                             sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2073,7 +2079,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             if(cur_bc.dof == "x")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "0");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2082,7 +2089,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             else if(cur_bc.dof == "y")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "1");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2091,7 +2099,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             else if(cur_bc.dof == "z")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "2");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2147,6 +2156,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     addNTVParameter(n4, "Specific Heat", "double", m_InputData.materials[0].specific_heat);
                 }
                 // Natural BCs
+                int tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Natural Boundary Conditions";
                 for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
@@ -2170,7 +2180,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             if(cur_load.type == "heat")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Surface Flux Boundary Condition";
+                                sprintf(tmp_buf, "Surface Flux Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Uniform");
                                 addNTVParameter(n4, "Value", "double", cur_load.values[0]);
                                 sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
@@ -2180,6 +2191,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     }
                 }
                 // Essential BCs
+                tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Essential Boundary Conditions";
                 for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
@@ -2198,7 +2210,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     if(found)
                     {
                         n4 = n3.append_child("ParameterList");
-                        n4.append_attribute("name") = "Fixed Temperature Boundary Condition";
+                        sprintf(tmp_buf, "Fixed Temperature Boundary Condition %d", tBCCounter++);
+                        n4.append_attribute("name") = tmp_buf;
                         addNTVParameter(n4, "Type", "string", "Zero Value");
                         addNTVParameter(n4, "Index", "int", "0");
                         sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2254,6 +2267,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     addNTVParameter(n4, "Reference Temperature", "double", m_InputData.materials[0].reference_temperature);
                 }
                 // Mechanical Natural BCs
+                int tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Mechanical Natural Boundary Conditions";
                 for(size_t j=0; j<cur_obj.load_case_ids.size(); j++)
@@ -2277,7 +2291,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             if(cur_load.type == "traction")
                             {
                             	n4 = n3.append_child("ParameterList");
-                            	n4.append_attribute("name") = "Traction Vector Boundary Condition";
+                                sprintf(tmp_buf, "Traction Vector Boundary Condition %d", tBCCounter++);
+                            	n4.append_attribute("name") = tmp_buf;
                             	addNTVParameter(n4, "Type", "string", "Uniform");
                             	double x = std::atof(cur_load.values[0].c_str());
                             	double y = std::atof(cur_load.values[1].c_str());
@@ -2314,7 +2329,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             if(cur_load.type == "heat")
                             {
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Surface Flux Boundary Condition";
+                                sprintf(tmp_buf, "Surface Flux Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Uniform");
                                 addNTVParameter(n4, "Value", "double", cur_load.values[0]);
                                 sprintf(tmp_buf, "ss_%s", cur_load.app_id.c_str());
@@ -2324,6 +2340,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                     }
                 }
                 // Essential BCs
+                tBCCounter = 1;
                 n3 = n2.append_child("ParameterList");
                 n3.append_attribute("name") = "Essential Boundary Conditions";
                 for(size_t j=0; j<cur_obj.bc_ids.size(); j++)
@@ -2344,7 +2361,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                         if(cur_bc.type == "temperature")
                         {
                             n4 = n3.append_child("ParameterList");
-                            n4.append_attribute("name") = "Fixed Temperature Boundary Condition";
+                            sprintf(tmp_buf, "Fixed Temperature Boundary Condition %d", tBCCounter++);
+                            n4.append_attribute("name") = tmp_buf;
                             addNTVParameter(n4, "Type", "string", "Zero Value");
                             addNTVParameter(n4, "Index", "int", "3");
                             sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2357,21 +2375,24 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                                 // apply in all 3 directions
                                 // X Displacement
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "0");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                                 addNTVParameter(n4, "Sides", "string", tmp_buf);
                                 // Y Displacement
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "1");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                                 addNTVParameter(n4, "Sides", "string", tmp_buf);
                                 // Z Displacement
                                 n4 = n3.append_child("ParameterList");
-                                n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
                                 addNTVParameter(n4, "Index", "int", "2");
                                 sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2382,7 +2403,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                                 if(cur_bc.dof == "x")
                                 {
                                     n4 = n3.append_child("ParameterList");
-                                    n4.append_attribute("name") = "X Fixed Displacement Boundary Condition";
+                                    sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                    n4.append_attribute("name") = tmp_buf;
                                     addNTVParameter(n4, "Type", "string", "Zero Value");
                                     addNTVParameter(n4, "Index", "int", "0");
                                     sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2391,7 +2413,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                                 else if(cur_bc.dof == "y")
                                 {
                                     n4 = n3.append_child("ParameterList");
-                                    n4.append_attribute("name") = "Y Fixed Displacement Boundary Condition";
+                                    sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                    n4.append_attribute("name") = tmp_buf;
                                     addNTVParameter(n4, "Type", "string", "Zero Value");
                                     addNTVParameter(n4, "Index", "int", "1");
                                     sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -2400,7 +2423,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                                 else if(cur_bc.dof == "z")
                                 {
                                     n4 = n3.append_child("ParameterList");
-                                    n4.append_attribute("name") = "Z Fixed Displacement Boundary Condition";
+                                    sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
+                                    n4.append_attribute("name") = tmp_buf;
                                     addNTVParameter(n4, "Type", "string", "Zero Value");
                                     addNTVParameter(n4, "Index", "int", "2");
                                     sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
@@ -4231,6 +4255,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.initial_density_value = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"use","normalization","in","aggregator"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"use normalization in aggregator\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mUseNormalizationInAggregator = tStringValue;
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"create","levelset","spheres"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -4972,6 +5005,16 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                 return false;
             }
         }
+    }
+
+    // If "use normalization in aggregator" was not specified choose a default value based on
+    // the optimization algorithm.
+    if(m_InputData.mUseNormalizationInAggregator.length() == 0)
+    {
+        if(m_InputData.optimization_algorithm == "ksal")
+            m_InputData.mUseNormalizationInAggregator = "true";
+        else
+            m_InputData.mUseNormalizationInAggregator = "false";
     }
 
     return true;
@@ -6253,6 +6296,7 @@ void XMLGenerator::addFilterControlOperation(pugi::xml_document &aDoc)
 void XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
+    char tBuffer[100];
     pugi::xml_node tmp_node2;
     pugi::xml_node tmp_node = aDoc.append_child("Operation");
     addChild(tmp_node, "Function", "Aggregator");
@@ -6275,12 +6319,23 @@ void XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
         tmp_node2 = tmp_node1.append_child("Weight");
         addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
     }
+    if(m_InputData.mUseNormalizationInAggregator == "true")
+    {
+        tmp_node2 = tmp_node1.append_child("Normals");
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            pugi::xml_node tmp_node3 = tmp_node2.append_child("Input");
+            sprintf(tBuffer, "Normalization Factor %d", (int)(i+1));
+            addChild(tmp_node3, "ArgumentName", tBuffer);
+        }
+    }
 }
 
 /******************************************************************************/
 void XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
+    char tBuffer[100];
     pugi::xml_node tmp_node2;
     pugi::xml_node tmp_node = aDoc.append_child("Operation");
     addChild(tmp_node, "Function", "Aggregator");
@@ -6315,12 +6370,23 @@ void XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
         tmp_node2 = tmp_node1.append_child("Weight");
         addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
     }
+    if(m_InputData.mUseNormalizationInAggregator == "true")
+    {
+        tmp_node2 = tmp_node1.append_child("Normals");
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            pugi::xml_node tmp_node3 = tmp_node2.append_child("Input");
+            sprintf(tBuffer, "Normalization Factor %d", (int)(i+1));
+            addChild(tmp_node3, "ArgumentName", tBuffer);
+        }
+    }
 }
 
 /******************************************************************************/
 void XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
+    char tBuffer[100];
     pugi::xml_node tmp_node2;
     pugi::xml_node tmp_node = aDoc.append_child("Operation");
     addChild(tmp_node, "Function", "Aggregator");
@@ -6342,6 +6408,16 @@ void XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
     {
         tmp_node2 = tmp_node1.append_child("Weight");
         addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+    }
+    if(m_InputData.mUseNormalizationInAggregator == "true")
+    {
+        tmp_node2 = tmp_node1.append_child("Normals");
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            pugi::xml_node tmp_node3 = tmp_node2.append_child("Input");
+            sprintf(tBuffer, "Normalization Factor %d", (int)(i+1));
+            addChild(tmp_node3, "ArgumentName", tBuffer);
+        }
     }
 }
 
@@ -7208,6 +7284,14 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
         addChild(input_node, "ArgumentName", tmp_buf);
         sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
+        if(m_InputData.mUseNormalizationInAggregator == "true")
+        {
+            input_node = op_node.append_child("Input");
+            sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
+            addChild(input_node, "ArgumentName", tmp_buf);
+            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            addChild(input_node, "SharedDataName", tmp_buf);
+        }
     }
 
     output_node = op_node.append_child("Output");
@@ -7323,6 +7407,14 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
         addChild(input_node, "ArgumentName", tmp_buf);
         sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
+        if(m_InputData.mUseNormalizationInAggregator == "true")
+        {
+            input_node = op_node.append_child("Input");
+            sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
+            addChild(input_node, "ArgumentName", tmp_buf);
+            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            addChild(input_node, "SharedDataName", tmp_buf);
+        }
     }
 
     output_node = op_node.append_child("Output");
@@ -7575,6 +7667,12 @@ bool XMLGenerator::generateInterfaceXML()
         // create shared data for objectives
         sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
         createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+
+        if(m_InputData.mUseNormalizationInAggregator == "true")
+        {
+            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        }
     }
     // Internal Energy XXX Gradient shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
@@ -7730,8 +7828,8 @@ bool XMLGenerator::generateInterfaceXML()
     // Output To File
     outputOutputToFileStage(doc, tHasUncertainties, tRequestedVonMisesOutput);
 
-    // Initialize Optimization DOFs
-    outputInitializeOptimizationDOFsStage(doc);
+    // Initialize Optimization
+    outputInitializeOptimizationStage(doc);
 
     // Update Problem
     outputUpdateProblemStage(doc);
@@ -7806,7 +7904,7 @@ bool XMLGenerator::generateInterfaceXML()
 
     tTmpNode = tMiscNode.append_child("OptimizationVariables");
     addChild(tTmpNode, "ValueName", "Optimization DOFs");
-    addChild(tTmpNode, "InitializationStage", "Initialize Optimization DOFs");
+    addChild(tTmpNode, "InitializationStage", "Initialize Optimization");
     addChild(tTmpNode, "FilteredName", "Topology");
     addChild(tTmpNode, "LowerBoundValueName", "Lower Bound Value");
     addChild(tTmpNode, "LowerBoundVectorName", "Lower Bound Vector");
@@ -8040,11 +8138,11 @@ void XMLGenerator::outputUpdateProblemStage(pugi::xml_document &doc)
 }
 
 /**********************************************************************************/
-void XMLGenerator::outputInitializeOptimizationDOFsStage(pugi::xml_document &doc)
+void XMLGenerator::outputInitializeOptimizationStage(pugi::xml_document &doc)
 /**********************************************************************************/
 {
     pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Initialize Optimization DOFs");
+    addChild(stage_node, "Name", "Initialize Optimization");
 
     pugi::xml_node op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Initialize Field");
@@ -8053,6 +8151,49 @@ void XMLGenerator::outputInitializeOptimizationDOFsStage(pugi::xml_document &doc
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Initialized Field");
     addChild(output_node, "SharedDataName", "Optimization DOFs");
+
+    if(m_InputData.mUseNormalizationInAggregator == "true")
+    {
+        // Filter control
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "FilterControl");
+        addChild(op_node, "PerformerName", "PlatoMain");
+        pugi::xml_node input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Field");
+        addChild(input_node, "SharedDataName", "Optimization DOFs");
+        pugi::xml_node output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Filtered Field");
+        addChild(output_node, "SharedDataName", "Topology");
+
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
+            op_node = stage_node.append_child("Operation");
+            if(cur_obj.code_name == "plato_analyze")
+            {
+                addChild(op_node, "Name", "Compute Objective Value");
+                addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+            }
+            else
+            {
+                addChild(op_node, "Name", "Compute Objective");
+                addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+            }
+
+            input_node = op_node.append_child("Input");
+            addChild(input_node, "ArgumentName", "Topology");
+            addChild(input_node, "SharedDataName", "Topology");
+
+            output_node = op_node.append_child("Output");
+            if(cur_obj.code_name == "plato_analyze")
+                addChild(output_node, "ArgumentName", "Objective Value");
+            else
+                addChild(output_node, "ArgumentName", "Internal Energy");
+            char tBuffer[800];
+            sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
+            addChild(output_node, "SharedDataName", tBuffer);
+        }
+    }
 
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Optimization DOFs");

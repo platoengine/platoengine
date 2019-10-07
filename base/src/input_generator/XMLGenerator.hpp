@@ -148,7 +148,7 @@ protected:
     void addUpdateProblemOperation(pugi::xml_document &aDoc);
     void addFilterInfo(pugi::xml_document &aDoc);
     void addInitializeFieldOperation(pugi::xml_document &aDoc);
-    void outputInitializeOptimizationDOFsStage(pugi::xml_document &doc);
+    void outputInitializeOptimizationStage(pugi::xml_document &doc);
     bool outputVolumeGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaStage(pugi::xml_document &doc);
     void outputSetLowerBoundsStage(pugi::xml_document &doc);
