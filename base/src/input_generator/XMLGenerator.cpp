@@ -4850,12 +4850,17 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"algorithm"}, tStringValue))
                         {
-                            if(tStringValue == "")
+                            if(tokens.size() < 2)
                             {
                                 std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"algorithm\" keyword(s).\n";
                                 return false;
                             }
-                            m_InputData.optimization_algorithm = tStringValue;
+                            m_InputData.optimization_algorithm = tokens[1];
+                            for(size_t j=2; j<tokens.size(); ++j)
+                            {
+                                m_InputData.optimization_algorithm += " ";
+                                m_InputData.optimization_algorithm += tokens[j];
+                            }
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"discretization"}, tStringValue))
                         {
@@ -5011,10 +5016,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     // the optimization algorithm.
     if(m_InputData.mUseNormalizationInAggregator.length() == 0)
     {
-        if(m_InputData.optimization_algorithm == "ksal")
+        if(m_InputData.optimization_algorithm == "ksal" ||
+           m_InputData.optimization_algorithm == "rol ksal")
+        {
             m_InputData.mUseNormalizationInAggregator = "true";
+        }
         else
+        {
             m_InputData.mUseNormalizationInAggregator = "false";
+        }
     }
 
     return true;
@@ -5736,7 +5746,80 @@ bool XMLGenerator::generatePerformerOperationsXML()
     generateLightMPOperationsXML();
     generatePlatoAnalyzeOperationsXML();
     generateAMGXInput();
+    generateROLInput();
     return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::generateROLInput()
+/******************************************************************************/
+{
+    if(m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
+    {
+        pugi::xml_document doc;
+        pugi::xml_node n1, n2;
+        pugi::xml_attribute a1;
+
+        // Version entry
+        n1 = doc.append_child(pugi::node_declaration);
+        n1.set_name("xml");
+        a1 = n1.append_attribute("version");
+        a1.set_value("1.0");
+
+        n1 = doc.append_child("ParameterList");
+        n1.append_attribute("name") = "Problem";
+
+        n1 = doc.append_child("ParameterList");
+        n1.append_attribute("name") = "General";
+
+        n1 = doc.append_child("ParameterList");
+        n1.append_attribute("name") = "Step";
+
+        // Trust region
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "Trust Region";
+        addNTVParameter(n2, "Subproblem Solver", "string", "Truncated CG");
+        addNTVParameter(n2, "Subproblem Model", "string", "Kelley-Sachs");
+        addNTVParameter(n2, "Initial Radius", "double", "-1.0");
+        addNTVParameter(n2, "Maximum Radius", "double", "1.0e8");
+        addNTVParameter(n2, "Step Acceptance Threshold", "double", "0.05");
+        addNTVParameter(n2, "Radius Shrinking Threshold", "double", "0.05");
+        addNTVParameter(n2, "Radius Growing Threshold", "double", "0.9");
+        addNTVParameter(n2, "Radius Shrinking Rate (Negative rho)", "double", "0.0625");
+        addNTVParameter(n2, "Radius Shrinking Rate (Positive rho)", "double", "0.25");
+        addNTVParameter(n2, "Radius Growing Rate", "double", "2.5");
+        addNTVParameter(n2, "Safeguard Size", "double", "100.0");
+
+        // Augmented Lagrangian
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "Augmented Lagrangian";
+        addNTVParameter(n2, "Use Scaled Augmented Lagrangian", "bool", "false");
+        addNTVParameter(n2, "Level of Hessian Approximation", "int", "0");
+        addNTVParameter(n2, "Use Default Problem Scaling", "bool", "true");
+        addNTVParameter(n2, "Objective Scaling", "double", "1.0");
+        addNTVParameter(n2, "Constraint Scaling", "double", "1.0");
+        addNTVParameter(n2, "Use Default Initial Penalty Parameter", "bool", "true");
+        addNTVParameter(n2, "Initial Penalty Parameter", "double", "1.0e1");
+        addNTVParameter(n2, "Penalty Parameter Growth Factor", "double", "1.0e1");
+        addNTVParameter(n2, "Maximum Penalty Parameter", "double", "1.0e8");
+        addNTVParameter(n2, "Initial Optimality Tolerance", "double", "1.0");
+        addNTVParameter(n2, "Optimality Tolerance Update Exponent", "double", "1.0");
+        addNTVParameter(n2, "Optimality Tolerance Decrease Exponent", "double", "1.0");
+        addNTVParameter(n2, "Initial Feasibility Tolerance", "double", "1.0");
+        addNTVParameter(n2, "Feasibility Tolerance Update Exponent", "double", "0.1");
+        addNTVParameter(n2, "Feasibility Tolerance Decrease Exponent", "double", "0.9");
+        addNTVParameter(n2, "Print Intermediate Optimization History", "bool", "false");
+        addNTVParameter(n2, "Subproblem Step Type", "string", "Trust Region");
+        addNTVParameter(n2, "Subproblem Iteration Limit", "int", "20");
+
+        n1 = doc.append_child("ParameterList");
+        n1.append_attribute("name") = "Status Test";
+        addNTVParameter(n1, "Iteration Limit", "int", m_InputData.max_iterations);
+
+        // Write the file to disk
+        doc.save_file("rol_input.xml", "  ");
+    }
 }
 
 /******************************************************************************/
@@ -6119,8 +6202,10 @@ bool XMLGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("OutputGradient");
             addChild(tmp_node1, "Name", "Internal Energy Gradient");
 
-            if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-               m_InputData.optimization_algorithm.compare("ksal") == 0)
+            if(m_InputData.optimization_algorithm =="ksbc" ||
+               m_InputData.optimization_algorithm == "ksal" ||
+               m_InputData.optimization_algorithm == "rol ksal" ||
+               m_InputData.optimization_algorithm == "rol ksbc")
             {
                 // InternalEnergyHessian
                 tmp_node = doc.append_child("Operation");
@@ -6920,8 +7005,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
     addUpdateProblemOperation(doc);
     addFilterControlOperation(doc);
     addFilterGradientOperation(doc);
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         addFilterHessianOperation(doc);
     }
@@ -6936,8 +7023,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
     }
     addAggregateEnergyOperation(doc);
     addAggregateGradientOperation(doc);
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         addAggregateHessianOperation(doc);
     }
@@ -7749,8 +7838,10 @@ bool XMLGenerator::generateInterfaceXML()
     }
 
     // Hessian shared data
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -7766,8 +7857,10 @@ bool XMLGenerator::generateInterfaceXML()
     createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
 
     // Internal Energy Hessian and Descent Direction
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
         sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
@@ -7873,8 +7966,10 @@ bool XMLGenerator::generateInterfaceXML()
     outputInternalEnergyGradientStage(doc, tHasUncertainties);
 
     // Internal Energy Hessian
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         outputInternalEnergyHessianStage(doc);
     }
@@ -7912,8 +8007,10 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(tTmpNode, "UpperBoundVectorName", "Upper Bound Vector");
     addChild(tTmpNode, "SetLowerBoundsStage", "Set Lower Bounds");
     addChild(tTmpNode, "SetUpperBoundsStage", "Set Upper Bounds");
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         addChild(tTmpNode, "DescentDirectionName", "Descent Direction");
     }
@@ -7923,8 +8020,10 @@ bool XMLGenerator::generateInterfaceXML()
     addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
     addChild(tTmpNode, "ValueStageName", "Internal Energy");
     addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
-    if(m_InputData.optimization_algorithm.compare("ksbc") == 0 ||
-       m_InputData.optimization_algorithm.compare("ksal") == 0)
+    if(m_InputData.optimization_algorithm =="ksbc" ||
+       m_InputData.optimization_algorithm == "ksal" ||
+       m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
     {
         addChild(tTmpNode, "HessianName", "Internal Energy Hessian");
     }
@@ -8399,6 +8498,14 @@ bool XMLGenerator::setOptimizerMethod(pugi::xml_node & aXMLnode)
     else if(m_InputData.optimization_algorithm.compare("ksal") == 0)
     {
         addChild(aXMLnode, "Package", "KSAL");
+    }
+    else if(m_InputData.optimization_algorithm.compare("rol ksbc") == 0)
+    {
+        addChild(aXMLnode, "Package", "ROL KSBC");
+    }
+    else if(m_InputData.optimization_algorithm.compare("rol ksal") == 0)
+    {
+        addChild(aXMLnode, "Package", "ROL KSAL");
     }
     else if(m_InputData.optimization_algorithm.compare("derivativechecker") == 0)
     {
