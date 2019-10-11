@@ -46,6 +46,7 @@ struct BC
     std::string app_id; // nodeset/sideset id
     std::string dof;
     std::string bc_id;
+    std::string value;
 };
 
 struct Objective

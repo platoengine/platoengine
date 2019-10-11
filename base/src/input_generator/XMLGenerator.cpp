@@ -1505,10 +1505,21 @@ bool XMLGenerator::generateSalinasInputDecks()
                         }
                         else
                         {
-                            fprintf(fp, "  %s %s %s 0\n",
-                                    cur_bc.app_type.c_str(),
-                                    cur_bc.app_id.c_str(),
-                                    cur_bc.dof.c_str());
+                            if(cur_bc.value.empty())
+                            {
+                                fprintf(fp, "  %s %s %s 0\n",
+                                        cur_bc.app_type.c_str(),
+                                        cur_bc.app_id.c_str(),
+                                        cur_bc.dof.c_str());
+                            }
+                            else
+                            {
+                                fprintf(fp, "  %s %s %s %s\n",
+                                        cur_bc.app_type.c_str(),
+                                        cur_bc.app_id.c_str(),
+                                        cur_bc.dof.c_str(),
+                                        cur_bc.value.c_str());
+                            }
                         }
                     }
                 }
@@ -1653,16 +1664,35 @@ bool XMLGenerator::generateAlbanyInputDecks()
                         }
                         else
                         {
-                            sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
-                                    cur_bc.app_id.c_str(), cur_bc.dof.c_str());
-                            addNTVParameter(n3, string_var, "double", "0.0");
+                            if(cur_bc.value.empty())
+                            {
+                                sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                        cur_bc.app_id.c_str(), cur_bc.dof.c_str());
+                                addNTVParameter(n3, string_var, "double", "0.0");
+                            }
+                            else
+                            {
+                                sprintf(string_var, "DBC on NS nodelist_%s for DOF %s",
+                                        cur_bc.app_id.c_str(), cur_bc.dof.c_str());
+                                addNTVParameter(n3, string_var, "double", cur_bc.value);
+
+                            }
                         }
                     }
                     else if(!cur_obj.type.compare("maximize heat conduction"))
                     {
-                        sprintf(string_var, "DBC on NS nodelist_%s for DOF P",
-                                cur_bc.app_id.c_str());
-                        addNTVParameter(n3, string_var, "double", "0.0");
+                        if(cur_bc.value.empty())
+                        {
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF P",
+                                    cur_bc.app_id.c_str());
+                            addNTVParameter(n3, string_var, "double", "0.0");
+                        }
+                        else
+                        {
+                            sprintf(string_var, "DBC on NS nodelist_%s for DOF P",
+                                    cur_bc.app_id.c_str());
+                            addNTVParameter(n3, string_var, "double", cur_bc.value);
+                        }
                     }
                 }
             }
@@ -2076,35 +2106,39 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                         }
                         else
                         {
+                            std::string tBCIndex;
+                            std::string tBCDOF;
+                            std::string tBCType;
                             if(cur_bc.dof == "x")
                             {
-                                n4 = n3.append_child("ParameterList");
-                                sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                n4.append_attribute("name") = tmp_buf;
-                                addNTVParameter(n4, "Type", "string", "Zero Value");
-                                addNTVParameter(n4, "Index", "int", "0");
-                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                tBCIndex = "0";
+                                tBCDOF = "X";
                             }
                             else if(cur_bc.dof == "y")
                             {
-                                n4 = n3.append_child("ParameterList");
-                                sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                n4.append_attribute("name") = tmp_buf;
-                                addNTVParameter(n4, "Type", "string", "Zero Value");
-                                addNTVParameter(n4, "Index", "int", "1");
-                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                tBCIndex = "1";
+                                tBCDOF = "Y";
                             }
                             else if(cur_bc.dof == "z")
                             {
-                                n4 = n3.append_child("ParameterList");
-                                sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                n4.append_attribute("name") = tmp_buf;
+                                tBCIndex = "2";
+                                tBCDOF = "Z";
+                            }
+
+                            n4 = n3.append_child("ParameterList");
+                            sprintf(tmp_buf, "%s Fixed Displacement Boundary Condition %d", tBCDOF.c_str(), tBCCounter++);
+                            n4.append_attribute("name") = tmp_buf;
+                            addNTVParameter(n4, "Index", "int", tBCIndex);
+                            sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                            addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            if(cur_bc.value.empty())
+                            {
                                 addNTVParameter(n4, "Type", "string", "Zero Value");
-                                addNTVParameter(n4, "Index", "int", "2");
-                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            }
+                            else
+                            {
+                                addNTVParameter(n4, "Type", "string", "Fixed Value");
+                                addNTVParameter(n4, "Value", "double", cur_bc.value);
                             }
                         }
                     }
@@ -2212,10 +2246,18 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                         n4 = n3.append_child("ParameterList");
                         sprintf(tmp_buf, "Fixed Temperature Boundary Condition %d", tBCCounter++);
                         n4.append_attribute("name") = tmp_buf;
-                        addNTVParameter(n4, "Type", "string", "Zero Value");
                         addNTVParameter(n4, "Index", "int", "0");
                         sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                         addNTVParameter(n4, "Sides", "string", tmp_buf);
+                        if(cur_bc.value.empty())
+                        {
+                            addNTVParameter(n4, "Type", "string", "Zero Value");
+                        }
+                        else
+                        {
+                            addNTVParameter(n4, "Type", "string", "Fixed Value");
+                            addNTVParameter(n4, "Value", "double", cur_bc.value);
+                        }
                     }
                 }
             }
@@ -2363,10 +2405,18 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             n4 = n3.append_child("ParameterList");
                             sprintf(tmp_buf, "Fixed Temperature Boundary Condition %d", tBCCounter++);
                             n4.append_attribute("name") = tmp_buf;
-                            addNTVParameter(n4, "Type", "string", "Zero Value");
                             addNTVParameter(n4, "Index", "int", "3");
                             sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
                             addNTVParameter(n4, "Sides", "string", tmp_buf);
+                            if(cur_bc.value.empty())
+                            {
+                                addNTVParameter(n4, "Type", "string", "Zero Value");
+                            }
+                            else
+                            {
+                                addNTVParameter(n4, "Type", "string", "Fixed Value");
+                                addNTVParameter(n4, "Value", "double", cur_bc.value);
+                            }
                         }
                         else if(cur_bc.type == "displacement")
                         {
@@ -2400,35 +2450,39 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
                             }
                             else
                             {
+                                std::string tBCIndex;
+                                std::string tBCDOF;
+                                std::string tBCType;
                                 if(cur_bc.dof == "x")
                                 {
-                                    n4 = n3.append_child("ParameterList");
-                                    sprintf(tmp_buf, "X Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                    n4.append_attribute("name") = tmp_buf;
-                                    addNTVParameter(n4, "Type", "string", "Zero Value");
-                                    addNTVParameter(n4, "Index", "int", "0");
-                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                    tBCIndex = "0";
+                                    tBCDOF = "X";
                                 }
                                 else if(cur_bc.dof == "y")
                                 {
-                                    n4 = n3.append_child("ParameterList");
-                                    sprintf(tmp_buf, "Y Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                    n4.append_attribute("name") = tmp_buf;
-                                    addNTVParameter(n4, "Type", "string", "Zero Value");
-                                    addNTVParameter(n4, "Index", "int", "1");
-                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                    tBCIndex = "1";
+                                    tBCDOF = "Y";
                                 }
                                 else if(cur_bc.dof == "z")
                                 {
-                                    n4 = n3.append_child("ParameterList");
-                                    sprintf(tmp_buf, "Z Fixed Displacement Boundary Condition %d", tBCCounter++);
-                                    n4.append_attribute("name") = tmp_buf;
+                                    tBCIndex = "2";
+                                    tBCDOF = "Z";
+                                }
+
+                                n4 = n3.append_child("ParameterList");
+                                sprintf(tmp_buf, "%s Fixed Displacement Boundary Condition %d", tBCDOF.c_str(), tBCCounter++);
+                                n4.append_attribute("name") = tmp_buf;
+                                addNTVParameter(n4, "Index", "int", tBCIndex);
+                                sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
+                                addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                if(cur_bc.value.empty())
+                                {
                                     addNTVParameter(n4, "Type", "string", "Zero Value");
-                                    addNTVParameter(n4, "Index", "int", "2");
-                                    sprintf(tmp_buf, "ns_%s", cur_bc.app_id.c_str());
-                                    addNTVParameter(n4, "Sides", "string", tmp_buf);
+                                }
+                                else
+                                {
+                                    addNTVParameter(n4, "Type", "string", "Fixed Value");
+                                    addNTVParameter(n4, "Value", "double", cur_bc.value);
                                 }
                             }
                         }
@@ -2630,6 +2684,15 @@ bool XMLGenerator::generateLightMPInputDecks()
                     }
                     else
                     {
+                        std::string tValue;
+                        if(cur_bc.value.empty())
+                        {
+                            tValue = "0.0";
+                        }
+                        else
+                        {
+                            tValue = cur_bc.value;
+                        }
                         node4 = node3.append_child("displacement");
                         node5 = node4.append_child("nodeset");
                         node6 = node5.append_child(pugi::node_pcdata);
@@ -2639,7 +2702,7 @@ bool XMLGenerator::generateLightMPInputDecks()
                         node6.set_value(cur_bc.dof.c_str());
                         node5 = node4.append_child("value");
                         node6 = node5.append_child(pugi::node_pcdata);
-                        node6.set_value("0.0");
+                        node6.set_value(tValue.c_str());
                         node5 = node4.append_child("scale");
                         node6 = node5.append_child(pugi::node_pcdata);
                         node6.set_value("1.0");
@@ -3937,7 +4000,7 @@ bool XMLGenerator::parseBCs(std::istream &fin)
                             XMLGen::BC new_bc;
                             if(tokens.size() < 7)
                             {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Valid number of BC parameters were not specified in \"boundary conditions\" block.\n";
+                                std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
                                 return false;
                             }
                             if(tokens[0] != "fixed")
@@ -3945,62 +4008,82 @@ bool XMLGenerator::parseBCs(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
                                 return false;
                             }
-                            // token 0 is "fixed"
-                            size_t j = 1;  // "displacement or temperature"
-                            std::string cur_token1 = tokens[j];
-                            if(cur_token1 != "displacement" && cur_token1 != "temperature")
+                            new_bc.type = tokens[1];
+                            if(tokens[1] == "displacement")
+                            {
+                                // Potential syntax:
+                                // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
+                                // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
+                                // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
+                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+                                    return false;
+                                }
+                                new_bc.app_type = tokens[2];
+
+                                new_bc.app_id = tokens[3]; // nodeset or sideset id
+                                new_bc.dof = "";
+                                new_bc.value = "";
+                                if(tokens[4] != "bc")
+                                {
+                                    if(tokens[4] != "x" && tokens[4] != "y" && tokens[4] != "z")
+                                    {
+                                        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
+                                        return false;
+                                    }
+                                    new_bc.dof = tokens[4];
+                                    if(tokens[5] != "bc")
+                                    {
+                                        new_bc.value = tokens[5];
+                                        new_bc.bc_id = tokens[8];
+                                    }
+                                    else
+                                    {
+                                        new_bc.bc_id = tokens[7];
+                                    }
+                                }
+                                else
+                                    new_bc.bc_id = tokens[6];
+                            }
+                            else if (tokens[1] == "temperature")
+                            {
+                                // Potential syntax:
+                                // fixed temperature nodeset 1 bc id 1
+                                // fixed temperature nodeset 1 value 25.0 bc id 1
+                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
+                                {
+                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+                                    return false;
+                                }
+                                new_bc.app_type = tokens[2];
+
+                                new_bc.app_id = tokens[3]; // nodeset or sideset id
+                                new_bc.value = "";
+                                if(tokens[4] != "bc")
+                                {
+                                    if(tokens[4] != "value")
+                                    {
+                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+                                        return false;
+                                    }
+                                    new_bc.value = tokens[5];
+                                    if(tokens[6] != "bc")
+                                    {
+                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+                                        return false;
+                                    }
+                                    new_bc.bc_id = tokens[8];
+                                }
+                                else
+                                    new_bc.bc_id = tokens[6];
+                            }
+                            else
                             {
                                 std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
                                 return false;
                             }
-                            new_bc.type = cur_token1;
 
-                            j++;  // "nodeset" or "sideset"
-                            std::string cur_token2 = tokens[j];
-                            if(cur_token2 != "nodeset" && cur_token2 != "sideset")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-                                return false;
-                            }
-                            new_bc.app_type = cur_token2;
-
-                            j++;  // nodeset/sideset id
-                            std::string cur_token3 = tokens[j];
-                            new_bc.app_id = cur_token3;
-                            j++;
-                            new_bc.dof = "";
-                            std::string cur_token4 = tokens[j];
-                            ++j;
-                            std::string cur_token5 = tokens[j];
-                            ++j;
-                            std::string cur_token6 = tokens[j];
-                            if(cur_token4 == "bc" && cur_token5 == "id")
-                            {
-                                new_bc.bc_id = cur_token6;
-                            }
-                            else
-                            {
-                                if(cur_token4 != "x" && cur_token4 != "y" && cur_token4 != "z")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
-                                    return false;
-                                }
-                                new_bc.dof = cur_token4;
-                                if(cur_token5 != "bc" || cur_token6 != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition id syntax is wrong.\n";
-                                    return false;
-                                }
-                                ++j;
-                                if(j<tokens.size())
-                                {
-                                    new_bc.bc_id = tokens[j];
-                                }
-                                else
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition id not specified.\n";
-                                }
-                            }
                             m_InputData.bcs.push_back(new_bc);
                         }
                     }
@@ -8260,7 +8343,7 @@ void XMLGenerator::outputInitializeOptimizationStage(pugi::xml_document &doc)
         pugi::xml_node input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Field");
         addChild(input_node, "SharedDataName", "Optimization DOFs");
-        pugi::xml_node output_node = op_node.append_child("Output");
+        output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Filtered Field");
         addChild(output_node, "SharedDataName", "Topology");
 
