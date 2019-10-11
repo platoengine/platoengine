@@ -1,5 +1,5 @@
 /*
- * Plato_RapidOptimizationLibraryInterface.hpp
+ * Plato_ROLKSBCInterface.hpp
  *
  *  Created on: Feb 8, 2018
  */
@@ -46,8 +46,8 @@
 //@HEADER
 */
 
-#ifndef PLATO_RAPIDOPTIMIZATIONLIBRARYINTERFACE_HPP_
-#define PLATO_RAPIDOPTIMIZATIONLIBRARYINTERFACE_HPP_
+#ifndef PLATO_ROLKSBCINTERFACE_HPP_
+#define PLATO_ROLKSBCINTERFACE_HPP_
 
 #include <mpi.h>
 
@@ -77,11 +77,11 @@ namespace Plato
 {
 
 template<typename ScalarType, typename OrdinalType = size_t>
-class RapidOptimizationLibraryInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
+class ROLKSBCInterface : public Plato::OptimizerInterface<ScalarType, OrdinalType>
 {
 public:
     /******************************************************************************/
-    RapidOptimizationLibraryInterface(Plato::Interface* aInterface, const MPI_Comm & aComm) :
+    ROLKSBCInterface(Plato::Interface* aInterface, const MPI_Comm & aComm) :
             mComm(aComm),
             mInterface(aInterface),
             mInputData(Plato::OptimizerEngineStageData())
@@ -90,7 +90,7 @@ public:
     }
 
     /******************************************************************************/
-    virtual ~RapidOptimizationLibraryInterface()
+    virtual ~ROLKSBCInterface()
     /******************************************************************************/
     {
     }
@@ -99,7 +99,7 @@ public:
     Plato::optimizer::algorithm_t type() const
     /******************************************************************************/
     {
-        return (Plato::optimizer::algorithm_t::RAPID_OPTIMIZATION_LIBRARY);
+        return (Plato::optimizer::algorithm_t::ROL_KSBC);
     }
 
     /******************************************************************************/
@@ -155,14 +155,10 @@ public:
                 Teuchos::rcp(new Plato::DistributedVectorROL<ScalarType>(mComm, tMyNumControls));
         this->setInitialGuess(tMyName, tControls.operator*());
 
-        /****************************** SET DUAL VECTOR *******************************/
-        const OrdinalType tNumConstraints = mInputData.getNumConstraints();
-        Teuchos::RCP<Plato::SerialVectorROL<ScalarType>> tDual = Teuchos::rcp(new Plato::SerialVectorROL<ScalarType>(tNumConstraints));
-
         /********************************* SET OPTIMIZATION PROBLEM *********************************/
         Teuchos::RCP<ROL::Objective<ScalarType>> tObjective = Teuchos::rcp(new Plato::ReducedObjectiveROL<ScalarType>(mInputData, mInterface));
-        Teuchos::RCP<ROL::Constraint<ScalarType>> tInequality = Teuchos::rcp(new Plato::ReducedConstraintROL<ScalarType>(mInputData, mInterface));
-        ROL::OptimizationProblem<ScalarType> tOptimizationProblem(tObjective, tControls, tControlBoundsMng, tInequality, tDual);
+        ROL::OptimizationProblem<ScalarType> tOptimizationProblem(tObjective, tControls, tControlBoundsMng);
+
 
         /******************************** SOLVE OPTIMIZATION PROBLEM ********************************/
         this->solve(tOptimizationProblem);
@@ -181,10 +177,6 @@ private:
                                         Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
     /******************************************************************************/
     {
-        const OrdinalType tNumDuals = mInputData.getNumConstraints();
-        Plato::StandardVector<ScalarType, OrdinalType> tDuals(tNumDuals);
-        aDataFactory.allocateDual(tDuals);
-
         // ********* Allocate control vectors baseline data structures *********
         const OrdinalType tNumVectors = mInputData.getNumControlVectors();
         assert(tNumVectors > static_cast<OrdinalType>(0));
@@ -378,10 +370,10 @@ public:
     Plato::OptimizerEngineStageData mInputData;
 
 private:
-    RapidOptimizationLibraryInterface(const Plato::RapidOptimizationLibraryInterface<ScalarType> & aRhs);
-    Plato::RapidOptimizationLibraryInterface<ScalarType> & operator=(const Plato::RapidOptimizationLibraryInterface<ScalarType> & aRhs);
+    ROLKSBCInterface(const Plato::ROLKSBCInterface<ScalarType> & aRhs);
+    Plato::ROLKSBCInterface<ScalarType> & operator=(const Plato::ROLKSBCInterface<ScalarType> & aRhs);
 };
 
 } // namespace Plato
 
-#endif /* PLATO_RAPIDOPTIMIZATIONLIBRARYINTERFACE_HPP_ */
+#endif /* PLATO_ROLKSBCINTERFACE_HPP_ */

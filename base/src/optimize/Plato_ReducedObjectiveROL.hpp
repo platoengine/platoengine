@@ -82,7 +82,8 @@ public:
             mInterface(aInterface),
             mEngineInputData(aInputData),
             mParameterList(std::make_shared<Teuchos::ParameterList>()),
-            mStateHasBeenCalculated(false)
+            mStateHasBeenCalculated(false),
+            mLastIteration(-1)
     {
         this->initialize();
     }
@@ -102,11 +103,25 @@ public:
     **********************************************************************************/
     void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
     {
-        assert(mInterface != nullptr);
-        std::vector<std::string> tStageNames;
-        std::string tOutputStageName = mEngineInputData.getOutputStageName();
-        tStageNames.push_back(tOutputStageName);
-        mInterface->compute(tStageNames, *mParameterList);
+      printf("flag: %d, iteration: %d \n", aFlag, aIteration);
+        if(aIteration != mLastIteration && aIteration != -1)
+        {
+          assert(mInterface != nullptr);
+          std::vector<std::string> tStageNames;
+          std::string tOutputStageName = mEngineInputData.getOutputStageName();
+          tStageNames.push_back(tOutputStageName);
+          mInterface->compute(tStageNames, *mParameterList);
+        }
+
+        if(aIteration != mLastIteration && aIteration > 0 && aIteration % mEngineInputData.getProblemUpdateFrequency() == 0)
+        {
+          std::vector<std::string> tStageNames;
+          std::string tUpdateStageName = mEngineInputData.getUpdateProblemStageName();
+          tStageNames.push_back(tUpdateStageName);
+          mInterface->compute(tStageNames, *mParameterList);
+        }
+
+        mLastIteration = aIteration;
     }
 
     /******************************************************************************//**
@@ -249,6 +264,8 @@ private:
     std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< parameter list used in-memory to transfer data through PLATO Engine */
 
     bool mStateHasBeenCalculated; /*!< flag - indicates if state has been computed */
+
+    int mLastIteration;
 
 private:
     ReducedObjectiveROL(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);

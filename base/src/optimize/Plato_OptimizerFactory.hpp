@@ -62,7 +62,8 @@
 #include "Plato_GloballyConvergentMethodMovingAsymptotesInterface.hpp"
 
 #ifdef ENABLE_ROL
-#include "Plato_RapidOptimizationLibraryInterface.hpp"
+#include "Plato_ROLKSALInterface.hpp"
+#include "Plato_ROLKSBCInterface.hpp"
 #endif
 
 namespace Plato
@@ -164,10 +165,16 @@ public:
          } catch(...){aInterface->Catch();}
        }
 #ifdef ENABLE_ROL
-       else if( tOptPackage == "ROL" )
+       else if( tOptPackage == "ROL KSAL" )
        {
          try {
-           tOptimizer = new Plato::RapidOptimizationLibraryInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+           tOptimizer = new Plato::ROLKSALInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+         } catch(...){aInterface->Catch();}
+       }
+       else if( tOptPackage == "ROL KSBC" )
+       {
+         try {
+           tOptimizer = new Plato::ROLKSBCInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
 #endif

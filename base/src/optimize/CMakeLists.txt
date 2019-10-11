@@ -168,7 +168,8 @@ set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
                         
 IF( ENABLE_ROL )
 SET(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
-					    Plato_RapidOptimizationLibraryInterface.hpp
+                                                Plato_ROLKSALInterface.hpp
+                                                Plato_ROLKSBCInterface.hpp
 						Plato_SerialEpetraVectorROL.hpp
 						Plato_DistributedVectorROL.hpp
 						Plato_ReducedConstraintROL.hpp
@@ -176,7 +177,7 @@ SET(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
 						Plato_ConstraintSimOptROL.hpp
 						Plato_ObjectiveSimOptROL.hpp
 						Plato_ProxyComplianceROL.hpp
-					    Plato_SerialVectorROL.hpp
+                                                Plato_SerialVectorROL.hpp
 						Plato_ProxyVolumeROL.hpp
                         )
 ENDIF()
