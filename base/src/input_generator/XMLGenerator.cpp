@@ -8343,7 +8343,7 @@ void XMLGenerator::outputInitializeOptimizationStage(pugi::xml_document &doc)
         pugi::xml_node input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Field");
         addChild(input_node, "SharedDataName", "Optimization DOFs");
-        pugi::xml_node output_node = op_node.append_child("Output");
+        output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Filtered Field");
         addChild(output_node, "SharedDataName", "Topology");
 
