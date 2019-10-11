@@ -36,9 +36,9 @@ Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/
 
 Omega_h library (provides mesh metadata): https://github.com/SNLComputation/omega_h
 
-Netcdf library (I/O libraries): https://www.unidata.ucar.edu/software/netcdf/
-
 AMGX library (provides GPU linear solver): https://github.com/NVIDIA/AMGX
+
+Netcdf library (I/O libraries): https://www.unidata.ucar.edu/software/netcdf/
 
 Lapack library (linear algebra libraries): http://www.netlib.org/lapack/
 
