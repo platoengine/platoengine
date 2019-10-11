@@ -15,7 +15,7 @@ git clone https://username:password@github.com/SNLComputation/lgrtk.git (PLATO A
 ```
 where username and password corresponds to your github.com account. At this stage, make sure all required environment variables are set and all tpls are installed. 
 
-For build instructions, please refer to the [Plato Wiki](https://github.com/platoengine/platoengine/wiki/Build-Instructions)
+For build instructions, please refer to the [PLATO Wiki](https://github.com/platoengine/platoengine/wiki/Build-Instructions)
 
 ### Branches
 There are two main branches of this repository; stable and master. 
