@@ -3078,7 +3078,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical)
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1\n"
-            "    boundary condition ids 1\n"
+            "    boundary condition ids 1 2 3\n"
             "    code plato_analyze\n"
             "    number processors 2\n"
             "end objective\n"
@@ -3091,6 +3091,8 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical)
             "end material\n"
             "begin boundary conditions\n"
             "    fixed displacement nodeset 1 bc id 1\n"
+            "    fixed displacement nodeset 1 x bc id 2\n"
+            "    fixed displacement nodeset 1 y 3.0 bc id 3\n"
             "end boundary conditions\n";
 
     // do parse
@@ -3123,7 +3125,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
             "begin objective\n"
             "    type maximize heat conduction\n"
             "    load ids 1\n"
-            "    boundary condition ids 1 2\n"
+            "    boundary condition ids 1 2 3\n"
             "    code plato_analyze\n"
             "    number processors 2\n"
             "end objective\n"
@@ -3138,6 +3140,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
             "begin boundary conditions\n"
             "    fixed temperature nodeset 1 bc id 1\n"
             "    fixed temperature nodeset 2 bc id 2\n"
+            "    fixed temperature nodeset 3 value 25.0 bc id 3\n"
             "end boundary conditions\n";
 
     // do parse
