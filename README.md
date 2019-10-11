@@ -33,10 +33,15 @@ PLATO Engine has been designed for MPMD parallel executions.  It also targets Si
 
 # Required Libraries
 Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/trilinos
+
 Omega_h library (provides mesh metadata): https://github.com/SNLComputation/omega_h
+
 Netcdf library (I/O libraries): https://www.unidata.ucar.edu/software/netcdf/
+
 AMGX library (provides GPU linear solver): https://github.com/NVIDIA/AMGX
+
 Lapack library (linear algebra libraries): http://www.netlib.org/lapack/
+
 Boost library (C++ source libraries): https://www.boost.org/
 
 # Hardware Requirements
