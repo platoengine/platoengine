@@ -19,28 +19,33 @@ For build instructions, please refer to the [PLATO Wiki](https://github.com/plat
 
 ### Branches
 There are two main branches of this repository; stable and master. 
-* **stable** - Most recent stable version of PLATO Engine. This may not have all of the current features but will be more tested. Checkout the stable branch if you want to use PLATO Engine to run some examples. A `stable version` is denoted by a tag. For instance, the latest release version is `v0.3.0`.
-* **master** - Constantly changing and may contain bugs. Checkout the master branch if you are actively developing.
+* **stable** - Most recent stable version of PLATO Engine. This may not have all of the current features but will be more tested. Checkout the stable branch if you want to use PLATO Engine to run some examples. A `stable version` is denoted by a tag. For instance, the latest release version is `v0.6.0`.
+* **master** - Constantly changing and may contain bugs. Checkout the master branch if you are actively developing in PLATO.
 
 # Application
-The PLATO Engine testbed is designed to support research in the area of synthesis optimization on high-performance distributed memory computer architectures. The PLATO Engine testbed is being used to explore interoperability with multiple analysis, modeling and optimization numerical libraries on high-performance distributed memory computer architectures to synthesized designs. The testbed is also being used to test the viability of these analysis, modeling and optimization numerical libraries for the solution of synthesis optimization problems. 
+The PLATO Engine testbed is designed to support research in the area of optimization-based design on high-performance computing systems.  The PLATO Engine testbed is used to explore interoperability with several analysis, modeling and optimization tools.  The testbed is also used to test the viability of these analysis, modeling and optimization tools for the solution of optimization-based design problems. 
 
 # Approach
-PLATO Engine is intended to serve as a collaborative testbed that enables the demonstration of other modeling, analysis and optimization numerical libraries for optimization-based design. It is designed to enable intercommunication of modeling, analysis and synthesis data using a Multiple Program, Multiple Data (MPMD) parallel programming model. This MPMD model allows multiple programs/executables to run independently while communicating with one another. The synthesis optimization algorithm orchestrates the execution and communication between the various analysis codes and aggregates their contributions to generate a design that meets multiple criteria.  
+PLATO Engine is intended to serve as a collaborative testbed.  It is designed to enable intercommunication of modeling, analysis and optimization data using a Multiple Program, Multiple Data (MPMD) parallel programming model.  The MPMD model allows multiple, independent programs/executables to share data in-memory.  The optimization algorithms orchestrate the execution and communication between multiple analysis codes and aggregates their contributions to create designs that meet multiple performance criteria.  
 
 # High Performance Computing
-PLATO Engine has been designed for the MPMD parallel programming model. It also aims to perform using a Single Program, Multiple Data (SPMD) parallel programming model. PLATO Engine is designed for MPI distributed memory calculations and aims to perform its function efficiently on current and next generation computing architectures.
+PLATO Engine has been designed for MPMD parallel executions.  It also targets Single Program, Multiple Data (SPMD) parallel programming model; however, the SPMD model is not heavily used by the targeted PLATO applications.  PLATO Engine is also performance-protable, which allow it to optimally perform in current and next-generation computing architectures.
 
 # Required Libraries
 Trilinos library (provides Epetra, Seacas and STK): https://github.com/trilinos/trilinos
+Omega_h library (provides mesh metadata): https://github.com/SNLComputation/omega_h
+Netcdf library (I/O libraries): https://www.unidata.ucar.edu/software/netcdf/
+AMGX library (provides GPU linear solver): https://github.com/NVIDIA/AMGX
+Lapack library (linear algebra libraries): http://www.netlib.org/lapack/
+Boost library (C++ source libraries): https://www.boost.org/
 
 # Hardware Requirements
-Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, `g++ 7.2.0` and `intel 17.0.1` compilers. Tested `OS` include `Linux` and `Mac`. `RAM` requirements are problem size dependent. 
+Tested compilers are `g++ 4.7.2`, `g++ 5.4.0`, and `g++ 7.2.0` compilers. Tested `OS` include `Linux` and `Mac`. `RAM` requirements are problem size dependent. 
 
 **Note: Currently, PLATO Analyze only runs on Graphics Processing Units (GPUs)**
 
 # Contributing 
-Please open a GitHub issue to ask a question, report a bug, request features, etc. If you'd like to contribute, please fork the repository and use a feature branch. Make sure to follow the team's [coding style policies](https://github.com/platoengine/platoengine/wiki/Coding-Style). Pull requests are welcome.
+Please open a GitHub issue to ask a question, report a bug, request features, etc.  If you'd like to contribute, please fork the repository and use a feature branch.  Make sure to follow the team's [coding style policies](https://github.com/platoengine/platoengine/wiki/Coding-Style).  Pull requests are welcomed.
 
 # User Support
 
