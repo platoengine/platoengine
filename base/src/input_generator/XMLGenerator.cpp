@@ -5904,7 +5904,7 @@ void XMLGenerator::generateROLInput()
         addNTVParameter(n2, "Iteration Limit", "int", m_InputData.max_iterations);
 
         // Write the file to disk
-        doc.save_file("rol_input.xml", "  ");
+        doc.save_file("rol_inputs.xml", "  ");
     }
 }
 
@@ -8073,6 +8073,11 @@ bool XMLGenerator::generateInterfaceXML()
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
     this->setKelleySachsAlgorithmOptions(tTmpNode);
+    if(m_InputData.optimization_algorithm == "rol ksal" ||
+       m_InputData.optimization_algorithm == "rol ksbc")
+    {
+        addChild(tTmpNode, "InputFileName", "rol_inputs.xml");
+    }
 
     tTmpNode = tMiscNode.append_child("Output");
     addChild(tTmpNode, "OutputStage", "Output To File");
