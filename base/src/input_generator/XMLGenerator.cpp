@@ -5841,7 +5841,7 @@ void XMLGenerator::generateROLInput()
        m_InputData.optimization_algorithm == "rol ksbc")
     {
         pugi::xml_document doc;
-        pugi::xml_node n1, n2;
+        pugi::xml_node n1, n2, n3;
         pugi::xml_attribute a1;
 
         // Version entry
@@ -5851,54 +5851,57 @@ void XMLGenerator::generateROLInput()
         a1.set_value("1.0");
 
         n1 = doc.append_child("ParameterList");
-        n1.append_attribute("name") = "Problem";
+        n1.append_attribute("name") = "Inputs";
 
-        n1 = doc.append_child("ParameterList");
-        n1.append_attribute("name") = "General";
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "Problem";
 
-        n1 = doc.append_child("ParameterList");
-        n1.append_attribute("name") = "Step";
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "General";
+
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "Step";
 
         // Trust region
-        n2 = n1.append_child("ParameterList");
-        n2.append_attribute("name") = "Trust Region";
-        addNTVParameter(n2, "Subproblem Solver", "string", "Truncated CG");
-        addNTVParameter(n2, "Subproblem Model", "string", "Kelley-Sachs");
-        addNTVParameter(n2, "Initial Radius", "double", "-1.0");
-        addNTVParameter(n2, "Maximum Radius", "double", "1.0e8");
-        addNTVParameter(n2, "Step Acceptance Threshold", "double", "0.05");
-        addNTVParameter(n2, "Radius Shrinking Threshold", "double", "0.05");
-        addNTVParameter(n2, "Radius Growing Threshold", "double", "0.9");
-        addNTVParameter(n2, "Radius Shrinking Rate (Negative rho)", "double", "0.0625");
-        addNTVParameter(n2, "Radius Shrinking Rate (Positive rho)", "double", "0.25");
-        addNTVParameter(n2, "Radius Growing Rate", "double", "2.5");
-        addNTVParameter(n2, "Safeguard Size", "double", "100.0");
+        n3 = n2.append_child("ParameterList");
+        n3.append_attribute("name") = "Trust Region";
+        addNTVParameter(n3, "Subproblem Solver", "string", "Truncated CG");
+        addNTVParameter(n3, "Subproblem Model", "string", "Kelley-Sachs");
+        addNTVParameter(n3, "Initial Radius", "double", "-1.0");
+        addNTVParameter(n3, "Maximum Radius", "double", "1.0e8");
+        addNTVParameter(n3, "Step Acceptance Threshold", "double", "0.05");
+        addNTVParameter(n3, "Radius Shrinking Threshold", "double", "0.05");
+        addNTVParameter(n3, "Radius Growing Threshold", "double", "0.9");
+        addNTVParameter(n3, "Radius Shrinking Rate (Negative rho)", "double", "0.0625");
+        addNTVParameter(n3, "Radius Shrinking Rate (Positive rho)", "double", "0.25");
+        addNTVParameter(n3, "Radius Growing Rate", "double", "2.5");
+        addNTVParameter(n3, "Safeguard Size", "double", "100.0");
 
         // Augmented Lagrangian
-        n2 = n1.append_child("ParameterList");
-        n2.append_attribute("name") = "Augmented Lagrangian";
-        addNTVParameter(n2, "Use Scaled Augmented Lagrangian", "bool", "false");
-        addNTVParameter(n2, "Level of Hessian Approximation", "int", "0");
-        addNTVParameter(n2, "Use Default Problem Scaling", "bool", "true");
-        addNTVParameter(n2, "Objective Scaling", "double", "1.0");
-        addNTVParameter(n2, "Constraint Scaling", "double", "1.0");
-        addNTVParameter(n2, "Use Default Initial Penalty Parameter", "bool", "true");
-        addNTVParameter(n2, "Initial Penalty Parameter", "double", "1.0e1");
-        addNTVParameter(n2, "Penalty Parameter Growth Factor", "double", "1.0e1");
-        addNTVParameter(n2, "Maximum Penalty Parameter", "double", "1.0e8");
-        addNTVParameter(n2, "Initial Optimality Tolerance", "double", "1.0");
-        addNTVParameter(n2, "Optimality Tolerance Update Exponent", "double", "1.0");
-        addNTVParameter(n2, "Optimality Tolerance Decrease Exponent", "double", "1.0");
-        addNTVParameter(n2, "Initial Feasibility Tolerance", "double", "1.0");
-        addNTVParameter(n2, "Feasibility Tolerance Update Exponent", "double", "0.1");
-        addNTVParameter(n2, "Feasibility Tolerance Decrease Exponent", "double", "0.9");
-        addNTVParameter(n2, "Print Intermediate Optimization History", "bool", "false");
-        addNTVParameter(n2, "Subproblem Step Type", "string", "Trust Region");
-        addNTVParameter(n2, "Subproblem Iteration Limit", "int", "20");
+        n3 = n2.append_child("ParameterList");
+        n3.append_attribute("name") = "Augmented Lagrangian";
+        addNTVParameter(n3, "Use Scaled Augmented Lagrangian", "bool", "false");
+        addNTVParameter(n3, "Level of Hessian Approximation", "int", "0");
+        addNTVParameter(n3, "Use Default Problem Scaling", "bool", "true");
+        addNTVParameter(n3, "Objective Scaling", "double", "1.0");
+        addNTVParameter(n3, "Constraint Scaling", "double", "1.0");
+        addNTVParameter(n3, "Use Default Initial Penalty Parameter", "bool", "true");
+        addNTVParameter(n3, "Initial Penalty Parameter", "double", "1.0e1");
+        addNTVParameter(n3, "Penalty Parameter Growth Factor", "double", "1.0e1");
+        addNTVParameter(n3, "Maximum Penalty Parameter", "double", "1.0e8");
+        addNTVParameter(n3, "Initial Optimality Tolerance", "double", "1.0");
+        addNTVParameter(n3, "Optimality Tolerance Update Exponent", "double", "1.0");
+        addNTVParameter(n3, "Optimality Tolerance Decrease Exponent", "double", "1.0");
+        addNTVParameter(n3, "Initial Feasibility Tolerance", "double", "1.0");
+        addNTVParameter(n3, "Feasibility Tolerance Update Exponent", "double", "0.1");
+        addNTVParameter(n3, "Feasibility Tolerance Decrease Exponent", "double", "0.9");
+        addNTVParameter(n3, "Print Intermediate Optimization History", "bool", "false");
+        addNTVParameter(n3, "Subproblem Step Type", "string", "Trust Region");
+        addNTVParameter(n3, "Subproblem Iteration Limit", "int", "20");
 
-        n1 = doc.append_child("ParameterList");
-        n1.append_attribute("name") = "Status Test";
-        addNTVParameter(n1, "Iteration Limit", "int", m_InputData.max_iterations);
+        n2 = n1.append_child("ParameterList");
+        n2.append_attribute("name") = "Status Test";
+        addNTVParameter(n2, "Iteration Limit", "int", m_InputData.max_iterations);
 
         // Write the file to disk
         doc.save_file("rol_input.xml", "  ");
