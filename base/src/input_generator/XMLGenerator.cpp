@@ -8077,6 +8077,7 @@ bool XMLGenerator::generateInterfaceXML()
        m_InputData.optimization_algorithm == "rol ksbc")
     {
         addChild(tTmpNode, "InputFileName", "rol_inputs.xml");
+        addChild(tTmpNode, "OutputDiagnosticsToFile", "true");
     }
 
     tTmpNode = tMiscNode.append_child("Output");
