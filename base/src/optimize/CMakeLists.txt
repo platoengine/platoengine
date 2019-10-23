@@ -7,7 +7,8 @@ set(${LIB_NAME}_SOURCES Plato_OptimizersIO_Utilities.cpp
                         Plato_SromXML.cpp
                         )
                         
-set(${LIB_NAME}_HEADERS Plato_GradFreeCircle.hpp
+set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
+                        Plato_GradFreeCircle.hpp
                         Plato_GradFreeRadius.hpp
                         Plato_GradFreeCriterion.hpp
                         Plato_GradFreeRosenbrock.hpp

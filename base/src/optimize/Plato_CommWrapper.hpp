@@ -50,6 +50,7 @@
 #include <mpi.h>
 
 #include <memory>
+#include <vector>
 #include <sstream>
 #include <stdexcept>
 
