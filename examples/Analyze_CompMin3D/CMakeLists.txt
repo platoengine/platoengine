@@ -5,7 +5,7 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "interface.xml;alexaInput.xml;alexaApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.gen;bolted_bracket_assoc.txt")
+set( testFiles "interface.xml;alexaInput.xml;alexaApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.gen;bolted_bracket_assoc.txt;report.sh")
 Plato_add_test_files("${testFiles}")
 
 ## Plato_add_test_files() only works for files.  *.osh is a directory.

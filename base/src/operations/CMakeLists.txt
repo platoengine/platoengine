@@ -4,6 +4,7 @@ set(LIB_NAME Operations)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         Plato_Roughness.cpp
+                        Plato_SystemCall.cpp
                         Plato_Aggregator.cpp
                         Plato_DesignVolume.cpp
                         Plato_EnforceBounds.cpp
@@ -27,6 +28,7 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         
 set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_Roughness.hpp
+                        Plato_SystemCall.hpp
                         Plato_Aggregator.hpp
                         Plato_DesignVolume.hpp
                         Plato_EnforceBounds.hpp

@@ -41,38 +41,62 @@
  */
 
 /*
- * Plato_Operations_incl.hpp
+ * Plato_SystemCall.cpp
  *
- *  Created on: Jun 27, 2019
+ *  Created on: Jun 29, 2019
  */
 
-#pragma once
+#include <cstdlib>
+#include <sstream>
 
-#include "Plato_Filter.hpp"
-#include "Plato_Roughness.hpp"
+#include "PlatoApp.hpp"
+#include "Plato_Parser.hpp"
+#include "Plato_InputData.hpp"
+#include "Plato_Exceptions.hpp"
 #include "Plato_SystemCall.hpp"
-#include "Plato_Aggregator.hpp"
-#include "Plato_DesignVolume.hpp"
-#include "Plato_EnforceBounds.hpp"
-#include "Plato_UpdateProblem.hpp"
-#include "Plato_ComputeVolume.hpp"
-#include "Plato_SetUpperBounds.hpp"
-#include "Plato_SetLowerBounds.hpp"
-#include "Plato_PlatoMainOutput.hpp"
-#include "Plato_InitializeField.hpp"
-#include "Plato_InitializeValues.hpp"
-#include "Plato_WriteGlobalValue.hpp"
 #include "Plato_OperationsUtilities.hpp"
-#include "Plato_NormalizeObjectiveValue.hpp"
-#include "Plato_MeanPlusVarianceMeasure.hpp"
-#include "Plato_MeanPlusVarianceGradient.hpp"
-#include "Plato_ReciprocateObjectiveValue.hpp"
-#include "Plato_NormalizeObjectiveGradient.hpp"
-#include "Plato_ReciprocateObjectiveGradient.hpp"
 
-#ifdef GEOMETRY
-#include "Plato_MapMLSField.hpp"
-#include "Plato_MetaDataMLS.hpp"
-#include "Plato_ComputeMLSField.hpp"
-#include "Plato_InitializeMLSPoints.hpp"
-#endif
+namespace Plato
+{
+  /******************************************************************************/
+  void SystemCall::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
+  /******************************************************************************/
+  {
+    for(auto& tInputName : mInputNames) {
+      aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, tInputName));
+    }
+  }
+
+  /******************************************************************************/
+  SystemCall::SystemCall(PlatoApp* aPlatoApp, Plato::InputData & aNode) :
+          Plato::LocalOp(aPlatoApp)
+  /******************************************************************************/
+  {
+    mStringCommand = Plato::Get::String(aNode, "Command");
+
+    for(Plato::InputData tInputNode : aNode.getByName<Plato::InputData>("Input"))
+    {
+      mInputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
+    }
+  }
+
+  /******************************************************************************/
+  void SystemCall::operator()()
+  /******************************************************************************/
+  {
+    // collect arguments
+    std::stringstream commandPlusArgs;
+    commandPlusArgs << mStringCommand << " ";
+    for(auto& tInputName : mInputNames) {
+      auto tInputArgument = mPlatoApp->getValue(tInputName);
+      if(tInputArgument->size() > 1){
+        throw ParsingException("PlatoApp::SystemCall: input arguments must be than length one.");
+      }
+      commandPlusArgs << tInputArgument->data()[0];
+    }
+
+    // make system call
+    std::system(commandPlusArgs.str().c_str());
+  }
+}
+

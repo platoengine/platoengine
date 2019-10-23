@@ -182,6 +182,14 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("SystemCall");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::SystemCall(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("EnforceBounds");
             if(tStrFunction == tFunctions.back())
             {

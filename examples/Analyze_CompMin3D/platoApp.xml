@@ -6,6 +6,13 @@
   <Absolute>-1.0</Absolute>
 </Filter>
 
+ <Operation>
+   <Function>SystemCall</Function>
+   <Command>./report.sh</Command>
+   <Name>Report Value</Name>
+   <Input> <ArgumentName>Value</ArgumentName> </Input>
+ </Operation>
+
 <Operation>
   <Function>PlatoMainOutput</Function>
   <OutputFrequency>1000</OutputFrequency>

@@ -436,6 +436,14 @@
   <Output>
     <SharedDataName>Internal Energy</SharedDataName>
   </Output>
+  <Operation>
+    <Name>Report Value</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Value</ArgumentName>
+      <SharedDataName>Internal Energy</SharedDataName>
+    </Input>
+  </Operation>
 </Stage>
 
 <Stage>
