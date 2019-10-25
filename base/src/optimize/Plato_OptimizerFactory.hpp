@@ -199,7 +199,8 @@ public:
            << "\t ALPSO ... Augmented Lagrangian Particle Swarm Optimization\n"
            << "\t DerivativeChecker ... Derivative Checker Toolkit\n"
 #ifdef ENABLE_ROL
-           << "\t ROL ... Rapid Optimization Library\n"
+           << "\t ROL KSAL... Rapid Optimization Library Kelley Sachs Augmented Lagrangian\n"
+           << "\t ROL KSBC... Rapid Optimization Library Kelley Sachs Bound Constrained\n"
 #endif
            << std::endl;
            throw Plato::ParsingException(tStringStream.str());
