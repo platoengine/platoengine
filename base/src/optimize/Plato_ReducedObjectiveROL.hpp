@@ -200,12 +200,13 @@ private:
       mParameterList->set(tControlName, mControl.data());
 
       // ********* Set view to objective function value ********* //
-      std::string tObjectiveValueName = mEngineInputData.getObjectiveValueOutputName();
-      mParameterList->set(tObjectiveValueName, &mObjectiveValue);
+      std::string tObjectiveValueOutputName = mEngineInputData.getObjectiveValueOutputName();
+      mParameterList->set(tObjectiveValueOutputName, &mObjectiveValue);
 
       // ********* Compute objective function value ********* //
       std::vector<std::string> tStageNames;
-      tStageNames.push_back(tObjectiveValueName);
+      std::string tObjectiveValueStageName = mEngineInputData.getObjectiveValueStageName();
+      tStageNames.push_back(tObjectiveValueStageName);
       mInterface->compute(tStageNames, *mParameterList);
 
       cacheState();
@@ -224,13 +225,14 @@ private:
       mParameterList->set(tControlName, mControl.data());
 
       // ********* Set view to gradient vector ********* //
-      std::string tObjectiveGradientName = mEngineInputData.getObjectiveGradientOutputName();
+      std::string tObjectiveGradientOutputName = mEngineInputData.getObjectiveGradientOutputName();
       std::fill(mGradient.begin(), mGradient.end(), static_cast<ScalarType>(0));
-      mParameterList->set(tObjectiveGradientName, mGradient.data());
+      mParameterList->set(tObjectiveGradientOutputName, mGradient.data());
 
       // ********* Compute gradient vector ********* //
       std::vector<std::string> tStageNames;
-      tStageNames.push_back(tObjectiveGradientName);
+      std::string tObjectiveGradientStageName = mEngineInputData.getObjectiveGradientStageName();
+      tStageNames.push_back(tObjectiveGradientStageName);
       mInterface->compute(tStageNames, *mParameterList);
 
       mGradientComputed = true;

@@ -72,7 +72,7 @@
 
 <!---OBJECTIVE FUNCTION STAGE-->
 <Stage>
-  <Name>Objective Value</Name>
+  <Name>Compliance Value</Name>
   <Input>
     <SharedDataName>Control</SharedDataName>
   </Input>
@@ -106,7 +106,7 @@
 
 <!---OBJECTIVE FUNCTION GRADIENT STAGE-->
 <Stage>
-  <Name>Objective Gradient</Name>
+  <Name>Compliance Gradient</Name>
   <Input>
     <SharedDataName>Control</SharedDataName>
   </Input>
@@ -136,7 +136,7 @@
 
 <!---CONSTRAINT FUNCTION STAGE-->
 <Stage>
-  <Name>Constraint Value</Name>
+  <Name>Volume Value</Name>
   <Input>
     <SharedDataName>Control</SharedDataName>
   </Input>
@@ -161,7 +161,7 @@
 
 <!---CONSTRAINT GRADIENT STAGE-->
 <Stage>
-  <Name>Constraint Gradient</Name>
+  <Name>Volume Gradient</Name>
   <Input>
     <SharedDataName>Control</SharedDataName>
   </Input>
@@ -201,15 +201,15 @@
     <DescentDirectionName>Vector</DescentDirectionName> <!---NEEDS TO MATCH THE SARED DATA NAME DEFINED BY THE USER FOR THE DESIGN VARIABLES-->
   </OptimizationVariables>
   <Objective>
-    <ValueStageName>Objective Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
+    <ValueStageName>Compliance Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE FUNCTION STAGE-->
     <ValueName>Objective Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE FUNCTION STAGE-->
-    <GradientStageName>Objective Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
+    <GradientStageName>Compliance Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE OBJECTIVE GRADIENT STAGE-->
     <GradientName>Objective Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE OBJECTIVE GRADIENT STAGE-->
   </Objective>
   <Constraint>
-    <ValueStageName>Constraint Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT FUNCTION STAGE-->
+    <ValueStageName>Volume Value</ValueStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT FUNCTION STAGE-->
     <ValueName>Constraint Value</ValueName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT FUNCTION STAGE-->
-    <GradientStageName>Constraint Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
+    <GradientStageName>Volume Gradient</GradientStageName> <!---NEEDS TO MATCH USER-DEFINED STAGE NAME FOR THE CONSTRAINT GRADIENT STAGE-->
     <GradientName>Constraint Gradient</GradientName> <!---NEEDS TO MATCH USER-DEFINED OUTPUT SHARED DATA NAME FOR THE CONSTRAINT GRADIENT STAGE-->
   </Constraint>
   <BoundConstraint>
