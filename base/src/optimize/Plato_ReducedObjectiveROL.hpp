@@ -129,10 +129,10 @@ public:
     **********************************************************************************/
     ScalarType value(const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
-      /* if(!mStateComputed) */
-      computeValue(aControl);
+        if(!mStateComputed)
+            computeValue(aControl);
 
-      return mObjectiveValue;
+        return mObjectiveValue;
     }
 
     /******************************************************************************//**
@@ -143,11 +143,11 @@ public:
     **********************************************************************************/
     void gradient(ROL::Vector<ScalarType> & aGradient, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
-        /* if(!mStateComputed) */
-          computeValue(aControl);
+        if(!mStateComputed)
+            computeValue(aControl);
 
-        /* if(!mGradientComputed) */
-          computeGradient(aControl);
+        if(!mGradientComputed)
+            computeGradient(aControl);
 
         // ********* Set output gradient vector ********* //
         Plato::DistributedVectorROL<ScalarType> & tOutputGradient =
