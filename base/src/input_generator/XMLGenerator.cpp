@@ -3266,6 +3266,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.analysis_solver_tolerance = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"normalize","objective"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"normalize objective\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.normalize_objective = tStringValue;
+                        }
                         else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"reference","frf","file"}, tStringValue))
                         {
                             if(tStringValue == "")
