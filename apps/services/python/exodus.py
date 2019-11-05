@@ -114,20 +114,23 @@ class ElementBlock:
 
 class NodeSet:
   "Exodus-style node set"
-  def __init__(self, ns_id, num_nodes, num_dists, nodes):
+  def __init__(self, ns_id, num_nodes, num_dists, nodes, name=""):
     self.Id = ns_id
     self.numNodes = num_nodes
     self.numDists = num_dists
     self.nodes = nodes
+    self.name = name if (name!="") else ("ns_" + str(ns_id))
 
 class SideSet:
   "Exodus-style side set"
-  def __init__(self, ss_id, num_sides, num_dists, elems, sides):
+  def __init__(self, ss_id, num_sides, num_dists, elems, sides, name=""):
     self.Id = ss_id
     self.numSides = num_sides
     self.numDists = num_dists
     self.elems = elems
     self.sides = sides
+    self.name = name if (name!="") else ("ss_" + str(ss_id))
+
 
 class ExodusDB:
   "Exodus database object"
@@ -433,16 +436,22 @@ class ExodusDB:
       expy.put_elem_conn(self.outFileId, block.Id, connect_numbered_from_one)
 
     # write sidesets
+    sideSetNames = []
     for sideset in self.SideSets:
       expy.put_side_set_param(self.outFileId, sideset.Id, sideset.numSides, sideset.numDists)
       expy.put_side_set(self.outFileId, sideset.Id, sideset.elems, sideset.sides)
+      sideSetNames.append(sideset.name)
+    expy.put_names(self.outFileId, "ss", sideSetNames)
 
     # write nodesets
+    nodeSetNames = []
     for nodeset in self.NodeSets:
       # convert nodes to count from 1
       ex_nodes = [node+1 for node in nodeset.nodes]
       expy.put_node_set_param(self.outFileId, nodeset.Id, nodeset.numNodes, nodeset.numDists)
       expy.put_node_set(self.outFileId, nodeset.Id, ex_nodes)
+      nodeSetNames.append(nodeset.name)
+    expy.put_names(self.outFileId, "ns", nodeSetNames)
   
     # write time steps
     if len(self.varTimes) > 0:

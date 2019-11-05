@@ -281,6 +281,42 @@ expy_put_init(PyObject *self, PyObject *args)
 
 /******************************************************************************/
 static PyObject *
+expy_put_names(PyObject *self, PyObject *args)
+/******************************************************************************/
+{
+  int i;
+  int exoid;
+  char *var_type;
+  PyObject *pynames;
+  char **names;
+  int num_names;
+  int return_status;
+
+  if (!PyArg_ParseTuple(args, "isO:put_names", &exoid, &var_type, &pynames))
+    return NULL;
+
+  if(!PyList_Check(pynames)) {
+    PyErr_SetString(PyExc_TypeError, "arg must be list");
+    return NULL;
+  }
+
+  num_names = PyList_Size(pynames);
+
+  names = (char**) calloc(num_names,sizeof(char*));
+
+  for(i = 0; i < num_names; i++)
+    names[i] = (char*) calloc((MAX_LINE_LENGTH+1),sizeof(char));
+
+  string_array_from_list(pynames, names);
+
+  ex_entity_type obj_type = get_enum_from_var_type(var_type);
+
+  return_status = ex_put_names(exoid, obj_type, names);
+
+  return Py_BuildValue("i",return_status);
+}
+/******************************************************************************/
+static PyObject *
 expy_put_info(PyObject *self, PyObject *args)
 /******************************************************************************/
 {
@@ -291,7 +327,7 @@ expy_put_info(PyObject *self, PyObject *args)
   PyObject  *pyinfo;
   char **info;
 
-        if (!PyArg_ParseTuple(args, "iiO:put_info", &exoid, &num_info, &pyinfo))
+  if (!PyArg_ParseTuple(args, "iiO:put_info", &exoid, &num_info, &pyinfo))
     return NULL;
 
   if(!PyList_Check(pyinfo)) {
@@ -1153,6 +1189,7 @@ static PyMethodDef expy_methods[] = {
   {"put_time",            expy_put_time,            METH_VARARGS},
   {"put_elem_var",        expy_put_elem_var,        METH_VARARGS},
   {"put_nodal_var",       expy_put_nodal_var,       METH_VARARGS},
+  {"put_names",           expy_put_names,           METH_VARARGS},
   {NULL,NULL}/* sentinel */
 };
 
@@ -1185,6 +1222,10 @@ ex_entity_type get_enum_from_var_type(const char * var_type)
      return EX_NODAL;
    else if(!strcmp(var_type,"e"))
      return EX_ELEM_BLOCK;
+   else if(!strcmp(var_type,"ns"))
+     return EX_NODE_SET;
+   else if(!strcmp(var_type,"ss"))
+     return EX_SIDE_SET;
    else if(!strcmp(var_type,"g"))
      return EX_GLOBAL;
    else
