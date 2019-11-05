@@ -79,11 +79,14 @@ public:
     explicit ReducedObjectiveROL(const Plato::OptimizerEngineStageData & aInputData, Plato::Interface* aInterface = nullptr) :
             mControl(),
             mGradient(),
+            mObjectiveValue(0),
             mInterface(aInterface),
             mEngineInputData(aInputData),
             mParameterList(std::make_shared<Teuchos::ParameterList>()),
-            mStateHasBeenCalculated(false),
-            mLastIteration(-1)
+            mLastIteration(-1),
+            mUpdateFrequency(0),
+            mStateComputed(false),
+            mGradientComputed(false)
     {
         this->initialize();
     }
@@ -96,109 +99,55 @@ public:
     }
 
     /******************************************************************************//**
-     * \brief Enables continuation of app-based parameters.
+     * \brief Updates physics and enables continuation of app-based parameters.
      * \param [in] aControl design variables
      * \param [in] aFlag indicates if vector of design variables was updated
      * \param [in] aIteration outer loop optimization iteration
     **********************************************************************************/
     void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
     {
-      printf("flag: %d, iteration: %d \n", aFlag, aIteration);
-        if(aIteration != mLastIteration && aIteration != -1)
-        {
-          assert(mInterface != nullptr);
-          std::vector<std::string> tStageNames;
-          std::string tOutputStageName = mEngineInputData.getOutputStageName();
-          tStageNames.push_back(tOutputStageName);
-          mInterface->compute(tStageNames, *mParameterList);
-        }
+        mStateComputed = false;
+        mGradientComputed = false;
 
-        if(aIteration != mLastIteration && aIteration > 0 && aIteration % mEngineInputData.getProblemUpdateFrequency() == 0)
-        {
-          std::vector<std::string> tStageNames;
-          std::string tUpdateStageName = mEngineInputData.getUpdateProblemStageName();
-          tStageNames.push_back(tUpdateStageName);
-          mInterface->compute(tStageNames, *mParameterList);
-        }
+        bool tNewIteration = aIteration != mLastIteration && aIteration != -1;
+        bool tUpdateIteration = mUpdateFrequency > 0 && tNewIteration && aIteration > 0 && aIteration % mUpdateFrequency == 0;
+
+        if(tNewIteration)
+          callOutputStage();
+
+        if(tUpdateIteration)
+          callUpdateStage();
 
         mLastIteration = aIteration;
     }
 
     /******************************************************************************//**
-     * \brief Evaluate objective function
+     * \brief Returns current objective value
      * \param [in] aControl design variables
      * \param [in] aTolerance inexactness tolerance
      * \return objective function value
     **********************************************************************************/
     ScalarType value(const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
-        // ********* Set view to control vector ********* //
-        const Plato::DistributedVectorROL<ScalarType> & tControl =
-                dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
-        const std::vector<ScalarType> & tControlData = tControl.vector();
-        assert(tControlData.size() == mControl.size());
-        const size_t tCONTROL_VECTOR_INDEX = 0;
-        std::string tControlName = mEngineInputData.getControlName(tCONTROL_VECTOR_INDEX);
-        this->copy(tControlData, mControl);
-        mParameterList->set(tControlName, mControl.data());
+        if(!mStateComputed)
+            computeValue(aControl);
 
-        // ********* Set view to objective function value ********* //
-        ScalarType tObjectiveValue = 0;
-        std::string tObjectiveValueName = mEngineInputData.getObjectiveValueOutputName();
-        mParameterList->set(tObjectiveValueName, &tObjectiveValue);
-
-        // ********* Compute objective function value ********* //
-        std::vector<std::string> tStageNames;
-        tStageNames.push_back(tObjectiveValueName);
-        mInterface->compute(tStageNames, *mParameterList);
-
-        return (tObjectiveValue);
+        return mObjectiveValue;
     }
 
     /******************************************************************************//**
-     * \brief Evaluate objective function gradient
-     * \param [in\out] aGradient objective function gradient
+     * \brief Returns current gradient value
+     * \param [out] aGradient objective function gradient
      * \param [in] aControl design variables
      * \param [in] aTolerance inexactness tolerance
     **********************************************************************************/
     void gradient(ROL::Vector<ScalarType> & aGradient, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
-        assert(aControl.dimension() == aGradient.dimension());
+        if(!mStateComputed)
+            computeValue(aControl);
 
-        if(!mStateHasBeenCalculated)
-        {
-            mStateHasBeenCalculated = true;
-            value(aControl, aTolerance);
-        }
-
-        // Tell performers to cache the state
-        std::vector<std::string> tStageNames;
-        std::string tCacheStageName = mEngineInputData.getCacheStageName();
-        if(tCacheStageName.empty() == false)
-        {
-            tStageNames.push_back(tCacheStageName);
-            mInterface->compute(tStageNames, *mParameterList);
-        }
-
-        // ********* Set view to control vector ********* //
-        const Plato::DistributedVectorROL<ScalarType> & tControl =
-                dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
-        const std::vector<ScalarType> & tControlData = tControl.vector();
-        assert(tControlData.size() == mControl.size());
-        const size_t tCONTROL_VECTOR_INDEX = 0;
-        std::string tControlName = mEngineInputData.getControlName(tCONTROL_VECTOR_INDEX);
-        this->copy(tControlData, mControl);
-        mParameterList->set(tControlName, mControl.data());
-
-        // ********* Set view to gradient vector ********* //
-        std::string tObjectiveGradientName = mEngineInputData.getObjectiveGradientOutputName();
-        std::fill(mGradient.begin(), mGradient.end(), static_cast<ScalarType>(0));
-        mParameterList->set(tObjectiveGradientName, mGradient.data());
-
-        // ********* Compute gradient vector ********* //
-        tStageNames.clear();
-        tStageNames.push_back(tObjectiveGradientName);
-        mInterface->compute(tStageNames, *mParameterList);
+        if(!mGradientComputed)
+            computeGradient(aControl);
 
         // ********* Set output gradient vector ********* //
         Plato::DistributedVectorROL<ScalarType> & tOutputGradient =
@@ -207,31 +156,13 @@ public:
         this->copy(mGradient, tOutputGradientData);
     }
 
-    /******************************************************************************//**
-     * \brief Apply descent direction vector to objective function Hessian
-     * \param [in\out] aOutput application of descent direction vector to objective function Hessian
-     * \param [in] aVector descent direction
-     * \param [in] aControl design variables
-     * \param [in] aTolerance inexactness tolerance
-    **********************************************************************************/
-//    void hessVec(ROL::Vector<ScalarType> & aOutput,
-//                 const ROL::Vector<ScalarType> & aVector,
-//                 const ROL::Vector<ScalarType> & aControl,
-//                 ScalarType & aTolerance)
-/*
-    {
-        assert(aVector.dimension() == aOutput.dimension());
-        assert(aControl.dimension() == aOutput.dimension());
-        aOutput.set(aVector);
-    }
-*/
-
 private:
     /******************************************************************************//**
      * \brief Initialize member data
     **********************************************************************************/
     void initialize()
     {
+        assert(mInterface != nullptr);
         const size_t tCONTROL_INDEX = 0;
         std::vector<std::string> tControlNames = mEngineInputData.getControlNames();
         std::string tMyControlName = tControlNames[tCONTROL_INDEX];
@@ -239,6 +170,7 @@ private:
         assert(tNumDesignVariables >= static_cast<ScalarType>(0));
         mControl.resize(tNumDesignVariables);
         mGradient.resize(tNumDesignVariables);
+        mUpdateFrequency = mEngineInputData.getProblemUpdateFrequency();
     }
 
     /******************************************************************************//**
@@ -255,17 +187,106 @@ private:
         }
     }
 
+    void computeValue(const ROL::Vector<ScalarType> & aControl)
+    {
+      // ********* Set view to control vector ********* //
+      const Plato::DistributedVectorROL<ScalarType> & tControl =
+              dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
+      const std::vector<ScalarType> & tControlData = tControl.vector();
+      assert(tControlData.size() == mControl.size());
+      const size_t tCONTROL_VECTOR_INDEX = 0;
+      std::string tControlName = mEngineInputData.getControlName(tCONTROL_VECTOR_INDEX);
+      this->copy(tControlData, mControl);
+      mParameterList->set(tControlName, mControl.data());
+
+      // ********* Set view to objective function value ********* //
+      std::string tObjectiveValueOutputName = mEngineInputData.getObjectiveValueOutputName();
+      mParameterList->set(tObjectiveValueOutputName, &mObjectiveValue);
+
+      // ********* Compute objective function value ********* //
+      std::vector<std::string> tStageNames;
+      std::string tObjectiveValueStageName = mEngineInputData.getObjectiveValueStageName();
+      tStageNames.push_back(tObjectiveValueStageName);
+      mInterface->compute(tStageNames, *mParameterList);
+
+      cacheState();
+    }
+
+    void computeGradient(const ROL::Vector<ScalarType> & aControl)
+    {
+      // ********* Set view to control vector ********* //
+      const Plato::DistributedVectorROL<ScalarType> & tControl =
+              dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
+      const std::vector<ScalarType> & tControlData = tControl.vector();
+      assert(tControlData.size() == mControl.size());
+      const size_t tCONTROL_VECTOR_INDEX = 0;
+      std::string tControlName = mEngineInputData.getControlName(tCONTROL_VECTOR_INDEX);
+      this->copy(tControlData, mControl);
+      mParameterList->set(tControlName, mControl.data());
+
+      // ********* Set view to gradient vector ********* //
+      std::string tObjectiveGradientOutputName = mEngineInputData.getObjectiveGradientOutputName();
+      std::fill(mGradient.begin(), mGradient.end(), static_cast<ScalarType>(0));
+      mParameterList->set(tObjectiveGradientOutputName, mGradient.data());
+
+      // ********* Compute gradient vector ********* //
+      std::vector<std::string> tStageNames;
+      std::string tObjectiveGradientStageName = mEngineInputData.getObjectiveGradientStageName();
+      tStageNames.push_back(tObjectiveGradientStageName);
+      mInterface->compute(tStageNames, *mParameterList);
+
+      mGradientComputed = true;
+    }
+
+    void callOutputStage()
+    {
+      std::vector<std::string> tStageNames;
+      std::string tOutputStageName = mEngineInputData.getOutputStageName();
+      if(tOutputStageName.empty() == false)
+      {
+          tStageNames.push_back(tOutputStageName);
+          mInterface->compute(tStageNames, *mParameterList);
+      }
+    }
+
+    void callUpdateStage()
+    {
+      std::vector<std::string> tStageNames;
+      std::string tUpdateStageName = mEngineInputData.getUpdateProblemStageName();
+      if(tUpdateStageName.empty() == false)
+      {
+        tStageNames.push_back(tUpdateStageName);
+        mInterface->compute(tStageNames, *mParameterList);
+      }
+    }
+
+    void cacheState()
+    {
+        std::vector<std::string> tStageNames;
+        std::string tCacheStageName = mEngineInputData.getCacheStageName();
+        if(tCacheStageName.empty() == false)
+        {
+            tStageNames.push_back(tCacheStageName);
+            mInterface->compute(tStageNames, *mParameterList);
+        }
+
+        mStateComputed = true;
+    }
+
 private:
     std::vector<ScalarType> mControl; /*!< design variables */
     std::vector<ScalarType> mGradient; /*!< objective function gradient */
+    ScalarType mObjectiveValue;
 
     Plato::Interface* mInterface; /*!< PLATO Engine interface */
     Plato::OptimizerEngineStageData mEngineInputData; /*!< XML input data */
     std::shared_ptr<Teuchos::ParameterList> mParameterList; /*!< parameter list used in-memory to transfer data through PLATO Engine */
 
-    bool mStateHasBeenCalculated; /*!< flag - indicates if state has been computed */
-
     int mLastIteration;
+    int mUpdateFrequency;
+
+    bool mStateComputed;
+    bool mGradientComputed;
 
 private:
     ReducedObjectiveROL(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);

@@ -120,7 +120,8 @@ public:
 
         // ********* Compute constraint value. Meaning, just the evaluation not the actual residual, i.e. h(z)<=0 ********* //
         std::vector<std::string> tStageName;
-        tStageName.push_back(tConstraintValueName);
+        std::string tConstraintValueStageName = mEngineInputData.getConstraintValueStageName(tMY_CONSTRAINT_INDEX);
+        tStageName.push_back(tConstraintValueStageName);
         mInterface->compute(tStageName, *mParameterList);
 
         // NOTE: THE CURRENT ASSUMPTION IS THAT THE USER ONLY PROVIDES THE CONSTRAINT EVALUATION.
@@ -172,7 +173,8 @@ public:
 
         // ********* Compute constraint Jacobian ********* //
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tConstraintGradientName);
+        std::string tConstraintGradientStageName = mEngineInputData.getConstraintGradientStageName(tMY_CONSTRAINT_INDEX);
+        tStageNames.push_back(tConstraintGradientStageName);
         mInterface->compute(tStageNames, *mParameterList);
 
         // ********* Apply direction to Jacobian ********* //
@@ -216,7 +218,8 @@ public:
 
         // ********* Compute adjoint Jacobian ********* //
         std::vector<std::string> tStageNames;
-        tStageNames.push_back(tConstraintGradientName);
+        std::string tConstraintGradientStageName = mEngineInputData.getConstraintGradientStageName(tMY_CONSTRAINT_INDEX);
+        tStageNames.push_back(tConstraintGradientStageName);
         mInterface->compute(tStageNames, *mParameterList);
         Plato::DistributedVectorROL<ScalarType> & tOutput =
                 dynamic_cast<Plato::DistributedVectorROL<ScalarType>&>(aAdjointJacobianTimesDirection);
@@ -229,25 +232,6 @@ public:
         const ScalarType tConstraintReferenceValue = mEngineInputData.getConstraintReferenceValue(tMY_CONSTRAINT_INDEX);
         tOutput.scale(tValue/tConstraintReferenceValue);
     }
-
-    /******************************************************************************//**
-     * \brief Apply descent direction to adjoint constraint Hessian
-     * \param [in/out] aOutput application of descent direction to adjoint constraint Hessian
-     * \param [in] aDual dual vector, i.e. Lagrange multipliers
-     * \param [in] aVector descent direction
-     * \param [in] aControl design variables
-     * \param [in] aTolerance inexactness tolerance
-    **********************************************************************************/
-//    void applyAdjointHessian(ROL::Vector<ScalarType> & aOutput,
-//                             const ROL::Vector<ScalarType> & aDual,
-//                             const ROL::Vector<ScalarType> & aVector,
-//                             const ROL::Vector<ScalarType> & aControl,
-//                             ScalarType & aTolerance)
-//    {
-//        assert(aVector.dimension() == aOutput.dimension());
-//        assert(aControl.dimension() == aOutput.dimension());
-//        aOutput.set(aVector);
-//    }
 
 private:
     /******************************************************************************//**

@@ -3266,6 +3266,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.analysis_solver_tolerance = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"normalize","objective"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"normalize objective\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.normalize_objective = tStringValue;
+                        }
                         else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"reference","frf","file"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -5858,6 +5867,13 @@ void XMLGenerator::generateROLInput()
 
         n2 = n1.append_child("ParameterList");
         n2.append_attribute("name") = "General";
+        n3 = n2.append_child("ParameterList");
+        n3.append_attribute("name") = "Secant";
+        addNTVParameter(n3, "Type", "string", "Limited-Memory BFGS");
+        addNTVParameter(n3, "Use as Preconditioner", "bool", "false");
+        addNTVParameter(n3, "Use as Hessian", "bool", "true");
+        addNTVParameter(n3, "Maximum Storage", "int", "20");
+        addNTVParameter(n3, "Barzilai-Borwein", "int", "1");
 
         n2 = n1.append_child("ParameterList");
         n2.append_attribute("name") = "Step";
