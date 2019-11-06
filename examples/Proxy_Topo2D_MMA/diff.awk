@@ -1,5 +1,5 @@
 BEGIN {
-  rel_tol = 1e-7
+  rel_tol = 1e-3
   num_total_cols = 18   ## total number of columns in files.  
   num_cols=0
   cols[num_cols++]=3
