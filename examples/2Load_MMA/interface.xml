@@ -538,7 +538,7 @@
 <Optimizer>
   <Package>MMA</Package>
   <Options>
-    <MaxNumOuterIterations>10</MaxNumOuterIterations>
+    <MaxNumOuterIterations>15</MaxNumOuterIterations>
   </Options>
   <Output>
     <OutputStage>Output To File</OutputStage>

@@ -284,8 +284,6 @@
 
 <Optimizer>
   <Package>KSBC</Package>
-  <!--Package>DerivativeChecker</Package-->
-  <!--CheckGradient>true</CheckGradient-->
   <Options>
     <KSTrustRegionExpansionFactor>4</KSTrustRegionExpansionFactor>
     <KSTrustRegionContractionFactor>0.5</KSTrustRegionContractionFactor>
@@ -334,6 +332,6 @@
     <Lower>0</Lower>
   </BoundConstraint>
   <Convergence>
-    <MaxIterations>7</MaxIterations>
+    <MaxIterations>20</MaxIterations>
   </Convergence>
 </Optimizer>
