@@ -1,0 +1,15 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 11/05/2019 09:42:24 AM
+## Command Options:
+create brick x 1
+volume all scheme tetmesh
+mesh volume all
+block 1 volume all
+sideset 1 surface 6
+sideset 1 name "ss_1"
+nodeset 2 surface 4
+nodeset 2 name "ns_2"
+export mesh "brick.exo"
