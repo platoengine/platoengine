@@ -553,42 +553,64 @@ bool Su2ToExodus::readNodeCoordinates(std::istream &aStream)
 bool Su2ToExodus::readElementConnectivity(std::istream &aStream)
 {
     bool tRet = true;
+    std::string tLine(200, ' ');
+    char tElementTypeBuffer[50];
+    char tNodeIDBuffer[50];
+    std::vector<int> tCurElemConnectivity;
     for(int i=0; i<mSu2Data.mNumElements; ++i)
     {
-        std::vector<int> tCurElemConnectivity;
-        std::string tLine;
         std::getline(aStream, tLine);
-        size_t tPos = tLine.find(' ');
-        if(tPos != std::string::npos)
+        int tLength = tLine.length();
+        bool tReadingElementType = true;
+        bool tReadingNodeIDs = false;
+        int tNumNodeIDsRead = 0;
+        int tNumNodes = 0;
+        int tNumCharsInBuffer=0;
+        int tElementType=0;
+        for(int j=0; j<tLength; ++j)
         {
-            int tElementType = std::atoi(tLine.substr(0, tPos).c_str());
-            int tNumNodes = 0;
-            if(tElementType == 10)
-                tNumNodes = 4;
-            tLine = tLine.substr(tPos+1);
-            for(int j=0; j<tNumNodes; ++j)
+            char tCurChar = tLine[j];
+            if(tReadingElementType)
             {
-                tPos = tLine.find(' ');
-                if(tPos != std::string::npos)
+                if(tCurChar == ' ')
                 {
-                    int tNodeId = std::atoi(tLine.substr(0, tPos).c_str());
-                    tCurElemConnectivity.push_back(tNodeId);
-                    tLine = tLine.substr(tPos+1);
+                    tElementTypeBuffer[tNumCharsInBuffer] = '\0';
+                    tNumCharsInBuffer = 0;
+                    tElementType = std::atoi(tElementTypeBuffer);
+                    if(tElementType == 10)
+                        tNumNodes=4;
+                    tReadingElementType = false;
+                    tReadingNodeIDs = true;
                 }
                 else
                 {
-                    tRet = false;
-                    j=tNumNodes;
-                    i=mSu2Data.mNumElements;
+                    tElementTypeBuffer[tNumCharsInBuffer] = tCurChar;
+                    ++tNumCharsInBuffer;
                 }
             }
-            if(tRet)
-                mSu2Data.mElementConnectivity.push_back(tCurElemConnectivity);
-        }
-        else
-        {
-            tRet = false;
-            i=mSu2Data.mNumElements;
+            else if(tReadingNodeIDs)
+            {
+                if(tCurChar == ' ')
+                {
+                    tNodeIDBuffer[tNumCharsInBuffer] = '\0';
+                    tNumCharsInBuffer = 0;
+                    int tNodeID = std::atoi(tNodeIDBuffer);
+                    tCurElemConnectivity.push_back(tNodeID);
+                    ++tNumNodeIDsRead;
+                    if(tNumNodeIDsRead == tNumNodes)
+                    {
+                        mSu2Data.mElementConnectivity.push_back(tCurElemConnectivity);
+                        tCurElemConnectivity.clear();
+                        break;
+                    }
+                }
+                else
+                {
+                    tNodeIDBuffer[tNumCharsInBuffer] = tCurChar;
+                    ++tNumCharsInBuffer;
+                }
+            }
+
         }
     }
     return tRet;
