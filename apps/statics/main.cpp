@@ -46,6 +46,7 @@
 #include <Plato_Interface.hpp>
 #include <Plato_PenaltyModel.hpp>
 #include <Plato_SharedData.hpp>
+#include <Plato_Console.hpp>
 
 #ifndef NDEBUG
 #include <fenv.h>

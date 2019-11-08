@@ -41,72 +41,55 @@
 */
 
 /*
- * Plato_Performer.cpp
+ * Plato_Console.hpp
  *
- *  Created on: April 23, 2017
+ *  Created on: Nov 7, 2019
  *
  */
 
-#include "Plato_Performer.hpp"
-#include "Plato_Application.hpp"
-#include "Plato_Console.hpp"
+#ifndef SRC_CONSOLE_HPP_
+#define SRC_CONSOLE_HPP_
+
+#include "Plato_InputData.hpp"
+
+#include <string>
+#include <fstream>
+#include <iostream>
 
 namespace Plato
 {
 
-Performer::Performer(const std::string & aMyName, const int & aCommID) :
-        mApplication(nullptr),
-        mName(aMyName),
-        mCommID(aCommID)
+class Console
 {
-}
+public:
+    explicit Console(const std::string & aPerformerName, int aPerformerID, InputData aInputData);
+    ~Console();
 
-void Performer::finalize()
-{
-    if(mApplication)
-    {
-        mApplication->finalize();
-    }
-}
+    static void Alert(std::string aAlertMessage);
+    static void Status(std::string aStatusMessage);
 
-void Performer::compute(const std::string & aOperationName)
-{
-    if(mApplication)
-    {
-        Console::Alert(mName + ": " + aOperationName);
-        mApplication->compute(aOperationName);
-    }
-}
+    static std::streambuf* mStreamBufferCout;
 
-void Performer::importData(const std::string & aArgumentName, const SharedData & aImportData)
-{
-    if(mApplication)
-    {
-        mApplication->importData(aArgumentName, aImportData);
-    }
-}
+private:
+    std::string mPerformerName;
+    int mPerformerID;
 
-void Performer::exportData(const std::string & aArgumentName, SharedData & aExportData)
-{
-    if(mApplication)
-    {
-        mApplication->exportData(aArgumentName, aExportData);
-    }
-}
+    static bool mVerbose;
+    static bool mRedirectable;
+    static int m_stdout_fd;
+    static int m_stderr_fd;
+    static int m_redir_fd;
 
-void Performer::setApplication(Application* aApplication)
-{
-    mApplication = aApplication;
-}
+    static std::fstream* mConsoleFile;
 
-std::string Performer::myName()
-{
-    return mName;
-}
-
-int Performer::myCommID()
-{
-    return mCommID;
-}
+    static void redirect();
+    static void restore();
+    static void redirect_cout();
+    static void redirect_printf();
+    static void restore_cout();
+    static void restore_printf();
+};
 
 }
+
+#endif
