@@ -360,18 +360,11 @@ bool Su2ToExodus::createSideSetFromMark(int &aMarkIndex)
     {
         std::vector<int> tCurFaceConn = mSu2Data.mMarks[aMarkIndex][i];
         std::sort(tCurFaceConn.begin(), tCurFaceConn.end());
-        std::vector<int> tAttachedElems = mSu2Data.mFaceToTetMap[tCurFaceConn[0]]
-                                                                 [tCurFaceConn[1]][tCurFaceConn[2]];
-        if(tAttachedElems.size() > 1)
-        {
-            std::cout << "\nCannot handle internal mesh faces yet.\n";
-            tRet = false;
-            break;
-        }
-        int tConnectedElem = tAttachedElems[0];
+        int tAttachedElem = mSu2Data.mFaceToTetMap[tCurFaceConn[0]]
+                            [tCurFaceConn[1]][tCurFaceConn[2]];
         // Exocus is 1-based
-        tNewSideSetElem[i] = tConnectedElem+1;
-        int tFaceIndex = getFaceIndex(tConnectedElem, tCurFaceConn);
+        tNewSideSetElem[i] = tAttachedElem+1;
+        int tFaceIndex = getFaceIndex(tAttachedElem, tCurFaceConn);
         tNewSideSetFace[i] = tFaceIndex+1;
     }
 
@@ -642,17 +635,18 @@ bool Su2ToExodus::createFaceToTetMap()
 {
     bool tRet = true;
 
+    std::vector<int> tFaceNodes(3);
     int tSortedTetFaceMap[4][3] = {{0,1,2},{1,2,3},{0,1,3},{0,2,3}};
     for(int i=0; i<mSu2Data.mNumElements; ++i)
     {
-        std::vector<int> tCurElemConn = mSu2Data.mElementConnectivity[i];
-        std::sort(tCurElemConn.begin(), tCurElemConn.end());
+        int *tElemConn = mSu2Data.mElementConnectivity[i].data();
         for(int j=0; j<4; ++j) // assuming 4 faces on a tet
         {
-            int p0 = tCurElemConn[tSortedTetFaceMap[j][0]];
-            int p1 = tCurElemConn[tSortedTetFaceMap[j][1]];
-            int p2 = tCurElemConn[tSortedTetFaceMap[j][2]];
-            mSu2Data.mFaceToTetMap[p0][p1][p2].push_back(i);
+            tFaceNodes[0] = tElemConn[tSortedTetFaceMap[j][0]];
+            tFaceNodes[1] = tElemConn[tSortedTetFaceMap[j][1]];
+            tFaceNodes[2] = tElemConn[tSortedTetFaceMap[j][2]];
+            std::sort(tFaceNodes.begin(), tFaceNodes.end());
+            mSu2Data.mFaceToTetMap[tFaceNodes[0]][tFaceNodes[1]][tFaceNodes[2]] = i;
         }
     }
     return tRet;

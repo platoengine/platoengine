@@ -79,7 +79,7 @@ struct Su2Data
     std::vector<int> mMarkNumElems;
     std::vector<int> mMarkTypeIDs;
     std::vector<std::string> mMarkTypes;
-    std::map<int,std::map<int,std::map<int,std::vector<int>>>> mFaceToTetMap;
+    std::map<int,std::map<int,std::map<int,int>>> mFaceToTetMap;
    
 };
 
