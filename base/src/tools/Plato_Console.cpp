@@ -64,15 +64,19 @@ std::streambuf* Console::mStreamBufferCout = nullptr;
 std::fstream*   Console::mConsoleFile = nullptr;
 bool Console::mRedirectable = false;
 bool Console::mVerbose = false;
+int Console::mMyRank = -1;
 int Console::m_stdout_fd = 0;
 int Console::m_stderr_fd = 0;
 int Console::m_redir_fd = 0;
 
 void Console::Alert(std::string aAlertMessage)
 {
-   restore(); 
-   std::cout << aAlertMessage << std::endl;
-   redirect(); 
+   if (mMyRank == 0)
+   {
+      restore();
+      std::cout << aAlertMessage << std::endl;
+      redirect();
+   }
 }
 
 void Console::Status(std::string aStatusMessage)
@@ -83,10 +87,11 @@ void Console::Status(std::string aStatusMessage)
 }
 
 
-Console::Console(const std::string & aPerformerName, int aPerformerID, InputData aInputData):
+Console::Console(const std::string & aPerformerName, int aPerformerID, InputData aInputData, MPI_Comm& aLocalComm):
   mPerformerName ( aPerformerName ),
   mPerformerID   ( aPerformerID   )
 {
+   MPI_Comm_rank(aLocalComm, &mMyRank);
    mVerbose = Get::Bool(aInputData, "Verbose", false);
 
    if( mStreamBufferCout == nullptr )

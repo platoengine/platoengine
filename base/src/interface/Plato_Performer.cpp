@@ -73,7 +73,7 @@ void Performer::compute(const std::string & aOperationName)
 {
     if(mApplication)
     {
-        Console::Alert(mName + ": " + aOperationName);
+        Console::Status("Operation: (" + mName + ") " + aOperationName);
         mApplication->compute(aOperationName);
     }
 }

@@ -104,7 +104,7 @@ Interface::Interface(MPI_Comm aGlobalComm) :
 
     this->createPerformers();
 
-    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"));
+    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"), mLocalComm);
 }
 
 /******************************************************************************/
@@ -136,7 +136,7 @@ Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_C
 
     this->createPerformers();
 
-    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"));
+    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"), mLocalComm);
 }
 
 /******************************************************************************/
@@ -259,6 +259,8 @@ void Interface::perform()
 void Interface::perform(Plato::Stage* aStage)
 /******************************************************************************/
 {
+    Console::Status("Stage: (" + mPerformer->myName() + ") " + aStage->getName());
+
     // transmits input data
     //
     aStage->begin();

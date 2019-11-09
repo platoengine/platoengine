@@ -52,6 +52,7 @@
 
 #include "Plato_InputData.hpp"
 
+#include <mpi.h>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -62,7 +63,7 @@ namespace Plato
 class Console
 {
 public:
-    explicit Console(const std::string & aPerformerName, int aPerformerID, InputData aInputData);
+    explicit Console(const std::string & aPerformerName, int aPerformerID, InputData aInputData, MPI_Comm& aLocalComm);
     ~Console();
 
     static void Alert(std::string aAlertMessage);
@@ -74,6 +75,7 @@ private:
     std::string mPerformerName;
     int mPerformerID;
 
+    static int mMyRank;
     static bool mVerbose;
     static bool mRedirectable;
     static int m_stdout_fd;
