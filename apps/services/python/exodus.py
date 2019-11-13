@@ -119,7 +119,7 @@ class NodeSet:
     self.numNodes = num_nodes
     self.numDists = num_dists
     self.nodes = nodes
-    self.name = name if (name!="") else ("ns_" + str(ns_id))
+    self.name = name if (name!="") else ("unnamed_ns_" + str(ns_id))
 
 class SideSet:
   "Exodus-style side set"
@@ -129,7 +129,7 @@ class SideSet:
     self.numDists = num_dists
     self.elems = elems
     self.sides = sides
-    self.name = name if (name!="") else ("ss_" + str(ss_id))
+    self.name = name if (name!="") else ("unnamed_ss_" + str(ss_id))
 
 
 class ExodusDB:
@@ -356,28 +356,35 @@ class ExodusDB:
 
     # load node set ids
     if self.numNodeSets > 0:
-      nodeSetIds = expy.get_node_set_ids(self.inFileId, \
-                                                          self.numNodeSets);
+      nodeSetIds = expy.get_node_set_ids(self.inFileId, self.numNodeSets);
+      nodeSetNames = expy.get_names(self.inFileId, "ns", self.numNodeSets)
   
       # load node sets
+      nsIndex = 0
       for ns_id in nodeSetIds:
         num_nodes_in_set, num_dist_in_set = expy.get_node_set_param(self.inFileId, ns_id)
         # ex_nodes numbers from 1
         ex_nodes = expy.get_node_set(self.inFileId, ns_id, num_nodes_in_set)
         # py_nodes numbers from 0
         py_nodes = [ node_id-1 for node_id in ex_nodes ]
-        self.NodeSets.append(NodeSet(ns_id, num_nodes_in_set, num_dist_in_set, py_nodes))
+        name = nodeSetNames[nsIndex]
+        self.NodeSets.append(NodeSet(ns_id, num_nodes_in_set, num_dist_in_set, py_nodes, name))
+        nsIndex += 1
 
 
     # load side set ids
     if self.numSideSets > 0:
       sideSetIds = expy.get_side_set_ids(self.inFileId, self.numSideSets);
+      sideSetNames = expy.get_names(self.inFileId, "ss", self.numSideSets)
 
       # load side sets
+      ssIndex = 0
       for ss_id in sideSetIds:
         num_sides_in_set, num_dist_in_set = expy.get_side_set_param(self.inFileId, ss_id)
         elems, sides = expy.get_side_set(self.inFileId, ss_id, num_sides_in_set)
-        self.SideSets.append(SideSet(ss_id, num_sides_in_set, num_dist_in_set, elems, sides))
+        name = sideSetNames[ssIndex]
+        self.SideSets.append(SideSet(ss_id, num_sides_in_set, num_dist_in_set, elems, sides, name))
+        ssIndex += 1
 
     # read data
     self.numNodeVars = expy.get_var_param(self.inFileId, "n")

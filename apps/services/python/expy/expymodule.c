@@ -280,6 +280,36 @@ expy_put_init(PyObject *self, PyObject *args)
 }
 
 /******************************************************************************/
+static PyObject*
+expy_get_names(PyObject *self, PyObject *args)
+/******************************************************************************/
+{
+  int i, exoid;
+  char* var_type;
+  int num_vars;
+  char** names;
+  PyObject *pynames;
+
+  if(!PyArg_ParseTuple(args, "isi", &exoid, &var_type, &num_vars))
+    return NULL;
+
+        pynames = PyList_New(num_vars);
+  names = (char**)calloc(num_vars,sizeof(char*));
+
+        for(i=0;i<num_vars;i++)
+          names[i] = (char*)calloc((MAX_STR_LENGTH+1),sizeof(char));
+
+  ex_entity_type obj_type = get_enum_from_var_type(var_type);
+
+  ex_get_names(exoid, obj_type, names);
+
+        for(i=0;i<num_vars;i++)
+          PyList_SetItem(pynames,i,Py_BuildValue("s",names[i]));
+
+  return pynames;
+}
+
+/******************************************************************************/
 static PyObject *
 expy_put_names(PyObject *self, PyObject *args)
 /******************************************************************************/
@@ -1190,6 +1220,7 @@ static PyMethodDef expy_methods[] = {
   {"put_elem_var",        expy_put_elem_var,        METH_VARARGS},
   {"put_nodal_var",       expy_put_nodal_var,       METH_VARARGS},
   {"put_names",           expy_put_names,           METH_VARARGS},
+  {"get_names",           expy_get_names,           METH_VARARGS},
   {NULL,NULL}/* sentinel */
 };
 
