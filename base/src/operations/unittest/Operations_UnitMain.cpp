@@ -40,47 +40,13 @@
 //@HEADER
 */
 
-#include <iostream>
-#include <cstring>
-#include "Su2ToExodus.hpp"
+#include <gtest/gtest.h>
 
-void print_usage()
+int main(int argc, char **argv)
 {
-    std::cout << "\n\nUsage: Su2ToExodus <su2_input_filename> <exodus_output_filename> [mark <id> nodeset|sideset mark <id> nodeset/sideset ...]\n\n";
+
+    testing::InitGoogleTest(&argc, argv);
+    int returnVal = RUN_ALL_TESTS();
+
+    return returnVal;
 }
-
-/******************************************************************************/
-int main(int argc, char *argv[])
-/******************************************************************************/
-{
-    if(argc == 1 ||
-      (argc > 1 && (!std::strcmp(argv[1], "-h") || !std::strcmp(argv[1], "--h"))))
-    {
-        print_usage();
-    }
-    else
-    {
-        Su2ToExodus::Su2ToExodus tConverter;
-        if(argc > 1)
-            tConverter.setInputFilename(argv[1]);
-        if(argc > 2)
-            tConverter.setOutputFilename(argv[2]);
-        for(int i=3; i<argc;)
-        {
-            if(argc >= i+4)
-            {
-                tConverter.addMarkTypeID(std::atoi((char*)(argv[i+1])));
-                tConverter.addMarkType(argv[i+2]);
-                tConverter.addMarkName(argv[i+3]);
-            }
-            i += 4;
-        }
-        tConverter.convert();
-
-    }
-
-    return 0;
-}
-
-
-

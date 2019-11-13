@@ -73,12 +73,15 @@ struct Su2Data
     std::vector<std::vector<int> > mNodeSets;
     std::vector<std::vector<int> > mSideSetsElem;
     std::vector<std::vector<int> > mSideSetsFace;
+    std::vector<std::string> mSideSetNames;
+    std::vector<std::string> mNodeSetNames;
     std::vector<std::vector<int> > mElementConnectivity;
     std::vector<std::vector<std::vector<int> > > mMarks;
     std::vector<int> mMarkTags;
     std::vector<int> mMarkNumElems;
     std::vector<int> mMarkTypeIDs;
     std::vector<std::string> mMarkTypes;
+    std::vector<std::string> mMarkNames;
     std::map<int,std::map<int,std::map<int,int>>> mFaceToTetMap;
    
 };
@@ -103,11 +106,12 @@ public:
     void setInputFilename(std::string aFilename){mInputFilename = aFilename;}
     void setOutputFilename(std::string aFilename){mOutputFilename = aFilename;}
     void convert();
-    void addMarkTypeID(int aTypeID){mSu2Data.mMarkTypeIDs.push_back(aTypeID);}
     int getNodeSetNode(int aNodeSetIndex, int aNodeIndex){return mSu2Data.mNodeSets[aNodeSetIndex][aNodeIndex];}
     int getSideSetElem(int aSideSetIndex, int aSideIndex){return mSu2Data.mSideSetsElem[aSideSetIndex][aSideIndex];}
     int getSideSetSide(int aSideSetIndex, int aSideIndex){return mSu2Data.mSideSetsFace[aSideSetIndex][aSideIndex];}
+    void addMarkTypeID(int aTypeID){mSu2Data.mMarkTypeIDs.push_back(aTypeID);}
     void addMarkType(std::string aType){mSu2Data.mMarkTypes.push_back(aType);}
+    void addMarkName(std::string aName){mSu2Data.mMarkNames.push_back(aName);}
 
 protected:
 
@@ -123,8 +127,8 @@ protected:
     bool writeElementConnectivity();
     bool writeNodeSets();
     bool writeSideSets();
-    bool createNodeSetFromMark(int &aMarkIndex);
-    bool createSideSetFromMark(int &aMarkIndex);
+    bool createNodeSetFromMark(int &aMarkIndex, std::string &aName);
+    bool createSideSetFromMark(int &aMarkIndex, std::string &aName);
     bool createNodeSetsFromMarks();
     bool createSideSetsFromMarks();
     bool createFaceToTetMap();

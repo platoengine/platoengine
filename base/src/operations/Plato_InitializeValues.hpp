@@ -62,6 +62,7 @@ class InputData;
  **********************************************************************************/
 class InitializeValues : public Plato::LocalOp
 {
+
 public:
     /******************************************************************************//**
      * @brief Constructor
@@ -81,9 +82,30 @@ public:
     **********************************************************************************/
     void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
 
+    /******************************************************************************//**
+     * @brief Read initialization values from CSM file.
+    **********************************************************************************/
+    void getValuesFromCSMFile();
+
+    /******************************************************************************//**
+     * @brief Read initialization values from input stream.
+    **********************************************************************************/
+    void getValuesFromStream(std::istream &aStream);
+
+    double getValue(int aIndex){return mValues[aIndex];}
+    double getValueUpperBound(int aIndex){return mValueUpperBounds[aIndex];}
+    double getValueLowerBound(int aIndex){return mValueLowerBounds[aIndex];}
+
 private:
+
+
     std::string mValuesName; /*!< initial value argument name */
-    double mValue; /*!< input value */
+    std::string mStringMethod; /*!< method for initialization */
+    std::string mCSMFileName; /*!< method for initialization */
+    std::vector<double> mValues; /*!< input value */
+    std::vector<double> mValueLowerBounds; /*!< value lower bound */
+    std::vector<double> mValueUpperBounds; /*!< value upper bound */
+
 };
 // class InitializeValues;
 
