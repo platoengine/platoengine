@@ -51,7 +51,6 @@
 #include "Plato_InputData.hpp"
 #include "Plato_InitializeValues.hpp"
 
-
 namespace Plato
 {
 
@@ -60,6 +59,8 @@ const int MAX_CHARS_PER_LINE = 10000;
 InitializeValues::InitializeValues(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
         Plato::LocalOp(aPlatoAppp),
         mValuesName("Values"),
+        mUpperBoundsName("Upper Bounds"),
+        mLowerBoundsName("Lower Bounds"),
         mStringMethod(""),
         mCSMFileName("")
 {
@@ -82,12 +83,29 @@ void InitializeValues::operator()()
 
     std::vector<double>* tData = mPlatoApp->getValue(mValuesName);
     *tData = mValues;
+
+    if(mStringMethod == "ReadFromCSMFile")
+    {
+        tData = mPlatoApp->getValue(mLowerBoundsName);
+        *tData = mLowerBounds;
+        tData = mPlatoApp->getValue(mUpperBoundsName);
+        *tData = mUpperBounds;
+    }
 }
 
 void InitializeValues::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 {
-    aLocalArgs.push_back(Plato::LocalArg
-        { Plato::data::layout_t::SCALAR, mValuesName,/*length=*/1 });
+    if(mStringMethod == "UniformValue")
+    {
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mValuesName, 1});
+    }
+    else if(mStringMethod == "ReadFromCSMFile")
+    {
+        int tSize = mValues.size();
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mValuesName, tSize});
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mLowerBoundsName, tSize});
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mUpperBoundsName, tSize});
+    }
 }
 
 void InitializeValues::getValuesFromCSMFile()
@@ -104,14 +122,13 @@ void InitializeValues::getValuesFromCSMFile()
 void InitializeValues::getValuesFromStream(std::istream &aStream)
 {
     mValues.clear();
-    mValueLowerBounds.clear();
-    mValueUpperBounds.clear();
+    mLowerBounds.clear();
+    mUpperBounds.clear();
 
     char tBuffer[MAX_CHARS_PER_LINE];
-    char tFirstWord[MAX_CHARS_PER_LINE];
 
     // read each line of the file (could optimize this to not read the whole file)
-    while (!aStream.eof())
+    while(!aStream.eof())
     {
         // read an entire line into memory
         aStream.getline(tBuffer, MAX_CHARS_PER_LINE);
@@ -139,14 +156,14 @@ void InitializeValues::getValuesFromStream(std::istream &aStream)
             tCharPointer = std::strtok(0, " ");
             if(!tCharPointer)
                 break;
-            mValueLowerBounds.push_back(std::atof(tCharPointer));
+            mLowerBounds.push_back(std::atof(tCharPointer));
             // Get the upper bound keyword
             tCharPointer = std::strtok(0, " ");
             // Get the upper bound value
             tCharPointer = std::strtok(0, " ");
             if(!tCharPointer)
                 break;
-            mValueUpperBounds.push_back(std::atof(tCharPointer));
+            mUpperBounds.push_back(std::atof(tCharPointer));
         }
     }
 }
