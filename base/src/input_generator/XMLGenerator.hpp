@@ -84,6 +84,14 @@ protected:
                                                     const std::string &aSize,
                                                     const std::string &aOwner,
                                                     const std::string &aUser);
+    pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aSize,
+                                                   const std::string &aOwner,
+                                                   const std::vector<std::string> &aUsers);
+    bool parseCSMFileFromStream(std::istream &aStream);
+    bool parseCSMFile();
     void generateROLInput();
     void generateAMGXInput();
     bool parseLoads(std::istream &fin);
@@ -150,17 +158,24 @@ protected:
     void addFilterInfo(pugi::xml_document &aDoc);
     void addInitializeFieldOperation(pugi::xml_document &aDoc);
     void outputInitializeOptimizationStage(pugi::xml_document &doc);
+    void outputInitializeOptimizationStageForSO(pugi::xml_document &doc);
+    void outputInitializeOptimizationStageForTO(pugi::xml_document &doc);
     bool outputVolumeGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaStage(pugi::xml_document &doc);
     void outputSetLowerBoundsStage(pugi::xml_document &doc);
     void outputSetUpperBoundsStage(pugi::xml_document &doc);
     void outputCacheStateStage(pugi::xml_document &doc, bool &aHasUncertainties);
+    bool outputConstraintStage(pugi::xml_document &doc);
+    bool outputConstraintGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaGradientStage(pugi::xml_document &doc);
     void outputDesignVolumeStage(pugi::xml_document &doc);
     bool outputComputeStateStage(pugi::xml_document &doc);
     bool outputInternalEnergyStage(pugi::xml_document &doc, bool &aHasUncertainties);
     bool outputInternalEnergyGradientStage(pugi::xml_document &doc,
                                            bool &aHasUncertainties);
+    bool outputObjectiveStage(pugi::xml_document &doc);
+    bool outputObjectiveHessianStage(pugi::xml_document &doc);
+    bool outputObjectiveGradientStage(pugi::xml_document &doc);
     bool outputInternalEnergyHessianStage(pugi::xml_document &doc);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);

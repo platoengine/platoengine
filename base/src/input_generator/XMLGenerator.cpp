@@ -193,6 +193,52 @@ bool XMLGenerator::runSROMForUncertainVariables()
 }
 
 /******************************************************************************/
+bool XMLGenerator::parseCSMFile()
+/******************************************************************************/
+{
+    bool tRet = true;
+
+    std::ifstream tInputStream;
+    tInputStream.open(m_InputData.csm_filename.c_str());
+    if(tInputStream.good())
+    {
+        tRet = parseCSMFileFromStream(tInputStream);
+        tInputStream.close();
+    }
+    else
+        tRet = false;
+
+    return tRet;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseCSMFileFromStream(std::istream &aStream)
+/******************************************************************************/
+{
+    bool tRet = true;
+
+    char tBuffer[MAX_CHARS_PER_LINE];
+
+    // read each line of the file (could optimize this to not read the whole file)
+    while(!aStream.eof())
+    {
+        // read an entire line into memory
+        aStream.getline(tBuffer, MAX_CHARS_PER_LINE);
+
+        char *tCharPointer = std::strtok(tBuffer, " ");
+
+        // skip comments
+        if(tCharPointer && tCharPointer[0] == '#')
+            continue;
+
+        if(tCharPointer && std::strcmp(tCharPointer, "despmtr") == 0)
+            m_InputData.num_shape_design_variables++;
+    }
+
+    return tRet;
+}
+
+/******************************************************************************/
 bool XMLGenerator::generate()
 /******************************************************************************/
 {
@@ -200,6 +246,15 @@ bool XMLGenerator::generate()
     {
         std::cout << "Failed to parse input file." << std::endl;
         return false;
+    }
+
+    if(m_InputData.optimization_type == "shape" && m_InputData.csm_filename.length() > 0)
+    {
+        if(!parseCSMFile())
+        {
+            std::cout << "Failed to parse CSM file" << std::endl;
+            return false;
+        }
     }
 
     // NOTE: modifies objectives and loads for uncertainties
@@ -4218,6 +4273,7 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.filter_use_additive_continuation = "";
 
     m_InputData.write_restart_file = "False";
+    m_InputData.optimization_type = "topology";
 }
 
 /******************************************************************************/
@@ -4346,6 +4402,24 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                                 return false;
                             }
                             m_InputData.initial_density_value = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"optimization","type"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"optimization type\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.optimization_type = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"csm","file"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"csm file\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.csm_filename = tStringValue;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"use","normalization","in","aggregator"}, tStringValue))
                         {
@@ -7312,6 +7386,72 @@ bool XMLGenerator::outputVolumeStage(pugi::xml_document &doc)
 }
 
 /******************************************************************************/
+bool XMLGenerator::outputConstraintStage(pugi::xml_document &doc)
+/******************************************************************************/
+{
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Constraint");
+
+    pugi::xml_node input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Update Geometry operation
+    pugi::xml_node op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Compute constraint value operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Compute Constraint Value");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+
+    pugi::xml_node output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Constraint Value");
+    addChild(output_node, "SharedDataName", "Constraint");
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Constraint");
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::outputConstraintGradientStage(pugi::xml_document &doc)
+/******************************************************************************/
+{
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Constraint Gradient");
+
+    pugi::xml_node input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Update Geometry operation
+    pugi::xml_node op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Compute constraint gradient value operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Compute Constraint Gradient");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+
+    pugi::xml_node output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Constraint Gradient");
+    addChild(output_node, "SharedDataName", "Constraint Gradient");
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Constraint Gradient");
+
+    return true;
+}
+
+/******************************************************************************/
 bool XMLGenerator::outputSurfaceAreaStage(pugi::xml_document &doc)
 /******************************************************************************/
 {
@@ -7520,6 +7660,136 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
 
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Internal Energy");
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::outputObjectiveStage(pugi::xml_document &doc)
+/******************************************************************************/
+{
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Objective");
+
+    pugi::xml_node input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Update Geometry operation
+    pugi::xml_node op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    pugi::xml_node cur_parent = stage_node;
+    if(m_InputData.objectives.size() > 1)
+    {
+        op_node = stage_node.append_child("Operation");
+        cur_parent = op_node;
+    }
+
+    char tmp_buf[200];
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
+        op_node = cur_parent.append_child("Operation");
+        addChild(op_node, "Name", "Compute Objective Value");
+        addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+
+
+        pugi::xml_node output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Objective Value");
+        sprintf(tmp_buf, "Objective %d", (int)(i+1));
+        addChild(output_node, "SharedDataName", tmp_buf);
+    }
+
+    // Aggregate
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "AggregateEnergy");
+    addChild(op_node, "PerformerName", "PlatoMain");
+
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        input_node = op_node.append_child("Input");
+        sprintf(tmp_buf, "Value %d", (int)(i+1));
+        addChild(input_node, "ArgumentName", tmp_buf);
+        sprintf(tmp_buf, "Objective %d", (int)(i+1));
+        addChild(input_node, "SharedDataName", tmp_buf);
+    }
+
+    pugi::xml_node output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Value");
+    addChild(output_node, "SharedDataName", "Objective");
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Objective");
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::outputObjectiveGradientStage(pugi::xml_document &doc)
+/******************************************************************************/
+{
+    // Internal Energy
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Objective Gradient");
+
+    pugi::xml_node input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Update Geometry operation
+    pugi::xml_node op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    input_node = op_node.append_child("Input");
+
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    pugi::xml_node cur_parent = stage_node;
+    if(m_InputData.objectives.size() > 1)
+    {
+        op_node = stage_node.append_child("Operation");
+        cur_parent = op_node;
+    }
+
+    char tmp_buf[200];
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
+        op_node = cur_parent.append_child("Operation");
+        addChild(op_node, "Name", "Compute Objective Gradient");
+        addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+
+
+        pugi::xml_node output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Objective Gradient");
+        sprintf(tmp_buf, "Objective Gradient %d", (int)(i+1));
+        addChild(output_node, "SharedDataName", tmp_buf);
+    }
+
+    // Aggregate
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "AggregateEnergy");
+    addChild(op_node, "PerformerName", "PlatoMain");
+
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        input_node = op_node.append_child("Input");
+        sprintf(tmp_buf, "Value %d", (int)(i+1));
+        addChild(input_node, "ArgumentName", tmp_buf);
+        sprintf(tmp_buf, "Objective Gradient %d", (int)(i+1));
+        addChild(input_node, "SharedDataName", tmp_buf);
+    }
+
+    pugi::xml_node output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Value");
+    addChild(output_node, "SharedDataName", "Objective Gradient");
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Objective Gradient");
 
     return true;
 }
@@ -7761,6 +8031,72 @@ bool XMLGenerator::outputInternalEnergyHessianStage(pugi::xml_document &doc)
 }
 
 /******************************************************************************/
+bool XMLGenerator::outputObjectiveHessianStage(pugi::xml_document &doc)
+/******************************************************************************/
+{
+    char tmp_buf[200];
+    // Internal Energy
+    pugi::xml_node op_node, output_node;
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Objective Hessian");
+
+    pugi::xml_node input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+    input_node = stage_node.append_child("Input");
+    addChild(input_node, "SharedDataName", "Descent Direction");
+
+    pugi::xml_node cur_parent = stage_node;
+    if(m_InputData.objectives.size() > 1)
+    {
+        op_node = stage_node.append_child("Operation");
+        cur_parent = op_node;
+    }
+
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        op_node = cur_parent.append_child("Operation");
+        addChild(op_node, "Name", "Compute HessianTimesVector");
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Design Parameters");
+        addChild(input_node, "SharedDataName", "Design Parameters");
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Descent Direction");
+        addChild(input_node, "SharedDataName", "Descent Direction");
+
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "HessianTimesVector");
+        sprintf(tmp_buf, "HessianTimesVector %d", (int)(i+1));
+        addChild(output_node, "SharedDataName", tmp_buf);
+    }
+
+    // Aggregate
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "AggregateHessian");
+    addChild(op_node, "PerformerName", "PlatoMain");
+
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        input_node = op_node.append_child("Input");
+        sprintf(tmp_buf, "Value %d", (int)(i+1));
+        addChild(input_node, "ArgumentName", tmp_buf);
+        sprintf(tmp_buf, "HessianTimesVector %d", (int)(i+1));
+        addChild(input_node, "SharedDataName", tmp_buf);
+    }
+
+    output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Value");
+    addChild(output_node, "SharedDataName", "Objective Hessian");
+
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Objective Hessian");
+
+    return true;
+}
+
+/******************************************************************************/
 pugi::xml_node XMLGenerator::createSingleUserNodalSharedData(pugi::xml_document &aDoc,
                                                              const std::string &aName,
                                                              const std::string &aType,
@@ -7814,6 +8150,28 @@ pugi::xml_node XMLGenerator::createSingleUserGlobalSharedData(pugi::xml_document
 }
 
 /******************************************************************************/
+pugi::xml_node XMLGenerator::createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                              const std::string &aName,
+                                                              const std::string &aType,
+                                                              const std::string &aSize,
+                                                              const std::string &aOwner,
+                                                              const std::vector<std::string> &aUsers)
+/******************************************************************************/
+{
+    pugi::xml_node sd_node = aDoc.append_child("SharedData");
+    addChild(sd_node, "Name", aName);
+    addChild(sd_node, "Type", aType);
+    addChild(sd_node, "Layout", "Global");
+    addChild(sd_node, "Size", aSize);
+    addChild(sd_node, "OwnerName", aOwner);
+    for(size_t i=0; i<aUsers.size(); ++i)
+    {
+        addChild(sd_node, "UserName", aUsers[i]);
+    }
+    return sd_node;
+}
+
+/******************************************************************************/
 bool XMLGenerator::generateInterfaceXML()
 /******************************************************************************/
 {
@@ -7852,72 +8210,110 @@ bool XMLGenerator::generateInterfaceXML()
     // Shared Data
     /////////////////////////////////////////////////
 
+    bool tHasUncertainties = false;
+    bool tRequestedVonMisesOutput = false;
+    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
+
     // Internal Energy XXX shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        // create shared data for objectives
-        sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
-        createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        if(m_InputData.optimization_type == "topology")
+        {
+            // create shared data for objectives
+            sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        }
+        else if(m_InputData.optimization_type == "shape")
+        {
+            // create shared data for objectives
+            sprintf(tmp_buf, "Objective %d", (int)(i+1));
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        }
 
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
-            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
-            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+            if(m_InputData.optimization_type == "topology")
+            {
+                sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+                createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+            }
         }
     }
     // Internal Energy XXX Gradient shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
-        sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
-        createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
-    }
-    
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
-
-    if(tHasUncertainties)
-    {
-        // Objective statistics
-        createSingleUserGlobalSharedData(doc, "Objective Mean Plus StdDev Value", "Scalar", "1", "PlatoMain", "PlatoMain");
-        createSingleUserNodalSharedData(doc, "Objective Mean Plus StdDev Gradient", "Scalar", "PlatoMain", "PlatoMain");
-
-        if(tRequestedVonMisesOutput)
+        if(m_InputData.optimization_type == "topology")
         {
-            // VonMises statistics
-            createSingleUserElementSharedData(doc, "VonMises Mean", "Scalar", "PlatoMain", "PlatoMain");
-            createSingleUserElementSharedData(doc, "VonMises StdDev", "Scalar", "PlatoMain", "PlatoMain");
-            for(size_t i=0; i<m_InputData.mStandardDeviations.size(); ++i)
-            {
-                std::string tFieldName = "VonMises Mean Plus ";
-                tFieldName += m_InputData.mStandardDeviations[i];
-                tFieldName += " StdDev";
-                createSingleUserElementSharedData(doc, tFieldName, "Scalar", "PlatoMain", "PlatoMain");
-            }
+            sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+            createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
+        }
+        else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
+        {
+            char tTempBuffer[100];
+            sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
+            sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", tTempBuffer, m_InputData.objectives[i].performer_name, "PlatoMain");
         }
     }
 
-    // QOI shared data
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_InputData.optimization_type == "topology")
     {
-        XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        // If this is a UQ run we are assuming only one load case per objective
-        // and we are only supporting vonmises stress right now.
         if(tHasUncertainties)
         {
-            // create shared data for vonmises
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
-            createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
-        }
-        else if(cur_obj.multi_load_case == "true")
-        {
-            for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
+            // Objective statistics
+            createSingleUserGlobalSharedData(doc, "Objective Mean Plus StdDev Value", "Scalar", "1", "PlatoMain", "PlatoMain");
+            createSingleUserNodalSharedData(doc, "Objective Mean Plus StdDev Gradient", "Scalar", "PlatoMain", "PlatoMain");
+
+            if(tRequestedVonMisesOutput)
             {
-                std::string cur_load_string = cur_obj.load_case_ids[k];
+                // VonMises statistics
+                createSingleUserElementSharedData(doc, "VonMises Mean", "Scalar", "PlatoMain", "PlatoMain");
+                createSingleUserElementSharedData(doc, "VonMises StdDev", "Scalar", "PlatoMain", "PlatoMain");
+                for(size_t i=0; i<m_InputData.mStandardDeviations.size(); ++i)
+                {
+                    std::string tFieldName = "VonMises Mean Plus ";
+                    tFieldName += m_InputData.mStandardDeviations[i];
+                    tFieldName += " StdDev";
+                    createSingleUserElementSharedData(doc, tFieldName, "Scalar", "PlatoMain", "PlatoMain");
+                }
+            }
+        }
+
+
+        // QOI shared data
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
+            // If this is a UQ run we are assuming only one load case per objective
+            // and we are only supporting vonmises stress right now.
+            if(tHasUncertainties)
+            {
+                // create shared data for vonmises
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
+                createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+            }
+            else if(cur_obj.multi_load_case == "true")
+            {
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); ++k)
+                {
+                    std::string cur_load_string = cur_obj.load_case_ids[k];
+                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+                    {
+                        // create shared data for objectives
+                        sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                        if(cur_obj.output_for_plotting[j] == "vonmises")
+                            createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                        else
+                            createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                    }
+                }
+            }
+            else
+            {
                 for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
                 {
                     // create shared data for objectives
-                    sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
                     if(cur_obj.output_for_plotting[j] == "vonmises")
                         createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
                     else
@@ -7925,25 +8321,13 @@ bool XMLGenerator::generateInterfaceXML()
                 }
             }
         }
-        else
-        {
-            for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
-            {
-                // create shared data for objectives
-                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
-                if(cur_obj.output_for_plotting[j] == "vonmises")
-                    createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
-                else
-                    createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
-            }
-        }
     }
 
     // Hessian shared data
     if(m_InputData.optimization_algorithm =="ksbc" ||
-       m_InputData.optimization_algorithm == "ksal" ||
-       m_InputData.optimization_algorithm == "rol ksal" ||
-       m_InputData.optimization_algorithm == "rol ksbc")
+            m_InputData.optimization_algorithm == "ksal" ||
+            m_InputData.optimization_algorithm == "rol ksal" ||
+            m_InputData.optimization_algorithm == "rol ksbc")
     {
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -7952,11 +8336,22 @@ bool XMLGenerator::generateInterfaceXML()
         }
     }
 
-    // Internal Energy
-    createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
+    if(m_InputData.optimization_type == "topology")
+    {
+        // Internal Energy
+        createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
 
-    // Internal Energy Gradient
-    createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
+        // Internal Energy Gradient
+        createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
+    }
+    else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
+    {
+        createSingleUserGlobalSharedData(doc, "Objective", "Scalar", "1", "PlatoMain", "PlatoMain");
+
+        char tTempBuffer[100];
+        sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
+        createSingleUserGlobalSharedData(doc, "Objective Gradient", "Scalar", tTempBuffer, "PlatoMain", "PlatoMain");
+    }
 
     // Internal Energy Hessian and Descent Direction
     if(m_InputData.optimization_algorithm =="ksbc" ||
@@ -7964,43 +8359,76 @@ bool XMLGenerator::generateInterfaceXML()
        m_InputData.optimization_algorithm == "rol ksal" ||
        m_InputData.optimization_algorithm == "rol ksbc")
     {
-        createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
-        sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
+        if(m_InputData.optimization_type == "topology")
+        {
+            createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
+            sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
+            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+                addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+        }
+        else if(m_InputData.optimization_type == "shape")
+        {
+            createSingleUserNodalSharedData(doc, "Objective Hessian", "Scalar", "PlatoMain", "PlatoMain");
+            sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
+            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+                addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+        }
+    }
+    
+    if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
+    {
+        char tTempBuffer[100];
+        sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
+        std::vector<std::string> tUserNames;
+        tUserNames.push_back("PlatoMain");
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+            tUserNames.push_back(m_InputData.objectives[i].performer_name);
+        createMultiUserGlobalSharedData(doc, "Design Parameters", "Scalar", tTempBuffer, "PlatoMain", tUserNames);
+    }
+    else if(m_InputData.optimization_type == "topology")
+    {
+        // Optimization DOFs
+        sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+            addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+
+        // Topology
+        sd_node = createSingleUserNodalSharedData(doc, "Topology", "Scalar", "PlatoMain", "PlatoMain");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
             addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
     }
-    
-    // Optimization DOFs
-    sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
 
-    // Topology
-    sd_node = createSingleUserNodalSharedData(doc, "Topology", "Scalar", "PlatoMain", "PlatoMain");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
-
-    if(m_InputData.discretization == "density")
+    if(m_InputData.optimization_type == "topology")
     {
-        // Volume
-        createSingleUserGlobalSharedData(doc, "Volume", "Scalar", "1", "PlatoMain", "PlatoMain");
+        if(m_InputData.discretization == "density")
+        {
+            // Volume
+            createSingleUserGlobalSharedData(doc, "Volume", "Scalar", "1", "PlatoMain", "PlatoMain");
 
-        // Volume Gradient
-        createSingleUserNodalSharedData(doc, "Volume Gradient", "Scalar", "PlatoMain", "PlatoMain");
+            // Volume Gradient
+            createSingleUserNodalSharedData(doc, "Volume Gradient", "Scalar", "PlatoMain", "PlatoMain");
 
-        // Design Volume
-        createSingleUserGlobalSharedData(doc, "Design Volume", "Scalar", "1", "PlatoMain", "PlatoMain");
+            // Design Volume
+            createSingleUserGlobalSharedData(doc, "Design Volume", "Scalar", "1", "PlatoMain", "PlatoMain");
+        }
+        else if(m_InputData.discretization == "levelset")
+        {
+            // For now we will assume there is only one type of objective
+            // if doing levelsets and we will just grab the first performer
+            // as the one that will calculate the surface area.
+            // Surface Area
+            createSingleUserGlobalSharedData(doc, "Surface Area", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
+
+            // Surface Area Gradient
+            createSingleUserNodalSharedData(doc, "Surface Area Gradient", "Scalar", m_InputData.objectives[0].performer_name, "PlatoMain");
+        }
     }
-    else if(m_InputData.discretization == "levelset")
+    else if(m_InputData.optimization_type == "shape")
     {
-        // For now we will assume there is only one type of objective
-        // if doing levelsets and we will just grab the first performer
-        // as the one that will calculate the surface area.
-        // Surface Area
-        createSingleUserGlobalSharedData(doc, "Surface Area", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
-
-        // Surface Area Gradient
-        createSingleUserNodalSharedData(doc, "Surface Area Gradient", "Scalar", m_InputData.objectives[0].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(doc, "Constraint", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
+        char tTempBuffer[100];
+        sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
+        createSingleUserGlobalSharedData(doc, "Constraint Gradient", "Scalar", tTempBuffer, m_InputData.objectives[0].performer_name, "PlatoMain");
     }
 
     // Lower Bound Value
@@ -8009,11 +8437,21 @@ bool XMLGenerator::generateInterfaceXML()
     // Upper Bound Value
     createSingleUserGlobalSharedData(doc, "Upper Bound Value", "Scalar", "1", "PlatoMain", "PlatoMain");
 
-    // Lower Bound Vector
-    createSingleUserNodalSharedData(doc, "Lower Bound Vector", "Scalar", "PlatoMain", "PlatoMain");
+    if(m_InputData.optimization_type == "topology")
+    {
+        // Lower Bound Vector
+        createSingleUserNodalSharedData(doc, "Lower Bound Vector", "Scalar", "PlatoMain", "PlatoMain");
 
-    // Upper Bound Vector
-    createSingleUserNodalSharedData(doc, "Upper Bound Vector", "Scalar", "PlatoMain", "PlatoMain");
+        // Upper Bound Vector
+        createSingleUserNodalSharedData(doc, "Upper Bound Vector", "Scalar", "PlatoMain", "PlatoMain");
+    }
+    else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
+    {
+        char tTempBuffer[100];
+        sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
+        createSingleUserGlobalSharedData(doc, "Lower Bound Vector", "Scalar", tTempBuffer, "PlatoMain", "PlatoMain");
+        createSingleUserGlobalSharedData(doc, "Upper Bound Vector", "Scalar", tTempBuffer, "PlatoMain", "PlatoMain");
+    }
 
     
     //////////////////////////////////////////////////
@@ -8026,8 +8464,11 @@ bool XMLGenerator::generateInterfaceXML()
     // Initialize Optimization
     outputInitializeOptimizationStage(doc);
 
-    // Update Problem
-    outputUpdateProblemStage(doc);
+    if(m_InputData.optimization_type == "topology")
+    {
+        // Update Problem
+        outputUpdateProblemStage(doc);
+    }
 
     // Cache State Stage
     outputCacheStateStage(doc, tHasUncertainties);
@@ -8038,34 +8479,53 @@ bool XMLGenerator::generateInterfaceXML()
     // Set Upper Bounds
     outputSetUpperBoundsStage(doc);
 
-    if(m_InputData.discretization == "density")
+    if(m_InputData.optimization_type == "topology")
     {
-        // Design Volume
-        outputDesignVolumeStage(doc);
+        if(m_InputData.discretization == "density")
+        {
+            // Design Volume
+            outputDesignVolumeStage(doc);
 
-        // Volume
-        outputVolumeStage(doc);
+            // Volume
+            outputVolumeStage(doc);
 
-        // Volume Gradient
-        outputVolumeGradientStage(doc);
+            // Volume Gradient
+            outputVolumeGradientStage(doc);
+        }
+        else if(m_InputData.discretization == "levelset")
+        {
+            // Surface Area
+            outputSurfaceAreaStage(doc);
+
+            // Surface Area Gradient
+            outputSurfaceAreaGradientStage(doc);
+        }
     }
-    else if(m_InputData.discretization == "levelset")
+    else if(m_InputData.optimization_type == "shape")
     {
-        // Surface Area
-        outputSurfaceAreaStage(doc);
-
-        // Surface Area Gradient
-        outputSurfaceAreaGradientStage(doc);
+        outputConstraintStage(doc);
+        outputConstraintGradientStage(doc);
     }
 
     // Compute State
 //    outputComputeStateStage(doc);
 
-    // Internal Energy
-    outputInternalEnergyStage(doc, tHasUncertainties);
+    if(m_InputData.optimization_type == "topology")
+    {
+        // Internal Energy
+        outputInternalEnergyStage(doc, tHasUncertainties);
 
-    // Internal Energy Gradient
-    outputInternalEnergyGradientStage(doc, tHasUncertainties);
+        // Internal Energy Gradient
+        outputInternalEnergyGradientStage(doc, tHasUncertainties);
+    }
+    else if(m_InputData.optimization_type == "shape")
+    {
+        // Internal Energy
+        outputObjectiveStage(doc);
+
+        // Internal Energy Gradient
+        outputObjectiveGradientStage(doc);
+    }
 
     // Internal Energy Hessian
     if(m_InputData.optimization_algorithm =="ksbc" ||
@@ -8073,7 +8533,14 @@ bool XMLGenerator::generateInterfaceXML()
        m_InputData.optimization_algorithm == "rol ksal" ||
        m_InputData.optimization_algorithm == "rol ksbc")
     {
-        outputInternalEnergyHessianStage(doc);
+        if(m_InputData.optimization_type == "topology")
+        {
+            outputInternalEnergyHessianStage(doc);
+        }
+        else if(m_InputData.optimization_type == "shape")
+        {
+            outputObjectiveHessianStage(doc);
+        }
     }
 
     /////////////////////////////////////////////////
@@ -8089,6 +8556,7 @@ bool XMLGenerator::generateInterfaceXML()
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
     this->setKelleySachsAlgorithmOptions(tTmpNode);
+
     if(m_InputData.optimization_algorithm == "rol ksal" ||
        m_InputData.optimization_algorithm == "rol ksbc")
     {
@@ -8102,38 +8570,81 @@ bool XMLGenerator::generateInterfaceXML()
     tTmpNode = tMiscNode.append_child("CacheStage");
     addChild(tTmpNode, "Name", "Cache State");
 
-    tTmpNode = tMiscNode.append_child("UpdateProblemStage");
-    addChild(tTmpNode, "Name", "Update Problem");
-
-    tTmpNode = tMiscNode.append_child("OptimizationVariables");
-    addChild(tTmpNode, "ValueName", "Optimization DOFs");
-    addChild(tTmpNode, "InitializationStage", "Initialize Optimization");
-    addChild(tTmpNode, "FilteredName", "Topology");
-    addChild(tTmpNode, "LowerBoundValueName", "Lower Bound Value");
-    addChild(tTmpNode, "LowerBoundVectorName", "Lower Bound Vector");
-    addChild(tTmpNode, "UpperBoundValueName", "Upper Bound Value");
-    addChild(tTmpNode, "UpperBoundVectorName", "Upper Bound Vector");
-    addChild(tTmpNode, "SetLowerBoundsStage", "Set Lower Bounds");
-    addChild(tTmpNode, "SetUpperBoundsStage", "Set Upper Bounds");
-    if(m_InputData.optimization_algorithm =="ksbc" ||
-       m_InputData.optimization_algorithm == "ksal" ||
-       m_InputData.optimization_algorithm == "rol ksal" ||
-       m_InputData.optimization_algorithm == "rol ksbc")
+    if(m_InputData.optimization_type == "topology")
     {
-        addChild(tTmpNode, "DescentDirectionName", "Descent Direction");
+        tTmpNode = tMiscNode.append_child("UpdateProblemStage");
+        addChild(tTmpNode, "Name", "Update Problem");
     }
 
-    tTmpNode = tMiscNode.append_child("Objective");
-    addChild(tTmpNode, "ValueName", "Internal Energy");
-    addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
-    addChild(tTmpNode, "ValueStageName", "Internal Energy");
-    addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
-    if(m_InputData.optimization_algorithm =="ksbc" ||
-       m_InputData.optimization_algorithm == "ksal" ||
-       m_InputData.optimization_algorithm == "rol ksal" ||
-       m_InputData.optimization_algorithm == "rol ksbc")
+    tTmpNode = tMiscNode.append_child("OptimizationVariables");
+    if(m_InputData.optimization_type == "topology")
     {
-        addChild(tTmpNode, "HessianName", "Internal Energy Hessian");
+        addChild(tTmpNode, "ValueName", "Optimization DOFs");
+        addChild(tTmpNode, "InitializationStage", "Initialize Optimization");
+        addChild(tTmpNode, "FilteredName", "Topology");
+        addChild(tTmpNode, "LowerBoundValueName", "Lower Bound Value");
+        addChild(tTmpNode, "LowerBoundVectorName", "Lower Bound Vector");
+        addChild(tTmpNode, "UpperBoundValueName", "Upper Bound Value");
+        addChild(tTmpNode, "UpperBoundVectorName", "Upper Bound Vector");
+        addChild(tTmpNode, "SetLowerBoundsStage", "Set Lower Bounds");
+        addChild(tTmpNode, "SetUpperBoundsStage", "Set Upper Bounds");
+        if(m_InputData.optimization_algorithm =="ksbc" ||
+                m_InputData.optimization_algorithm == "ksal" ||
+                m_InputData.optimization_algorithm == "rol ksal" ||
+                m_InputData.optimization_algorithm == "rol ksbc")
+        {
+            addChild(tTmpNode, "DescentDirectionName", "Descent Direction");
+        }
+    }
+    else if(m_InputData.optimization_type == "shape")
+    {
+        addChild(tTmpNode, "ValueName", "Design Parameters");
+        addChild(tTmpNode, "InitializationStage", "Initialize Design Parameters");
+        addChild(tTmpNode, "FilteredName", "Topology");
+        addChild(tTmpNode, "LowerBoundValueName", "Lower Bound Value");
+        addChild(tTmpNode, "LowerBoundVectorName", "Lower Bound Vector");
+        addChild(tTmpNode, "UpperBoundValueName", "Upper Bound Value");
+        addChild(tTmpNode, "UpperBoundVectorName", "Upper Bound Vector");
+        addChild(tTmpNode, "SetLowerBoundsStage", "Set Lower Bounds");
+        addChild(tTmpNode, "SetUpperBoundsStage", "Set Upper Bounds");
+        if(m_InputData.optimization_algorithm =="ksbc" ||
+                m_InputData.optimization_algorithm == "ksal" ||
+                m_InputData.optimization_algorithm == "rol ksal" ||
+                m_InputData.optimization_algorithm == "rol ksbc")
+        {
+            addChild(tTmpNode, "DescentDirectionName", "Descent Direction");
+        }
+    }
+
+    if(m_InputData.optimization_type == "topology")
+    {
+        tTmpNode = tMiscNode.append_child("Objective");
+        addChild(tTmpNode, "ValueName", "Internal Energy");
+        addChild(tTmpNode, "ValueStageName", "Internal Energy");
+        addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
+        addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
+        if(m_InputData.optimization_algorithm =="ksbc" ||
+                m_InputData.optimization_algorithm == "ksal" ||
+                m_InputData.optimization_algorithm == "rol ksal" ||
+                m_InputData.optimization_algorithm == "rol ksbc")
+        {
+            addChild(tTmpNode, "HessianName", "Internal Energy Hessian");
+        }
+    }
+    else if(m_InputData.optimization_type == "shape")
+    {
+        tTmpNode = tMiscNode.append_child("Objective");
+        addChild(tTmpNode, "ValueName", "Objective");
+        addChild(tTmpNode, "ValueStageName", "Objective");
+        addChild(tTmpNode, "GradientName", "Objective Gradient");
+        addChild(tTmpNode, "GradientStageName", "Objective Gradient");
+        if(m_InputData.optimization_algorithm =="ksbc" ||
+                m_InputData.optimization_algorithm == "ksal" ||
+                m_InputData.optimization_algorithm == "rol ksal" ||
+                m_InputData.optimization_algorithm == "rol ksbc")
+        {
+            addChild(tTmpNode, "HessianName", "Internal Energy Hessian");
+        }
     }
 
     tTmpNode = tMiscNode.append_child("BoundConstraint");
@@ -8148,36 +8659,47 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(tTmpNode, "Lower", "-10.0");
     }
 
-    for(size_t b=0; b<m_InputData.constraints.size(); ++b)
+    if(m_InputData.optimization_type == "topology")
+    {
+        for(size_t b=0; b<m_InputData.constraints.size(); ++b)
+        {
+            tTmpNode = tMiscNode.append_child("Constraint");
+            if(m_InputData.constraints[b].type == "volume")
+            {
+                addChild(tTmpNode, "Equality", "True");
+                addChild(tTmpNode, "Linear", "True");
+                addChild(tTmpNode, "ValueName", "Volume");
+                addChild(tTmpNode, "ReferenceValueName", "Design Volume");
+                addChild(tTmpNode, "GradientName", "Volume Gradient");
+                addChild(tTmpNode, "ValueStageName", "Volume");
+                addChild(tTmpNode, "GradientStageName", "Volume Gradient");
+                if(m_InputData.constraints[b].volume_fraction != "")
+                    addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
+                if(m_InputData.constraints[b].volume_absolute != "")
+                    addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
+                addChild(tTmpNode, "Tolerance", "1e-3");
+            }
+            else if(m_InputData.constraints[b].type == "surface area")
+            {
+                addChild(tTmpNode, "Equality", "True");
+                addChild(tTmpNode, "Linear", "True");
+                addChild(tTmpNode, "ValueName", "Surface Area");
+                addChild(tTmpNode, "ReferenceValue", m_InputData.constraints[b].surface_area);
+                addChild(tTmpNode, "GradientName", "Surface Area Gradient");
+                addChild(tTmpNode, "NormalizedTargetValue", "1.0");
+                addChild(tTmpNode, "Tolerance", "1e-3");
+                addChild(tTmpNode, "ValueStageName", "Surface Area");
+                addChild(tTmpNode, "GradientStageName", "Surface Area Gradient");
+            }
+        }
+    }
+    else if(m_InputData.optimization_type == "shape")
     {
         tTmpNode = tMiscNode.append_child("Constraint");
-        if(m_InputData.constraints[b].type == "volume")
-        {
-            addChild(tTmpNode, "Equality", "True");
-            addChild(tTmpNode, "Linear", "True");
-            addChild(tTmpNode, "ValueName", "Volume");
-            addChild(tTmpNode, "ReferenceValueName", "Design Volume");
-            addChild(tTmpNode, "GradientName", "Volume Gradient");
-            addChild(tTmpNode, "ValueStageName", "Volume");
-            addChild(tTmpNode, "GradientStageName", "Volume Gradient");
-            if(m_InputData.constraints[b].volume_fraction != "")
-                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
-            if(m_InputData.constraints[b].volume_absolute != "")
-                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
-            addChild(tTmpNode, "Tolerance", "1e-3");
-        }
-        else if(m_InputData.constraints[b].type == "surface area")
-        {
-            addChild(tTmpNode, "Equality", "True");
-            addChild(tTmpNode, "Linear", "True");
-            addChild(tTmpNode, "ValueName", "Surface Area");
-            addChild(tTmpNode, "ReferenceValue", m_InputData.constraints[b].surface_area);
-            addChild(tTmpNode, "GradientName", "Surface Area Gradient");
-            addChild(tTmpNode, "NormalizedTargetValue", "1.0");
-            addChild(tTmpNode, "Tolerance", "1e-3");
-            addChild(tTmpNode, "ValueStageName", "Surface Area");
-            addChild(tTmpNode, "GradientStageName", "Surface Area Gradient");
-        }
+        addChild(tTmpNode, "ValueName", "Constraint");
+        addChild(tTmpNode, "ValueStageName", "Constraint");
+        addChild(tTmpNode, "GradientName", "Constraint Gradient");
+        addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
     }
 
     if(m_InputData.optimization_algorithm != "mma")
@@ -8186,25 +8708,28 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(tTmpNode, "MaxIterations", m_InputData.max_iterations);
     }
 
-    // mesh
-    pugi::xml_node mesh_node = doc.append_child("mesh");
-    addChild(mesh_node, "type", "unstructured");
-    addChild(mesh_node, "format", "exodus");
-    addChild(mesh_node, "mesh", m_InputData.run_mesh_name);
-    for(size_t n=0; n<m_InputData.blocks.size(); ++n)
+    if(m_InputData.optimization_type == "topology")
     {
-        tTmpNode = mesh_node.append_child("block");
-        addChild(tTmpNode, "index", m_InputData.blocks[n].block_id);
-        pugi::xml_node tmp_node1 = tTmpNode.append_child("integration");
-        addChild(tmp_node1, "type", "gauss");
-        addChild(tmp_node1, "order", "2");
-        addChild(tTmpNode, "material", m_InputData.blocks[n].material_id);
-    }
+        // mesh
+        pugi::xml_node mesh_node = doc.append_child("mesh");
+        addChild(mesh_node, "type", "unstructured");
+        addChild(mesh_node, "format", "exodus");
+        addChild(mesh_node, "mesh", m_InputData.run_mesh_name);
+        for(size_t n=0; n<m_InputData.blocks.size(); ++n)
+        {
+            tTmpNode = mesh_node.append_child("block");
+            addChild(tTmpNode, "index", m_InputData.blocks[n].block_id);
+            pugi::xml_node tmp_node1 = tTmpNode.append_child("integration");
+            addChild(tmp_node1, "type", "gauss");
+            addChild(tmp_node1, "order", "2");
+            addChild(tTmpNode, "material", m_InputData.blocks[n].material_id);
+        }
 
-    // output
-    tTmpNode = doc.append_child("output");
-    addChild(tTmpNode, "file", "plato");
-    addChild(tTmpNode, "format", "exodus");
+        // output
+        tTmpNode = doc.append_child("output");
+        addChild(tTmpNode, "file", "plato");
+        addChild(tTmpNode, "format", "exodus");
+    }
 
     // Write the file to disk
     doc.save_file("interface.xml", "  ");
@@ -8221,50 +8746,53 @@ void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc,
     pugi::xml_node stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Cache State");
 
-    pugi::xml_node cur_parent = stage_node;
-    if(m_InputData.objectives.size() > 1)
+    if(m_InputData.optimization_type == "topology")
     {
-        op_node = stage_node.append_child("Operation");
-        cur_parent = op_node;
-    }
-
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
-                cur_obj.code_name.compare("lightmp")) // Albany, analyze, and lightmp don't handle Cache State correctly yet
+        pugi::xml_node cur_parent = stage_node;
+        if(m_InputData.objectives.size() > 1)
         {
-            op_node = cur_parent.append_child("Operation");
-            addChild(op_node, "Name", "Cache State");
-            addChild(op_node, "PerformerName", cur_obj.performer_name);
-            if(aHasUncertainties)
+            op_node = stage_node.append_child("Operation");
+            cur_parent = op_node;
+        }
+
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
+            if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+                    cur_obj.code_name.compare("lightmp")) // Albany, analyze, and lightmp don't handle Cache State correctly yet
             {
-                output_node = op_node.append_child("Output");
-                addChild(output_node, "ArgumentName", "vonmises0");
-                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
-            }
-            else if(cur_obj.multi_load_case == "true")
-            {
-                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+                op_node = cur_parent.append_child("Operation");
+                addChild(op_node, "Name", "Cache State");
+                addChild(op_node, "PerformerName", cur_obj.performer_name);
+                if(aHasUncertainties)
                 {
-                    char buffer[100];
-                    sprintf(buffer, "%lu", k);
-                    std::string cur_load_string = cur_obj.load_case_ids[k];
+                    output_node = op_node.append_child("Output");
+                    addChild(output_node, "ArgumentName", "vonmises0");
+                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
+                }
+                else if(cur_obj.multi_load_case == "true")
+                {
+                    for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+                    {
+                        char buffer[100];
+                        sprintf(buffer, "%lu", k);
+                        std::string cur_load_string = cur_obj.load_case_ids[k];
+                        for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                        {
+                            output_node = op_node.append_child("Output");
+                            addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                            addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                        }
+                    }
+                }
+                else
+                {
                     for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                     {
                         output_node = op_node.append_child("Output");
-                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
-                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
                     }
-                }
-            }
-            else
-            {
-                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                {
-                    output_node = op_node.append_child("Output");
-                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
-                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
                 }
             }
         }
@@ -8275,22 +8803,26 @@ void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc,
 void XMLGenerator::outputSetLowerBoundsStage(pugi::xml_document &doc)
 /**********************************************************************************/
 {
-    pugi::xml_node stage_node = doc.append_child("Stage");
+    pugi::xml_node stage_node, input_node, op_node, output_node;
+    stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Set Lower Bounds");
-    pugi::xml_node input_node = stage_node.append_child("Input");
-    addChild(input_node, "SharedDataName", "Lower Bound Value");
+    if(m_InputData.optimization_type == "topology")
+    {
+        input_node = stage_node.append_child("Input");
+        addChild(input_node, "SharedDataName", "Lower Bound Value");
 
-    pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Calculate Lower Bounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "Calculate Lower Bounds");
+        addChild(op_node, "PerformerName", "PlatoMain");
 
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Lower Bound Value");
-    addChild(input_node, "SharedDataName", "Lower Bound Value");
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Lower Bound Value");
+        addChild(input_node, "SharedDataName", "Lower Bound Value");
 
-    pugi::xml_node output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Lower Bound Vector");
-    addChild(output_node, "SharedDataName", "Lower Bound Vector");
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Lower Bound Vector");
+        addChild(output_node, "SharedDataName", "Lower Bound Vector");
+    }
 
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Lower Bound Vector");
@@ -8300,22 +8832,26 @@ void XMLGenerator::outputSetLowerBoundsStage(pugi::xml_document &doc)
 void XMLGenerator::outputSetUpperBoundsStage(pugi::xml_document &doc)
 /**********************************************************************************/
 {
-    pugi::xml_node stage_node = doc.append_child("Stage");
+    pugi::xml_node stage_node, input_node, op_node, output_node;
+    stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Set Upper Bounds");
-    pugi::xml_node input_node = stage_node.append_child("Input");
-    addChild(input_node, "SharedDataName", "Upper Bound Value");
+    if(m_InputData.optimization_type == "topology")
+    {
+        input_node = stage_node.append_child("Input");
+        addChild(input_node, "SharedDataName", "Upper Bound Value");
 
-    pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Calculate Upper Bounds");
-    addChild(op_node, "PerformerName", "PlatoMain");
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "Calculate Upper Bounds");
+        addChild(op_node, "PerformerName", "PlatoMain");
 
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Upper Bound Value");
-    addChild(input_node, "SharedDataName", "Upper Bound Value");
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Upper Bound Value");
+        addChild(input_node, "SharedDataName", "Upper Bound Value");
 
-    pugi::xml_node output_node = op_node.append_child("Output");
-    addChild(output_node, "ArgumentName", "Upper Bound Vector");
-    addChild(output_node, "SharedDataName", "Upper Bound Vector");
+        output_node = op_node.append_child("Output");
+        addChild(output_node, "ArgumentName", "Upper Bound Vector");
+        addChild(output_node, "SharedDataName", "Upper Bound Vector");
+    }
 
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Upper Bound Vector");
@@ -8346,6 +8882,46 @@ void XMLGenerator::outputUpdateProblemStage(pugi::xml_document &doc)
 
 /**********************************************************************************/
 void XMLGenerator::outputInitializeOptimizationStage(pugi::xml_document &doc)
+/**********************************************************************************/
+{
+    if(m_InputData.optimization_type == "topology")
+        outputInitializeOptimizationStageForTO(doc);
+    else if(m_InputData.optimization_type == "shape")
+        outputInitializeOptimizationStageForSO(doc);
+
+}
+
+/**********************************************************************************/
+void XMLGenerator::outputInitializeOptimizationStageForSO(pugi::xml_document &doc)
+/**********************************************************************************/
+{
+    pugi::xml_node stage_node = doc.append_child("Stage");
+    addChild(stage_node, "Name", "Initialize Design Parameters");
+
+    pugi::xml_node op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Initialize Values");
+    addChild(op_node, "PerformerName", "PlatoMain");
+
+    pugi::xml_node output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Values");
+    addChild(output_node, "SharedDataName", "Design Parameters");
+    output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Lower Bounds");
+    addChild(output_node, "SharedDataName", "Lower Bound Vector");
+    output_node = op_node.append_child("Output");
+    addChild(output_node, "ArgumentName", "Upper Bounds");
+    addChild(output_node, "SharedDataName", "Upper Bound Vector");
+
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Design Parameters");
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Lower Bound Vector");
+    output_node = stage_node.append_child("Output");
+    addChild(output_node, "SharedDataName", "Upper Bound Vector");
+}
+
+/**********************************************************************************/
+void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &doc)
 /**********************************************************************************/
 {
     pugi::xml_node stage_node = doc.append_child("Stage");
@@ -8417,150 +8993,153 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
     addChild(stage_node, "Name", "Output To File");
     pugi::xml_node op_node, output_node, input_node;
 
-    // *********************************************************
-    // This code is a hack and needs to be fixed!!!!!!!!!!!!!
-    // This Alexa specific output information should probably
-    // go in the Alexa input deck rather than in interface.xml.
-    // We can't have it in hear because other performers won't
-    // know how to execute this Alexa-specific operation.
-    // *********************************************************
-    bool tFirstTime = true;
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_InputData.optimization_type == "topology")
     {
-        XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        if(cur_obj.code_name == "plato_analyze")
-        {
-            for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
-            {
-                if(tFirstTime)
-                {
-                    op_node = stage_node.append_child("Operation");
-                    addChild(op_node, "Name", "Write Output");
-                    addChild(op_node, "PerformerName", cur_obj.performer_name);
-                    tFirstTime = false;
-                }
-                // create shared data for objectives
-                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
-                output_node = op_node.append_child("Output");
-                addChild(output_node, "ArgumentName", tmp_buf);
-                addChild(output_node, "SharedDataName", tmp_buf);
-            }
-        }
-    }
-
-    // VonMises Statistics
-    if(aHasUncertainties && aRequestedVonMises)
-    {
-        op_node = stage_node.append_child("Operation");
-        addChild(op_node, "Name", "VonMises Statistics");
-        addChild(op_node, "PerformerName", "PlatoMain");
-        // We are assuming only one load case per objective/performer which
-        // means we will only have one vonmises per performer.
+        // *********************************************************
+        // This code is a hack and needs to be fixed!!!!!!!!!!!!!
+        // This Alexa specific output information should probably
+        // go in the Alexa input deck rather than in interface.xml.
+        // We can't have it in hear because other performers won't
+        // know how to execute this Alexa-specific operation.
+        // *********************************************************
+        bool tFirstTime = true;
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
-            input_node = op_node.append_child("Input");
-            addChild(input_node, "ArgumentName", cur_obj.performer_name + "_vonmises");
-            addChild(input_node, "SharedDataName", cur_obj.performer_name + "_vonmises");
-        }
-        output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "von_mises_mean");
-        addChild(output_node, "SharedDataName", "VonMises Mean");
-        output_node = op_node.append_child("Output");
-        addChild(output_node, "ArgumentName", "von_mises_std_dev");
-        addChild(output_node, "SharedDataName", "VonMises StdDev");
-        for(size_t j=0; j<m_InputData.mStandardDeviations.size(); ++j)
-        {
-            output_node = op_node.append_child("Output");
-            std::string tTmpString = "VonMises Mean Plus ";
-            tTmpString += m_InputData.mStandardDeviations[j];
-            tTmpString += " StdDev";
-            addChild(output_node, "ArgumentName", tTmpString);
-            addChild(output_node, "SharedDataName", tTmpString);
-        }
-    }
-
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "PlatoMainOutput");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Internal Energy Gradient");
-    addChild(input_node, "SharedDataName", "Internal Energy Gradient");
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Optimization DOFs");
-    addChild(input_node, "SharedDataName", "Optimization DOFs");
-
-    if(m_InputData.constraints.size() > 0)
-    {
-        if(m_InputData.constraints[0].type == "volume")
-        {
-            input_node = op_node.append_child("Input");
-            addChild(input_node, "ArgumentName", "Volume Gradient");
-            addChild(input_node, "SharedDataName", "Volume Gradient");
-        }
-        else if(m_InputData.constraints[0].type == "surface area")
-        {
-            input_node = op_node.append_child("Input");
-            addChild(input_node, "ArgumentName", "Surface Area Gradient");
-            addChild(input_node, "SharedDataName", "Surface Area Gradient");
-        }
-    }
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        if(aHasUncertainties)
-        {
-            input_node = op_node.append_child("Input");
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
-            addChild(input_node, "ArgumentName", tmp_buf);
-            addChild(input_node, "SharedDataName", tmp_buf);
-        }
-        else if(cur_obj.multi_load_case == "true")
-        {
-            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+            if(cur_obj.code_name == "plato_analyze")
             {
-                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+                {
+                    if(tFirstTime)
+                    {
+                        op_node = stage_node.append_child("Operation");
+                        addChild(op_node, "Name", "Write Output");
+                        addChild(op_node, "PerformerName", cur_obj.performer_name);
+                        tFirstTime = false;
+                    }
+                    // create shared data for objectives
+                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    output_node = op_node.append_child("Output");
+                    addChild(output_node, "ArgumentName", tmp_buf);
+                    addChild(output_node, "SharedDataName", tmp_buf);
+                }
+            }
+        }
+
+        // VonMises Statistics
+        if(aHasUncertainties && aRequestedVonMises)
+        {
+            op_node = stage_node.append_child("Operation");
+            addChild(op_node, "Name", "VonMises Statistics");
+            addChild(op_node, "PerformerName", "PlatoMain");
+            // We are assuming only one load case per objective/performer which
+            // means we will only have one vonmises per performer.
+            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+            {
+                XMLGen::Objective cur_obj = m_InputData.objectives[i];
+                input_node = op_node.append_child("Input");
+                addChild(input_node, "ArgumentName", cur_obj.performer_name + "_vonmises");
+                addChild(input_node, "SharedDataName", cur_obj.performer_name + "_vonmises");
+            }
+            output_node = op_node.append_child("Output");
+            addChild(output_node, "ArgumentName", "von_mises_mean");
+            addChild(output_node, "SharedDataName", "VonMises Mean");
+            output_node = op_node.append_child("Output");
+            addChild(output_node, "ArgumentName", "von_mises_std_dev");
+            addChild(output_node, "SharedDataName", "VonMises StdDev");
+            for(size_t j=0; j<m_InputData.mStandardDeviations.size(); ++j)
+            {
+                output_node = op_node.append_child("Output");
+                std::string tTmpString = "VonMises Mean Plus ";
+                tTmpString += m_InputData.mStandardDeviations[j];
+                tTmpString += " StdDev";
+                addChild(output_node, "ArgumentName", tTmpString);
+                addChild(output_node, "SharedDataName", tTmpString);
+            }
+        }
+
+        op_node = stage_node.append_child("Operation");
+        addChild(op_node, "Name", "PlatoMainOutput");
+        addChild(op_node, "PerformerName", "PlatoMain");
+
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Topology");
+        addChild(input_node, "SharedDataName", "Topology");
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Internal Energy Gradient");
+        addChild(input_node, "SharedDataName", "Internal Energy Gradient");
+        input_node = op_node.append_child("Input");
+        addChild(input_node, "ArgumentName", "Optimization DOFs");
+        addChild(input_node, "SharedDataName", "Optimization DOFs");
+
+        if(m_InputData.constraints.size() > 0)
+        {
+            if(m_InputData.constraints[0].type == "volume")
+            {
+                input_node = op_node.append_child("Input");
+                addChild(input_node, "ArgumentName", "Volume Gradient");
+                addChild(input_node, "SharedDataName", "Volume Gradient");
+            }
+            else if(m_InputData.constraints[0].type == "surface area")
+            {
+                input_node = op_node.append_child("Input");
+                addChild(input_node, "ArgumentName", "Surface Area Gradient");
+                addChild(input_node, "SharedDataName", "Surface Area Gradient");
+            }
+        }
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
+            XMLGen::Objective cur_obj = m_InputData.objectives[i];
+            if(aHasUncertainties)
+            {
+                input_node = op_node.append_child("Input");
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
+                addChild(input_node, "ArgumentName", tmp_buf);
+                addChild(input_node, "SharedDataName", tmp_buf);
+            }
+            else if(cur_obj.multi_load_case == "true")
+            {
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+                {
+                    std::string cur_load_string = cur_obj.load_case_ids[k];
+                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                    {
+                        input_node = op_node.append_child("Input");
+                        sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                        addChild(input_node, "ArgumentName", tmp_buf);
+                        addChild(input_node, "SharedDataName", tmp_buf);
+                    }
+                }
+            }
+            else
+            {
                 for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                 {
                     input_node = op_node.append_child("Input");
-                    sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
                     addChild(input_node, "ArgumentName", tmp_buf);
                     addChild(input_node, "SharedDataName", tmp_buf);
                 }
             }
         }
-        else
-        {
-            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-            {
-                input_node = op_node.append_child("Input");
-                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
-                addChild(input_node, "ArgumentName", tmp_buf);
-                addChild(input_node, "SharedDataName", tmp_buf);
-            }
-        }
-    }
 
-    if(aHasUncertainties && aRequestedVonMises)
-    {
-        input_node = op_node.append_child("Input");
-        addChild(input_node, "ArgumentName", "VonMises Mean");
-        addChild(input_node, "SharedDataName", "VonMises Mean");
-        input_node = op_node.append_child("Input");
-        addChild(input_node, "ArgumentName", "VonMises StdDev");
-        addChild(input_node, "SharedDataName", "VonMises StdDev");
-        for(size_t j=0; j<m_InputData.mStandardDeviations.size(); ++j)
+        if(aHasUncertainties && aRequestedVonMises)
         {
             input_node = op_node.append_child("Input");
-            std::string tTmpString = "VonMises Mean Plus ";
-            tTmpString += m_InputData.mStandardDeviations[j];
-            tTmpString += " StdDev";
-            addChild(input_node, "ArgumentName", tTmpString);
-            addChild(input_node, "SharedDataName", tTmpString);
+            addChild(input_node, "ArgumentName", "VonMises Mean");
+            addChild(input_node, "SharedDataName", "VonMises Mean");
+            input_node = op_node.append_child("Input");
+            addChild(input_node, "ArgumentName", "VonMises StdDev");
+            addChild(input_node, "SharedDataName", "VonMises StdDev");
+            for(size_t j=0; j<m_InputData.mStandardDeviations.size(); ++j)
+            {
+                input_node = op_node.append_child("Input");
+                std::string tTmpString = "VonMises Mean Plus ";
+                tTmpString += m_InputData.mStandardDeviations[j];
+                tTmpString += " StdDev";
+                addChild(input_node, "ArgumentName", tTmpString);
+                addChild(input_node, "SharedDataName", tTmpString);
+            }
         }
     }
 }
