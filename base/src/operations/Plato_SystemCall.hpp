@@ -86,6 +86,10 @@ public:
 private:
     std::string mStringCommand;
     std::vector<std::string> mInputNames;
+    std::vector<std::vector<double> > mSavedParameters;
+    std::vector<std::string> mArguments;
+    bool mOnChange;
+    bool mAppendInput;
 
 };
 // class SystemCall;

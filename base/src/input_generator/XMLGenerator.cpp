@@ -7094,7 +7094,7 @@ void XMLGenerator::addInitializeValuesOperation(pugi::xml_document &aDoc)
     if(m_InputData.csm_filename.length() > 0)
     {
         addChild(tmp_node, "Method", "ReadFromCSMFile");
-        addChild(tmp_node, "Model", m_InputData.csm_filename);
+        addChild(tmp_node, "CSMFileName", m_InputData.csm_filename);
     }
     else
     {
@@ -8018,7 +8018,7 @@ bool XMLGenerator::outputObjectiveGradientStage(pugi::xml_document &doc)
 
         pugi::xml_node output_node = op_node.append_child("Output");
         addChild(output_node, "ArgumentName", "Objective Gradient");
-        sprintf(tmp_buf, "Objective Gradient %d", (int)(i+1));
+        sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
         addChild(output_node, "SharedDataName", tmp_buf);
     }
 
@@ -8032,7 +8032,7 @@ bool XMLGenerator::outputObjectiveGradientStage(pugi::xml_document &doc)
         input_node = op_node.append_child("Input");
         sprintf(tmp_buf, "Value %d", (int)(i+1));
         addChild(input_node, "ArgumentName", tmp_buf);
-        sprintf(tmp_buf, "Objective Gradient %d", (int)(i+1));
+        sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
     }
 
