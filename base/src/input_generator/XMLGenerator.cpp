@@ -208,12 +208,14 @@ bool XMLGenerator::parseCSMFile()
     else
         tRet = false;
 
-    // Build a tesselation filename from the csm filename
+    // Build a tesselation and exodus filenames from the csm filename
     size_t tPosition = m_InputData.csm_filename.find(".csm");
     if(tPosition != std::string::npos)
     {
         m_InputData.csm_tesselation_filename = m_InputData.csm_filename.substr(0, tPosition);
         m_InputData.csm_tesselation_filename += ".eto";
+        m_InputData.csm_exodus_filename = m_InputData.csm_filename.substr(0, tPosition);
+        m_InputData.csm_exodus_filename += ".exo";
     }
     else
     {
@@ -6371,6 +6373,19 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
 
+                // Reinitialize on Change Operation
+                tmp_node = doc.append_child("Operation");
+                addChild(tmp_node, "Function", "ReinitializeESP");
+                addChild(tmp_node, "Name", "Reinitialize on Change");
+                tmp_node1 = tmp_node.append_child("Input");
+                addChild(tmp_node1, "ArgumentName", "Parameters");
+                addChild(tmp_node, "Model", m_InputData.csm_filename);
+                addChild(tmp_node, "Tesselation", m_InputData.csm_tesselation_filename);
+                tmp_node1 = tmp_node.append_child("Parameter");
+                addChild(tmp_node1, "ArgumentName", "Input Mesh");
+                addChild(tmp_node1, "Target", "Input Mesh");
+                addChild(tmp_node1, "InitialValue", m_InputData.csm_exodus_filename);
+
                 // WriteOutput
                 /*
                 tmp_node = doc.append_child("Operation");
@@ -7045,6 +7060,24 @@ void XMLGenerator::addInitializeFieldOperation(pugi::xml_document &aDoc)
 }
 
 /******************************************************************************/
+void XMLGenerator::addUpdateGeometryOnChangeOperation(pugi::xml_document &aDoc)
+/******************************************************************************/
+{
+    // Update Geometry on Change
+    pugi::xml_node tmp_node = aDoc.append_child("Operation");
+    addChild(tmp_node, "Function", "SystemCall");
+    addChild(tmp_node, "Name", "Update Geometry on Change");
+    addChild(tmp_node, "Command", "python aflr.py");
+    addChild(tmp_node, "OnChange", "true");
+    addChild(tmp_node, "Argument", m_InputData.csm_filename);
+    addChild(tmp_node, "Argument", m_InputData.csm_exodus_filename);
+    addChild(tmp_node, "Argument", m_InputData.csm_tesselation_filename);
+    addChild(tmp_node, "AppendInput", "true");
+    pugi::xml_node tmp_node1 = tmp_node.append_child("Input");
+    addChild(tmp_node1, "ArgumentName", "Parameters");
+}
+
+/******************************************************************************/
 void XMLGenerator::addInitializeValuesOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
@@ -7396,6 +7429,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
     {
         addInitializeValuesOperation(doc);
         addAggregateValuesOperation(doc);
+        addUpdateGeometryOnChangeOperation(doc);
     }
 
     // Write the file to disk
@@ -7582,9 +7616,17 @@ bool XMLGenerator::outputConstraintStage(pugi::xml_document &doc)
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Design Parameters");
 
-    // Update Geometry operation
+    // Update Geometry on Change operation
     pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "Name", "Update Geometry on Change");
+    addChild(op_node, "PerformerName", "PlatoMain");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Reinitialize on Change operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Reinitialize on Change");
     addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Parameters");
@@ -7615,9 +7657,17 @@ bool XMLGenerator::outputConstraintGradientStage(pugi::xml_document &doc)
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Design Parameters");
 
-    // Update Geometry operation
+    // Update Geometry on Change operation
     pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "Name", "Update Geometry on Change");
+    addChild(op_node, "PerformerName", "PlatoMain");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Reinitialize on Change operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Reinitialize on Change");
     addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Parameters");
@@ -7861,9 +7911,17 @@ bool XMLGenerator::outputObjectiveStage(pugi::xml_document &doc)
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Design Parameters");
 
-    // Update Geometry operation
+    // Update Geometry on Change operation
     pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "Name", "Update Geometry on Change");
+    addChild(op_node, "PerformerName", "PlatoMain");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Reinitialize on Change operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Reinitialize on Change");
     addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Parameters");
@@ -7926,12 +7984,19 @@ bool XMLGenerator::outputObjectiveGradientStage(pugi::xml_document &doc)
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Design Parameters");
 
-    // Update Geometry operation
+    // Update Geometry on Change operation
     pugi::xml_node op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "Update Geometry");
+    addChild(op_node, "Name", "Update Geometry on Change");
+    addChild(op_node, "PerformerName", "PlatoMain");
+    input_node = op_node.append_child("Input");
+    addChild(input_node, "ArgumentName", "Parameters");
+    addChild(input_node, "SharedDataName", "Design Parameters");
+
+    // Reinitialize on Change operation
+    op_node = stage_node.append_child("Operation");
+    addChild(op_node, "Name", "Reinitialize on Change");
     addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
     input_node = op_node.append_child("Input");
-
     addChild(input_node, "ArgumentName", "Parameters");
     addChild(input_node, "SharedDataName", "Design Parameters");
 
@@ -9101,10 +9166,12 @@ void XMLGenerator::outputInitializeOptimizationStageForSO(pugi::xml_document &do
 
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Design Parameters");
+    /*
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Lower Bound Vector");
     output_node = stage_node.append_child("Output");
     addChild(output_node, "SharedDataName", "Upper Bound Vector");
+    */
 }
 
 /**********************************************************************************/

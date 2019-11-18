@@ -152,6 +152,7 @@ protected:
     void addAggregateHessianOperation(pugi::xml_document &aDoc);
     void addAggregateEnergyOperation(pugi::xml_document &aDoc);
     void addAggregateValuesOperation(pugi::xml_document &aDoc);
+    void addUpdateGeometryOnChangeOperation(pugi::xml_document &aDoc);
     void addAggregateGradientOperation(pugi::xml_document &aDoc);
     void addComputeVolumeOperation(pugi::xml_document &aDoc);
     void addDesignVolumeOperation(pugi::xml_document &aDoc);
