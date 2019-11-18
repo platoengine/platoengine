@@ -166,6 +166,7 @@ struct InputData
     int num_shape_design_variables;
     std::string optimization_type;
     std::string csm_filename;
+    std::string csm_tesselation_filename;
     std::string num_opt_processors;
     std::string output_frequency;
     std::string output_method;

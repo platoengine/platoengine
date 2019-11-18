@@ -151,12 +151,14 @@ protected:
     void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
     void addAggregateHessianOperation(pugi::xml_document &aDoc);
     void addAggregateEnergyOperation(pugi::xml_document &aDoc);
+    void addAggregateValuesOperation(pugi::xml_document &aDoc);
     void addAggregateGradientOperation(pugi::xml_document &aDoc);
     void addComputeVolumeOperation(pugi::xml_document &aDoc);
     void addDesignVolumeOperation(pugi::xml_document &aDoc);
     void addUpdateProblemOperation(pugi::xml_document &aDoc);
     void addFilterInfo(pugi::xml_document &aDoc);
     void addInitializeFieldOperation(pugi::xml_document &aDoc);
+    void addInitializeValuesOperation(pugi::xml_document &aDoc);
     void outputInitializeOptimizationStage(pugi::xml_document &doc);
     void outputInitializeOptimizationStageForSO(pugi::xml_document &doc);
     void outputInitializeOptimizationStageForTO(pugi::xml_document &doc);
