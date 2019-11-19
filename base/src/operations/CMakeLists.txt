@@ -9,6 +9,7 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         Plato_DesignVolume.cpp
                         Plato_EnforceBounds.cpp
                         Plato_UpdateProblem.cpp
+                        Plato_CSMMeshOutput.cpp
                         Plato_ComputeVolume.cpp
                         Plato_SetUpperBounds.cpp
                         Plato_SetLowerBounds.cpp
@@ -33,6 +34,7 @@ set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_DesignVolume.hpp
                         Plato_EnforceBounds.hpp
                         Plato_UpdateProblem.hpp
+                        Plato_CSMMeshOutput.hpp
                         Plato_ComputeVolume.hpp
                         Plato_SetUpperBounds.hpp
                         Plato_SetLowerBounds.hpp

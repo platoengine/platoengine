@@ -126,6 +126,7 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
+    void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
     bool addNTVParameter(pugi::xml_node parent_node,
                          const std::string &name,
                          const std::string &type,
@@ -145,6 +146,14 @@ protected:
     void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
                                      bool &aHasUncertainties,
                                      bool &aRequestedVonMises);
+    void buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
+    void buildMaximizeHeatConductionEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter);
+    void buildMechanicsNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
+    void buildMaximizeStiffnessEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
+    void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
     void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
