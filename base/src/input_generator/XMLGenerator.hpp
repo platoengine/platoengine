@@ -150,9 +150,13 @@ protected:
     void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
     void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
     void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildMaximizeHeatConductionEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter);
-    void buildMechanicsNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildMaximizeStiffnessEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
+    void buildThermalEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter,
+                                         const char* aVariableIndex);
+    void addPAMaterialModelBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
+    void addPAPDEConstraintBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
+    void addPAObjectiveBlock(pugi::xml_node aNode, const char* aObjectiveName);
+    void buildMechanicalNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
+    void buildMechanicalEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
     void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
