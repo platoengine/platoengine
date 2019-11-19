@@ -85,16 +85,16 @@ bool Su2ToExodus_UnitTester::publicReadMarks(std::istream &aStream)
     return readMarks(aStream);
 }
 /******************************************************************************/
-bool Su2ToExodus_UnitTester::publicCreateNodeSetFromMark(int &aMarkIndex)
+bool Su2ToExodus_UnitTester::publicCreateNodeSetFromMark(int &aMarkIndex, std::string &aName)
 /******************************************************************************/
 {
-    return createNodeSetFromMark(aMarkIndex);
+    return createNodeSetFromMark(aMarkIndex, aName);
 }
 /******************************************************************************/
-bool Su2ToExodus_UnitTester::publicCreateSideSetFromMark(int &aMarkIndex)
+bool Su2ToExodus_UnitTester::publicCreateSideSetFromMark(int &aMarkIndex, std::string &aName)
 /******************************************************************************/
 {
-    return createSideSetFromMark(aMarkIndex);
+    return createSideSetFromMark(aMarkIndex, aName);
 }
 /******************************************************************************/
 bool Su2ToExodus_UnitTester::publicCreateFaceToTetMap()

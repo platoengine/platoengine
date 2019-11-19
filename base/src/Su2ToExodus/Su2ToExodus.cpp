@@ -259,6 +259,7 @@ bool Su2ToExodus::writeNodeSets()
                                                                                                         << " to file \n";
                 }
             }
+            ex_put_name(mExodusFileID, EX_NODE_SET, mSu2Data.mNodeSetIDs[i], mSu2Data.mNodeSetNames[i].c_str());
         }
     }
 
@@ -287,18 +288,20 @@ bool Su2ToExodus::writeSideSets()
                                                                                                         << " to file \n";
                 }
             }
+            ex_put_name(mExodusFileID, EX_SIDE_SET, mSu2Data.mSideSetIDs[i], mSu2Data.mSideSetNames[i].c_str());
         }
     }
 
     return tRet;
 }
 
-bool Su2ToExodus::createNodeSetFromMark(int &aMarkIndex)
+bool Su2ToExodus::createNodeSetFromMark(int &aMarkIndex, std::string &aName)
 {
     bool tRet = true;
 
     int tCntr = 0;
     mSu2Data.mNodeSetIDs.push_back(mSu2Data.mMarkTags[aMarkIndex]);
+    mSu2Data.mNodeSetNames.push_back(aName);
     std::vector<int> tNewNodeSet(mSu2Data.mMarkNumElems[aMarkIndex]*mSu2Data.mMarks[aMarkIndex][0].size());
     for(int i=0; i<mSu2Data.mMarkNumElems[aMarkIndex]; ++i)
     {
@@ -326,6 +329,7 @@ bool Su2ToExodus::createNodeSetsFromMarks()
     mSu2Data.mNodeSets.clear();
     for(size_t i=0; i<mSu2Data.mMarks.size(); ++i)
     {
+        std::string tName = "";
         bool tCurMarkIsNodeset = false;
         for(size_t j=0; j<mSu2Data.mMarkTypeIDs.size(); ++j)
         {
@@ -333,13 +337,14 @@ bool Su2ToExodus::createNodeSetsFromMarks()
                     mSu2Data.mMarkTypes[j] == "nodeset")
             {
                 tCurMarkIsNodeset = true;
+                tName = mSu2Data.mMarkNames[j];
                 j = mSu2Data.mMarkTypeIDs.size();
             }
         }
         if(tCurMarkIsNodeset)
         {
             int tIndex = i;
-            tRet = createNodeSetFromMark(tIndex);
+            tRet = createNodeSetFromMark(tIndex, tName);
             if(!tRet)
                 i = mSu2Data.mMarks.size();
         }
@@ -348,11 +353,12 @@ bool Su2ToExodus::createNodeSetsFromMarks()
     return tRet;
 }
 
-bool Su2ToExodus::createSideSetFromMark(int &aMarkIndex)
+bool Su2ToExodus::createSideSetFromMark(int &aMarkIndex, std::string &aName)
 {
     bool tRet = true;
 
     mSu2Data.mSideSetIDs.push_back(mSu2Data.mMarkTags[aMarkIndex]);
+    mSu2Data.mSideSetNames.push_back(aName);
     std::vector<int> tNewSideSetElem(mSu2Data.mMarks[aMarkIndex].size());
     std::vector<int> tNewSideSetFace(mSu2Data.mMarks[aMarkIndex].size());
 
@@ -384,6 +390,7 @@ bool Su2ToExodus::createSideSetsFromMarks()
     mSu2Data.mSideSetsFace.clear();
     for(size_t i=0; i<mSu2Data.mMarks.size(); ++i)
     {
+        std::string tName = "";
         bool tCurMarkIsSideset = false;
         for(size_t j=0; j<mSu2Data.mMarkTypeIDs.size(); ++j)
         {
@@ -391,13 +398,14 @@ bool Su2ToExodus::createSideSetsFromMarks()
                     mSu2Data.mMarkTypes[j] == "sideset")
             {
                 tCurMarkIsSideset = true;
+                tName = mSu2Data.mMarkNames[j];
                 j = mSu2Data.mMarkTypeIDs.size();
             }
         }
         if(tCurMarkIsSideset)
         {
             int tIndex = i;
-            tRet = createSideSetFromMark(tIndex);
+            tRet = createSideSetFromMark(tIndex, tName);
             if(!tRet)
                 i = mSu2Data.mMarks.size();
         }

@@ -58,45 +58,105 @@
 
 namespace Plato
 {
-  /******************************************************************************/
-  void SystemCall::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
-  /******************************************************************************/
-  {
+/******************************************************************************/
+void SystemCall::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
+/******************************************************************************/
+{
     for(auto& tInputName : mInputNames) {
-      aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, tInputName));
+        aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, tInputName));
     }
-  }
+}
 
-  /******************************************************************************/
-  SystemCall::SystemCall(PlatoApp* aPlatoApp, Plato::InputData & aNode) :
-          Plato::LocalOp(aPlatoApp)
-  /******************************************************************************/
-  {
+/******************************************************************************/
+SystemCall::SystemCall(PlatoApp* aPlatoApp, Plato::InputData & aNode) :
+                  Plato::LocalOp(aPlatoApp)
+/******************************************************************************/
+{
+    mOnChange = Plato::Get::Bool(aNode, "OnChange");
+    mAppendInput = Plato::Get::Bool(aNode, "AppendInput");
     mStringCommand = Plato::Get::String(aNode, "Command");
 
     for(Plato::InputData tInputNode : aNode.getByName<Plato::InputData>("Input"))
     {
-      mInputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
+        mInputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
     }
-  }
+    for(auto tStrValue : aNode.getByName<std::string>("Argument"))
+    {
+        mArguments.push_back(tStrValue);
+    }
+}
 
-  /******************************************************************************/
-  void SystemCall::operator()()
-  /******************************************************************************/
-  {
-    // collect arguments
-    std::stringstream commandPlusArgs;
-    commandPlusArgs << mStringCommand << " ";
-    for(auto& tInputName : mInputNames) {
-      auto tInputArgument = mPlatoApp->getValue(tInputName);
-      if(tInputArgument->size() > 1){
-        throw ParsingException("PlatoApp::SystemCall: input arguments must be than length one.");
-      }
-      commandPlusArgs << tInputArgument->data()[0];
+/******************************************************************************/
+void SystemCall::operator()()
+/******************************************************************************/
+{
+    bool tPerformSystemCall = true;
+
+    if(mOnChange)
+    {
+        bool tChanged = false;
+
+        // If we haven't saved any parameters yet save them now
+        // and set "changed" to true.
+        if(mSavedParameters.size() == 0)
+        {
+            for(int j=0; j<mInputNames.size(); ++j)
+            {
+                auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
+                std::vector<double> tCurVector(tInputArgument->size());
+                for(size_t i=0; i<tInputArgument->size(); ++i)
+                    tCurVector[i] = tInputArgument->data()[i];
+                mSavedParameters.push_back(tCurVector);
+            }
+            tChanged = true;
+        }
+
+        if(!tChanged)
+        {
+            for(int j=0; j<mInputNames.size(); ++j)
+            {
+                auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
+                for(size_t i=0; i<tInputArgument->size(); ++i)
+                {
+                    if(tInputArgument->data()[0] != mSavedParameters[j][i])
+                    {
+                        tChanged = true;
+                        i = tInputArgument->size();
+                        j = mInputNames.size();
+                    }
+                }
+            }
+        }
+
+        if(!tChanged)
+            tPerformSystemCall = false;
     }
 
-    // make system call
-    std::system(commandPlusArgs.str().c_str());
-  }
+    if(tPerformSystemCall)
+    {
+        // collect arguments
+        std::stringstream commandPlusArgs;
+        commandPlusArgs << mStringCommand << " ";
+        for(auto& tArgumentName : mArguments)
+        {
+            commandPlusArgs << tArgumentName << " ";
+        }
+        if(mAppendInput)
+        {
+            for(auto& tInputName : mInputNames)
+            {
+                auto tInputArgument = mPlatoApp->getValue(tInputName);
+                for(size_t i=0; i<tInputArgument->size(); ++i)
+                {
+                    commandPlusArgs << tInputArgument->data()[i] << " ";
+                }
+            }
+        }
+
+        // make system call
+        std::system(commandPlusArgs.str().c_str());
+    }
+}
+
 }
 

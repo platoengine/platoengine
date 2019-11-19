@@ -165,10 +165,11 @@ TEST(PlatoTestSu2ToExodus, createNodeSetFromMark)
     bool tVal = tTester.publicReadMarks(tStringStream);
     EXPECT_EQ(tVal, true);
     int tIndex = 0;
-    tVal = tTester.publicCreateNodeSetFromMark(tIndex);
+    std::string tName = "dummy";
+    tVal = tTester.publicCreateNodeSetFromMark(tIndex, tName);
     EXPECT_EQ(tVal, true);
     tIndex = 1;
-    tVal = tTester.publicCreateNodeSetFromMark(tIndex);
+    tVal = tTester.publicCreateNodeSetFromMark(tIndex, tName);
     EXPECT_EQ(tVal, true);
 
     EXPECT_EQ(tTester.getNodeSetNode(0,0), 152);
@@ -226,8 +227,9 @@ TEST(PlatoTestSu2ToExodus, createSideSetFromMark)
 
     tTester.publicCreateFaceToTetMap();
 
+    std::string tName = "dummy";
     int tIndex = 0;
-    tVal = tTester.publicCreateSideSetFromMark(tIndex);
+    tVal = tTester.publicCreateSideSetFromMark(tIndex, tName);
     EXPECT_EQ(tVal, true);
 
     EXPECT_EQ(tTester.getSideSetElem(0,0), 1);

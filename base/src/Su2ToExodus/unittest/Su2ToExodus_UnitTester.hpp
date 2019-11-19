@@ -68,8 +68,8 @@ public:
     bool publicReadElementConnectivity(std::istream &aStream);
     bool publicReadNodeCoordinates(std::istream &aStream);
     bool publicReadMarks(std::istream &aStream);
-    bool publicCreateNodeSetFromMark(int &aMarkIndex);
-    bool publicCreateSideSetFromMark(int &aMarkIndex);
+    bool publicCreateNodeSetFromMark(int &aMarkIndex, std::string &aName);
+    bool publicCreateSideSetFromMark(int &aMarkIndex, std::string &aName);
     bool publicCreateFaceToTetMap();
     int publicGetFaceIndex(int &aConnectedElem, std::vector<int> &aFaceConn);
 

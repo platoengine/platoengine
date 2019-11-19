@@ -206,6 +206,14 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("CSMMeshOutput");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CSMMeshOutput(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("SetLowerBounds");
             if(tStrFunction == tFunctions.back())
             {

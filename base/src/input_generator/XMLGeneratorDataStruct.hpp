@@ -163,6 +163,11 @@ struct InputData
     std::string filter_heaviside_update;
     std::string filter_heaviside_max;
 
+    int num_shape_design_variables;
+    std::string optimization_type;
+    std::string csm_filename;
+    std::string csm_tesselation_filename;
+    std::string csm_exodus_filename;
     std::string num_opt_processors;
     std::string output_frequency;
     std::string output_method;

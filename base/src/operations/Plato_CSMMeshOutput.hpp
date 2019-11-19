@@ -41,18 +41,14 @@
  */
 
 /*
- * Plato_SystemCall.hpp
+ * Plato_CSMMeshOutput.hpp
  *
- *  Created on: Oct 23, 2019
+ *  Created on: N, 2019
  */
 
 #pragma once
 
 #include "Plato_LocalOperation.hpp"
-#include <vector>
-#include <string>
-
-class PlatoApp;
 
 namespace Plato
 {
@@ -60,21 +56,26 @@ namespace Plato
 class InputData;
 
 /******************************************************************************//**
- * @brief Call a shell script
-**********************************************************************************/
-class SystemCall : public Plato::LocalOp
+ * @brief Manage PLATO Main output
+ **********************************************************************************/
+class CSMMeshOutput : public Plato::LocalOp
 {
 public:
     /******************************************************************************//**
      * @brief Constructor
      * @param [in] aPlatoApp PLATO application
      * @param [in] aNode input XML data
-    **********************************************************************************/
-    SystemCall(PlatoApp* aPlatoApp, Plato::InputData & aNode);
+     **********************************************************************************/
+    CSMMeshOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode);
 
     /******************************************************************************//**
-     * @brief perform local operation - initialize level
-    **********************************************************************************/
+     * @brief Destructor
+     **********************************************************************************/
+    ~CSMMeshOutput();
+
+    /******************************************************************************//**
+     * @brief perform local operation - output data
+     **********************************************************************************/
     void operator()();
 
     /******************************************************************************//**
@@ -84,15 +85,20 @@ public:
     void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
 
 private:
-    std::string mStringCommand;
-    std::vector<std::string> mInputNames;
-    std::vector<std::vector<double> > mSavedParameters;
-    std::vector<std::string> mArguments;
-    bool mOnChange;
-    bool mAppendInput;
+    /******************************************************************************//**
+     * @brief build a string based on the current iteration
+     * @param [in] aCurIteration current optimization iteration
+     * @param [out] aString output iteration string
+     **********************************************************************************/
+    void buildIterationNumberString(std::string &aString);
 
+private:
+    std::string mBaseMeshName;
+    int mOutputFrequency; /*!< output frequency */
+    int mMaxIterations; /*!< max iterations */
+    int mCurIteration; /*!< current iteration */
 };
-// class SystemCall;
+// class CSMMeshOutput
 
 }
 // namespace Plato

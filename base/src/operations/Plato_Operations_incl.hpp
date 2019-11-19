@@ -56,6 +56,7 @@
 #include "Plato_EnforceBounds.hpp"
 #include "Plato_UpdateProblem.hpp"
 #include "Plato_ComputeVolume.hpp"
+#include "Plato_CSMMeshOutput.hpp"
 #include "Plato_SetUpperBounds.hpp"
 #include "Plato_SetLowerBounds.hpp"
 #include "Plato_PlatoMainOutput.hpp"

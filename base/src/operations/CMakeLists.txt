@@ -9,6 +9,7 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         Plato_DesignVolume.cpp
                         Plato_EnforceBounds.cpp
                         Plato_UpdateProblem.cpp
+                        Plato_CSMMeshOutput.cpp
                         Plato_ComputeVolume.cpp
                         Plato_SetUpperBounds.cpp
                         Plato_SetLowerBounds.cpp
@@ -33,6 +34,7 @@ set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_DesignVolume.hpp
                         Plato_EnforceBounds.hpp
                         Plato_UpdateProblem.hpp
+                        Plato_CSMMeshOutput.hpp
                         Plato_ComputeVolume.hpp
                         Plato_SetUpperBounds.hpp
                         Plato_SetLowerBounds.hpp
@@ -77,6 +79,8 @@ if( ENABLE_ISO )
 endif()
   set(ADD_PLATO_LIBRARIES ${ADD_PLATO_LIBRARIES} Plato${PLATO_LIB})
 ENDFOREACH()
+
+set(PLATO_LIBRARIES ${PLATO_LIBRARIES} ${ADD_PLATO_LIBRARIES} )
 set(PLATO_LIBRARIES ${PLATO_LIBRARIES} ${ADD_PLATO_LIBRARIES} PARENT_SCOPE)
 
 if( CMAKE_INSTALL_PREFIX )
@@ -87,4 +91,8 @@ if( CMAKE_INSTALL_PREFIX )
            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
   install( FILES ${${PLATO_LIB}_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
  ENDFOREACH()
+endif()
+
+if( UNIT_TESTING )
+  add_subdirectory(./unittest)
 endif()

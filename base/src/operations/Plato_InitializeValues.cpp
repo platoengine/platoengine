@@ -54,11 +54,27 @@
 namespace Plato
 {
 
+const int MAX_CHARS_PER_LINE = 10000;
+
 InitializeValues::InitializeValues(PlatoApp* aPlatoAppp, Plato::InputData& aNode) :
         Plato::LocalOp(aPlatoAppp),
-        mValuesName("Values")
+        mValuesName("Values"),
+        mUpperBoundsName("Upper Bounds"),
+        mLowerBoundsName("Lower Bounds"),
+        mStringMethod(""),
+        mCSMFileName("")
 {
-    mValue = Plato::Get::Double(aNode, "InitialValue");
+    mStringMethod = Plato::Get::String(aNode, "Method");
+    if(mStringMethod == "UniformValue")
+    {
+        mValues.clear();
+        mValues.push_back(Plato::Get::Double(aNode, "InitialValue"));
+    }
+    else if(mStringMethod == "ReadFromCSMFile")
+    {
+        mCSMFileName = Plato::Get::String(aNode, "CSMFileName");
+        getValuesFromCSMFile();
+    }
 }
 
 void InitializeValues::operator()()
@@ -66,13 +82,90 @@ void InitializeValues::operator()()
     // Output: Values
 
     std::vector<double>* tData = mPlatoApp->getValue(mValuesName);
-    (*tData)[0] = mValue;
+    *tData = mValues;
+
+    if(mStringMethod == "ReadFromCSMFile")
+    {
+        tData = mPlatoApp->getValue(mLowerBoundsName);
+        *tData = mLowerBounds;
+        tData = mPlatoApp->getValue(mUpperBoundsName);
+        *tData = mUpperBounds;
+    }
 }
 
 void InitializeValues::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 {
-    aLocalArgs.push_back(Plato::LocalArg
-        { Plato::data::layout_t::SCALAR, mValuesName,/*length=*/1 });
+    if(mStringMethod == "UniformValue")
+    {
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mValuesName, 1});
+    }
+    else if(mStringMethod == "ReadFromCSMFile")
+    {
+        int tSize = mValues.size();
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mValuesName, tSize});
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mLowerBoundsName, tSize});
+        aLocalArgs.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, mUpperBoundsName, tSize});
+    }
+}
+
+void InitializeValues::getValuesFromCSMFile()
+{
+    std::ifstream tInputStream;
+    tInputStream.open(mCSMFileName.c_str());
+    if(tInputStream.good())
+    {
+        getValuesFromStream(tInputStream);
+        tInputStream.close();
+    }
+}
+
+void InitializeValues::getValuesFromStream(std::istream &aStream)
+{
+    mValues.clear();
+    mLowerBounds.clear();
+    mUpperBounds.clear();
+
+    char tBuffer[MAX_CHARS_PER_LINE];
+
+    // read each line of the file (could optimize this to not read the whole file)
+    while(!aStream.eof())
+    {
+        // read an entire line into memory
+        aStream.getline(tBuffer, MAX_CHARS_PER_LINE);
+
+        char *tCharPointer = std::strtok(tBuffer, " ");
+
+        // skip comments
+        if(tCharPointer && tCharPointer[0] == '#')
+            continue;
+
+        if(tCharPointer && std::strcmp(tCharPointer, "despmtr") == 0)
+        {
+            // Get the variable name
+            tCharPointer = std::strtok(0, " ");
+            if(!tCharPointer)
+                break;
+            // Get the variable value
+            tCharPointer = std::strtok(0, " ");
+            if(!tCharPointer)
+                break;
+            mValues.push_back(std::atof(tCharPointer));
+            // Get the lower bound keyword
+            tCharPointer = std::strtok(0, " ");
+            // Get the lower bound value
+            tCharPointer = std::strtok(0, " ");
+            if(!tCharPointer)
+                break;
+            mLowerBounds.push_back(std::atof(tCharPointer));
+            // Get the upper bound keyword
+            tCharPointer = std::strtok(0, " ");
+            // Get the upper bound value
+            tCharPointer = std::strtok(0, " ");
+            if(!tCharPointer)
+                break;
+            mUpperBounds.push_back(std::atof(tCharPointer));
+        }
+    }
 }
 
 }

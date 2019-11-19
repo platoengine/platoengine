@@ -84,6 +84,14 @@ protected:
                                                     const std::string &aSize,
                                                     const std::string &aOwner,
                                                     const std::string &aUser);
+    pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aSize,
+                                                   const std::string &aOwner,
+                                                   const std::vector<std::string> &aUsers);
+    bool parseCSMFileFromStream(std::istream &aStream);
+    bool parseCSMFile();
     void generateROLInput();
     void generateAMGXInput();
     bool parseLoads(std::istream &fin);
@@ -118,6 +126,7 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
+    void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
     bool addNTVParameter(pugi::xml_node parent_node,
                          const std::string &name,
                          const std::string &type,
@@ -137,30 +146,48 @@ protected:
     void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
                                      bool &aHasUncertainties,
                                      bool &aRequestedVonMises);
+    void buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
+    void buildMaximizeHeatConductionEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter);
+    void buildMechanicsNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
+    void buildMaximizeStiffnessEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
+    void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
     void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
     void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
     void addAggregateHessianOperation(pugi::xml_document &aDoc);
     void addAggregateEnergyOperation(pugi::xml_document &aDoc);
+    void addAggregateValuesOperation(pugi::xml_document &aDoc);
+    void addUpdateGeometryOnChangeOperation(pugi::xml_document &aDoc);
     void addAggregateGradientOperation(pugi::xml_document &aDoc);
     void addComputeVolumeOperation(pugi::xml_document &aDoc);
     void addDesignVolumeOperation(pugi::xml_document &aDoc);
     void addUpdateProblemOperation(pugi::xml_document &aDoc);
     void addFilterInfo(pugi::xml_document &aDoc);
     void addInitializeFieldOperation(pugi::xml_document &aDoc);
+    void addInitializeValuesOperation(pugi::xml_document &aDoc);
     void outputInitializeOptimizationStage(pugi::xml_document &doc);
+    void outputInitializeOptimizationStageForSO(pugi::xml_document &doc);
+    void outputInitializeOptimizationStageForTO(pugi::xml_document &doc);
     bool outputVolumeGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaStage(pugi::xml_document &doc);
     void outputSetLowerBoundsStage(pugi::xml_document &doc);
     void outputSetUpperBoundsStage(pugi::xml_document &doc);
     void outputCacheStateStage(pugi::xml_document &doc, bool &aHasUncertainties);
+    bool outputConstraintStage(pugi::xml_document &doc);
+    bool outputConstraintGradientStage(pugi::xml_document &doc);
     bool outputSurfaceAreaGradientStage(pugi::xml_document &doc);
     void outputDesignVolumeStage(pugi::xml_document &doc);
     bool outputComputeStateStage(pugi::xml_document &doc);
     bool outputInternalEnergyStage(pugi::xml_document &doc, bool &aHasUncertainties);
     bool outputInternalEnergyGradientStage(pugi::xml_document &doc,
                                            bool &aHasUncertainties);
+    bool outputObjectiveStage(pugi::xml_document &doc);
+    bool outputObjectiveHessianStage(pugi::xml_document &doc);
+    bool outputObjectiveGradientStage(pugi::xml_document &doc);
     bool outputInternalEnergyHessianStage(pugi::xml_document &doc);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
