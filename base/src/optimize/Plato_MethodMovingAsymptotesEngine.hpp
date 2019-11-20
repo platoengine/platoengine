@@ -143,13 +143,13 @@ public:
         Plato::AlgebraFactory<ScalarType, OrdinalType> tAlgebraFactory;
         this->allocateDataStructures(tAlgebraFactory, tInputs);
 
-        // SET UPPER AND LOWER BOUNDS
-        this->setLowerBounds(tInputs);
-        this->setUpperBounds(tInputs);
-
         // SET INITIAL GUESS AND CONSTRAINT NORMALIZATION VALUES
         this->setInitialGuess(tInputs);
         this->setConstraintNormalizationValues(tInputs);
+
+        // SET UPPER AND LOWER BOUNDS
+        this->setLowerBounds(tInputs);
+        this->setUpperBounds(tInputs);
 
         // SET PROBLEM CRITERIA
         std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints;

@@ -445,7 +445,7 @@ bool Su2ToExodus::writeElementConnectivity()
     for(int i=0; i<mSu2Data.mNumElementBlocks; ++i)
     {
         int tNumElements = mSu2Data.mNumElements;
-        const char* tType = "tet";
+        const char* tType = "TETRA";
         int tNumNodePerElem = 4;
         int tElementBlockID = 1;
         if(ex_put_block(mExodusFileID, EX_ELEM_BLOCK, tElementBlockID, tType, tNumElements, tNumNodePerElem, 0, 0, 0))

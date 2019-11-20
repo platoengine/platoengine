@@ -55,6 +55,9 @@
 #include <vector>
 #include <array>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+#include <cctype>
 
 extern "C" {
 #include "egads.h"
@@ -94,8 +97,10 @@ class ESP
       mActiveParameterIndex(-1),
       mBuiltTo(0),
       mContext(nullptr),
-      mModel(nullptr)
+      mModel(nullptr),
+      mModelT(nullptr)
     {
+        readNames();
         openContext();
         openModel();
         checkModel();
@@ -111,6 +116,33 @@ class ESP
 
     decltype(mModelFileName) getModelFileName(){ return mModelFileName; }
     decltype(mTessFileName)  getTessFileName() { return mTessFileName;  }
+
+    int getNumParameters(){ return mParameterNames.size(); }
+
+    void readNames()
+    {
+        mParameterNames.empty();
+        std::ifstream tInputStream;
+        tInputStream.open(mModelFileName.c_str());
+        if(tInputStream.good())
+        {
+            std::string tLine, tWord;
+            while(std::getline(tInputStream, tLine))
+            {
+                std::istringstream tStream(tLine, std::istringstream::in);
+                while( tStream >> tWord )    
+                {
+                    for(auto& c : tWord) { c = std::tolower(c); }
+                    if (tWord == "despmtr")
+                    {
+                        tStream >> tWord;
+                        mParameterNames.push_back(tWord);
+                    }
+                }
+            }
+            tInputStream.close();
+        }
+    }
 
     ScalarType sensitivity(int aParameterIndex, ScalarVectorType aGradientX)
     {
@@ -352,7 +384,6 @@ class ESP
 
     void openModel()
     {
-        void *mModel;
         auto tStatus = ocsmLoad((char*)mModelFileName.c_str(), &mModel);
         if (tStatus < SUCCESS)
         {
