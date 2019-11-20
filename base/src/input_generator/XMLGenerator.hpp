@@ -58,6 +58,10 @@
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 
+namespace XMLGen
+{
+
+
 class XMLGenerator
 {
 
@@ -126,11 +130,6 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
-    bool addNTVParameter(pugi::xml_node parent_node,
-                         const std::string &name,
-                         const std::string &type,
-                         const std::string &value);
     bool addChild(pugi::xml_node parent_node, const std::string &name, const std::string &value);
     bool outputVolumeStage(pugi::xml_document &doc);
     void outputUpdateProblemStage(pugi::xml_document &doc);
@@ -146,17 +145,6 @@ protected:
     void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
                                      bool &aHasUncertainties,
                                      bool &aRequestedVonMises);
-    void buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildThermalEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter,
-                                         const char* aVariableIndex);
-    void addPAMaterialModelBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
-    void addPAPDEConstraintBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
-    void addPAObjectiveBlock(pugi::xml_node aNode, const char* aObjectiveName);
-    void buildMechanicalNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildMechanicalEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
     void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
@@ -265,5 +253,7 @@ private:
      **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
 };
+
+}
 
 #endif /* SRC_XMLGENERATOR_HPP_ */

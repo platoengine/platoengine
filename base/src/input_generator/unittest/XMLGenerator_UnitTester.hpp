@@ -53,7 +53,7 @@
 #include "XMLGenerator.hpp"
 
 
-class XMLGenerator_UnitTester : public XMLGenerator
+class XMLGenerator_UnitTester : public XMLGen::XMLGenerator
 {
 
 public:

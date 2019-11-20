@@ -40,45 +40,34 @@
 //@HEADER
 */
 
-#include "XMLGenerator.hpp"
-#include <cstring>
-#include <mpi.h>
-#include <Kokkos_Core.hpp>
+/*
+ * XMLGeneratorUtilities.cpp
+ *
+ *  Created on: Nov 19, 2019
+ *
+ */
 
-void print_usage()
+#include "XMLGeneratorUtilities.hpp"
+
+namespace XMLGen
 {
-    std::cout << "\n\nUsage: XMLGenerator [use_launch] <plato_input_deck_filename>\n\n";
-}
 
 /******************************************************************************/
-int main(int argc, char *argv[])
+bool addNTVParameter(pugi::xml_node parent_node,
+                                const std::string &name,
+                                const std::string &type,
+                                const std::string &value)
 /******************************************************************************/
 {
-    MPI_Init(&argc, &argv);
-    Kokkos::initialize(argc, argv);
-
-    if(argc == 1 ||
-      (argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--h"))))
-    {
-        print_usage();
-    }
-    else
-    {
-        bool use_launch = false;
-        int filename_index = 1;
-        if(!strcmp(argv[1], "use_launch"))
-        {
-            use_launch = true;
-            filename_index = 2;
-        }
-        XMLGen::XMLGenerator generator(argv[filename_index], use_launch);
-        generator.generate();
-    }
-
-    Kokkos::finalize();
-    MPI_Finalize();
-    return 0;
+    pugi::xml_node node = parent_node.append_child("Parameter");
+    node.append_attribute("name") = name.c_str();
+    node.append_attribute("type") = type.c_str();
+    node.append_attribute("value") = value.c_str();
+    return true;
 }
 
+
+
+}
 
 
