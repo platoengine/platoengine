@@ -173,7 +173,6 @@ void PlatoAnalyzeInputDeckWriter::buildMinimizeThermoelasticEnergyParamsForPlato
 /******************************************************************************/
 {
     pugi::xml_node tPugiNode1, tPugiNode2;
-    char tBuffer[200];
 
     addNTVParameter(aNode, "Physics", "string", "Thermomechanical");
     addNTVParameter(aNode, "PDE Constraint", "string", "Elliptic");

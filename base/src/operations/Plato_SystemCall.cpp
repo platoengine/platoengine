@@ -100,7 +100,7 @@ void SystemCall::operator()()
         // and set "changed" to true.
         if(mSavedParameters.size() == 0)
         {
-            for(int j=0; j<mInputNames.size(); ++j)
+            for(size_t j=0; j<mInputNames.size(); ++j)
             {
                 auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
                 std::vector<double> tCurVector(tInputArgument->size());
@@ -113,7 +113,7 @@ void SystemCall::operator()()
 
         if(!tChanged)
         {
-            for(int j=0; j<mInputNames.size(); ++j)
+            for(size_t j=0; j<mInputNames.size(); ++j)
             {
                 auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
                 for(size_t i=0; i<tInputArgument->size(); ++i)
