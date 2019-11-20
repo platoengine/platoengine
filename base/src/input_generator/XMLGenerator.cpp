@@ -5761,15 +5761,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
                 tmp_att.set_value("1.0");
 
-                // UpdateGeometry
-                tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "UpdateGeometry");
-                addChild(tmp_node, "Name", "Update Geometry");
-                tmp_node1 = tmp_node.append_child("Input");
-                addChild(tmp_node1, "ArgumentName", "Parameters");
-                addChild(tmp_node, "Model", m_InputData.csm_filename);
-                addChild(tmp_node, "Tesselation", m_InputData.csm_tesselation_filename);
-
                 // ComputeSolution
                 tmp_node = doc.append_child("Operation");
                 addChild(tmp_node, "Function", "ComputeSolution");
