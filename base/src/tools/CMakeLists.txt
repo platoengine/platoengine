@@ -35,6 +35,11 @@ set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_Exceptions.cpp)
 set(${LIB_NAME}_HEADERS Plato_Exceptions.hpp)
 
+set(LIB_NAME Console)
+set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
+set(${LIB_NAME}_SOURCES Plato_Console.cpp)
+set(${LIB_NAME}_HEADERS Plato_Console.hpp)
+
 set(LIBLESS_HEADERS
   Plato_Communication.hpp
 )

@@ -75,6 +75,7 @@ Interface::Interface(MPI_Comm aGlobalComm) :
         mPerformer(nullptr),
         mStages(),
         mExceptionHandler(nullptr),
+        mConsole(nullptr),
         mLocalCommID(-1),
         mPerformerID(-1),
         mLocalPerformerName(),
@@ -102,6 +103,8 @@ Interface::Interface(MPI_Comm aGlobalComm) :
     delete parser;
 
     this->createPerformers();
+
+    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"), mLocalComm);
 }
 
 /******************************************************************************/
@@ -110,6 +113,7 @@ Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_C
         mPerformer(nullptr),
         mStages(),
         mExceptionHandler(nullptr),
+        mConsole(nullptr),
         mLocalCommID(-1),
         mPerformerID(-1),
         mLocalPerformerName(),
@@ -131,6 +135,8 @@ Interface::Interface(const int & aCommID, const std::string & aXML_String, MPI_C
     mInputData = parser->parseFile(input_char);
 
     this->createPerformers();
+
+    mConsole = new Console(mLocalPerformerName, mPerformerID, Plato::Get::InputData(mInputData,"Console"), mLocalComm);
 }
 
 /******************************************************************************/
@@ -253,6 +259,8 @@ void Interface::perform()
 void Interface::perform(Plato::Stage* aStage)
 /******************************************************************************/
 {
+    Console::Status("Stage: (" + mPerformer->myName() + ") " + aStage->getName());
+
     // transmits input data
     //
     aStage->begin();
@@ -738,6 +746,11 @@ Interface::~Interface()
     {
         delete mExceptionHandler;
         mExceptionHandler = nullptr;
+    }
+    if(mConsole)
+    {
+        delete mConsole;
+        mConsole = nullptr;
     }
     const size_t tNumStages = mStages.size();
     for(size_t tStageIndex = 0u; tStageIndex < tNumStages; tStageIndex++)
