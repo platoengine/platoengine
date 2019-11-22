@@ -51,6 +51,7 @@
 #define SRC_XMLGENERATORUTILITIES_HPP_
 
 #include "Plato_Parser.hpp"
+#include "XMLGeneratorDataStruct.hpp"
 
 namespace XMLGen
 {
@@ -59,6 +60,9 @@ bool addNTVParameter(pugi::xml_node parent_node,
                      const std::string &name,
                      const std::string &type,
                      const std::string &value);
+void getUncertaintyFlags(const InputData &aInputData,
+                         bool &aHasUncertainties,
+                         bool &aRequestedVonMisesOutput);
 
 }
 

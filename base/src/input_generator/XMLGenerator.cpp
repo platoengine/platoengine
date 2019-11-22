@@ -63,6 +63,7 @@
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "PlatoAnalyzeInputDeckWriter.hpp"
+#include "SalinasInputDeckWriter.hpp"
 #include "Plato_FreeFunctions.hpp"
 #include "Plato_SromXMLUtils.hpp"
 #include "Plato_SromXML.hpp"
@@ -983,13 +984,16 @@ bool XMLGenerator::generateLaunchScript()
 bool XMLGenerator::generateSalinasInputDecks()
 /******************************************************************************/
 {
+    SalinasInputDeckWriter tWriter(m_InputData);
+    tWriter.generate();
+#if 0
     bool levelset = false;
     if(m_InputData.discretization.compare("levelset") == 0)
         levelset = true;
 
     bool tHasUncertainties = false;
     bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
+    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
 
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
@@ -1604,6 +1608,7 @@ bool XMLGenerator::generateSalinasInputDecks()
             }
         }
     }
+#endif
     return true;
 }
 /******************************************************************************/
@@ -6003,35 +6008,6 @@ bool XMLGenerator::generateSalinasOperationsXML()
 }
 
 /******************************************************************************/
-void XMLGenerator::getUncertaintyFlags(bool &aHasUncertainties,
-                                       bool &aRequestedVonMisesOutput)
-/******************************************************************************/
-{
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
-        {
-            std::string cur_load_string = cur_obj.load_case_ids[k];
-            for(size_t j=0; aRequestedVonMisesOutput == false && j<cur_obj.output_for_plotting.size(); j++)
-            {
-                if(cur_obj.output_for_plotting[j] == "vonmises")
-                {
-                    aRequestedVonMisesOutput = true;
-                }
-            }
-            for(size_t j=0; aHasUncertainties == false && j<m_InputData.uncertainties.size(); ++j)
-            {
-                if(cur_load_string == m_InputData.uncertainties[j].id)
-                {
-                    aHasUncertainties = true;
-                }
-            }
-        }
-    }
-}
-
-/******************************************************************************/
 void XMLGenerator::addStochasticObjectiveValueOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
@@ -6837,7 +6813,7 @@ bool XMLGenerator::generatePlatoOperationsXML()
 
     bool tHasUncertainties = false;
     bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
+    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
 
     if(m_InputData.optimization_type == "topology")
     {
@@ -7916,7 +7892,7 @@ bool XMLGenerator::generateInterfaceXML()
 
     bool tHasUncertainties = false;
     bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(tHasUncertainties, tRequestedVonMisesOutput);
+    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
 
     // Internal Energy XXX shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)

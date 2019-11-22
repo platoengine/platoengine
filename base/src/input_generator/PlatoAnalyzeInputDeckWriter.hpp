@@ -50,11 +50,6 @@
 #ifndef SRC_PLATOANALYZEINPUTDECKWRITER_HPP_
 #define SRC_PLATOANALYZEINPUTDECKWRITER_HPP_
 
-//#include <string>
-//#include <map>
-//#include <vector>
-//#include <fstream>
-
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 

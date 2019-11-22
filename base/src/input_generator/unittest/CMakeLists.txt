@@ -6,7 +6,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       Plato_Test_XMLGenerator.cpp
                                       ../XMLGenerator.cpp
                                       ../XMLGeneratorUtilities.cpp
-                                      ../PlatoAnalyzeInputDeckWriter.cpp)
+                                      ../PlatoAnalyzeInputDeckWriter.cpp
+                                      ../SalinasInputDeckWriter.cpp)
 
 SET(PlatoXMLGenerator_UnitTester_HDRS XMLGenerator_UnitTester.hpp)
 

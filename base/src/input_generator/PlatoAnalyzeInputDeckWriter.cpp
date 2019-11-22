@@ -47,29 +47,8 @@
  *
  */
 
-//#include <set>
-//#include <string>
-//#include <iostream>
-//#include <iostream>
-//#include <fstream>
-//#include <cstring>
-//#include <cassert>
-//#include <utility>
-//#include <string>
-//#include <map>
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "XMLGeneratorUtilities.hpp"
-//#include "Plato_SolveUncertaintyProblem.hpp"
-//#include "Plato_UniqueCounter.hpp"
-//#include "Plato_Vector3DVariations.hpp"
-//#include "Plato_FreeFunctions.hpp"
-//#include "Plato_SromXMLUtils.hpp"
-//#include "Plato_SromXML.hpp"
-//#include "XMLG_Macros.hpp"
-
-//const int MAX_CHARS_PER_LINE = 10000;
-//const int MAX_TOKENS_PER_LINE = 5000;
-//const char* const DELIMITER = " \t";
 
 namespace XMLGen
 {

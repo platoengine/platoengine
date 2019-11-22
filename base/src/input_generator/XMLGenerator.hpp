@@ -114,8 +114,6 @@ protected:
     bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
-    void getUncertaintyFlags(bool &aHasUncertainties,
-                             bool &aRequestedVonMisesOutput);
     bool runSROMForUncertainVariables();
     bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();

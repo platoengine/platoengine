@@ -54,9 +54,9 @@ namespace XMLGen
 
 /******************************************************************************/
 bool addNTVParameter(pugi::xml_node parent_node,
-                                const std::string &name,
-                                const std::string &type,
-                                const std::string &value)
+                     const std::string &name,
+                     const std::string &type,
+                     const std::string &value)
 /******************************************************************************/
 {
     pugi::xml_node node = parent_node.append_child("Parameter");
@@ -66,6 +66,35 @@ bool addNTVParameter(pugi::xml_node parent_node,
     return true;
 }
 
+/******************************************************************************/
+void getUncertaintyFlags(const InputData &aInputData,
+                         bool &aHasUncertainties,
+                         bool &aRequestedVonMisesOutput)
+/******************************************************************************/
+{
+    for(size_t i=0; i<aInputData.objectives.size(); ++i)
+    {
+        const XMLGen::Objective cur_obj = aInputData.objectives[i];
+        for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+        {
+            std::string cur_load_string = cur_obj.load_case_ids[k];
+            for(size_t j=0; aRequestedVonMisesOutput == false && j<cur_obj.output_for_plotting.size(); j++)
+            {
+                if(cur_obj.output_for_plotting[j] == "vonmises")
+                {
+                    aRequestedVonMisesOutput = true;
+                }
+            }
+            for(size_t j=0; aHasUncertainties == false && j<aInputData.uncertainties.size(); ++j)
+            {
+                if(cur_load_string == aInputData.uncertainties[j].id)
+                {
+                    aHasUncertainties = true;
+                }
+            }
+        }
+    }
+}
 
 
 }
