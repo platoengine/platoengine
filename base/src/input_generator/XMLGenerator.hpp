@@ -110,7 +110,7 @@ protected:
     bool generatePlatoAnalyzeOperationsXML();
     bool generateLightMPOperationsXML();
     bool generatePhysicsInputDecks();
-    bool generateSalinasInputDecks();
+    bool generateSalinasInputDecks(std::ostringstream *aStringStream = NULL);
     bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
