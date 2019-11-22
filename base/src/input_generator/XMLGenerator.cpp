@@ -1401,12 +1401,6 @@ bool XMLGenerator::generateAlbanyInputDecks()
     return true;
 }
 
-
-
-
-
-
-
 /******************************************************************************/
 bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
@@ -5157,15 +5151,17 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
 
                 // ComputeObjectiveGradient
                 tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "ComputeObjectiveGradient");
+                addChild(tmp_node, "Function", "ComputeObjectiveP");
                 addChild(tmp_node, "Name", "Compute Objective Gradient");
+                addChild(tmp_node, "ESPName", "Design Geometry");
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Objective Gradient");
 
                 // ComputeObjective
                 tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "ComputeObjective");
+                addChild(tmp_node, "Function", "ComputeObjectiveP");
                 addChild(tmp_node, "Name", "Compute Objective");
+                addChild(tmp_node, "ESPName", "Design Geometry");
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Objective Value");
                 tmp_node1 = tmp_node.append_child("Output");
@@ -5175,20 +5171,31 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 tmp_node = doc.append_child("Operation");
                 addChild(tmp_node, "Function", "ComputeConstraintValue");
                 addChild(tmp_node, "Name", "Compute Constraint Value");
+///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
+                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
+                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Value");
 
                 // ComputeConstraintGradient
                 tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "ComputeConstraintGradient");
+                addChild(tmp_node, "Function", "ComputeConstraintGradientP");
                 addChild(tmp_node, "Name", "Compute Constraint Gradient");
+                addChild(tmp_node, "ESPName", "Design Geometry");
+///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
+                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
+                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
 
                 // ComputeConstraint
                 tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "ComputeConstraint");
+                addChild(tmp_node, "Function", "ComputeConstraintP");
                 addChild(tmp_node, "Name", "Compute Constraint");
+                addChild(tmp_node, "ESPName", "Design Geometry");
+///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
+                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
+                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Value");
                 tmp_node1 = tmp_node.append_child("Output");
@@ -5200,25 +5207,16 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 addChild(tmp_node, "Name", "Reinitialize on Change");
                 tmp_node1 = tmp_node.append_child("Input");
                 addChild(tmp_node1, "ArgumentName", "Parameters");
-                addChild(tmp_node, "Model", m_InputData.csm_filename);
-                addChild(tmp_node, "Tesselation", m_InputData.csm_tesselation_filename);
+                addChild(tmp_node, "ESPName", "Design Geometry");
                 tmp_node1 = tmp_node.append_child("Parameter");
                 addChild(tmp_node1, "ArgumentName", "Input Mesh");
                 addChild(tmp_node1, "Target", "Input Mesh");
                 addChild(tmp_node1, "InitialValue", m_InputData.csm_exodus_filename);
 
-                // WriteOutput
-                /*
-                tmp_node = doc.append_child("Operation");
-                addChild(tmp_node, "Function", "WriteOutput");
-                addChild(tmp_node, "Name", "Write Output");
-                for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
-                {
-                    sprintf(tBuffer, "%s_%s", tCurObjective.performer_name.c_str(), tCurObjective.output_for_plotting[j].c_str());
-                    tmp_node1 = tmp_node.append_child("Output");
-                    addChild(tmp_node1, "ArgumentName", tBuffer);
-                }
-                */
+                tmp_node = doc.append_child("ESP");
+                addChild(tmp_node, "Name", "Design Geometry");
+                addChild(tmp_node, "ModelFileName", m_InputData.csm_filename);
+                addChild(tmp_node, "TessFileName", m_InputData.csm_tesselation_filename);
 
                 char buf[200];
                 sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
@@ -7239,6 +7237,10 @@ bool XMLGenerator::generateInterfaceXML()
     tTmpNode.set_name("xml");
     pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
     tmp_att.set_value("1.0");
+
+    // Console output control
+    tTmpNode = doc.append_child("Console");
+    addChild(tTmpNode, "Verbose", "true");
 
     //////////////////////////////////////////////////
     // Performers
