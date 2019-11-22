@@ -1,0 +1,11 @@
+The following two commands allow users to convert a .msh file to .exo file.  
+
+1. $OMEGA_H_BUILD_PATH/src/msh2osh name.msh name.osh
+2. $OMEGA_H_BUILD_PATH/src/osh2exo name.osh name.exo
+
+Here, $OMEGA_H_BUILD_PATH denotes the path to the omega_h build directory.  The executbales msh2osh and osh2exo should be inside the src/ directory.  The msh2osh exectuable converts the Gmsh .msh file into an Omega_h .osh file.  Similarly, The osh2exo executable converts the Omega_h osh file into an Exodus .exo file.  The sideset and nodesets are automatically assigned by Omega_h during the conversion/translation step.  The Gmsh surface labels, i.e. identifiers, are assigned by Omega_h as sideset and node set IDs (identifiers).  The sideset and nodeset names, as mentioned above, are assigned automatically by Omega_h.  The Gmsh surface labels are related to the Exodus sideset and nodeset names through the sideset and nodeset identifiers.  Sandia's Cubit software can be used to open/import the exodus file and visualize the sideset and nodeset names.
+
+Users are encouraged to test the Gmsh to Exodus converter by running the convert.source file inside this directory.  Make sure to replace $OMEGA_H_BUILD_PATH with the right path. 
+
+NOTE:
+The PLATO team has tested the Gmsh to Exodus converter with Gmsh version 3.0.6 or lower.  The Gmsh to Exodus converter doesn't work with the latest Gmsh version.  Users are welcomed to contribute to the PLATO effort by providing a new Gmsh2Exodus to the PLATO effort.  

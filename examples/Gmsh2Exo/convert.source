@@ -1,0 +1,2 @@
+$OMEGA_H_BUILD_PATH/src/msh2osh name.msh name.osh
+$OMEGA_H_BUILD_PATH/src/osh2exo name.osh name.exo
