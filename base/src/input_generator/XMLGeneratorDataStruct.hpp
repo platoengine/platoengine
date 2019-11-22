@@ -243,6 +243,7 @@ struct InputData
     std::string mMMAAsymptoteExpansion;
     std::string mMMAAsymptoteContraction;
     std::string mMMAMaxNumSubProblemIterations;
+    std::string mMMAMaxTrustRegionIterations;
 
     std::string mUseMeanNorm;
     std::string mAugLagPenaltyParam;

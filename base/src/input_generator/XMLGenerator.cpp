@@ -3405,6 +3405,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mMMAMaxNumSubProblemIterations = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","max","trust","region","iterations"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma max trust region iterations\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAMaxTrustRegionIterations = tStringValue;
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"ks","max","trust","region","iterations"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -8469,6 +8478,10 @@ bool XMLGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
     if(m_InputData.mMMAMaxNumSubProblemIterations.size() > 0)
     {
         this->addChild(aXMLnode, "MaxNumSubProblemIter", m_InputData.mMMAMaxNumSubProblemIterations);
+    }
+    if(m_InputData.mMMAMaxTrustRegionIterations.size() > 0)
+    {
+        this->addChild(aXMLnode, "MaxNumTrustRegionIter", m_InputData.mMMAMaxTrustRegionIterations);
     }
 
     return (true);
