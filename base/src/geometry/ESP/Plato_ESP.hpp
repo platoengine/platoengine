@@ -154,14 +154,7 @@ class ESP
   private:
     void tesselate()
     {
-        // JR TODO: get these as inputs
-        /* set the global tessellation parameters */
-        std::array<ScalarType, mSpaceDim> tGlobal;
-        tGlobal[0] = 0.025;
-        tGlobal[1] = 0.001;
-        tGlobal[2] = 12.0;
-
-        /* tessellate & store the tessellation object in OpenCSM */
+        /* store the tessellation object in OpenCSM */
         for (int ibody=1; ibody<=mModelT->nbody; ibody++)
         {
             if (mModelT->body[ibody].onstack != 1) continue;
@@ -175,28 +168,6 @@ class ESP
             if (tStatus != EGADS_SUCCESS)
             {
                 throwWithError("EG_loadTess failed.");
-            }
-            else
-            {
-                std::array<ScalarType, mSpaceDim> tParam = tGlobal;
-                constexpr int nBoxVals = 2*mSpaceDim;
-                std::array<ScalarType, nBoxVals> tBox;
-                // tparam[0] = tGlobal[0];
-                // tparam[1] = tGlobal[1];
-                // tparam[2] = tGlobal[2];
-                auto tStatus = EG_getBoundingBox(tBody, tBox.data());
-                if (tStatus != EGADS_SUCCESS) {
-                    throwWithError("EG_getBoundingBox failed.");
-                }
-                auto size = sqrt((tBox[3]-tBox[0])*(tBox[3]-tBox[0]) +
-                                 (tBox[4]-tBox[1])*(tBox[4]-tBox[1]) +
-                                 (tBox[5]-tBox[2])*(tBox[5]-tBox[2]));
-                tParam[0] *= size;
-                tParam[1] *= size;
-                tStatus = EG_makeTessBody(tBody, tParam.data(), &mModelT->body[ibody].etess);
-                if (tStatus != EGADS_SUCCESS) {
-                    throwWithError("EG_makeTessBody failed.");
-                }
             }
         }
     }
@@ -350,7 +321,7 @@ class ESP
     void activateParameterInModel(const std::string& aParameterName)
     {
         int tNumRows(1), tNumCols(1); // no matrix variables allowed currently
-        int tType(0); // not sure what this does
+        int tType(0); // not sure what this variable is for
         char tParameterName[129];
         for (int j=0; j<mModelT->npmtr; j++)
         {
