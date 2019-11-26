@@ -66,9 +66,9 @@ namespace Plato
  * @param [in] aData diagnostic data for MMA algorithm
  * @param [in] aOutputFile output file
  **********************************************************************************/
-template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType, typename OutputType>
 void check_mma_inputs(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
-                      const std::ofstream &aOutputFile)
+                      const OutputType &aOutputFile)
 {
     try
     {
@@ -131,9 +131,9 @@ inline void print_mma_stop_criterion(const Plato::algorithm::stop_t & aStopCrite
  * @param [in] aData diagnostic data for mma algorithm
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
-template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType, typename OutputType>
 void print_mma_diagnostics_header(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
-                                  std::ofstream &aOutputFile)
+                                  OutputType &aOutputFile)
 {
     try
     {
@@ -175,9 +175,9 @@ void print_mma_diagnostics_header(const Plato::OutputDataMMA<ScalarType, Ordinal
  * @param [in] aData diagnostic data for mma algorithm
  * @param [in,out] aOutputFile output file
 **********************************************************************************/
-template<typename ScalarType, typename OrdinalType>
+template<typename ScalarType, typename OrdinalType, typename OutputType>
 void print_mma_diagnostics(const Plato::OutputDataMMA<ScalarType, OrdinalType> &aData,
-                           std::ofstream &aOutputFile)
+                           OutputType &aOutputFile)
 {
     try
     {

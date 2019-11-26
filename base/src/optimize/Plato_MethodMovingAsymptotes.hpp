@@ -48,6 +48,7 @@
 
 #pragma once
 
+#include "Plato_Console.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_CriterionList.hpp"
 #include "Plato_AugmentedLagrangian.hpp"
@@ -528,6 +529,11 @@ private:
             }
 
             Plato::print_mma_diagnostics(mOutputData, mOutputStream);
+
+            std::stringstream tConsoleStream;
+            Plato::print_mma_diagnostics_header(mOutputData, tConsoleStream);
+            Plato::print_mma_diagnostics(mOutputData, tConsoleStream);
+            Plato::Console::Alert(tConsoleStream.str());
         }
     }
 

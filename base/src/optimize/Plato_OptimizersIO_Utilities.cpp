@@ -64,5 +64,13 @@ Plato::MemorySpace::type_t get_memory_space(const std::string& aInput)
 }
 // function get_memory_space
 
-}
-// namespace Plato
+namespace error
+{
+/******************************************************************************//**
+ * @brief Specialization that permits stringstreams.
+ * @param [in] aOutputStream stringstream pretending to be a file.
+**********************************************************************************/
+template <>
+void is_file_open(const std::stringstream& aOutputStream){}
+} // namespace error
+} // namespace Plato

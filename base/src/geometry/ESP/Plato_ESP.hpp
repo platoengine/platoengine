@@ -77,6 +77,8 @@ namespace Geometry {
 template <typename ScalarType, typename ScalarVectorType>
 class ESP
 {
+    std::vector<ScalarVectorType> mSensitivity;
+
     std::vector<std::string>  mParameterNames;
    
     std::string  mModelFileName;
@@ -101,6 +103,9 @@ class ESP
       mModelT(nullptr)
     {
         readNames();
+
+        mSensitivity.resize(mParameterNames.size());
+
         openContext();
         openModel();
         checkModel();
@@ -146,9 +151,15 @@ class ESP
 
     ScalarType sensitivity(int aParameterIndex, ScalarVectorType aGradientX)
     {
-        activateParameterInModel(mParameterNames[aParameterIndex]);
-
-        return computeSensitivity(aGradientX);
+        ScalarType tDfDp(0.0);
+        auto& tSensitivity = mSensitivity[aParameterIndex];
+        int tNumData = tSensitivity.extent(0);
+        for (int k=0; k<tNumData; k++)
+        {
+            tDfDp += tSensitivity(k)*aGradientX(k);
+        }
+        return tDfDp;
+      
     }
 
   private:
@@ -170,10 +181,16 @@ class ESP
                 throwWithError("EG_loadTess failed.");
             }
         }
+        int tNumParams = mParameterNames.size();
+        for(int iParam=0; iParam<tNumParams; iParam++)
+        {
+            activateParameterInModel(mParameterNames[iParam]);
+            computeSensitivity(mSensitivity[iParam]);
+        }
     }
 
 
-    ScalarType computeSensitivity(ScalarVectorType aGradientX)
+    ScalarType computeSensitivity(ScalarVectorType& aDXDp)
     {
         ScalarType tSensitivity(0.0);
 
@@ -187,7 +204,7 @@ class ESP
         /* retrieve the sensitivities for the active bodies */
         int tNface, tNedge, tNvert, tNtri;
         int *tTris(nullptr);
-        ScalarType *tCoords(nullptr), *tDvar(nullptr);
+        ScalarType *tCoords(nullptr);
         verTags *tVtags;
         for (int ibody = 1; ibody <= mModelT->nbody; ibody++)
         {
@@ -198,13 +215,8 @@ class ESP
             {
                 throwWithError("bodyTess failed.");
             }
-            tDvar = (ScalarType *) EG_alloc(3*tNvert*sizeof(ScalarType));
-            if (tDvar == NULL)
-            {
-                EG_free(tTris);
-                EG_free(tVtags);
-                throwWithError("Malloc failed on verts.");
-            }
+
+            aDXDp = ScalarVectorType("dxdp", tNvert*mSpaceDim);
 
             const ScalarType *tPcsens;
       
@@ -215,7 +227,6 @@ class ESP
                 auto tStatus = ocsmGetTessVel(mModel, ibody, OCSM_NODE, tVtags[j].pindex, &tPcsens);
                 if (tStatus != EGADS_SUCCESS)
                 {
-                    EG_free(tDvar);
                     EG_free(tTris);
                     EG_free(tVtags);
                     EG_free(tCoords);
@@ -224,9 +235,9 @@ class ESP
                        << tStatus << " (Node = " << tVtags[j].pindex << ")!";
                     throwWithError(ss.str());
                 }
-                tDvar[3*j  ] = tPcsens[0];
-                tDvar[3*j+1] = tPcsens[1];
-                tDvar[3*j+2] = tPcsens[2];
+                aDXDp(3*j  ) = tPcsens[0];
+                aDXDp(3*j+1) = tPcsens[1];
+                aDXDp(3*j+2) = tPcsens[2];
             }
       
             /* next do all of the edges */
@@ -236,7 +247,6 @@ class ESP
                 auto tStatus = ocsmGetTessVel(mModel, ibody, OCSM_EDGE, j, &tPcsens);
                 if (tStatus != EGADS_SUCCESS)
                 {
-                    EG_free(tDvar);
                     EG_free(tTris);
                     EG_free(tVtags);
                     EG_free(tCoords);
@@ -248,9 +258,9 @@ class ESP
                 {
                     if ((tVtags[k].ptype > 0) && (tVtags[k].pindex == j)) {
                         tIndex       = tVtags[k].ptype - 1;
-                        tDvar[3*k  ] = tPcsens[3*tIndex  ];
-                        tDvar[3*k+1] = tPcsens[3*tIndex+1];
-                        tDvar[3*k+2] = tPcsens[3*tIndex+2];
+                        aDXDp(3*k  ) = tPcsens[3*tIndex  ];
+                        aDXDp(3*k+1) = tPcsens[3*tIndex+1];
+                        aDXDp(3*k+2) = tPcsens[3*tIndex+2];
                     }
                 }
             }
@@ -259,7 +269,6 @@ class ESP
             for (int j=1; j<=tNface; j++) {
               auto tStatus = ocsmGetTessVel(mModel, ibody, OCSM_FACE, j, &tPcsens);
               if (tStatus != EGADS_SUCCESS) {
-                EG_free(tDvar);
                 EG_free(tTris);
                 EG_free(tVtags);
                 EG_free(tCoords);
@@ -270,17 +279,12 @@ class ESP
               for (int k=0; k<tNvert; k++)
                 if ((tVtags[k].ptype < 0) && (tVtags[k].pindex == j)) {
                   tIndex       = -tVtags[k].ptype - 1;
-                  tDvar[3*k  ] = tPcsens[3*tIndex  ];
-                  tDvar[3*k+1] = tPcsens[3*tIndex+1];
-                  tDvar[3*k+2] = tPcsens[3*tIndex+2];
+                  aDXDp(3*k  ) = tPcsens[3*tIndex  ];
+                  aDXDp(3*k+1) = tPcsens[3*tIndex+1];
+                  aDXDp(3*k+2) = tPcsens[3*tIndex+2];
                 }
             }
-            for (int k=0; k<mSpaceDim*tNvert; k++)
-            {
-                tSensitivity += tDvar[k]*aGradientX(k);
-            }
       
-            EG_free(tDvar);
             EG_free(tTris);
             EG_free(tVtags);
             EG_free(tCoords);
