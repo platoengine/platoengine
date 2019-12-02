@@ -3378,6 +3378,24 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                             }
                             m_InputData.mMMAMoveLimit = tStringValue;
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","control","stagnation","tolerance"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma control stagnation tolerance\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAControlStagnationTolerance = tStringValue;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"mma","objective","stagnation","tolerance"}, tStringValue))
+                        {
+                            if(tStringValue == "")
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"mma objective stagnation tolerance\" keyword(s).\n";
+                                return false;
+                            }
+                            m_InputData.mMMAObjectiveStagnationTolerance = tStringValue;
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"mma","asymptote","expansion"}, tStringValue))
                         {
                             if(tStringValue == "")
@@ -8482,6 +8500,14 @@ bool XMLGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
     if(m_InputData.mMMAMaxTrustRegionIterations.size() > 0)
     {
         this->addChild(aXMLnode, "MaxNumTrustRegionIter", m_InputData.mMMAMaxTrustRegionIterations);
+    }
+    if(m_InputData.mMMAControlStagnationTolerance.size() > 0)
+    {
+        this->addChild(aXMLnode, "ControlStagnationTolerance", m_InputData.mMMAControlStagnationTolerance);
+    }
+    if(m_InputData.mMMAObjectiveStagnationTolerance.size() > 0)
+    {
+        this->addChild(aXMLnode, "ObjectiveStagnationTolerance", m_InputData.mMMAObjectiveStagnationTolerance);
     }
 
     return (true);
