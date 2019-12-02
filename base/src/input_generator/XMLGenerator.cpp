@@ -5134,9 +5134,15 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 addChild(tmp_node, "Name", "Write Output");
                 for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
                 {
-                    sprintf(tBuffer, "%s_%s", tCurObjective.performer_name.c_str(), tCurObjective.output_for_plotting[j].c_str());
                     tmp_node1 = tmp_node.append_child("Output");
-                    addChild(tmp_node1, "ArgumentName", tBuffer);
+                    if(tCurObjective.output_for_plotting[j] == "disp_x")
+                        addChild(tmp_node1, "ArgumentName", "Solution X");
+                    else if(tCurObjective.output_for_plotting[j] == "disp_y")
+                        addChild(tmp_node1, "ArgumentName", "Solution Y");
+                    else if(tCurObjective.output_for_plotting[j] == "disp_z")
+                        addChild(tmp_node1, "ArgumentName", "Solution Z");
+                    else if(tCurObjective.output_for_plotting[j] == "temperature")
+                        addChild(tmp_node1, "ArgumentName", "Solution");
                 }
 
                 char buf[200];
@@ -6053,7 +6059,8 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
             {
                 tmp_node1 = tmp_node.append_child("Input");
                 addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
-                if(cur_obj.output_for_plotting[j] == "vonmises")
+                if(cur_obj.output_for_plotting[j] == "vonmises" ||
+                   cur_obj.output_for_plotting[j] == "Vonmises")
                     addChild(tmp_node1, "Layout", "Element Field");
             }
         }
@@ -8105,11 +8112,17 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                         addChild(op_node, "PerformerName", cur_obj.performer_name);
                         tFirstTime = false;
                     }
-                    // create shared data for objectives
                     sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
                     output_node = op_node.append_child("Output");
-                    addChild(output_node, "ArgumentName", tmp_buf);
                     addChild(output_node, "SharedDataName", tmp_buf);
+                    if(cur_obj.output_for_plotting[j] == "disp_x")
+                        addChild(output_node, "ArgumentName", "Solution X");
+                    else if(cur_obj.output_for_plotting[j] == "disp_y")
+                        addChild(output_node, "ArgumentName", "Solution Y");
+                    else if(cur_obj.output_for_plotting[j] == "disp_z")
+                        addChild(output_node, "ArgumentName", "Solution Z");
+                    else if(cur_obj.output_for_plotting[j] == "temperature")
+                        addChild(output_node, "ArgumentName", "Solution");
                 }
             }
         }
