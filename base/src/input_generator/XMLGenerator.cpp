@@ -5084,7 +5084,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
 /******************************************************************************/
 {
     int num_plato_analyze_objs = 0;
-    char tBuffer[1000];
     if(m_InputData.optimization_type == "topology")
     {
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
