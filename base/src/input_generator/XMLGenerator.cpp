@@ -5134,11 +5134,11 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
                 {
                     tmp_node1 = tmp_node.append_child("Output");
-                    if(tCurObjective.output_for_plotting[j] == "disp_x")
+                    if(tCurObjective.output_for_plotting[j] == "dispx")
                         addChild(tmp_node1, "ArgumentName", "Solution X");
-                    else if(tCurObjective.output_for_plotting[j] == "disp_y")
+                    else if(tCurObjective.output_for_plotting[j] == "dispy")
                         addChild(tmp_node1, "ArgumentName", "Solution Y");
-                    else if(tCurObjective.output_for_plotting[j] == "disp_z")
+                    else if(tCurObjective.output_for_plotting[j] == "dispz")
                         addChild(tmp_node1, "ArgumentName", "Solution Z");
                     else if(tCurObjective.output_for_plotting[j] == "temperature")
                         addChild(tmp_node1, "ArgumentName", "Solution");
@@ -8114,11 +8114,11 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                     sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
                     output_node = op_node.append_child("Output");
                     addChild(output_node, "SharedDataName", tmp_buf);
-                    if(cur_obj.output_for_plotting[j] == "disp_x")
+                    if(cur_obj.output_for_plotting[j] == "dispx")
                         addChild(output_node, "ArgumentName", "Solution X");
-                    else if(cur_obj.output_for_plotting[j] == "disp_y")
+                    else if(cur_obj.output_for_plotting[j] == "dispy")
                         addChild(output_node, "ArgumentName", "Solution Y");
-                    else if(cur_obj.output_for_plotting[j] == "disp_z")
+                    else if(cur_obj.output_for_plotting[j] == "dispz")
                         addChild(output_node, "ArgumentName", "Solution Z");
                     else if(cur_obj.output_for_plotting[j] == "temperature")
                         addChild(output_node, "ArgumentName", "Solution");
