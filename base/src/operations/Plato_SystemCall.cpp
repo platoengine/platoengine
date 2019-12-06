@@ -157,7 +157,7 @@ void SystemCall::operator()()
                 auto tInputArgument = mPlatoApp->getValue(tInputName);
                 for(size_t i=0; i<tInputArgument->size(); ++i)
                 {
-                    commandPlusArgs << tInputArgument->data()[i] << " ";
+                    commandPlusArgs << std::setprecision(16) << tInputArgument->data()[i] << " ";
                 }
             }
         }
