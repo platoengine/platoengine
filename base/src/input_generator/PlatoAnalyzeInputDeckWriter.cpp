@@ -125,7 +125,10 @@ void PlatoAnalyzeInputDeckWriter::buildMaximizeStiffnessParamsForPlatoAnalyze(co
     addNTVParameter(aNode, "PDE Constraint", "string", "Elliptic");
     addNTVParameter(aNode, "Constraint", "string", "My Volume");
     addNTVParameter(aNode, "Objective", "string", "My Internal Elastic Energy");
-    addNTVParameter(aNode, "Self-Adjoint", "bool", "true");
+    if(mInputData.optimization_type == "shape")
+        addNTVParameter(aNode, "Self-Adjoint", "bool", "false");
+    else
+        addNTVParameter(aNode, "Self-Adjoint", "bool", "true");
 
     // Volume Constraint
     addVolumeConstraintForPlatoAnalyze(aNode);

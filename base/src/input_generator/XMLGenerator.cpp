@@ -5203,9 +5203,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 tmp_node = doc.append_child("Operation");
                 addChild(tmp_node, "Function", "ComputeConstraintValue");
                 addChild(tmp_node, "Name", "Compute Constraint Value");
-///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
-                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
-                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Value");
 
@@ -5214,9 +5211,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 addChild(tmp_node, "Function", "ComputeConstraintGradientP");
                 addChild(tmp_node, "Name", "Compute Constraint Gradient");
                 addChild(tmp_node, "ESPName", "Design Geometry");
-///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
-                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
-                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
 
@@ -5225,9 +5219,6 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 addChild(tmp_node, "Function", "ComputeConstraintP");
                 addChild(tmp_node, "Name", "Compute Constraint");
                 addChild(tmp_node, "ESPName", "Design Geometry");
-///// THIS IS ASSUMING ONLY ONE CONSTRAINT!!! //////////////////////////
-                if(m_InputData.constraints.size() > 0 && m_InputData.constraints[0].volume_absolute.length() > 0)
-                    addChild(tmp_node, "Target", m_InputData.constraints[0].volume_absolute);
                 tmp_node1 = tmp_node.append_child("Output");
                 addChild(tmp_node1, "ArgumentName", "Constraint Value");
                 tmp_node1 = tmp_node.append_child("Output");
@@ -5237,6 +5228,7 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
                 tmp_node = doc.append_child("Operation");
                 addChild(tmp_node, "Function", "ReinitializeESP");
                 addChild(tmp_node, "Name", "Reinitialize on Change");
+                addChild(tmp_node, "OnChange", "true");
                 tmp_node1 = tmp_node.append_child("Input");
                 addChild(tmp_node1, "ArgumentName", "Parameters");
                 addChild(tmp_node, "ESPName", "Design Geometry");
@@ -7792,6 +7784,8 @@ bool XMLGenerator::generateInterfaceXML()
         addChild(tTmpNode, "ValueStageName", "Constraint");
         addChild(tTmpNode, "GradientName", "Constraint Gradient");
         addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
+        if(m_InputData.constraints[0].volume_absolute != "")
+            addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].volume_absolute);
     }
 
     if(m_InputData.optimization_algorithm != "mma")
