@@ -258,6 +258,7 @@ struct InputData
     std::vector<std::string> fixed_sideset_ids;
     std::vector<std::string> fixed_nodeset_ids;
     std::vector<std::string> mStandardDeviations;
+    std::vector<std::string> mShapeDesignVariableValues;
 
     std::vector<XMLGen::LoadCase> load_cases;
     std::vector<XMLGen::BC> bcs;

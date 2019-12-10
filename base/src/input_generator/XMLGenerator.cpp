@@ -254,7 +254,16 @@ bool XMLGenerator::parseCSMFileFromStream(std::istream &aStream)
             continue;
 
         if(tCharPointer && std::strcmp(tCharPointer, "despmtr") == 0)
+        {
+            // Get the variable name
+            tCharPointer = std::strtok(0, " ");
+            if(!tCharPointer)
+                break;
+            // Get the variable value
+            tCharPointer = std::strtok(0, " ");
+            m_InputData.mShapeDesignVariableValues.push_back(tCharPointer);
             m_InputData.num_shape_design_variables++;
+        }
     }
 
     return tRet;
@@ -930,6 +939,15 @@ bool XMLGenerator::generateLaunchScript()
         tLaunchString = "mpiexec";
         tNumProcsString = "-np";
     }
+
+    if(m_InputData.optimization_type == "shape")
+    {
+        fprintf(fp, "python aflr.py %s %s %s ", m_InputData.csm_filename.c_str(), m_InputData.csm_exodus_filename.c_str(), m_InputData.csm_tesselation_filename.c_str());
+        for(size_t i=0; i<m_InputData.mShapeDesignVariableValues.size(); ++i)
+            fprintf(fp, "%s ", m_InputData.mShapeDesignVariableValues[i].c_str());
+        fprintf(fp, "\n");
+    }
+
     // Now add the main mpirun call.
     fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
     fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
