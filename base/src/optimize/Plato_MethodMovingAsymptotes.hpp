@@ -411,6 +411,7 @@ public:
         {
             this->updateState();
             this->updateSubProblem();
+            mDataMng->cacheState();
             this->solveSubProblem();
             mIterationCount++;
 
@@ -418,6 +419,7 @@ public:
             if(tStop == true)
             {
                 this->updateState();
+                mDataMng->cacheState();
                 this->printStoppingCriterion();
                 this->closeOutputFile();
                 break;
@@ -601,7 +603,6 @@ private:
         this->evaluateConstraints();
         this->performContinuation();
         mDataMng->computeStoppingMeasures();
-        mDataMng->cacheState();
         this->printDiagnostics();
     }
 
