@@ -89,14 +89,21 @@ void PlatoApp::exportDataMap(const Plato::data::layout_t & aDataLayout, std::vec
     }
     else if(aDataLayout == Plato::data::layout_t::ELEMENT_FIELD)
     {
-        int tMyNumElements = mLightMp->getMesh()->getNumElems();
-        int* tElemGlobalIds = mLightMp->getMesh()->elemGlobalIds;
-        aMyOwnedGlobalIDs.resize(tMyNumElements);
-        std::copy(tElemGlobalIds, tElemGlobalIds + tMyNumElements, aMyOwnedGlobalIDs.begin());
+        if(mLightMp == nullptr)
+        {
+            aMyOwnedGlobalIDs.resize(0);
+        }
+        else
+        {
+            int tMyNumElements = mLightMp->getMesh()->getNumElems();
+            int* tElemGlobalIds = mLightMp->getMesh()->elemGlobalIds;
+            aMyOwnedGlobalIDs.resize(tMyNumElements);
+            std::copy(tElemGlobalIds, tElemGlobalIds + tMyNumElements, aMyOwnedGlobalIDs.begin());
+        }
     }
     else
     {
-        // TODO: THROW
+        throw ParsingException("PlatoApp::exportDataMap: Unknown Data Layout requested.");
     }
 }
 
@@ -413,6 +420,10 @@ void PlatoApp::createLocalData(Plato::LocalArg aLocalArguments)
         {
             return;
         }
+        if(mLightMp == nullptr)
+        {
+            throw ParsingException("PlatoApp::createLocalData: SCALAR_FIELD requested but no mesh defined.");
+        }
         std::vector<VarIndex> tNewData(1);
         tNewData[0] =
                 mLightMp->getDataContainer()->registerVariable(RealType, aLocalArguments.mName, NODE, aLocalArguments.mWrite);
@@ -424,6 +435,10 @@ void PlatoApp::createLocalData(Plato::LocalArg aLocalArguments)
         if(tIterator != mElementFieldMap.end())
         {
             return;
+        }
+        if(mLightMp == nullptr)
+        {
+            throw ParsingException("PlatoApp::createLocalData: ELEMENT_FIELD requested but no mesh defined.");
         }
         VarIndex tNewDataIndex;
         tNewDataIndex =
@@ -538,7 +553,7 @@ DistributedVector* PlatoApp::getNodeField(const std::string & aName)
 
 size_t PlatoApp::getLocalNumElements() const
 {
-    return (mLightMp->getMesh()->getNumElems());
+    return mLightMp != nullptr ? mLightMp->getMesh()->getNumElems() : 0;
 }
 
 VarIndex PlatoApp::getElementField(const std::string & aName)
@@ -553,6 +568,10 @@ VarIndex PlatoApp::getElementField(const std::string & aName)
 
 double* PlatoApp::getElementFieldData(const std::string & aName)
 {
+    if(mLightMp == nullptr)
+    {
+        return nullptr;
+    }
     double* tOutputDataView;
     auto tFieldIndex = this->getElementField(aName);
     auto tDataContainer = mLightMp->getDataContainer();
@@ -589,6 +608,10 @@ Plato::AbstractFilter* PlatoApp::getFilter()
 {
     if(!mFilter)
     {
+        if(mLightMp == nullptr)
+        {
+            return nullptr;
+        }
         if(mTimersTree)
         {
             mTimersTree->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
@@ -654,7 +677,11 @@ PlatoApp::PlatoApp(int aArgc, char **aArgv, MPI_Comm& aLocalComm) :
         tInputfile = "platomain.xml";
     }
     mInputfileData = parser->parseFile(tInputfile.c_str());
-    mLightMp = new LightMP(tInputfile);
+    auto tMeshSpec = mInputfileData.getByName<Plato::InputData>("mesh");
+    if (tMeshSpec.size() != 0)
+    {
+        mLightMp = new LightMP(tInputfile);
+    }
 
     if (parser)
     {

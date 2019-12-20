@@ -117,6 +117,24 @@ void SharedDataInfo::setSharedDataSize(const std::string & aName, const int & aS
 }
 
 /******************************************************************************/
+bool SharedDataInfo::getSharedDataDynamic(const std::string & aName) const
+/******************************************************************************/
+{
+    assert(mSharedDataDynamic.empty() == false);
+    std::map<std::string, bool>::const_iterator tIterator;
+    tIterator = mSharedDataDynamic.find(aName);
+    assert(tIterator != mSharedDataDynamic.end());
+    return (tIterator->second);
+}
+
+/******************************************************************************/
+void SharedDataInfo::setSharedDataDynamic(const std::string & aName, const bool & aIsDynamic)
+/******************************************************************************/
+{
+    mSharedDataDynamic[aName] = aIsDynamic;
+}
+
+/******************************************************************************/
 bool SharedDataInfo::isNameDefined(const std::string & aName) const
 /******************************************************************************/
 {

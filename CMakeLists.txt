@@ -202,6 +202,7 @@ endif()
 
 if( ESP_ENABLED )
   add_subdirectory(base/src/geometry/ESP)
+  add_subdirectory(apps/esp)
 endif()
 
 if( STK_ENABLED )

@@ -64,6 +64,11 @@ extern "C" {
 #include "bodyTess.h"
 #include "common.h"
 #include "OpenCSM.h"
+// the 'undef' and 'define' below are a work around.  OpenCSM defines SUCCESS which 
+// conflicts with a definition in opempi.
+#undef SUCCESS
+#define OCSM_SUCCESS 0
+
 /* undocumented EGADS function */
 extern int EG_loadTess(ego body, const char *name, ego *tess);
 }
@@ -77,14 +82,15 @@ namespace Geometry {
 template <typename ScalarType, typename ScalarVectorType>
 class ESP
 {
-    std::vector<ScalarVectorType> mSensitivity;
+    typedef std::vector<ScalarType> VectorType;
+    std::vector<VectorType> mSensitivity;
 
     std::vector<std::string>  mParameterNames;
    
     std::string  mModelFileName;
     std::string  mTessFileName;
     std::string  mActiveParameterName;
-    int          mActiveParameterIndex, mBuiltTo;
+    int          mParameterIndex, mActiveParameterIndex, mBuiltTo;
     ego          mContext;
     void         *mModel;
     modl_T       *mModelT;
@@ -93,9 +99,10 @@ class ESP
 
   public:
 
-    ESP(std::string aModelFileName, std::string aTessFileName) :
+    ESP(std::string aModelFileName, std::string aTessFileName, int aParameterIndex=-1) :
       mModelFileName(aModelFileName),
       mTessFileName(aTessFileName),
+      mParameterIndex(aParameterIndex),
       mActiveParameterIndex(-1),
       mBuiltTo(0),
       mContext(nullptr),
@@ -103,6 +110,12 @@ class ESP
       mModelT(nullptr)
     {
         readNames();
+
+        if(mParameterIndex != -1){
+          auto tName = mParameterNames[mParameterIndex];
+          mParameterNames.resize(1);
+          mParameterNames[0] = tName;
+        }
 
         mSensitivity.resize(mParameterNames.size());
 
@@ -124,6 +137,22 @@ class ESP
 
     int getNumParameters(){ return mParameterNames.size(); }
 
+    decltype(mSensitivity) getSensitivities(){ return mSensitivity; }
+
+    ScalarType sensitivity(int aParameterIndex, ScalarVectorType aGradientX)
+    {
+        ScalarType tDfDp(0.0);
+        auto& tSensitivity = mSensitivity[aParameterIndex];
+        int tNumData = tSensitivity.size();
+        for (int k=0; k<tNumData; k++)
+        {
+            tDfDp += tSensitivity[k]*aGradientX[k];
+        }
+        return tDfDp;
+      
+    }
+
+  private:
     void readNames()
     {
         mParameterNames.empty();
@@ -149,20 +178,6 @@ class ESP
         }
     }
 
-    ScalarType sensitivity(int aParameterIndex, ScalarVectorType aGradientX)
-    {
-        ScalarType tDfDp(0.0);
-        auto& tSensitivity = mSensitivity[aParameterIndex];
-        int tNumData = tSensitivity.extent(0);
-        for (int k=0; k<tNumData; k++)
-        {
-            tDfDp += tSensitivity(k)*aGradientX(k);
-        }
-        return tDfDp;
-      
-    }
-
-  private:
     void tesselate()
     {
         /* store the tessellation object in OpenCSM */
@@ -190,7 +205,7 @@ class ESP
     }
 
 
-    ScalarType computeSensitivity(ScalarVectorType& aDXDp)
+    ScalarType computeSensitivity(VectorType& aDXDp)
     {
         ScalarType tSensitivity(0.0);
 
@@ -216,7 +231,7 @@ class ESP
                 throwWithError("bodyTess failed.");
             }
 
-            aDXDp = ScalarVectorType("dxdp", tNvert*mSpaceDim);
+            aDXDp = VectorType(tNvert*mSpaceDim);
 
             const ScalarType *tPcsens;
       
@@ -235,9 +250,9 @@ class ESP
                        << tStatus << " (Node = " << tVtags[j].pindex << ")!";
                     throwWithError(ss.str());
                 }
-                aDXDp(3*j  ) = tPcsens[0];
-                aDXDp(3*j+1) = tPcsens[1];
-                aDXDp(3*j+2) = tPcsens[2];
+                aDXDp[3*j  ] = tPcsens[0];
+                aDXDp[3*j+1] = tPcsens[1];
+                aDXDp[3*j+2] = tPcsens[2];
             }
       
             /* next do all of the edges */
@@ -251,16 +266,16 @@ class ESP
                     EG_free(tVtags);
                     EG_free(tCoords);
                     std::stringstream ss;
-                    ss << " ocsmGetTessVel Parameter " << mActiveParameterName << " Edge " << j << " failed: " << stat;
+                    ss << " ocsmGetTessVel Parameter " << mActiveParameterName << " Edge " << j << " failed: " << tStatus;
                     throwWithError(ss.str());
                 }
                 for (int k = 0; k < tNvert; k++)
                 {
                     if ((tVtags[k].ptype > 0) && (tVtags[k].pindex == j)) {
                         tIndex       = tVtags[k].ptype - 1;
-                        aDXDp(3*k  ) = tPcsens[3*tIndex  ];
-                        aDXDp(3*k+1) = tPcsens[3*tIndex+1];
-                        aDXDp(3*k+2) = tPcsens[3*tIndex+2];
+                        aDXDp[3*k  ] = tPcsens[3*tIndex  ];
+                        aDXDp[3*k+1] = tPcsens[3*tIndex+1];
+                        aDXDp[3*k+2] = tPcsens[3*tIndex+2];
                     }
                 }
             }
@@ -273,15 +288,15 @@ class ESP
                 EG_free(tVtags);
                 EG_free(tCoords);
                 std::stringstream ss;
-                ss << " ocsmGetTessVel Parameter " << mActiveParameterName << " Face " << j << "failed: " << stat;
+                ss << " ocsmGetTessVel Parameter " << mActiveParameterName << " Face " << j << "failed: " << tStatus;
                 throwWithError(ss.str());
               }
               for (int k=0; k<tNvert; k++)
                 if ((tVtags[k].ptype < 0) && (tVtags[k].pindex == j)) {
                   tIndex       = -tVtags[k].ptype - 1;
-                  aDXDp(3*k  ) = tPcsens[3*tIndex  ];
-                  aDXDp(3*k+1) = tPcsens[3*tIndex+1];
-                  aDXDp(3*k+2) = tPcsens[3*tIndex+2];
+                  aDXDp[3*k  ] = tPcsens[3*tIndex  ];
+                  aDXDp[3*k+1] = tPcsens[3*tIndex+1];
+                  aDXDp[3*k+2] = tPcsens[3*tIndex+2];
                 }
             }
       
@@ -301,7 +316,7 @@ class ESP
         int tNbody   = 0;
         auto tStatus = ocsmBuild(mModel, tBuildTo, &mBuiltTo, &tNbody, NULL);
         EG_deleteObject(mContext); mContext = nullptr;
-        if (tStatus != SUCCESS)
+        if (tStatus != OCSM_SUCCESS)
         {
            throwWithError("ocsmBuild failed");
         }
@@ -330,7 +345,7 @@ class ESP
         for (int j=0; j<mModelT->npmtr; j++)
         {
             auto tStatus = ocsmGetPmtr(mModel, j+1, &tType, &tNumRows, &tNumCols, tParameterName);
-            if (tStatus != SUCCESS) {
+            if (tStatus != OCSM_SUCCESS) {
                 throwWithError("ocsmGetPmtr failed.");
             }
             if (strcmp(aParameterName.c_str(), tParameterName) == 0) {
@@ -360,7 +375,7 @@ class ESP
     void openModel()
     {
         auto tStatus = ocsmLoad((char*)mModelFileName.c_str(), &mModel);
-        if (tStatus < SUCCESS)
+        if (tStatus < OCSM_SUCCESS)
         {
             throwWithError("ocsmLoad failed");
         }
@@ -371,7 +386,7 @@ class ESP
     void checkModel()
     {
         auto tStatus = ocsmCheck(mModel);
-        if (tStatus < SUCCESS)
+        if (tStatus < OCSM_SUCCESS)
         {
             throwWithError("ocsmCheck failed");
         }

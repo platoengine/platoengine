@@ -1,11 +1,4 @@
 /*
- * Plato_SharedValue.hpp
- *
- *  Created on: April 23, 2017
- *
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -47,54 +40,20 @@
 //@HEADER
 */
 
-#ifndef SRC_SHAREDVALUE_HPP_
-#define SRC_SHAREDVALUE_HPP_
+/*
+ * Plato_ESP.cpp
+ *
+ *  Created on: Dec 18, 2019
+ *
+ */
 
-#include <string>
-#include <vector>
+#include "PlatoESPApp.hpp"
+#include "Plato_Interface.hpp"
+#include "Plato_Exceptions.hpp"
 
-#include "mpi.h"
-#include "Plato_SharedData.hpp"
-
-namespace Plato
+/******************************************************************************/
+int main(int aArgc, char *aArgv[])
+/******************************************************************************/
 {
-
-struct CommunicationData;
-
-class SharedValue : public SharedData
-{
-public:
-    SharedValue(const std::string & aMyName, 
-                const std::vector<std::string> & aProviderName, 
-                const Plato::CommunicationData & aCommData, int aSize = 1, bool aIsDynamic=false);
-    virtual ~SharedValue();
-
-    int size() const;
-    std::string myName() const;
-    Plato::data::layout_t myLayout() const;
-
-    void transmitData();
-    void setData(const std::vector<double> & aData);
-    void getData(std::vector<double> & aData) const;
-
-private:
-    std::string mMyName;
-    std::vector<std::string> mProviderNames;
-    std::string mLocalCommName;
-
-    MPI_Comm mMyComm;
-    MPI_Comm mInterComm;
-
-    int mNumData;
-    bool mIsDynamic;
-    std::vector<double> mData;
-    Plato::data::layout_t mMyLayout;
-
-private:
-    SharedValue(const SharedValue& aRhs);
-    SharedValue& operator=(const SharedValue& aRhs);
-};
-
-} // End namespace Plato
-
-#endif
+    Plato::Main<PlatoESPApp>(aArgc, aArgv);
+}

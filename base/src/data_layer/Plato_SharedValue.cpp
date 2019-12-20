@@ -71,8 +71,17 @@ void SharedValue::transmitData()
         {
             MPI_Comm_rank(mInterComm, &tGlobalProcID);
         }
+        // determine provider procID
         int tSenderProcID = -1;
         MPI_Allreduce(&tGlobalProcID, &tSenderProcID, 1, MPI_INT, MPI_MAX, mInterComm);
+
+        if( mIsDynamic )
+        {
+            int tNumData = mData.size();
+            MPI_Bcast(&tNumData, 1, MPI_INT, tSenderProcID, mInterComm);
+            mData.resize(tNumData);
+            mNumData = tNumData;
+        }
         auto tRecv(mData);
         MPI_Bcast(tRecv.data(), tRecv.size(), MPI_DOUBLE, tSenderProcID, mInterComm);
         if( !tIsProvider ){
@@ -130,6 +139,11 @@ void SharedValue::transmitData()
 void SharedValue::setData(const std::vector<double> & aData)
 /******************************************************************************/
 {
+    if( mIsDynamic )
+    {
+        mNumData = aData.size();
+        mData.resize(mNumData);
+    }
     for(int tIndex = 0; tIndex < mNumData; tIndex++)
     {
         mData[tIndex] = aData[tIndex];
@@ -140,6 +154,10 @@ void SharedValue::setData(const std::vector<double> & aData)
 void SharedValue::getData(std::vector<double> & aData) const
 /******************************************************************************/
 {
+    if( mIsDynamic )
+    {
+        aData.resize(mNumData);
+    }
     for(int tIndex = 0; tIndex < mNumData; tIndex++)
     {
         aData[tIndex] = mData[tIndex];
@@ -170,13 +188,14 @@ Plato::data::layout_t SharedValue::myLayout() const
 SharedValue::SharedValue(const std::string & aMyName,
                          const std::vector<std::string> & aProviderNames,
                          const Plato::CommunicationData & aCommData,
-                         int aSize) :
+                         int aSize, bool aIsDynamic) :
         mMyName(aMyName),
         mProviderNames(aProviderNames),
         mLocalCommName(aCommData.mLocalCommName),
         mMyComm(aCommData.mLocalComm),
         mInterComm(aCommData.mInterComm),
         mNumData(aSize),
+        mIsDynamic(aIsDynamic),
         mData(std::vector<double>(aSize)),
         mMyLayout(Plato::data::layout_t::SCALAR)
 /*****************************************************************************/

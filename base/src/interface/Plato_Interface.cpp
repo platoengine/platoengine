@@ -630,8 +630,10 @@ void Interface::createSharedData(Plato::Application* aApplication)
         }
         std::string tMyName = Plato::Get::String(tNode, "Name");
         std::string tMyLayout = Plato::Get::String(tNode, "Layout");
+        bool tIsDynamic = Plato::Get::Bool(tNode, "Dynamic", false);
         Parse::toUppercase(tMyLayout);
         tSharedDataInfo.setSharedDataSize(tMyName, tMySize);
+        tSharedDataInfo.setSharedDataDynamic(tMyName, tIsDynamic);
         tSharedDataInfo.setSharedDataIdentifiers(tMyName, tMyLayout);
     }
 
