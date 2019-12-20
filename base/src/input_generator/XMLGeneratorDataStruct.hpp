@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 namespace XMLGen
 {
 
@@ -240,6 +243,9 @@ struct InputData
     std::string mMMAAsymptoteExpansion;
     std::string mMMAAsymptoteContraction;
     std::string mMMAMaxNumSubProblemIterations;
+    std::string mMMAMaxTrustRegionIterations;
+    std::string mMMAControlStagnationTolerance;
+    std::string mMMAObjectiveStagnationTolerance;
 
     std::string mUseMeanNorm;
     std::string mAugLagPenaltyParam;
@@ -252,6 +258,7 @@ struct InputData
     std::vector<std::string> fixed_sideset_ids;
     std::vector<std::string> fixed_nodeset_ids;
     std::vector<std::string> mStandardDeviations;
+    std::vector<std::string> mShapeDesignVariableValues;
 
     std::vector<XMLGen::LoadCase> load_cases;
     std::vector<XMLGen::BC> bcs;

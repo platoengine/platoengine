@@ -58,6 +58,10 @@
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 
+namespace XMLGen
+{
+
+
 class XMLGenerator
 {
 
@@ -106,12 +110,10 @@ protected:
     bool generatePlatoAnalyzeOperationsXML();
     bool generateLightMPOperationsXML();
     bool generatePhysicsInputDecks();
-    bool generateSalinasInputDecks();
+    bool generateSalinasInputDecks(std::ostringstream *aStringStream = NULL);
     bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
-    void getUncertaintyFlags(bool &aHasUncertainties,
-                             bool &aRequestedVonMisesOutput);
     bool runSROMForUncertainVariables();
     bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();
@@ -126,11 +128,6 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
-    bool addNTVParameter(pugi::xml_node parent_node,
-                         const std::string &name,
-                         const std::string &type,
-                         const std::string &value);
     bool addChild(pugi::xml_node parent_node, const std::string &name, const std::string &value);
     bool outputVolumeStage(pugi::xml_document &doc);
     void outputUpdateProblemStage(pugi::xml_document &doc);
@@ -146,13 +143,6 @@ protected:
     void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
                                      bool &aHasUncertainties,
                                      bool &aRequestedVonMises);
-    void buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
-    void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildMaximizeHeatConductionEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter);
-    void buildMechanicsNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
-    void buildMaximizeStiffnessEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
     void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
@@ -261,5 +251,7 @@ private:
      **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
 };
+
+}
 
 #endif /* SRC_XMLGENERATOR_HPP_ */

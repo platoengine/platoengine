@@ -4,7 +4,7 @@ begin objective
    boundary condition ids 1 2  
    code plato_analyze
    number processors 1
-   output for plotting dispx dispy vonmises
+//   output for plotting dispx dispy vonmises
 end objective
 
 begin boundary conditions

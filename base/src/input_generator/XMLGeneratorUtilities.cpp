@@ -40,45 +40,63 @@
 //@HEADER
 */
 
-#include "XMLGenerator.hpp"
-#include <cstring>
-#include <mpi.h>
-#include <Kokkos_Core.hpp>
+/*
+ * XMLGeneratorUtilities.cpp
+ *
+ *  Created on: Nov 19, 2019
+ *
+ */
 
-void print_usage()
+#include "XMLGeneratorUtilities.hpp"
+
+namespace XMLGen
 {
-    std::cout << "\n\nUsage: XMLGenerator [use_launch] <plato_input_deck_filename>\n\n";
+
+/******************************************************************************/
+bool addNTVParameter(pugi::xml_node parent_node,
+                     const std::string &name,
+                     const std::string &type,
+                     const std::string &value)
+/******************************************************************************/
+{
+    pugi::xml_node node = parent_node.append_child("Parameter");
+    node.append_attribute("name") = name.c_str();
+    node.append_attribute("type") = type.c_str();
+    node.append_attribute("value") = value.c_str();
+    return true;
 }
 
 /******************************************************************************/
-int main(int argc, char *argv[])
+void getUncertaintyFlags(const InputData &aInputData,
+                         bool &aHasUncertainties,
+                         bool &aRequestedVonMisesOutput)
 /******************************************************************************/
 {
-    MPI_Init(&argc, &argv);
-    Kokkos::initialize(argc, argv);
-
-    if(argc == 1 ||
-      (argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--h"))))
+    for(size_t i=0; i<aInputData.objectives.size(); ++i)
     {
-        print_usage();
-    }
-    else
-    {
-        bool use_launch = false;
-        int filename_index = 1;
-        if(!strcmp(argv[1], "use_launch"))
+        const XMLGen::Objective cur_obj = aInputData.objectives[i];
+        for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
         {
-            use_launch = true;
-            filename_index = 2;
+            std::string cur_load_string = cur_obj.load_case_ids[k];
+            for(size_t j=0; aRequestedVonMisesOutput == false && j<cur_obj.output_for_plotting.size(); j++)
+            {
+                if(cur_obj.output_for_plotting[j] == "vonmises")
+                {
+                    aRequestedVonMisesOutput = true;
+                }
+            }
+            for(size_t j=0; aHasUncertainties == false && j<aInputData.uncertainties.size(); ++j)
+            {
+                if(cur_load_string == aInputData.uncertainties[j].id)
+                {
+                    aHasUncertainties = true;
+                }
+            }
         }
-        XMLGen::XMLGenerator generator(argv[filename_index], use_launch);
-        generator.generate();
     }
-
-    Kokkos::finalize();
-    MPI_Finalize();
-    return 0;
 }
 
+
+}
 
 

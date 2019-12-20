@@ -1,8 +1,17 @@
 ###############################################################################
 # Sources:
 ###############################################################################
-SET(XMLGenerator_SRCS XMLGenerator_Main.cpp XMLGenerator.cpp)
-SET(XMLGenerator_HDRS XMLGenerator.hpp XMLGeneratorDataStruct.hpp XMLGeneratorDataStruct.hpp)
+SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
+                      XMLGenerator.cpp
+                      PlatoAnalyzeInputDeckWriter.cpp
+                      XMLGeneratorUtilities.cpp
+                      SalinasInputDeckWriter.cpp)
+SET(XMLGenerator_HDRS XMLGenerator.hpp 
+                      XMLGeneratorDataStruct.hpp 
+                      XMLGeneratorDataStruct.hpp
+                      PlatoAnalyzeInputDeckWriter.hpp
+                      XMLGeneratorUtilities.hpp
+                      SalinasInputDeckWriter.hpp)
 
 find_package(MPI)
 

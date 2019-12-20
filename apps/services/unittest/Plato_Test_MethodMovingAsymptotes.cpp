@@ -76,31 +76,40 @@ namespace PlatoTest
 
 std::vector<double> get_topology_optimization_gold()
 {
-    std::vector<double> tData = { 1, 1, 0.09963763906, 0.01, 0.01, 0.01, 0.02981858214, 0.122176848, 1, 1, 1, 1, 0.2407984809, 0.0159862795, 0.01, 0.01,
-        0.02993454668, 0.1204176079, 0.9984638161, 1, 1, 0.8792774721, 1, 0.1527013574, 0.01, 0.01, 0.03110600992, 0.116003526, 0.99789355, 1, 1, 0.3621251213,
-        0.869480942, 0.9222532171, 0.1059821443, 0.01, 0.02726839263, 0.1093306959, 1, 1, 1, 0.229465817, 0.177670247, 0.9608359435, 0.7573956306,
-        0.07856082129, 0.01613082746, 0.1038487414, 1, 0.9987520709, 1, 0.213310992, 0.09880097021, 0.4230699414, 0.8618869651, 0.6385901013, 0.05527002214,
-        0.09962157642, 0.9991862169, 0.9873343721, 0.9936766576, 0.21332468, 0.0888907914, 0.06665360106, 0.6708894614, 0.8500175685, 0.4072074949,
-        0.1368029677, 1, 1, 1, 0.2086912518, 0.07991180519, 0.01759975628, 0.1035920092, 0.7906481264, 0.9033673742, 0.3404269023, 0.9982450947, 1,
-        0.9954508096, 0.2127764606, 0.07411368624, 0.01, 0.01, 0.1524722234, 0.9224332142, 0.8073510223, 0.9127129638, 1, 1, 0.2146435157, 0.06006097549, 0.01,
-        0.01, 0.01295802044, 0.2550278407, 0.965270516, 0.905787634, 0.9939075568, 0.9945545856, 0.2230887416, 0.05064233306, 0.01, 0.01, 0.01, 0.01774828622,
-        0.3203253654, 0.9965550133, 0.9934764039, 0.9981459117, 0.2293810086, 0.04568875546, 0.01634284154, 0.01, 0.01, 0.01044056529, 0.2528440393, 1, 1,
-        0.99727598, 0.2413115806, 0.03164221735, 0.01262831739, 0.01841103037, 0.01, 0.1774915334, 0.9692749415, 0.7129325521, 0.8632292503, 1, 0.2580872933,
-        0.02539650312, 0.01986806615, 0.01006649374, 0.1385087242, 0.8632392614, 0.8557574523, 0.1701971433, 0.8751502435, 0.9966404439, 0.2888995111,
-        0.0168106666, 0.01875154327, 0.112405472, 0.7739732449, 0.893669012, 0.1467913411, 0.07236252735, 0.8757534631, 0.9992574255, 0.3394110602,
-        0.01372413809, 0.09592103627, 0.7157707903, 0.815507893, 0.369117658, 0.01567082462, 0.06453770917, 0.8747390771, 1, 0.416004086, 0.1156031579,
-        0.6132942877, 0.813874354, 0.5883956644, 0.04770494721, 0.01592927583, 0.06346413713, 0.873894403, 0.9945048142, 0.4007816515, 0.520010458,
-        0.8460529553, 0.7240971586, 0.07553824292, 0.01, 0.01, 0.06352301774, 0.873194224, 0.9934189319, 0.5218459518, 0.750271282, 0.8378993636, 0.1098522469,
-        0.01257494755, 0.01, 0.01, 0.06361849477, 0.8725756646, 0.9916137817, 0.7458641095, 0.8546970895, 0.1701835009, 0.01735174789, 0.01, 0.01, 0.01,
-        0.06371955664, 0.8719892236, 0.9735136467, 0.8210040525, 0.4429160497, 0.02614668387, 0.01338563026, 0.01, 0.01, 0.01, 0.06386002518, 0.8713635522,
-        0.8493975383, 0.8719407676, 0.19617933, 0.01490080135, 0.01, 0.01, 0.01, 0.01168024438, 0.06407551131, 0.8706381416, 0.1372458288, 0.881936745,
-        0.8051764521, 0.1475906557, 0.01, 0.01317893402, 0.01, 0.01100125746, 0.06447658074, 0.8694408448, 0.01160002611, 0.1483743016, 0.8454816649,
-        0.8001792584, 0.1476388708, 0.01, 0.01, 0.01, 0.06523647754, 0.8674728199, 0.01, 0.01262313208, 0.1633494583, 0.8378953242, 0.7977748154, 0.1468819449,
-        0.01, 0.01611682195, 0.06690406329, 0.8640400233, 0.01, 0.01, 0.01469643042, 0.167958588, 0.8368900078, 0.7937936722, 0.1471738997, 0.01, 0.07009093675,
-        0.8606060962, 0.01, 0.01, 0.01, 0.01002830186, 0.1701030503, 0.8393064961, 0.7847495731, 0.1444929369, 0.07748326246, 0.8597340432, 0.01, 0.01,
-        0.02057088789, 0.01, 0.0123472956, 0.1664332417, 0.8605738334, 0.7747448051, 0.2566614261, 0.8579196479, 0.01, 0.01, 0.01, 0.01454491462, 0.01, 0.01,
-        0.1540314408, 0.922222503, 0.7825272514, 0.7965536156, 0.01444850231, 0.01, 0.01, 0.01, 0.01, 0.01016863972, 0.01175750541, 0.1550800289, 0.9349465177,
-        1 };
+    std::vector<double> tData = {1.000000, 1.000000, 0.054416, 0.010000, 0.010000, 0.010000, 0.010000, 0.107172, 1.000000,
+                                 0.995753, 1.000000, 1.000000, 0.222840, 0.011774, 0.010000, 0.011193, 0.017450, 0.099040,
+                                 1.000000, 0.995839, 1.000000, 0.995062, 0.994558, 0.145738, 0.010000, 0.010000, 0.010000,
+                                 0.100141, 1.000000, 0.992882, 1.000000, 0.423631, 0.949310, 0.884680, 0.104899, 0.010000,
+                                 0.010000, 0.100928, 1.000000, 0.987589, 1.000000, 0.267570, 0.208984, 1.000000, 0.683408,
+                                 0.055787, 0.010000, 0.100133, 1.000000, 1.000000, 1.000000, 0.250357, 0.010000, 0.320634,
+                                 1.000000, 0.474707, 0.021041, 0.102702, 1.000000, 1.000000, 1.000000, 0.249412, 0.010000,
+                                 0.028060, 0.533048, 1.000000, 0.277356, 0.114534, 1.000000, 1.000000, 1.000000, 0.253342,
+                                 0.010000, 0.010000, 0.071676, 0.757942, 1.000000, 0.269741, 1.000000, 1.000000, 1.000000,
+                                 0.258540, 0.010000, 0.010000, 0.010000, 0.122981, 0.949194, 0.927986, 1.000000, 1.000000,
+                                 1.000000, 0.265321, 0.010000, 0.010000, 0.010000, 0.010000, 0.172308, 1.000000, 1.000000,
+                                 1.000000, 1.000000, 0.273426, 0.010000, 0.010000, 0.010000, 0.010000, 0.010000, 0.217226,
+                                 1.000000, 1.000000, 1.000000, 0.283754, 0.010000, 0.010000, 0.010000, 0.010000, 0.013950,
+                                 0.353984, 1.000000, 1.000000, 1.000000, 0.296464, 0.010000, 0.010000, 0.010000, 0.010000,
+                                 0.174673, 1.000000, 0.724970, 0.879559, 1.000000, 0.312293, 0.010000, 0.010000, 0.010000,
+                                 0.104787, 0.932868, 0.865799, 0.174877, 0.883984, 1.000000, 0.332625, 0.010000, 0.010000,
+                                 0.064205, 0.716493, 0.999894, 0.160022, 0.065007, 0.882556, 1.000000, 0.361010, 0.012093,
+                                 0.026129, 0.528020, 1.000000, 0.267766, 0.010000, 0.064538, 0.880948, 1.000000, 0.405741,
+                                 0.025328, 0.294324, 1.000000, 0.510514, 0.022451, 0.010000, 0.063489, 0.879414, 1.000000,
+                                 0.458781, 0.227690, 1.000000, 0.710788, 0.065053, 0.010000, 0.010000, 0.063364, 0.878329,
+                                 1.000000, 0.459109, 0.837643, 0.952140, 0.118016, 0.010000, 0.010000, 0.010000, 0.063441,
+                                 0.877578, 1.000000, 0.688623, 1.000000, 0.178189, 0.010000, 0.010000, 0.010000, 0.010000,
+                                 0.063215, 0.877164, 1.000000, 1.000000, 0.466642, 0.028261, 0.010000, 0.010000, 0.010000,
+                                 0.010000, 0.063249, 0.877080, 1.000000, 0.749128, 0.102255, 0.010000, 0.010000, 0.010000,
+                                 0.010000, 0.010000, 0.063339, 0.877342, 0.370998, 1.000000, 0.499144, 0.053033, 0.010000,
+                                 0.010000, 0.010000, 0.010000, 0.063584, 0.877876, 0.015374, 0.276432, 1.000000, 0.547670,
+                                 0.063342, 0.010000, 0.010000, 0.010000, 0.064030, 0.878854, 0.017543, 0.010000, 0.262921,
+                                 1.000000, 0.590471, 0.072003, 0.010000, 0.010000, 0.064773, 0.879917, 0.010000, 0.010000,
+                                 0.010000, 0.235337, 1.000000, 0.630965, 0.084735, 0.010000, 0.066888, 0.882083, 0.010000,
+                                 0.010000, 0.010000, 0.010000, 0.212622, 1.000000, 0.672914, 0.095532, 0.070270, 0.881922,
+                                 0.010000, 0.010000, 0.010000, 0.010000, 0.010000, 0.192335, 1.000000, 0.699664, 0.198865,
+                                 0.876913, 0.010000, 0.010000, 0.010000, 0.010000, 0.010000, 0.010000, 0.174371, 1.000000,
+                                 0.754778, 0.789327, 0.014449, 0.010000, 0.010000, 0.010000, 0.010000, 0.012695, 0.010000,
+                                 0.172408, 0.999518, 1.000000};
     return tData;
 }
 
@@ -770,6 +779,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_5Bars)
     const size_t tNumControls = 5;
     const size_t tNumConstraints = 1;
     Plato::AlgorithmInputsMMA<double> tInputs;
+    tInputs.mObjectiveStagnationTolerance = 1e-4;
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 1.0 /* values */);
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 10.0 /* values */);
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 5.0 /* values */);
@@ -779,11 +789,11 @@ TEST(PlatoTest, MethodMovingAsymptotes_5Bars)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(28u, tOutputs.mNumSolverIter);
+    ASSERT_EQ(7u, tOutputs.mNumSolverIter);
     ASSERT_NEAR(1.33996, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = 6.007921063; tGold(0,1) = 5.309376913; tGold(0,2) = 4.497699841; tGold(0,3) = 3.505355435; tGold(0,4) = 2.15340137;
+    tGold(0,0) = 6.016016667; tGold(0,1) = 5.309054073; tGold(0,2) = 4.494354659; tGold(0,3) = 3.501440931; tGold(0,4) = 2.152814957;
     PlatoTest::checkMultiVectorData(tGold, *tOutputs.mSolution);
 
     // ********* PRINT SOLUTION *********
@@ -818,11 +828,11 @@ TEST(PlatoTest, MethodMovingAsymptotes_RosenbrockRadius)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(36u, tOutputs.mNumSolverIter);
-    ASSERT_NEAR(0.0456735, tOutputs.mObjFuncValue, tTolerance);
+    ASSERT_EQ(77u, tOutputs.mNumSolverIter);
+    ASSERT_NEAR(0.0456748, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = 0.7864850239; tGold(0,1) = 0.617637575;
+    tGold(0,0) = 0.7864153996; tGold(0,1) = 0.6176982996;
     PlatoTest::checkMultiVectorData(tGold, *tOutputs.mSolution);
 
     // ********* PRINT SOLUTION *********
@@ -851,17 +861,17 @@ TEST(PlatoTest, MethodMovingAsymptotes_HimmelblauShiftedEllipse)
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -5.0 /* values */);
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -1.0 /* values */);
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -2.0 /* values */);
-    tInputs.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<double>>(tNumConstraints, 0.5 /* values */);
+    tInputs.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<double>>(tNumConstraints, 2 /* values */);
     Plato::AlgorithmOutputsMMA<double> tOutputs;
     Plato::solve_mma<double, size_t>(tObjective, tConstraintList, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-4;
-    ASSERT_EQ(27u, tOutputs.mNumSolverIter);
-    ASSERT_NEAR(11.8039164, tOutputs.mObjFuncValue, tTolerance);
+    const double tTolerance = 5e-4;
+    ASSERT_EQ(121u, tOutputs.mNumSolverIter);
+    ASSERT_NEAR(2.40362, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = -3.99832364; tGold(0,1) = -2.878447094;
+    tGold(0,0) = -3.984413902; tGold(0,1) = -3.369074813;
     PlatoTest::checkMultiVectorData(tGold, *tOutputs.mSolution);
 
     // ********* PRINT SOLUTION *********
@@ -890,13 +900,13 @@ TEST(PlatoTest, MethodMovingAsymptotes_GoldsteinPriceShiftedEllipse)
     tInputs.mLowerBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -3.0 /* values */);
     tInputs.mUpperBounds = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, 0.0 /* values */);
     tInputs.mInitialGuess = std::make_shared<Plato::StandardMultiVector<double>>(tNumVectors, tNumControls, -0.4 /* values */);
-    tInputs.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<double>>(tNumConstraints, 0.5 /* values */);
+    tInputs.mConstraintNormalizationParams = std::make_shared<Plato::StandardVector<double>>(tNumConstraints, 2 /* values */);
     Plato::AlgorithmOutputsMMA<double> tOutputs;
     Plato::solve_mma<double, size_t>(tObjective, tConstraintList, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(19u, tOutputs.mNumSolverIter);
+    ASSERT_EQ(36u, tOutputs.mNumSolverIter);
     ASSERT_NEAR(3, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
@@ -934,11 +944,11 @@ TEST(PlatoTest, MethodMovingAsymptotes_CircleRadius)
 
     // ********* TEST SOLUTION *********
     const double tTolerance = 1e-4;
-    ASSERT_EQ(19u, tOutputs.mNumSolverIter);
-    ASSERT_NEAR(2.677976067, tOutputs.mObjFuncValue, tTolerance);
+    ASSERT_EQ(11u, tOutputs.mNumSolverIter);
+    ASSERT_NEAR(2.678, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     Plato::StandardMultiVector<double> tGold(tNumVectors, tNumControls);
-    tGold(0,0) = 0.3129487804; tGold(0,1) = 0.9497764126;
+    tGold(0,0) =  0.3115706212; tGold(0,1) = 0.950222216;
     PlatoTest::checkMultiVectorData(tGold, *tOutputs.mSolution, tTolerance);
 
     // ********* PRINT SOLUTION *********
@@ -986,8 +996,6 @@ TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
     Plato::AlgorithmInputsMMA<double, int> tInputs;
     const double tTargetVolume = tPDE->getVolumeFraction();
     tInputs.mMaxNumSolverIter = 50;
-    tInputs.mAsymptoteExpansion = 1.001;
-    tInputs.mAsymptoteContraction = 0.999;
     tInputs.mInitialGuess = std::make_shared<Plato::EpetraSerialDenseMultiVector<double, int>>(tNumVectors, tNumControls, tTargetVolume /* values */);
     tInputs.mUpperBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double, int>>(tNumVectors, tNumControls, 1.0 /* values */);
     tInputs.mLowerBounds = std::make_shared<Plato::EpetraSerialDenseMultiVector<double, int>>(tNumVectors, tNumControls, 1e-2 /* values */);
@@ -996,9 +1004,9 @@ TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
     Plato::solve_mma<double, int>(tCompliance, tConstraintList, tInputs, tOutputs);
 
     // ********* TEST SOLUTION *********
-    const double tTolerance = 1e-2;
+    const double tTolerance = 1e-4;
     ASSERT_EQ(50, tOutputs.mNumSolverIter);
-    ASSERT_NEAR(0.1485850316, tOutputs.mObjFuncValue, tTolerance);
+    ASSERT_NEAR(0.142172, tOutputs.mObjFuncValue, tTolerance);
     ASSERT_TRUE(std::abs((*tOutputs.mConstraints)[0]) < tTolerance);
     std::vector<double> tGoldData = PlatoTest::get_topology_optimization_gold();
     Plato::StandardMultiVector<double, int> tGold(tNumVectors, tGoldData);
