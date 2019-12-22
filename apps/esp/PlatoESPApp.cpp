@@ -84,10 +84,30 @@ void PlatoESPApp::initialize()
 
 void PlatoESPApp::compute(const std::string & aOperationName)
 {
-    // TODO: on change
-    mESP.reset( new ESPType(mModelFileName, mTessFileName, mParameterIndex) );
-
+    if(hasChanged())
+    {
+        mESP.reset( new ESPType(mModelFileName, mTessFileName, mParameterIndex) );
+    }
     mLocalData = mESP->getSensitivities()[0];
+}
+
+bool PlatoESPApp::hasChanged()
+{
+    if( mPrevParameters.size() == 0 )
+    {
+        mPrevParameters = mParameters;
+        return true;
+    }
+
+    if( mPrevParameters == mParameters )
+    {
+        return false;
+    }
+    else
+    {
+        mPrevParameters = mParameters;
+        return true;
+    }
 }
 
 void PlatoESPApp::finalize()

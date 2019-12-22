@@ -143,8 +143,8 @@ public:
     {
         if(aImportData.myLayout() == Plato::data::layout_t::SCALAR)
         {
-            mLocalData.resize(aImportData.size());
-            aImportData.getData(mLocalData);
+            mParameters.resize(aImportData.size());
+            aImportData.getData(mParameters);
         }
         else
         if(aImportData.myLayout() == Plato::data::layout_t::SCALAR_PARAMETER)
@@ -185,9 +185,14 @@ private:
 
     std::shared_ptr<ESPType> mESP;
 
+    std::vector<ScalarType> mParameters;
+    std::vector<ScalarType> mPrevParameters;
     std::vector<ScalarType> mLocalData;
 
     Plato::TimersTree* mTimersTree;
+
+    bool hasChanged();
+
 };
 
 #ifndef NDEBUG
