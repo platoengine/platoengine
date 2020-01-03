@@ -8,11 +8,11 @@ begin objective
 end objective
 
 begin boundary conditions
-   fixed displacement nodeset 1 bc id 1
+   fixed displacement nodeset ns_1 bc id 1
 end boundary conditions
 
 begin loads
-    traction sideset 2 value 0 -3e3 0 load id 1
+    traction sideset ss_2 value 0 -3e3 0 load id 1
 end loads
       
 begin constraint 
