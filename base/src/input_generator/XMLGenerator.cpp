@@ -990,7 +990,7 @@ bool XMLGenerator::generateLaunchScript()
             if(m_InputData.plato_analyze_path.length() != 0)
                 fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
             else
-                fprintf(fp, "LGR_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+                fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
         }
     }
 

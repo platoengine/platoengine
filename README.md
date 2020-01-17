@@ -11,7 +11,7 @@ The PLATO Engine computer program serves as a collaborative testbed rich in ligh
 To checkout a copy of PLATO Engine and PLATO Analyze from the command line use from the directory of your choice (i.e. `$HOME/codes`):
 ```javascript
 git clone https://username:password@github.com/platoengine/platoengine.git (PLATO Engine)
-git clone https://username:password@github.com/SNLComputation/lgrtk.git (PLATO Analyze)
+git clone https://username:password@github.com/platoengine/platoanalyze.git (PLATO Analyze)
 ```
 where username and password corresponds to your github.com account. At this stage, make sure all required environment variables are set and all tpls are installed. 
 
