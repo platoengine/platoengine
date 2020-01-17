@@ -920,10 +920,10 @@ bool XMLGenerator::generateLaunchScript()
     }
 
 #ifndef USING_OPEN_MPI
-    std::string envString = "-env";
+    std::string envString = "-x";
     std::string separationString = " ";
 #else
-    std::string envString = "-x";
+    std::string envString = "-env";
     std::string separationString = "=";
 #endif
 
