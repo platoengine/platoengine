@@ -779,6 +779,8 @@ ExodusIO::readConn()
 //  delete [] ids;
   delete [] num_elem_in_block;
   delete [] num_nodes_per_elem;
+  delete [] num_edges_per_elem;
+  delete [] num_faces_per_elem;
   delete [] num_attr;
 
   return true;
