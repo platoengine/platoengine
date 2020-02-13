@@ -3,11 +3,11 @@ import os, sys
 
 tPathInput = str(sys.argv[1])
 if tPathInput[-1:] == "/":
-  tmhs2osh_root = tPathInput + "src/msh2osh "
-  tosh2exo_root = tPathInput + "src/osh2exo "
+  tmhs2osh_root = tPathInput + "msh2osh "
+  tosh2exo_root = tPathInput + "osh2exo "
 else:
-  tmhs2osh_root = tPathInput + "/src/msh2osh "
-  tosh2exo_root = tPathInput + "/src/osh2exo "
+  tmhs2osh_root = tPathInput + "/msh2osh "
+  tosh2exo_root = tPathInput + "/osh2exo "
 
 tNameInput = str(sys.argv[2])
 if tNameInput[-4:] == ".msh":
