@@ -70,6 +70,10 @@ public:
                                          std::string &aReturnStringValue);
     bool publicParseObjectives(std::istream &sin);
     bool publicParseLoads(std::istream &sin);
+    bool publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParseBCs(std::istream &sin);
     bool publicParseOptimizationParameters(std::istream &sin);
     bool publicParseConstraints(std::istream &sin);

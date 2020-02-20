@@ -99,7 +99,20 @@ protected:
     void generateROLInput();
     void generateAMGXInput();
     bool parseLoads(std::istream &fin);
+    bool parseLoadsBlock(std::istream &fin);
+    bool parseLoadLine(std::vector<std::string>& tokens);
+    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     bool parseBCs(std::istream &fin);
+    bool parseBCsBlock(std::istream &fin);
+    bool parseBCLine(std::vector<std::string>& tokens);
+    bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool generateInterfaceXML();
     bool generateLaunchScript();
     bool generatePlatoOperationsXML();
@@ -191,6 +204,7 @@ protected:
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
     void lookForPlatoAnalyzePerformers();
+    bool checkForNodesetSidesetNameConflicts();
 
     std::string m_InputFilename;
     bool m_UseLaunch;
@@ -250,6 +264,10 @@ private:
      * @param [in] aXMLnode data structure with information parsed from XML input file.
      **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
+
+    void putLoadInLoadCase(XMLGen::Load& new_load);
+    bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
+    void createNewLoadCase(XMLGen::Load& new_load);
 };
 
 }

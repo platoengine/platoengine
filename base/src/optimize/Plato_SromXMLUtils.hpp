@@ -336,6 +336,7 @@ inline int get_or_create_random_load_variable(const XMLGen::LoadCase &aLoadCase,
     tNewLoad.mLoadType = aLoadCase.loads[0].type;
     tNewLoad.mAppType = aLoadCase.loads[0].app_type;
     tNewLoad.mAppID = std::atoi(aLoadCase.loads[0].app_id.c_str());
+    tNewLoad.mAppName = aLoadCase.loads[0].app_name;
     tNewLoad.mLoadID = aLoadCase.id;
     for(size_t i=0; i<aLoadCase.loads[0].values.size(); ++i)
         tNewLoad.mValues.push_back(aLoadCase.loads[0].values[i]);
@@ -1409,6 +1410,7 @@ inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, 
     for(size_t tLoadIndex = 0; tLoadIndex < aSetRandomLoads.size(); tLoadIndex++)
     {
         aSetRandomLoads[tLoadIndex].mAppID = aOriginalLoad.mAppID;
+        aSetRandomLoads[tLoadIndex].mAppName = aOriginalLoad.mAppName;
         aSetRandomLoads[tLoadIndex].mAppType = aOriginalLoad.mAppType;
         aSetRandomLoads[tLoadIndex].mLoadType = aOriginalLoad.mLoadType;
     }

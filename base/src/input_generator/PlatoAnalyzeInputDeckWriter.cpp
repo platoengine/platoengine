@@ -50,6 +50,8 @@
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "XMLGeneratorUtilities.hpp"
 
+#include <exodusII.h>
+
 namespace XMLGen
 {
 
@@ -337,7 +339,7 @@ void PlatoAnalyzeInputDeckWriter::buildThermalNBCsForPlatoAnalyze(const XMLGen::
                     tPugiNode2.append_attribute("name") = tBuffer;
                     addNTVParameter(tPugiNode2, "Type", "string", "Uniform");
                     addNTVParameter(tPugiNode2, "Value", "double", cur_load.values[0]);
-                    sprintf(tBuffer, "%s", cur_load.app_id.c_str());
+                    sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 }
             }
@@ -371,7 +373,7 @@ void PlatoAnalyzeInputDeckWriter::buildThermalEBCsForPlatoAnalyze(const XMLGen::
             sprintf(tBuffer, "Fixed Temperature Boundary Condition %d", aBCCounter++);
             tPugiNode2.append_attribute("name") = tBuffer;
             addNTVParameter(tPugiNode2, "Index", "int", aVariableIndex);
-            sprintf(tBuffer, "%s", cur_bc.app_id.c_str());
+            sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
             addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
             if(cur_bc.value.empty())
             {
@@ -415,7 +417,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "X Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "0");
-                sprintf(tBuffer, "%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
                 // Y Displacement
@@ -423,7 +425,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "Y Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "1");
-                sprintf(tBuffer, "%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
                 // Z Displacement
@@ -431,7 +433,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "Z Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "2");
-                sprintf(tBuffer, "%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
             }
@@ -460,7 +462,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "%s Fixed Displacement Boundary Condition %d", tBCDOF.c_str(), aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", tBCIndex);
-                sprintf(tBuffer, "%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 if(cur_bc.value.empty())
                 {
@@ -513,7 +515,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalNBCsForPlatoAnalyze(const XMLGe
                     double z = std::atof(cur_load.values[2].c_str());
                     sprintf(tBuffer, "{%lf,%lf,%lf}", x, y, z);
                     addNTVParameter(tPugiNode2, "Values", "Array(double)", tBuffer);
-                    sprintf(tBuffer, "%s", cur_load.app_id.c_str());
+                    sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 }
             }

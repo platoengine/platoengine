@@ -161,6 +161,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
                         tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
                         tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
                         tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                        tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
                         for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
                             tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
                         tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
@@ -185,6 +186,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
                     tNewLoad.type = tLoads[j].mLoadType;
                     tNewLoad.app_type = tLoads[j].mAppType;
                     tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
+                    tNewLoad.app_name = tLoads[j].mAppName;
                     for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
                         tNewLoad.values.push_back(tLoads[j].mValues[h]);
                     tNewLoadCase.loads.push_back(tNewLoad);
@@ -1423,10 +1425,75 @@ bool XMLGenerator::generateAlbanyInputDecks()
 bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
+    if(checkForNodesetSidesetNameConflicts())
+      return false;
     PlatoAnalyzeInputDeckWriter tInputDeckWriter(m_InputData);
     tInputDeckWriter.generate(aStringStream);
 
     return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::checkForNodesetSidesetNameConflicts()
+/******************************************************************************/
+{
+  std::vector<std::string> nodeset_names;
+  std::vector<std::string> sideset_names;
+
+  std::vector<XMLGen::LoadCase> load_cases = m_InputData.load_cases;
+
+  for(auto load_case:load_cases)
+  {
+    std::vector<XMLGen::Load> loads = load_case.loads;
+    for(auto load:loads)
+    {
+      if(load.app_type == "nodeset")
+        nodeset_names.push_back(load.app_name);
+      else if(load.app_type == "sideset")
+        sideset_names.push_back(load.app_name);
+      else
+        std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+    }
+  }
+
+  std::vector<XMLGen::BC> BCs = m_InputData.bcs;
+  for(auto bc:BCs)
+  {
+    if(bc.app_type == "nodeset")
+      nodeset_names.push_back(bc.app_name);
+    else if(bc.app_type == "sideset")
+      sideset_names.push_back(bc.app_name);
+    else
+      std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+  }
+
+  for(auto ns_name:nodeset_names)
+    if(ns_name == "")
+    {
+      std::cout << "nodeset name empty" << std::endl;
+      return true;
+    }
+
+  for(auto ss_name:sideset_names)
+    if(ss_name == "")
+    {
+      std::cout << "sideset name empty" << std::endl;
+      return true;
+    }
+
+  for(auto ns_name:nodeset_names)
+  {
+    for(auto ss_name:sideset_names)
+    {
+      if(ns_name == ss_name)
+      {
+        std::cout << "nodeset name equal to sideset name" << std::endl;
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /******************************************************************************/
@@ -2403,205 +2470,372 @@ bool XMLGenerator::parseLoads(std::istream &fin)
 /******************************************************************************/
 {
     std::vector<std::string> tInputStringList;
-    char buf[MAX_CHARS_PER_LINE];
     std::vector<std::string> tokens;
     std::string tStringValue;
+    bool load_block_found = false;
 
     // read each line of the file
     while (!fin.eof())
     {
-        // read an entire line into memory
-        fin.getline(buf, MAX_CHARS_PER_LINE);
-        tokens.clear();
-        parseTokens(buf, tokens);
+        getTokensFromLine(fin,tokens);
 
         // process the tokens
         if(tokens.size() > 0)
         {
-            for(size_t j=0; j<tokens.size(); ++j)
-                tokens[j] = toLower(tokens[j]);
-
             if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
             {
-                while (!fin.eof())
-                {
-                    tokens.clear();
-                    fin.getline(buf, MAX_CHARS_PER_LINE);
-                    parseTokens(buf, tokens);
-                    // process the tokens
-                    if(tokens.size() > 0)
-                    {
-                        for(size_t j=0; j<tokens.size(); ++j)
-                            tokens[j] = toLower(tokens[j]);
-
-                        if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            XMLGen::Load new_load;
-                            int j=0;
-                            new_load.type = tokens[j];  // traction or heat [flux] or force
-                            if(!new_load.type.compare("traction"))
-                            {
-                                if(tokens.size() != 10)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                new_load.values.push_back(tokens[5]);
-                                new_load.values.push_back(tokens[6]);
-                                if(tokens[7] != "load" || tokens[8] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[9];
-                            }
-                            else if(!new_load.type.compare("pressure"))
-                            {
-                                if(tokens.size() != 8)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"pressure\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                if(new_load.app_type != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
-                                    return false;
-                                }
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                if(tokens[5] != "load" || tokens[6] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[7];
-                            }
-                            else if(!new_load.type.compare("acceleration"))
-                            {
-                                if(tokens.size() != 7)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"acceleration\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = "body";
-                                new_load.values.push_back(tokens[1]);
-                                new_load.values.push_back(tokens[2]);
-                                new_load.values.push_back(tokens[3]);
-                                if(tokens[4] != "load" || tokens[5] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[6];
-                            }
-                            else if(!new_load.type.compare("heat"))
-                            {
-                                if(tokens.size() != 9)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"heat flux\" load.\n";
-                                    return false;
-                                }
-                                if(!tokens[1].compare("flux"))
-                                {
-                                    new_load.app_type = tokens[2];
-                                    if(new_load.app_type != "sideset")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
-                                        return false;
-                                    }
-                                    new_load.app_id = tokens[3];
-                                    // tokens[4] is "value"
-                                    new_load.values.push_back(tokens[5]);
-                                    if(tokens[6] != "load" || tokens[7] != "id")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                        return false;
-                                    }
-                                    new_load.load_id = tokens[8];
-                                }
-                                else
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
-                                    return false;
-                                }
-                            }
-                            else if(!new_load.type.compare("force"))
-                            {
-                                if(tokens.size() != 10)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"force\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
-                                    return false;
-                                }
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                new_load.values.push_back(tokens[5]);
-                                new_load.values.push_back(tokens[6]);
-                                if(tokens[7] != "load" || tokens[8] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[9];
-                            }
-                            else
-                            {
-                                PrintUnrecognizedTokens(tokens);
-                                std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.  Must be traction, heat flux, or force.\n";
-                                return false;
-                            }
-                            bool found_load_case = false;
-                            for(size_t h=0; h<m_InputData.load_cases.size() && !found_load_case; ++h)
-                            {
-                                if(m_InputData.load_cases[h].id == new_load.load_id)
-                                {
-                                    m_InputData.load_cases[h].loads.push_back(new_load);
-                                    found_load_case = true;
-                                }
-                            }
-                            if(!found_load_case)
-                            {
-                                XMLGen::LoadCase new_load_case;
-                                new_load_case.id = new_load.load_id;
-                                new_load_case.loads.push_back(new_load);
-                                m_InputData.load_cases.push_back(new_load_case);
-                            }
-                        }
-                    }
-                }
+              if(!parseLoadsBlock(fin))
+                return false;
+              load_block_found = true;
             }
         }
     }
+
+    if(!load_block_found)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: No load block found \n";
+      return false;
+    }
+
     return true;
 }
+
+/******************************************************************************/
+bool XMLGenerator::parseLoadsBlock(std::istream &fin)
+/******************************************************************************/
+{
+  std::vector<std::string> tInputStringList;
+  std::vector<std::string> tokens;
+  std::string tStringValue;
+  
+  while (!fin.eof())
+  {
+    getTokensFromLine(fin,tokens);
+
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+          tokens[j] = toLower(tokens[j]);
+      if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
+        break;
+      else
+        if(!parseLoadLine(tokens))
+          return false;
+    }
+  }
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    char buf[MAX_CHARS_PER_LINE];
+    
+    tokens.clear();
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+    parseTokens(buf, tokens);
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    XMLGen::Load new_load;
+    new_load.type = tokens[0];
+    bool return_status = true;
+
+    if(!new_load.type.compare("traction"))
+      return_status = parseTractionLoad(tokens,new_load);
+    else if(!new_load.type.compare("pressure"))
+      return_status = parsePressureLoad(tokens,new_load);
+    else if(!new_load.type.compare("acceleration"))
+      return_status = parseAccelerationLoad(tokens,new_load);
+    else if(!new_load.type.compare("heat"))
+      return_status = parseHeatFluxLoad(tokens,new_load);
+    else if(!new_load.type.compare("force"))
+      return_status = parseForceLoad(tokens,new_load);
+    else
+    {
+        PrintUnrecognizedTokens(tokens);
+        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.\n";
+        return false;
+    }
+
+    if(return_status)
+      putLoadInLoadCase(new_load);
+
+    return return_status;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    size_t tMin_parameters = 10;
+    if(tokens.size() < tMin_parameters)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+      return false;
+    }
+
+    size_t tTokenIndex = 0;
+
+    new_load.app_type = tokens[++tTokenIndex];
+
+    if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+    {
+      if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+        --tTokenIndex;
+    }
+    else
+    {
+      new_load.app_name = "";
+      new_load.app_id = tokens[tTokenIndex];
+    }
+
+    if(tokens[++tTokenIndex] != "value")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+    }
+
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+
+    if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+    }
+
+    new_load.load_id = tokens[++tTokenIndex];
+
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    if(tokens[++aTokenIndex] == "id")
+    {
+      new_load.app_id = tokens[++aTokenIndex];
+      return true;
+    }
+    else if(tokens[aTokenIndex] == "name")
+    {
+      new_load.app_name = tokens[++aTokenIndex];
+      return true;
+    }
+    else
+      return false;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 8;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
+      return false;
+  }
+
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
+
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 7;
+  if(tokens.size() != tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  new_load.app_type = "body";
+  new_load.values.push_back(tokens[1]);
+  new_load.values.push_back(tokens[2]);
+  new_load.values.push_back(tokens[3]);
+  if(tokens[4] != "load" || tokens[5] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[6];
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 9;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  if(!tokens[++tTokenIndex].compare("flux"))
+  {
+      new_load.app_type = tokens[++tTokenIndex];
+      if(new_load.app_type != "sideset")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
+          return false;
+      }
+
+      if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      {
+        if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+          --tTokenIndex;
+      }
+      else
+      {
+        new_load.app_name = "";
+        new_load.app_id = tokens[tTokenIndex];
+      }
+
+      if(tokens[++tTokenIndex] != "value")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
+          return false;
+      }
+      new_load.values.push_back(tokens[++tTokenIndex]);
+      if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+          return false;
+      }
+      new_load.load_id = tokens[++tTokenIndex];
+  }
+  else
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
+      return false;
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 10;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
+      return false;
+  }
+
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
+  
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::putLoadInLoadCase(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  bool found_load_case = putLoadInLoadCaseWithMatchingID(new_load);
+
+  if(!found_load_case)
+    createNewLoadCase(new_load);
+}
+
+/******************************************************************************/
+bool XMLGenerator::putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  for(size_t h=0; h<m_InputData.load_cases.size(); ++h)
+      if(m_InputData.load_cases[h].id == new_load.load_id)
+      {
+        m_InputData.load_cases[h].loads.push_back(new_load);
+        return true;
+      }
+  return false;
+}
+
+/******************************************************************************/
+void XMLGenerator::createNewLoadCase(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  XMLGen::LoadCase new_load_case;
+  new_load_case.id = new_load.load_id;
+  new_load_case.loads.push_back(new_load);
+  m_InputData.load_cases.push_back(new_load_case);
+}
+
 
 /******************************************************************************/
 bool XMLGenerator::parseUncertainties(std::istream &fin)
@@ -2877,142 +3111,241 @@ bool XMLGenerator::parseBCs(std::istream &fin)
 /******************************************************************************/
 {
     std::vector<std::string> tInputStringList;
-    char buf[MAX_CHARS_PER_LINE];
     std::vector<std::string> tokens;
     std::string tStringValue;
+    bool bc_block_found = false;
 
     // read each line of the file
     while (!fin.eof())
     {
-        // read an entire line into memory
-        fin.getline(buf, MAX_CHARS_PER_LINE);
-        tokens.clear();
-        parseTokens(buf, tokens);
+        getTokensFromLine(fin,tokens);
 
         // process the tokens
         if(tokens.size() > 0)
         {
-            for(size_t j=0; j<tokens.size(); ++j)
-                tokens[j] = toLower(tokens[j]);
-
             if(parseSingleValue(tokens, tInputStringList = {"begin","boundary","conditions"}, tStringValue))
             {
-                // found an objective. parse it.
-                // parse the rest of the objective
-                while (!fin.eof())
-                {
-                    tokens.clear();
-                    fin.getline(buf, MAX_CHARS_PER_LINE);
-                    parseTokens(buf, tokens);
-                    // process the tokens
-                    if(tokens.size() > 0)
-                    {
-                        std::vector<std::string> unlowered_tokens = tokens;
-
-                        for(size_t j=0; j<tokens.size(); ++j)
-                            tokens[j] = toLower(tokens[j]);
-
-                        if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            XMLGen::BC new_bc;
-                            if(tokens.size() < 7)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
-                                return false;
-                            }
-                            if(tokens[0] != "fixed")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
-                                return false;
-                            }
-                            new_bc.type = tokens[1];
-                            if(tokens[1] == "displacement")
-                            {
-                                // Potential syntax:
-                                // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
-                                // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
-                                // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
-                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-                                    return false;
-                                }
-                                new_bc.app_type = tokens[2];
-
-                                new_bc.app_id = tokens[3]; // nodeset or sideset id
-                                new_bc.dof = "";
-                                new_bc.value = "";
-                                if(tokens[4] != "bc")
-                                {
-                                    if(tokens[4] != "x" && tokens[4] != "y" && tokens[4] != "z")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
-                                        return false;
-                                    }
-                                    new_bc.dof = tokens[4];
-                                    if(tokens[5] != "bc")
-                                    {
-                                        new_bc.value = tokens[5];
-                                        new_bc.bc_id = tokens[8];
-                                    }
-                                    else
-                                    {
-                                        new_bc.bc_id = tokens[7];
-                                    }
-                                }
-                                else
-                                    new_bc.bc_id = tokens[6];
-                            }
-                            else if (tokens[1] == "temperature")
-                            {
-                                // Potential syntax:
-                                // fixed temperature nodeset 1 bc id 1
-                                // fixed temperature nodeset 1 value 25.0 bc id 1
-                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-                                    return false;
-                                }
-                                new_bc.app_type = tokens[2];
-
-                                new_bc.app_id = tokens[3]; // nodeset or sideset id
-                                new_bc.value = "";
-                                if(tokens[4] != "bc")
-                                {
-                                    if(tokens[4] != "value")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-                                        return false;
-                                    }
-                                    new_bc.value = tokens[5];
-                                    if(tokens[6] != "bc")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-                                        return false;
-                                    }
-                                    new_bc.bc_id = tokens[8];
-                                }
-                                else
-                                    new_bc.bc_id = tokens[6];
-                            }
-                            else
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
-                                return false;
-                            }
-
-                            m_InputData.bcs.push_back(new_bc);
-                        }
-                    }
-                }
+              if(!parseBCsBlock(fin))
+                return false;
+              bc_block_found = true;
             }
         }
     }
+
+    if(!bc_block_found)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: No boundary condition block found \n";
+      return false;
+    }
+
     return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseBCsBlock(std::istream &fin)
+/******************************************************************************/
+{
+  std::vector<std::string> tInputStringList;
+  std::vector<std::string> tokens;
+  std::string tStringValue;
+  
+  while (!fin.eof())
+  {
+    getTokensFromLine(fin,tokens);
+
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+          tokens[j] = toLower(tokens[j]);
+      if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
+        break;
+      else
+        if(!parseBCLine(tokens))
+          return false;
+    }
+  }
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    XMLGen::BC new_bc;
+    bool return_status = true;
+
+    if(tokens.size() < 7)
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
+        return false;
+    }
+    if(tokens[0] != "fixed")
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
+        return false;
+    }
+    new_bc.type = tokens[1];
+
+    if(!new_bc.type.compare("displacement"))
+      return_status = parseDisplacementBC(tokens,new_bc);
+    else if(!new_bc.type.compare("temperature"))
+      return_status = parseTemperatureBC(tokens,new_bc);
+    else
+    {
+        PrintUnrecognizedTokens(tokens);
+        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n";
+        return false;
+    }
+
+    m_InputData.bcs.push_back(new_bc);
+
+    return return_status;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+/******************************************************************************/
+{
+  // Potential syntax:
+  // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
+  // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
+  // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
+
+  size_t tTokenIndex = 1;
+  bool tNameOrIDSpecified = false;
+
+  if(tokens[++tTokenIndex] != "nodeset" && tokens[tTokenIndex] != "sideset")
+  {
+    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+    return false;
+  }
+  new_bc.app_type = tokens[tTokenIndex];
+
+  if(tokens[++tTokenIndex] == "id")
+  {
+    new_bc.app_id = tokens[++tTokenIndex];
+    tNameOrIDSpecified = true;
+  }
+  else if(tokens[tTokenIndex] == "name")
+  {
+    new_bc.app_name = tokens[++tTokenIndex];
+    tNameOrIDSpecified = true;
+  }
+  else
+  {
+    new_bc.app_id = tokens[tTokenIndex];
+    new_bc.app_name = "";
+  }
+  
+  if(tNameOrIDSpecified)
+  {
+    if(tokens[++tTokenIndex] == "id")
+      new_bc.app_id = tokens[++tTokenIndex];
+    else if(tokens[tTokenIndex] == "name")
+      new_bc.app_name = tokens[++tTokenIndex];
+    else
+      --tTokenIndex;
+  }
+
+  new_bc.dof = "";
+  new_bc.value = "";
+  if(tokens[++tTokenIndex] != "bc")
+  {
+    if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
+        return false;
+    }
+    new_bc.dof = tokens[tTokenIndex];
+    if(tokens[++tTokenIndex] != "bc")
+    {
+        new_bc.value = tokens[tTokenIndex];
+        tTokenIndex += 3;
+        new_bc.bc_id = tokens[tTokenIndex];
+    }
+    else
+    {
+        tTokenIndex += 2;
+        new_bc.bc_id = tokens[tTokenIndex];
+    }
+  }
+  else
+  {
+    tTokenIndex += 2;
+    new_bc.bc_id = tokens[tTokenIndex];
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+/******************************************************************************/
+{
+  // Potential syntax:
+  // fixed temperature nodeset 1 bc id 1
+  // fixed temperature nodeset 1 value 25.0 bc id 1
+  if(tokens[2] != "nodeset" && tokens[2] != "sideset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+      return false;
+  }
+  new_bc.app_type = tokens[2];
+
+  size_t tOffset = 0;
+  bool name_or_id_specified = false;
+  if(tokens[3] == "id")
+  {
+    ++tOffset;
+    new_bc.app_id = tokens[3+tOffset];
+    name_or_id_specified = true;
+  }
+  else if(tokens[3] == "name")
+  {
+    ++tOffset;
+    new_bc.app_name = tokens[3+tOffset];
+    name_or_id_specified = true;
+  }
+  else
+  {
+    new_bc.app_id = tokens[3];
+    new_bc.app_name = "";
+  }
+
+  if(name_or_id_specified)
+  {
+    if(tokens[4+tOffset] == "id")
+    {
+      ++tOffset;
+      new_bc.app_id = tokens[4+tOffset];
+    }
+    else if(tokens[4+tOffset] == "name")
+    {
+      ++tOffset;
+      new_bc.app_name = tokens[4+tOffset];
+    }
+  }
+
+  new_bc.value = "";
+  if(tokens[4+tOffset] != "bc")
+  {
+      if(tokens[4+tOffset] != "value")
+      {
+          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+          return false;
+      }
+      new_bc.value = tokens[5+tOffset];
+      if(tokens[6+tOffset] != "bc")
+      {
+          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+          return false;
+      }
+      new_bc.bc_id = tokens[8+tOffset];
+  }
+  else
+      new_bc.bc_id = tokens[6+tOffset];
+
+  return true;
 }
 
 /******************************************************************************/
@@ -7850,53 +8183,67 @@ void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc,
     pugi::xml_node stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Cache State");
 
-    if(m_InputData.optimization_type == "topology")
-    {
-        pugi::xml_node cur_parent = stage_node;
-        if(m_InputData.objectives.size() > 1)
-        {
-            op_node = stage_node.append_child("Operation");
-            cur_parent = op_node;
-        }
+    size_t tNum_objectives = m_InputData.objectives.size();
+    size_t tNum_to_write = 0;
+    bool tHandles_cache_state;
 
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    for(size_t i = 0; i < tNum_objectives; i++)
+    {
+      XMLGen::Objective cur_obj = m_InputData.objectives[i];
+      tHandles_cache_state = cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+              cur_obj.code_name.compare("lightmp"); // Albany, analyze, and lightmp don't handle Cache State correctly yet
+
+      if(tHandles_cache_state)
+        ++tNum_to_write;
+    }
+
+    pugi::xml_node cur_parent = stage_node;
+    if(tNum_to_write > 1)
+    {
+        op_node = stage_node.append_child("Operation");
+        cur_parent = op_node;
+    }
+    for(size_t i=0; i<tNum_objectives; ++i)
+    {
+
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
+
+        tHandles_cache_state = cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+                  cur_obj.code_name.compare("lightmp"); // Albany, analyze, and lightmp don't handle Cache State correctly yet
+
+        if(tHandles_cache_state)
         {
-            XMLGen::Objective cur_obj = m_InputData.objectives[i];
-            if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
-                    cur_obj.code_name.compare("lightmp")) // Albany, analyze, and lightmp don't handle Cache State correctly yet
+            op_node = cur_parent.append_child("Operation");
+            addChild(op_node, "Name", "Cache State");
+            addChild(op_node, "PerformerName", cur_obj.performer_name);
+            if(aHasUncertainties)
             {
-                op_node = cur_parent.append_child("Operation");
-                addChild(op_node, "Name", "Cache State");
-                addChild(op_node, "PerformerName", cur_obj.performer_name);
-                if(aHasUncertainties)
+                output_node = op_node.append_child("Output");
+                addChild(output_node, "ArgumentName", "vonmises0");
+                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
+            }
+            else if(cur_obj.multi_load_case == "true")
+            {
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
                 {
-                    output_node = op_node.append_child("Output");
-                    addChild(output_node, "ArgumentName", "vonmises0");
-                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
-                }
-                else if(cur_obj.multi_load_case == "true")
-                {
-                    for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%lu", k);
-                        std::string cur_load_string = cur_obj.load_case_ids[k];
-                        for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                        {
-                            output_node = op_node.append_child("Output");
-                            addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
-                            addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
-                        }
-                    }
-                }
-                else
-                {
+                    char buffer[100];
+                    sprintf(buffer, "%lu", k);
+                    std::string cur_load_string = cur_obj.load_case_ids[k];
                     for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                     {
                         output_node = op_node.append_child("Output");
-                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
-                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
                     }
+                }
+            }
+            else
+            {
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    output_node = op_node.append_child("Output");
+                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
                 }
             }
         }
