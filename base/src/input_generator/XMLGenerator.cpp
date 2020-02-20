@@ -1425,76 +1425,12 @@ bool XMLGenerator::generateAlbanyInputDecks()
 bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
-    if(checkForNodesetSidesetNameConflicts())
-      return false;
     PlatoAnalyzeInputDeckWriter tInputDeckWriter(m_InputData);
     tInputDeckWriter.generate(aStringStream);
 
     return true;
 }
 
-/******************************************************************************/
-bool XMLGenerator::checkForNodesetSidesetNameConflicts()
-/******************************************************************************/
-{
-  std::vector<std::string> nodeset_names;
-  std::vector<std::string> sideset_names;
-
-  std::vector<XMLGen::LoadCase> load_cases = m_InputData.load_cases;
-
-  for(auto load_case:load_cases)
-  {
-    std::vector<XMLGen::Load> loads = load_case.loads;
-    for(auto load:loads)
-    {
-      if(load.app_type == "nodeset")
-        nodeset_names.push_back(load.app_name);
-      else if(load.app_type == "sideset")
-        sideset_names.push_back(load.app_name);
-      else
-        std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
-    }
-  }
-
-  std::vector<XMLGen::BC> BCs = m_InputData.bcs;
-  for(auto bc:BCs)
-  {
-    if(bc.app_type == "nodeset")
-      nodeset_names.push_back(bc.app_name);
-    else if(bc.app_type == "sideset")
-      sideset_names.push_back(bc.app_name);
-    else
-      std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
-  }
-
-  for(auto ns_name:nodeset_names)
-    if(ns_name == "")
-    {
-      std::cout << "nodeset name empty" << std::endl;
-      return true;
-    }
-
-  for(auto ss_name:sideset_names)
-    if(ss_name == "")
-    {
-      std::cout << "sideset name empty" << std::endl;
-      return true;
-    }
-
-  for(auto ns_name:nodeset_names)
-  {
-    for(auto ss_name:sideset_names)
-    {
-      if(ns_name == ss_name)
-      {
-        std::cout << "nodeset name equal to sideset name" << std::endl;
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
 
 /******************************************************************************/
 bool XMLGenerator::addChild(pugi::xml_node parent_node,
@@ -1755,10 +1691,14 @@ bool XMLGenerator::generateLightMPInputDecks()
 bool XMLGenerator::generatePhysicsInputDecks()
 /******************************************************************************/
 {
-    generateSalinasInputDecks();
-    generateAlbanyInputDecks();
-    generateLightMPInputDecks();
-    generatePlatoAnalyzeInputDecks();
+    if(!generateSalinasInputDecks())
+      return false;
+    if(!generateAlbanyInputDecks())
+      return false;
+    if(!generateLightMPInputDecks())
+      return false;
+    if(!generatePlatoAnalyzeInputDecks())
+      return false;
     return true;
 }
 

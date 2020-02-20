@@ -8,12 +8,12 @@ begin objective
 end objective
 
 begin boundary conditions
-   fixed temperature nodeset ns_1 bc id 1
-   fixed temperature nodeset ns_2 bc id 2
+   fixed temperature nodeset name ns_1 bc id 1
+   fixed temperature nodeset name ns_2 bc id 2
 end boundary conditions
 
 begin loads
-    heat flux sideset ss_1 value -1e2 load id 1
+    heat flux sideset name ss_1 value -1e2 load id 1
 end loads
       
 begin constraint 

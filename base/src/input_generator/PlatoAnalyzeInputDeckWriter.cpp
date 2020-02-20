@@ -76,6 +76,8 @@ void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
         const XMLGen::Objective& cur_obj = mInputData.objectives[i];
         if(!cur_obj.code_name.compare("plato_analyze"))
         {
+            checkForNodesetSidesetNameConflicts();
+
             char buf[200];
             sprintf(buf, "plato_analyze_input_deck_%s.xml", cur_obj.name.c_str());
             pugi::xml_document doc;
@@ -115,6 +117,69 @@ void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
                 doc.save_file(buf, "  ");
         }
     }
+}
+
+/******************************************************************************/
+bool PlatoAnalyzeInputDeckWriter::checkForNodesetSidesetNameConflicts()
+/******************************************************************************/
+{
+  std::vector<std::string> nodeset_names;
+  std::vector<std::string> sideset_names;
+
+  std::vector<XMLGen::LoadCase> load_cases = mInputData.load_cases;
+
+  for(auto load_case:load_cases)
+  {
+    std::vector<XMLGen::Load> loads = load_case.loads;
+    for(auto load:loads)
+    {
+      if(load.app_type == "nodeset")
+        nodeset_names.push_back(load.app_name);
+      else if(load.app_type == "sideset")
+        sideset_names.push_back(load.app_name);
+      else
+        std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+    }
+  }
+
+  std::vector<XMLGen::BC> BCs = mInputData.bcs;
+  for(auto bc:BCs)
+  {
+    if(bc.app_type == "nodeset")
+      nodeset_names.push_back(bc.app_name);
+    else if(bc.app_type == "sideset")
+      sideset_names.push_back(bc.app_name);
+    else
+      std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+  }
+
+  for(auto ns_name:nodeset_names)
+    if(ns_name == "")
+    {
+      std::cout << "ERROR::XMLGenerator Nodeset name is empty" << std::endl;
+      return true;
+    }
+
+  for(auto ss_name:sideset_names)
+    if(ss_name == "")
+    {
+      std::cout << "ERROR::XMLGenerator Sideset name is empty" << std::endl;
+      return true;
+    }
+
+  for(auto ns_name:nodeset_names)
+  {
+    for(auto ss_name:sideset_names)
+    {
+      if(ns_name == ss_name)
+      {
+        std::cout << "ERROR::XMLGenerator Nodeset name is identical to sideset name" << std::endl;
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /******************************************************************************/
