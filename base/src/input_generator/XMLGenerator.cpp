@@ -1426,9 +1426,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
 /******************************************************************************/
 {
     PlatoAnalyzeInputDeckWriter tInputDeckWriter(m_InputData);
-    tInputDeckWriter.generate(aStringStream);
-
-    return true;
+    return tInputDeckWriter.generate(aStringStream);
 }
 
 

@@ -69,14 +69,15 @@ PlatoAnalyzeInputDeckWriter::~PlatoAnalyzeInputDeckWriter()
 {
 }
 
-void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
+bool PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
 {
     for(size_t i=0; i<mInputData.objectives.size(); ++i)
     {
         const XMLGen::Objective& cur_obj = mInputData.objectives[i];
         if(!cur_obj.code_name.compare("plato_analyze"))
         {
-            checkForNodesetSidesetNameConflicts();
+            if(checkForNodesetSidesetNameConflicts())
+              return false;
 
             char buf[200];
             sprintf(buf, "plato_analyze_input_deck_%s.xml", cur_obj.name.c_str());
@@ -117,6 +118,8 @@ void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
                 doc.save_file(buf, "  ");
         }
     }
+
+    return true;
 }
 
 /******************************************************************************/

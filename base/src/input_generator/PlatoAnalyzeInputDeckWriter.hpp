@@ -62,7 +62,7 @@ class PlatoAnalyzeInputDeckWriter
 public:
     PlatoAnalyzeInputDeckWriter(const InputData &aInputData);
     ~PlatoAnalyzeInputDeckWriter();
-    void generate(std::ostringstream *aStringStream = NULL);
+    bool generate(std::ostringstream *aStringStream = NULL);
 
 protected:
 
