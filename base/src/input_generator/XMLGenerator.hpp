@@ -66,9 +66,10 @@ class XMLGenerator
 {
 
 public:
-    XMLGenerator(const std::string &input_filename = "", bool use_launch = false);
+    XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     bool generate();
+
 
 protected:
 
@@ -113,8 +114,10 @@ protected:
     bool parseBCLine(std::vector<std::string>& tokens);
     bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    bool generateDefinesXML(std::ostringstream *aStringStream = NULL);
     bool generateInterfaceXML();
     bool generateLaunchScript();
+    bool generateSummitLaunchScripts();
     bool generatePlatoOperationsXML();
     bool generatePlatoMainInputDeckXML();
     bool generatePerformerOperationsXML();
@@ -208,6 +211,7 @@ protected:
 
     std::string m_InputFilename;
     bool m_UseLaunch;
+    XMLGen::Arch m_Arch;
     XMLGen::InputData m_InputData;
     std::string m_filterType_identity_generatorName;
     std::string m_filterType_identity_XMLName;
@@ -217,6 +221,7 @@ protected:
     std::string m_filterType_kernelThenHeaviside_XMLName;
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
+    std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
 private:
     /******************************************************************************//**
      * @brief Initialize Plato problem options
@@ -268,6 +273,16 @@ private:
     void putLoadInLoadCase(XMLGen::Load& new_load);
     bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
     void createNewLoadCase(XMLGen::Load& new_load);
+    void addVersionEntryToDoc(pugi::xml_document& doc);
+    bool addDefinesToDoc(pugi::xml_document& doc);
+    size_t stringToSizeT(const std::string& aString);
+    size_t getGreatestDivisor(const size_t& aDividend, size_t aDivisor);
+    size_t computeNumberOfNodesNeeded();
+    void generateBatchScript();
+    void generateJSRunScript();
+    void generatePerformerBashScripts();
+    void generateEngineBashScript();
+    void generateAnalyzeBashScripts();
 };
 
 }

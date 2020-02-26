@@ -86,9 +86,10 @@ void PrintUnrecognizedTokens(const std::vector<std::string> & unrecognizedTokens
 }
 
 /******************************************************************************/
-XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
+XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, const XMLGen::Arch& arch) :
         m_InputFilename(input_filename),
         m_UseLaunch(use_launch),
+        m_Arch(arch),
         m_InputData(),
         m_filterType_identity_generatorName("identity"),
         m_filterType_identity_XMLName("Identity"),
@@ -115,87 +116,94 @@ bool XMLGenerator::runSROMForUncertainVariables()
     if(m_InputData.uncertainties.size() > 0)
     {
         std::vector<XMLGen::LoadCase> tNewLoadCases;
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        if(m_InputData.objectives.size() > 1)
         {
-            std::vector<XMLGen::LoadCase> tCurObjLoadCases;
-            std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
-            XMLGen::Objective &tCurObj = m_InputData.objectives[i];
-            for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+          std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
+          return false;
+        }
+
+        std::vector<XMLGen::LoadCase> tCurObjLoadCases;
+        std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
+        XMLGen::Objective &tCurObj = m_InputData.objectives[0];
+        for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+        {
+            const std::string &tCurID = tCurObj.load_case_ids[j];
+            for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
             {
-                const std::string &tCurID = tCurObj.load_case_ids[j];
-                for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
+                if(m_InputData.load_cases[k].id == tCurID)
                 {
-                    if(m_InputData.load_cases[k].id == tCurID)
-                    {
-                        tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
-                        k=m_InputData.load_cases.size();
-                    }
-                }
-                for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
-                {
-                    if(m_InputData.uncertainties[k].id == tCurID)
-                        tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+                    tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
+                    k=m_InputData.load_cases.size();
                 }
             }
-
-            std::vector<Plato::srom::Load> tLoads;
-            Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
-
-            if(tCurObjUncertainties.size() > 0)
+            for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
             {
-                Plato::srom::InputMetaData tInputs;
-                tInputs.mLoads = tLoads;
-                Plato::srom::OutputMetaData tOutputs;
-                Plato::generate_load_sroms(tInputs, tOutputs);
-
-                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-                tCurObj.load_case_ids.clear();
-                tCurObj.load_case_weights.clear();
-                for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
+                if(m_InputData.uncertainties[k].id == tCurID)
                 {
-                    XMLGen::LoadCase tNewLoadCase;
-                    tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-                    for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
-                    {
-                        XMLGen::Load tNewLoad;
-                        tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
-                        tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
-                        tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
-                        tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
-                        for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
-                            tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
-                        tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
-                        tNewLoadCase.loads.push_back(tNewLoad);
-                    }
-                    tNewLoadCases.push_back(tNewLoadCase);
-                    tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-                    tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
-                    tStartingLoadCaseID++;
+                  tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+                  mObjectiveLoadCaseIndexToUncertaintyIndex[j] = k;
                 }
             }
-            else
+        }
+
+        std::vector<Plato::srom::Load> tLoads;
+        Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+
+        if(tCurObjUncertainties.size() > 0)
+        {
+            Plato::srom::InputMetaData tInputs;
+            tInputs.mLoads = tLoads;
+            Plato::srom::OutputMetaData tOutputs;
+            Plato::generate_load_sroms(tInputs, tOutputs);
+
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
             {
-                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-                tCurObj.load_case_ids.clear();
-                tCurObj.load_case_weights.clear();
                 XMLGen::LoadCase tNewLoadCase;
                 tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-                for(size_t j=0; j<tLoads.size(); ++j)
+                for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
                 {
                     XMLGen::Load tNewLoad;
-                    tNewLoad.type = tLoads[j].mLoadType;
-                    tNewLoad.app_type = tLoads[j].mAppType;
-                    tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
-                    tNewLoad.app_name = tLoads[j].mAppName;
-                    for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
-                        tNewLoad.values.push_back(tLoads[j].mValues[h]);
+                    tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
+                    tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
+                    tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                    tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
+                    for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
+                        tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
+                    tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
                 tNewLoadCases.push_back(tNewLoadCase);
                 tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-                tCurObj.load_case_weights.push_back("1.0");
+                tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
+                tStartingLoadCaseID++;
             }
         }
+        else
+        {
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            XMLGen::LoadCase tNewLoadCase;
+            tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+            for(size_t j=0; j<tLoads.size(); ++j)
+            {
+                XMLGen::Load tNewLoad;
+                tNewLoad.type = tLoads[j].mLoadType;
+                tNewLoad.app_type = tLoads[j].mAppType;
+                tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
+                tNewLoad.app_name = tLoads[j].mAppName;
+                for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
+                    tNewLoad.values.push_back(tLoads[j].mValues[h]);
+                tNewLoadCase.loads.push_back(tNewLoad);
+            }
+            tNewLoadCases.push_back(tNewLoadCase);
+            tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+            tCurObj.load_case_weights.push_back("1.0");
+        }
+
         m_InputData.load_cases = tNewLoadCases;
     }
     return true;
@@ -313,6 +321,12 @@ bool XMLGenerator::generate()
     }
 
     lookForPlatoAnalyzePerformers();
+
+    // if(!generateDefinesXML())
+    // {
+    //     std::cout << "Failed to generate defines.xml" << std::endl;
+    //     return false;
+    // }
 
     if(!generateInterfaceXML())
     {
@@ -799,206 +813,334 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
 bool XMLGenerator::generateLaunchScript()
 /******************************************************************************/
 {
-    FILE *fp=fopen("mpirun.source", "w");
-    if(!fp)
+    if(m_Arch == XMLGen::Arch::SUMMIT)
+      generateSummitLaunchScripts();
+    else
     {
-        return true;
-    }
+      FILE *fp=fopen("mpirun.source", "w");
+      if(!fp)
+      {
+          return true;
+      }
 
-    std::string num_opt_procs = "1";
-    if(!m_InputData.num_opt_processors.empty())
-        num_opt_procs = m_InputData.num_opt_processors;
+      std::string num_opt_procs = "1";
+      if(!m_InputData.num_opt_processors.empty())
+          num_opt_procs = m_InputData.num_opt_processors;
 
-    // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
-    // any combination of the above we need to add an mpirun call for this first so it will run as
-    // a pre-processor on the input mesh.
-    int tNumRefines = 0;
-    if(m_InputData.number_refines != "")
-        tNumRefines = std::atoi(m_InputData.number_refines.c_str());
-    if(tNumRefines > 0 ||
-            (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
-    {
-        // Determine how many processors to use for the prune_and_refine run.
-        std::string tNumberPruneAndRefineProcsString = "1";
-        int tNumberPruneAndRefineProcs = 1;
-        if(m_InputData.number_prune_and_refine_processors != "" &&
-                m_InputData.number_prune_and_refine_processors != "0")
-        {
-            tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
-            tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
-        }
-        else
-        {
-            // Find the max number of objective procs.
-            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-            {
-                if(!m_InputData.objectives[i].num_procs.empty())
-                {
-                    int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
-                    if(tNumProcs > tNumberPruneAndRefineProcs)
-                    {
-                        tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
-                        tNumberPruneAndRefineProcs = tNumProcs;
-                    }
-                }
-            }
-        }
+      // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
+      // any combination of the above we need to add an mpirun call for this first so it will run as
+      // a pre-processor on the input mesh.
+      int tNumRefines = 0;
+      if(m_InputData.number_refines != "")
+          tNumRefines = std::atoi(m_InputData.number_refines.c_str());
+      if(tNumRefines > 0 ||
+              (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
+      {
+          // Determine how many processors to use for the prune_and_refine run.
+          std::string tNumberPruneAndRefineProcsString = "1";
+          int tNumberPruneAndRefineProcs = 1;
+          if(m_InputData.number_prune_and_refine_processors != "" &&
+                  m_InputData.number_prune_and_refine_processors != "0")
+          {
+              tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
+              tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
+          }
+          else
+          {
+              // Find the max number of objective procs.
+              for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+              {
+                  if(!m_InputData.objectives[i].num_procs.empty())
+                  {
+                      int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
+                      if(tNumProcs > tNumberPruneAndRefineProcs)
+                      {
+                          tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
+                          tNumberPruneAndRefineProcs = tNumProcs;
+                      }
+                  }
+              }
+          }
 
-        // First decompose the files that will be involved below
-        if(tNumberPruneAndRefineProcs > 1)
-        {
-            fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
-            if(m_InputData.initial_guess_filename != "")
-                fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
-        }
+          // First decompose the files that will be involved below
+          if(tNumberPruneAndRefineProcs > 1)
+          {
+              fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
+              if(m_InputData.initial_guess_filename != "")
+                  fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
+          }
 
-        std::string tPruneString = "0";
-        std::string tNumRefinesString = "0";
-        std::string tNumBufferLayersString = "2";
-        if(m_InputData.prune_mesh == "true")
-            tPruneString = "1";
-        if(m_InputData.number_refines != "")
-            tNumRefinesString = m_InputData.number_refines;
-        if(m_InputData.number_buffer_layers != "")
-            tNumBufferLayersString = m_InputData.number_buffer_layers;
+          std::string tPruneString = "0";
+          std::string tNumRefinesString = "0";
+          std::string tNumBufferLayersString = "2";
+          if(m_InputData.prune_mesh == "true")
+              tPruneString = "1";
+          if(m_InputData.number_refines != "")
+              tNumRefinesString = m_InputData.number_refines;
+          if(m_InputData.number_buffer_layers != "")
+              tNumBufferLayersString = m_InputData.number_buffer_layers;
 
-        std::string tCommand;
-        std::string tPruneAndRefineExe = "prune_and_refine";
-        if(m_InputData.prune_and_refine_path.length() > 0)
-            tPruneAndRefineExe = m_InputData.prune_and_refine_path;
-        if(m_UseLaunch)
-            tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-        else
-            tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-        if(m_InputData.initial_guess_filename != "")
-            tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
-        tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
-        tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
-        if(m_InputData.initial_guess_field_name != "")
-            tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
-        tCommand += (" --number_of_refines=" + tNumRefinesString);
-        tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
-        tCommand += (" --prune_mesh=" + tPruneString);
+          std::string tCommand;
+          std::string tPruneAndRefineExe = "prune_and_refine";
+          if(m_InputData.prune_and_refine_path.length() > 0)
+              tPruneAndRefineExe = m_InputData.prune_and_refine_path;
+          if(m_UseLaunch)
+              tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+          else
+              tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+          if(m_InputData.initial_guess_filename != "")
+              tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
+          tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
+          tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
+          if(m_InputData.initial_guess_field_name != "")
+              tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
+          tCommand += (" --number_of_refines=" + tNumRefinesString);
+          tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
+          tCommand += (" --prune_mesh=" + tPruneString);
 
-        fprintf(fp, "%s\n", tCommand.c_str());
+          fprintf(fp, "%s\n", tCommand.c_str());
 
-        // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
-        if(tNumberPruneAndRefineProcs > 1)
-        {
-            // Build the extension string we will need.
-            std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
-            for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
-                tExtensionString += "0";
-            fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
-        }
-    }
+          // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
+          if(tNumberPruneAndRefineProcs > 1)
+          {
+              // Build the extension string we will need.
+              std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
+              for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
+                  tExtensionString += "0";
+              fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
+          }
+      }
 
-    // remember if the run_mesh has been decomposed to this processor count
-    std::map<std::string,int> hasBeenDecompedToThisCount;
+      // remember if the run_mesh has been decomposed to this processor count
+      std::map<std::string,int> hasBeenDecompedToThisCount;
 
-    // Now do the decomps for the TO run.
-    if(num_opt_procs.compare("1") != 0) {
-        if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
-        {
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
-        }
-    }
-    if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
-        fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        std::string num_procs = "4";
-        if(!m_InputData.objectives[i].num_procs.empty())
-            num_procs = m_InputData.objectives[i].num_procs;
-        if(num_procs.compare("1") != 0)
-        {
-            if(++hasBeenDecompedToThisCount[num_procs] == 1)
-            {
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
-            }
-            if(m_InputData.objectives[i].ref_frf_file.length() > 0)
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
-        }
-    }
+      // Now do the decomps for the TO run.
+      if(num_opt_procs.compare("1") != 0) {
+          if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
+          {
+              fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
+          }
+      }
+      if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
+          fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          std::string num_procs = "4";
+          if(!m_InputData.objectives[i].num_procs.empty())
+              num_procs = m_InputData.objectives[i].num_procs;
+          if(num_procs.compare("1") != 0)
+          {
+              if(++hasBeenDecompedToThisCount[num_procs] == 1)
+              {
+                  fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
+              }
+              if(m_InputData.objectives[i].ref_frf_file.length() > 0)
+                  fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
+          }
+      }
 
 #ifndef USING_OPEN_MPI
-    std::string envString = "-env";
-    std::string separationString = " ";
+      std::string envString = "-env";
+      std::string separationString = " ";
 #else
-    std::string envString = "-x";
-    std::string separationString = "=";
+      std::string envString = "-x";
+      std::string separationString = "=";
 #endif
 
-    std::string tLaunchString = "";
-    std::string tNumProcsString = "";
-    if(m_UseLaunch)
-    {
-        tLaunchString = "launch";
-        tNumProcsString = "-n";
-    }
-    else
-    {
-        tLaunchString = "mpiexec";
-        tNumProcsString = "-np";
-    }
+      std::string tLaunchString = "";
+      std::string tNumProcsString = "";
+      if(m_UseLaunch)
+      {
+          tLaunchString = "launch";
+          tNumProcsString = "-n";
+      }
+      else
+      {
+          tLaunchString = "mpiexec";
+          tNumProcsString = "-np";
+      }
 
-    if(m_InputData.optimization_type == "shape")
-    {
-        fprintf(fp, "python aflr.py %s %s %s ", m_InputData.csm_filename.c_str(), m_InputData.csm_exodus_filename.c_str(), m_InputData.csm_tesselation_filename.c_str());
-        for(size_t i=0; i<m_InputData.mShapeDesignVariableValues.size(); ++i)
-            fprintf(fp, "%s ", m_InputData.mShapeDesignVariableValues[i].c_str());
-        fprintf(fp, "\n");
-    }
+      if(m_InputData.optimization_type == "shape")
+      {
+          fprintf(fp, "python aflr.py %s %s %s ", m_InputData.csm_filename.c_str(), m_InputData.csm_exodus_filename.c_str(), m_InputData.csm_tesselation_filename.c_str());
+          for(size_t i=0; i<m_InputData.mShapeDesignVariableValues.size(); ++i)
+              fprintf(fp, "%s ", m_InputData.mShapeDesignVariableValues[i].c_str());
+          fprintf(fp, "\n");
+      }
 
-    // Now add the main mpirun call.
-    fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
-    fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-    fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
-    if(m_InputData.plato_main_path.length() != 0)
-        fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
-    else
-        fprintf(fp, "plato_main platomain.xml \\\n");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
-        if(!cur_obj.num_procs.empty())
+      // Now add the main mpirun call.
+      fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+      fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+      fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
+      if(m_InputData.plato_main_path.length() != 0)
+          fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
+      else
+          fprintf(fp, "plato_main platomain.xml \\\n");
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
+          if(!cur_obj.num_procs.empty())
+          {
             fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
-        else
-            fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
-        fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-        fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
-                cur_obj.name.c_str());
-        if(!cur_obj.code_name.compare("sierra_sd"))
-        {
-            if(m_InputData.sierra_sd_path.length() != 0)
-                fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("lightmp"))
-        {
-            if(m_InputData.lightmp_path.length() != 0)
-                fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("albany"))
-        {
-            if(m_InputData.albany_path.length() != 0)
-                fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("plato_analyze"))
-        {
-            if(m_InputData.plato_analyze_path.length() != 0)
-                fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
-        }
-    }
+          }
+          else
+              fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
+          fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+          fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
+                  cur_obj.name.c_str());
+          if(!cur_obj.code_name.compare("sierra_sd"))
+          {
+              if(m_InputData.sierra_sd_path.length() != 0)
+                  fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("lightmp"))
+          {
+              if(m_InputData.lightmp_path.length() != 0)
+                  fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("albany"))
+          {
+              if(m_InputData.albany_path.length() != 0)
+                  fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("plato_analyze"))
+          {
+              if(m_InputData.plato_analyze_path.length() != 0)
+                  fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+          }
+      }
 
-    fclose(fp);
+      fclose(fp);
+    }
     return true;
 }
+
+/******************************************************************************/
+bool XMLGenerator::generateSummitLaunchScripts()
+/******************************************************************************/
+{
+  if(m_InputData.objectives.size() > 99)
+  {
+    std::cout << "ERROR: Number of Samples must be less than 100" << std::endl;
+    return false;
+  }
+  for(auto objective:m_InputData.objectives)
+  {
+    if(objective.code_name != "plato_analyze")
+      std::cout << "ERROR: Summit output is only supported for Plato Analyze performers" << std::endl;
+  }
+  generatePerformerBashScripts();
+  generateJSRunScript();
+  generateBatchScript();
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::generatePerformerBashScripts()
+/******************************************************************************/
+{
+  generateEngineBashScript();
+  generateAnalyzeBashScripts();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateAnalyzeBashScripts()
+/******************************************************************************/
+{
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    std::ofstream analyzeBash;
+    std::string filename = "analyze" + std::to_string(i) + ".sh";
+    analyzeBash.open(filename);
+    analyzeBash << "export PLATO_PERFORMER_ID=" << i << "\n";
+    analyzeBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
+    analyzeBash << "export PLATO_APP_FILE=plato_analyze_operations_" << i << ".xml\n";
+    analyzeBash << "\n";
+    analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck_" << i << ".xml\n";
+
+    analyzeBash.close();
+  }
+}
+
+/******************************************************************************/
+void XMLGenerator::generateEngineBashScript()
+/******************************************************************************/
+{
+  std::ofstream engineBash;
+  engineBash.open("engine.sh");
+  engineBash << "export PLATO_PERFORMER_ID=0\n";
+  engineBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
+  engineBash << "export PLATO_APP_FILE=plato_operations.xml\n";
+  engineBash << "\n";
+  engineBash << "PlatoMain platomain.xml";
+  engineBash.close();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateJSRunScript()
+/******************************************************************************/
+{
+  std::ofstream jsrun;
+  jsrun.open("jsrun.source");
+  jsrun << "1 : eng : bash engine.sh\n";
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    jsrun << "1 : per" << i << " : bash analyze" << i << ".sh\n";
+  }
+  jsrun.close();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateBatchScript()
+/******************************************************************************/
+{
+  std::ofstream batchFile;
+  batchFile.open ("plato.batch");
+  batchFile << "#!/bin/bash\n";
+  batchFile << "# LSF Directives\n";
+  batchFile << "#BSUB -P <PROJECT>\n";
+  batchFile << "#BSUB -W 0:00\n";
+
+  size_t tNumNodesNeeded = computeNumberOfNodesNeeded();
+
+  batchFile << "#BSUB -nnodes " << tNumNodesNeeded << "\n";
+  batchFile << "#BSUB -J plato\n";
+  batchFile << "#BSUB -o plato.%J\n";
+  batchFile << "\n";
+  batchFile << "cd <path/to/working/directory>\n";
+  batchFile << "date\n";
+  batchFile << "jsrun -A eng -n1 -a1 -c1 -g0\n";
+
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    batchFile << "jsrun -A per" << i << " -n1 -a1 -c1 -g1\n";
+  }
+
+  batchFile << "jsrun -f jsrun.source\n";
+  
+
+  batchFile.close();
+}
+
+/******************************************************************************/
+size_t XMLGenerator::computeNumberOfNodesNeeded()
+/******************************************************************************/
+{
+  size_t tNumGPUsNeeded = m_InputData.objectives.size();
+  size_t tNumGPUsPerNode = 6;
+  size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
+  if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
+    ++tNumNodesNeeded;
+  return tNumNodesNeeded;
+}
+
 
 /******************************************************************************/
 bool XMLGenerator::generateSalinasInputDecks(std::ostringstream *aStringStream)
@@ -7538,6 +7680,104 @@ pugi::xml_node XMLGenerator::createMultiUserGlobalSharedData(pugi::xml_document 
         addChild(sd_node, "UserName", aUsers[i]);
     }
     return sd_node;
+}
+
+/******************************************************************************/
+bool XMLGenerator::generateDefinesXML(std::ostringstream *aStringStream)
+/******************************************************************************/
+{
+  if(m_InputData.mPlatoAnalyzePerformerExists && m_InputData.uncertainties.size() > 0)
+  {
+    pugi::xml_document doc;
+
+    addVersionEntryToDoc(doc);
+    if(!addDefinesToDoc(doc))
+      return false;
+    
+    if(aStringStream)
+        doc.save(*aStringStream, "\t", pugi::format_default & ~pugi::format_indent);
+    else
+      doc.save_file("defines.xml", "  ");
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::addVersionEntryToDoc(pugi::xml_document& doc)
+/******************************************************************************/
+{
+    // Version entry
+    pugi::xml_node tTmpNode = doc.append_child(pugi::node_declaration);
+    tTmpNode.set_name("xml");
+    pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
+    tmp_att.set_value("1.0");
+}
+
+/******************************************************************************/
+bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
+/******************************************************************************/
+{
+  if(m_InputData.objectives.size() > 1)
+  {
+    std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
+    return false;
+  }
+
+  pugi::xml_node tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumSamples";
+  tTmpNode.append_attribute("type") = "int";
+  std::string tNumSamplesString = m_InputData.uncertainties[0].num_samples;
+  tTmpNode.append_attribute("value") = tNumSamplesString.c_str();
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumMPIProcesses";
+  tTmpNode.append_attribute("type") = "int";
+  std::string tNumMPIProcessesString = m_InputData.objectives[0].atmost_total_num_processors;
+  size_t tNumMPIProcesses = stringToSizeT(tNumMPIProcessesString);
+  size_t tNumSamples = stringToSizeT(tNumSamplesString);
+
+  if(tNumMPIProcesses == 0)
+  {
+    std::cout << "ERROR: Cannot assign zero MPI processes" << std::endl;
+    return false;
+  }
+
+  tNumMPIProcesses = getGreatestDivisor(tNumSamples,tNumMPIProcesses);
+
+  tNumMPIProcessesString = std::to_string(tNumMPIProcesses);
+  tTmpNode.append_attribute("value") = tNumMPIProcessesString.c_str();
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumEvals";
+  tTmpNode.append_attribute("type") = "int";
+  tTmpNode.append_attribute("value") = "{NumSamples/NumMPIProcesses}";
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "LoadMag";
+
+  return true;
+}
+
+/******************************************************************************/
+size_t XMLGenerator::getGreatestDivisor(const size_t& aDividend, size_t aDivisor)
+/******************************************************************************/
+{
+  if(aDivisor == 0)
+    throw std::invalid_argument( "Error: divide by zero" );
+  while(aDividend % aDivisor != 0)
+    --aDivisor;
+  return aDivisor;
+}
+
+/******************************************************************************/
+size_t XMLGenerator::stringToSizeT(const std::string& aString)
+/******************************************************************************/
+{
+  std::stringstream sstream(aString);
+  size_t result;
+  sstream >> result;
+  return result;
 }
 
 /******************************************************************************/

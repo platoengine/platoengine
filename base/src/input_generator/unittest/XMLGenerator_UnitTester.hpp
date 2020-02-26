@@ -85,6 +85,7 @@ public:
     bool publicExpandUncertaintiesForGenerate();
     bool publicDistributeObjectivesForGenerate();
     bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
+    bool publicGenerateDefinesXML(std::ostringstream *aStringStream = NULL);
     std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name;}
     std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].type;}
     std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}

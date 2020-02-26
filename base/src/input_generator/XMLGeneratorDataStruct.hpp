@@ -274,5 +274,11 @@ struct InputData
     bool mPlatoAnalyzePerformerExists;
 };
 
+enum struct Arch
+{
+  CEE,
+  SUMMIT
+};
+
 }
 // namespace XMLGen
