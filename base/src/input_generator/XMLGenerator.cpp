@@ -101,6 +101,8 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
         m_filterType_kernelThenTANH_XMLName("KernelThenTANH")
 /******************************************************************************/
 {
+  m_HasUncertainties = false;
+  m_RequestedVonMisesOutput = false;
 }
 
 /******************************************************************************/
@@ -297,6 +299,8 @@ bool XMLGenerator::generate()
             return false;
         }
     }
+
+    getUncertaintyFlags(m_InputData, m_HasUncertainties, m_RequestedVonMisesOutput);
 
     // NOTE: modifies objectives and loads for uncertainties
     /*
@@ -6642,14 +6646,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
     // Operations
     /////////////////////////////////////////////////
 
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
-
     if(m_InputData.optimization_type == "topology")
     {
         addFilterInfo(doc);
-        addPlatoMainOutputOperation(doc, tHasUncertainties, tRequestedVonMisesOutput);
+        addPlatoMainOutputOperation(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
         addUpdateProblemOperation(doc);
         addFilterControlOperation(doc);
         addFilterGradientOperation(doc);
@@ -7823,10 +7823,6 @@ bool XMLGenerator::generateInterfaceXML()
     // Shared Data
     /////////////////////////////////////////////////
 
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
-
     // Internal Energy XXX shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
@@ -7871,13 +7867,13 @@ bool XMLGenerator::generateInterfaceXML()
 
     if(m_InputData.optimization_type == "topology")
     {
-        if(tHasUncertainties)
+        if(m_HasUncertainties)
         {
             // Objective statistics
             createSingleUserGlobalSharedData(doc, "Objective Mean Plus StdDev Value", "Scalar", "1", "PlatoMain", "PlatoMain");
             createSingleUserNodalSharedData(doc, "Objective Mean Plus StdDev Gradient", "Scalar", "PlatoMain", "PlatoMain");
 
-            if(tRequestedVonMisesOutput)
+            if(m_RequestedVonMisesOutput)
             {
                 // VonMises statistics
                 createSingleUserElementSharedData(doc, "VonMises Mean", "Scalar", "PlatoMain", "PlatoMain");
@@ -7899,7 +7895,7 @@ bool XMLGenerator::generateInterfaceXML()
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             // If this is a UQ run we are assuming only one load case per objective
             // and we are only supporting vonmises stress right now.
-            if(tHasUncertainties)
+            if(m_HasUncertainties)
             {
                 // create shared data for vonmises
                 sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
@@ -8072,7 +8068,7 @@ bool XMLGenerator::generateInterfaceXML()
     /////////////////////////////////////////////////
 
     // Output To File
-    outputOutputToFileStage(doc, tHasUncertainties, tRequestedVonMisesOutput);
+    outputOutputToFileStage(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
 
     // Initialize Optimization
     outputInitializeOptimizationStage(doc);
@@ -8084,7 +8080,7 @@ bool XMLGenerator::generateInterfaceXML()
     }
 
     // Cache State Stage
-    outputCacheStateStage(doc, tHasUncertainties);
+    outputCacheStateStage(doc, m_HasUncertainties);
 
     // Set Lower Bounds Stage
     outputSetLowerBoundsStage(doc);
@@ -8126,10 +8122,10 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         // Internal Energy
-        outputInternalEnergyStage(doc, tHasUncertainties);
+        outputInternalEnergyStage(doc, m_HasUncertainties);
 
         // Internal Energy Gradient
-        outputInternalEnergyGradientStage(doc, tHasUncertainties);
+        outputInternalEnergyGradientStage(doc, m_HasUncertainties);
     }
     else if(m_InputData.optimization_type == "shape")
     {

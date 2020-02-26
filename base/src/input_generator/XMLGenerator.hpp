@@ -211,6 +211,8 @@ protected:
 
     std::string m_InputFilename;
     bool m_UseLaunch;
+    bool m_HasUncertainties;
+    bool m_RequestedVonMisesOutput;
     XMLGen::Arch m_Arch;
     XMLGen::InputData m_InputData;
     std::string m_filterType_identity_generatorName;
