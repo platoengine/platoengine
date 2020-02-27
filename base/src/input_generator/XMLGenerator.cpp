@@ -6437,7 +6437,10 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
     pugi::xml_node tmp_node1 = tmp_node.append_child("Input");
     addChild(tmp_node1, "ArgumentName", "Topology");
     tmp_node1 = tmp_node.append_child("Input");
-    addChild(tmp_node1, "ArgumentName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+    else
+      addChild(tmp_node1, "ArgumentName", "Internal Energy Gradient");
     tmp_node1 = tmp_node.append_child("Input");
     addChild(tmp_node1, "ArgumentName", "Optimization DOFs");
     if(m_InputData.constraints.size() > 0)
@@ -6610,7 +6613,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
         pugi::xml_node input_node = tmp_node1.append_child("Input");
         std::string tTmpString = "";
         if(cur_obj.code_name == "plato_analyze")
-            tTmpString += "Objective Value ";
+            tTmpString += "Objective ";
         else
             tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
@@ -7045,7 +7048,10 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
     char tmp_buf[200];
     // Internal Energy
     pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(stage_node, "Name", "Objective Value");
+    else
+      addChild(stage_node, "Name", "Internal Energy");
 
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
@@ -7091,11 +7097,15 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
         addChild(input_node, "SharedDataName", "Topology");
 
         output_node = op_node.append_child("Output");
-        if(cur_obj.code_name == "plato_analyze")
-            addChild(output_node, "ArgumentName", "Objective Value");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(output_node, "ArgumentName", "Objective Value");
         else
-            addChild(output_node, "ArgumentName", "Internal Energy");
-        sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+          addChild(output_node, "ArgumentName", "Internal Energy");
+        if(cur_obj.code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+
         addChild(output_node, "SharedDataName", tmp_buf);
     }
 
@@ -7109,21 +7119,30 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
         input_node = op_node.append_child("Input");
         sprintf(tmp_buf, "Value %d", (int)(i+1));
         addChild(input_node, "ArgumentName", tmp_buf);
-        sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
             input_node = op_node.append_child("Input");
             sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
             addChild(input_node, "ArgumentName", tmp_buf);
-            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
             addChild(input_node, "SharedDataName", tmp_buf);
         }
     }
 
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Value");
-    addChild(output_node, "SharedDataName", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Value");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy");
 
     // If there are uncertainties add an operation for
     // the objective mean and std deviation.
@@ -7155,7 +7174,10 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
     }
 
     output_node = stage_node.append_child("Output");
-    addChild(output_node, "SharedDataName", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Value");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy");
 
     return true;
 }
@@ -7313,7 +7335,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     char tmp_buf[200];
     // Internal Energy
     pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(stage_node, "Name", "Objective Gradient");
+    else
+      addChild(stage_node, "Name", "Internal Energy Gradient");
 
     // fitler control
     pugi::xml_node input_node = stage_node.append_child("Input");
@@ -7363,7 +7388,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
             addChild(output_node, "ArgumentName", "Objective Gradient");
         else
             addChild(output_node, "ArgumentName", "Internal Energy Gradient");
-        sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+        if(cur_obj.code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(output_node, "SharedDataName", tmp_buf);
     }
 
@@ -7377,21 +7405,30 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
         input_node = op_node.append_child("Input");
         sprintf(tmp_buf, "Field %d", (int)(i+1));
         addChild(input_node, "ArgumentName", tmp_buf);
-        sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
             input_node = op_node.append_child("Input");
             sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
             addChild(input_node, "ArgumentName", tmp_buf);
-            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
             addChild(input_node, "SharedDataName", tmp_buf);
         }
     }
 
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Field");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     // filter gradient
     op_node = stage_node.append_child("Operation");
@@ -7402,10 +7439,16 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     addChild(input_node, "SharedDataName", "Optimization DOFs");
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Gradient");
-    addChild(input_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(input_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(input_node, "SharedDataName", "Internal Energy Gradient");
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Gradient");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     if(aHasUncertainties)
     {
@@ -7429,7 +7472,7 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
             input_node = op_node.append_child("Input");
             tTmpString = "";
             if(cur_obj.code_name == "plato_analyze")
-                tTmpString += "Objective Value ";
+                tTmpString += "Objective ";
             else
                 tTmpString += "Internal Energy ";
             tTmpString += std::to_string(i+1);
@@ -7448,7 +7491,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
 
     // stage output
     output_node = stage_node.append_child("Output");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     return true;
 }
@@ -7829,7 +7875,10 @@ bool XMLGenerator::generateInterfaceXML()
         if(m_InputData.optimization_type == "topology")
         {
             // create shared data for objectives
-            sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
             createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape")
@@ -7843,7 +7892,10 @@ bool XMLGenerator::generateInterfaceXML()
         {
             if(m_InputData.optimization_type == "topology")
             {
-                sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+                if(m_InputData.objectives[i].code_name == "plato_analyze")
+                  sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+                else
+                  sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
                 createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
             }
         }
@@ -7853,7 +7905,10 @@ bool XMLGenerator::generateInterfaceXML()
     {
         if(m_InputData.optimization_type == "topology")
         {
-            sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
             createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
@@ -7948,10 +8003,16 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         // Internal Energy
-        createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          createSingleUserGlobalSharedData(doc, "Objective Value", "Scalar", "1", "PlatoMain", "PlatoMain");
+        else
+          createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
 
         // Internal Energy Gradient
-        createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          createSingleUserNodalSharedData(doc, "Objective Gradient", "Scalar", "PlatoMain", "PlatoMain");
+        else
+          createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
     }
     else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
     {
@@ -8228,10 +8289,22 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         tTmpNode = tMiscNode.append_child("Objective");
-        addChild(tTmpNode, "ValueName", "Internal Energy");
-        addChild(tTmpNode, "ValueStageName", "Internal Energy");
-        addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
-        addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "ValueName", "Objective Value");
+        else
+          addChild(tTmpNode, "ValueName", "Internal Energy");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "ValueStageName", "Objective Value");
+        else
+          addChild(tTmpNode, "ValueStageName", "Internal Energy");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "GradientName", "Objective Gradient");
+        else
+          addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "GradientStageName", "Objective Gradient");
+        else
+          addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
         if(m_InputData.optimization_algorithm =="ksbc" ||
                 m_InputData.optimization_algorithm == "ksal" ||
                 m_InputData.optimization_algorithm == "rol ksal" ||
@@ -8595,12 +8668,15 @@ void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &do
             addChild(input_node, "SharedDataName", "Topology");
 
             output_node = op_node.append_child("Output");
-            if(cur_obj.code_name == "plato_analyze")
-                addChild(output_node, "ArgumentName", "Objective Value");
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              addChild(output_node, "ArgumentName", "Objective Value");
             else
-                addChild(output_node, "ArgumentName", "Internal Energy");
+              addChild(output_node, "ArgumentName", "Internal Energy");
             char tBuffer[800];
-            sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tBuffer, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
             addChild(output_node, "SharedDataName", tBuffer);
         }
     }
@@ -8699,8 +8775,14 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
         input_node = op_node.append_child("Input");
-        addChild(input_node, "ArgumentName", "Internal Energy Gradient");
-        addChild(input_node, "SharedDataName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(input_node, "ArgumentName", "Objective Gradient");
+        else
+          addChild(input_node, "ArgumentName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(input_node, "SharedDataName", "Objective Gradient");
+        else
+          addChild(input_node, "SharedDataName", "Internal Energy Gradient");
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Optimization DOFs");
         addChild(input_node, "SharedDataName", "Optimization DOFs");
