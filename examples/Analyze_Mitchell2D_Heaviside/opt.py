@@ -1,17 +1,17 @@
 import nlopt
 import exodus
-import Plato
+import PlatoPython
 import PlatoServices
 import ctypes
 from numpy import *
 
-# boilerplate that dynamically loads the mpi library required by Plato.Analyze
+# boilerplate that dynamically loads the mpi library required by PlatoPython.Analyze
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
 appFileName = "alexaApp.xml"
 defaultInputFile = "mitchell_tri.xml"
-analyze = Plato.Analyze(defaultInputFile, appFileName, "2D mitchell")
+analyze = PlatoPython.Analyze(defaultInputFile, appFileName, "2D mitchell")
 analyze.initialize();
 
 # create global PlatoServices instance
