@@ -193,13 +193,6 @@ bool XMLGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostrings
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicGenerateDefinesXML(std::ostringstream *aStringStream)
-/******************************************************************************/
-{
-    return generateDefinesXML(aStringStream);
-}
-
-/******************************************************************************/
 bool XMLGenerator_UnitTester::publicExpandUncertaintiesForGenerate()
 /******************************************************************************/
 {

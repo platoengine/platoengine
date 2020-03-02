@@ -78,12 +78,23 @@ protected:
                                                    const std::string &aType,
                                                    const std::string &aOwner,
                                                    const std::string &aUser);
+    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_node &aNode,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aOwner,
+                                                   const std::string &aUser);
     pugi::xml_node createSingleUserElementSharedData(pugi::xml_document &aDoc,
                                                      const std::string &aName,
                                                      const std::string &aType,
                                                      const std::string &aOwner,
                                                      const std::string &aUser);
     pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                    const std::string &aName,
+                                                    const std::string &aType,
+                                                    const std::string &aSize,
+                                                    const std::string &aOwner,
+                                                    const std::string &aUser);
+    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_node &aNode,
                                                     const std::string &aName,
                                                     const std::string &aType,
                                                     const std::string &aSize,
@@ -124,13 +135,21 @@ protected:
     bool generateSalinasOperationsXML();
     bool generateAlbanyOperationsXML();
     bool generatePlatoAnalyzeOperationsXML();
+    bool generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow();
     bool generateLightMPOperationsXML();
     bool generatePhysicsInputDecks();
     bool generateSalinasInputDecks(std::ostringstream *aStringStream = NULL);
     bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
+    bool generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow();
     bool generateLightMPInputDecks();
     bool generateAlbanyInputDecks();
     bool runSROMForUncertainVariables();
+    bool generateUncertaintyMetaData();
+    bool getSizeOfLoadCases();
+    bool getIndicesOfDeterministicAndRandomVariables();
+    bool verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases();
+    bool verifyEachLoadHaSSameAppNameAcrossAllLoadCases();
+    bool verifyEachLoadIsATractionLoad();
     bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();
     bool parseFile();
@@ -148,6 +167,9 @@ protected:
     bool outputVolumeStage(pugi::xml_document &doc);
     void outputUpdateProblemStage(pugi::xml_document &doc);
     void outputOutputToFileStage(pugi::xml_document &doc,
+                                 bool &aHasUncertainties,
+                                 bool &aRequestedVonMises);
+    void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
                                  bool &aHasUncertainties,
                                  bool &aRequestedVonMises);
     void addStochasticObjectiveValueOperation(pugi::xml_document &aDoc);
@@ -208,11 +230,14 @@ protected:
                                    std::string &aReturnStringValue);
     void lookForPlatoAnalyzePerformers();
     bool checkForNodesetSidesetNameConflicts();
+    void addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
+    void addComputeObjectiveGradientOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
 
     std::string m_InputFilename;
     bool m_UseLaunch;
     bool m_HasUncertainties;
     bool m_RequestedVonMisesOutput;
+    bool m_UseNewPlatoAnalyzeUncertaintyWorkflow;
     XMLGen::Arch m_Arch;
     XMLGen::InputData m_InputData;
     std::string m_filterType_identity_generatorName;
@@ -224,6 +249,7 @@ protected:
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
     std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
+    XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
 private:
     /******************************************************************************//**
      * @brief Initialize Plato problem options
@@ -285,6 +311,7 @@ private:
     void generatePerformerBashScripts();
     void generateEngineBashScript();
     void generateAnalyzeBashScripts();
+    std::string makeLoadString(const std::vector<std::string>& aValues);
 };
 
 }

@@ -280,5 +280,12 @@ enum struct Arch
   SUMMIT
 };
 
+struct UncertaintyMetaData
+{
+  size_t numVariables;
+  std::vector<size_t> randomVariableIndices;
+  std::vector<size_t> deterministicVariableIndices;
+};
+
 }
 // namespace XMLGen

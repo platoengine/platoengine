@@ -305,6 +305,4 @@ std::string gThermomechanicalGoldString =
         "</ParameterList>\n"
         "</ParameterList>\n"
         "</ParameterList>\n";
-
-std::string gDefinesXMLString = "";
 } // end PlatoTestXMLGenerator namespace
