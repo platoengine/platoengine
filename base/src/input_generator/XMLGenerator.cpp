@@ -103,7 +103,7 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
 {
   m_HasUncertainties = false;
   m_RequestedVonMisesOutput = false;
-  m_UseNewPlatoAnalyzeUncertaintyWorkflow = true;
+  m_UseNewPlatoAnalyzeUncertaintyWorkflow = false;
 }
 
 /******************************************************************************/
@@ -119,6 +119,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
     if(m_InputData.uncertainties.size() > 0)
     {
         std::vector<XMLGen::LoadCase> tNewLoadCases;
+        std::vector<double> tLoadCaseProbabilities;
         if(m_InputData.objectives.size() > 1)
         {
           std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
@@ -179,6 +180,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
                 tNewLoadCases.push_back(tNewLoadCase);
+                tLoadCaseProbabilities.push_back(tOutputs.mLoadCases[j].mProbability);
                 tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
                 tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
                 tStartingLoadCaseID++;
@@ -208,10 +210,11 @@ bool XMLGenerator::runSROMForUncertainVariables()
         }
 
         m_InputData.load_cases = tNewLoadCases;
+        m_InputData.load_case_probabilities = tLoadCaseProbabilities;
+        if(!generateUncertaintyMetaData())
+          return false;
     }
 
-    if(!generateUncertaintyMetaData())
-      return false;
 
     return true;
 }
@@ -224,6 +227,7 @@ bool XMLGenerator::generateUncertaintyMetaData()
     return false;
   if(!getIndicesOfDeterministicAndRandomVariables())
     return false;
+  m_UncertaintyMetaData.numSamples = m_InputData.load_cases.size();
   return true;
 }
 
@@ -1129,44 +1133,58 @@ bool XMLGenerator::generateLaunchScript()
           fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
       else
           fprintf(fp, "plato_main platomain.xml \\\n");
-      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
       {
+
+          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), "1", envString.c_str(),separationString.c_str());
+          fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+          fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
+        if(m_InputData.plato_analyze_path.length() != 0)
+          fprintf(fp, "%s --input-config=plato_analyze_input_deck.xml \\\n", m_InputData.plato_analyze_path.c_str());
+        else
+          fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck.xml \\\n");
+      }
+      else
+      {
+        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        {
           const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
           if(!cur_obj.num_procs.empty())
           {
             fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
           }
           else
-              fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
+            fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
           fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
-                  cur_obj.name.c_str());
+              cur_obj.name.c_str());
           if(!cur_obj.code_name.compare("sierra_sd"))
           {
-              if(m_InputData.sierra_sd_path.length() != 0)
-                  fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
-              else
-                  fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
+            if(m_InputData.sierra_sd_path.length() != 0)
+              fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
+            else
+              fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
           }
           else if(!cur_obj.code_name.compare("lightmp"))
           {
-              if(m_InputData.lightmp_path.length() != 0)
-                  fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
+            if(m_InputData.lightmp_path.length() != 0)
+              fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
           }
           else if(!cur_obj.code_name.compare("albany"))
           {
-              if(m_InputData.albany_path.length() != 0)
-                  fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
-              else
-                  fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
+            if(m_InputData.albany_path.length() != 0)
+              fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
+            else
+              fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
           }
           else if(!cur_obj.code_name.compare("plato_analyze"))
           {
-              if(m_InputData.plato_analyze_path.length() != 0)
-                  fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
-              else
-                  fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+            if(m_InputData.plato_analyze_path.length() != 0)
+              fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
+            else
+              fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
           }
+        }
       }
 
       fclose(fp);
@@ -1772,7 +1790,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
   n3 = n2.append_child("ParameterList");
   n3.append_attribute("name") = "My Internal Elastic Energy";
   addNTVParameter(n3, "Type", "string", "Scalar Function");
-  addNTVParameter(n3, "Scalar Function Type", "string", "Interna Elastic Energy");
+  addNTVParameter(n3, "Scalar Function Type", "string", "Internal Elastic Energy");
 
   n4 = n3.append_child("ParameterList");
   n4.append_attribute("name") = "Penalty Function";
@@ -2747,6 +2765,11 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                                 std::cout << "ERROR:XMLGenerator:parseObjectives: Unmatched case specified after \"repeat objective\" keywords.\n";
                                 return false;
                             }
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"analyze","new","workflow"}, tStringValue))
+                        {
+                          if(tokens[3] == "true")
+                            m_UseNewPlatoAnalyzeUncertaintyWorkflow = true;
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"begin","frequency"}, tStringValue))
                         {
@@ -6097,19 +6120,19 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow()
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     tmp_node1 = tmp_node.append_child("Parameter");
-    std::string tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " X";
+    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
     addChild(tmp_node1, "InitialValue", "0.0");
     tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Y";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
     addChild(tmp_node1, "InitialValue", "0.0");
     tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Z";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
@@ -6127,19 +6150,19 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow()
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     tmp_node1 = tmp_node.append_child("Parameter");
-    std::string tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " X";
+    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
     addChild(tmp_node1, "InitialValue", "0.0");
     tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Y";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
     addChild(tmp_node1, "InitialValue", "0.0");
     tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Z";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
     addChild(tmp_node1, "Target", tPathToLoadInInputFile);
@@ -6414,7 +6437,7 @@ void XMLGenerator::addFilterControlOperation(pugi::xml_document &aDoc)
 }
 
 /******************************************************************************/
-void XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
+bool XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
     char tBuffer[100];
@@ -6424,24 +6447,51 @@ void XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
     addChild(tmp_node, "Name", "AggregateGradient");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Input");
-        std::string tTmpString = "Field ";
-        tTmpString += std::to_string(i+1);
-        addChild(tmp_node2, "ArgumentName", tTmpString);
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Input"); 
+      addChild(tmp_node2, "ArgumentName", "Field {sampleIndex}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Input");
+          std::string tTmpString = "Field ";
+          tTmpString += std::to_string(i+1);
+          addChild(tmp_node2, "ArgumentName", tTmpString);
+      }
     }
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "ArgumentName", "Field");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Weight");
-        addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Weight"); 
+      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Weight");
+          addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      }
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
+      if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+      {
+        std::cerr << "Error: Normalization not supported for uncertain loads" << std::endl;
+        return false;
+      }
         tmp_node2 = tmp_node1.append_child("Normals");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -6450,10 +6500,12 @@ void XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
             addChild(tmp_node3, "ArgumentName", tBuffer);
         }
     }
+
+    return true;
 }
 
 /******************************************************************************/
-void XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
+bool XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
     char tBuffer[100];
@@ -6463,36 +6515,81 @@ void XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
     addChild(tmp_node, "Name", "AggregateEnergy");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Value");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Input"); 
+      addChild(tmp_node2, "ArgumentName", "Value {sampleIndex}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         tmp_node2 = tmp_node1.append_child("Input");
         std::string tTmpString = "Value ";
         tTmpString += std::to_string(i+1);
         addChild(tmp_node2, "ArgumentName", tTmpString);
+      }
     }
+
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "ArgumentName", "Value");
 
     tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Input"); 
+      addChild(tmp_node2, "ArgumentName", "Field {sampleIndex}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         tmp_node2 = tmp_node1.append_child("Input");
         std::string tTmpString = "Field ";
         tTmpString += std::to_string(i+1);
         addChild(tmp_node2, "ArgumentName", tTmpString);
+      }
     }
+
+
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "ArgumentName", "Field");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Weight");
-        addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Weight"); 
+      addChild(tmp_node2, "value", "{Probabilities[sampleIndex]}");
     }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Weight");
+          addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      }
+    }
+
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+        {
+          std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
+          return false;
+        }
         tmp_node2 = tmp_node1.append_child("Normals");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -6501,10 +6598,12 @@ void XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
             addChild(tmp_node3, "ArgumentName", tBuffer);
         }
     }
+
+    return true;
 }
 
 /******************************************************************************/
-void XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
+bool XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
     char tBuffer[100];
@@ -6514,24 +6613,51 @@ void XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
     addChild(tmp_node, "Name", "AggregateValues");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Value");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Input");
-        std::string tTmpString = "Value ";
-        tTmpString += std::to_string(i+1);
-        addChild(tmp_node2, "ArgumentName", tTmpString);
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Input"); 
+      addChild(tmp_node2, "ArgumentName", "Value {sampleIndex}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Input");
+          std::string tTmpString = "Value ";
+          tTmpString += std::to_string(i+1);
+          addChild(tmp_node2, "ArgumentName", tTmpString);
+      }
     }
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "ArgumentName", "Values");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Weight");
-        addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      pugi::xml_node for_node = tmp_node1.append_child("for");
+      for_node.append_attribute("var") = "sampleindex";
+      for_node.append_attribute("in") = "samples";
+      tmp_node2 = for_node.append_child("Weight"); 
+      addChild(tmp_node2, "value", "{probabilities[sampleindex]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Weight");
+          addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      }
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+        {
+          std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
+          return false;
+        }
         tmp_node2 = tmp_node1.append_child("Normals");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -6540,10 +6666,12 @@ void XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
             addChild(tmp_node3, "ArgumentName", tBuffer);
         }
     }
+
+    return true;
 }
 
 /******************************************************************************/
-void XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
+bool XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
 /******************************************************************************/
 {
     char tBuffer[100];
@@ -6553,24 +6681,51 @@ void XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
     addChild(tmp_node, "Name", "AggregateHessian");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Input");
-        std::string tTmpString = "Field ";
-        tTmpString += std::to_string(i+1);
-        addChild(tmp_node2, "ArgumentName", tTmpString);
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+      tmp_node2 = for_node.append_child("Input"); 
+      addChild(tmp_node2, "ArgumentName", "Field {sampleIndex}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Input");
+          std::string tTmpString = "Field ";
+          tTmpString += std::to_string(i+1);
+          addChild(tmp_node2, "ArgumentName", tTmpString);
+      }
     }
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "ArgumentName", "Field");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-        tmp_node2 = tmp_node1.append_child("Weight");
-        addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      pugi::xml_node for_node = tmp_node1.append_child("for");
+      for_node.append_attribute("var") = "sampleindex";
+      for_node.append_attribute("in") = "samples";
+      tmp_node2 = for_node.append_child("Weight"); 
+      addChild(tmp_node2, "value", "{probabilities[sampleindex]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          tmp_node2 = tmp_node1.append_child("Weight");
+          addChild(tmp_node2, "Value", m_InputData.objectives[i].weight.c_str());
+      }
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+        {
+          std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
+          return false;
+        }
         tmp_node2 = tmp_node1.append_child("Normals");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
@@ -6579,6 +6734,8 @@ void XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
             addChild(tmp_node3, "ArgumentName", tBuffer);
         }
     }
+
+    return true;
 }
 
 /******************************************************************************/
@@ -6939,45 +7096,52 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
         }
     }
 
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      ;
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         if(aHasUncertainties)
         {
-            // Only handling vonmises for UQ runs and only one load case
-            // per objective/performer.
-            tmp_node1 = tmp_node.append_child("Input");
-            addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
-            addChild(tmp_node1, "Layout", "Element Field");
+          // Only handling vonmises for UQ runs and only one load case
+          // per objective/performer.
+          tmp_node1 = tmp_node.append_child("Input");
+          addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
+          addChild(tmp_node1, "Layout", "Element Field");
         }
         else if(cur_obj.multi_load_case == "true")
         {
-            for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+          for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+          {
+            std::string cur_load_string = cur_obj.load_case_ids[k];
+            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
             {
-                std::string cur_load_string = cur_obj.load_case_ids[k];
-                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                {
-                    tmp_node1 = tmp_node.append_child("Input");
-                    addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
-                    if(cur_obj.output_for_plotting[j] == "vonmises")
-                        addChild(tmp_node1, "Layout", "Element Field");
-                }
+              tmp_node1 = tmp_node.append_child("Input");
+              addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+              if(cur_obj.output_for_plotting[j] == "vonmises")
+                addChild(tmp_node1, "Layout", "Element Field");
             }
+          }
         }
         else
         {
-            for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-            {
-                tmp_node1 = tmp_node.append_child("Input");
-                addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
-                if(cur_obj.output_for_plotting[j] == "vonmises" ||
-                   cur_obj.output_for_plotting[j] == "Vonmises")
-                    addChild(tmp_node1, "Layout", "Element Field");
-            }
+          for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+          {
+            tmp_node1 = tmp_node.append_child("Input");
+            addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+            if(cur_obj.output_for_plotting[j] == "vonmises" ||
+                cur_obj.output_for_plotting[j] == "Vonmises")
+              addChild(tmp_node1, "Layout", "Element Field");
+          }
         }
+      }
     }
 
-    if(aHasUncertainties && aRequestedVonMises)
+    if(aHasUncertainties && aRequestedVonMises && !m_UseNewPlatoAnalyzeUncertaintyWorkflow)
     {
         tmp_node1 = tmp_node.append_child("Input");
         addChild(tmp_node1, "ArgumentName", "VonMises Mean");
@@ -7005,7 +7169,7 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
     pugi::xml_node tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Format", "Exodus");
 
-    if(aHasUncertainties)
+    if(aHasUncertainties && !m_UseNewPlatoAnalyzeUncertaintyWorkflow)
     {
         addStochasticObjectiveValueOperation(aDoc);
         addStochasticObjectiveGradientOperation(aDoc);
@@ -7127,6 +7291,12 @@ bool XMLGenerator::generatePlatoOperationsXML()
     pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
     tmp_att.set_value("1.0");
 
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+    {
+      pugi::xml_node def_node = doc.append_child("include");
+      def_node.append_attribute("filename") = "defines.xml";
+    }
+
     //////////////////////////////////////////////////
     // Operations
     /////////////////////////////////////////////////
@@ -7154,8 +7324,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
         else if(m_InputData.discretization == "levelset")
         {
         }
-        addAggregateEnergyOperation(doc);
-        addAggregateGradientOperation(doc);
+        if(!addAggregateEnergyOperation(doc))
+          return false;
+        if(!addAggregateGradientOperation(doc))
+          return false;
         if(m_InputData.optimization_algorithm =="ksbc" ||
                 m_InputData.optimization_algorithm == "ksal" ||
                 m_InputData.optimization_algorithm == "rol ksal" ||
@@ -7693,11 +7865,11 @@ void XMLGenerator::addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pu
 {
   pugi::xml_node for_node = aNode.append_child("For");
   for_node.append_attribute("var") = "PerformerSampleIndex";
-  for_node.append_attribute("in") = "PeformerSamples";
+  for_node.append_attribute("in") = "PerformerSamples";
   pugi::xml_node op_node = for_node.append_child("Operation");
   for_node = op_node.append_child("For");
-  for_node.append_attribute("var") = "PerformerIndex";
-  for_node.append_attribute("in") = "Peformers";
+  for_node.append_attribute("var") = "performerIndex";
+  for_node.append_attribute("in") = "Performers";
   op_node = for_node.append_child("Operation");
   addChild(op_node, "PerformerName", "plato_analyze_{performerIndex}");
   addChild(op_node, "Name", "Compute Objective Value");
@@ -7705,19 +7877,19 @@ void XMLGenerator::addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pu
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
-    std::string tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " X";
+    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Y";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Z";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
@@ -7738,11 +7910,11 @@ void XMLGenerator::addComputeObjectiveGradientOperationForNewUncertaintyWorkflow
 {
   pugi::xml_node for_node = aNode.append_child("For");
   for_node.append_attribute("var") = "PerformerSampleIndex";
-  for_node.append_attribute("in") = "PeformerSamples";
+  for_node.append_attribute("in") = "PerformerSamples";
   pugi::xml_node op_node = for_node.append_child("Operation");
   for_node = op_node.append_child("For");
-  for_node.append_attribute("var") = "PerformerIndex";
-  for_node.append_attribute("in") = "Peformers";
+  for_node.append_attribute("var") = "performerIndex";
+  for_node.append_attribute("in") = "Performers";
   op_node = for_node.append_child("Operation");
   addChild(op_node, "PerformerName", "plato_analyze_{performerIndex}");
   addChild(op_node, "Name", "Compute Objective Gradient");
@@ -7750,19 +7922,19 @@ void XMLGenerator::addComputeObjectiveGradientOperationForNewUncertaintyWorkflow
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
-    std::string tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " X";
+    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Y";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "Random Load " + std::to_string(tRandomLoadIndex) + " Z";
+    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
@@ -8008,10 +8180,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     {
       pugi::xml_node for_node = op_node.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
-      for_node.append_attribute("in") = "Peformers";
+      for_node.append_attribute("in") = "Performers";
       for_node = for_node.append_child("For");
       for_node.append_attribute("var") = "PerformerSampleIndex";
-      for_node.append_attribute("in") = "PeformerSamples";
+      for_node.append_attribute("in") = "PerformerSamples";
 
       pugi::xml_node input_node = for_node.append_child("Input");
       addChild(input_node, "ArgumentName", "Field {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
@@ -8425,7 +8597,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
   pugi::xml_node tTmpNode = doc.append_child("Define");
   tTmpNode.append_attribute("name") = "NumSamples";
   tTmpNode.append_attribute("type") = "int";
-  std::string tNumSamplesString = m_InputData.uncertainties[0].num_samples;
+  std::string tNumSamplesString = std::to_string(m_UncertaintyMetaData.numSamples);
   tTmpNode.append_attribute("value") = tNumSamplesString.c_str();
 
   tTmpNode = doc.append_child("Define");
@@ -8470,17 +8642,28 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
 
   std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
 
+  std::vector<std::string> tProbabilitiesForLoadCaseIndex;
+
+  for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tLoadCases.size(); ++tLoadCaseIndex)
+  {
+    XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
+    tProbabilitiesForLoadCaseIndex.push_back(std::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
+  }
+
+  std::string tProbabilitiesString = makeValuesString(tProbabilitiesForLoadCaseIndex);
+
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     std::vector<std::string> tXValuesForRandomLoadIndex;
     std::vector<std::string> tYValuesForRandomLoadIndex;
     std::vector<std::string> tZValuesForRandomLoadIndex;
 
-    for(auto load_case:tLoadCases)
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tLoadCases.size(); ++tLoadCaseIndex)
     {
+      XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
       if(load_case.loads.size() != m_UncertaintyMetaData.numVariables)
       {
-        std::cout << "Error: Load case size does not match number of loads in uncertainty metadata" << std::endl;
+        std::cerr << "Error: Load case size does not match number of loads in uncertainty metadata" << std::endl;
         return false;
       }
 
@@ -8488,37 +8671,44 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
       tXValuesForRandomLoadIndex.push_back(tRandomLoad.values[0]);
       tYValuesForRandomLoadIndex.push_back(tRandomLoad.values[1]);
       tZValuesForRandomLoadIndex.push_back(tRandomLoad.values[2]);
+      tProbabilitiesForLoadCaseIndex.push_back(std::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
 
     }
 
-    std::string tXValuesString = makeLoadString(tXValuesForRandomLoadIndex);
-    std::string tYValuesString = makeLoadString(tYValuesForRandomLoadIndex);
-    std::string tZValuesString = makeLoadString(tZValuesForRandomLoadIndex);
+    std::string tXValuesString = makeValuesString(tXValuesForRandomLoadIndex);
+    std::string tYValuesString = makeValuesString(tYValuesForRandomLoadIndex);
+    std::string tZValuesString = makeValuesString(tZValuesForRandomLoadIndex);
 
     tTmpNode = doc.append_child("Array");
-    std::string tRandomLoadString = "Random Load " + std::to_string(tRandomLoadIndex) + " X";
+    std::string tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tXValuesString.c_str();
 
     tTmpNode = doc.append_child("Array");
-    tRandomLoadString = "Random Load " + std::to_string(tRandomLoadIndex) + " Y";
+    tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tYValuesString.c_str();
 
     tTmpNode = doc.append_child("Array");
-    tRandomLoadString = "Random Load " + std::to_string(tRandomLoadIndex) + " Z";
+    tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tZValuesString.c_str();
+
   }
+
+  tTmpNode = doc.append_child("Array");
+  tTmpNode.append_attribute("name") = "Probabilities";
+  tTmpNode.append_attribute("type") = "real";
+  tTmpNode.append_attribute("values") = tProbabilitiesString.c_str();
 
   return true;
 }
 
 /******************************************************************************/
-std::string XMLGenerator::makeLoadString(const std::vector<std::string>& aValues)
+std::string XMLGenerator::makeValuesString(const std::vector<std::string>& aValues)
 /******************************************************************************/
 {
   std::string tValuesString;
@@ -8560,22 +8750,23 @@ bool XMLGenerator::generateInterfaceXML()
 {
     pugi::xml_document doc;
 
-    // Version entry
-    pugi::xml_node tTmpNode = doc.append_child(pugi::node_declaration);
-    tTmpNode.set_name("xml");
-    pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
-    tmp_att.set_value("1.0");
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+    {
+      pugi::xml_node def_node = doc.append_child("include");
+      def_node.append_attribute("filename") = "defines.xml";
+    }
+
+    // // Version entry
+    pugi::xml_node tTmpNode;
+    // pugi::xml_node tTmpNode = doc.append_child(pugi::node_declaration);
+    // tTmpNode.set_name("xml");
+    // pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
+    // tmp_att.set_value("1.0");
     
 
     // Console output control
     tTmpNode = doc.append_child("Console");
     addChild(tTmpNode, "Verbose", "true");
-
-    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
-    {
-      tTmpNode = doc.append_child("include");
-      addChild(tTmpNode, "filename", "defines.xml");
-    }
 
     //////////////////////////////////////////////////
     // Performers

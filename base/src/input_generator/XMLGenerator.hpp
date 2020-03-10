@@ -186,11 +186,11 @@ protected:
     void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
     void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
     void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
-    void addAggregateHessianOperation(pugi::xml_document &aDoc);
-    void addAggregateEnergyOperation(pugi::xml_document &aDoc);
-    void addAggregateValuesOperation(pugi::xml_document &aDoc);
+    bool addAggregateHessianOperation(pugi::xml_document &aDoc);
+    bool addAggregateEnergyOperation(pugi::xml_document &aDoc);
+    bool addAggregateValuesOperation(pugi::xml_document &aDoc);
+    bool addAggregateGradientOperation(pugi::xml_document &aDoc);
     void addUpdateGeometryOnChangeOperation(pugi::xml_document &aDoc);
-    void addAggregateGradientOperation(pugi::xml_document &aDoc);
     void addComputeVolumeOperation(pugi::xml_document &aDoc);
     void addDesignVolumeOperation(pugi::xml_document &aDoc);
     void addUpdateProblemOperation(pugi::xml_document &aDoc);
@@ -311,7 +311,7 @@ private:
     void generatePerformerBashScripts();
     void generateEngineBashScript();
     void generateAnalyzeBashScripts();
-    std::string makeLoadString(const std::vector<std::string>& aValues);
+    std::string makeValuesString(const std::vector<std::string>& aValues);
 };
 
 }

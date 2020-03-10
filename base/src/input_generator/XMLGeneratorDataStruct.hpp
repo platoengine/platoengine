@@ -263,6 +263,7 @@ struct InputData
     std::vector<std::string> mShapeDesignVariableValues;
 
     std::vector<XMLGen::LoadCase> load_cases;
+    std::vector<double> load_case_probabilities;
     std::vector<XMLGen::BC> bcs;
     std::vector<XMLGen::Uncertainty> uncertainties;
 
@@ -283,6 +284,7 @@ enum struct Arch
 struct UncertaintyMetaData
 {
   size_t numVariables;
+  size_t numSamples;
   std::vector<size_t> randomVariableIndices;
   std::vector<size_t> deterministicVariableIndices;
 };
