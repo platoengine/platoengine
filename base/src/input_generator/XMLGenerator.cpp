@@ -86,9 +86,10 @@ void PrintUnrecognizedTokens(const std::vector<std::string> & unrecognizedTokens
 }
 
 /******************************************************************************/
-XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
+XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, const XMLGen::Arch& arch) :
         m_InputFilename(input_filename),
         m_UseLaunch(use_launch),
+        m_Arch(arch),
         m_InputData(),
         m_filterType_identity_generatorName("identity"),
         m_filterType_identity_XMLName("Identity"),
@@ -100,6 +101,8 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch) :
         m_filterType_kernelThenTANH_XMLName("KernelThenTANH")
 /******************************************************************************/
 {
+  m_HasUncertainties = false;
+  m_RequestedVonMisesOutput = false;
 }
 
 /******************************************************************************/
@@ -115,85 +118,94 @@ bool XMLGenerator::runSROMForUncertainVariables()
     if(m_InputData.uncertainties.size() > 0)
     {
         std::vector<XMLGen::LoadCase> tNewLoadCases;
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        if(m_InputData.objectives.size() > 1)
         {
-            std::vector<XMLGen::LoadCase> tCurObjLoadCases;
-            std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
-            XMLGen::Objective &tCurObj = m_InputData.objectives[i];
-            for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+          std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
+          return false;
+        }
+
+        std::vector<XMLGen::LoadCase> tCurObjLoadCases;
+        std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
+        XMLGen::Objective &tCurObj = m_InputData.objectives[0];
+        for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
+        {
+            const std::string &tCurID = tCurObj.load_case_ids[j];
+            for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
             {
-                const std::string &tCurID = tCurObj.load_case_ids[j];
-                for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
+                if(m_InputData.load_cases[k].id == tCurID)
                 {
-                    if(m_InputData.load_cases[k].id == tCurID)
-                    {
-                        tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
-                        k=m_InputData.load_cases.size();
-                    }
-                }
-                for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
-                {
-                    if(m_InputData.uncertainties[k].id == tCurID)
-                        tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+                    tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
+                    k=m_InputData.load_cases.size();
                 }
             }
-
-            std::vector<Plato::srom::Load> tLoads;
-            Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
-
-            if(tCurObjUncertainties.size() > 0)
+            for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
             {
-                Plato::srom::InputMetaData tInputs;
-                tInputs.mLoads = tLoads;
-                Plato::srom::OutputMetaData tOutputs;
-                Plato::generate_load_sroms(tInputs, tOutputs);
-
-                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-                tCurObj.load_case_ids.clear();
-                tCurObj.load_case_weights.clear();
-                for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
+                if(m_InputData.uncertainties[k].id == tCurID)
                 {
-                    XMLGen::LoadCase tNewLoadCase;
-                    tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-                    for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
-                    {
-                        XMLGen::Load tNewLoad;
-                        tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
-                        tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
-                        tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
-                        for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
-                            tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
-                        tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
-                        tNewLoadCase.loads.push_back(tNewLoad);
-                    }
-                    tNewLoadCases.push_back(tNewLoadCase);
-                    tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-                    tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
-                    tStartingLoadCaseID++;
+                  tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
+                  mObjectiveLoadCaseIndexToUncertaintyIndex[j] = k;
                 }
             }
-            else
+        }
+
+        std::vector<Plato::srom::Load> tLoads;
+        Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+
+        if(tCurObjUncertainties.size() > 0)
+        {
+            Plato::srom::InputMetaData tInputs;
+            tInputs.mLoads = tLoads;
+            Plato::srom::OutputMetaData tOutputs;
+            Plato::generate_load_sroms(tInputs, tOutputs);
+
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
             {
-                int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-                tCurObj.load_case_ids.clear();
-                tCurObj.load_case_weights.clear();
                 XMLGen::LoadCase tNewLoadCase;
                 tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
-                for(size_t j=0; j<tLoads.size(); ++j)
+                for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
                 {
                     XMLGen::Load tNewLoad;
-                    tNewLoad.type = tLoads[j].mLoadType;
-                    tNewLoad.app_type = tLoads[j].mAppType;
-                    tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
-                    for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
-                        tNewLoad.values.push_back(tLoads[j].mValues[h]);
+                    tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
+                    tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
+                    tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                    tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
+                    for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
+                        tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
+                    tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
                 tNewLoadCases.push_back(tNewLoadCase);
                 tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
-                tCurObj.load_case_weights.push_back("1.0");
+                tCurObj.load_case_weights.push_back(std::to_string(tOutputs.mLoadCases[j].mProbability));
+                tStartingLoadCaseID++;
             }
         }
+        else
+        {
+            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
+            tCurObj.load_case_ids.clear();
+            tCurObj.load_case_weights.clear();
+            XMLGen::LoadCase tNewLoadCase;
+            tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+            for(size_t j=0; j<tLoads.size(); ++j)
+            {
+                XMLGen::Load tNewLoad;
+                tNewLoad.type = tLoads[j].mLoadType;
+                tNewLoad.app_type = tLoads[j].mAppType;
+                tNewLoad.app_id = std::to_string(tLoads[j].mAppID);
+                tNewLoad.app_name = tLoads[j].mAppName;
+                for(size_t h=0; h<tLoads[j].mValues.size(); ++h)
+                    tNewLoad.values.push_back(tLoads[j].mValues[h]);
+                tNewLoadCase.loads.push_back(tNewLoad);
+            }
+            tNewLoadCases.push_back(tNewLoadCase);
+            tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+            tCurObj.load_case_weights.push_back("1.0");
+        }
+
         m_InputData.load_cases = tNewLoadCases;
     }
     return true;
@@ -288,6 +300,8 @@ bool XMLGenerator::generate()
         }
     }
 
+    getUncertaintyFlags(m_InputData, m_HasUncertainties, m_RequestedVonMisesOutput);
+
     // NOTE: modifies objectives and loads for uncertainties
     /*
     if(!expandUncertaintiesForGenerate())
@@ -311,6 +325,12 @@ bool XMLGenerator::generate()
     }
 
     lookForPlatoAnalyzePerformers();
+
+    // if(!generateDefinesXML())
+    // {
+    //     std::cout << "Failed to generate defines.xml" << std::endl;
+    //     return false;
+    // }
 
     if(!generateInterfaceXML())
     {
@@ -797,206 +817,334 @@ bool XMLGenerator::expandUncertaintiesForGenerate()
 bool XMLGenerator::generateLaunchScript()
 /******************************************************************************/
 {
-    FILE *fp=fopen("mpirun.source", "w");
-    if(!fp)
+    if(m_Arch == XMLGen::Arch::SUMMIT)
+      generateSummitLaunchScripts();
+    else
     {
-        return true;
-    }
+      FILE *fp=fopen("mpirun.source", "w");
+      if(!fp)
+      {
+          return true;
+      }
 
-    std::string num_opt_procs = "1";
-    if(!m_InputData.num_opt_processors.empty())
-        num_opt_procs = m_InputData.num_opt_processors;
+      std::string num_opt_procs = "1";
+      if(!m_InputData.num_opt_processors.empty())
+          num_opt_procs = m_InputData.num_opt_processors;
 
-    // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
-    // any combination of the above we need to add an mpirun call for this first so it will run as
-    // a pre-processor on the input mesh.
-    int tNumRefines = 0;
-    if(m_InputData.number_refines != "")
-        tNumRefines = std::atoi(m_InputData.number_refines.c_str());
-    if(tNumRefines > 0 ||
-            (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
-    {
-        // Determine how many processors to use for the prune_and_refine run.
-        std::string tNumberPruneAndRefineProcsString = "1";
-        int tNumberPruneAndRefineProcs = 1;
-        if(m_InputData.number_prune_and_refine_processors != "" &&
-                m_InputData.number_prune_and_refine_processors != "0")
-        {
-            tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
-            tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
-        }
-        else
-        {
-            // Find the max number of objective procs.
-            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-            {
-                if(!m_InputData.objectives[i].num_procs.empty())
-                {
-                    int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
-                    if(tNumProcs > tNumberPruneAndRefineProcs)
-                    {
-                        tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
-                        tNumberPruneAndRefineProcs = tNumProcs;
-                    }
-                }
-            }
-        }
+      // For restarts where we need to call prune_and_refine to do a variable transfer, prune, refine, or
+      // any combination of the above we need to add an mpirun call for this first so it will run as
+      // a pre-processor on the input mesh.
+      int tNumRefines = 0;
+      if(m_InputData.number_refines != "")
+          tNumRefines = std::atoi(m_InputData.number_refines.c_str());
+      if(tNumRefines > 0 ||
+              (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
+      {
+          // Determine how many processors to use for the prune_and_refine run.
+          std::string tNumberPruneAndRefineProcsString = "1";
+          int tNumberPruneAndRefineProcs = 1;
+          if(m_InputData.number_prune_and_refine_processors != "" &&
+                  m_InputData.number_prune_and_refine_processors != "0")
+          {
+              tNumberPruneAndRefineProcsString = m_InputData.number_prune_and_refine_processors;
+              tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
+          }
+          else
+          {
+              // Find the max number of objective procs.
+              for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+              {
+                  if(!m_InputData.objectives[i].num_procs.empty())
+                  {
+                      int tNumProcs = std::atoi(m_InputData.objectives[i].num_procs.c_str());
+                      if(tNumProcs > tNumberPruneAndRefineProcs)
+                      {
+                          tNumberPruneAndRefineProcsString = m_InputData.objectives[i].num_procs;
+                          tNumberPruneAndRefineProcs = tNumProcs;
+                      }
+                  }
+              }
+          }
 
-        // First decompose the files that will be involved below
-        if(tNumberPruneAndRefineProcs > 1)
-        {
-            fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
-            if(m_InputData.initial_guess_filename != "")
-                fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
-        }
+          // First decompose the files that will be involved below
+          if(tNumberPruneAndRefineProcs > 1)
+          {
+              fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.mesh_name.c_str());
+              if(m_InputData.initial_guess_filename != "")
+                  fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, m_InputData.initial_guess_filename.c_str());
+          }
 
-        std::string tPruneString = "0";
-        std::string tNumRefinesString = "0";
-        std::string tNumBufferLayersString = "2";
-        if(m_InputData.prune_mesh == "true")
-            tPruneString = "1";
-        if(m_InputData.number_refines != "")
-            tNumRefinesString = m_InputData.number_refines;
-        if(m_InputData.number_buffer_layers != "")
-            tNumBufferLayersString = m_InputData.number_buffer_layers;
+          std::string tPruneString = "0";
+          std::string tNumRefinesString = "0";
+          std::string tNumBufferLayersString = "2";
+          if(m_InputData.prune_mesh == "true")
+              tPruneString = "1";
+          if(m_InputData.number_refines != "")
+              tNumRefinesString = m_InputData.number_refines;
+          if(m_InputData.number_buffer_layers != "")
+              tNumBufferLayersString = m_InputData.number_buffer_layers;
 
-        std::string tCommand;
-        std::string tPruneAndRefineExe = "prune_and_refine";
-        if(m_InputData.prune_and_refine_path.length() > 0)
-            tPruneAndRefineExe = m_InputData.prune_and_refine_path;
-        if(m_UseLaunch)
-            tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-        else
-            tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-        if(m_InputData.initial_guess_filename != "")
-            tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
-        tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
-        tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
-        if(m_InputData.initial_guess_field_name != "")
-            tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
-        tCommand += (" --number_of_refines=" + tNumRefinesString);
-        tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
-        tCommand += (" --prune_mesh=" + tPruneString);
+          std::string tCommand;
+          std::string tPruneAndRefineExe = "prune_and_refine";
+          if(m_InputData.prune_and_refine_path.length() > 0)
+              tPruneAndRefineExe = m_InputData.prune_and_refine_path;
+          if(m_UseLaunch)
+              tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+          else
+              tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
+          if(m_InputData.initial_guess_filename != "")
+              tCommand += (" --mesh_with_variable=" + m_InputData.initial_guess_filename);
+          tCommand += (" --mesh_to_be_pruned=" + m_InputData.mesh_name);
+          tCommand += (" --result_mesh=" + m_InputData.run_mesh_name);
+          if(m_InputData.initial_guess_field_name != "")
+              tCommand += (" --field_name=" + m_InputData.initial_guess_field_name);
+          tCommand += (" --number_of_refines=" + tNumRefinesString);
+          tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
+          tCommand += (" --prune_mesh=" + tPruneString);
 
-        fprintf(fp, "%s\n", tCommand.c_str());
+          fprintf(fp, "%s\n", tCommand.c_str());
 
-        // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
-        if(tNumberPruneAndRefineProcs > 1)
-        {
-            // Build the extension string we will need.
-            std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
-            for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
-                tExtensionString += "0";
-            fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
-        }
-    }
+          // Now concatenate the input mesh file again since we don't know what other decompositions will be needed.
+          if(tNumberPruneAndRefineProcs > 1)
+          {
+              // Build the extension string we will need.
+              std::string tExtensionString = "." + tNumberPruneAndRefineProcsString + ".";
+              for(size_t g=0; g<tNumberPruneAndRefineProcsString.length(); ++g)
+                  tExtensionString += "0";
+              fprintf(fp, "epu -auto %s%s\n", m_InputData.run_mesh_name.c_str(), tExtensionString.c_str());
+          }
+      }
 
-    // remember if the run_mesh has been decomposed to this processor count
-    std::map<std::string,int> hasBeenDecompedToThisCount;
+      // remember if the run_mesh has been decomposed to this processor count
+      std::map<std::string,int> hasBeenDecompedToThisCount;
 
-    // Now do the decomps for the TO run.
-    if(num_opt_procs.compare("1") != 0) {
-        if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
-        {
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
-        }
-    }
-    if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
-        fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        std::string num_procs = "4";
-        if(!m_InputData.objectives[i].num_procs.empty())
-            num_procs = m_InputData.objectives[i].num_procs;
-        if(num_procs.compare("1") != 0)
-        {
-            if(++hasBeenDecompedToThisCount[num_procs] == 1)
-            {
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
-            }
-            if(m_InputData.objectives[i].ref_frf_file.length() > 0)
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
-        }
-    }
+      // Now do the decomps for the TO run.
+      if(num_opt_procs.compare("1") != 0) {
+          if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
+          {
+              fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.run_mesh_name.c_str());
+          }
+      }
+      if(m_InputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
+          fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), m_InputData.initial_guess_filename.c_str());
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          std::string num_procs = "4";
+          if(!m_InputData.objectives[i].num_procs.empty())
+              num_procs = m_InputData.objectives[i].num_procs;
+          if(num_procs.compare("1") != 0)
+          {
+              if(++hasBeenDecompedToThisCount[num_procs] == 1)
+              {
+                  fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.run_mesh_name.c_str());
+              }
+              if(m_InputData.objectives[i].ref_frf_file.length() > 0)
+                  fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), m_InputData.objectives[i].ref_frf_file.c_str());
+          }
+      }
 
 #ifndef USING_OPEN_MPI
-    std::string envString = "-env";
-    std::string separationString = " ";
+      std::string envString = "-env";
+      std::string separationString = " ";
 #else
-    std::string envString = "-x";
-    std::string separationString = "=";
+      std::string envString = "-x";
+      std::string separationString = "=";
 #endif
 
-    std::string tLaunchString = "";
-    std::string tNumProcsString = "";
-    if(m_UseLaunch)
-    {
-        tLaunchString = "launch";
-        tNumProcsString = "-n";
-    }
-    else
-    {
-        tLaunchString = "mpiexec";
-        tNumProcsString = "-np";
-    }
+      std::string tLaunchString = "";
+      std::string tNumProcsString = "";
+      if(m_UseLaunch)
+      {
+          tLaunchString = "launch";
+          tNumProcsString = "-n";
+      }
+      else
+      {
+          tLaunchString = "mpiexec";
+          tNumProcsString = "-np";
+      }
 
-    if(m_InputData.optimization_type == "shape")
-    {
-        fprintf(fp, "python aflr.py %s %s %s ", m_InputData.csm_filename.c_str(), m_InputData.csm_exodus_filename.c_str(), m_InputData.csm_tesselation_filename.c_str());
-        for(size_t i=0; i<m_InputData.mShapeDesignVariableValues.size(); ++i)
-            fprintf(fp, "%s ", m_InputData.mShapeDesignVariableValues[i].c_str());
-        fprintf(fp, "\n");
-    }
+      if(m_InputData.optimization_type == "shape")
+      {
+          fprintf(fp, "python aflr.py %s %s %s ", m_InputData.csm_filename.c_str(), m_InputData.csm_exodus_filename.c_str(), m_InputData.csm_tesselation_filename.c_str());
+          for(size_t i=0; i<m_InputData.mShapeDesignVariableValues.size(); ++i)
+              fprintf(fp, "%s ", m_InputData.mShapeDesignVariableValues[i].c_str());
+          fprintf(fp, "\n");
+      }
 
-    // Now add the main mpirun call.
-    fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
-    fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-    fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
-    if(m_InputData.plato_main_path.length() != 0)
-        fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
-    else
-        fprintf(fp, "plato_main platomain.xml \\\n");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-    {
-        const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
-        if(!cur_obj.num_procs.empty())
+      // Now add the main mpirun call.
+      fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+      fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+      fprintf(fp, "%s PLATO_APP_FILE%splato_operations.xml \\\n", envString.c_str(),separationString.c_str());
+      if(m_InputData.plato_main_path.length() != 0)
+          fprintf(fp, "%s platomain.xml \\\n", m_InputData.plato_main_path.c_str());
+      else
+          fprintf(fp, "plato_main platomain.xml \\\n");
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+          const XMLGen::Objective& cur_obj = m_InputData.objectives[i];
+          if(!cur_obj.num_procs.empty())
+          {
             fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n", tNumProcsString.c_str(), cur_obj.num_procs.c_str(), envString.c_str(),separationString.c_str(), (int)(i+1));
-        else
-            fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
-        fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-        fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
-                cur_obj.name.c_str());
-        if(!cur_obj.code_name.compare("sierra_sd"))
-        {
-            if(m_InputData.sierra_sd_path.length() != 0)
-                fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("lightmp"))
-        {
-            if(m_InputData.lightmp_path.length() != 0)
-                fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("albany"))
-        {
-            if(m_InputData.albany_path.length() != 0)
-                fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
-        }
-        else if(!cur_obj.code_name.compare("plato_analyze"))
-        {
-            if(m_InputData.plato_analyze_path.length() != 0)
-                fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
-            else
-                fprintf(fp, "LGR_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
-        }
-    }
+          }
+          else
+              fprintf(fp, ": %s 4 %s PLATO_PERFORMER_ID%s%d \\\n",  tNumProcsString.c_str(), envString.c_str(),separationString.c_str(),(int)(i+1));
+          fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+          fprintf(fp, "%s PLATO_APP_FILE%s%s_operations_%s.xml \\\n", envString.c_str(),separationString.c_str(),cur_obj.code_name.c_str(),
+                  cur_obj.name.c_str());
+          if(!cur_obj.code_name.compare("sierra_sd"))
+          {
+              if(m_InputData.sierra_sd_path.length() != 0)
+                  fprintf(fp, "%s sierra_sd_input_deck_%s.i \\\n", m_InputData.sierra_sd_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "plato_sd_main sierra_sd_input_deck_%s.i \\\n", cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("lightmp"))
+          {
+              if(m_InputData.lightmp_path.length() != 0)
+                  fprintf(fp, "%s lightmp_input_deck_%s.i \\\n", m_InputData.lightmp_path.c_str(), cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("albany"))
+          {
+              if(m_InputData.albany_path.length() != 0)
+                  fprintf(fp, "%s albany_input_deck_%s.i \\\n", m_InputData.albany_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "albany albany_input_deck_%s.i \\\n", cur_obj.name.c_str());
+          }
+          else if(!cur_obj.code_name.compare("plato_analyze"))
+          {
+              if(m_InputData.plato_analyze_path.length() != 0)
+                  fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
+              else
+                  fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+          }
+      }
 
-    fclose(fp);
+      fclose(fp);
+    }
     return true;
 }
+
+/******************************************************************************/
+bool XMLGenerator::generateSummitLaunchScripts()
+/******************************************************************************/
+{
+  if(m_InputData.objectives.size() > 99)
+  {
+    std::cout << "ERROR: Number of Samples must be less than 100" << std::endl;
+    return false;
+  }
+  for(auto objective:m_InputData.objectives)
+  {
+    if(objective.code_name != "plato_analyze")
+      std::cout << "ERROR: Summit output is only supported for Plato Analyze performers" << std::endl;
+  }
+  generatePerformerBashScripts();
+  generateJSRunScript();
+  generateBatchScript();
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::generatePerformerBashScripts()
+/******************************************************************************/
+{
+  generateEngineBashScript();
+  generateAnalyzeBashScripts();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateAnalyzeBashScripts()
+/******************************************************************************/
+{
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    std::ofstream analyzeBash;
+    std::string filename = "analyze" + std::to_string(i) + ".sh";
+    analyzeBash.open(filename);
+    analyzeBash << "export PLATO_PERFORMER_ID=" << i << "\n";
+    analyzeBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
+    analyzeBash << "export PLATO_APP_FILE=plato_analyze_operations_" << i << ".xml\n";
+    analyzeBash << "\n";
+    analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck_" << i << ".xml\n";
+
+    analyzeBash.close();
+  }
+}
+
+/******************************************************************************/
+void XMLGenerator::generateEngineBashScript()
+/******************************************************************************/
+{
+  std::ofstream engineBash;
+  engineBash.open("engine.sh");
+  engineBash << "export PLATO_PERFORMER_ID=0\n";
+  engineBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
+  engineBash << "export PLATO_APP_FILE=plato_operations.xml\n";
+  engineBash << "\n";
+  engineBash << "PlatoMain platomain.xml";
+  engineBash.close();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateJSRunScript()
+/******************************************************************************/
+{
+  std::ofstream jsrun;
+  jsrun.open("jsrun.source");
+  jsrun << "1 : eng : bash engine.sh\n";
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    jsrun << "1 : per" << i << " : bash analyze" << i << ".sh\n";
+  }
+  jsrun.close();
+}
+
+/******************************************************************************/
+void XMLGenerator::generateBatchScript()
+/******************************************************************************/
+{
+  std::ofstream batchFile;
+  batchFile.open ("plato.batch");
+  batchFile << "#!/bin/bash\n";
+  batchFile << "# LSF Directives\n";
+  batchFile << "#BSUB -P <PROJECT>\n";
+  batchFile << "#BSUB -W 0:00\n";
+
+  size_t tNumNodesNeeded = computeNumberOfNodesNeeded();
+
+  batchFile << "#BSUB -nnodes " << tNumNodesNeeded << "\n";
+  batchFile << "#BSUB -J plato\n";
+  batchFile << "#BSUB -o plato.%J\n";
+  batchFile << "\n";
+  batchFile << "cd <path/to/working/directory>\n";
+  batchFile << "date\n";
+  batchFile << "jsrun -A eng -n1 -a1 -c1 -g0\n";
+
+  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  {
+    batchFile << "jsrun -A per" << i << " -n1 -a1 -c1 -g1\n";
+  }
+
+  batchFile << "jsrun -f jsrun.source\n";
+  
+
+  batchFile.close();
+}
+
+/******************************************************************************/
+size_t XMLGenerator::computeNumberOfNodesNeeded()
+/******************************************************************************/
+{
+  size_t tNumGPUsNeeded = m_InputData.objectives.size();
+  size_t tNumGPUsPerNode = 6;
+  size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
+  if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
+    ++tNumNodesNeeded;
+  return tNumNodesNeeded;
+}
+
 
 /******************************************************************************/
 bool XMLGenerator::generateSalinasInputDecks(std::ostringstream *aStringStream)
@@ -1424,10 +1572,9 @@ bool XMLGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStr
 /******************************************************************************/
 {
     PlatoAnalyzeInputDeckWriter tInputDeckWriter(m_InputData);
-    tInputDeckWriter.generate(aStringStream);
-
-    return true;
+    return tInputDeckWriter.generate(aStringStream);
 }
+
 
 /******************************************************************************/
 bool XMLGenerator::addChild(pugi::xml_node parent_node,
@@ -1688,10 +1835,14 @@ bool XMLGenerator::generateLightMPInputDecks()
 bool XMLGenerator::generatePhysicsInputDecks()
 /******************************************************************************/
 {
-    generateSalinasInputDecks();
-    generateAlbanyInputDecks();
-    generateLightMPInputDecks();
-    generatePlatoAnalyzeInputDecks();
+    if(!generateSalinasInputDecks())
+      return false;
+    if(!generateAlbanyInputDecks())
+      return false;
+    if(!generateLightMPInputDecks())
+      return false;
+    if(!generatePlatoAnalyzeInputDecks())
+      return false;
     return true;
 }
 
@@ -2403,205 +2554,372 @@ bool XMLGenerator::parseLoads(std::istream &fin)
 /******************************************************************************/
 {
     std::vector<std::string> tInputStringList;
-    char buf[MAX_CHARS_PER_LINE];
     std::vector<std::string> tokens;
     std::string tStringValue;
+    bool load_block_found = false;
 
     // read each line of the file
     while (!fin.eof())
     {
-        // read an entire line into memory
-        fin.getline(buf, MAX_CHARS_PER_LINE);
-        tokens.clear();
-        parseTokens(buf, tokens);
+        getTokensFromLine(fin,tokens);
 
         // process the tokens
         if(tokens.size() > 0)
         {
-            for(size_t j=0; j<tokens.size(); ++j)
-                tokens[j] = toLower(tokens[j]);
-
             if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
             {
-                while (!fin.eof())
-                {
-                    tokens.clear();
-                    fin.getline(buf, MAX_CHARS_PER_LINE);
-                    parseTokens(buf, tokens);
-                    // process the tokens
-                    if(tokens.size() > 0)
-                    {
-                        for(size_t j=0; j<tokens.size(); ++j)
-                            tokens[j] = toLower(tokens[j]);
-
-                        if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            XMLGen::Load new_load;
-                            int j=0;
-                            new_load.type = tokens[j];  // traction or heat [flux] or force
-                            if(!new_load.type.compare("traction"))
-                            {
-                                if(tokens.size() != 10)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                new_load.values.push_back(tokens[5]);
-                                new_load.values.push_back(tokens[6]);
-                                if(tokens[7] != "load" || tokens[8] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[9];
-                            }
-                            else if(!new_load.type.compare("pressure"))
-                            {
-                                if(tokens.size() != 8)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"pressure\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                if(new_load.app_type != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
-                                    return false;
-                                }
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                if(tokens[5] != "load" || tokens[6] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[7];
-                            }
-                            else if(!new_load.type.compare("acceleration"))
-                            {
-                                if(tokens.size() != 7)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"acceleration\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = "body";
-                                new_load.values.push_back(tokens[1]);
-                                new_load.values.push_back(tokens[2]);
-                                new_load.values.push_back(tokens[3]);
-                                if(tokens[4] != "load" || tokens[5] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[6];
-                            }
-                            else if(!new_load.type.compare("heat"))
-                            {
-                                if(tokens.size() != 9)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"heat flux\" load.\n";
-                                    return false;
-                                }
-                                if(!tokens[1].compare("flux"))
-                                {
-                                    new_load.app_type = tokens[2];
-                                    if(new_load.app_type != "sideset")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
-                                        return false;
-                                    }
-                                    new_load.app_id = tokens[3];
-                                    // tokens[4] is "value"
-                                    new_load.values.push_back(tokens[5]);
-                                    if(tokens[6] != "load" || tokens[7] != "id")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                        return false;
-                                    }
-                                    new_load.load_id = tokens[8];
-                                }
-                                else
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
-                                    return false;
-                                }
-                            }
-                            else if(!new_load.type.compare("force"))
-                            {
-                                if(tokens.size() != 10)
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"force\" load.\n";
-                                    return false;
-                                }
-                                new_load.app_type = tokens[1];
-                                if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
-                                    return false;
-                                }
-                                new_load.app_id = tokens[2];
-                                if(tokens[3] != "value")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
-                                    return false;
-                                }
-                                new_load.values.push_back(tokens[4]);
-                                new_load.values.push_back(tokens[5]);
-                                new_load.values.push_back(tokens[6]);
-                                if(tokens[7] != "load" || tokens[8] != "id")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-                                    return false;
-                                }
-                                new_load.load_id = tokens[9];
-                            }
-                            else
-                            {
-                                PrintUnrecognizedTokens(tokens);
-                                std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.  Must be traction, heat flux, or force.\n";
-                                return false;
-                            }
-                            bool found_load_case = false;
-                            for(size_t h=0; h<m_InputData.load_cases.size() && !found_load_case; ++h)
-                            {
-                                if(m_InputData.load_cases[h].id == new_load.load_id)
-                                {
-                                    m_InputData.load_cases[h].loads.push_back(new_load);
-                                    found_load_case = true;
-                                }
-                            }
-                            if(!found_load_case)
-                            {
-                                XMLGen::LoadCase new_load_case;
-                                new_load_case.id = new_load.load_id;
-                                new_load_case.loads.push_back(new_load);
-                                m_InputData.load_cases.push_back(new_load_case);
-                            }
-                        }
-                    }
-                }
+              if(!parseLoadsBlock(fin))
+                return false;
+              load_block_found = true;
             }
         }
     }
+
+    if(!load_block_found)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: No load block found \n";
+      return false;
+    }
+
     return true;
 }
+
+/******************************************************************************/
+bool XMLGenerator::parseLoadsBlock(std::istream &fin)
+/******************************************************************************/
+{
+  std::vector<std::string> tInputStringList;
+  std::vector<std::string> tokens;
+  std::string tStringValue;
+  
+  while (!fin.eof())
+  {
+    getTokensFromLine(fin,tokens);
+
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+          tokens[j] = toLower(tokens[j]);
+      if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
+        break;
+      else
+        if(!parseLoadLine(tokens))
+          return false;
+    }
+  }
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    char buf[MAX_CHARS_PER_LINE];
+    
+    tokens.clear();
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+    parseTokens(buf, tokens);
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    XMLGen::Load new_load;
+    new_load.type = tokens[0];
+    bool return_status = true;
+
+    if(!new_load.type.compare("traction"))
+      return_status = parseTractionLoad(tokens,new_load);
+    else if(!new_load.type.compare("pressure"))
+      return_status = parsePressureLoad(tokens,new_load);
+    else if(!new_load.type.compare("acceleration"))
+      return_status = parseAccelerationLoad(tokens,new_load);
+    else if(!new_load.type.compare("heat"))
+      return_status = parseHeatFluxLoad(tokens,new_load);
+    else if(!new_load.type.compare("force"))
+      return_status = parseForceLoad(tokens,new_load);
+    else
+    {
+        PrintUnrecognizedTokens(tokens);
+        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.\n";
+        return false;
+    }
+
+    if(return_status)
+      putLoadInLoadCase(new_load);
+
+    return return_status;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    size_t tMin_parameters = 10;
+    if(tokens.size() < tMin_parameters)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+      return false;
+    }
+
+    size_t tTokenIndex = 0;
+
+    new_load.app_type = tokens[++tTokenIndex];
+
+    if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+    {
+      if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+        --tTokenIndex;
+    }
+    else
+    {
+      new_load.app_name = "";
+      new_load.app_id = tokens[tTokenIndex];
+    }
+
+    if(tokens[++tTokenIndex] != "value")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+    }
+
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+
+    if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+    }
+
+    new_load.load_id = tokens[++tTokenIndex];
+
+
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    if(tokens[++aTokenIndex] == "id")
+    {
+      new_load.app_id = tokens[++aTokenIndex];
+      return true;
+    }
+    else if(tokens[aTokenIndex] == "name")
+    {
+      new_load.app_name = tokens[++aTokenIndex];
+      return true;
+    }
+    else
+      return false;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 8;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
+      return false;
+  }
+
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
+
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 7;
+  if(tokens.size() != tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  new_load.app_type = "body";
+  new_load.values.push_back(tokens[1]);
+  new_load.values.push_back(tokens[2]);
+  new_load.values.push_back(tokens[3]);
+  if(tokens[4] != "load" || tokens[5] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[6];
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 9;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  if(!tokens[++tTokenIndex].compare("flux"))
+  {
+      new_load.app_type = tokens[++tTokenIndex];
+      if(new_load.app_type != "sideset")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
+          return false;
+      }
+
+      if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      {
+        if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+          --tTokenIndex;
+      }
+      else
+      {
+        new_load.app_name = "";
+        new_load.app_id = tokens[tTokenIndex];
+      }
+
+      if(tokens[++tTokenIndex] != "value")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
+          return false;
+      }
+      new_load.values.push_back(tokens[++tTokenIndex]);
+      if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+          return false;
+      }
+      new_load.load_id = tokens[++tTokenIndex];
+  }
+  else
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
+      return false;
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 10;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
+      return false;
+  }
+
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
+  
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::putLoadInLoadCase(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  bool found_load_case = putLoadInLoadCaseWithMatchingID(new_load);
+
+  if(!found_load_case)
+    createNewLoadCase(new_load);
+}
+
+/******************************************************************************/
+bool XMLGenerator::putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  for(size_t h=0; h<m_InputData.load_cases.size(); ++h)
+      if(m_InputData.load_cases[h].id == new_load.load_id)
+      {
+        m_InputData.load_cases[h].loads.push_back(new_load);
+        return true;
+      }
+  return false;
+}
+
+/******************************************************************************/
+void XMLGenerator::createNewLoadCase(XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  XMLGen::LoadCase new_load_case;
+  new_load_case.id = new_load.load_id;
+  new_load_case.loads.push_back(new_load);
+  m_InputData.load_cases.push_back(new_load_case);
+}
+
 
 /******************************************************************************/
 bool XMLGenerator::parseUncertainties(std::istream &fin)
@@ -2877,142 +3195,241 @@ bool XMLGenerator::parseBCs(std::istream &fin)
 /******************************************************************************/
 {
     std::vector<std::string> tInputStringList;
-    char buf[MAX_CHARS_PER_LINE];
     std::vector<std::string> tokens;
     std::string tStringValue;
+    bool bc_block_found = false;
 
     // read each line of the file
     while (!fin.eof())
     {
-        // read an entire line into memory
-        fin.getline(buf, MAX_CHARS_PER_LINE);
-        tokens.clear();
-        parseTokens(buf, tokens);
+        getTokensFromLine(fin,tokens);
 
         // process the tokens
         if(tokens.size() > 0)
         {
-            for(size_t j=0; j<tokens.size(); ++j)
-                tokens[j] = toLower(tokens[j]);
-
             if(parseSingleValue(tokens, tInputStringList = {"begin","boundary","conditions"}, tStringValue))
             {
-                // found an objective. parse it.
-                // parse the rest of the objective
-                while (!fin.eof())
-                {
-                    tokens.clear();
-                    fin.getline(buf, MAX_CHARS_PER_LINE);
-                    parseTokens(buf, tokens);
-                    // process the tokens
-                    if(tokens.size() > 0)
-                    {
-                        std::vector<std::string> unlowered_tokens = tokens;
-
-                        for(size_t j=0; j<tokens.size(); ++j)
-                            tokens[j] = toLower(tokens[j]);
-
-                        if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            XMLGen::BC new_bc;
-                            if(tokens.size() < 7)
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
-                                return false;
-                            }
-                            if(tokens[0] != "fixed")
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
-                                return false;
-                            }
-                            new_bc.type = tokens[1];
-                            if(tokens[1] == "displacement")
-                            {
-                                // Potential syntax:
-                                // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
-                                // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
-                                // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
-                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-                                    return false;
-                                }
-                                new_bc.app_type = tokens[2];
-
-                                new_bc.app_id = tokens[3]; // nodeset or sideset id
-                                new_bc.dof = "";
-                                new_bc.value = "";
-                                if(tokens[4] != "bc")
-                                {
-                                    if(tokens[4] != "x" && tokens[4] != "y" && tokens[4] != "z")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
-                                        return false;
-                                    }
-                                    new_bc.dof = tokens[4];
-                                    if(tokens[5] != "bc")
-                                    {
-                                        new_bc.value = tokens[5];
-                                        new_bc.bc_id = tokens[8];
-                                    }
-                                    else
-                                    {
-                                        new_bc.bc_id = tokens[7];
-                                    }
-                                }
-                                else
-                                    new_bc.bc_id = tokens[6];
-                            }
-                            else if (tokens[1] == "temperature")
-                            {
-                                // Potential syntax:
-                                // fixed temperature nodeset 1 bc id 1
-                                // fixed temperature nodeset 1 value 25.0 bc id 1
-                                if(tokens[2] != "nodeset" && tokens[2] != "sideset")
-                                {
-                                    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-                                    return false;
-                                }
-                                new_bc.app_type = tokens[2];
-
-                                new_bc.app_id = tokens[3]; // nodeset or sideset id
-                                new_bc.value = "";
-                                if(tokens[4] != "bc")
-                                {
-                                    if(tokens[4] != "value")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-                                        return false;
-                                    }
-                                    new_bc.value = tokens[5];
-                                    if(tokens[6] != "bc")
-                                    {
-                                        std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-                                        return false;
-                                    }
-                                    new_bc.bc_id = tokens[8];
-                                }
-                                else
-                                    new_bc.bc_id = tokens[6];
-                            }
-                            else
-                            {
-                                std::cout << "ERROR:XMLGenerator:parseBCs: Only \"displacement\" and \"temperature\" boundary conditions are currently allowed.\n";
-                                return false;
-                            }
-
-                            m_InputData.bcs.push_back(new_bc);
-                        }
-                    }
-                }
+              if(!parseBCsBlock(fin))
+                return false;
+              bc_block_found = true;
             }
         }
     }
+
+    if(!bc_block_found)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: No boundary condition block found \n";
+      return false;
+    }
+
     return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseBCsBlock(std::istream &fin)
+/******************************************************************************/
+{
+  std::vector<std::string> tInputStringList;
+  std::vector<std::string> tokens;
+  std::string tStringValue;
+  
+  while (!fin.eof())
+  {
+    getTokensFromLine(fin,tokens);
+
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+          tokens[j] = toLower(tokens[j]);
+      if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
+        break;
+      else
+        if(!parseBCLine(tokens))
+          return false;
+    }
+  }
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    XMLGen::BC new_bc;
+    bool return_status = true;
+
+    if(tokens.size() < 7)
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
+        return false;
+    }
+    if(tokens[0] != "fixed")
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
+        return false;
+    }
+    new_bc.type = tokens[1];
+
+    if(!new_bc.type.compare("displacement"))
+      return_status = parseDisplacementBC(tokens,new_bc);
+    else if(!new_bc.type.compare("temperature"))
+      return_status = parseTemperatureBC(tokens,new_bc);
+    else
+    {
+        PrintUnrecognizedTokens(tokens);
+        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n";
+        return false;
+    }
+
+    m_InputData.bcs.push_back(new_bc);
+
+    return return_status;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+/******************************************************************************/
+{
+  // Potential syntax:
+  // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
+  // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
+  // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
+
+  size_t tTokenIndex = 1;
+  bool tNameOrIDSpecified = false;
+
+  if(tokens[++tTokenIndex] != "nodeset" && tokens[tTokenIndex] != "sideset")
+  {
+    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+    return false;
+  }
+  new_bc.app_type = tokens[tTokenIndex];
+
+  if(tokens[++tTokenIndex] == "id")
+  {
+    new_bc.app_id = tokens[++tTokenIndex];
+    tNameOrIDSpecified = true;
+  }
+  else if(tokens[tTokenIndex] == "name")
+  {
+    new_bc.app_name = tokens[++tTokenIndex];
+    tNameOrIDSpecified = true;
+  }
+  else
+  {
+    new_bc.app_id = tokens[tTokenIndex];
+    new_bc.app_name = "";
+  }
+  
+  if(tNameOrIDSpecified)
+  {
+    if(tokens[++tTokenIndex] == "id")
+      new_bc.app_id = tokens[++tTokenIndex];
+    else if(tokens[tTokenIndex] == "name")
+      new_bc.app_name = tokens[++tTokenIndex];
+    else
+      --tTokenIndex;
+  }
+
+  new_bc.dof = "";
+  new_bc.value = "";
+  if(tokens[++tTokenIndex] != "bc")
+  {
+    if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
+    {
+        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
+        return false;
+    }
+    new_bc.dof = tokens[tTokenIndex];
+    if(tokens[++tTokenIndex] != "bc")
+    {
+        new_bc.value = tokens[tTokenIndex];
+        tTokenIndex += 3;
+        new_bc.bc_id = tokens[tTokenIndex];
+    }
+    else
+    {
+        tTokenIndex += 2;
+        new_bc.bc_id = tokens[tTokenIndex];
+    }
+  }
+  else
+  {
+    tTokenIndex += 2;
+    new_bc.bc_id = tokens[tTokenIndex];
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+/******************************************************************************/
+{
+  // Potential syntax:
+  // fixed temperature nodeset 1 bc id 1
+  // fixed temperature nodeset 1 value 25.0 bc id 1
+  if(tokens[2] != "nodeset" && tokens[2] != "sideset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
+      return false;
+  }
+  new_bc.app_type = tokens[2];
+
+  size_t tOffset = 0;
+  bool name_or_id_specified = false;
+  if(tokens[3] == "id")
+  {
+    ++tOffset;
+    new_bc.app_id = tokens[3+tOffset];
+    name_or_id_specified = true;
+  }
+  else if(tokens[3] == "name")
+  {
+    ++tOffset;
+    new_bc.app_name = tokens[3+tOffset];
+    name_or_id_specified = true;
+  }
+  else
+  {
+    new_bc.app_id = tokens[3];
+    new_bc.app_name = "";
+  }
+
+  if(name_or_id_specified)
+  {
+    if(tokens[4+tOffset] == "id")
+    {
+      ++tOffset;
+      new_bc.app_id = tokens[4+tOffset];
+    }
+    else if(tokens[4+tOffset] == "name")
+    {
+      ++tOffset;
+      new_bc.app_name = tokens[4+tOffset];
+    }
+  }
+
+  new_bc.value = "";
+  if(tokens[4+tOffset] != "bc")
+  {
+      if(tokens[4+tOffset] != "value")
+      {
+          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+          return false;
+      }
+      new_bc.value = tokens[5+tOffset];
+      if(tokens[6+tOffset] != "bc")
+      {
+          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
+          return false;
+      }
+      new_bc.bc_id = tokens[8+tOffset];
+  }
+  else
+      new_bc.bc_id = tokens[6+tOffset];
+
+  return true;
 }
 
 /******************************************************************************/
@@ -6020,7 +6437,10 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
     pugi::xml_node tmp_node1 = tmp_node.append_child("Input");
     addChild(tmp_node1, "ArgumentName", "Topology");
     tmp_node1 = tmp_node.append_child("Input");
-    addChild(tmp_node1, "ArgumentName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+    else
+      addChild(tmp_node1, "ArgumentName", "Internal Energy Gradient");
     tmp_node1 = tmp_node.append_child("Input");
     addChild(tmp_node1, "ArgumentName", "Optimization DOFs");
     if(m_InputData.constraints.size() > 0)
@@ -6193,7 +6613,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
         pugi::xml_node input_node = tmp_node1.append_child("Input");
         std::string tTmpString = "";
         if(cur_obj.code_name == "plato_analyze")
-            tTmpString += "Objective Value ";
+            tTmpString += "Objective ";
         else
             tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
@@ -6229,14 +6649,10 @@ bool XMLGenerator::generatePlatoOperationsXML()
     // Operations
     /////////////////////////////////////////////////
 
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
-
     if(m_InputData.optimization_type == "topology")
     {
         addFilterInfo(doc);
-        addPlatoMainOutputOperation(doc, tHasUncertainties, tRequestedVonMisesOutput);
+        addPlatoMainOutputOperation(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
         addUpdateProblemOperation(doc);
         addFilterControlOperation(doc);
         addFilterGradientOperation(doc);
@@ -6632,7 +7048,10 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
     char tmp_buf[200];
     // Internal Energy
     pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(stage_node, "Name", "Objective Value");
+    else
+      addChild(stage_node, "Name", "Internal Energy");
 
     pugi::xml_node input_node = stage_node.append_child("Input");
     addChild(input_node, "SharedDataName", "Optimization DOFs");
@@ -6678,11 +7097,15 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
         addChild(input_node, "SharedDataName", "Topology");
 
         output_node = op_node.append_child("Output");
-        if(cur_obj.code_name == "plato_analyze")
-            addChild(output_node, "ArgumentName", "Objective Value");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(output_node, "ArgumentName", "Objective Value");
         else
-            addChild(output_node, "ArgumentName", "Internal Energy");
-        sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+          addChild(output_node, "ArgumentName", "Internal Energy");
+        if(cur_obj.code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+
         addChild(output_node, "SharedDataName", tmp_buf);
     }
 
@@ -6696,21 +7119,30 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
         input_node = op_node.append_child("Input");
         sprintf(tmp_buf, "Value %d", (int)(i+1));
         addChild(input_node, "ArgumentName", tmp_buf);
-        sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
             input_node = op_node.append_child("Input");
             sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
             addChild(input_node, "ArgumentName", tmp_buf);
-            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
             addChild(input_node, "SharedDataName", tmp_buf);
         }
     }
 
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Value");
-    addChild(output_node, "SharedDataName", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Value");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy");
 
     // If there are uncertainties add an operation for
     // the objective mean and std deviation.
@@ -6742,7 +7174,10 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
     }
 
     output_node = stage_node.append_child("Output");
-    addChild(output_node, "SharedDataName", "Internal Energy");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Value");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy");
 
     return true;
 }
@@ -6900,7 +7335,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     char tmp_buf[200];
     // Internal Energy
     pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(stage_node, "Name", "Objective Gradient");
+    else
+      addChild(stage_node, "Name", "Internal Energy Gradient");
 
     // fitler control
     pugi::xml_node input_node = stage_node.append_child("Input");
@@ -6950,7 +7388,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
             addChild(output_node, "ArgumentName", "Objective Gradient");
         else
             addChild(output_node, "ArgumentName", "Internal Energy Gradient");
-        sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+        if(cur_obj.code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(output_node, "SharedDataName", tmp_buf);
     }
 
@@ -6964,21 +7405,30 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
         input_node = op_node.append_child("Input");
         sprintf(tmp_buf, "Field %d", (int)(i+1));
         addChild(input_node, "ArgumentName", tmp_buf);
-        sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+          sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+        else
+          sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
         addChild(input_node, "SharedDataName", tmp_buf);
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
             input_node = op_node.append_child("Input");
             sprintf(tmp_buf, "Normalization Factor %d", (int)(i+1));
             addChild(input_node, "ArgumentName", tmp_buf);
-            sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
             addChild(input_node, "SharedDataName", tmp_buf);
         }
     }
 
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Field");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     // filter gradient
     op_node = stage_node.append_child("Operation");
@@ -6989,10 +7439,16 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
     addChild(input_node, "SharedDataName", "Optimization DOFs");
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Gradient");
-    addChild(input_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(input_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(input_node, "SharedDataName", "Internal Energy Gradient");
     output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Filtered Gradient");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     if(aHasUncertainties)
     {
@@ -7016,7 +7472,7 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
             input_node = op_node.append_child("Input");
             tTmpString = "";
             if(cur_obj.code_name == "plato_analyze")
-                tTmpString += "Objective Value ";
+                tTmpString += "Objective ";
             else
                 tTmpString += "Internal Energy ";
             tTmpString += std::to_string(i+1);
@@ -7035,7 +7491,10 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
 
     // stage output
     output_node = stage_node.append_child("Output");
-    addChild(output_node, "SharedDataName", "Internal Energy Gradient");
+    if(m_InputData.mPlatoAnalyzePerformerExists)
+      addChild(output_node, "SharedDataName", "Objective Gradient");
+    else
+      addChild(output_node, "SharedDataName", "Internal Energy Gradient");
 
     return true;
 }
@@ -7270,6 +7729,104 @@ pugi::xml_node XMLGenerator::createMultiUserGlobalSharedData(pugi::xml_document 
 }
 
 /******************************************************************************/
+bool XMLGenerator::generateDefinesXML(std::ostringstream *aStringStream)
+/******************************************************************************/
+{
+  if(m_InputData.mPlatoAnalyzePerformerExists && m_InputData.uncertainties.size() > 0)
+  {
+    pugi::xml_document doc;
+
+    addVersionEntryToDoc(doc);
+    if(!addDefinesToDoc(doc))
+      return false;
+    
+    if(aStringStream)
+        doc.save(*aStringStream, "\t", pugi::format_default & ~pugi::format_indent);
+    else
+      doc.save_file("defines.xml", "  ");
+  }
+
+  return true;
+}
+
+/******************************************************************************/
+void XMLGenerator::addVersionEntryToDoc(pugi::xml_document& doc)
+/******************************************************************************/
+{
+    // Version entry
+    pugi::xml_node tTmpNode = doc.append_child(pugi::node_declaration);
+    tTmpNode.set_name("xml");
+    pugi::xml_attribute tmp_att = tTmpNode.append_attribute("version");
+    tmp_att.set_value("1.0");
+}
+
+/******************************************************************************/
+bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
+/******************************************************************************/
+{
+  if(m_InputData.objectives.size() > 1)
+  {
+    std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
+    return false;
+  }
+
+  pugi::xml_node tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumSamples";
+  tTmpNode.append_attribute("type") = "int";
+  std::string tNumSamplesString = m_InputData.uncertainties[0].num_samples;
+  tTmpNode.append_attribute("value") = tNumSamplesString.c_str();
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumMPIProcesses";
+  tTmpNode.append_attribute("type") = "int";
+  std::string tNumMPIProcessesString = m_InputData.objectives[0].atmost_total_num_processors;
+  size_t tNumMPIProcesses = stringToSizeT(tNumMPIProcessesString);
+  size_t tNumSamples = stringToSizeT(tNumSamplesString);
+
+  if(tNumMPIProcesses == 0)
+  {
+    std::cout << "ERROR: Cannot assign zero MPI processes" << std::endl;
+    return false;
+  }
+
+  tNumMPIProcesses = getGreatestDivisor(tNumSamples,tNumMPIProcesses);
+
+  tNumMPIProcessesString = std::to_string(tNumMPIProcesses);
+  tTmpNode.append_attribute("value") = tNumMPIProcessesString.c_str();
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "NumEvals";
+  tTmpNode.append_attribute("type") = "int";
+  tTmpNode.append_attribute("value") = "{NumSamples/NumMPIProcesses}";
+
+  tTmpNode = doc.append_child("Define");
+  tTmpNode.append_attribute("name") = "LoadMag";
+
+  return true;
+}
+
+/******************************************************************************/
+size_t XMLGenerator::getGreatestDivisor(const size_t& aDividend, size_t aDivisor)
+/******************************************************************************/
+{
+  if(aDivisor == 0)
+    throw std::invalid_argument( "Error: divide by zero" );
+  while(aDividend % aDivisor != 0)
+    --aDivisor;
+  return aDivisor;
+}
+
+/******************************************************************************/
+size_t XMLGenerator::stringToSizeT(const std::string& aString)
+/******************************************************************************/
+{
+  std::stringstream sstream(aString);
+  size_t result;
+  sstream >> result;
+  return result;
+}
+
+/******************************************************************************/
 bool XMLGenerator::generateInterfaceXML()
 /******************************************************************************/
 {
@@ -7312,17 +7869,16 @@ bool XMLGenerator::generateInterfaceXML()
     // Shared Data
     /////////////////////////////////////////////////
 
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(m_InputData, tHasUncertainties, tRequestedVonMisesOutput);
-
     // Internal Energy XXX shared data
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         if(m_InputData.optimization_type == "topology")
         {
             // create shared data for objectives
-            sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
             createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape")
@@ -7336,7 +7892,10 @@ bool XMLGenerator::generateInterfaceXML()
         {
             if(m_InputData.optimization_type == "topology")
             {
-                sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
+                if(m_InputData.objectives[i].code_name == "plato_analyze")
+                  sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
+                else
+                  sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
                 createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
             }
         }
@@ -7346,7 +7905,10 @@ bool XMLGenerator::generateInterfaceXML()
     {
         if(m_InputData.optimization_type == "topology")
         {
-            sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
+            else
+              sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
             createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
@@ -7360,13 +7922,13 @@ bool XMLGenerator::generateInterfaceXML()
 
     if(m_InputData.optimization_type == "topology")
     {
-        if(tHasUncertainties)
+        if(m_HasUncertainties)
         {
             // Objective statistics
             createSingleUserGlobalSharedData(doc, "Objective Mean Plus StdDev Value", "Scalar", "1", "PlatoMain", "PlatoMain");
             createSingleUserNodalSharedData(doc, "Objective Mean Plus StdDev Gradient", "Scalar", "PlatoMain", "PlatoMain");
 
-            if(tRequestedVonMisesOutput)
+            if(m_RequestedVonMisesOutput)
             {
                 // VonMises statistics
                 createSingleUserElementSharedData(doc, "VonMises Mean", "Scalar", "PlatoMain", "PlatoMain");
@@ -7388,7 +7950,7 @@ bool XMLGenerator::generateInterfaceXML()
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             // If this is a UQ run we are assuming only one load case per objective
             // and we are only supporting vonmises stress right now.
-            if(tHasUncertainties)
+            if(m_HasUncertainties)
             {
                 // create shared data for vonmises
                 sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
@@ -7441,10 +8003,16 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         // Internal Energy
-        createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          createSingleUserGlobalSharedData(doc, "Objective Value", "Scalar", "1", "PlatoMain", "PlatoMain");
+        else
+          createSingleUserGlobalSharedData(doc, "Internal Energy", "Scalar", "1", "PlatoMain", "PlatoMain");
 
         // Internal Energy Gradient
-        createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          createSingleUserNodalSharedData(doc, "Objective Gradient", "Scalar", "PlatoMain", "PlatoMain");
+        else
+          createSingleUserNodalSharedData(doc, "Internal Energy Gradient", "Scalar", "PlatoMain", "PlatoMain");
     }
     else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
     {
@@ -7561,7 +8129,7 @@ bool XMLGenerator::generateInterfaceXML()
     /////////////////////////////////////////////////
 
     // Output To File
-    outputOutputToFileStage(doc, tHasUncertainties, tRequestedVonMisesOutput);
+    outputOutputToFileStage(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
 
     // Initialize Optimization
     outputInitializeOptimizationStage(doc);
@@ -7573,7 +8141,7 @@ bool XMLGenerator::generateInterfaceXML()
     }
 
     // Cache State Stage
-    outputCacheStateStage(doc, tHasUncertainties);
+    outputCacheStateStage(doc, m_HasUncertainties);
 
     // Set Lower Bounds Stage
     outputSetLowerBoundsStage(doc);
@@ -7615,10 +8183,10 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         // Internal Energy
-        outputInternalEnergyStage(doc, tHasUncertainties);
+        outputInternalEnergyStage(doc, m_HasUncertainties);
 
         // Internal Energy Gradient
-        outputInternalEnergyGradientStage(doc, tHasUncertainties);
+        outputInternalEnergyGradientStage(doc, m_HasUncertainties);
     }
     else if(m_InputData.optimization_type == "shape")
     {
@@ -7721,10 +8289,22 @@ bool XMLGenerator::generateInterfaceXML()
     if(m_InputData.optimization_type == "topology")
     {
         tTmpNode = tMiscNode.append_child("Objective");
-        addChild(tTmpNode, "ValueName", "Internal Energy");
-        addChild(tTmpNode, "ValueStageName", "Internal Energy");
-        addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
-        addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "ValueName", "Objective Value");
+        else
+          addChild(tTmpNode, "ValueName", "Internal Energy");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "ValueStageName", "Objective Value");
+        else
+          addChild(tTmpNode, "ValueStageName", "Internal Energy");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "GradientName", "Objective Gradient");
+        else
+          addChild(tTmpNode, "GradientName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(tTmpNode, "GradientStageName", "Objective Gradient");
+        else
+          addChild(tTmpNode, "GradientStageName", "Internal Energy Gradient");
         if(m_InputData.optimization_algorithm =="ksbc" ||
                 m_InputData.optimization_algorithm == "ksal" ||
                 m_InputData.optimization_algorithm == "rol ksal" ||
@@ -7850,53 +8430,67 @@ void XMLGenerator::outputCacheStateStage(pugi::xml_document &doc,
     pugi::xml_node stage_node = doc.append_child("Stage");
     addChild(stage_node, "Name", "Cache State");
 
-    if(m_InputData.optimization_type == "topology")
-    {
-        pugi::xml_node cur_parent = stage_node;
-        if(m_InputData.objectives.size() > 1)
-        {
-            op_node = stage_node.append_child("Operation");
-            cur_parent = op_node;
-        }
+    size_t tNum_objectives = m_InputData.objectives.size();
+    size_t tNum_to_write = 0;
+    bool tHandles_cache_state;
 
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    for(size_t i = 0; i < tNum_objectives; i++)
+    {
+      XMLGen::Objective cur_obj = m_InputData.objectives[i];
+      tHandles_cache_state = cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+              cur_obj.code_name.compare("lightmp"); // Albany, analyze, and lightmp don't handle Cache State correctly yet
+
+      if(tHandles_cache_state)
+        ++tNum_to_write;
+    }
+
+    pugi::xml_node cur_parent = stage_node;
+    if(tNum_to_write > 1)
+    {
+        op_node = stage_node.append_child("Operation");
+        cur_parent = op_node;
+    }
+    for(size_t i=0; i<tNum_objectives; ++i)
+    {
+
+        XMLGen::Objective cur_obj = m_InputData.objectives[i];
+
+        tHandles_cache_state = cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
+                  cur_obj.code_name.compare("lightmp"); // Albany, analyze, and lightmp don't handle Cache State correctly yet
+
+        if(tHandles_cache_state)
         {
-            XMLGen::Objective cur_obj = m_InputData.objectives[i];
-            if(cur_obj.code_name.compare("albany") && cur_obj.code_name.compare("plato_analyze") &&
-                    cur_obj.code_name.compare("lightmp")) // Albany, analyze, and lightmp don't handle Cache State correctly yet
+            op_node = cur_parent.append_child("Operation");
+            addChild(op_node, "Name", "Cache State");
+            addChild(op_node, "PerformerName", cur_obj.performer_name);
+            if(aHasUncertainties)
             {
-                op_node = cur_parent.append_child("Operation");
-                addChild(op_node, "Name", "Cache State");
-                addChild(op_node, "PerformerName", cur_obj.performer_name);
-                if(aHasUncertainties)
+                output_node = op_node.append_child("Output");
+                addChild(output_node, "ArgumentName", "vonmises0");
+                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
+            }
+            else if(cur_obj.multi_load_case == "true")
+            {
+                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
                 {
-                    output_node = op_node.append_child("Output");
-                    addChild(output_node, "ArgumentName", "vonmises0");
-                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
-                }
-                else if(cur_obj.multi_load_case == "true")
-                {
-                    for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
-                    {
-                        char buffer[100];
-                        sprintf(buffer, "%lu", k);
-                        std::string cur_load_string = cur_obj.load_case_ids[k];
-                        for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                        {
-                            output_node = op_node.append_child("Output");
-                            addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
-                            addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
-                        }
-                    }
-                }
-                else
-                {
+                    char buffer[100];
+                    sprintf(buffer, "%lu", k);
+                    std::string cur_load_string = cur_obj.load_case_ids[k];
                     for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                     {
                         output_node = op_node.append_child("Output");
-                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
-                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+                        addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
+                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
                     }
+                }
+            }
+            else
+            {
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+                {
+                    output_node = op_node.append_child("Output");
+                    addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
+                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
                 }
             }
         }
@@ -8074,12 +8668,15 @@ void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &do
             addChild(input_node, "SharedDataName", "Topology");
 
             output_node = op_node.append_child("Output");
-            if(cur_obj.code_name == "plato_analyze")
-                addChild(output_node, "ArgumentName", "Objective Value");
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              addChild(output_node, "ArgumentName", "Objective Value");
             else
-                addChild(output_node, "ArgumentName", "Internal Energy");
+              addChild(output_node, "ArgumentName", "Internal Energy");
             char tBuffer[800];
-            sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
+            if(m_InputData.objectives[i].code_name == "plato_analyze")
+              sprintf(tBuffer, "Initial Objective Value %d", (int)(i+1));
+            else
+              sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
             addChild(output_node, "SharedDataName", tBuffer);
         }
     }
@@ -8178,8 +8775,14 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
         input_node = op_node.append_child("Input");
-        addChild(input_node, "ArgumentName", "Internal Energy Gradient");
-        addChild(input_node, "SharedDataName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(input_node, "ArgumentName", "Objective Gradient");
+        else
+          addChild(input_node, "ArgumentName", "Internal Energy Gradient");
+        if(m_InputData.mPlatoAnalyzePerformerExists)
+          addChild(input_node, "SharedDataName", "Objective Gradient");
+        else
+          addChild(input_node, "SharedDataName", "Internal Energy Gradient");
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Optimization DOFs");
         addChild(input_node, "SharedDataName", "Optimization DOFs");

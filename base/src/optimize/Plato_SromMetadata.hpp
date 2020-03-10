@@ -87,6 +87,7 @@ struct Variable
 struct Load
 {
     int mAppID; /*!< application set identifier */
+    std::string mAppName; /*!< application set identifier */
     std::string mLoadID; /*!< global load identifier */
     std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
     std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
@@ -132,6 +133,7 @@ struct RandomLoad
     int mLoadID; /*!< load identifier */
     double mProbability; /*!< probability associated with this random load */
     std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
+    std::string mAppName; /*!< application name. */
     std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
     std::vector<double> mLoadValues; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
 };

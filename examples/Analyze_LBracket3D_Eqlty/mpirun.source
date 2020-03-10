@@ -6,5 +6,5 @@ PlatoMain platoMain.xml : \
 -x PLATO_PERFORMER_ID=1 \
 -x PLATO_INTERFACE_FILE=interface.xml \
 -x PLATO_APP_FILE=analyzeApp.xml \
-LGR_MPMD \
+analyze_MPMD \
 --input-config=analyzeInput.xml

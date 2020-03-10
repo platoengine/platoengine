@@ -532,7 +532,7 @@ bool STKExtract::run_stand_alone()
   {
     return_val = run_private_stand_alone();
   }
-  catch (std::exception exc)
+  catch (std::exception& exc)
   {
     delete mMeshAPIIn;
     mMeshAPIIn = mMeshAPIOut = NULL;
@@ -654,7 +654,7 @@ bool STKExtract::read_command_line( int argc, char *argv[])
   {
     parseReturn = clp.parse( argc, argv );
   }
-  catch (std::exception exc)
+  catch (std::exception& exc)
   {
     std::cout << "Failed to parse the command line arguments." << std::endl;
     return false;

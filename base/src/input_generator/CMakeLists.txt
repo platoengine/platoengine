@@ -15,22 +15,18 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
 
 find_package(MPI)
 
-#message("MPI_FOUND" ${MPI_FOUND} )
-#message("MPI_VERSION" ${MPI_VERSION} )
-#message("MPI_C_VERSION" ${MPI_C_VERSION} )
-#message("MPI_C_COMPILER" ${MPI_C_COMPILER} )
-#message("MPI_C_LIBRARIES" ${MPI_C_LIBRARIES} )
-#message("MPI_CXX_COMPILER" ${MPI_CXX_COMPILER} )
-
+# try to determine if Open MPI is being used
 STRING(FIND ${MPI_C_COMPILER} "openmpi" FIND_POS) 
-#message("FIND_POS: " ${FIND_POS})
 
 if( FIND_POS EQUAL -1 )
-#   set(USING_OPEN_MPI FALSE)
-#   message("Couldn't find openmpi in c compiler")
-else()
-  add_definitions(-DUSING_OPEN_MPI)
-#   message("Found openmpi in c compiler")
+  execute_process(COMMAND mpirun --version OUTPUT_VARIABLE OUT)
+  STRING(FIND ${OUT} "Open MPI" FIND_POS) 
+  if( FIND_POS EQUAL -1 )
+  else()
+    add_definitions(-DUSING_OPEN_MPI)
+  endif()
+ else()
+   add_definitions(-DUSING_OPEN_MPI)
 endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})

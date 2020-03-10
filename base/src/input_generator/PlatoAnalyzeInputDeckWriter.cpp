@@ -50,6 +50,8 @@
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "XMLGeneratorUtilities.hpp"
 
+#include <exodusII.h>
+
 namespace XMLGen
 {
 
@@ -67,13 +69,16 @@ PlatoAnalyzeInputDeckWriter::~PlatoAnalyzeInputDeckWriter()
 {
 }
 
-void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
+bool PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
 {
     for(size_t i=0; i<mInputData.objectives.size(); ++i)
     {
         const XMLGen::Objective& cur_obj = mInputData.objectives[i];
         if(!cur_obj.code_name.compare("plato_analyze"))
         {
+            if(checkForNodesetSidesetNameConflicts())
+              return false;
+
             char buf[200];
             sprintf(buf, "plato_analyze_input_deck_%s.xml", cur_obj.name.c_str());
             pugi::xml_document doc;
@@ -113,6 +118,71 @@ void PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
                 doc.save_file(buf, "  ");
         }
     }
+
+    return true;
+}
+
+/******************************************************************************/
+bool PlatoAnalyzeInputDeckWriter::checkForNodesetSidesetNameConflicts()
+/******************************************************************************/
+{
+  std::vector<std::string> nodeset_names;
+  std::vector<std::string> sideset_names;
+
+  std::vector<XMLGen::LoadCase> load_cases = mInputData.load_cases;
+
+  for(auto load_case:load_cases)
+  {
+    std::vector<XMLGen::Load> loads = load_case.loads;
+    for(auto load:loads)
+    {
+      if(load.app_type == "nodeset")
+        nodeset_names.push_back(load.app_name);
+      else if(load.app_type == "sideset")
+        sideset_names.push_back(load.app_name);
+      else
+        std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+    }
+  }
+
+  std::vector<XMLGen::BC> BCs = mInputData.bcs;
+  for(auto bc:BCs)
+  {
+    if(bc.app_type == "nodeset")
+      nodeset_names.push_back(bc.app_name);
+    else if(bc.app_type == "sideset")
+      sideset_names.push_back(bc.app_name);
+    else
+      std::cout << "WARNING:: Mesh set type found that is not \"nodeset\" or \"sideset\"" << std::endl;
+  }
+
+  for(auto ns_name:nodeset_names)
+    if(ns_name == "")
+    {
+      std::cout << "ERROR::XMLGenerator Nodeset name is empty" << std::endl;
+      return true;
+    }
+
+  for(auto ss_name:sideset_names)
+    if(ss_name == "")
+    {
+      std::cout << "ERROR::XMLGenerator Sideset name is empty" << std::endl;
+      return true;
+    }
+
+  for(auto ns_name:nodeset_names)
+  {
+    for(auto ss_name:sideset_names)
+    {
+      if(ns_name == ss_name)
+      {
+        std::cout << "ERROR::XMLGenerator Nodeset name is identical to sideset name" << std::endl;
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /******************************************************************************/
@@ -337,7 +407,7 @@ void PlatoAnalyzeInputDeckWriter::buildThermalNBCsForPlatoAnalyze(const XMLGen::
                     tPugiNode2.append_attribute("name") = tBuffer;
                     addNTVParameter(tPugiNode2, "Type", "string", "Uniform");
                     addNTVParameter(tPugiNode2, "Value", "double", cur_load.values[0]);
-                    sprintf(tBuffer, "ss_%s", cur_load.app_id.c_str());
+                    sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 }
             }
@@ -371,7 +441,7 @@ void PlatoAnalyzeInputDeckWriter::buildThermalEBCsForPlatoAnalyze(const XMLGen::
             sprintf(tBuffer, "Fixed Temperature Boundary Condition %d", aBCCounter++);
             tPugiNode2.append_attribute("name") = tBuffer;
             addNTVParameter(tPugiNode2, "Index", "int", aVariableIndex);
-            sprintf(tBuffer, "ns_%s", cur_bc.app_id.c_str());
+            sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
             addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
             if(cur_bc.value.empty())
             {
@@ -415,7 +485,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "X Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "0");
-                sprintf(tBuffer, "ns_%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
                 // Y Displacement
@@ -423,7 +493,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "Y Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "1");
-                sprintf(tBuffer, "ns_%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
                 // Z Displacement
@@ -431,7 +501,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "Z Fixed Displacement Boundary Condition %d", aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", "2");
-                sprintf(tBuffer, "ns_%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 addNTVParameter(tPugiNode2, "Type", "string", "Zero Value");
             }
@@ -460,7 +530,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalEBCsForPlatoAnalyze(const XMLGe
                 sprintf(tBuffer, "%s Fixed Displacement Boundary Condition %d", tBCDOF.c_str(), aBCCounter++);
                 tPugiNode2.append_attribute("name") = tBuffer;
                 addNTVParameter(tPugiNode2, "Index", "int", tBCIndex);
-                sprintf(tBuffer, "ns_%s", cur_bc.app_id.c_str());
+                sprintf(tBuffer, "%s", cur_bc.app_name.c_str());
                 addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 if(cur_bc.value.empty())
                 {
@@ -513,7 +583,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalNBCsForPlatoAnalyze(const XMLGe
                     double z = std::atof(cur_load.values[2].c_str());
                     sprintf(tBuffer, "{%lf,%lf,%lf}", x, y, z);
                     addNTVParameter(tPugiNode2, "Values", "Array(double)", tBuffer);
-                    sprintf(tBuffer, "ss_%s", cur_load.app_id.c_str());
+                    sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 }
             }

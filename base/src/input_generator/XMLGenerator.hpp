@@ -66,9 +66,10 @@ class XMLGenerator
 {
 
 public:
-    XMLGenerator(const std::string &input_filename = "", bool use_launch = false);
+    XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     bool generate();
+
 
 protected:
 
@@ -99,9 +100,24 @@ protected:
     void generateROLInput();
     void generateAMGXInput();
     bool parseLoads(std::istream &fin);
+    bool parseLoadsBlock(std::istream &fin);
+    bool parseLoadLine(std::vector<std::string>& tokens);
+    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     bool parseBCs(std::istream &fin);
+    bool parseBCsBlock(std::istream &fin);
+    bool parseBCLine(std::vector<std::string>& tokens);
+    bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    bool generateDefinesXML(std::ostringstream *aStringStream = NULL);
     bool generateInterfaceXML();
     bool generateLaunchScript();
+    bool generateSummitLaunchScripts();
     bool generatePlatoOperationsXML();
     bool generatePlatoMainInputDeckXML();
     bool generatePerformerOperationsXML();
@@ -191,9 +207,13 @@ protected:
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
     void lookForPlatoAnalyzePerformers();
+    bool checkForNodesetSidesetNameConflicts();
 
     std::string m_InputFilename;
     bool m_UseLaunch;
+    bool m_HasUncertainties;
+    bool m_RequestedVonMisesOutput;
+    XMLGen::Arch m_Arch;
     XMLGen::InputData m_InputData;
     std::string m_filterType_identity_generatorName;
     std::string m_filterType_identity_XMLName;
@@ -203,6 +223,7 @@ protected:
     std::string m_filterType_kernelThenHeaviside_XMLName;
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
+    std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
 private:
     /******************************************************************************//**
      * @brief Initialize Plato problem options
@@ -250,6 +271,20 @@ private:
      * @param [in] aXMLnode data structure with information parsed from XML input file.
      **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
+
+    void putLoadInLoadCase(XMLGen::Load& new_load);
+    bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
+    void createNewLoadCase(XMLGen::Load& new_load);
+    void addVersionEntryToDoc(pugi::xml_document& doc);
+    bool addDefinesToDoc(pugi::xml_document& doc);
+    size_t stringToSizeT(const std::string& aString);
+    size_t getGreatestDivisor(const size_t& aDividend, size_t aDivisor);
+    size_t computeNumberOfNodesNeeded();
+    void generateBatchScript();
+    void generateJSRunScript();
+    void generatePerformerBashScripts();
+    void generateEngineBashScript();
+    void generateAnalyzeBashScripts();
 };
 
 }

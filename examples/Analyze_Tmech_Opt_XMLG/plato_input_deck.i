@@ -7,19 +7,19 @@ begin objective
 end objective
 
 begin boundary conditions
-   fixed displacement nodeset 1 y bc id 1
-   fixed displacement nodeset 1 z bc id 2
-   fixed temperature nodeset 1 bc id 3
-   fixed displacement nodeset 11 x bc id 4
-   fixed displacement nodeset 2 y bc id 5
-   fixed displacement nodeset 2 z bc id 6
-   fixed temperature nodeset 2 bc id 7
-   fixed displacement nodeset 21 x bc id 8
+   fixed displacement nodeset name ns_1 y bc id 1
+   fixed displacement nodeset name ns_1 z bc id 2
+   fixed temperature nodeset name ns_1 bc id 3
+   fixed displacement nodeset name ns_11 x bc id 4
+   fixed displacement nodeset name ns_2 y bc id 5
+   fixed displacement nodeset name ns_2 z bc id 6
+   fixed temperature nodeset name ns_2 bc id 7
+   fixed displacement nodeset name ns_21 x bc id 8
 end boundary conditions
 
 begin loads
-    traction sideset 1 value 0 1e5 0 load id 1
-    heat flux sideset 1 value -0.0e2 load id 2
+    traction sideset name ss_1 value 0 1e5 0 load id 1
+    heat flux sideset name ss_1 value -0.0e2 load id 2
 end loads
       
 begin constraint 

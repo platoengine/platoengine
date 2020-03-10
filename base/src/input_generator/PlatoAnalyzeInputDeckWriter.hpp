@@ -62,7 +62,7 @@ class PlatoAnalyzeInputDeckWriter
 public:
     PlatoAnalyzeInputDeckWriter(const InputData &aInputData);
     ~PlatoAnalyzeInputDeckWriter();
-    void generate(std::ostringstream *aStringStream = NULL);
+    bool generate(std::ostringstream *aStringStream = NULL);
 
 protected:
 
@@ -79,6 +79,7 @@ private:
                                          const char* aVariableIndex);
     void buildMechanicalNBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
     void buildMechanicalEBCsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode, int &aBCCounter);
+    bool checkForNodesetSidesetNameConflicts();
 
     const InputData &mInputData;
 };

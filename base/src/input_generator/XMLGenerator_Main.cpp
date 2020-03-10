@@ -41,14 +41,37 @@
 */
 
 #include "XMLGenerator.hpp"
+#include "XMLGeneratorDataStruct.hpp"
 #include <cstring>
 #include <mpi.h>
 #include <Kokkos_Core.hpp>
 
+bool use_launch = false;
+XMLGen::Arch arch = XMLGen::Arch::CEE;
+int filename_index;
+
 void print_usage()
 {
-    std::cout << "\n\nUsage: XMLGenerator [use_launch] <plato_input_deck_filename>\n\n";
+    std::cout << "\n\nUsage: XMLGenerator [--use_launch] [--arch=<architecture> (cee or summit)] <plato_input_deck_filename>\n\n";
 }
+
+void parse_command_line_arguments(int &argc, char **argv)
+{
+  filename_index = argc - 1;
+  
+  for (int i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i],"--use_launch")==0)
+    {
+      use_launch = true;
+    }
+    else if (strcmp(argv[i],"--arch=summit")==0)
+    {
+      arch = XMLGen::Arch::SUMMIT;
+    }
+  }
+}
+
 
 /******************************************************************************/
 int main(int argc, char *argv[])
@@ -57,6 +80,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     Kokkos::initialize(argc, argv);
 
+
     if(argc == 1 ||
       (argc > 1 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--h"))))
     {
@@ -64,14 +88,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        bool use_launch = false;
-        int filename_index = 1;
-        if(!strcmp(argv[1], "use_launch"))
-        {
-            use_launch = true;
-            filename_index = 2;
-        }
-        XMLGen::XMLGenerator generator(argv[filename_index], use_launch);
+        parse_command_line_arguments(argc,argv);
+        XMLGen::XMLGenerator generator(argv[filename_index], use_launch, arch);
         generator.generate();
     }
 
@@ -79,6 +97,3 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
 }
-
-
-
