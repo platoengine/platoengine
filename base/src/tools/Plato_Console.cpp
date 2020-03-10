@@ -64,6 +64,7 @@ std::streambuf* Console::mStreamBufferCout = nullptr;
 std::fstream*   Console::mConsoleFile = nullptr;
 bool Console::mRedirectable = false;
 bool Console::mVerbose = false;
+bool Console::mEnabled = false;
 int Console::mMyRank = -1;
 int Console::m_stdout_fd = 0;
 int Console::m_stderr_fd = 0;
@@ -92,28 +93,36 @@ Console::Console(const std::string & aPerformerName, int aPerformerID, InputData
   mPerformerID   ( aPerformerID   )
 {
    MPI_Comm_rank(aLocalComm, &mMyRank);
+   mEnabled = Get::Bool(aInputData, "Enabled", false);
    mVerbose = Get::Bool(aInputData, "Verbose", false);
 
-   if( mStreamBufferCout == nullptr )
+   if( mEnabled )
    {
-      mStreamBufferCout = std::cout.rdbuf();
+       if( mStreamBufferCout == nullptr )
+       {
+           mStreamBufferCout = std::cout.rdbuf();
+       }
+
+       if( mConsoleFile == nullptr )
+       {
+           std::stringstream tNameStream;
+           tNameStream << mPerformerName << "_" << mPerformerID;
+
+           mConsoleFile = new std::fstream;
+           mConsoleFile->open(tNameStream.str(), std::ios::out);
+           redirect_cout();
+
+           m_redir_fd = open(tNameStream.str().c_str(), O_WRONLY);
+           m_stdout_fd = dup(STDOUT_FILENO);
+           m_stderr_fd = dup(STDERR_FILENO);
+           redirect_printf();
+
+           mRedirectable = true;
+       }
    }
-
-   if( mConsoleFile == nullptr )
+   else
    {
-      std::stringstream tNameStream;
-      tNameStream << mPerformerName << "_" << mPerformerID;
-
-      mConsoleFile = new std::fstream;
-      mConsoleFile->open(tNameStream.str(), std::ios::out);
-      redirect_cout();
-
-      m_redir_fd = open(tNameStream.str().c_str(), O_WRONLY);
-      m_stdout_fd = dup(STDOUT_FILENO);
-      m_stderr_fd = dup(STDERR_FILENO);
-      redirect_printf();
-
-      mRedirectable = true;
+      mRedirectable = false;
    }
 }
 

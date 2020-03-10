@@ -76,6 +76,7 @@ private:
     int mPerformerID;
 
     static int mMyRank;
+    static bool mEnabled;
     static bool mVerbose;
     static bool mRedirectable;
     static int m_stdout_fd;
