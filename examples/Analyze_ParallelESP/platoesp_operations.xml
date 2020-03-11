@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Timers>
+  <time>true</time>
+</Timers>
+<Operation>
+  <Function>ComputeParameterSensitivity</Function>
+  <Name>Compute Parameter Sensitivity on Change</Name>
+  <OnChange>true</OnChange>
+  <Input>
+    <ArgumentName>Parameters</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Parameter Sensitivity</ArgumentName>
+  </Output>
+  <Parameter>
+    <ArgumentName>Parameter Index</ArgumentName>
+    <InitialValue>0</InitialValue>
+  </Parameter>
+</Operation>

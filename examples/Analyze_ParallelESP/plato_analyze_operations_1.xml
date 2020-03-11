@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+
+<include filename="defines.xml"/>
+
+<Operation>
+  <Name>Compute Constraint Sensitivity</Name>
+  <Function>MapConstraintGradientX</Function>
+  <For var="I" in="Parameters">
+  <Input>
+    <ArgumentName>Parameter Sensitivity {I}</ArgumentName>
+  </Input>
+  </For>
+  <Output>
+    <ArgumentName>Constraint Sensitivity</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Sensitivity</Name>
+  <Function>MapObjectiveGradientX</Function>
+  <For var="I" in="Parameters">
+  <Input>
+    <ArgumentName>Parameter Sensitivity {I}</ArgumentName>
+  </Input>
+  </For>
+  <Output>
+    <ArgumentName>Objective Sensitivity</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Value</Name>
+  <Function>ComputeObjectiveValue</Function>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint Gradient</Name>
+  <Function>ComputeConstraintX</Function>
+  <!-- no output needed -->
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Gradient</Name>
+  <Function>ComputeObjectiveX</Function>
+  <!-- no output needed -->
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint Value</Name>
+  <Function>ComputeConstraintValue</Function>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+<!--
+<Operation>
+  <Name>Compute Constraint Gradient</Name>
+  <Function>ComputeConstraintGradientP</Function>
+</Operation>
+-->
+
+<Operation>
+  <Name>Reinitialize on Change</Name>
+  <Function>Reinitialize</Function>
+  <OnChange>true</OnChange>
+  <Input>
+    <ArgumentName>Parameters</ArgumentName>
+    <SharedDataName>Design Parameters</SharedDataName>
+  </Input>
+</Operation>
+
+<!--
+<ESP>
+  <Name>Design Geometry</Name>
+  <ModelFileName>rocker.csm</ModelFileName>
+  <TessFileName>rocker.eto</TessFileName>
+</ESP>
+-->
