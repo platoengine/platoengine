@@ -9021,12 +9021,12 @@ bool XMLGenerator::generateInterfaceXML()
     {
       if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
       {
-        pugi::xml_node for_node = doc.append_child("For");
+        createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
+        sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
+        pugi::xml_node for_node = sd_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
-        createSingleUserNodalSharedData(for_node, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
-        sd_node = createSingleUserNodalSharedData(for_node, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
-            addChild(sd_node, "UserName", "plato_analyze_{performerIndex}");
+        addChild(for_node, "UserName", "plato_analyze_{performerIndex}");
       }
       else
       {
@@ -9061,16 +9061,17 @@ bool XMLGenerator::generateInterfaceXML()
     {
       if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
       {
-        pugi::xml_node for_node = doc.append_child("For");
+        sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
+        pugi::xml_node for_node = sd_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
-        sd_node = createSingleUserNodalSharedData(for_node, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
-        addChild(sd_node, "UserName", "plato_analyze_{performerIndex}");
-        for_node = doc.append_child("For");
+        addChild(for_node, "UserName", "plato_analyze_{performerIndex}");
+
+        sd_node = createSingleUserNodalSharedData(doc, "Topology", "Scalar", "PlatoMain", "PlatoMain");
+        for_node = sd_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
-        sd_node = createSingleUserNodalSharedData(for_node, "Topology", "Scalar", "PlatoMain", "PlatoMain");
-        addChild(sd_node, "UserName", "plato_analyze_{performerIndex}");
+        addChild(for_node, "UserName", "plato_analyze_{performerIndex}");
       }
       else
       {
@@ -9669,19 +9670,36 @@ void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &do
         addChild(output_node, "ArgumentName", "Filtered Field");
         addChild(output_node, "SharedDataName", "Topology");
 
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
         {
+            for_node = stage_node.append_child("For");
+            for_node.append_attribute("var") = "performerIndex";
+            for_node.append_attribute("in") = "Performers";
+            op_node = for_node.append_child("Operation");
+            addChild(op_node, "Name", "Compute Objective Value");
+            addChild(op_node, "PerformerName", "plato_analyze_{performerIndex}");
+            input_node = op_node.append_child("Input");
+            addChild(input_node, "ArgumentName", "Topology");
+            addChild(input_node, "SharedDataName", "Topology");
+            output_node = op_node.append_child("Output");
+            addChild(output_node, "ArgumentName", "Objective Value");
+            addChild(output_node, "SharedDataName", "Initial Objective Value {performerIndex}");
+        }
+        else
+        {
+          for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+          {
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             op_node = stage_node.append_child("Operation");
             if(cur_obj.code_name == "plato_analyze")
             {
-                addChild(op_node, "Name", "Compute Objective Value");
-                addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "Name", "Compute Objective Value");
+              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
             }
             else
             {
-                addChild(op_node, "Name", "Compute Objective");
-                addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "Name", "Compute Objective");
+              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
             }
 
             input_node = op_node.append_child("Input");
@@ -9699,6 +9717,7 @@ void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &do
             else
               sprintf(tBuffer, "Initial Internal Energy %d", (int)(i+1));
             addChild(output_node, "SharedDataName", tBuffer);
+          }
         }
     }
 
