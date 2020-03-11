@@ -88,6 +88,11 @@ protected:
                                                      const std::string &aType,
                                                      const std::string &aOwner,
                                                      const std::string &aUser);
+    pugi::xml_node createSingleUserElementSharedData(pugi::xml_node &aNode,
+                                                     const std::string &aName,
+                                                     const std::string &aType,
+                                                     const std::string &aOwner,
+                                                     const std::string &aUser);
     pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_document &aDoc,
                                                     const std::string &aName,
                                                     const std::string &aType,
