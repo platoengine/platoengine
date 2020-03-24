@@ -279,6 +279,7 @@ struct UncertaintyMetaData
 {
   size_t numSamples;
   size_t numVariables;
+  size_t numPeformers;
   std::vector<size_t> randomVariableIndices;
   std::vector<size_t> deterministicVariableIndices;
 };

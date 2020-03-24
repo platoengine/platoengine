@@ -228,6 +228,13 @@ bool XMLGenerator::generateUncertaintyMetaData()
   if(!getIndicesOfDeterministicAndRandomVariables())
     return false;
   m_UncertaintyMetaData.numSamples = m_InputData.load_cases.size();
+  m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].atmost_total_num_processors.c_str());
+  if(m_UncertaintyMetaData.numSamples % m_UncertaintyMetaData.numPeformers != 0)
+  {
+    std::cout << "Number of samples must divide evenly into number of processors" << std::endl;
+    return false;
+  }
+    
   return true;
 }
 
@@ -1136,7 +1143,7 @@ bool XMLGenerator::generateLaunchScript()
       if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
       {
 
-          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), "1", envString.c_str(),separationString.c_str());
+          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), std::to_string(m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_analyze_path.length() != 0)
@@ -1225,18 +1232,34 @@ void XMLGenerator::generatePerformerBashScripts()
 void XMLGenerator::generateAnalyzeBashScripts()
 /******************************************************************************/
 {
-  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
   {
     std::ofstream analyzeBash;
-    std::string filename = "analyze" + std::to_string(i) + ".sh";
+    std::string filename = "analyze.sh";
     analyzeBash.open(filename);
-    analyzeBash << "export PLATO_PERFORMER_ID=" << i << "\n";
+    analyzeBash << "export PLATO_PERFORMER_ID=1\n";
     analyzeBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
-    analyzeBash << "export PLATO_APP_FILE=plato_analyze_operations_" << i << ".xml\n";
+    analyzeBash << "export PLATO_APP_FILE=plato_analyze_operations.xml\n";
     analyzeBash << "\n";
-    analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck_" << i << ".xml\n";
+    analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck.xml\n";
 
     analyzeBash.close();
+  }
+  else
+  {
+    for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+    {
+      std::ofstream analyzeBash;
+      std::string filename = "analyze" + std::to_string(i) + ".sh";
+      analyzeBash.open(filename);
+      analyzeBash << "export PLATO_PERFORMER_ID=" << i << "\n";
+      analyzeBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
+      analyzeBash << "export PLATO_APP_FILE=plato_analyze_operations_" << i << ".xml\n";
+      analyzeBash << "\n";
+      analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck_" << i << ".xml\n";
+
+      analyzeBash.close();
+    }
   }
 }
 
@@ -1261,9 +1284,16 @@ void XMLGenerator::generateJSRunScript()
   std::ofstream jsrun;
   jsrun.open("jsrun.source");
   jsrun << "1 : eng : bash engine.sh\n";
-  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
   {
-    jsrun << "1 : per" << i << " : bash analyze" << i << ".sh\n";
+    jsrun << std::to_string(m_UncertaintyMetaData.numPeformers) << " : per : bash analyze.sh\n";
+  }
+  else
+  {
+    for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+    {
+      jsrun << "1 : per" << i << " : bash analyze" << i << ".sh\n";
+    }
   }
   jsrun.close();
 }
@@ -1289,9 +1319,16 @@ void XMLGenerator::generateBatchScript()
   batchFile << "date\n";
   batchFile << "jsrun -A eng -n1 -a1 -c1 -g0\n";
 
-  for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
   {
-    batchFile << "jsrun -A per" << i << " -n1 -a1 -c1 -g1\n";
+    batchFile << "jsrun -A per -n" << std::to_string(m_UncertaintyMetaData.numPeformers) << " -a1 -c1 -g1\n";
+  }
+  else
+  {
+    for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
+    {
+      batchFile << "jsrun -A per" << i << " -n1 -a1 -c1 -g1\n";
+    }
   }
 
   batchFile << "jsrun -f jsrun.source\n";
@@ -1304,14 +1341,17 @@ void XMLGenerator::generateBatchScript()
 size_t XMLGenerator::computeNumberOfNodesNeeded()
 /******************************************************************************/
 {
-  size_t tNumGPUsNeeded = m_InputData.objectives.size();
+  size_t tNumGPUsNeeded;
+  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+    tNumGPUsNeeded = m_UncertaintyMetaData.numPeformers;
+  else
+    tNumGPUsNeeded = m_InputData.objectives.size();
   size_t tNumGPUsPerNode = 6;
   size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
   if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
     ++tNumNodesNeeded;
   return tNumNodesNeeded;
 }
-
 
 /******************************************************************************/
 bool XMLGenerator::generateSalinasInputDecks(std::ostringstream *aStringStream)
@@ -6466,7 +6506,7 @@ bool XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
       for_node.append_attribute("var") = "sampleIndex";
       for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
+      addChild(tmp_node2, "Value", "1");
     }
     else
     {
@@ -6563,7 +6603,7 @@ bool XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
       for_node.append_attribute("var") = "sampleIndex";
       for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
+      addChild(tmp_node2, "Value", "1");
     }
     else
     {
@@ -6632,7 +6672,7 @@ bool XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
       for_node.append_attribute("var") = "sampleIndex";
       for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
+      addChild(tmp_node2, "Value", "1");
     }
     else
     {
@@ -6700,7 +6740,7 @@ bool XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
       for_node.append_attribute("var") = "sampleIndex";
       for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
+      addChild(tmp_node2, "Value", "1");
     }
     else
     {
@@ -8740,7 +8780,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
   tTmpNode = doc.append_child("Define");
   tTmpNode.append_attribute("name") = "NumPerformers";
   tTmpNode.append_attribute("type") = "int";
-  size_t tNumPerformers = 1;
+  size_t tNumPerformers = m_UncertaintyMetaData.numPeformers;
   size_t tNumSamples = stringToSizeT(tNumSamplesString);
 
   if(tNumPerformers == 0)
