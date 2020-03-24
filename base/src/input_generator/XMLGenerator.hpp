@@ -150,12 +150,12 @@ protected:
     bool generateAlbanyInputDecks();
     bool runSROMForUncertainVariables();
     bool generateUncertaintyMetaData();
+    bool expandUncertaintiesForGenerate();
     bool getSizeOfLoadCases();
     bool getIndicesOfDeterministicAndRandomVariables();
     bool verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases();
     bool verifyEachLoadHaSSameAppNameAcrossAllLoadCases();
     bool verifyEachLoadIsATractionLoad();
-    bool expandUncertaintiesForGenerate();
     bool distributeObjectivesForGenerate();
     bool parseFile();
     bool parseMesh(std::istream &fin);

@@ -275,18 +275,18 @@ struct InputData
     bool mPlatoAnalyzePerformerExists;
 };
 
+struct UncertaintyMetaData
+{
+  size_t numSamples;
+  size_t numVariables;
+  std::vector<size_t> randomVariableIndices;
+  std::vector<size_t> deterministicVariableIndices;
+};
+
 enum struct Arch
 {
   CEE,
   SUMMIT
-};
-
-struct UncertaintyMetaData
-{
-  size_t numVariables;
-  size_t numSamples;
-  std::vector<size_t> randomVariableIndices;
-  std::vector<size_t> deterministicVariableIndices;
 };
 
 }

@@ -5889,307 +5889,268 @@ bool XMLGenerator::generateAlbanyOperationsXML()
 bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
   /******************************************************************************/
 {
-  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+  int num_plato_analyze_objs = 0;
+  if(m_InputData.optimization_type == "topology")
   {
-    if(!generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow())
-      return false;
-  }
-  else
-  {
-    int num_plato_analyze_objs = 0;
-    if(m_InputData.optimization_type == "topology")
-        {
-          for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-          {
-            if(m_InputData.objectives[i].code_name == "plato_analyze")
-            {
-              Objective tCurObjective = m_InputData.objectives[i];
-              num_plato_analyze_objs++;
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
+    {
+      pugi::xml_document doc;
+      pugi::xml_node tmp_node, tmp_node1;
 
-              pugi::xml_document doc;
-              pugi::xml_node tmp_node, tmp_node1;
+      // Version entry
+      tmp_node = doc.append_child(pugi::node_declaration);
+      tmp_node.set_name("xml");
+      pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+      tmp_att.set_value("1.0");
 
-              // Version entry
-              tmp_node = doc.append_child(pugi::node_declaration);
-              tmp_node.set_name("xml");
-              pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-              tmp_att.set_value("1.0");
+      // ComputeSolution
+      tmp_node = doc.append_child("Operation");
+      addChild(tmp_node, "Function", "ComputeSolution");
+      addChild(tmp_node, "Name", "Compute Displacement Solution");
+      tmp_node1 = tmp_node.append_child("Input");
+      addChild(tmp_node1, "ArgumentName", "Topology");
 
-              // ComputeSolution
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeSolution");
-              addChild(tmp_node, "Name", "Compute Displacement Solution");
-              tmp_node1 = tmp_node.append_child("Input");
-              addChild(tmp_node1, "ArgumentName", "Topology");
+      // ComputeObjectiveValue
+      tmp_node = doc.append_child("Operation");
+      addChild(tmp_node, "Function", "ComputeObjectiveValue");
+      addChild(tmp_node, "Name", "Compute Objective Value");
+      tmp_node1 = tmp_node.append_child("Input");
+      addChild(tmp_node1, "ArgumentName", "Topology");
+      tmp_node1 = tmp_node.append_child("Output");
+      addChild(tmp_node1, "ArgumentName", "Objective Value");
 
-              // ComputeObjectiveValue
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeObjectiveValue");
-              addChild(tmp_node, "Name", "Compute Objective Value");
-              tmp_node1 = tmp_node.append_child("Input");
-              addChild(tmp_node1, "ArgumentName", "Topology");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Value");
+      for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
+      {
+        tmp_node1 = tmp_node.append_child("Parameter");
+        std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+        tmp_node1 = tmp_node.append_child("Parameter");
+        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+        tmp_node1 = tmp_node.append_child("Parameter");
+        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+      }
 
-              // ComputeObjectiveGradient
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeObjectiveGradient");
-              addChild(tmp_node, "Name", "Compute Objective Gradient");
-              tmp_node1 = tmp_node.append_child("Input");
-              addChild(tmp_node1, "ArgumentName", "Topology");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+      // ComputeObjectiveGradient
+      tmp_node = doc.append_child("Operation");
+      addChild(tmp_node, "Function", "ComputeObjective");
+      addChild(tmp_node, "Name", "Compute Objective Gradient");
+      tmp_node1 = tmp_node.append_child("Input");
+      addChild(tmp_node1, "ArgumentName", "Topology");
+      tmp_node1 = tmp_node.append_child("Output");
+      addChild(tmp_node1, "ArgumentName", "Objective Gradient");
 
-              // WriteOutput
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "WriteOutput");
-              addChild(tmp_node, "Name", "Write Output");
-              for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
-              {
-                tmp_node1 = tmp_node.append_child("Output");
-                if(tCurObjective.output_for_plotting[j] == "dispx")
-                  addChild(tmp_node1, "ArgumentName", "Solution X");
-                else if(tCurObjective.output_for_plotting[j] == "dispy")
-                  addChild(tmp_node1, "ArgumentName", "Solution Y");
-                else if(tCurObjective.output_for_plotting[j] == "dispz")
-                  addChild(tmp_node1, "ArgumentName", "Solution Z");
-                else if(tCurObjective.output_for_plotting[j] == "temperature")
-                  addChild(tmp_node1, "ArgumentName", "Solution");
-              }
+      for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
+      {
+        tmp_node1 = tmp_node.append_child("Parameter");
+        std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+        tmp_node1 = tmp_node.append_child("Parameter");
+        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+        tmp_node1 = tmp_node.append_child("Parameter");
+        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+        addChild(tmp_node1, "ArgumentName", tLoadName);
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
+        addChild(tmp_node1, "Target", tPathToLoadInInputFile);
+        addChild(tmp_node1, "InitialValue", "0.0");
+      }
 
-              char buf[200];
-              sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
-              // Write the file to disk
-              doc.save_file(buf, "  ");
-            }
-          }
-        }
-        else if(m_InputData.optimization_type == "shape")
-        {
-          for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-          {
-            if(m_InputData.objectives[i].code_name == "plato_analyze")
-            {
-              Objective tCurObjective = m_InputData.objectives[i];
-              num_plato_analyze_objs++;
 
-              pugi::xml_document doc;
-              pugi::xml_node tmp_node, tmp_node1;
+      // WriteOutput
+      tmp_node = doc.append_child("Operation");
+      addChild(tmp_node, "Function", "WriteOutput");
+      addChild(tmp_node, "Name", "Write Output");
 
-              // Version entry
-              tmp_node = doc.append_child(pugi::node_declaration);
-              tmp_node.set_name("xml");
-              pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-              tmp_att.set_value("1.0");
-
-              // ComputeSolution
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeSolution");
-              addChild(tmp_node, "Name", "Compute Displacement Solution");
-
-              // ComputeObjectiveValue
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeObjectiveValue");
-              addChild(tmp_node, "Name", "Compute Objective Value");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Value");
-
-              // ComputeObjectiveGradient
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeObjectiveP");
-              addChild(tmp_node, "Name", "Compute Objective Gradient");
-              addChild(tmp_node, "ESPName", "Design Geometry");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Gradient");
-
-              // ComputeObjective
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeObjectiveP");
-              addChild(tmp_node, "Name", "Compute Objective");
-              addChild(tmp_node, "ESPName", "Design Geometry");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Value");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Objective Gradient");
-
-              // ComputeConstraintValue
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeConstraintValue");
-              addChild(tmp_node, "Name", "Compute Constraint Value");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Constraint Value");
-
-              // ComputeConstraintGradient
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeConstraintGradientP");
-              addChild(tmp_node, "Name", "Compute Constraint Gradient");
-              addChild(tmp_node, "ESPName", "Design Geometry");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
-
-              // ComputeConstraint
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ComputeConstraintP");
-              addChild(tmp_node, "Name", "Compute Constraint");
-              addChild(tmp_node, "ESPName", "Design Geometry");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Constraint Value");
-              tmp_node1 = tmp_node.append_child("Output");
-              addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
-
-              // Reinitialize on Change Operation
-              tmp_node = doc.append_child("Operation");
-              addChild(tmp_node, "Function", "ReinitializeESP");
-              addChild(tmp_node, "Name", "Reinitialize on Change");
-              addChild(tmp_node, "OnChange", "true");
-              tmp_node1 = tmp_node.append_child("Input");
-              addChild(tmp_node1, "ArgumentName", "Parameters");
-              addChild(tmp_node, "ESPName", "Design Geometry");
-              tmp_node1 = tmp_node.append_child("Parameter");
-              addChild(tmp_node1, "ArgumentName", "Input Mesh");
-              addChild(tmp_node1, "Target", "Input Mesh");
-              addChild(tmp_node1, "InitialValue", m_InputData.csm_exodus_filename);
-
-              tmp_node = doc.append_child("ESP");
-              addChild(tmp_node, "Name", "Design Geometry");
-              addChild(tmp_node, "ModelFileName", m_InputData.csm_filename);
-              addChild(tmp_node, "TessFileName", m_InputData.csm_tesselation_filename);
-
-              char buf[200];
-              sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
-              // Write the file to disk
-              doc.save_file(buf, "  ");
-            }
-          }
-        }
+      char buf[200];
+      sprintf(buf, "plato_analyze_operations.xml");
+      // Write the file to disk
+      doc.save_file(buf, "  ");
     }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
+        if(m_InputData.objectives[i].code_name == "plato_analyze")
+        {
+          Objective tCurObjective = m_InputData.objectives[i];
+          num_plato_analyze_objs++;
+
+          pugi::xml_document doc;
+          pugi::xml_node tmp_node, tmp_node1;
+
+          // Version entry
+          tmp_node = doc.append_child(pugi::node_declaration);
+          tmp_node.set_name("xml");
+          pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+          tmp_att.set_value("1.0");
+
+          // ComputeSolution
+          tmp_node = doc.append_child("Operation");
+          addChild(tmp_node, "Function", "ComputeSolution");
+          addChild(tmp_node, "Name", "Compute Displacement Solution");
+          tmp_node1 = tmp_node.append_child("Input");
+          addChild(tmp_node1, "ArgumentName", "Topology");
+
+          // ComputeObjectiveValue
+          tmp_node = doc.append_child("Operation");
+          addChild(tmp_node, "Function", "ComputeObjectiveValue");
+          addChild(tmp_node, "Name", "Compute Objective Value");
+          tmp_node1 = tmp_node.append_child("Input");
+          addChild(tmp_node1, "ArgumentName", "Topology");
+          tmp_node1 = tmp_node.append_child("Output");
+          addChild(tmp_node1, "ArgumentName", "Objective Value");
+
+          // ComputeObjectiveGradient
+          tmp_node = doc.append_child("Operation");
+          addChild(tmp_node, "Function", "ComputeObjectiveGradient");
+          addChild(tmp_node, "Name", "Compute Objective Gradient");
+          tmp_node1 = tmp_node.append_child("Input");
+          addChild(tmp_node1, "ArgumentName", "Topology");
+          tmp_node1 = tmp_node.append_child("Output");
+          addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+
+          // WriteOutput
+          tmp_node = doc.append_child("Operation");
+          addChild(tmp_node, "Function", "WriteOutput");
+          addChild(tmp_node, "Name", "Write Output");
+          for(size_t j=0; j<tCurObjective.output_for_plotting.size(); ++j)
+          {
+            tmp_node1 = tmp_node.append_child("Output");
+            if(tCurObjective.output_for_plotting[j] == "dispx")
+              addChild(tmp_node1, "ArgumentName", "Solution X");
+            else if(tCurObjective.output_for_plotting[j] == "dispy")
+              addChild(tmp_node1, "ArgumentName", "Solution Y");
+            else if(tCurObjective.output_for_plotting[j] == "dispz")
+              addChild(tmp_node1, "ArgumentName", "Solution Z");
+            else if(tCurObjective.output_for_plotting[j] == "temperature")
+              addChild(tmp_node1, "ArgumentName", "Solution");
+          }
+
+          char buf[200];
+          sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
+          // Write the file to disk
+          doc.save_file(buf, "  ");
+        }
+      }
+    }
+  }
+  else if(m_InputData.optimization_type == "shape")
+  {
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+      if(m_InputData.objectives[i].code_name == "plato_analyze")
+      {
+        Objective tCurObjective = m_InputData.objectives[i];
+        num_plato_analyze_objs++;
+
+        pugi::xml_document doc;
+        pugi::xml_node tmp_node, tmp_node1;
+
+        // Version entry
+        tmp_node = doc.append_child(pugi::node_declaration);
+        tmp_node.set_name("xml");
+        pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+        tmp_att.set_value("1.0");
+
+        // ComputeSolution
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeSolution");
+        addChild(tmp_node, "Name", "Compute Displacement Solution");
+
+        // ComputeObjectiveValue
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeObjectiveValue");
+        addChild(tmp_node, "Name", "Compute Objective Value");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Objective Value");
+
+        // ComputeObjectiveGradient
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeObjectiveP");
+        addChild(tmp_node, "Name", "Compute Objective Gradient");
+        addChild(tmp_node, "ESPName", "Design Geometry");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+
+        // ComputeObjective
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeObjectiveP");
+        addChild(tmp_node, "Name", "Compute Objective");
+        addChild(tmp_node, "ESPName", "Design Geometry");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Objective Value");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Objective Gradient");
+
+        // ComputeConstraintValue
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeConstraintValue");
+        addChild(tmp_node, "Name", "Compute Constraint Value");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Constraint Value");
+
+        // ComputeConstraintGradient
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeConstraintGradientP");
+        addChild(tmp_node, "Name", "Compute Constraint Gradient");
+        addChild(tmp_node, "ESPName", "Design Geometry");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
+
+        // ComputeConstraint
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ComputeConstraintP");
+        addChild(tmp_node, "Name", "Compute Constraint");
+        addChild(tmp_node, "ESPName", "Design Geometry");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Constraint Value");
+        tmp_node1 = tmp_node.append_child("Output");
+        addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
+
+        // Reinitialize on Change Operation
+        tmp_node = doc.append_child("Operation");
+        addChild(tmp_node, "Function", "ReinitializeESP");
+        addChild(tmp_node, "Name", "Reinitialize on Change");
+        addChild(tmp_node, "OnChange", "true");
+        tmp_node1 = tmp_node.append_child("Input");
+        addChild(tmp_node1, "ArgumentName", "Parameters");
+        addChild(tmp_node, "ESPName", "Design Geometry");
+        tmp_node1 = tmp_node.append_child("Parameter");
+        addChild(tmp_node1, "ArgumentName", "Input Mesh");
+        addChild(tmp_node1, "Target", "Input Mesh");
+        addChild(tmp_node1, "InitialValue", m_InputData.csm_exodus_filename);
+
+        tmp_node = doc.append_child("ESP");
+        addChild(tmp_node, "Name", "Design Geometry");
+        addChild(tmp_node, "ModelFileName", m_InputData.csm_filename);
+        addChild(tmp_node, "TessFileName", m_InputData.csm_tesselation_filename);
+
+        char buf[200];
+        sprintf(buf, "plato_analyze_operations_%s.xml", m_InputData.objectives[i].name.c_str());
+        // Write the file to disk
+        doc.save_file(buf, "  ");
+      }
+    }
+  }
 
     return true;
-}
-
-/******************************************************************************/
-bool XMLGenerator::generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow()
-/******************************************************************************/
-{
-  if(m_InputData.optimization_type != "topology")
-  {
-    std::cout << "ERROR: uncertainty workflow currently only supported for topology optimization" << std::endl;
-    return false;
-  }
-
-  pugi::xml_document doc;
-  pugi::xml_node tmp_node, tmp_node1;
-
-  // Version entry
-  tmp_node = doc.append_child(pugi::node_declaration);
-  tmp_node.set_name("xml");
-  pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-  tmp_att.set_value("1.0");
-
-  // ComputeConstraint
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeConstraint");
-  addChild(tmp_node, "Name", "Compute Constraint");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Constraint Value");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Constraint Gradient");
-
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeConstraintValue");
-  addChild(tmp_node, "Name", "Compute Constraint Value");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Constraint Value");
-
-  // ComputeSolution
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeSolution");
-  addChild(tmp_node, "Name", "Compute Displacement Solution");
-  tmp_node1 = tmp_node.append_child("Input");
-  addChild(tmp_node1, "ArgumentName", "Topology");
-
-  // ComputeObjectiveValue
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeObjective");
-  addChild(tmp_node, "Name", "Compute Objective Value");
-  tmp_node1 = tmp_node.append_child("Input");
-  addChild(tmp_node1, "ArgumentName", "Topology");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Objective Value");
-
-  for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
-  {
-    tmp_node1 = tmp_node.append_child("Parameter");
-    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-    tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-    tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-  }
-
-  // ComputeObjectiveGradient
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeObjective");
-  addChild(tmp_node, "Name", "Compute Objective Gradient");
-  tmp_node1 = tmp_node.append_child("Input");
-  addChild(tmp_node1, "ArgumentName", "Topology");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Objective Gradient");
-  for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
-  {
-    tmp_node1 = tmp_node.append_child("Parameter");
-    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-    tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-    tmp_node1 = tmp_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
-    addChild(tmp_node1, "ArgumentName", tLoadName);
-    tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
-    addChild(tmp_node1, "Target", tPathToLoadInInputFile);
-    addChild(tmp_node1, "InitialValue", "0.0");
-  }
-
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "ComputeObjective");
-  addChild(tmp_node, "Name", "Compute Objective");
-  tmp_node1 = tmp_node.append_child("Input");
-  addChild(tmp_node1, "ArgumentName", "Topology");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Objective Value");
-  tmp_node1 = tmp_node.append_child("Output");
-  addChild(tmp_node1, "ArgumentName", "Objective Gradient");
-
-  // WriteOutput
-  tmp_node = doc.append_child("Operation");
-  addChild(tmp_node, "Function", "WriteOutput");
-  addChild(tmp_node, "Name", "Write Output");
-
-  char buf[200];
-  sprintf(buf, "plato_analyze_operations.xml");
-  // Write the file to disk
-  doc.save_file(buf, "  ");
-
-  return true;
 }
 
 /******************************************************************************/
@@ -6355,18 +6316,33 @@ void XMLGenerator::addStochasticObjectiveValueOperation(pugi::xml_document &aDoc
     addChild(tmp_node, "Function", "MeanPlusStdDev");
     addChild(tmp_node, "Name", "Stochastic Objective Value");
     addChild(tmp_node, "Layout", "Scalar");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node.append_child("For");
+      for_node.append_attribute("var") = "performerIndex";
+      for_node.append_attribute("in") = "Performers";
+      for_node = for_node.append_child("For");
+      for_node.append_attribute("var") = "PerformerSampleIndex";
+      for_node.append_attribute("in") = "PerformerSamples";
+      pugi::xml_node input_node = for_node.append_child("Input");
+      addChild(input_node, "ArgumentName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+      addChild(input_node, "Probability", "{Probabilities[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         tmp_node1 = tmp_node.append_child("Input");
         std::string tTmpString = "";
         if(cur_obj.code_name == "plato_analyze")
-            tTmpString += "Objective Value ";
+          tTmpString += "Objective Value ";
         else
-            tTmpString += "Internal Energy ";
+          tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
         addChild(tmp_node1, "ArgumentName", tTmpString);
         addChild(tmp_node1, "Probability", cur_obj.load_case_weights[0]);
+      }
     }
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "Statistic", "mean");
@@ -6395,12 +6371,27 @@ void XMLGenerator::addVonMisesStatisticsOperation(pugi::xml_document &aDoc)
     addChild(tmp_node, "Function", "MeanPlusStdDev");
     addChild(tmp_node, "Name", "VonMises Statistics");
     addChild(tmp_node, "Layout", "Element Field");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node.append_child("For");
+      for_node.append_attribute("var") = "performerIndex";
+      for_node.append_attribute("in") = "Performers";
+      for_node = for_node.append_child("For");
+      for_node.append_attribute("var") = "PerformerSampleIndex";
+      for_node.append_attribute("in") = "PerformerSamples";
+      pugi::xml_node input_node = for_node.append_child("Input");
+      addChild(input_node, "ArgumentName", "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises");
+      addChild(input_node, "Probability", "{Probabilities[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         tmp_node1 = tmp_node.append_child("Input");
         addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
         addChild(tmp_node1, "Probability", cur_obj.load_case_weights[0]);
+      }
     }
     tmp_node1 = tmp_node.append_child("Output");
     addChild(tmp_node1, "Statistic", "mean");
@@ -6572,7 +6563,7 @@ bool XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
       for_node.append_attribute("var") = "sampleIndex";
       for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "value", "{Probabilities[sampleIndex]}");
+      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
     }
     else
     {
@@ -6637,11 +6628,11 @@ bool XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
     tmp_node1 = tmp_node.append_child("Weighting");
     if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-      pugi::xml_node for_node = tmp_node1.append_child("for");
-      for_node.append_attribute("var") = "sampleindex";
-      for_node.append_attribute("in") = "samples";
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "value", "{probabilities[sampleindex]}");
+      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
     }
     else
     {
@@ -6705,11 +6696,11 @@ bool XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
     tmp_node1 = tmp_node.append_child("Weighting");
     if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-      pugi::xml_node for_node = tmp_node1.append_child("for");
-      for_node.append_attribute("var") = "sampleindex";
-      for_node.append_attribute("in") = "samples";
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
       tmp_node2 = for_node.append_child("Weight"); 
-      addChild(tmp_node2, "value", "{probabilities[sampleindex]}");
+      addChild(tmp_node2, "Value", "{Probabilities[sampleIndex]}");
     }
     else
     {
@@ -7098,7 +7089,13 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
 
     if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
-      ;
+      pugi::xml_node for_node = tmp_node.append_child("For");
+      for_node.append_attribute("var") = "sampleIndex";
+      for_node.append_attribute("in") = "Samples";
+
+      tmp_node1 = for_node.append_child("Input");
+      addChild(tmp_node1, "ArgumentName", "plato_analyze_{sampleIndex}_vonmises");
+      addChild(tmp_node1, "Layout", "Element Field");
     }
     else
     {
@@ -7141,7 +7138,7 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
       }
     }
 
-    if(aHasUncertainties && aRequestedVonMises && !m_UseNewPlatoAnalyzeUncertaintyWorkflow)
+    if(aHasUncertainties && aRequestedVonMises)
     {
         tmp_node1 = tmp_node.append_child("Input");
         addChild(tmp_node1, "ArgumentName", "VonMises Mean");
@@ -7169,7 +7166,7 @@ void XMLGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc,
     pugi::xml_node tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Format", "Exodus");
 
-    if(aHasUncertainties && !m_UseNewPlatoAnalyzeUncertaintyWorkflow)
+    if(aHasUncertainties)
     {
         addStochasticObjectiveValueOperation(aDoc);
         addStochasticObjectiveGradientOperation(aDoc);
@@ -7231,18 +7228,33 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
 
     tmp_node1 = tmp_node.append_child("CriterionValue");
     addChild(tmp_node1, "Layout", "Global");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "performerIndex";
+      for_node.append_attribute("in") = "Performers";
+      for_node = for_node.append_child("For");
+      for_node.append_attribute("var") = "PerformerSampleIndex";
+      for_node.append_attribute("in") = "PerformerSamples";
+      pugi::xml_node input_node = for_node.append_child("Input");
+      addChild(input_node, "ArgumentName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+      addChild(input_node, "Probability", "{Probabilities[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         pugi::xml_node input_node = tmp_node1.append_child("Input");
         std::string tTmpString = "";
         if(cur_obj.code_name == "plato_analyze")
-            tTmpString += "Objective Value ";
+          tTmpString += "Objective Value ";
         else
-            tTmpString += "Internal Energy ";
+          tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
         addChild(input_node, "ArgumentName", tTmpString);
         addChild(input_node, "Probability", cur_obj.load_case_weights[0]);
+      }
     }
     tmp_node2 = tmp_node1.append_child("Output");
     addChild(tmp_node2, "Statistic", "mean");
@@ -7253,19 +7265,34 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
 
     tmp_node1 = tmp_node.append_child("CriterionGradient");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
     {
+      pugi::xml_node for_node = tmp_node1.append_child("For");
+      for_node.append_attribute("var") = "performerIndex";
+      for_node.append_attribute("in") = "Performers";
+      for_node = for_node.append_child("For");
+      for_node.append_attribute("var") = "PerformerSampleIndex";
+      for_node.append_attribute("in") = "PerformerSamples";
+      pugi::xml_node input_node = for_node.append_child("Input");
+      addChild(input_node, "ArgumentName", "Objective {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Gradient");
+      addChild(input_node, "Probability", "{Probabilities[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}");
+    }
+    else
+    {
+      for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+      {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         pugi::xml_node input_node = tmp_node1.append_child("Input");
         std::string tTmpString = "";
         if(cur_obj.code_name == "plato_analyze")
-            tTmpString += "Objective ";
+          tTmpString += "Objective ";
         else
-            tTmpString += "Internal Energy ";
+          tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
         tTmpString += " Gradient";
         addChild(input_node, "ArgumentName", tTmpString);
         addChild(input_node, "Probability", cur_obj.load_case_weights[0]);
+      }
     }
     tmp_node2 = tmp_node1.append_child("Output");
     std::string tTmpString = "mean_plus_";
@@ -7902,19 +7929,19 @@ void XMLGenerator::addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pu
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
     std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    std::string tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    std::string tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
     tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
     tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
   }
 
@@ -7947,19 +7974,19 @@ void XMLGenerator::addComputeObjectiveGradientOperationForNewUncertaintyWorkflow
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
     std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    std::string tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    std::string tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
     tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
     tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
-    tValueName = "{" + tLoadName + "[performerIndex*NumSamplesPerPerformer+PerformerSampleIndex]}";
+    tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
   }
 
@@ -9028,7 +9055,10 @@ bool XMLGenerator::generateInterfaceXML()
         pugi::xml_node for_node = doc.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
-        createSingleUserElementSharedData(for_node, "plato_analyze_{performerIndex}_vonmises", "Scalar", "plato_analyze_{performerIndex}", "PlatoMain");
+        for_node = for_node.append_child("For");
+        for_node.append_attribute("var") = "PerformerSampleIndex";
+        for_node.append_attribute("in") = "PerformerSamples";
+        createSingleUserElementSharedData(for_node, "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises", "Scalar", "plato_analyze_{performerIndex}", "PlatoMain");
       }
       else
       {
@@ -9260,10 +9290,7 @@ bool XMLGenerator::generateInterfaceXML()
     /////////////////////////////////////////////////
 
     // Output To File
-    if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
-      outputOutputToFileStageForNewUncertaintyWorkflow(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
-    else
-      outputOutputToFileStage(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
+    outputOutputToFileStage(doc, m_HasUncertainties, m_RequestedVonMisesOutput);
 
     // Initialize Optimization
     outputInitializeOptimizationStage(doc);
@@ -9841,25 +9868,6 @@ void XMLGenerator::outputInitializeOptimizationStageForTO(pugi::xml_document &do
 }
 
 /**********************************************************************************/
-void XMLGenerator::outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
-                                           bool &aHasUncertainties,
-                                           bool &aRequestedVonMises)
-/**********************************************************************************/
-{
-    pugi::xml_node stage_node = doc.append_child("Stage");
-    addChild(stage_node, "Name", "Output To File");
-    pugi::xml_node op_node, input_node;
-
-    op_node = stage_node.append_child("Operation");
-    addChild(op_node, "Name", "PlatoMainOutput");
-    addChild(op_node, "PerformerName", "PlatoMain");
-
-    input_node = op_node.append_child("Input");
-    addChild(input_node, "ArgumentName", "Topology");
-    addChild(input_node, "SharedDataName", "Topology");
-}
-
-/**********************************************************************************/
 void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                                            bool &aHasUncertainties,
                                            bool &aRequestedVonMises)
@@ -9917,12 +9925,27 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
             addChild(op_node, "PerformerName", "PlatoMain");
             // We are assuming only one load case per objective/performer which
             // means we will only have one vonmises per performer.
-            for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+            if(m_UseNewPlatoAnalyzeUncertaintyWorkflow)
             {
+              pugi::xml_node for_node = op_node.append_child("For");
+              for_node.append_attribute("var") = "performerIndex";
+              for_node.append_attribute("in") = "Performers";
+              for_node = for_node.append_child("For");
+              for_node.append_attribute("var") = "PerformerSampleIndex";
+              for_node.append_attribute("in") = "PerformerSamples";
+              input_node = for_node.append_child("Input");
+              addChild(input_node, "ArgumentName", "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises");
+              addChild(input_node, "SharedDataName", "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises");
+            }
+            else
+            {
+              for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+              {
                 XMLGen::Objective cur_obj = m_InputData.objectives[i];
                 input_node = op_node.append_child("Input");
                 addChild(input_node, "ArgumentName", cur_obj.performer_name + "_vonmises");
                 addChild(input_node, "SharedDataName", cur_obj.performer_name + "_vonmises");
+              }
             }
             output_node = op_node.append_child("Output");
             addChild(output_node, "ArgumentName", "von_mises_mean");
@@ -9976,40 +9999,55 @@ void XMLGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                 addChild(input_node, "SharedDataName", "Surface Area Gradient");
             }
         }
-        for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
         {
+          pugi::xml_node for_node = op_node.append_child("For");
+          for_node.append_attribute("var") = "performerIndex";
+          for_node.append_attribute("in") = "Performers";
+          for_node = for_node.append_child("For");
+          for_node.append_attribute("var") = "PerformerSampleIndex";
+          for_node.append_attribute("in") = "PerformerSamples";
+          input_node = for_node.append_child("Input");
+          addChild(input_node, "ArgumentName", "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises");
+          addChild(input_node, "SharedDataName", "plato_analyze_{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises");
+        }
+        else
+        {
+          for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+          {
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             if(aHasUncertainties)
             {
-                input_node = op_node.append_child("Input");
-                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
-                addChild(input_node, "ArgumentName", tmp_buf);
-                addChild(input_node, "SharedDataName", tmp_buf);
+              input_node = op_node.append_child("Input");
+              sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
+              addChild(input_node, "ArgumentName", tmp_buf);
+              addChild(input_node, "SharedDataName", tmp_buf);
             }
             else if(cur_obj.multi_load_case == "true")
             {
-                for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+              for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+              {
+                std::string cur_load_string = cur_obj.load_case_ids[k];
+                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                 {
-                    std::string cur_load_string = cur_obj.load_case_ids[k];
-                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                    {
-                        input_node = op_node.append_child("Input");
-                        sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
-                        addChild(input_node, "ArgumentName", tmp_buf);
-                        addChild(input_node, "SharedDataName", tmp_buf);
-                    }
+                  input_node = op_node.append_child("Input");
+                  sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                  addChild(input_node, "ArgumentName", tmp_buf);
+                  addChild(input_node, "SharedDataName", tmp_buf);
                 }
+              }
             }
             else
             {
-                for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
-                {
-                    input_node = op_node.append_child("Input");
-                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
-                    addChild(input_node, "ArgumentName", tmp_buf);
-                    addChild(input_node, "SharedDataName", tmp_buf);
-                }
+              for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
+              {
+                input_node = op_node.append_child("Input");
+                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                addChild(input_node, "ArgumentName", tmp_buf);
+                addChild(input_node, "SharedDataName", tmp_buf);
+              }
             }
+          }
         }
 
         if(aHasUncertainties && aRequestedVonMises)
