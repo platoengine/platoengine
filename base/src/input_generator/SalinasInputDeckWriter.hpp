@@ -62,7 +62,7 @@ class SalinasInputDeckWriter
 public:
     SalinasInputDeckWriter(InputData &aInputData);
     ~SalinasInputDeckWriter();
-    void generate(std::ostringstream *aStringStream = NULL);
+    void generate(bool aHasUncertainties, bool aRequestedVonMises, std::ostringstream *aStringStream = NULL);
 
 protected:
 

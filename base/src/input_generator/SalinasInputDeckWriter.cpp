@@ -69,12 +69,8 @@ SalinasInputDeckWriter::~SalinasInputDeckWriter()
 {
 }
 
-void SalinasInputDeckWriter::generate(std::ostringstream *aStringStream)
+void SalinasInputDeckWriter::generate(bool tHasUncertainties, bool tRequestedVonMisesOutput, std::ostringstream *aStringStream)
 {
-    bool tHasUncertainties = false;
-    bool tRequestedVonMisesOutput = false;
-    getUncertaintyFlags(mInputData, tHasUncertainties, tRequestedVonMisesOutput);
-
     for(size_t i=0; i<mInputData.objectives.size(); ++i)
     {
         XMLGen::Objective& cur_obj = mInputData.objectives[i];
