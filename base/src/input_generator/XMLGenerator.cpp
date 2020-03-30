@@ -195,6 +195,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
                 tNewLoadCases.push_back(tNewLoadCase);
                 tLoadCaseProbabilities.push_back(tOutputs.mLoadCases[j].mProbability);
                 tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+                tCurObj.load_case_weights.push_back("1");
                 tStartingLoadCaseID++;
             }
         }
@@ -6380,7 +6381,7 @@ void XMLGenerator::addStochasticObjectiveValueOperation(pugi::xml_document &aDoc
           tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
         addChild(tmp_node1, "ArgumentName", tTmpString);
-        addChild(tmp_node1, "Probability", cur_obj.load_case_weights[0]);
+        addChild(tmp_node1, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node1 = tmp_node.append_child("Output");
@@ -6429,7 +6430,7 @@ void XMLGenerator::addVonMisesStatisticsOperation(pugi::xml_document &aDoc)
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         tmp_node1 = tmp_node.append_child("Input");
         addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
-        addChild(tmp_node1, "Probability", cur_obj.load_case_weights[0]);
+        addChild(tmp_node1, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node1 = tmp_node.append_child("Output");
@@ -7292,7 +7293,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
           tTmpString += "Internal Energy ";
         tTmpString += std::to_string(i+1);
         addChild(input_node, "ArgumentName", tTmpString);
-        addChild(input_node, "Probability", cur_obj.load_case_weights[0]);
+        addChild(input_node, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node2 = tmp_node1.append_child("Output");
@@ -7330,7 +7331,7 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
         tTmpString += std::to_string(i+1);
         tTmpString += " Gradient";
         addChild(input_node, "ArgumentName", tTmpString);
-        addChild(input_node, "Probability", cur_obj.load_case_weights[0]);
+        addChild(input_node, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node2 = tmp_node1.append_child("Output");
