@@ -338,7 +338,7 @@ private:
         else
         {
             assert(aInputs.size() == static_cast<size_t>(aBounds.dimension()));
-            aBounds.set(aInputs);
+            aBounds.setVector(aInputs);
         }
     }
 
@@ -367,7 +367,7 @@ private:
             else
             {
                 assert(tInitialGuess.size() == static_cast<size_t>(aControl.dimension()));
-                aControl.set(tInitialGuess);
+                aControl.setVector(tInitialGuess);
             }
         }
     }
