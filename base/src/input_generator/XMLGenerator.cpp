@@ -224,7 +224,10 @@ bool XMLGenerator::generateUncertaintyMetaData()
   if(!getIndicesOfDeterministicAndRandomVariables())
     return false;
   m_UncertaintyMetaData.numSamples = m_InputData.load_cases.size();
-  m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].atmost_total_num_processors.c_str());
+  if(m_UseNewPlatoAnalyzeUncertaintyWorkflow)
+    m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].num_ranks.c_str());
+  else
+    m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].atmost_total_num_processors.c_str());
   if(m_UncertaintyMetaData.numSamples % m_UncertaintyMetaData.numPeformers != 0)
   {
     std::cout << "Number of samples must divide evenly into number of processors" << std::endl;
@@ -557,6 +560,11 @@ bool XMLGenerator::distributeObjectivesForGenerate()
     while(objective_index < m_InputData.objectives.size())
     {
         const std::string thisObjective_distributeType = m_InputData.objectives[objective_index].distribute_objective_type;
+        if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && thisObjective_distributeType != "")
+        {
+          std::cout << "Objective distribution is not supported with new plato analyze uncertainty workflow" << std::endl;
+          return false;
+        }
         if(thisObjective_distributeType == "")
         {
             // no distribute; nothing to do for this objective.
@@ -1852,8 +1860,8 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
 
   n4 = n3.append_child("ParameterList");
   n4.append_attribute("name") = "Isotropic Linear Elastic";
-  addNTVParameter(n4, "Poissons Ratio", "double", "0.3");
-  addNTVParameter(n4, "Youngs Modulus", "double", "1.0e8");
+  addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio.c_str());
+  addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus.c_str());
 
 
   n3 = n2.append_child("ParameterList");
@@ -2810,6 +2818,10 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                         {
                           if(tokens[3] == "true")
                             m_UseNewPlatoAnalyzeUncertaintyWorkflow = true;
+                        }
+                        else if(parseSingleValue(tokens, tInputStringList = {"number", "ranks"}, tStringValue))
+                        {
+                          new_objective.num_ranks = tokens[2];
                         }
                         else if(parseSingleValue(tokens, tInputStringList = {"begin","frequency"}, tStringValue))
                         {

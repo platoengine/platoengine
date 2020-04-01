@@ -70,6 +70,7 @@ struct Objective
     std::vector<std::string> load_case_weights;
     std::string distribute_objective_type;
     std::string atmost_total_num_processors;
+    std::string num_ranks;
 
     // type: "match frf data"
     std::string complex_error_measure;
