@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+
+<MeshMap>
+  <FilterFirst>false</FilterFirst>
+  <Filter>
+    <Type>Linear</Type>
+    <Radius>0.15</Radius>
+  </Filter>
+  <LinearMap>
+    <Type>SymmetryPlane</Type>
+    <Origin>
+      <X>0.0</X>
+      <Y>0.0</Y>
+      <Z>0.0</Z>
+    </Origin>
+    <Normal>
+      <X>1.0</X>
+      <Y>0.0</Y>
+      <Z>0.0</Z>
+    </Normal>
+  </LinearMap>
+</MeshMap>
+
+
+<Operation>
+  <Function>ComputeSolution</Function>
+  <Name>Compute Displacement Solution</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
+
+<Operation>
+  <Function>ComputeConstraintValue</Function>
+  <Name>Compute Constraint Value</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeConstraintGradient</Function>
+  <Name>Compute Constraint Gradient</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Constraint Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeConstraint</Function>
+  <Name>Compute Constraint</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Constraint Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+
+<Operation>
+  <Function>ComputeObjectiveValue</Function>
+  <Name>Compute Objective Value</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjectiveGradient</Function>
+  <Name>Compute Objective Gradient</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ComputeObjective</Function>
+  <Name>Compute Objective</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Topology</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Y</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Z</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
