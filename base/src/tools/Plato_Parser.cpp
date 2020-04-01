@@ -85,7 +85,7 @@ MathParser::addVariable(std::string aVarName, std::string aVarValue)
     
     if( aVarValue.find("{") != std::string::npos ) aVarValue = this->compute(aVarValue);
 
-    auto tNewDatum = std::make_shared<double>(stof(aVarValue));
+    auto tNewDatum = std::make_shared<double>(atof(aVarValue.c_str()));
     mValues.push_back(tNewDatum);
     
     // tinyexpr only works with lowercase variable names
@@ -367,12 +367,12 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                     // parse from=
                     std::string tStrFrom = tArrayNode.attribute("from").value();
                     if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser->compute(tStrFrom);
-                    double tRealFrom = stof(tStrFrom);
+                    double tRealFrom = atof(tStrFrom.c_str());
 
                     // parse to=
                     std::string tStrTo = tArrayNode.attribute("to").value();
                     if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser->compute(tStrTo);
-                    double tRealTo  = stof(tStrTo);
+                    double tRealTo  = atof(tStrTo.c_str());
 
                     // parse by= or intervals=
                     int tNumReals=0;
@@ -392,7 +392,7 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                     {
                         // parse 'by='
                         if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser->compute(tStrBy);
-                        tRealBy = stof(tStrBy);
+                        tRealBy = atof(tStrBy.c_str());
                         if( tRealBy == 0.0 )
                         {
                             throw Plato::ParsingException("'by' keyword cannot be zero.");
