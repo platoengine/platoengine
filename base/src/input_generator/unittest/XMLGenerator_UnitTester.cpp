@@ -193,10 +193,10 @@ bool XMLGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostrings
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicExpandUncertaintiesForGenerate()
+bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables()
 /******************************************************************************/
 {
-    return expandUncertaintiesForGenerate();
+    return runSROMForUncertainVariables();
 }
 
 /******************************************************************************/

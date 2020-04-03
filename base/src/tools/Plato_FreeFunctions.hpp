@@ -49,6 +49,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <float.h>
 
 namespace Plato
 {
@@ -67,6 +68,36 @@ T free_sum(const std::vector<T>& in_)
         result += in_[i];
     }
     return result;
+}
+
+inline std::string to_string(const double d)
+{
+  int sig_digits = DECIMAL_DIG;
+  std::string tString;
+  char buf[50];
+  sprintf(buf, "%.*e", sig_digits, d);
+  tString = buf;
+  return tString;
+}
+
+inline std::string to_string(const float f)
+{
+  int sig_digits = DECIMAL_DIG;
+  std::string tString;
+  char buf[50];
+  sprintf(buf, "%.*e", sig_digits, f);
+  tString = buf;
+  return tString;
+}
+
+inline std::string to_string(const int d)
+{
+  return std::to_string(d);
+}
+
+inline std::string to_string(const size_t d)
+{
+  return std::to_string(d);
 }
 
 } // end namespace Plato

@@ -3001,6 +3001,217 @@ TEST(PlatoTestXMLGenerator,distributeObjective_moreThanEnoughProcessors)
     EXPECT_EQ(wasMaintained[4], true);
 }
 
+TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow)
+{
+  XMLGenerator_UnitTester tester;
+  std::istringstream iss;
+  std::string stringInput =
+  "begin objective\n"
+  "   type maximize stiffness\n"
+  "   load ids 10\n"
+  "   boundary condition ids 11\n"
+  "   code plato_analyze\n"
+  "   number processors 1\n"
+  "   weight 1\n"
+  "   analyze new workflow true\n"
+  "   number ranks 1\n"
+  "end objective\n"
+  "begin boundary conditions\n"
+  "   fixed displacement nodeset name 1 bc id 11\n"
+  "end boundary conditions\n"
+  "begin loads\n"
+  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+  "end loads\n"
+  "begin uncertainty\n"
+  "    type angle variation\n"
+  "    load 10\n"
+  "    axis X\n"
+  "    distribution beta\n"
+  "    mean 0.0\n"
+  "    upper bound 45.0\n"
+  "    lower bound -45.0\n"
+  "    standard deviation 22.5\n"
+  "    num samples 2\n"
+  "end uncertainty\n";
+  // do parse
+  iss.str(stringInput);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseObjectives(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseLoads(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseBCs(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+  EXPECT_EQ(tester.publicRunSROMForUncertainVariables(), true);
+  EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+  size_t numSamples = tester.getNumSamples();
+  size_t numVariables = tester.getNumVariables();
+  size_t numPeformers = tester.getNumPerformers();
+  EXPECT_EQ(numSamples,2u);
+  EXPECT_EQ(numVariables,1u);
+  EXPECT_EQ(numPeformers,1u);
+
+  std::vector<size_t> randomVariableIndices = {0u};
+  std::vector<size_t> deterministicVariableIndices = {};
+
+  EXPECT_EQ(tester.getRandomVariableIndices(), randomVariableIndices);
+  EXPECT_EQ(tester.getDeterministicVariableIndices(), deterministicVariableIndices);
+
+  std::vector<double> gold_loadCaseProbabilities = { 0.36112468067266207, 0.63887286897558715 };
+  std::vector<double> loadCaseProbabilities = tester.getLoadCaseProbabilities();
+  for(size_t i = 0; i < numSamples; ++i)
+    EXPECT_DOUBLE_EQ(loadCaseProbabilities[i],gold_loadCaseProbabilities[i]);
+
+  std::vector<XMLGen::LoadCase> loadCases = tester.getLoadCases();
+  EXPECT_EQ(loadCases.size(), numSamples);
+
+
+  std::vector<std::vector<std::string>> gold_values;
+  gold_values.resize(numSamples);
+  gold_values[0] = { "0.000000000000000000000e+00", "-4.751921387767659325618e+04", "1.555391630579348566243e+04" };
+  gold_values[1] = { "0.000000000000000000000e+00", "-4.813588076578034088016e+04", "-1.352541987897522631101e+04"};
+
+
+  for(size_t i = 0; i < numSamples; ++i)
+  {
+    std::vector<XMLGen::Load> loads = loadCases[i].loads;
+    EXPECT_EQ(loads.size(), 1u);
+    for(size_t j = 0; j < loads.size(); ++j)
+    {
+      XMLGen::Load load = loads[j];
+      EXPECT_EQ(load.type, "traction");
+      std::vector<std::string> values = load.values;
+      EXPECT_EQ(load.values, gold_values[i+j]);
+    }
+  }
+
+  size_t numObjectives = tester.getNumObjectives();
+  EXPECT_EQ(numObjectives, 1u);
+}
+
+TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministic)
+{
+  XMLGenerator_UnitTester tester;
+  std::istringstream iss;
+  std::string stringInput =
+  "begin objective\n"
+  "   type maximize stiffness\n"
+  "   load ids 10 1\n"
+  "   boundary condition ids 11\n"
+  "   code plato_analyze\n"
+  "   number processors 1\n"
+  "   weight 1\n"
+  "   analyze new workflow true\n"
+  "   number ranks 5\n"
+  "end objective\n"
+  "begin boundary conditions\n"
+  "   fixed displacement nodeset name 1 bc id 11\n"
+  "end boundary conditions\n"
+  "begin loads\n"
+  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+  "    traction sideset name 3 value 0 -5e4 0 load id 1\n"
+  "end loads\n"
+  "begin uncertainty\n"
+  "    type angle variation\n"
+  "    load 10\n"
+  "    axis X\n"
+  "    distribution beta\n"
+  "    mean 0.0\n"
+  "    upper bound 45.0\n"
+  "    lower bound -45.0\n"
+  "    standard deviation 22.5\n"
+  "    num samples 10\n"
+  "end uncertainty\n";
+  // do parse
+  iss.str(stringInput);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseObjectives(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseLoads(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseBCs(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+  EXPECT_EQ(tester.publicRunSROMForUncertainVariables(), true);
+  EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+  size_t numSamples = tester.getNumSamples();
+  size_t numVariables = tester.getNumVariables();
+  size_t numPeformers = tester.getNumPerformers();
+  EXPECT_EQ(numSamples,10u);
+  EXPECT_EQ(numVariables,2u);
+  EXPECT_EQ(numPeformers,5u);
+
+  std::vector<size_t> randomVariableIndices = {0u};
+  std::vector<size_t> deterministicVariableIndices = {1u};
+
+  EXPECT_EQ(tester.getRandomVariableIndices(), randomVariableIndices);
+  EXPECT_EQ(tester.getDeterministicVariableIndices(), deterministicVariableIndices);
+
+  std::vector<double> gold_loadCaseProbabilities = { 0.094172629104440519, 0.096118338919238849, 0.099663940442524482,
+                                                     0.10447870334065364, 0.10564855564584232, 0.10576322174283935,
+                                                     0.10486290959769146, 0.099755080570144233, 0.095660857410530639,
+                                                     0.093878478812968374};
+  std::vector<double> loadCaseProbabilities = tester.getLoadCaseProbabilities();
+  for(size_t i = 0; i < numSamples; ++i)
+    EXPECT_DOUBLE_EQ(loadCaseProbabilities[i],gold_loadCaseProbabilities[i]);
+
+  std::vector<XMLGen::LoadCase> loadCases = tester.getLoadCases();
+  EXPECT_EQ(loadCases.size(), numSamples);
+
+  size_t numLoadsExpectedPerSample = 2u;
+
+  std::vector<std::vector<std::string>> gold_values;
+  gold_values.resize(numSamples*numLoadsExpectedPerSample);
+  gold_values[0] = { "0.000000000000000000000e+00", "-4.008042184600126347505e+04", "2.989247036707714141812e+04" };
+  gold_values[1] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[2] = { "0.000000000000000000000e+00", "-4.410827789159363601357e+04", "2.354697053631213930203e+04" };
+  gold_values[3] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[4] = { "0.000000000000000000000e+00", "-4.704161308330694009783e+04", "1.694363120822820928879e+04" };
+  gold_values[5] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[6] = { "0.000000000000000000000e+00", "-4.894831379618879145710e+04", "1.020110663162747732713e+04" };
+  gold_values[7] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[8] = { "0.000000000000000000000e+00", "-4.988485492991151841125e+04", "3.391349085789085165743e+03" };
+  gold_values[9] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[10] = { "0.000000000000000000000e+00", "-4.988284696095977415098e+04", "-3.420757090099503329839e+03"};
+  gold_values[11] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[12] = { "0.000000000000000000000e+00", "-4.894769754769306018716e+04", "-1.020406315050838020397e+04"};
+  gold_values[13] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[14] = { "0.000000000000000000000e+00", "-4.706038546730067173485e+04", "-1.689142148160054057371e+04"};
+  gold_values[15] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[16] = { "0.000000000000000000000e+00", "-4.418230226249388215365e+04", "-2.340778004821533613722e+04"};
+  gold_values[17] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+  gold_values[18] = { "0.000000000000000000000e+00", "-4.025755085941775905667e+04", "-2.965349218559918881510e+04"};
+  gold_values[19] = { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" };
+
+
+  for(size_t i = 0; i < numSamples; ++i)
+  {
+    std::vector<XMLGen::Load> loads = loadCases[i].loads;
+    EXPECT_EQ(loads.size(), numLoadsExpectedPerSample);
+    for(size_t j = 0; j < loads.size(); ++j)
+    {
+      XMLGen::Load load = loads[j];
+      EXPECT_EQ(load.type, "traction");
+      std::vector<std::string> values = load.values;
+      EXPECT_EQ(load.values, gold_values[loads.size()*i+j]);
+    }
+  }
+
+  size_t numObjectives = tester.getNumObjectives();
+  EXPECT_EQ(numObjectives, 1u);
+}
+
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
 {
     XMLGenerator_UnitTester tester;
@@ -3044,7 +3255,6 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
     std::ostringstream tOStringStream;
     EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
     EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
-
 }
 
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_names)

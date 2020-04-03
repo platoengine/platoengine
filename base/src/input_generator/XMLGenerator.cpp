@@ -179,22 +179,22 @@ bool XMLGenerator::runSROMForUncertainVariables()
             for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
             {
                 XMLGen::LoadCase tNewLoadCase;
-                tNewLoadCase.id = std::to_string(tStartingLoadCaseID);
+                tNewLoadCase.id = Plato::to_string(tStartingLoadCaseID);
                 for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
                 {
                     XMLGen::Load tNewLoad;
                     tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
                     tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
-                    tNewLoad.app_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
+                    tNewLoad.app_id = Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
                     tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
                     for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
-                        tNewLoad.values.push_back(std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
-                    tNewLoad.load_id = std::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
+                        tNewLoad.values.push_back(Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
+                    tNewLoad.load_id = Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
                     tNewLoadCase.loads.push_back(tNewLoad);
                 }
                 tNewLoadCases.push_back(tNewLoadCase);
                 tLoadCaseProbabilities.push_back(tOutputs.mLoadCases[j].mProbability);
-                tCurObj.load_case_ids.push_back(std::to_string(tStartingLoadCaseID));
+                tCurObj.load_case_ids.push_back(Plato::to_string(tStartingLoadCaseID));
                 tCurObj.load_case_weights.push_back("1");
                 tStartingLoadCaseID++;
             }
@@ -457,15 +457,6 @@ bool XMLGenerator::generate()
 
     getUncertaintyFlags(m_InputData, m_HasUncertainties, m_RequestedVonMisesOutput);
 
-    // NOTE: modifies objectives and loads for uncertainties
-    /*
-    if(!expandUncertaintiesForGenerate())
-    {
-        std::cout << "Failed to expand uncertainties in file generation" << std::endl;
-        return false;
-    }
-    */
-
     if(!runSROMForUncertainVariables())
     {
         std::cout << "Failed to expand uncertainties in file generation" << std::endl;
@@ -653,335 +644,6 @@ bool XMLGenerator::distributeObjectivesForGenerate()
 }
 
 /******************************************************************************/
-bool XMLGenerator::expandUncertaintiesForGenerate()
-/******************************************************************************/
-{
-    // // make unique load counter
-    // Plato::UniqueCounter unique_load_counter;
-
-    // // map load ids to load indices
-    // std::map<int, std::vector<int> > loadIdToPrivateLoadIndices;
-    // // for each load
-    // const int num_load_cases = m_InputData.load_cases.size();
-    // for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
-    // {
-    //     // register load case
-    //     const int load_cases_id = std::atoi(m_InputData.load_cases[privateLoadIndex].id.c_str());
-    //     unique_load_counter.mark(load_cases_id);
-
-    //     const std::vector<XMLGen::Load>& this_loads = m_InputData.load_cases[privateLoadIndex].loads;
-    //     const int num_this_loads = this_loads.size();
-    //     if(num_this_loads == 1)
-    //     {
-    //         // build map
-    //         const int load_id = std::atoi(this_loads[0].load_id.c_str());
-    //         loadIdToPrivateLoadIndices[load_id].push_back(privateLoadIndex);
-    //     }
-
-    //     // for each load within this case
-    //     for(int this_load_index = 0; this_load_index < num_this_loads; this_load_index++)
-    //     {
-    //         // register load id
-    //         const int load_id = std::atoi(this_loads[this_load_index].load_id.c_str());
-    //         unique_load_counter.mark(load_id);
-    //     }
-    // }
-
-    // // map load ids to uncertainties
-    // std::map<int, std::vector<int> > loadIdToPrivateUncertaintyIndices;
-    // // for each uncertainty
-    // const int num_uncertainties = m_InputData.uncertainties.size();
-    // for(int privateUncertainIndex = 0; privateUncertainIndex < num_uncertainties; privateUncertainIndex++)
-    // {
-    //     // build map
-    //     const int load_id = std::atoi(m_InputData.uncertainties[privateUncertainIndex].id.c_str());
-    //     loadIdToPrivateUncertaintyIndices[load_id].push_back(privateUncertainIndex);
-
-    //     // get load to be uncertain
-    //     const int num_privateLoadIndices = loadIdToPrivateLoadIndices[load_id].size();
-    //     if(num_privateLoadIndices == 0)
-    //     {
-    //         std::cout<<"XMLGenerator::expandUncertaintiesForGenerate: "
-    //                  <<"Unmatched uncertain load id."<<std::endl;
-    //         return false;
-    //     }
-    //     if(1 < num_privateLoadIndices)
-    //     {
-    //         std::cout<<"XMLGenerator::expandUncertaintiesForGenerate: "
-    //                  <<"Uncertain loads must currently be individual loads."<<std::endl;
-    //         return false;
-    //     }
-    // }
-
-    // // allocate load expansion mapping
-    // std::map<int, std::vector<std::pair<int,double> > > originalUncertainLoadCase_to_expandedLoadCasesAndWeights;
-
-    // // for each load, if uncertain, expand in all uncertainties
-    // for(int privateLoadIndex = 0; privateLoadIndex < num_load_cases; privateLoadIndex++)
-    // {
-    //     // skip multiple loads in this loadcase
-    //     const std::vector<XMLGen::Load>& this_first_loads = m_InputData.load_cases[privateLoadIndex].loads;
-    //     if(this_first_loads.size() != 1)
-    //     {
-    //         continue;
-    //     }
-    //     const int first_load_id = std::atoi(this_first_loads[0].load_id.c_str());
-
-    //     // get uncertainties for this load
-    //     const std::vector<int>& thisLoadUncertaintyIndices = loadIdToPrivateUncertaintyIndices[first_load_id];
-    //     const int this_load_num_uncertainties = thisLoadUncertaintyIndices.size();
-
-    //     // if certain, nothing to do
-    //     if(0 == this_load_num_uncertainties)
-    //     {
-    //         continue;
-    //     }
-
-    //     // store which loads are being expanded
-    //     std::vector<int> loadcaseInThisUncertain = {first_load_id};
-
-    //     // store weights so far during expansion
-    //     std::map<int, double> thisUncertaintyWeightsSoFar;
-    //     thisUncertaintyWeightsSoFar[first_load_id] = 1.0;
-
-    //     // for each uncertainty
-    //     for(int this_loadUncertain_index = 0; this_loadUncertain_index < this_load_num_uncertainties; this_loadUncertain_index++)
-    //     {
-    //         int thisUncertaintyIndex = thisLoadUncertaintyIndices[this_loadUncertain_index];
-    //         const XMLGen::Uncertainty& thisUncertainty = m_InputData.uncertainties[thisUncertaintyIndex];
-
-    //         // clear any previously established loadcases and weights
-    //         originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].clear();
-
-    //         // pose uncertainty
-    //         Plato::SromInputs<double> tSromInputs;
-    //         if(thisUncertainty.distribution == "normal")
-    //         {
-    //             tSromInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
-    //         }
-    //         else if(thisUncertainty.distribution == "uniform")
-    //         {
-    //             tSromInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
-    //         }
-    //         else if(thisUncertainty.distribution == "beta")
-    //         {
-    //             tSromInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
-    //         }
-    //         else
-    //         {
-    //             std::cout << "XMLGenerator::expandUncertaintiesForGenerate: " << "Unmatched name." << std::endl;
-    //             return false;
-    //         }
-    //         tSromInputs.mMean = std::atof(thisUncertainty.mean.c_str());
-    //         tSromInputs.mLowerBound = std::atof(thisUncertainty.lower.c_str());
-    //         tSromInputs.mUpperBound = std::atof(thisUncertainty.upper.c_str());
-    //         const double stdDev = std::atof(thisUncertainty.standard_deviation.c_str());
-    //         tSromInputs.mVariance = stdDev * stdDev;
-    //         const size_t num_samples = std::atoi(thisUncertainty.num_samples.c_str());
-    //         tSromInputs.mNumSamples = num_samples;
-
-    //         // solve uncertainty sub-problem
-    //         const bool tEnableOutput = true;
-    //         Plato::AlgorithmInputsKSAL<double> tAlgoInputs;
-    //         Plato::SromDiagnostics<double> tSromDiagnostics;
-    //         std::vector<Plato::SromOutputs<double>> tSromOutput;
-    //         Plato::solve_srom_problem(tSromInputs, tAlgoInputs, tSromDiagnostics, tSromOutput, tEnableOutput);
-
-    //         // check size
-    //         if(tSromOutput.size() != num_samples)
-    //         {
-    //             std::cout << "unexpected length" << std::endl;
-    //             return false;
-    //         }
-
-    //         // for each uncertain load case from prior
-    //         const int priorNum_loadcaseInThisUncertain = loadcaseInThisUncertain.size();
-    //         for(int abstractIndex_loadcaseInThisUncertain = 0;
-    //                 abstractIndex_loadcaseInThisUncertain < priorNum_loadcaseInThisUncertain;
-    //                 abstractIndex_loadcaseInThisUncertain++)
-    //                 {
-    //             const int this_load_id = loadcaseInThisUncertain[abstractIndex_loadcaseInThisUncertain];
-    //             const double thisLoadId_UncertaintyWeight = thisUncertaintyWeightsSoFar[this_load_id];
-
-    //             // convert load id to private index
-    //             const int num_priv_loads = loadIdToPrivateLoadIndices[this_load_id].size();
-    //             if(num_priv_loads != 1)
-    //             {
-    //                 std::cout << "unexpected length" << std::endl;
-    //                 return false;
-    //             }
-    //             const int this_privateLoadIndex = loadIdToPrivateLoadIndices[this_load_id][0];
-
-    //             // get loads from private
-    //             const std::vector<XMLGen::Load>& this_loads = m_InputData.load_cases[this_privateLoadIndex].loads;
-    //             if(this_loads.size() != 1)
-    //             {
-    //                 std::cout << "unexpected length" << std::endl;
-    //                 return false;
-    //             }
-
-    //             // get original load vector
-    //             const double loadVecX = std::atof(this_loads[0].values[0].c_str());
-    //             const double loadVecY = std::atof(this_loads[0].values[1].c_str());
-    //             const double loadVecZ = std::atof(this_loads[0].values[2].c_str());
-    //             Plato::Vector3D original_load_vec = {loadVecX, loadVecY, loadVecZ};
-
-    //             // get axis
-    //             Plato::axis3D::axis3D this_axis = Plato::axis3D::axis3D::x;
-    //             Plato::axis3D_stringToEnum(thisUncertainty.axis, this_axis);
-
-    //             // make uncertainty variations
-    //             for(size_t sample_index = 0; sample_index < num_samples; sample_index++)
-    //             {
-    //                 // retrieve weight
-    //                 const double this_sample_weight = tSromOutput[sample_index].mSampleWeight * thisLoadId_UncertaintyWeight;
-
-    //                 // decide which load to modify
-    //                 XMLGen::Load* loadToModify = NULL;
-    //                 if(sample_index == 0u && abstractIndex_loadcaseInThisUncertain == 0)
-    //                 {
-    //                     // modify original load
-    //                     loadToModify = &m_InputData.load_cases[this_privateLoadIndex].loads[0];
-
-    //                     // mark original load in mapping
-    //                     std::pair<int, double> lc_and_weight = std::make_pair(first_load_id, this_sample_weight);
-    //                     originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].push_back(lc_and_weight);
-
-    //                     // update weights so far
-    //                     thisUncertaintyWeightsSoFar[first_load_id] = this_sample_weight;
-    //                 }
-    //                 else
-    //                 {
-    //                     // get new load id
-    //                     const size_t newUniqueLoadId = unique_load_counter.assignNextUnique();
-    //                     const std::string newUniqueLoadId_str = std::to_string(newUniqueLoadId);
-    //                     loadcaseInThisUncertain.push_back(newUniqueLoadId);
-
-    //                     // register this new load in mapping
-    //                     loadIdToPrivateLoadIndices[newUniqueLoadId].push_back(m_InputData.load_cases.size());
-
-    //                     // make new load
-    //                     XMLGen::LoadCase new_load_case;
-    //                     m_InputData.load_cases.push_back(new_load_case);
-    //                     XMLGen::LoadCase& last_load_case = m_InputData.load_cases.back();
-    //                     last_load_case.id = newUniqueLoadId_str;
-    //                     last_load_case.loads.assign(1u, m_InputData.load_cases[this_privateLoadIndex].loads[0]);
-    //                     last_load_case.loads[0].load_id = newUniqueLoadId_str;
-    //                     // modify new load
-    //                     loadToModify = &m_InputData.load_cases.back().loads[0];
-
-    //                     // append new load in mapping
-    //                     std::pair<int, double> lc_and_weight = std::make_pair(newUniqueLoadId, this_sample_weight);
-    //                     originalUncertainLoadCase_to_expandedLoadCasesAndWeights[first_load_id].push_back(lc_and_weight);
-
-    //                     // update weights so far
-    //                     thisUncertaintyWeightsSoFar[newUniqueLoadId] = this_sample_weight;
-    //                 }
-    //                 assert(loadToModify != NULL);
-
-    //                 // rotate vector
-    //                 const double angle_to_vary = tSromOutput[sample_index].mSampleValue;
-    //                 Plato::Vector3D rotated_load_vec = original_load_vec;
-    //                 Plato::rotate_vector_by_axis(rotated_load_vec, this_axis, angle_to_vary);
-
-    //                 // update vector in load
-    //                 loadToModify->values[0] = std::to_string(rotated_load_vec.mX);
-    //                 loadToModify->values[1] = std::to_string(rotated_load_vec.mY);
-    //                 loadToModify->values[2] = std::to_string(rotated_load_vec.mZ);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // // for each objective
-    // const int num_objectives = m_InputData.objectives.size();
-    // for(int objIndex = 0; objIndex < num_objectives; objIndex++)
-    // {
-    //     XMLGen::Objective& this_obj = m_InputData.objectives[objIndex];
-
-    //     // get all load cases
-    //     const std::vector<std::string>& this_obj_load_case_ids = this_obj.load_case_ids;
-
-    //     // for each load case
-    //     const int this_num_case_ids = this_obj_load_case_ids.size();
-    //     for(int subIndex = 0; subIndex < this_num_case_ids; subIndex++)
-    //     {
-    //         // get id
-    //         const int load_case_id = std::atoi(this_obj_load_case_ids[subIndex].c_str());
-
-    //         // determine expanded load count
-    //         const std::vector<std::pair<int, double> >& this_expandedLoadCasesAndWeights =
-    //                 originalUncertainLoadCase_to_expandedLoadCasesAndWeights[load_case_id];
-    //         const int num_expanded = this_expandedLoadCasesAndWeights.size();
-
-    //         // if not expanded, nothing to do
-    //         if(num_expanded == 0)
-    //         {
-    //             continue;
-    //         }
-
-    //         // expect sierra_sd
-    //         if(this_obj.code_name != "sierra_sd")
-    //         {
-    //             std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
-    //                       << "Uncertain loads can only applied to sierra_sd code." << std::endl;
-    //             return false;
-    //         }
-    //         // force multi load case
-    //         this_obj.multi_load_case = "true";
-
-    //         // NOTE: this is not a strict requirement. Other physics codes could handle uncertain loads.
-    //         // However, this is a requirement for our initial implementation.
-
-    //         // assess initial weights/ids
-    //         const int num_initial_load_case_ids = this_obj.load_case_ids.size();
-    //         const int num_initial_load_case_weights = this_obj.load_case_weights.size();
-
-    //         // if not well specified initially
-    //         if(num_initial_load_case_weights != num_initial_load_case_ids)
-    //         {
-    //             std::cout << "XMLGenerator::expandUncertaintiesForGenerate: "
-    //                     << "Uncertain loads found length mismatch between load case ids and weights." << std::endl;
-    //             return false;
-    //         }
-
-    //         // get initial scaling
-    //         const double beforeExpandScale = std::atof(this_obj.load_case_weights[subIndex].c_str());
-
-    //         // for each expand
-    //         for(int expand_iter = 0; expand_iter < num_expanded; expand_iter++)
-    //         {
-    //             const int expand_loadCaseId = this_expandedLoadCasesAndWeights[expand_iter].first;
-    //             const double expand_loadCaseWeight = this_expandedLoadCasesAndWeights[expand_iter].second;
-
-    //             // original load was mutated, other loads are completely new
-    //             int indexOfWeightToModify = -1;
-    //             if(expand_loadCaseId == load_case_id)
-    //             {
-    //                 // id is correctly, only need to modify weight
-    //                 indexOfWeightToModify = subIndex;
-    //             }
-    //             else
-    //             {
-    //                 // set load case id
-    //                 this_obj.load_case_ids.push_back(std::to_string(expand_loadCaseId));
-    //                 // reserve spot in vector for weight
-    //                 indexOfWeightToModify = this_obj.load_case_weights.size();
-    //                 this_obj.load_case_weights.push_back("");
-    //             }
-
-    //             // set weight
-    //             const double thisExpandWeight = beforeExpandScale * expand_loadCaseWeight;
-    //             this_obj.load_case_weights[indexOfWeightToModify] = std::to_string(thisExpandWeight);
-    //         }
-    //     }
-    // }
-
-    // // exit with success
-    return true;
-}
-
-/******************************************************************************/
 bool XMLGenerator::generateLaunchScript()
 /******************************************************************************/
 {
@@ -1151,7 +813,7 @@ bool XMLGenerator::generateLaunchScript()
       if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
       {
 
-          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), std::to_string(m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
+          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_analyze_path.length() != 0)
@@ -1258,7 +920,7 @@ void XMLGenerator::generateAnalyzeBashScripts()
     for(size_t i = 1; i <= m_InputData.objectives.size(); ++i)
     {
       std::ofstream analyzeBash;
-      std::string filename = "analyze" + std::to_string(i) + ".sh";
+      std::string filename = "analyze" + Plato::to_string(i) + ".sh";
       analyzeBash.open(filename);
       analyzeBash << "export PLATO_PERFORMER_ID=" << i << "\n";
       analyzeBash << "export PLATO_INTERFACE_FILE=interface.xml\n";
@@ -1294,7 +956,7 @@ void XMLGenerator::generateJSRunScript()
   jsrun << "1 : eng : bash engine.sh\n";
   if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
   {
-    jsrun << std::to_string(m_UncertaintyMetaData.numPeformers) << " : per : bash analyze.sh\n";
+    jsrun << Plato::to_string(m_UncertaintyMetaData.numPeformers) << " : per : bash analyze.sh\n";
   }
   else
   {
@@ -1329,7 +991,7 @@ void XMLGenerator::generateBatchScript()
 
   if(m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_HasUncertainties)
   {
-    batchFile << "jsrun -A per -n" << std::to_string(m_UncertaintyMetaData.numPeformers) << " -a1 -c1 -g1\n";
+    batchFile << "jsrun -A per -n" << Plato::to_string(m_UncertaintyMetaData.numPeformers) << " -a1 -c1 -g1\n";
   }
   else
   {
@@ -1870,7 +1532,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     n4 = n3.append_child("ParameterList");
-    std::string tRandomLoadName = "Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex);
+    std::string tRandomLoadName = "Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex);
     n4.append_attribute("name") = tRandomLoadName.c_str();
     addNTVParameter(n4, "Type", "string", "Uniform");
     addNTVParameter(n4, "Values", "Array(double)", "{0.0, 0.0, 0.0}");
@@ -1881,7 +1543,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
   for(size_t tDeterministicLoadIndex = 0; tDeterministicLoadIndex < m_UncertaintyMetaData.deterministicVariableIndices.size(); ++tDeterministicLoadIndex)
   {
     n4 = n3.append_child("ParameterList");
-    std::string tDeterministicLoadName = "Deterministic Traction Vector Boundary Condition " + std::to_string(tDeterministicLoadIndex);
+    std::string tDeterministicLoadName = "Deterministic Traction Vector Boundary Condition " + Plato::to_string(tDeterministicLoadIndex);
     n4.append_attribute("name") = tDeterministicLoadName.c_str();
     addNTVParameter(n4, "Type", "string", "Uniform");
     std::vector<std::string> tDeterministicLoadValues = m_InputData.load_cases[0].loads[tDeterministicLoadIndex].values;
@@ -1915,7 +1577,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
     if(bc.dof == "x")
     {
       n4 = n3.append_child("ParameterList");
-      std::string tBCName = "X Fixed Displacement Boundary Condition " + std::to_string(i);
+      std::string tBCName = "X Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       if(bc.value.empty())
         addNTVParameter(n4, "Type", "string", "Zero Value");
@@ -1930,7 +1592,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
     else if(bc.dof == "y")
     {
       n4 = n3.append_child("ParameterList");
-      std::string tBCName = "Y Fixed Displacement Boundary Condition " + std::to_string(i);
+      std::string tBCName = "Y Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       if(bc.value.empty())
         addNTVParameter(n4, "Type", "string", "Zero Value");
@@ -1945,7 +1607,7 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
     else if(bc.dof == "z")
     {
       n4 = n3.append_child("ParameterList");
-      std::string tBCName = "Z Fixed Displacement Boundary Condition " + std::to_string(i);
+      std::string tBCName = "Z Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       if(bc.value.empty())
         addNTVParameter(n4, "Type", "string", "Zero Value");
@@ -1960,21 +1622,21 @@ bool XMLGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow()
     else if(bc.dof.empty())
     {
       n4 = n3.append_child("ParameterList");
-      std::string tBCName = "X Fixed Displacement Boundary Condition " + std::to_string(i);
+      std::string tBCName = "X Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       addNTVParameter(n4, "Type", "string", "Zero Value");
       addNTVParameter(n4, "Index", "int", "0");
       addNTVParameter(n4, "Sides", "string", bc.app_name);
 
       n4 = n3.append_child("ParameterList");
-      tBCName = "Y Fixed Displacement Boundary Condition " + std::to_string(i);
+      tBCName = "Y Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       addNTVParameter(n4, "Type", "string", "Zero Value");
       addNTVParameter(n4, "Index", "int", "1");
       addNTVParameter(n4, "Sides", "string", bc.app_name);
 
       n4 = n3.append_child("ParameterList");
-      tBCName = "Z Fixed Displacement Boundary Condition " + std::to_string(i);
+      tBCName = "Z Fixed Displacement Boundary Condition " + Plato::to_string(i);
       n4.append_attribute("name") = tBCName.c_str();
       addNTVParameter(n4, "Type", "string", "Zero Value");
       addNTVParameter(n4, "Index", "int", "2");
@@ -2215,17 +1877,17 @@ bool XMLGenerator::generateLightMPInputDecks()
                         if(magx > magy && magx > magz)
                         {
                             node6.set_value("x");
-                            value = std::to_string(x);
+                            value = Plato::to_string(x);
                         }
                         else if(magy > magx && magy > magz)
                         {
                             node6.set_value("y");
-                            value = std::to_string(y);
+                            value = Plato::to_string(y);
                         }
                         else if(magz > magx && magz > magy)
                         {
                             node6.set_value("z");
-                            value = std::to_string(z);
+                            value = Plato::to_string(z);
                         }
                         node5 = node4.append_child("value");
                         node6 = node5.append_child(pugi::node_pcdata);
@@ -2889,7 +2551,7 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                 {
                     // replace with constant weighting
                     const double constantWeightFraction = 1.0;
-                    const std::string uniformWeightFraction_str = std::to_string(constantWeightFraction);
+                    const std::string uniformWeightFraction_str = Plato::to_string(constantWeightFraction);
                     new_objective.load_case_weights.assign(num_load_ids, uniformWeightFraction_str);
                     // must be constant at 1.0 rather than (1.0/num_cases) to allow
                     // multi-load to be equivalent to multi-objective. We don't know within
@@ -5974,21 +5636,21 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
       for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
       {
         tmp_node1 = tmp_node.append_child("Parameter");
-        std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+        std::string tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "X";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
+        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(0)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
         tmp_node1 = tmp_node.append_child("Parameter");
-        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+        tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Y";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(1)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
         tmp_node1 = tmp_node.append_child("Parameter");
-        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+        tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Z";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(2)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
       }
@@ -6005,21 +5667,21 @@ bool XMLGenerator::generatePlatoAnalyzeOperationsXML()
       for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
       {
         tmp_node1 = tmp_node.append_child("Parameter");
-        std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+        std::string tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "X";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(0)";
+        std::string tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(0)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
         tmp_node1 = tmp_node.append_child("Parameter");
-        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+        tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Y";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(1)";
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(1)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
         tmp_node1 = tmp_node.append_child("Parameter");
-        tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+        tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Z";
         addChild(tmp_node1, "ArgumentName", tLoadName);
-        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + std::to_string(tRandomLoadIndex) + "]:Values(2)";
+        tPathToLoadInInputFile = "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition " + Plato::to_string(tRandomLoadIndex) + "]:Values(2)";
         addChild(tmp_node1, "Target", tPathToLoadInInputFile);
         addChild(tmp_node1, "InitialValue", "0.0");
       }
@@ -6391,9 +6053,9 @@ void XMLGenerator::addStochasticObjectiveValueOperation(pugi::xml_document &aDoc
           tTmpString += "Objective Value ";
         else
           tTmpString += "Internal Energy ";
-        tTmpString += std::to_string(i+1);
+        tTmpString += Plato::to_string(i+1);
         addChild(tmp_node1, "ArgumentName", tTmpString);
-        addChild(tmp_node1, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
+        addChild(tmp_node1, "Probability", Plato::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node1 = tmp_node.append_child("Output");
@@ -6442,7 +6104,7 @@ void XMLGenerator::addVonMisesStatisticsOperation(pugi::xml_document &aDoc)
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         tmp_node1 = tmp_node.append_child("Input");
         addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
-        addChild(tmp_node1, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
+        addChild(tmp_node1, "Probability", Plato::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node1 = tmp_node.append_child("Output");
@@ -6504,7 +6166,7 @@ bool XMLGenerator::addAggregateGradientOperation(pugi::xml_document &aDoc)
       {
           tmp_node2 = tmp_node1.append_child("Input");
           std::string tTmpString = "Field ";
-          tTmpString += std::to_string(i+1);
+          tTmpString += Plato::to_string(i+1);
           addChild(tmp_node2, "ArgumentName", tTmpString);
       }
     }
@@ -6573,7 +6235,7 @@ bool XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
       {
         tmp_node2 = tmp_node1.append_child("Input");
         std::string tTmpString = "Value ";
-        tTmpString += std::to_string(i+1);
+        tTmpString += Plato::to_string(i+1);
         addChild(tmp_node2, "ArgumentName", tTmpString);
       }
     }
@@ -6598,7 +6260,7 @@ bool XMLGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc)
       {
         tmp_node2 = tmp_node1.append_child("Input");
         std::string tTmpString = "Field ";
-        tTmpString += std::to_string(i+1);
+        tTmpString += Plato::to_string(i+1);
         addChild(tmp_node2, "ArgumentName", tTmpString);
       }
     }
@@ -6670,7 +6332,7 @@ bool XMLGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc)
       {
           tmp_node2 = tmp_node1.append_child("Input");
           std::string tTmpString = "Value ";
-          tTmpString += std::to_string(i+1);
+          tTmpString += Plato::to_string(i+1);
           addChild(tmp_node2, "ArgumentName", tTmpString);
       }
     }
@@ -6738,7 +6400,7 @@ bool XMLGenerator::addAggregateHessianOperation(pugi::xml_document &aDoc)
       {
           tmp_node2 = tmp_node1.append_child("Input");
           std::string tTmpString = "Field ";
-          tTmpString += std::to_string(i+1);
+          tTmpString += Plato::to_string(i+1);
           addChild(tmp_node2, "ArgumentName", tTmpString);
       }
     }
@@ -7303,9 +6965,9 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
           tTmpString += "Objective Value ";
         else
           tTmpString += "Internal Energy ";
-        tTmpString += std::to_string(i+1);
+        tTmpString += Plato::to_string(i+1);
         addChild(input_node, "ArgumentName", tTmpString);
-        addChild(input_node, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
+        addChild(input_node, "Probability", Plato::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node2 = tmp_node1.append_child("Output");
@@ -7340,10 +7002,10 @@ void XMLGenerator::addStochasticObjectiveGradientOperation(pugi::xml_document &a
           tTmpString += "Objective ";
         else
           tTmpString += "Internal Energy ";
-        tTmpString += std::to_string(i+1);
+        tTmpString += Plato::to_string(i+1);
         tTmpString += " Gradient";
         addChild(input_node, "ArgumentName", tTmpString);
-        addChild(input_node, "Probability", std::to_string(m_InputData.load_case_probabilities[i]).c_str());
+        addChild(input_node, "Probability", Plato::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
     tmp_node2 = tmp_node1.append_child("Output");
@@ -7938,7 +7600,7 @@ bool XMLGenerator::outputInternalEnergyStage(pugi::xml_document &doc,
             tTmpString += "Objective Value ";
           else
             tTmpString += "Internal Energy ";
-          tTmpString += std::to_string(i+1);
+          tTmpString += Plato::to_string(i+1);
           addChild(input_node, "ArgumentName", tTmpString);
           addChild(input_node, "SharedDataName", tTmpString);
         }
@@ -7979,19 +7641,19 @@ void XMLGenerator::addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pu
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
-    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+    std::string tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+    tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+    tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
@@ -8024,19 +7686,19 @@ void XMLGenerator::addComputeObjectiveGradientOperationForNewUncertaintyWorkflow
   for(size_t tRandomLoadIndex = 0; tRandomLoadIndex < m_UncertaintyMetaData.randomVariableIndices.size(); ++tRandomLoadIndex)
   {
     pugi::xml_node tmp_node1 = op_node.append_child("Parameter");
-    std::string tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+    std::string tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "X";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     std::string tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+    tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Y";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
 
     tmp_node1 = op_node.append_child("Parameter");
-    tLoadName = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+    tLoadName = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Z";
     addChild(tmp_node1, "ArgumentName", tLoadName);
     tValueName = "{" + tLoadName + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
     addChild(tmp_node1, "ArgumentValue", tValueName);
@@ -8385,7 +8047,7 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
               tTmpString += "Objective Value ";
             else
               tTmpString += "Internal Energy ";
-            tTmpString += std::to_string(i+1);
+            tTmpString += Plato::to_string(i+1);
             addChild(input_node, "ArgumentName", tTmpString);
             addChild(input_node, "SharedDataName", tTmpString);
 
@@ -8395,7 +8057,7 @@ bool XMLGenerator::outputInternalEnergyGradientStage(pugi::xml_document &doc,
               tTmpString += "Objective ";
             else
               tTmpString += "Internal Energy ";
-            tTmpString += std::to_string(i+1);
+            tTmpString += Plato::to_string(i+1);
             tTmpString += " Gradient";
             addChild(input_node, "ArgumentName", tTmpString);
             addChild(input_node, "SharedDataName", tTmpString);
@@ -8786,7 +8448,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
   pugi::xml_node tTmpNode = doc.append_child("Define");
   tTmpNode.append_attribute("name") = "NumSamples";
   tTmpNode.append_attribute("type") = "int";
-  std::string tNumSamplesString = std::to_string(m_UncertaintyMetaData.numSamples);
+  std::string tNumSamplesString = Plato::to_string(m_UncertaintyMetaData.numSamples);
   tTmpNode.append_attribute("value") = tNumSamplesString.c_str();
 
   tTmpNode = doc.append_child("Define");
@@ -8803,7 +8465,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
 
   tNumPerformers = getGreatestDivisor(tNumSamples,tNumPerformers);
 
-  std::string tNumPerformersString = std::to_string(tNumPerformers);
+  std::string tNumPerformersString = Plato::to_string(tNumPerformers);
   tTmpNode.append_attribute("value") = tNumPerformersString.c_str();
 
   tTmpNode = doc.append_child("Define");
@@ -8836,7 +8498,9 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
   for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tLoadCases.size(); ++tLoadCaseIndex)
   {
     XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
-    tProbabilitiesForLoadCaseIndex.push_back(std::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
+    char buf[200];
+    sprintf(buf, "%.17e", m_InputData.load_case_probabilities[tLoadCaseIndex]);
+    tProbabilitiesForLoadCaseIndex.push_back(buf);
   }
 
   std::string tProbabilitiesString = makeValuesString(tProbabilitiesForLoadCaseIndex);
@@ -8860,7 +8524,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
       tXValuesForRandomLoadIndex.push_back(tRandomLoad.values[0]);
       tYValuesForRandomLoadIndex.push_back(tRandomLoad.values[1]);
       tZValuesForRandomLoadIndex.push_back(tRandomLoad.values[2]);
-      tProbabilitiesForLoadCaseIndex.push_back(std::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
+      tProbabilitiesForLoadCaseIndex.push_back(Plato::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
 
     }
 
@@ -8869,19 +8533,19 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
     std::string tZValuesString = makeValuesString(tZValuesForRandomLoadIndex);
 
     tTmpNode = doc.append_child("Array");
-    std::string tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "X";
+    std::string tRandomLoadString = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "X";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tXValuesString.c_str();
 
     tTmpNode = doc.append_child("Array");
-    tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Y";
+    tRandomLoadString = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Y";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tYValuesString.c_str();
 
     tTmpNode = doc.append_child("Array");
-    tRandomLoadString = "RandomLoad" + std::to_string(tRandomLoadIndex) + "Z";
+    tRandomLoadString = "RandomLoad" + Plato::to_string(tRandomLoadIndex) + "Z";
     tTmpNode.append_attribute("name") = tRandomLoadString.c_str();
     tTmpNode.append_attribute("type") = "real";
     tTmpNode.append_attribute("values") = tZValuesString.c_str();

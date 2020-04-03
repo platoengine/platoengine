@@ -50,6 +50,7 @@
 #ifndef SRC_XMLGENERATOR_UNITTESTER_HPP_
 #define SRC_XMLGENERATOR_UNITTESTER_HPP_
 
+#include "XMLGeneratorDataStruct.hpp"
 #include "XMLGenerator.hpp"
 
 
@@ -82,9 +83,9 @@ public:
     bool publicParseBlocks(std::istream &sin);
     bool publicParseMaterials(std::istream &sin);
     bool publicParseUncertainties(std::istream &sin);
-    bool publicExpandUncertaintiesForGenerate();
     bool publicDistributeObjectivesForGenerate();
     bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
+    bool publicRunSROMForUncertainVariables();
     std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name;}
     std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].type;}
     std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}
@@ -108,6 +109,8 @@ public:
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
     std::vector<std::string> getObjLoadIds(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_ids;}
     std::vector<std::string> getObjLoadWeights(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_weights;}
+    std::vector<XMLGen::LoadCase> getLoadCases() {return m_InputData.load_cases;}
+    std::vector<double> getLoadCaseProbabilities() {return m_InputData.load_case_probabilities;}
     std::string getObjStressLimit(const int &aIndex) {return m_InputData.objectives[aIndex].stress_limit;}
     std::string getObjStressRampFactor(const int &aIndex) {return m_InputData.objectives[aIndex].stress_ramp_factor;}
     std::string getBCApplicationType(const std::string &aBCID);
@@ -165,6 +168,11 @@ public:
     std::string getAlbanyPath() {return m_InputData.albany_path;}
     std::string getLightMPPath() {return m_InputData.lightmp_path;}
     std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
+    size_t      getNumSamples() {return m_UncertaintyMetaData.numSamples;}
+    size_t      getNumVariables() {return m_UncertaintyMetaData.numVariables;}
+    size_t      getNumPerformers() {return m_UncertaintyMetaData.numPeformers;}
+    std::vector<size_t> getRandomVariableIndices() {return m_UncertaintyMetaData.randomVariableIndices;}
+    std::vector<size_t> getDeterministicVariableIndices() {return m_UncertaintyMetaData.deterministicVariableIndices;}
     void clearInputData();
     XMLGen::InputData* exposeInputData() {return &m_InputData;}
 

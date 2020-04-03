@@ -150,7 +150,6 @@ protected:
     bool generateAlbanyInputDecks();
     bool runSROMForUncertainVariables();
     bool generateUncertaintyMetaData();
-    bool expandUncertaintiesForGenerate();
     bool getSizeOfLoadCases();
     bool getIndicesOfDeterministicAndRandomVariables();
     bool verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases();
