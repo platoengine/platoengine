@@ -3212,6 +3212,212 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
   EXPECT_EQ(numObjectives, 1u);
 }
 
+TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
+{
+  XMLGenerator_UnitTester tester;
+  std::istringstream iss;
+  std::string stringInput =
+  "begin objective\n"
+  "   type maximize stiffness\n"
+  "   load ids 10\n"
+  "   boundary condition ids 11\n"
+  "   code plato_analyze\n"
+  "   number processors 1\n"
+  "   weight 1\n"
+  "   multi load case true\n"
+  "   distribute objective at most 3 processors\n"
+  "end objective\n"
+  "begin boundary conditions\n"
+  "   fixed displacement nodeset name 1 bc id 11\n"
+  "end boundary conditions\n"
+  "begin loads\n"
+  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+  "end loads\n"
+  "begin uncertainty\n"
+  "    type angle variation\n"
+  "    load 10\n"
+  "    axis X\n"
+  "    distribution beta\n"
+  "    mean 0.0\n"
+  "    upper bound 45.0\n"
+  "    lower bound -45.0\n"
+  "    standard deviation 22.5\n"
+  "    num samples 3\n"
+  "end uncertainty\n";
+  // do parse
+  iss.str(stringInput);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseObjectives(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseLoads(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseBCs(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+  EXPECT_EQ(tester.publicRunSROMForUncertainVariables(), true);
+  EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+  size_t numSamples = tester.getNumSamples();
+  size_t numVariables = tester.getNumVariables();
+  size_t numPeformers = tester.getNumPerformers();
+  EXPECT_EQ(numSamples,3u);
+  EXPECT_EQ(numVariables,1u);
+  EXPECT_EQ(numPeformers,3u);
+
+  std::vector<size_t> randomVariableIndices = {0u};
+  std::vector<size_t> deterministicVariableIndices = {};
+
+  EXPECT_EQ(tester.getRandomVariableIndices(), randomVariableIndices);
+  EXPECT_EQ(tester.getDeterministicVariableIndices(), deterministicVariableIndices);
+
+  std::vector<double> gold_loadCaseProbabilities = { 0.36406606886994869, 0.27079380819551258, 0.36514142000522448};
+
+  std::vector<double> loadCaseProbabilities = tester.getLoadCaseProbabilities();
+  for(size_t i = 0; i < numSamples; ++i)
+    EXPECT_DOUBLE_EQ(loadCaseProbabilities[i],gold_loadCaseProbabilities[i]);
+
+  std::vector<XMLGen::LoadCase> loadCases = tester.getLoadCases();
+  EXPECT_EQ(loadCases.size(), numSamples);
+
+  size_t numLoadsExpectedPerSample = 1u;
+
+  std::vector<std::vector<std::string>> gold_values;
+  gold_values.resize(numSamples*numLoadsExpectedPerSample);
+  gold_values[0] = { "0.000000000000000000000e+00", "-4.534825437206416972913e+04", "2.106029024981761904201e+04" };
+  gold_values[1] = { "0.000000000000000000000e+00", "-4.999912137119322869694e+04", "-2.964154326084487820481e+02" };
+  gold_values[2] = { "0.000000000000000000000e+00", "-4.486609665898913226556e+04", "-2.206883256056478785467e+04" };
+
+
+  for(size_t i = 0; i < numSamples; ++i)
+  {
+    std::vector<XMLGen::Load> loads = loadCases[i].loads;
+    EXPECT_EQ(loads.size(), numLoadsExpectedPerSample);
+    for(size_t j = 0; j < loads.size(); ++j)
+    {
+      XMLGen::Load load = loads[j];
+      EXPECT_EQ(load.type, "traction");
+      std::vector<std::string> values = load.values;
+      EXPECT_EQ(load.values, gold_values[loads.size()*i+j]);
+    }
+  }
+
+  size_t numObjectives = tester.getNumObjectives();
+  EXPECT_EQ(numObjectives, 3u);
+
+  EXPECT_EQ(numSamples % numObjectives, 0u);
+  size_t numSamplesPerObjective = numSamples/numObjectives;
+
+  for(size_t i = 0; i < numObjectives; ++i)
+    EXPECT_EQ(tester.getObjLoadIds(i).size(), numSamplesPerObjective);
+}
+
+TEST(PlatoTestXMLGenerator,uncertainty_sierra)
+{
+  XMLGenerator_UnitTester tester;
+  std::istringstream iss;
+  std::string stringInput =
+  "begin objective\n"
+  "   type maximize stiffness\n"
+  "   load ids 10\n"
+  "   boundary condition ids 11\n"
+  "   code sierra_sd\n"
+  "   number processors 1\n"
+  "   weight 1\n"
+  "   multi load case true\n"
+  "   distribute objective at most 3 processors\n"
+  "end objective\n"
+  "begin boundary conditions\n"
+  "   fixed displacement nodeset name 1 bc id 11\n"
+  "end boundary conditions\n"
+  "begin loads\n"
+  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+  "end loads\n"
+  "begin uncertainty\n"
+  "    type angle variation\n"
+  "    load 10\n"
+  "    axis X\n"
+  "    distribution beta\n"
+  "    mean 0.0\n"
+  "    upper bound 45.0\n"
+  "    lower bound -45.0\n"
+  "    standard deviation 22.5\n"
+  "    num samples 3\n"
+  "end uncertainty\n";
+  // do parse
+  iss.str(stringInput);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseObjectives(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseLoads(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseBCs(iss), true);
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tester.publicParseUncertainties(iss), true);
+  EXPECT_EQ(tester.publicRunSROMForUncertainVariables(), true);
+  EXPECT_EQ(tester.publicDistributeObjectivesForGenerate(), true);
+
+  size_t numSamples = tester.getNumSamples();
+  size_t numVariables = tester.getNumVariables();
+  size_t numPeformers = tester.getNumPerformers();
+  EXPECT_EQ(numSamples,3u);
+  EXPECT_EQ(numVariables,1u);
+  EXPECT_EQ(numPeformers,3u);
+
+  std::vector<size_t> randomVariableIndices = {0u};
+  std::vector<size_t> deterministicVariableIndices = {};
+
+  EXPECT_EQ(tester.getRandomVariableIndices(), randomVariableIndices);
+  EXPECT_EQ(tester.getDeterministicVariableIndices(), deterministicVariableIndices);
+
+  std::vector<double> gold_loadCaseProbabilities = { 0.36406606886994869, 0.27079380819551258, 0.36514142000522448};
+
+  std::vector<double> loadCaseProbabilities = tester.getLoadCaseProbabilities();
+  for(size_t i = 0; i < numSamples; ++i)
+    EXPECT_DOUBLE_EQ(loadCaseProbabilities[i],gold_loadCaseProbabilities[i]);
+
+  std::vector<XMLGen::LoadCase> loadCases = tester.getLoadCases();
+  EXPECT_EQ(loadCases.size(), numSamples);
+
+  size_t numLoadsExpectedPerSample = 1u;
+
+  std::vector<std::vector<std::string>> gold_values;
+  gold_values.resize(numSamples*numLoadsExpectedPerSample);
+  gold_values[0] = { "0.000000000000000000000e+00", "-4.534825437206416972913e+04", "2.106029024981761904201e+04" };
+  gold_values[1] = { "0.000000000000000000000e+00", "-4.999912137119322869694e+04", "-2.964154326084487820481e+02" };
+  gold_values[2] = { "0.000000000000000000000e+00", "-4.486609665898913226556e+04", "-2.206883256056478785467e+04" };
+
+
+  for(size_t i = 0; i < numSamples; ++i)
+  {
+    std::vector<XMLGen::Load> loads = loadCases[i].loads;
+    EXPECT_EQ(loads.size(), numLoadsExpectedPerSample);
+    for(size_t j = 0; j < loads.size(); ++j)
+    {
+      XMLGen::Load load = loads[j];
+      EXPECT_EQ(load.type, "traction");
+      std::vector<std::string> values = load.values;
+      EXPECT_EQ(load.values, gold_values[loads.size()*i+j]);
+    }
+  }
+
+  size_t numObjectives = tester.getNumObjectives();
+  EXPECT_EQ(numObjectives, 3u);
+
+  EXPECT_EQ(numSamples % numObjectives, 0u);
+  size_t numSamplesPerObjective = numSamples/numObjectives;
+
+  for(size_t i = 0; i < numObjectives; ++i)
+    EXPECT_EQ(tester.getObjLoadIds(i).size(), numSamplesPerObjective);
+}
+
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
 {
     XMLGenerator_UnitTester tester;

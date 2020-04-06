@@ -109,10 +109,10 @@ public:
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
     std::vector<std::string> getObjLoadIds(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_ids;}
     std::vector<std::string> getObjLoadWeights(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_weights;}
-    std::vector<XMLGen::LoadCase> getLoadCases() {return m_InputData.load_cases;}
-    std::vector<double> getLoadCaseProbabilities() {return m_InputData.load_case_probabilities;}
     std::string getObjStressLimit(const int &aIndex) {return m_InputData.objectives[aIndex].stress_limit;}
     std::string getObjStressRampFactor(const int &aIndex) {return m_InputData.objectives[aIndex].stress_ramp_factor;}
+    std::vector<XMLGen::LoadCase> getLoadCases() {return m_InputData.load_cases;}
+    std::vector<double> getLoadCaseProbabilities() {return m_InputData.load_case_probabilities;}
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
