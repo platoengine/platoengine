@@ -1229,7 +1229,7 @@ bool XMLGenerator::generateAlbanyInputDecks()
                                 double x = std::atof(cur_load.values[0].c_str());
                                 double y = std::atof(cur_load.values[1].c_str());
                                 double z = std::atof(cur_load.values[2].c_str());
-                                sprintf(tmp_buf, "{%lf,%lf,%lf}", x, y, z);
+                                sprintf(tmp_buf, "{%s,%s,%s}", Plato::to_string(x).c_str(), Plato::to_string(y).c_str(), Plato::to_string(z).c_str());
                                 addNTVParameter(n3, string_var, "Array(double)", tmp_buf);
                             }
                         }
@@ -8499,7 +8499,7 @@ bool XMLGenerator::addDefinesToDoc(pugi::xml_document& doc)
   {
     XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
     char buf[200];
-    sprintf(buf, "%.17e", m_InputData.load_case_probabilities[tLoadCaseIndex]);
+    sprintf(buf, "%s", Plato::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]).c_str());
     tProbabilitiesForLoadCaseIndex.push_back(buf);
   }
 

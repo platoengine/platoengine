@@ -898,7 +898,7 @@ void IVEMeshAPISTK::export_my_mesh()
         stk::mesh::Entity cur_node = (*(node_buckets[i]))[j];
         double* vals = stk::mesh::field_data(*mCoordsField, cur_node);
         unsigned long id = mBulkData->identifier(cur_node);
-        fprintf(fp, "%lu %lf %lf %lf\n", id, vals[0], vals[1], vals[2]);
+        fprintf(fp, "%lu %s %s %s\n", id, Plato::to_string(vals[0]).c_str(), Plato::to_string(vals[1]).c_str(), Plato::to_string(vals[2]).c_str());
       }
     }
     fprintf(fp, "Shared Nodes\n");
@@ -911,7 +911,7 @@ void IVEMeshAPISTK::export_my_mesh()
         stk::mesh::Entity cur_node = (*(node_buckets2[i]))[j];
         double* vals = stk::mesh::field_data(*mCoordsField, cur_node);
         unsigned long id = mBulkData->identifier(cur_node);
-        fprintf(fp, "%lu %lf %lf %lf\n", id, vals[0], vals[1], vals[2]);
+        fprintf(fp, "%lu %s %s %s\n", id, Plato::to_string(vals[0]).c_str(), Plato::to_string(vals[1]).c_str(), Plato::to_string(vals[2]).c_str());
       }
     }
     fclose(fp);

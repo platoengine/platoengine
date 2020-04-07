@@ -67,4 +67,34 @@ size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
     return std::min(total_number_of_tasks, equal_division_of_tasks);
 }
 
+std::string to_string(const double d)
+{
+  int sig_digits = DECIMAL_DIG;
+  std::string tString;
+  char buf[50];
+  sprintf(buf, "%.*e", sig_digits, d);
+  tString = buf;
+  return tString;
+}
+
+std::string to_string(const float f)
+{
+  int sig_digits = DECIMAL_DIG;
+  std::string tString;
+  char buf[50];
+  sprintf(buf, "%.*e", sig_digits, f);
+  tString = buf;
+  return tString;
+}
+
+std::string to_string(const int d)
+{
+  return std::to_string(d);
+}
+
+std::string to_string(const size_t d)
+{
+  return std::to_string(d);
+}
+
 } // end namespace Plato
