@@ -49,7 +49,6 @@
 
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "XMLGeneratorUtilities.hpp"
-#include <Plato_FreeFunctions.hpp>
 
 #include <exodusII.h>
 
@@ -582,7 +581,7 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalNBCsForPlatoAnalyze(const XMLGe
                     double x = std::atof(cur_load.values[0].c_str());
                     double y = std::atof(cur_load.values[1].c_str());
                     double z = std::atof(cur_load.values[2].c_str());
-                    sprintf(tBuffer, "{%s,%s,%s}", Plato::to_string(x).c_str(), Plato::to_string(y).c_str(), Plato::to_string(z).c_str());
+                    sprintf(tBuffer, "{%lf,%lf,%lf}", x, y, z);
                     addNTVParameter(tPugiNode2, "Values", "Array(double)", tBuffer);
                     sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);

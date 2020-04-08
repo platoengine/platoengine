@@ -64,7 +64,6 @@
 
 #include "Plato_Parser.hpp"
 #include "Plato_Exceptions.hpp"
-#include <Plato_FreeFunctions.hpp>
 
 namespace Plato
 {
@@ -102,6 +101,8 @@ MathParser::addVariable(std::string aVarName, std::string aVarValue)
 std::string
 MathParser::compute(std::string aExpr)
 {
+    std::stringstream tRetval;
+
     // get substring between '{' and '}'
     size_t tBegin = aExpr.find("{");
     tBegin++;
@@ -164,10 +165,10 @@ MathParser::compute(std::string aExpr)
     int error;
     te_expr *tExpr = te_compile(tSubExpr.c_str(), mVariables.data(), mVariables.size(), &error);
  
-    double tVal;
     if( tExpr )
     {
-        tVal = te_eval(tExpr);
+        double tVal = te_eval(tExpr);
+        tRetval << tVal;
     }
     else
     {
@@ -176,12 +177,14 @@ MathParser::compute(std::string aExpr)
         throw Plato::ParsingException(ss.str());
     }
     te_free(tExpr);
-    return Plato::to_string(tVal);
+    return tRetval.str();
 }
 
 std::string
 MathParser::parse(std::string aExpr)
 {
+    std::stringstream tRetval;
+    
     int error=0;
     double tValue = te_interp(aExpr.c_str(), &error);
 
@@ -191,7 +194,9 @@ MathParser::parse(std::string aExpr)
         throw Plato::ParsingException(ss.str());
     }
 
-    return Plato::to_string(tValue);
+    tRetval << tValue;
+
+    return tRetval.str();
 }
 
 InputData 

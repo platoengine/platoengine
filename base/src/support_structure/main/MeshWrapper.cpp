@@ -28,7 +28,6 @@
 #include <stk_mesh/base/Types.hpp>
 #include <stk_mesh/base/FieldRestriction.hpp>
 #include "Ioss_Region.h"                // for Region, NodeSetContainer, etc
-#include <Plato_FreeFunctions.hpp>
 
 namespace plato
 {
@@ -257,7 +256,7 @@ void MeshWrapper::export_my_mesh()
                 stk::mesh::Entity cur_node = (*(node_buckets[i]))[j];
                 double* vals = stk::mesh::field_data(*mCoordsField, cur_node);
                 unsigned long id = mBulkData->identifier(cur_node);
-                fprintf(fp, "%lu %s %s %s\n", id, Plato::to_string(vals[0]).c_str(), Plato::to_string(vals[1]).c_str(), Plato::to_string(vals[2]).c_str());
+                fprintf(fp, "%lu %lf %lf %lf\n", id, vals[0], vals[1], vals[2]);
             }
         }
         fprintf(fp, "Shared Nodes\n");
@@ -270,7 +269,7 @@ void MeshWrapper::export_my_mesh()
                 stk::mesh::Entity cur_node = (*(node_buckets2[i]))[j];
                 double* vals = stk::mesh::field_data(*mCoordsField, cur_node);
                 unsigned long id = mBulkData->identifier(cur_node);
-                fprintf(fp, "%lu %s %s %s\n", id, Plato::to_string(vals[0]).c_str(), Plato::to_string(vals[1]).c_str(), Plato::to_string(vals[2]).c_str());
+                fprintf(fp, "%lu %lf %lf %lf\n", id, vals[0], vals[1], vals[2]);
             }
         }
         fclose(fp);

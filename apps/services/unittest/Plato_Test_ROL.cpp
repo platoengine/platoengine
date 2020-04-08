@@ -392,5 +392,109 @@ TEST(PlatoTest, ProxyVolumeROL)
     }
 }
 
+#if 0
+TEST(PlatoTest, ProxyStructuralTopologyOptimizationROL)
+{
+    // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
+    const double tPoissonRatio = 0.3;
+    const double tElasticModulus = 1;
+    const int tNumElementsXdirection = 30;
+    const int tNumElementsYdirection = 10;
+    std::shared_ptr<Plato::StructuralTopologyOptimization> tPDE =
+            std::make_shared<Plato::StructuralTopologyOptimization>(tPoissonRatio, tElasticModulus, tNumElementsXdirection, tNumElementsYdirection);
+
+    // ************** DISABLE CACHING FOR ROL: CACHING IS NOT CLEARLY UNDERSTOOD YET FOR ROL **************
+    tPDE->disableCacheState();
+
+    // ************** SET FORCE VECTOR **************
+    const int tGlobalNumDofs = tPDE->getGlobalNumDofs();
+    Epetra_SerialDenseVector tForce(tGlobalNumDofs);
+    const int tDOFsIndex = 1;
+    tForce[tDOFsIndex] = -1;
+    tPDE->setForceVector(tForce);
+
+    // ************** SET FIXED DEGREES OF FREEDOM (DOFs) VECTOR **************
+    std::vector<double> tData = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 681};
+    Epetra_SerialDenseVector tFixedDOFs(Epetra_DataAccess::Copy, tData.data(), tData.size());
+    tPDE->setFixedDOFs(tFixedDOFs);
+
+    // ************** ALLOCATE VOLUME CONSTRAINT **************
+    Teuchos::RCP<ROL::Constraint<double>> tConstraint =
+            Teuchos::rcp(new Plato::ProxyVolumeROL<double>(tPDE));
+
+    // ************** ALLOCATE COMPLIANCE OBJECTIVE **************
+    bool tDisableFilter = true;
+    Teuchos::RCP<ROL::Objective<double>> tObjective =
+            Teuchos::rcp(new Plato::ProxyComplianceROL<double>(tPDE, tDisableFilter));
+
+    // ************** ALLOCATE ROL'S BOUND CONSTRAINT INTERFACE **************
+    double tBaseValue = 1e-3;
+    const int tNumControls = tPDE->getNumDesignVariables();
+    Teuchos::RCP<ROL::Vector<double>> tControlLowerBound =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+    tBaseValue = 1;
+    Teuchos::RCP<ROL::Vector<double>> tControlUpperBound =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+    Teuchos::RCP<ROL::BoundConstraint<double> > tBoundConstraintInterface =
+            Teuchos::rcp(new ROL::Bounds<double>(tControlLowerBound, tControlUpperBound));
+
+    // ************** ALLOCATE CONTROL VECTOR **************
+    tBaseValue = tPDE->getVolumeFraction();
+    Teuchos::RCP<ROL::Vector<double>> tControls =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls, tBaseValue));
+
+    // ************** CHECK CLONE OPERATION **************
+    Teuchos::RCP<ROL::Vector<double>> tGradientOne =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    double tGradTolerance = 1e-8;
+    tObjective->gradient(*tGradientOne, *tControls, tGradTolerance);
+    Teuchos::RCP<ROL::Vector<double>> tControlTwo = tControls->clone();
+    tControlTwo->scale(2);
+    Teuchos::RCP<ROL::Vector<double>> tGradientTwo =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    tObjective->gradient(*tGradientTwo, *tControlTwo, tGradTolerance);
+    Teuchos::RCP<ROL::Vector<double>> tDifference =
+            Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumControls));
+    tDifference->set(*tGradientTwo);
+    tDifference->axpy(-2, *tGradientOne);
+    double tGold = 0;
+    double tTolerance = 1e-6;
+    EXPECT_NEAR(tGold, tDifference->norm(), tTolerance);
+
+    // ************** ALLOCATE DUAL VECTOR **************
+    tBaseValue = 0;
+    const int tNumConstraints = 1;
+    Teuchos::RCP<ROL::Vector<double>> tDual = Teuchos::rcp(new Plato::SerialEpetraVectorROL<double>(tNumConstraints, tBaseValue));
+
+    // ************** READ XML INPUT FILE ************** //
+    std::string filename = "rol_unit_test_inputs.xml";
+    Teuchos::RCP<Teuchos::ParameterList> tParameterList = Teuchos::rcp(new Teuchos::ParameterList);
+    Teuchos::updateParametersFromXmlFile(filename, tParameterList.ptr());
+
+    // Run optimization.
+    ROL::OptimizationProblem<double> tProblem(tObjective, tControls, tBoundConstraintInterface, tConstraint, tDual);
+    bool tDerivCheck = false;  // Derivative check flag.
+    if(tDerivCheck)
+    {
+        tProblem.check(std::cout);
+    }
+    ROL::OptimizationSolver<double> tSolver(tProblem, *tParameterList);
+    tSolver.solve(std::cout);
+
+    // Get Optimal Solution
+    ROL::Ptr<ROL::Vector<double>> tOptimalControl = tProblem.getSolutionVector();
+    Plato::SerialEpetraVectorROL<double>& tOptimalControlRef =
+            dynamic_cast<Plato::SerialEpetraVectorROL<double>&>(*tOptimalControl.get());
+    Epetra_SerialDenseVector & tControlData = tOptimalControlRef.vector();
+    std::vector<double> tGoldControl = TopoProxy::getGoldControlRolTest();
+//    FILE *fp = fopen("debug.txt", "w");
+    for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
+    {
+//        fprintf(fp, "%lf, ", tControlData[tIndex]);
+        EXPECT_NEAR(tControlData[tIndex], tGoldControl[tIndex], tTolerance);
+    }
+//    fclose(fp);
+}
+#endif
 #endif
 } // PlatoTest

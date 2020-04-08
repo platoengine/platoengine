@@ -21,7 +21,6 @@
 #include <stk_mesh/base/FieldRestriction.hpp>
 #include "Ioss_Region.h"                // for Region, NodeSetContainer, etc
 #include "Teuchos_CommandLineProcessor.hpp"
-#include <Plato_FreeFunctions.hpp>
 
 #include <iostream>
 
@@ -102,7 +101,7 @@ int main(int argc,  char **argv)
     FILE *fp = fopen(outputFilename.c_str(), "a");
     if(fp)
     {
-        fprintf(fp, "%d %s\n", iteration, Plato::to_string(totalSum).c_str());
+        fprintf(fp, "%d %lf\n", iteration, totalSum);
         fclose(fp);
     }
 
