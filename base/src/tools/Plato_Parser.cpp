@@ -76,7 +76,7 @@ MathParser::addArrays(const decltype(mArrays)& aArrays)
 }
 
 void
-MathParser::addVariable(std::string aVarName, std::string aVarValue)
+MathParser::addVariable(std::string aVarName, std::string aVarType, std::string aVarValue)
 {
     // the te_variable struct stores pointers to name and value -- it doesn't
     // copy anything -- so the data have to be persistent.  Use shared_ptr's 
@@ -84,7 +84,14 @@ MathParser::addVariable(std::string aVarName, std::string aVarValue)
     // counted, but mVariables, mValues, and mNames all go out of scope at the
     // same time.
     
-    if( aVarValue.find("{") != std::string::npos ) aVarValue = this->compute(aVarValue);
+    if(aVarType == "int")
+    {
+      if( aVarValue.find("{") != std::string::npos ) aVarValue = this->computeInt(aVarValue);
+    }
+    else
+    {
+      if( aVarValue.find("{") != std::string::npos ) aVarValue = this->compute(aVarValue);
+    }
 
     auto tNewDatum = std::make_shared<double>(atof(aVarValue.c_str()));
     mValues.push_back(tNewDatum);
@@ -165,6 +172,7 @@ MathParser::compute(std::string aExpr)
     te_expr *tExpr = te_compile(tSubExpr.c_str(), mVariables.data(), mVariables.size(), &error);
  
     double tVal;
+    std::string tRetVal;
     if( tExpr )
     {
         tVal = te_eval(tExpr);
@@ -176,7 +184,93 @@ MathParser::compute(std::string aExpr)
         throw Plato::ParsingException(ss.str());
     }
     te_free(tExpr);
-    return Plato::to_string(tVal);
+    tRetVal = Plato::to_string(tVal);
+    return tRetVal;
+}
+
+std::string
+MathParser::computeInt(std::string aExpr)
+{
+    // get substring between '{' and '}'
+    size_t tBegin = aExpr.find("{");
+    tBegin++;
+    size_t tEnd = aExpr.find("}");
+    std::string tSubExpr = aExpr.substr(tBegin,tEnd-tBegin);
+
+    // tinyexpr doesn't handle arrays.  find/replace array values before compiling.
+    size_t tSearchPos;
+    if( (tSearchPos = tSubExpr.find("[")) != std::string::npos )
+    {
+        if( mArrays.size() == 0 )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' has Array operator (i.e., [*]) but no Arrays are defined.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        size_t tIndexEnd = tSubExpr.find("]", tSearchPos);
+        if( tIndexEnd == std::string::npos )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' has opening '[' but no closing ']'";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        auto tIndexStart = tSearchPos+1;
+        auto tIndexLen = tIndexEnd - tIndexStart;
+        int tArrayIndex = stoi(tSubExpr.substr(tIndexStart, tIndexLen));
+        
+        std::string tDelimiters(" +-()/*^");
+        auto tNameStart = tSubExpr.find_last_of(tDelimiters,tSearchPos);
+        tNameStart++; // Array name starts immediately after the delimiter
+        auto tNameLen = tSearchPos - tNameStart;
+        std::string tArrayName = tSubExpr.substr(tNameStart, tNameLen);
+        
+        if( mArrays.count(tArrayName) == 0 )
+        {
+            std::stringstream ss;
+            ss << "Expression '" << tSubExpr << "' uses Array '" << tArrayName << "' that is not defined.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        const auto& tStrVals = mArrays[tArrayName];
+        if( (tStrVals.size() < (static_cast<size_t>(tArrayIndex + 1))) || (tArrayIndex < 0) )
+        {
+            std::stringstream ss;
+            ss << "Expression '," << tSubExpr << "' Array '" << tArrayName 
+               << "', value (" << tArrayIndex << " out of bounds.";
+            throw Plato::ParsingException(ss.str());
+        }
+
+        auto tStrVal = tStrVals[tArrayIndex];
+        auto tTotalLen = tIndexEnd - tNameStart;
+        tSubExpr.replace(tNameStart, tTotalLen+1, tStrVal);
+    }
+
+    // tinyexpr requires lowercase.
+    std::transform(tSubExpr.begin(), tSubExpr.end(), tSubExpr.begin(), ::tolower);
+
+    int error;
+    te_expr *tExpr = te_compile(tSubExpr.c_str(), mVariables.data(), mVariables.size(), &error);
+ 
+    double tVal;
+    std::string tRetVal;
+    if( tExpr )
+    {
+        tVal = te_eval(tExpr);
+    }
+    else
+    {
+        std::stringstream ss;
+        ss << "Fatal error:  failed to evaluate expression: '" << aExpr << "'.";
+        throw Plato::ParsingException(ss.str());
+    }
+    te_free(tExpr);
+
+    int tIntVal = (int)tVal;
+
+    tRetVal = Plato::to_string(tIntVal);
+    return tRetVal;
 }
 
 std::string
@@ -271,7 +365,8 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
     {
         std::string tDefName  = tDefineNode.attribute("name").value();
         std::string tDefValue = tDefineNode.attribute("value").value();
-        tMathParser->addVariable(tDefName, tDefValue);
+        std::string tDefType = tDefineNode.attribute("type").value();
+        tMathParser->addVariable(tDefName, tDefType, tDefValue);
     }
     
 
@@ -303,18 +398,18 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                 {
                     // parse from=, to=, by=, 
                     std::string tStrFrom = tArrayNode.attribute("from").value();
-                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser->compute(tStrFrom);
+                    if( tStrFrom.find("{") != std::string::npos ) tStrFrom = tMathParser->computeInt(tStrFrom);
                     int tIntFrom = stoi(tStrFrom);
 
                     std::string tStrTo = tArrayNode.attribute("to").value();
-                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser->compute(tStrTo);
+                    if( tStrTo.find("{") != std::string::npos ) tStrTo = tMathParser->computeInt(tStrTo);
                     int tIntTo  = stoi(tStrTo);
 
                     std::string tStrBy = tArrayNode.attribute("by").value();
                     int tIntBy = 1;
                     if( tStrBy != "" )
                     {
-                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser->compute(tStrBy);
+                        if( tStrBy.find("{") != std::string::npos ) tStrBy = tMathParser->computeInt(tStrBy);
                         tIntBy = stoi(tStrBy);
                     }
                     if( tIntBy == 0 )
