@@ -621,8 +621,8 @@ namespace PlatoTestInputData
 
     auto singleOpSpecs = multiOpSpec[0].getByName<Plato::InputData>("Operation");
     auto parameters = singleOpSpecs[0].getByName<Plato::InputData>("Parameter");
-    EXPECT_EQ( parameters[0].get<std::string>("ArgumentValue"), "0.984808" );
-    EXPECT_EQ( parameters[1].get<std::string>("ArgumentValue"), "-0.173648" );
+    EXPECT_EQ( parameters[0].get<std::string>("ArgumentValue"), "0.9848077786116991" );
+    EXPECT_EQ( parameters[1].get<std::string>("ArgumentValue"), "-0.1736480324849395" );
   }
 
 } // end PlatoTestInputData namespace
