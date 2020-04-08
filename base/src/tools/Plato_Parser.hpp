@@ -70,10 +70,9 @@ class MathParser {
 
     std::map<std::string,std::vector<std::string>> mArrays;
   public:  
-    void addVariable(std::string aVarName, std::string aVarType, std::string aVarValue);
+    void addVariable(std::string aVarName, std::string aVarValue);
     void addArrays(const decltype(mArrays)&);
     std::string compute(std::string);
-    std::string computeInt(std::string);
     std::string parse(std::string);
 };
 
