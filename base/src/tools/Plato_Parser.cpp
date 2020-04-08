@@ -168,7 +168,7 @@ MathParser::compute(std::string aExpr)
     if( tExpr )
     {
         double tVal = te_eval(tExpr);
-        tRetval << tVal;
+        tRetval << std::setprecision(16) << tVal;
     }
     else
     {
@@ -194,7 +194,7 @@ MathParser::parse(std::string aExpr)
         throw Plato::ParsingException(ss.str());
     }
 
-    tRetval << tValue;
+    tRetval << std::setprecision(16) << tValue;
 
     return tRetval.str();
 }
