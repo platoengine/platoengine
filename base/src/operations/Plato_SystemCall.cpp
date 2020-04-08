@@ -51,6 +51,7 @@
 
 #include "PlatoApp.hpp"
 #include "Plato_Parser.hpp"
+#include "Plato_Console.hpp"
 #include "Plato_InputData.hpp"
 #include "Plato_Exceptions.hpp"
 #include "Plato_SystemCall.hpp"
@@ -118,9 +119,10 @@ void SystemCall::operator()()
                 auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
                 for(size_t i=0; i<tInputArgument->size(); ++i)
                 {
-                    if(tInputArgument->data()[0] != mSavedParameters[j][i])
+                    if(tInputArgument->data()[i] != mSavedParameters[j][i])
                     {
                         tChanged = true;
+                        mSavedParameters[j] = *(tInputArgument);
                         i = tInputArgument->size();
                         j = mInputNames.size();
                     }
@@ -129,7 +131,14 @@ void SystemCall::operator()()
         }
 
         if(!tChanged)
+        {
             tPerformSystemCall = false;
+            Plato::Console::Status("PlatoMain: SystemCall -- Condition not met. Not calling.");
+        } 
+        else
+        {
+            Plato::Console::Status("PlatoMain: SystemCall -- Condition met. Calling.");
+        }
     }
 
     if(tPerformSystemCall)
@@ -148,7 +157,7 @@ void SystemCall::operator()()
                 auto tInputArgument = mPlatoApp->getValue(tInputName);
                 for(size_t i=0; i<tInputArgument->size(); ++i)
                 {
-                    commandPlusArgs << tInputArgument->data()[i] << " ";
+                    commandPlusArgs << std::setprecision(16) << tInputArgument->data()[i] << " ";
                 }
             }
         }

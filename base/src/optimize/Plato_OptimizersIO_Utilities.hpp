@@ -85,6 +85,12 @@ void is_file_open(const Type& aOutputFile)
         throw tError;
     }
 }
+/******************************************************************************//**
+ * @brief Specialization that permits stringstreams.
+ * @param [in] aOutputStream stringstream pretending to be a file.
+**********************************************************************************/
+template<>
+void is_file_open(const std::stringstream& aOutputStream);
 
 /******************************************************************************//**
  * @brief Check if vector is empty. An error is thrown if vector is empty.

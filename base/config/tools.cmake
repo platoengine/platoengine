@@ -73,6 +73,42 @@ message(STATUS "The search path is:  ${SEARCH_PATH} ")
 endfunction(Plato_find_lib)
 
 ###############################################################################
+## Plato_find_path( 
+##    VAR_NAME      == Return variable containing filepath to file
+##    OPTION_NAME   == If ON, function attempts to find requested file
+##    FILE_NAME     == name of file to be found
+##    SEARCH_PATH   == Directories below this path are searched.
+## )
+###############################################################################
+
+function( Plato_find_path VAR_NAME OPTION_NAME FILE_NAME SEARCH_PATH )
+
+  if( ${OPTION_NAME} )
+
+message(STATUS "The search path is:  ${SEARCH_PATH} ") 
+
+  message(STATUS " ")
+  message(STATUS "Finding ${OUT_NAME}")
+  
+  find_path( ${VAR_NAME}_SEARCH_RESULT ${FILE_NAME}
+                HINTS ${SEARCH_PATH}
+                DOC "${FILE_NAME} file"
+                NO_DEFAULT_PATH )
+  
+  if( ${VAR_NAME}_SEARCH_RESULT MATCHES "NOTFOUND" )
+    message(FATAL_ERROR "!! ${FILE_NAME} not found !!")
+  endif( ${VAR_NAME}_SEARCH_RESULT MATCHES "NOTFOUND" )
+  
+  set( ${VAR_NAME} ${${VAR_NAME}_SEARCH_RESULT} PARENT_SCOPE )
+  message(STATUS "${FILE_NAME} found")
+  message(STATUS "Using:  ${${VAR_NAME}_SEARCH_RESULT}")
+  message(STATUS " ")
+  
+  endif( ${OPTION_NAME} )
+    
+endfunction(Plato_find_path)
+
+###############################################################################
 function( Plato_no_src_build )
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")

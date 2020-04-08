@@ -115,7 +115,12 @@ if( UNIT_TESTING )
   include_directories( ${GTEST_INCLUDE_DIRS} )
 endif()
 
-
+if( ESP_ENABLED )
+  Plato_find_lib ( ESP_LIB ON egads ${ESP_LIB_DIR} )
+  Plato_find_lib ( OCSM_LIB ON ocsm ${ESP_LIB_DIR} )
+  Plato_find_path( ESP_INC ON egads.h ${ESP_INC_DIR} )
+  include_directories( ${ESP_INC} )
+endif()
 
 ###############################################################################
 ###############################################################################
@@ -133,6 +138,11 @@ endif()
 if( STK_ENABLED )
   message( "-- Compiling with STK " )
   add_definitions( -DSTK_ENABLED )
+endif()
+
+if( ESP_ENABLED )
+  message( "-- Compiling with ESP " )
+  add_definitions( -DESP_ENABLED )
 endif()
 
 if( ENABLE_ISO )
@@ -188,6 +198,11 @@ endif()
 
 if( ENABLE_ISO )
   add_subdirectory(base/src/iso/main)
+endif()
+
+if( ESP_ENABLED )
+  add_subdirectory(base/src/geometry/ESP)
+  add_subdirectory(apps/esp)
 endif()
 
 if( STK_ENABLED )

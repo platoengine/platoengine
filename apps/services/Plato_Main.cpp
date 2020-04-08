@@ -59,6 +59,7 @@
 #include "Plato_OptimizerFactory.hpp"
 #include "Plato_Exceptions.hpp"
 #include <iostream>
+#include <sstream>
 
 #ifndef NDEBUG
 #include <fenv.h>
@@ -71,6 +72,8 @@ void safeExit(){
     MPI_Finalize();
     exit(0);
 }
+
+void writeSplashScreen();
 
 /******************************************************************************/
 int main(int aArgc, char *aArgv[])
@@ -134,6 +137,8 @@ int main(int aArgc, char *aArgv[])
         safeExit();
     }
 
+    writeSplashScreen();
+
     Plato::OptimizerInterface<double>* tOptimizer = nullptr;
     try
     {
@@ -170,3 +175,36 @@ int main(int aArgc, char *aArgv[])
 }
 
 
+void writeSplashScreen()
+{
+
+  std::stringstream splash;
+  splash << "################################################################################" << std::endl;
+  splash << "#                                                                              #" << std::endl;
+  splash << "#                    @@@@@                                                     #" << std::endl;
+  splash << "#                    @@@@@                                                     #" << std::endl;
+  splash << "#                    @@@@@                                                     #" << std::endl;
+  splash << "#                    @@@@@                       ,*****                        #" << std::endl;
+  splash << "#                    @@@@@                       %@@@@@                        #" << std::endl;
+  splash << "#                    @@@@@                       %@@@@@                        #" << std::endl;
+  splash << "#                    @@@@@                       %@@@@@                        #" << std::endl;
+  splash << "#  @@@@@@@@@@@@@@@   @@@@@    @@@@@@@@@@@@@@   @@@@@@@@@@@   @@@@@@@@@@@@@@@,  #" << std::endl;
+  splash << "#  @@@@@@@@@@@@@@@   @@@@@   ,@@@@@@@@@@@@@@   @@@@@@@@@@@   @@@@@@@@@@@@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@   ,@@@@     @@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@             @@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@    *@@@@@@@@@@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@   @@@@@@@@@@@@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@   @@@@@     @@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@   @@@@@     @@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@     @@@@@   @@@@@   @@@@@     @@@@@     %@@@@@      @@@@@.    %@@@@@  #" << std::endl;
+  splash << "#  @@@@@@@@@@@@@@@   @@@@@   @@@@@@@@@@@@@@@     %@@@@@@@@   @@@@@@@@@@@@@@@@  #" << std::endl;
+  splash << "#  @@@@@@@@@@@@@@#   @@@@@   &@@@@@@@@@@@@@@      @@@@@@@@   @@@@@@@@@@@@@@@*  #" << std::endl;
+  splash << "#  @@@@@                                                                       #" << std::endl;
+  splash << "#  @@@@@                                                                       #" << std::endl;
+  splash << "#  @@@@@   OPTIMIZATION BASED DESIGN                                           #" << std::endl;
+  splash << "#  @@@@@                                                                       #" << std::endl;
+  splash << "#  @@@@@   Questions? contact Plato3d-help@sandia.gov                          #" << std::endl;
+  splash << "#                                                                              #" << std::endl;
+  splash << "################################################################################" << std::endl;
+  Plato::Console::Alert(splash.str());
+}

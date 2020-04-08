@@ -66,7 +66,7 @@ class SharedValue : public SharedData
 public:
     SharedValue(const std::string & aMyName, 
                 const std::vector<std::string> & aProviderName, 
-                const Plato::CommunicationData & aCommData, int aSize = 1);
+                const Plato::CommunicationData & aCommData, int aSize = 1, bool aIsDynamic=false);
     virtual ~SharedValue();
 
     int size() const;
@@ -86,6 +86,7 @@ private:
     MPI_Comm mInterComm;
 
     int mNumData;
+    bool mIsDynamic;
     std::vector<double> mData;
     Plato::data::layout_t mMyLayout;
 

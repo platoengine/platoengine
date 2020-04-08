@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<Timers>
+  <time>true</time>
+</Timers>
+<Operation>
+  <Function>CSMMeshOutput</Function>
+  <Name>CSMMeshOutput</Name>
+  <BaseMeshName>rocker.exo</BaseMeshName>
+  <OutputFrequency>1</OutputFrequency>
+  <MaxIterations>100</MaxIterations>
+</Operation>
+<Operation>
+  <Function>InitializeValues</Function>
+  <Name>Initialize Values</Name>
+  <Output>
+    <ArgumentName>Values</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Lower Bounds</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Upper Bounds</ArgumentName>
+  </Output>
+  <Method>ReadFromCSMFile</Method>
+  <CSMFileName>rocker.csm</CSMFileName>
+</Operation>
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateValues</Name>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Values</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Weighting>
+    <Weight>
+      <Value>1</Value>
+    </Weight>
+  </Weighting>
+</Operation>
+<Operation>
+  <Function>SystemCall</Function>
+  <Name>Update Geometry on Change</Name>
+  <Command>python aflr.py</Command>
+  <OnChange>true</OnChange>
+  <Argument>rocker.csm</Argument>
+  <Argument>rocker.exo</Argument>
+  <Argument>rocker.eto</Argument>
+  <AppendInput>true</AppendInput>
+  <Input>
+    <ArgumentName>Parameters</ArgumentName>
+  </Input>
+</Operation>

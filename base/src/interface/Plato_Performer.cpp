@@ -49,6 +49,7 @@
 
 #include "Plato_Performer.hpp"
 #include "Plato_Application.hpp"
+#include "Plato_Console.hpp"
 
 namespace Plato
 {
@@ -72,6 +73,7 @@ void Performer::compute(const std::string & aOperationName)
 {
     if(mApplication)
     {
+        Console::Status("Operation: (" + mName + ") " + aOperationName);
         mApplication->compute(aOperationName);
     }
 }

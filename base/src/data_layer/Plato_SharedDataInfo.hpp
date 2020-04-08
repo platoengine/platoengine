@@ -76,6 +76,9 @@ public:
     int getSharedDataSize(const std::string & aName) const;
     void setSharedDataSize(const std::string & aName, const int & aSize);
 
+    bool getSharedDataDynamic(const std::string & aName) const;
+    void setSharedDataDynamic(const std::string & aName, const bool & aDynamic);
+
     const std::vector<std::string> & getProviderNames(const int & aIndex) const;
     const std::vector<std::string> & getReceiverNames(const int & aIndex) const;
     void setSharedDataMap(
@@ -93,6 +96,7 @@ public:
 
 private:
     std::map<std::string, int> mSharedDataSize;
+    std::map<std::string, bool> mSharedDataDynamic;
     std::vector<Plato::communication::broadcast_t> mBroadcast;
     std::vector<std::pair<std::string, std::string>> mSharedDataIdentifiers;
     std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> mSharedDataMap;

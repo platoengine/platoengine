@@ -11,6 +11,7 @@ set(PLATO_INCLUDES ${PLATO_INCLUDES}
   ${CMAKE_SOURCE_DIR}/base/src/interface
   ${CMAKE_SOURCE_DIR}/base/src/geometry/MovingLeastSquares
   ${CMAKE_SOURCE_DIR}/base/src/geometry/Cogent
+  ${CMAKE_SOURCE_DIR}/base/src/geometry/ESP
   ${CMAKE_SOURCE_DIR}/base/src/EngineInterfaceToPlatoSubproblemLibrary
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/Agent
   ${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibrary/BoundedSupportFunction

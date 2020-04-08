@@ -62,6 +62,7 @@
 #include "Plato_DataLayer.hpp"
 #include "Plato_Exceptions.hpp"
 #include "Plato_SharedData.hpp"
+#include "Plato_Console.hpp"
 
 namespace Plato
 {
@@ -155,6 +156,8 @@ private:
     std::vector<Plato::Stage*> mStages;
 
     Plato::ExceptionHandler* mExceptionHandler;
+
+    Plato::Console* mConsole;
 
     int mLocalCommID;
     int mPerformerID;

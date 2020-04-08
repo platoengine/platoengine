@@ -1,12 +1,12 @@
 import exodus
-import Plato
+import PlatoPython
 
-# boilerplate that dynamically loads the mpi library required by Plato.Analyze
+# boilerplate that dynamically loads the mpi library required by PlatoPython.Analyze
 import ctypes
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-analyze = Plato.Analyze("InternalEnergyGradX_input.xml", "InternalEnergyGradX_appfile.xml", "3D square bar")
+analyze = PlatoPython.Analyze("InternalEnergyGradX_input.xml", "InternalEnergyGradX_appfile.xml", "3D square bar")
 analyze.initialize();
 
 outMesh = exodus.ExodusDB()

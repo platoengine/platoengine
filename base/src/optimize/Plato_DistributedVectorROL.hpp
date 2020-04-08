@@ -244,7 +244,7 @@ public:
     }
 
     /******************************************************************************/
-    void set(const std::vector<ScalarType> & aInput)
+    void setVector(const std::vector<ScalarType> & aInput)
     /******************************************************************************/
     {
         mData = aInput;

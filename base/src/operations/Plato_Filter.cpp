@@ -113,11 +113,17 @@ void Filter::operator()()
         Real* tBaseField;
         tBasefield->ExtractView(&tBaseField);
 
-        mFilter->apply_on_gradient(tLength, tBaseField, tOutputField);
+        if(mFilter)
+        {
+            mFilter->apply_on_gradient(tLength, tBaseField, tOutputField);
+        }
     }
     else
     {
-        mFilter->apply_on_field(tLength, tOutputField);
+        if(mFilter)
+        {
+            mFilter->apply_on_field(tLength, tOutputField);
+        }
     }
 
     if(mPlatoApp->getTimersTree())

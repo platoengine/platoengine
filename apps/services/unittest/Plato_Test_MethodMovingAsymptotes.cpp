@@ -960,7 +960,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_CircleRadius)
     std::cout << tOutputs.mStopCriterion.c_str() << "\n" << std::flush;
 }
 
-TEST(PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
+TEST(DISABLED_PlatoTest, MethodMovingAsymptotes_MinComplianceVolumeConstraint)
 {
     // ************** ALLOCATE SIMPLE STRUCTURAL TOPOLOGY OPTIMIZATION SOLVER **************
     const int tNumElementsXDir = 30;

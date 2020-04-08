@@ -67,7 +67,10 @@ void UpdateProblem::operator()()
 {
     // update filter
     Plato::AbstractFilter* tFilter = mPlatoApp->getFilter();
-    tFilter->advance_continuation();
+    if (tFilter)
+    {
+        tFilter->advance_continuation();
+    }
 
     // update other portions of the problem here (if necessary)
 }

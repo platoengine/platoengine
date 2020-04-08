@@ -94,9 +94,10 @@ DataLayer::DataLayer(const Plato::SharedDataInfo & aSharedDataInfo, const Plato:
         if(tMyLayout == "GLOBAL")
         {
             const int tSize = aSharedDataInfo.getSharedDataSize(tMyName);
+            const int tIsDynamic = aSharedDataInfo.getSharedDataDynamic(tMyName);
             assert(tSize > static_cast<int>(0));
             std::vector<std::string> tMyProviderNames = aSharedDataInfo.getProviderNames(tIndex);
-            tNewData = new Plato::SharedValue(tMyName, tMyProviderNames, aCommData, tSize);
+            tNewData = new Plato::SharedValue(tMyName, tMyProviderNames, aCommData, tSize, tIsDynamic);
         }
         else
         {
