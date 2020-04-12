@@ -1,0 +1,496 @@
+<?xml version="1.0"?>
+
+<!-- DEFINE PERFORMERS -->
+
+<Performer> 
+  <Name>PlatoMain</Name>
+  <Code>Plato_Main</Code>
+  <PerformerID>0</PerformerID>
+</Performer> 
+
+<Performer> 
+  <Name>Analyze</Name>
+  <Code>Analyze</Code>
+  <PerformerID>1</PerformerID>
+</Performer> 
+
+<!-- DEFINE SHARED DATA -->
+
+<SharedData>
+    <Name>Objective Value</Name>
+    <Type>Scalar</Type>
+    <Layout>Global</Layout>
+    <OwnerName>Analyze</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient 1</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>Analyze</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Objective Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+    <Name>Volume</Name>
+    <Type>Scalar</Type>
+    <Layout>Global</Layout>
+    <OwnerName>PlatoMain</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+    <Name>Design Volume</Name>
+    <Type>Scalar</Type>
+    <Layout>Global</Layout>
+    <OwnerName>PlatoMain</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Volume Gradient</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Controls</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Analyze</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Topology</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+  <UserName>Analyze</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Lower Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Value</Name>
+  <Type>Scalar</Type>
+  <Layout>Global</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Lower Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+  <Name>Upper Bound Vector</Name>
+  <Type>Scalar</Type>
+  <Layout>Nodal Field</Layout>
+  <OwnerName>PlatoMain</OwnerName>
+  <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+    <Name>Displacement X</Name>
+    <Type>Scalar</Type>
+    <Layout>Nodal Field</Layout>
+    <OwnerName>Analyze</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+    <Name>Displacement Y</Name>
+    <Type>Scalar</Type>
+    <Layout>Nodal Field</Layout>
+    <OwnerName>Analyze</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<SharedData>
+    <Name>Displacement Z</Name>
+    <Type>Scalar</Type>
+    <Layout>Nodal Field</Layout>
+    <OwnerName>Analyze</OwnerName>
+    <UserName>PlatoMain</UserName>
+</SharedData>
+
+<!-- DEFINE PROBLEM STAGES -->
+
+<Stage> <!-- DEFINE SET LOWER BOUND ON DESIGN VARIABLES STAGE -->
+  <Name>Set Lower Bounds</Name>
+  <Input>
+    <SharedDataName>Lower Bound Value</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <Name>Calculate Lower Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Lower Bound Value</ArgumentName>
+      <SharedDataName>Lower Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Lower Bound Vector</ArgumentName>
+      <SharedDataName>Lower Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Lower Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE SET UPPER BOUND ON DESIGN VARIABLES STAGE -->
+  <Name>Set Upper Bounds</Name>
+  <Input>
+    <SharedDataName>Upper Bound Value</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <Name>Calculate Upper Bounds</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Upper Bound Value</ArgumentName>
+      <SharedDataName>Upper Bound Value</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Upper Bound Vector</ArgumentName>
+      <SharedDataName>Upper Bound Vector</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Upper Bound Vector</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE WIRTE OUTOUT TO FILE STAGE -->
+    <Name>Output To File</Name>
+
+    <Operation>
+      <Name>Write Output</Name>
+      <PerformerName>Analyze</PerformerName>
+      <Output>
+        <ArgumentName>Solution X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Solution Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Output>
+      <Output>
+        <ArgumentName>Solution Z</ArgumentName>
+        <SharedDataName>Displacement Z</SharedDataName>
+      </Output>
+    </Operation>
+
+    <Operation>
+      <Name>PlatoMainOutput</Name>
+      <PerformerName>PlatoMain</PerformerName>
+      <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <SharedDataName>Topology</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Objective Gradient</ArgumentName>
+        <SharedDataName>Objective Gradient</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Volume Gradient</ArgumentName>
+        <SharedDataName>Volume Gradient</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement X</ArgumentName>
+        <SharedDataName>Displacement X</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement Y</ArgumentName>
+        <SharedDataName>Displacement Y</SharedDataName>
+      </Input>
+      <Input>
+        <ArgumentName>Displacement Z</ArgumentName>
+        <SharedDataName>Displacement Z</SharedDataName>
+      </Input>
+    </Operation>
+</Stage>
+
+<Stage> <!-- DEFINE INITIALIZE DESIGN VARIABLES STAGE -->
+  <Name>Initialize Controls</Name>
+  
+  <Operation>
+    <Name>Initialize Field</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Initialized Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+      <SharedDataName>Controls</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE COMPUTE DESIGN VOLUME STAGE -->
+  <Name>Design Volume</Name>
+  
+  <Operation>
+    <Name>Design Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Output>
+      <ArgumentName>Design Volume</ArgumentName>
+      <SharedDataName>Design Volume</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Design Volume</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE COMPUTE VOLUME STAGE -->
+  <Name>Compute Volume Stage</Name>
+  <Input>
+    <SharedDataName>Controls</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Operation>
+    <Name>Compute Current Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Volume</ArgumentName>
+      <SharedDataName>Volume</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Volume</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE COMPUTE VOLUME GRADIENT STAGE -->
+  <Name>Compute Volume Gradient Stage</Name>
+  <Input>
+    <SharedDataName>Controls</SharedDataName>
+  </Input>
+  
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Operation>
+    <Name>Compute Current Volume</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Volume Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Operation>
+    <Name>FilterGradient</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Gradient</ArgumentName>
+      <SharedDataName>Volume Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Volume Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE COMPUTE OBJECTIVE STAGE -->
+  <Name>Compute Objective Value Stage</Name>
+  <Input>
+    <SharedDataName>Controls</SharedDataName>
+  </Input>
+
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <PerformerName>Analyze</PerformerName>
+    <Name>Compute Objective Value</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Objective Value</ArgumentName>
+      <SharedDataName>Objective Value</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Output>
+    <SharedDataName>Objective Value</SharedDataName>
+  </Output>
+</Stage>
+
+<Stage> <!-- DEFINE COMPUTE OBJECTIVE GRADIENT STAGE -->
+  <Name>Compute Objective Gradient Stage</Name>
+  <Input>
+    <SharedDataName>Controls</SharedDataName>
+  </Input>
+
+  <Operation>
+    <Name>FilterControl</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Field</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <PerformerName>Analyze</PerformerName>
+    <Name>Compute Objective Gradient</Name>
+    <Input>
+      <ArgumentName>Topology</ArgumentName>
+      <SharedDataName>Topology</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Objective Gradient</ArgumentName>
+      <SharedDataName>Objective Gradient 1</SharedDataName>
+    </Output>
+  </Operation>
+
+  <Operation>
+    <Name>FilterGradient</Name>
+    <PerformerName>PlatoMain</PerformerName>
+    <Input>
+      <ArgumentName>Field</ArgumentName>
+      <SharedDataName>Controls</SharedDataName>
+    </Input>
+    <Input>
+      <ArgumentName>Gradient</ArgumentName>
+      <SharedDataName>Objective Gradient 1</SharedDataName>
+    </Input>
+    <Output>
+      <ArgumentName>Filtered Gradient</ArgumentName>
+      <SharedDataName>Objective Gradient</SharedDataName>
+    </Output>
+  </Operation>
+  
+  <Output>
+    <SharedDataName>Objective Gradient</SharedDataName>
+  </Output>
+</Stage>
+
+<!-- DEFINE OPTIMIZATION OPTIONS -->
+
+<Optimizer>
+  <Package>OC</Package>
+  <Output>
+    <OutputStage>Output To File</OutputStage>
+  </Output>
+  <OptimizationVariables>
+    <ValueName>Controls</ValueName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <FilteredName>Topology</FilteredName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <LowerBoundValueName>Lower Bound Value</LowerBoundValueName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <LowerBoundVectorName>Lower Bound Vector</LowerBoundVectorName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <UpperBoundValueName>Upper Bound Value</UpperBoundValueName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <UpperBoundVectorName>Upper Bound Vector</UpperBoundVectorName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <SetLowerBoundsStage>Set Lower Bounds</SetLowerBoundsStage> <!--NEEDS TO MATCH STAGE NAME -->
+    <SetUpperBoundsStage>Set Upper Bounds</SetUpperBoundsStage> <!--NEEDS TO MATCH STAGE NAME -->
+    <InitializationStage>Initialize Controls</InitializationStage> <!--NEEDS TO MATCH STAGE NAME -->
+  </OptimizationVariables>
+  <Objective>
+    <ValueName>Objective Value</ValueName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <GradientName>Objective Gradient</GradientName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <ValueStageName>Compute Objective Value Stage</ValueStageName> <!--NEEDS TO MATCH STAGE NAME -->
+    <GradientStageName>Compute Objective Gradient Stage</GradientStageName> <!--NEEDS TO MATCH STAGE NAME -->
+  </Objective>
+  <BoundConstraint>
+    <Upper>1.0</Upper>
+    <Lower>0.0</Lower>
+  </BoundConstraint>
+  <Constraint>
+    <ValueName>Volume</ValueName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <GradientName>Volume Gradient</GradientName> <!--NEEDS TO MATCH SHARED DATA NAME -->
+    <ValueStageName>Compute Volume Stage</ValueStageName> <!-- NEEDS TO MATCH STAGE NAME -->
+    <GradientStageName>Compute Volume Gradient Stage</GradientStageName> <!--NEEDS TO MATCH STAGE NAME -->
+    <ReferenceValueName>Design Volume</ReferenceValueName>
+    <NormalizedTargetValue>.4</NormalizedTargetValue> <!-- 0.901688 is calculated to remove 1/3 of baffle material-->
+  </Constraint>
+  <Convergence>
+    <MaxIterations>20</MaxIterations>
+  </Convergence>
+</Optimizer>
