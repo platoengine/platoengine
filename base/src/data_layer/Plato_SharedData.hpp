@@ -82,47 +82,41 @@ struct data
 **********************************************************************************/
 inline std::string get_data_latout(const Plato::data::layout_t& aInput)
 {
-    switch (aInput)
+    std::string tOutput("UNDEFINED");
+    switch(aInput)
     {
         case Plato::data::SCALAR:
         {
-            return std::string("GLOBAL SCALAR VALUE");
+            tOutput = std::string("GLOBAL SCALAR VALUE");
             break;
         }
         case Plato::data::SCALAR_FIELD:
         {
-            return std::string("SCALAR FIELD");
+            tOutput = std::string("SCALAR FIELD");
             break;
         }
         case Plato::data::VECTOR_FIELD:
         {
-            return std::string("VECTOR FIELD");
+            tOutput = std::string("VECTOR FIELD");
             break;
         }
         case Plato::data::TENSOR_FIELD:
         {
-            return std::string("TENSOR FIELD");
+            tOutput = std::string("TENSOR FIELD");
             break;
         }
         case Plato::data::ELEMENT_FIELD:
         {
-            return std::string("ELEMENT FIELD");
+            tOutput = std::string("ELEMENT FIELD");
             break;
         }
         case Plato::data::SCALAR_PARAMETER:
         {
-            return std::string("SCALAR PARAMETER");
-            break;
-        }
-        default:
-        {
-            throw std::runtime_error(std::string("\n\nFILE: ") + __FILE__ \
-            + std::string("\nFUNCTION: ") + __PRETTY_FUNCTION__ \
-            + std::string("\nLINE:") + std::to_string(__LINE__) \
-            + std::string("\nMESSAGE: ") + "Input 'data layout' is not supported" + "\n\n");
+            tOutput = std::string("SCALAR PARAMETER");
             break;
         }
     }
+    return tOutput;
 }
 // function get_data_latout
 
