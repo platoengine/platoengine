@@ -71,54 +71,15 @@ struct data
 {
     enum layout_t
     {
-        SCALAR = 0, SCALAR_FIELD = 1, VECTOR_FIELD = 2, TENSOR_FIELD = 3, ELEMENT_FIELD = 4, SCALAR_PARAMETER = 5
+        SCALAR = 0,
+        SCALAR_FIELD = 1,
+        VECTOR_FIELD = 2,
+        TENSOR_FIELD = 3,
+        ELEMENT_FIELD = 4,
+        SCALAR_PARAMETER = 5,
+        UNDEFINED = 6
     };
 };
-
-/******************************************************************************//**
- * \brief Return string with data layout description
- * \param [in] aInput 1D data layout description
- * \return string with data layout description
-**********************************************************************************/
-inline std::string get_data_latout(const Plato::data::layout_t& aInput)
-{
-    std::string tOutput("UNDEFINED");
-    switch(aInput)
-    {
-        case Plato::data::SCALAR:
-        {
-            tOutput = std::string("GLOBAL SCALAR VALUE");
-            break;
-        }
-        case Plato::data::SCALAR_FIELD:
-        {
-            tOutput = std::string("SCALAR FIELD");
-            break;
-        }
-        case Plato::data::VECTOR_FIELD:
-        {
-            tOutput = std::string("VECTOR FIELD");
-            break;
-        }
-        case Plato::data::TENSOR_FIELD:
-        {
-            tOutput = std::string("TENSOR FIELD");
-            break;
-        }
-        case Plato::data::ELEMENT_FIELD:
-        {
-            tOutput = std::string("ELEMENT FIELD");
-            break;
-        }
-        case Plato::data::SCALAR_PARAMETER:
-        {
-            tOutput = std::string("SCALAR PARAMETER");
-            break;
-        }
-    }
-    return tOutput;
-}
-// function get_data_latout
 
 /******************************************************************************//**
  * \brief Shared Data abstract class
