@@ -618,7 +618,8 @@ private:
     void performContinuation()
     {
         const bool tIsContinuationEnabled = mProblemUpdateFrequency > static_cast<OrdinalType>(0);
-        bool tPerformContinuation = tIsContinuationEnabled ? (mIterationCount % mProblemUpdateFrequency) == static_cast<OrdinalType>(0) : false;
+        const auto IterationCountOneBase = mIterationCount + static_cast<OrdinalType>(1);
+        bool tPerformContinuation = tIsContinuationEnabled ? (IterationCountOneBase % mProblemUpdateFrequency) == static_cast<OrdinalType>(0) : false;
         if (tPerformContinuation)
         {
             mObjective->updateProblem(mDataMng->getCurrentControls());
