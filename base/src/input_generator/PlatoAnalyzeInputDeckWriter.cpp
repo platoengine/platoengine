@@ -122,6 +122,59 @@ bool PlatoAnalyzeInputDeckWriter::generate(std::ostringstream *aStringStream)
     return true;
 }
 
+bool PlatoAnalyzeInputDeckWriter::generateForShape(std::ostringstream *aStringStream)
+{
+    for(size_t i=0; i<mInputData.objectives.size(); ++i)
+    {
+        const XMLGen::Objective& cur_obj = mInputData.objectives[i];
+        if(!cur_obj.code_name.compare("plato_analyze"))
+        {
+            if(checkForNodesetSidesetNameConflicts())
+              return false;
+
+            char buf[200];
+            sprintf(buf, "plato_analyze_input_deck_%s.xml", cur_obj.name.c_str());
+            pugi::xml_document doc;
+
+            // Version entry
+            pugi::xml_node tmp_node = doc.append_child(pugi::node_declaration);
+            tmp_node.set_name("xml");
+            pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
+            tmp_att.set_value("1.0");
+
+            pugi::xml_node n1, n2;
+            n1 = doc.append_child("ParameterList");
+            n1.append_attribute("name") = "Problem";
+            addNTVParameter(n1, "Physics", "string", "Plato Driver");
+            addNTVParameter(n1, "Spatial Dimension", "int", "3");
+            addNTVParameter(n1, "Input Mesh", "string", mInputData.csm_exodus_filename.c_str());
+
+            n2 = n1.append_child("ParameterList");
+            n2.append_attribute("name") = "Plato Problem";
+            if(!cur_obj.type.compare("maximize stiffness"))
+            {
+                buildMaximizeStiffnessParamsForPlatoAnalyze(cur_obj, n2);
+            }
+            else if(!cur_obj.type.compare("maximize heat conduction"))
+            {
+                buildMaximizeHeatConductionParamsForPlatoAnalyze(cur_obj, n2);
+            }
+            else if(!cur_obj.type.compare("minimize thermoelastic energy"))
+            {
+                buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(cur_obj, n2);
+            }
+
+            // Write the file
+            if(aStringStream)
+                doc.save(*aStringStream, "\t", pugi::format_default & ~pugi::format_indent);
+            else
+                doc.save_file(buf, "  ");
+        }
+    }
+
+    return true;
+}
+
 /******************************************************************************/
 bool PlatoAnalyzeInputDeckWriter::checkForNodesetSidesetNameConflicts()
 /******************************************************************************/

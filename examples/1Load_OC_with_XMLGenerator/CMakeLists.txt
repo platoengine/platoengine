@@ -24,7 +24,9 @@ set( NUM_PROCS "${PLATOMAIN_NP} ${PLATOSTATICS_NP}" )
 set(OUTPUT_MESH platomain.exo)
 set(XMLGEN_COMMAND "../../base/src/input_generator/XMLGenerator plato_input_deck.i")
 
+set( SKIP_EXODIFF 0 )
+
 # Run test
-Plato_add_xmlgen_test(${TEST_NAME} ${XMLGEN_COMMAND} ${NUM_PROCS} ${IO_COMM_INDEX} ${OUTPUT_MESH})
+Plato_add_xmlgen_test(${TEST_NAME} ${XMLGEN_COMMAND} ${NUM_PROCS} ${IO_COMM_INDEX} ${OUTPUT_MESH} ${SKIP_EXODIFF})
 
 endif()

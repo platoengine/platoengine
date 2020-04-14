@@ -1,0 +1,18 @@
+mpirun \
+-np 1 \
+-x PLATO_PERFORMER_ID=0 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=platomain_operations.xml \
+PlatoMain PlatoMain.xml \
+: \
+-np 5 \
+-x PLATO_PERFORMER_ID=1 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=platoesp_operations.xml \
+PlatoESP PlatoESP.xml \
+: \
+-np 1 \
+-x PLATO_PERFORMER_ID=2 \
+-x PLATO_INTERFACE_FILE=interface.xml \
+-x PLATO_APP_FILE=plato_analyze_operations_1.xml \
+LGR_MPMD --input-config=plato_analyze_input_deck_1.xml

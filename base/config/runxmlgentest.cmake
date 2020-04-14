@@ -46,8 +46,11 @@ endif()
 
 # 2. Find and run exodiff
 
-if (NOT SEACAS_EXODIFF)
-  message(FATAL_ERROR "Cannot find exodiff")
+if(${SKIP_EXODIFF} MATCHES "1")
+  message("----------------- Skipping exodiff ------------------")
+else()
+  if (NOT SEACAS_EXODIFF)
+    message(FATAL_ERROR "Cannot find exodiff")
 endif()
 
 SET(EXODIFF_TEST ${SEACAS_EXODIFF} -i -m -f ${DATA_DIR}/${TEST_NAME}.exodiff_commands ${OUTPUT_MESH} ${DATA_DIR}/${TEST_NAME}.ref.exo)
@@ -59,4 +62,5 @@ EXECUTE_PROCESS(COMMAND ${EXODIFF_TEST} OUTPUT_FILE exodiff.out RESULT_VARIABLE 
 
 if(HAD_ERROR)
   message(FATAL_ERROR "Test failed")
+endif()
 endif()

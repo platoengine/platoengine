@@ -277,7 +277,7 @@ endfunction( Plato_add_test )
 ## )
 ###############################################################################
 
-function( Plato_add_xmlgen_test TEST_NAME XMLGEN_COMMAND NUM_PROCS IO_COMM_INDEX OUTPUT_MESH )
+function( Plato_add_xmlgen_test TEST_NAME XMLGEN_COMMAND NUM_PROCS IO_COMM_INDEX OUTPUT_MESH SKIP_EXODIFF )
 
 #    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
   set( RUN_COMMAND "source ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source" )
@@ -288,6 +288,7 @@ function( Plato_add_xmlgen_test TEST_NAME XMLGEN_COMMAND NUM_PROCS IO_COMM_INDEX
            -DTEST_NAME=${TEST_NAME} 
            -DNUM_PROCS=${NUM_PROCS}
            -DXMLGEN_COMMAND=${XMLGEN_COMMAND}
+           -DSKIP_EXODIFF=${SKIP_EXODIFF}
            -DSEACAS_EPU=${SEACAS_EPU} 
            -DSEACAS_EXODIFF=${SEACAS_EXODIFF} 
            -DSEACAS_DECOMP=${SEACAS_DECOMP}

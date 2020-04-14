@@ -63,6 +63,7 @@ public:
     PlatoAnalyzeInputDeckWriter(const InputData &aInputData);
     ~PlatoAnalyzeInputDeckWriter();
     bool generate(std::ostringstream *aStringStream = NULL);
+    bool generateForShape(std::ostringstream *aStringStream = NULL);
 
 protected:
 

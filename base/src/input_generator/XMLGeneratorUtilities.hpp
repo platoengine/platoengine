@@ -56,13 +56,55 @@
 namespace XMLGen
 {
 
-bool addNTVParameter(pugi::xml_node parent_node,
+    bool addNTVParameter(pugi::xml_node parent_node,
                      const std::string &name,
                      const std::string &type,
                      const std::string &value);
-void getUncertaintyFlags(const InputData &aInputData,
+    void getUncertaintyFlags(const InputData &aInputData,
                          bool &aHasUncertainties,
                          bool &aRequestedVonMisesOutput);
+    bool addChild(pugi::xml_node parent_node, 
+              const std::string &name, 
+              const std::string &value);
+
+    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_document &aDoc,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aOwner,
+                                                   const std::string &aUser);
+    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_node &aNode,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aOwner,
+                                                   const std::string &aUser);
+    pugi::xml_node createSingleUserElementSharedData(pugi::xml_document &aDoc,
+                                                     const std::string &aName,
+                                                     const std::string &aType,
+                                                     const std::string &aOwner,
+                                                     const std::string &aUser);
+    pugi::xml_node createSingleUserElementSharedData(pugi::xml_node &aNode,
+                                                     const std::string &aName,
+                                                     const std::string &aType,
+                                                     const std::string &aOwner,
+                                                     const std::string &aUser);
+    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                    const std::string &aName,
+                                                    const std::string &aType,
+                                                    const std::string &aSize,
+                                                    const std::string &aOwner,
+                                                    const std::string &aUser);
+    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_node &aNode,
+                                                    const std::string &aName,
+                                                    const std::string &aType,
+                                                    const std::string &aSize,
+                                                    const std::string &aOwner,
+                                                    const std::string &aUser);
+    pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
+                                                   const std::string &aName,
+                                                   const std::string &aType,
+                                                   const std::string &aSize,
+                                                   const std::string &aOwner,
+                                                   const std::vector<std::string> &aUsers);
 
 }
 

@@ -73,44 +73,6 @@ public:
 
 protected:
 
-    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_document &aDoc,
-                                                   const std::string &aName,
-                                                   const std::string &aType,
-                                                   const std::string &aOwner,
-                                                   const std::string &aUser);
-    pugi::xml_node createSingleUserNodalSharedData(pugi::xml_node &aNode,
-                                                   const std::string &aName,
-                                                   const std::string &aType,
-                                                   const std::string &aOwner,
-                                                   const std::string &aUser);
-    pugi::xml_node createSingleUserElementSharedData(pugi::xml_document &aDoc,
-                                                     const std::string &aName,
-                                                     const std::string &aType,
-                                                     const std::string &aOwner,
-                                                     const std::string &aUser);
-    pugi::xml_node createSingleUserElementSharedData(pugi::xml_node &aNode,
-                                                     const std::string &aName,
-                                                     const std::string &aType,
-                                                     const std::string &aOwner,
-                                                     const std::string &aUser);
-    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_document &aDoc,
-                                                    const std::string &aName,
-                                                    const std::string &aType,
-                                                    const std::string &aSize,
-                                                    const std::string &aOwner,
-                                                    const std::string &aUser);
-    pugi::xml_node createSingleUserGlobalSharedData(pugi::xml_node &aNode,
-                                                    const std::string &aName,
-                                                    const std::string &aType,
-                                                    const std::string &aSize,
-                                                    const std::string &aOwner,
-                                                    const std::string &aUser);
-    pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
-                                                   const std::string &aName,
-                                                   const std::string &aType,
-                                                   const std::string &aSize,
-                                                   const std::string &aOwner,
-                                                   const std::vector<std::string> &aUsers);
     bool parseCSMFileFromStream(std::istream &aStream);
     bool parseCSMFile();
     void generateROLInput();
@@ -131,16 +93,22 @@ protected:
     bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool generateDefinesXML(std::ostringstream *aStringStream = NULL);
+    bool generatePlatoAnalyzeShapeDefinesXML();
     bool generateInterfaceXML();
+    bool generatePlatoAnalyzeShapeInterfaceXML();
     bool generateLaunchScript();
+    bool generatePlatoAnalyzeShapeLaunchScript();
     bool generateSummitLaunchScripts();
-    bool generatePlatoOperationsXML();
+    bool generatePlatoMainOperationsXML();
+    bool generatePlatoMainOperationsXMLForShape();
     bool generatePlatoMainInputDeckXML();
+    bool generatePlatoESPInputDeckXML();
     bool generatePerformerOperationsXML();
     bool generateSalinasOperationsXML();
     bool generateAlbanyOperationsXML();
     bool generatePlatoAnalyzeOperationsXML();
-    bool generatePlatoAnalyzeOperationsXMLForNewUncertaintyWorkflow();
+    bool generatePlatoAnalyzeOperationsXMLForShape();
+    bool generatePlatoESPOperationsXMLForShape();
     bool generateLightMPOperationsXML();
     bool generatePhysicsInputDecks();
     bool generateSalinasInputDecks(std::ostringstream *aStringStream = NULL);
@@ -167,7 +135,6 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    bool addChild(pugi::xml_node parent_node, const std::string &name, const std::string &value);
     bool outputVolumeStage(pugi::xml_document &doc);
     void outputUpdateProblemStage(pugi::xml_document &doc);
     void outputOutputToFileStage(pugi::xml_document &doc,
