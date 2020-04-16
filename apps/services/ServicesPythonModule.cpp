@@ -115,9 +115,6 @@ class SharedValue : public SharedData
 
 struct Services {
     PyObject_HEAD
-    std::string m_inputfileName;
-    std::string m_appfileName;
-    std::string m_instanceName;
     std::shared_ptr<PlatoApp> m_MPMD_App;
     std::vector<int> m_localNodeIDs;
     std::vector<int> m_localElemIDs;
@@ -298,10 +295,8 @@ Services_init(Services *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    self->m_inputfileName = std::string(inputfileName);
-    self->m_appfileName   = std::string(appfileName);
-    self->m_instanceName  = std::string(instanceName);
-
+    std::string tInputfileName(inputfileName);
+    std::string tAppfileName(appfileName);
 
     // construct artificial argc and argv for initializing mpi, kokkos, and the MPMD_App
     //
@@ -310,7 +305,7 @@ Services_init(Services *self, PyObject *args, PyObject *kwds)
     char exeName[] = "exeName";
     char* arg0 = strdup(exeName);
     argv[0] = arg0;
-    char* arg1 = strdup(self->m_inputfileName.c_str());
+    char* arg1 = strdup(tInputfileName.c_str());
     argv[1] = arg1;
     argv[argc] = NULL;
 
@@ -330,7 +325,7 @@ Services_init(Services *self, PyObject *args, PyObject *kwds)
     //
     MPI_Comm myComm;
     MPI_Comm_dup(MPI_COMM_WORLD, &myComm);
-    setenv("PLATO_APP_FILE", self->m_appfileName.c_str(), true);
+    setenv("PLATO_APP_FILE", tAppfileName.c_str(), true);
     self->m_MPMD_App = std::make_shared<PlatoApp>(argc, argv, myComm);
 
 
@@ -354,7 +349,7 @@ static PyMemberDef Services_members[] = {
 static PyObject *
 Services_name(Services* self)
 {
-    PyObject *result = Py_BuildValue("s", self->m_instanceName.c_str());
+    PyObject *result = Py_BuildValue("s", "PlatoServices");
 
     return result;
 }
