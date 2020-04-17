@@ -1,0 +1,13 @@
+/Projects/Bingo/bingo/bingo/symbolic_regression/implicit_regression.py:60: RuntimeWarning: invalid value encountered in true_divide
+  normalized_fitness = np.sum(dot_product, axis=1) / denominator
+OptimizeResult(success=False, status=1, message='Stagnation occurred with no improvement for more than 100 generations', ngen=180, fitness=0.011125010320428712, time=74.847482)
+Generation:  180
+  FITNESS    COMPLEXITY    EQUATION
+0, 0, E/((1.0+v)(1.0-2.0*v))
+0.011125010320428712, 5, (X_1)(X_1) + (X_0)(X_0)
+0.6253582149736167, 3, (X_1)(X_0)
+1.0, 1, X_0
+/Users/allen/.venv/bingoenv/lib/python3.7/site-packages/scipy/optimize/minpack.py:162: RuntimeWarning: The iteration is not making good progress, as measured by the 
+  improvement from the last ten iterations.
+  warnings.warn(msg, RuntimeWarning)
+[16.]
