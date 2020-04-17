@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<!-- DEFINE COMPUTE OBJECTIVE VALUE OPERATION -->
+
+<Operation>
+  <Function>ComputeObjectiveValue</Function>
+  <Name>Compute Objective Value</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<!-- DEFINE COMPUTE OBJECTIVE GRADIENT OPERATION -->
+
+<Operation>
+  <Function>ComputeObjectiveGradient</Function>
+  <Name>Compute Objective Gradient</Name>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<!-- DEFINE WRITE ANALYZE OUTPUTS OPERATION -->
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Solution X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Y</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Z</ArgumentName>
+  </Output>
+</Operation>
+
