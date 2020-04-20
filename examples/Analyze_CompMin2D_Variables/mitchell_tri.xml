@@ -13,7 +13,6 @@
     <Parameter name="PDE Constraint"     type="string"  value="Elliptic"/>
     <Parameter name="Constraint"  type="string"  value="My Volume"/>
     <Parameter name="Objective"          type="string"  value="My Internal Elastic Energy"/>
-
     <Parameter name="Self-Adjoint"       type="bool"    value="true"/>
 
 
