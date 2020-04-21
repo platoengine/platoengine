@@ -819,20 +819,6 @@ TEST(PlatoTest, compute_sample_set_mean_global_value_error)
     ASSERT_THROW(Plato::compute_sample_set_mean(tPairs), std::runtime_error);
 }
 
-TEST(PlatoTest, compute_sample_set_mean_field_value_error)
-{
-    // EMPTY INPUT
-    std::vector<double> tMean = {0, 0};
-    std::vector<Plato::SampleProbPair<double*, double>> tPairs;
-    ASSERT_THROW(Plato::compute_sample_set_mean(tPairs, tMean.data()), std::runtime_error);
-
-    // NEGATIVE LENGTH
-    tPairs.push_back(Plato::SampleProbPair<double*, double>{});
-    tPairs[0].mLength = -1;
-    tPairs[0].mProbability = 0.2;
-    std::vector<double> tSample1 = {1, 3};
-}
-
 TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_error)
 {
     // EMPTY INPUT

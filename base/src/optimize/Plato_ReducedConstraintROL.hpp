@@ -72,6 +72,8 @@ template<class ScalarType>
 class ReducedConstraintROL : public ROL::Constraint<ScalarType>
 {
 public:
+    using ROL::Constraint::applyAdjointJacobian;
+
     /******************************************************************************//**
      * \brief Constructor
      * \param [in] aInputData XML input data
