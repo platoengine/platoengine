@@ -49,7 +49,7 @@
 
 #include <cstddef>
 #include <vector>
-#include <float.h>
+#include <cfloat>
 #include <string>
 
 namespace Plato
