@@ -72,7 +72,7 @@ template<class ScalarType>
 class ReducedConstraintROL : public ROL::Constraint<ScalarType>
 {
 public:
-    using ROL::Constraint::applyAdjointJacobian;
+    using ROL::Constraint::applyAdjointJacobian<class ScalarType>;
 
     /******************************************************************************//**
      * \brief Constructor
