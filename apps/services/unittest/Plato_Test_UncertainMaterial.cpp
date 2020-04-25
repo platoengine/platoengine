@@ -228,7 +228,7 @@ public:
     std::vector<std::string> tags() const
     {
         std::vector<std::string> tTags;
-        for(auto tItr : mTags)
+        for(auto& tItr : mTags)
         {
             tTags.push_back(tItr.first);
         }
@@ -340,7 +340,7 @@ inline void define_deterministic_material(const Plato::srom::Material& aInMateri
 inline void append_deterministic_materials(const std::vector<Plato::srom::Material>& aInput,
                                            std::vector<Plato::srom::RandomMaterialCase>& aOutput)
 {
-    for (auto tMaterialCase : aOutput)
+    for (auto& tMaterialCase : aOutput)
     {
         for (auto tMaterial : aInput)
         {
@@ -359,16 +359,16 @@ inline void append_deterministic_materials(const std::vector<Plato::srom::Materi
     }
 }
 
-inline void expand_random_and_deterministic_materials(const std::vector<Plato::srom::Material>& aMaterials,
-                                                      std::vector<Plato::srom::Material>& aRandomMats,
-                                                      std::vector<Plato::srom::Material>& aDeterministicMats)
+inline void split_random_and_deterministic_materials(const std::vector<Plato::srom::Material>& aMaterials,
+                                                     std::vector<Plato::srom::Material>& aRandomMats,
+                                                     std::vector<Plato::srom::Material>& aDeterministicMats)
 {
     if(aMaterials.empty())
     {
         PRINTERR("Expand Random And Deterministic Materials: Input material container is empty.");
     }
 
-    for(auto tMaterial : aMaterials)
+    for(auto& tMaterial : aMaterials)
     {
         if(tMaterial.isDeterministic())
         {
@@ -381,6 +381,106 @@ inline void expand_random_and_deterministic_materials(const std::vector<Plato::s
     }
 }
 
+inline void append_random_material_properties
+(const Plato::srom::Material& aMaterial,
+ const std::vector<Plato::srom::SromVariable>& aSromVariables,
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
+{
+    for(auto& tSromVar : aSromVariables)
+    {
+        if(aRandomMaterialSet.empty())
+        {
+            for(auto& tSample : tSromVar.mSampleProbPairs.mSamples)
+            {
+                Plato::srom::RandomMaterial tRandomMaterial;
+                tRandomMaterial.blockID(aMaterial.blockID());
+                tRandomMaterial.category(aMaterial.category());
+                tRandomMaterial.materialID(aMaterial.materialID());
+
+                auto tIndex = &tSample - &tSromVar.mSampleProbPairs.mSamples[0];
+                tRandomMaterial.probability(tSromVar.mSampleProbPairs.mProbabilities[tIndex]);
+
+                auto tValue = std::to_string(tSromVar.mSampleProbPairs.mSamples[tIndex]);
+                tRandomMaterial.append(tSromVar.mTag, tSromVar.mAttribute, tValue);
+
+                aRandomMaterialSet.push_back(tRandomMaterial);
+            }
+        }
+        else
+        {
+            auto tOriginalRandomMaterialSet = aRandomMaterialSet;
+
+            for(auto& tRandomMaterial : aRandomMaterialSet)
+            {
+                auto tUpdatedProbability = tRandomMaterial.probability()
+                    * tSromVar.mSampleProbPairs.mProbabilities[0];
+                tRandomMaterial.probability(tUpdatedProbability);
+                auto tValue = std::to_string(tSromVar.mSampleProbPairs.mSamples[0]);
+                tRandomMaterial.append(tSromVar.mTag, tSromVar.mAttribute, tValue);
+            }
+
+            auto tBeginItr = tSromVar.mSampleProbPairs.mSamples.begin();
+            for(auto tItr = tBeginItr++; tItr != tSromVar.mSampleProbPairs.mSamples.end(); tItr++)
+            {
+                for(auto& tOriginalRandomMaterial : tOriginalRandomMaterialSet)
+                {
+                    Plato::srom::RandomMaterial tNewRandomMaterial;
+                    tNewRandomMaterial.blockID(aMaterial.blockID());
+                    tNewRandomMaterial.category(aMaterial.category());
+                    tNewRandomMaterial.materialID(aMaterial.materialID());
+
+                    auto tIndex = std::distance(tBeginItr, tItr);
+                    auto tUpdatedProbability = tOriginalRandomMaterial.probability()
+                        * tSromVar.mSampleProbPairs.mProbabilities[tIndex];
+                    tNewRandomMaterial.probability(tUpdatedProbability);
+                    auto tValue = std::to_string(tSromVar.mSampleProbPairs.mSamples[tIndex]);
+                    tNewRandomMaterial.append(tSromVar.mTag, tSromVar.mAttribute, tValue);
+
+                    auto tOriginalTags = tOriginalRandomMaterial.tags();
+                    for(auto& tTag : tOriginalTags)
+                    {
+                        auto tValue = tOriginalRandomMaterial.value(tTag);
+                        auto tAttribute = tOriginalRandomMaterial.attribute(tTag);
+                        tNewRandomMaterial.append(tTag, tAttribute, tValue);
+                    }
+
+                    aRandomMaterialSet.push_back(tNewRandomMaterial);
+                }
+            }
+        }
+    }
+}
+
+inline void append_deterministic_material_properties
+(const Plato::srom::Material &aMaterial,
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
+{
+    auto tDeterministicVars = aMaterial.deterministicVars();
+    for(auto tRandomMaterial : aRandomMaterialSet)
+    {
+        for(auto &tVar : tDeterministicVars)
+        {
+            tRandomMaterial.append(tVar.mTag, tVar.mAttribute, tVar.mValue);
+            tRandomMaterial.check();
+        }
+    }
+}
+
+inline void build_random_materials_set
+(const Plato::srom::Material& aMaterial,
+ const std::vector<Plato::srom::SromVariable>& aSromVariables,
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterials)
+{
+    aMaterial.check();
+    if(aSromVariables.empty())
+    {
+        THROWERR("Build Random Material: Input set of SROM variables is empty.")
+    }
+
+    Plato::srom::append_random_material_properties(aMaterial, aSromVariables, aRandomMaterials);
+    Plato::srom::append_deterministic_material_properties(aMaterial, aRandomMaterials);
+}
+
 inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aInput,
                                     std::vector<Plato::srom::RandomMaterialCase>& aOutput)
 {
@@ -390,9 +490,9 @@ inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aI
     }
 
     std::vector<Plato::srom::Material> tRandomMaterials, tDeterministicMaterials;
-    Plato::srom::expand_random_and_deterministic_materials(aInput, tRandomMaterials, tDeterministicMaterials);
+    Plato::srom::split_random_and_deterministic_materials(aInput, tRandomMaterials, tDeterministicMaterials);
 
-    for(auto tMaterial : tRandomMaterials)
+    for(auto& tMaterial : tRandomMaterials)
     {
         tMaterial.check();
         if(tMaterial.isDeterministic())
@@ -409,6 +509,9 @@ inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aI
                 << "number '" << tMaterial.blockID() << "'.";
             PRINTERR(tMsg.str().c_str());
         }
+
+        std::vector<Plato::srom::RandomMaterial> tRandomMaterials;
+        Plato::srom::build_random_materials_set(tMaterial, tMySampleProbPairs, tRandomMaterials);
     }
     return (true);
 }
