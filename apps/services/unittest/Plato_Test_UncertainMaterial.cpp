@@ -45,6 +45,11 @@ public:
     {
         return (mRandomVars.empty());
     }
+    bool undefined() const
+    {
+        auto tIsMaterialUndefined = mDeterministicVars.empty() && mRandomVars.empty();
+        return tIsMaterialUndefined;
+    }
 
     void check() const
     {
@@ -249,23 +254,36 @@ public:
 struct RandomMaterialCase
 {
 private:
-    std::string mCaseID;      /*!< random material case identification number */
-    std::string mProbability; /*!< probability associated with this random load case */
-    std::map<std::string, Plato::srom::RandomMaterial> mMaterials; /*!< set of random materials for random material case */
+    double mProbability; /*!< probability associated with this random load case */
+    std::string mCaseID; /*!< random material case identification number */
+    std::map<std::string, Plato::srom::RandomMaterial> mMaterialCases; /*!< set of random materials for random material case */
 
 public:
+    void caseID(const std::string& aCaseID)
+    {
+        mCaseID = aCaseID;
+    }
     std::string caseID() const
     {
         return (mCaseID);
     }
-    std::string probability() const
+    void probability(const double& aProbability)
+    {
+        mProbability = aProbability;
+    }
+    double probability() const
     {
         return (mProbability);
     }
+    std::string probabilityToString() const
+    {
+        auto tOutput = std::to_string(mProbability);
+        return (tOutput);
+    }
     std::string blockID(const std::string& aMaterialID) const
     {
-        auto tItr = mMaterials.find(aMaterialID);
-        if(tItr == mMaterials.end())
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
         {
             std::ostringstream tMsg;
             tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
@@ -275,8 +293,8 @@ public:
     }
     std::string category(const std::string& aMaterialID) const
     {
-        auto tItr = mMaterials.find(aMaterialID);
-        if(tItr == mMaterials.end())
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
         {
             std::ostringstream tMsg;
             tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
@@ -286,8 +304,8 @@ public:
     }
     std::vector<std::string> tags(const std::string& aMaterialID) const
     {
-        auto tItr = mMaterials.find(aMaterialID);
-        if(tItr == mMaterials.end())
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
         {
             std::ostringstream tMsg;
             tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
@@ -297,8 +315,8 @@ public:
     }
     std::string value(const std::string& aMaterialID, const std::string& aTag) const
     {
-        auto tItr = mMaterials.find(aMaterialID);
-        if(tItr == mMaterials.end())
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
         {
             std::ostringstream tMsg;
             tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
@@ -308,8 +326,8 @@ public:
     }
     std::string attribute(const std::string& aMaterialID, const std::string& aTag) const
     {
-        auto tItr = mMaterials.find(aMaterialID);
-        if(tItr == mMaterials.end())
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
         {
             std::ostringstream tMsg;
             tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
@@ -317,12 +335,42 @@ public:
         }
         return (tItr->second.attribute(aTag));
     }
+    std::vector<Plato::srom::RandomMaterial> materials() const
+    {
+        std::vector<Plato::srom::RandomMaterial> tMaterials;
+        for(auto& tItr : mMaterialCases)
+        {
+            tMaterials.push_back(tItr.second);
+        }
+        return tMaterials;
+    }
     void append(const std::string& aMaterialID, const Plato::srom::RandomMaterial& aMaterial)
     {
-        mMaterials.insert(std::pair<std::string, Plato::srom::RandomMaterial>("aMaterialID", aMaterial));
+        mMaterialCases.insert(std::pair<std::string, Plato::srom::RandomMaterial>("aMaterialID", aMaterial));
     }
 };
 // struct RandomMaterialCase
+
+
+/******************************************************************************//**
+ * \brief Assign an identification number to each randome material case in the set.
+ * \param [out] aRandomMaterialCases random material cases
+**********************************************************************************/
+inline void assign_material_case_identification_number(std::vector<Plato::srom::RandomMaterialCase> & aRandomMaterialCases)
+{
+    if(aRandomMaterialCases.empty())
+    {
+        THROWERR("Assign Material Case Identification Number: Input container of random material cases is empty.")
+    }
+
+    Plato::UniqueCounter tCaseCounter;
+    tCaseCounter.mark(0);
+    for(auto& tRandomMaterialCase : aRandomMaterialCases)
+    {
+        auto tID = std::to_string(tCaseCounter.assignNextUnique());
+        tRandomMaterialCase.caseID(tID);
+    }
+}
 
 inline void define_deterministic_material(const Plato::srom::Material& aInMaterial, Plato::srom::RandomMaterial& aOutMaterial)
 {
@@ -337,12 +385,17 @@ inline void define_deterministic_material(const Plato::srom::Material& aInMateri
     }
 }
 
-inline void append_deterministic_materials(const std::vector<Plato::srom::Material>& aInput,
-                                           std::vector<Plato::srom::RandomMaterialCase>& aOutput)
+inline void append_deterministic_materials(const std::vector<Plato::srom::Material>& tDeterministicMaterials,
+                                           std::vector<Plato::srom::RandomMaterialCase>& RandomMaterialCases)
 {
-    for (auto& tMaterialCase : aOutput)
+    if(tDeterministicMaterials.empty())
     {
-        for (auto tMaterial : aInput)
+        return;
+    }
+
+    for (auto& tMaterialCase : RandomMaterialCases)
+    {
+        for (auto tMaterial : tDeterministicMaterials)
         {
             if (tMaterial.isRandom())
             {
@@ -475,7 +528,6 @@ inline void append_deterministic_material_properties
         for(auto &tVar : tDeterministicVars)
         {
             tRandomMaterial.append(tVar.mTag, tVar.mAttribute, tVar.mValue);
-            tRandomMaterial.check();
         }
     }
 }
@@ -485,7 +537,6 @@ inline void build_random_material_set
  const std::vector<Plato::srom::SromVariable>& aSromVariables,
  std::vector<Plato::srom::RandomMaterial>& aRandomMaterials)
 {
-    aMaterial.check();
     if(aSromVariables.empty())
     {
         THROWERR("Build Random Material: Input set of SROM variables is empty.")
@@ -495,14 +546,114 @@ inline void build_random_material_set
     Plato::srom::append_deterministic_material_properties(aMaterial, aRandomMaterials);
 }
 
-inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aInput,
-                                    std::vector<Plato::srom::RandomMaterialCase>& aOutput)
+inline void initialize_random_material_cases
+(const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
+ std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
+{
+    if(aRandomMaterials.empty())
+    {
+        THROWERR("Initialize Random Material Cases: Input container of random materials is empty.");
+    }
+
+    for(auto& tRandomMaterial : aRandomMaterials)
+    {
+        Plato::srom::RandomMaterialCase tRandomMaterialCase;
+        auto tMaterialID = tRandomMaterial.materialID();
+        tRandomMaterialCase.append(tMaterialID, tRandomMaterial);
+        tRandomMaterialCase.probability(tRandomMaterial.probability());
+        aRandomMaterialCases.push_back(tRandomMaterialCase);
+    }
+}
+
+inline void update_random_material_cases
+(const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
+ std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
+{
+    if(aRandomMaterials.empty())
+    {
+        THROWERR("Update Random Material Cases: Input container of random materials is empty.");
+    }
+
+    auto tOriginalRandomMaterialCases = aRandomMaterialCases;
+
+    for(auto& tRandomMaterialCase : aRandomMaterialCases)
+    {
+        auto tUpdatedProbability = tRandomMaterialCase.probability()
+            * aRandomMaterials[0].probability();
+        tRandomMaterialCase.probability(tUpdatedProbability);
+        auto tID = aRandomMaterials[0].materialID();
+        tRandomMaterialCase.append(tID, aRandomMaterials[0]);
+    }
+
+    auto tBeginItr = aRandomMaterials.begin();
+    for(auto tItr = tBeginItr++; tItr != aRandomMaterials.end(); tItr++)
+    {
+        for(auto& tOriginalRandomMaterialCase : tOriginalRandomMaterialCases)
+        {
+            Plato::srom::RandomMaterialCase tNewRandomMaterial;
+            auto tUpdatedProbability =
+                tOriginalRandomMaterialCase.probability() * tItr->probability();
+            tNewRandomMaterial.probability(tUpdatedProbability);
+            auto tID = tItr->materialID();
+            tNewRandomMaterial.append(tID, tItr.operator*());
+
+            auto tOriginalMaterials = tOriginalRandomMaterialCase.materials();
+            for(auto& tMaterial : tOriginalMaterials)
+            {
+                auto tID = tMaterial.materialID();
+                tNewRandomMaterial.append(tID, tMaterial);
+            }
+
+            aRandomMaterialCases.push_back(tNewRandomMaterial);
+        }
+    }
+}
+
+inline void append_random_material_set
+(const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
+ std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
+{
+    if(aRandomMaterials.empty())
+    {
+        THROWERR("Append Random Material Cases: Input container of random materials is empty.");
+    }
+
+    if(aRandomMaterialCases.empty())
+    {
+        Plato::srom::initialize_random_material_cases(aRandomMaterials, aRandomMaterialCases);
+    }
+    else
+    {
+        Plato::srom::update_random_material_cases(aRandomMaterials, aRandomMaterialCases);
+    }
+}
+
+inline void check_input_set_of_materials(const std::vector<Plato::srom::Material>& aMaterials)
+{
+    for(auto& tMaterial : aMaterials)
+    {
+        if(tMaterial.undefined())
+        {
+            std::ostringstream tMsg;
+            auto tIndex = &tMaterial - &aMaterials[0];
+            tMsg << "Check Input Materials Set: Material in position '" << tIndex << "' with identification number '"
+                << tMaterial.materialID() << "' in block with identification number '" << tMaterial.blockID()
+                << "' is undefined.";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+}
+
+inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInput,
+                                 std::vector<Plato::srom::RandomMaterialCase>& aOutput)
 {
     if(aInput.empty())
     {
         THROWERR("Generate Material SROMS: Input container of materials is empty.")
     }
+    Plato::srom::check_input_set_of_materials(aInput);
 
+    aOutput.clear();
     std::vector<Plato::srom::Material> tRandomMaterials, tDeterministicMaterials;
     Plato::srom::split_random_and_deterministic_materials(aInput, tRandomMaterials, tDeterministicMaterials);
 
@@ -524,10 +675,13 @@ inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aI
             PRINTERR(tMsg.str().c_str());
         }
 
-        std::vector<Plato::srom::RandomMaterial> tRandomMaterials;
-        Plato::srom::build_random_material_set(tMaterial, tMySampleProbPairs, tRandomMaterials);
+        std::vector<Plato::srom::RandomMaterial> tRandomMaterialSet;
+        Plato::srom::build_random_material_set(tMaterial, tMySampleProbPairs, tRandomMaterialSet);
+        Plato::srom::append_random_material_set(tRandomMaterialSet, aOutput);
     }
-    return (true);
+
+    Plato::srom::append_deterministic_materials(tDeterministicMaterials, aOutput);
+    Plato::srom::assign_material_case_identification_number(aOutput);
 }
 
 }
@@ -539,7 +693,7 @@ inline bool generate_material_sroms(const std::vector<Plato::srom::Material>& aI
 namespace UncertainMaterial
 {
 
-TEST(PlatoTest, ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
+TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
@@ -584,6 +738,82 @@ TEST(PlatoTest, ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
     std::system("rm -f plato_cdf_output.txt");
     std::system("rm -f plato_srom_diagnostics.txt");
     std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+}
+
+TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials)
+{
+    // DEFINE MATERIAL ONE - RANDOM
+    Plato::srom::Material tMaterialOne;
+    tMaterialOne.blockID("1");
+    tMaterialOne.materialID("1");
+    tMaterialOne.category("isotropic");
+    tMaterialOne.append("poissons ratio", "homogeneous", "0.3");
+    Plato::srom::Statistics tElasticModulusStats;
+    tElasticModulusStats.mDistribution = "beta";
+    tElasticModulusStats.mMean = "1e9";
+    tElasticModulusStats.mUpperBound = "1e10";
+    tElasticModulusStats.mLowerBound = "1e8";
+    tElasticModulusStats.mStandardDeviation = "2e8";
+    tElasticModulusStats.mNumSamples = "3";
+    tMaterialOne.append("elastic modulus", "homogeneous", tElasticModulusStats);
+
+    // DEFINE MATERIAL TWO - DETERMINISTIC
+    Plato::srom::Material tMaterialTwo;
+    tMaterialTwo.blockID("22");
+    tMaterialTwo.materialID("10");
+    tMaterialTwo.category("isotropic");
+    tMaterialTwo.append("poissons ratio", "homogeneous", "0.35");
+    tMaterialTwo.append("elastic modulus", "homogeneous", "2.5e8");
+
+    // APPEND MATERIALS TO MATERIALS SET
+    std::vector<Plato::srom::Material> tMaterials;
+    tMaterials.push_back(tMaterialOne);
+    tMaterials.push_back(tMaterialTwo);
+
+    // SPLIT MATERIALS INTO RANDOM AND DETERMINIST MATERIAL SETS
+    std::vector<Plato::srom::Material> tRandomMaterial, tDeterministicMaterial;
+    Plato::srom::split_random_and_deterministic_materials(tMaterials, tRandomMaterial, tDeterministicMaterial);
+
+    // 1) TEST RANDOM MATERIAL
+    ASSERT_EQ(1u, tRandomMaterial.size());
+    ASSERT_TRUE(tRandomMaterial[0].isRandom());
+    ASSERT_FALSE(tRandomMaterial[0].isDeterministic());
+    ASSERT_STREQ("1", tRandomMaterial[0].blockID().c_str());
+    ASSERT_STREQ("1", tRandomMaterial[0].materialID().c_str());
+    ASSERT_STREQ("isotropic", tRandomMaterial[0].category().c_str());
+
+    auto tRandomVars = tRandomMaterial[0].randomVars();
+    ASSERT_EQ(1u, tRandomVars.size());
+    ASSERT_STREQ("elastic modulus", tRandomVars[0].mTag.c_str());
+    ASSERT_STREQ("homogeneous", tRandomVars[0].mAttribute.c_str());
+    ASSERT_STREQ("1e9", tRandomVars[0].mStatistics.mMean.c_str());
+    ASSERT_STREQ("3", tRandomVars[0].mStatistics.mNumSamples.c_str());
+    ASSERT_STREQ("1e8", tRandomVars[0].mStatistics.mLowerBound.c_str());
+    ASSERT_STREQ("1e10", tRandomVars[0].mStatistics.mUpperBound.c_str());
+    ASSERT_STREQ("beta", tRandomVars[0].mStatistics.mDistribution.c_str());
+    ASSERT_STREQ("2e8", tRandomVars[0].mStatistics.mStandardDeviation.c_str());
+
+    auto tDeterministicVars = tRandomMaterial[0].deterministicVars();
+    ASSERT_EQ(1u, tDeterministicVars.size());
+    ASSERT_STREQ("poissons ratio", tDeterministicVars[0].mTag.c_str());
+    ASSERT_STREQ("homogeneous", tDeterministicVars[0].mAttribute.c_str());
+    ASSERT_STREQ("0.3", tDeterministicVars[0].mValue.c_str());
+
+    // 2) TEST DETERMINISTIC MATERIAL
+    ASSERT_EQ(1u, tDeterministicMaterial.size());
+    ASSERT_TRUE(tDeterministicMaterial[0].isDeterministic());
+    ASSERT_FALSE(tDeterministicMaterial[0].isRandom());
+    tRandomVars = tDeterministicMaterial[0].randomVars();
+    ASSERT_EQ(0u, tRandomVars.size());
+
+    tDeterministicVars = tDeterministicMaterial[0].deterministicVars();
+    ASSERT_EQ(2u, tDeterministicVars.size());
+    ASSERT_STREQ("poissons ratio", tDeterministicVars[0].mTag.c_str());
+    ASSERT_STREQ("homogeneous", tDeterministicVars[0].mAttribute.c_str());
+    ASSERT_STREQ("0.35", tDeterministicVars[0].mValue.c_str());
+    ASSERT_STREQ("elastic modulus", tDeterministicVars[1].mTag.c_str());
+    ASSERT_STREQ("homogeneous", tDeterministicVars[1].mAttribute.c_str());
+    ASSERT_STREQ("2.5e8", tDeterministicVars[1].mValue.c_str());
 }
 
 }

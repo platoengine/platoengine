@@ -55,11 +55,11 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Generate the stochastic reduced order model for this set of random loads
+ * @brief Build the stochastic reduced order model given a set of random loads
  * @param [in] aInput input metadata
  * @param [in] aOutput output metadata
 **********************************************************************************/
-bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput);
+bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput);
 
 } // namespace Plato
 

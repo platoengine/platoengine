@@ -2218,7 +2218,7 @@ TEST(PlatoTest, generate_load_sroms_error)
 {
     Plato::srom::InputMetaData tInputs;
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_FALSE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_FALSE(Plato::build_load_sroms(tInputs, tOutputs));
 }
 
 TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
@@ -2301,7 +2301,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(16u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES
@@ -2516,7 +2516,7 @@ TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
             Plato::srom::InputMetaData tInputs;
             tInputs.mLoads = tLoads;
             Plato::srom::OutputMetaData tOutputs;
-            ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+            ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
 
             int tStartingLoadCaseID = tNewLoadCases.size() + 1;
             tCurObj.load_case_ids.clear();
@@ -2677,7 +2677,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(16u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES
@@ -2802,7 +2802,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::generate_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(4u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES

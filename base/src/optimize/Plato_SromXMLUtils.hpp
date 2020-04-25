@@ -1474,11 +1474,10 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
 }
 
 /******************************************************************************//**
- * \brief Generate the load case identifiers for each load case in the set
+ * \brief Assign an identification number to each load case in the set.
  * \param [out] aSetLoadCases set of load cases
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline void generate_load_case_identifiers(std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
+inline void assign_load_case_identification_number(std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
 {
     Plato::UniqueCounter tLoadCounter, tLoadCaseCounter;
     tLoadCounter.mark(0); tLoadCaseCounter.mark(0);
@@ -1567,7 +1566,7 @@ inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Loa
     }
 
     Plato::append_deterministic_loads(aDeterministicLoads, aSetRandomLoadCases);
-    Plato::generate_load_case_identifiers(aSetRandomLoadCases);
+    Plato::assign_load_case_identification_number(aSetRandomLoadCases);
 
     return (true);
 }

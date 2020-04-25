@@ -172,7 +172,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
             Plato::srom::InputMetaData tInputs;
             tInputs.mLoads = tLoads;
             Plato::srom::OutputMetaData tOutputs;
-            Plato::generate_load_sroms(tInputs, tOutputs);
+            Plato::build_load_sroms(tInputs, tOutputs);
 
             int tStartingLoadCaseID = tNewLoadCases.size() + 1;
             tCurObj.load_case_ids.clear();
