@@ -250,6 +250,7 @@ inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>&
 
     // set output data
     aSolution.resize(tNumSamples);
+    // denormalize output
     Plato::save_srom_solution(aStatsInputs, *tOutputsKSAL.mSolution, aSolution);
     Plato::save_srom_cdf_diagnostics(*tSromObjective, aSromDiagnostics);
     Plato::save_srom_moments_diagnostics(*tSromObjective, aSromDiagnostics);

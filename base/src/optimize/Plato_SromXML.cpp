@@ -65,7 +65,7 @@ bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom:
 
     for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
     {
-        std::vector<Plato::srom::RandomVariable> tMySampleProbPairs;
+        std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
         if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
         {
             std::ostringstream tMsg;

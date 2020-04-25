@@ -31,6 +31,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_UniqueCounter.cpp
 							 Plato_Test_SimpleRocketOptimization.cpp
 							 Plato_Test_UncertainLoadGeneratorXML.cpp
+						     Plato_Test_UncertainMaterial.cpp
 							 Plato_Test_LocalStatisticsOperations.cpp
 							 Plato_Test_MethodMovingAsymptotes.cpp
 							 PSL_Test_Triangle.cpp  
