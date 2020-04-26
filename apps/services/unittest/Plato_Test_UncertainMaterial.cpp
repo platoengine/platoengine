@@ -573,7 +573,6 @@ inline void append_deterministic_material_properties
         {
             tRandomMaterial.append(tVar.mTag, tVar.mAttribute, tVar.mValue);
         }
-
     }
 }
 
@@ -1145,10 +1144,73 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterialProperties)
     std::vector<Plato::srom::SromVariable> tSromVariableSet;
     tSromVariableSet.push_back(tSromVariable);
 
+    // APPEND MATERIAL PROPERTIES
     std::vector<Plato::srom::RandomMaterial> tRandomMaterialSet;
     EXPECT_NO_THROW(Plato::srom::append_random_material_properties(tMaterial, tSromVariableSet, tRandomMaterialSet));
     ASSERT_EQ(2u, tRandomMaterialSet.size());
     EXPECT_NO_THROW(Plato::srom::append_deterministic_material_properties(tMaterial, tRandomMaterialSet));
+
+    const double tTolerance = 1e-4;
+    const std::vector<double> tGoldProbs = {0.75, 0.25};
+    const std::vector<std::string> tGoldTags = {"elastic modulus", "poissons ratio"};
+    const std::vector<std::vector<std::string>> tGoldSamples = { {"1e9", "0.3200000000000000"}, {"1e9", "0.2700000000000000"}};
+
+    for(auto& tRandomMaterial : tRandomMaterialSet)
+    {
+        ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
+        ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
+        ASSERT_STREQ("isotropic", tRandomMaterial.category().c_str());
+
+        auto tMatIndex = &tRandomMaterial - &tRandomMaterialSet[0];
+        ASSERT_NEAR(tGoldProbs[tMatIndex], tRandomMaterial.probability(), tTolerance);
+
+        auto tTags = tRandomMaterial.tags();
+        ASSERT_EQ(2u, tTags.size());
+        for(auto& tTag : tTags)
+        {
+            auto tTagIndex = &tTag - &tTags[0];
+            ASSERT_STREQ(tGoldTags[tTagIndex].c_str(), tTag.c_str());
+            ASSERT_STREQ("homogeneous", tRandomMaterial.attribute(tTag).c_str());
+            ASSERT_STREQ(tGoldSamples[tMatIndex][tTagIndex].c_str(), tRandomMaterial.value(tTag).c_str());
+        }
+    }
+}
+
+TEST(PlatoTest, SROM_BuildRandomMaterialSet)
+{
+    // DEFINE RANDOM MATERIAL
+    Plato::srom::Material tMaterial;
+    tMaterial.blockID("1");
+    tMaterial.materialID("2");
+    tMaterial.category("isotropic");
+    Plato::srom::Statistics tPoissonsRatioStats;
+    tPoissonsRatioStats.mDistribution = "beta";
+    tPoissonsRatioStats.mMean = "0.3";
+    tPoissonsRatioStats.mUpperBound = "0.4";
+    tPoissonsRatioStats.mLowerBound = "0.25";
+    tPoissonsRatioStats.mStandardDeviation = "0.05";
+    tPoissonsRatioStats.mNumSamples = "2";
+    tMaterial.append("poissons ratio", "homogeneous", tPoissonsRatioStats);
+    tMaterial.append("elastic modulus", "homogeneous", "1e9");
+    auto tTags = tMaterial.tags();
+    ASSERT_EQ(2u, tTags.size());
+    ASSERT_STREQ("poissons ratio", tTags[0].c_str());
+    ASSERT_STREQ("elastic modulus", tTags[1].c_str());
+
+    // INITIALIZE RANDOM MATERIAL SET
+    Plato::srom::SromVariable tSromVariable;
+    tSromVariable.mTag = "poissons ratio";
+    tSromVariable.mAttribute = "homogeneous";
+    tSromVariable.mSampleProbPairs.mNumSamples = 2;
+    tSromVariable.mSampleProbPairs.mSamples = {0.32, 0.27};
+    tSromVariable.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+
+    std::vector<Plato::srom::SromVariable> tSromVariableSet;
+    tSromVariableSet.push_back(tSromVariable);
+
+    // BUILD RANDOM MATERIAL SET
+    std::vector<Plato::srom::RandomMaterial> tRandomMaterialSet;
+    Plato::srom::build_random_material_set(tMaterial, tSromVariableSet, tRandomMaterialSet);
 
     const double tTolerance = 1e-4;
     const std::vector<double> tGoldProbs = {0.75, 0.25};
