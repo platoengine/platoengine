@@ -449,8 +449,10 @@ inline void append_deterministic_materials(const std::vector<Plato::srom::Materi
                 THROWERR(tMsg.str().c_str())
             }
 
+            tMaterial.check();
             Plato::srom::RandomMaterial tOutMaterial;
             Plato::srom::define_deterministic_material(tMaterial, tOutMaterial);
+            tOutMaterial.check();
             tMaterialCase.append(tMaterial.materialID(), tOutMaterial);
         }
     }
@@ -601,6 +603,7 @@ inline void initialize_random_material_cases
 
     for(auto& tRandomMaterial : aRandomMaterials)
     {
+        tRandomMaterial.check();
         Plato::srom::RandomMaterialCase tRandomMaterialCase;
         auto tMaterialID = tRandomMaterial.materialID();
         tRandomMaterialCase.append(tMaterialID, tRandomMaterial);
@@ -622,6 +625,7 @@ inline void update_random_material_cases
 
     for(auto& tRandomMaterialCase : aRandomMaterialCases)
     {
+        aRandomMaterials[0].check();
         auto tUpdatedProbability = tRandomMaterialCase.probability()
             * aRandomMaterials[0].probability();
         tRandomMaterialCase.probability(tUpdatedProbability);
@@ -632,6 +636,7 @@ inline void update_random_material_cases
     auto tBeginItr = aRandomMaterials.begin();
     for(auto tItr = std::next(tBeginItr, 1); tItr != aRandomMaterials.end(); tItr++)
     {
+        tItr->check();
         for(auto& tOriginalRandomMaterialCase : tOriginalRandomMaterialCases)
         {
             Plato::srom::RandomMaterialCase tNewRandomMaterial;
