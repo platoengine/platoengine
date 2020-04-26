@@ -418,7 +418,7 @@ inline void split_random_and_deterministic_materials(const std::vector<Plato::sr
 {
     if(aMaterials.empty())
     {
-        PRINTERR("Expand Random And Deterministic Materials: Input material container is empty.");
+        THROWERR("Expand Random And Deterministic Materials: Input material container is empty.");
     }
 
     for(auto& tMaterial : aMaterials)
@@ -636,9 +636,9 @@ inline void check_input_set_of_materials(const std::vector<Plato::srom::Material
         {
             std::ostringstream tMsg;
             auto tIndex = &tMaterial - &aMaterials[0];
-            tMsg << "Check Input Materials Set: Material in position '" << tIndex << "' with identification number '"
-                << tMaterial.materialID() << "' in block with identification number '" << tMaterial.blockID()
-                << "' is undefined.";
+            tMsg << "Check Input Materials Set: Material in position '" << tIndex << "' with material identification number '"
+                << tMaterial.materialID() << "', block with identification number '" << tMaterial.blockID()
+                << "', and category '" << tMaterial.category() << "' is undefined.";
             THROWERR(tMsg.str().c_str())
         }
     }
@@ -740,6 +740,13 @@ TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Bet
     std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
+TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials_Error)
+{
+    std::vector<Plato::srom::Material> tMaterials;
+    std::vector<Plato::srom::Material> tRandomMaterial, tDeterministicMaterial;
+    EXPECT_THROW(Plato::srom::split_random_and_deterministic_materials(tMaterials, tRandomMaterial, tDeterministicMaterial), std::runtime_error);
+}
+
 TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials)
 {
     // DEFINE MATERIAL ONE - RANDOM
@@ -814,6 +821,36 @@ TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials)
     ASSERT_STREQ("elastic modulus", tDeterministicVars[1].mTag.c_str());
     ASSERT_STREQ("homogeneous", tDeterministicVars[1].mAttribute.c_str());
     ASSERT_STREQ("2.5e8", tDeterministicVars[1].mValue.c_str());
+}
+
+TEST(PlatoTest, SROM_CheckInputSetOfMaterials_Error)
+{
+    // DEFINE MATERIAL ONE - RANDOM
+    Plato::srom::Material tMaterialOne;
+    tMaterialOne.blockID("1");
+    tMaterialOne.materialID("1");
+    tMaterialOne.category("isotropic");
+    tMaterialOne.append("poissons ratio", "homogeneous", "0.3");
+    Plato::srom::Statistics tElasticModulusStats;
+    tElasticModulusStats.mDistribution = "beta";
+    tElasticModulusStats.mMean = "1e9";
+    tElasticModulusStats.mUpperBound = "1e10";
+    tElasticModulusStats.mLowerBound = "1e8";
+    tElasticModulusStats.mStandardDeviation = "2e8";
+    tElasticModulusStats.mNumSamples = "3";
+    tMaterialOne.append("elastic modulus", "homogeneous", tElasticModulusStats);
+
+    // DEFINE MATERIAL TWO - DETERMINISTIC
+    Plato::srom::Material tMaterialTwo;
+    tMaterialTwo.blockID("22");
+    tMaterialTwo.materialID("10");
+    tMaterialTwo.category("isotropic");
+
+    std::vector<Plato::srom::Material> tInput;
+    tInput.push_back(tMaterialOne);
+    tInput.push_back(tMaterialTwo);
+    EXPECT_THROW(Plato::srom::check_input_set_of_materials(tInput), std::runtime_error);
+
 }
 
 }
