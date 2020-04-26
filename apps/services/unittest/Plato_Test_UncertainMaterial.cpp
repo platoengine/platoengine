@@ -439,7 +439,7 @@ inline void append_deterministic_materials(const std::vector<Plato::srom::Materi
 
     for (auto& tMaterialCase : RandomMaterialCases)
     {
-        for (auto tMaterial : tDeterministicMaterials)
+        for (auto& tMaterial : tDeterministicMaterials)
         {
             if (tMaterial.isRandom())
             {
