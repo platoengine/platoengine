@@ -61,6 +61,11 @@
 namespace XMLGen
 {
 
+enum ProblemType
+{
+   COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE,
+   UNKNOWN 
+};
 
 class XMLGenerator
 {
@@ -69,14 +74,12 @@ public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     bool generate();
-
+    const InputData& getInputData(){ return m_InputData; }
 
 protected:
 
     bool parseCSMFileFromStream(std::istream &aStream);
     bool parseCSMFile();
-    void generateROLInput();
-    void generateAMGXInput();
     bool parseLoads(std::istream &fin);
     bool parseLoadsBlock(std::istream &fin);
     bool parseLoadLine(std::vector<std::string>& tokens);
@@ -92,30 +95,6 @@ protected:
     bool parseBCLine(std::vector<std::string>& tokens);
     bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    bool generateDefinesXML(std::ostringstream *aStringStream = NULL);
-    bool generatePlatoAnalyzeShapeDefinesXML();
-    bool generateInterfaceXML();
-    bool generatePlatoAnalyzeShapeInterfaceXML();
-    bool generateLaunchScript();
-    bool generatePlatoAnalyzeShapeLaunchScript();
-    bool generateSummitLaunchScripts();
-    bool generatePlatoMainOperationsXML();
-    bool generatePlatoMainOperationsXMLForShape();
-    bool generatePlatoMainInputDeckXML();
-    bool generatePlatoESPInputDeckXML();
-    bool generatePerformerOperationsXML();
-    bool generateSalinasOperationsXML();
-    bool generateAlbanyOperationsXML();
-    bool generatePlatoAnalyzeOperationsXML();
-    bool generatePlatoAnalyzeOperationsXMLForShape();
-    bool generatePlatoESPOperationsXMLForShape();
-    bool generateLightMPOperationsXML();
-    bool generatePhysicsInputDecks();
-    bool generateSalinasInputDecks(std::ostringstream *aStringStream = NULL);
-    bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
-    bool generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow();
-    bool generateLightMPInputDecks();
-    bool generateAlbanyInputDecks();
     bool runSROMForUncertainVariables();
     bool generateUncertaintyMetaData();
     bool getSizeOfLoadCases();
@@ -135,59 +114,9 @@ protected:
     bool parseOptimizationParameters(std::istream &fin);
     bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    bool outputVolumeStage(pugi::xml_document &doc);
-    void outputUpdateProblemStage(pugi::xml_document &doc);
-    void outputOutputToFileStage(pugi::xml_document &doc,
-                                 bool &aHasUncertainties,
-                                 bool &aRequestedVonMises);
     void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
                                  bool &aHasUncertainties,
                                  bool &aRequestedVonMises);
-    void addStochasticObjectiveValueOperation(pugi::xml_document &aDoc);
-    void addStochasticObjectiveGradientOperation(pugi::xml_document &aDoc);
-    void addVonMisesStatisticsOperation(pugi::xml_document &aDoc);
-    void addFilterControlOperation(pugi::xml_document &aDoc);
-    void addFilterGradientOperation(pugi::xml_document &aDoc);
-    void addFilterHessianOperation(pugi::xml_document &aDoc);
-    void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
-                                     bool &aHasUncertainties,
-                                     bool &aRequestedVonMises);
-    void addCSMMeshOutputOperation(pugi::xml_document &aDoc);
-    void addEnforceBoundsOperationToFile(pugi::xml_document &aDoc);
-    void addEnforceBoundsOperationToStage(pugi::xml_node &aStageNode);
-    void addSetUpperBoundsOperation(pugi::xml_document &aDoc);
-    void addSetLowerBoundsOperation(pugi::xml_document &aDoc);
-    bool addAggregateHessianOperation(pugi::xml_document &aDoc);
-    bool addAggregateEnergyOperation(pugi::xml_document &aDoc);
-    bool addAggregateValuesOperation(pugi::xml_document &aDoc);
-    bool addAggregateGradientOperation(pugi::xml_document &aDoc);
-    void addUpdateGeometryOnChangeOperation(pugi::xml_document &aDoc);
-    void addComputeVolumeOperation(pugi::xml_document &aDoc);
-    void addDesignVolumeOperation(pugi::xml_document &aDoc);
-    void addUpdateProblemOperation(pugi::xml_document &aDoc);
-    void addFilterInfo(pugi::xml_document &aDoc);
-    void addInitializeFieldOperation(pugi::xml_document &aDoc);
-    void addInitializeValuesOperation(pugi::xml_document &aDoc);
-    void outputInitializeOptimizationStage(pugi::xml_document &doc);
-    void outputInitializeOptimizationStageForSO(pugi::xml_document &doc);
-    void outputInitializeOptimizationStageForTO(pugi::xml_document &doc);
-    bool outputVolumeGradientStage(pugi::xml_document &doc);
-    bool outputSurfaceAreaStage(pugi::xml_document &doc);
-    void outputSetLowerBoundsStage(pugi::xml_document &doc);
-    void outputSetUpperBoundsStage(pugi::xml_document &doc);
-    void outputCacheStateStage(pugi::xml_document &doc, bool &aHasUncertainties);
-    bool outputConstraintStage(pugi::xml_document &doc);
-    bool outputConstraintGradientStage(pugi::xml_document &doc);
-    bool outputSurfaceAreaGradientStage(pugi::xml_document &doc);
-    void outputDesignVolumeStage(pugi::xml_document &doc);
-    bool outputComputeStateStage(pugi::xml_document &doc);
-    bool outputInternalEnergyStage(pugi::xml_document &doc, bool &aHasUncertainties);
-    bool outputInternalEnergyGradientStage(pugi::xml_document &doc,
-                                           bool &aHasUncertainties);
-    bool outputObjectiveStage(pugi::xml_document &doc);
-    bool outputObjectiveHessianStage(pugi::xml_document &doc);
-    bool outputObjectiveGradientStage(pugi::xml_document &doc);
-    bool outputInternalEnergyHessianStage(pugi::xml_document &doc);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
     bool find_tokens(std::vector<std::string> &tokens, const int &start_index, const char *str1, const char *str2);
@@ -201,88 +130,29 @@ protected:
                                    std::string &aReturnStringValue);
     void lookForPlatoAnalyzePerformers();
     bool checkForNodesetSidesetNameConflicts();
-    void addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
-    void addComputeObjectiveGradientOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
 
     std::string m_InputFilename;
-    bool m_UseLaunch;
-    bool m_HasUncertainties;
-    bool m_RequestedVonMisesOutput;
-    bool m_UseNewPlatoAnalyzeUncertaintyWorkflow;
-    XMLGen::Arch m_Arch;
     XMLGen::InputData m_InputData;
-    std::string m_filterType_identity_generatorName;
-    std::string m_filterType_identity_XMLName;
-    std::string m_filterType_kernel_generatorName;
-    std::string m_filterType_kernel_XMLName;
-    std::string m_filterType_kernelThenHeaviside_generatorName;
-    std::string m_filterType_kernelThenHeaviside_XMLName;
-    std::string m_filterType_kernelThenTANH_generatorName;
-    std::string m_filterType_kernelThenTANH_XMLName;
-    std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
-    XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
 private:
+
+    /******************************************************************************//**
+     * @brief Identify Plato Analyze problem types 
+     **********************************************************************************/
+    ProblemType identifyPlatoAnalyzeProblemTypes();
+
+    /******************************************************************************//**
+     * @brief Determine the problem type 
+     **********************************************************************************/
+    ProblemType getProblemType();
+
     /******************************************************************************//**
      * @brief Initialize Plato problem options
      **********************************************************************************/
     void initializePlatoProblemOptions();
 
-    /******************************************************************************//**
-     * @brief Set algorithm used to solve optimization problem
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setOptimizerMethod(pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the Optimality Criteria algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setOptimalityCriteriaOptions(pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the augmented Lagrangian algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setAugmentedLagrangianOptions(const pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the trust region algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setTrustRegionAlgorithmOptions(const pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the trust region Kelley-Sachs algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setKelleySachsAlgorithmOptions(const pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the Globally Convergent Method of Moving Asymptotes algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setGCMMAoptions(const pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the Globally Convergent Method of Moving Asymptotes algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
-    bool setMMAoptions(const pugi::xml_node & aXMLnode);
-
     void putLoadInLoadCase(XMLGen::Load& new_load);
     bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
     void createNewLoadCase(XMLGen::Load& new_load);
-    void addVersionEntryToDoc(pugi::xml_document& doc);
-    bool addDefinesToDoc(pugi::xml_document& doc);
-    size_t stringToSizeT(const std::string& aString);
-    size_t getGreatestDivisor(const size_t& aDividend, size_t aDivisor);
-    size_t computeNumberOfNodesNeeded();
-    void generateBatchScript();
-    void generateJSRunScript();
-    void generatePerformerBashScripts();
-    void generateEngineBashScript();
-    void generateAnalyzeBashScripts();
-    std::string makeValuesString(const std::vector<std::string>& aValues);
 };
 
 }

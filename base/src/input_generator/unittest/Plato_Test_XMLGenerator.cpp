@@ -48,6 +48,8 @@
 
 #include <gtest/gtest.h>
 #include "XMLGenerator_UnitTester.hpp"
+#include "DefaultInputGenerator_UnitTester.hpp"
+#include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
 #include <cmath>
@@ -3457,10 +3459,104 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseMaterials(iss), true);
-
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    DefaultInputGenerator_UnitTester tGenerator(tInputData);;
     std::ostringstream tOStringStream;
-    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
     EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
+}
+
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_valid)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 1\n"
+            "    boundary condition ids 1 2 3\n"
+            "    code plato_analyze\n"
+            "    number processors 2\n"
+            "end objective\n"
+            "begin loads\n"
+            "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    poissons ratio 0.3\n"
+            "    youngs modulus 1e8\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed displacement nodeset name 1 bc id 1\n"
+            "    fixed displacement nodeset name 1 x bc id 2\n"
+            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
+            "end boundary conditions\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);;
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+    EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
+}
+
+TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeWriter)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 1\n"
+            "    boundary condition ids 1 2 3\n"
+            "    code plato_analyze\n"
+            "    number processors 2\n"
+            "end objective\n"
+            "begin loads\n"
+            "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    poissons ratio 0.3\n"
+            "    youngs modulus 1e8\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed displacement nodeset name 1 bc id 1\n"
+            "    fixed displacement nodeset name 1 x bc id 2\n"
+            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
+            "end boundary conditions\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
+    tester.publicLookForPlatoAnalyzePerformers();
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);;
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tGenerator.publicGenerateInterfaceXML(&tOStringStream), true);
+    EXPECT_EQ(tOStringStream.str(), gInterfaceXMLCompMinTOPAGoldString);
 }
 
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_names)
@@ -3503,8 +3599,57 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseMaterials(iss), true);
 
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    DefaultInputGenerator_UnitTester tGenerator(tInputData);
     std::ostringstream tOStringStream;
-    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), false);
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), false);
+    EXPECT_EQ(tOStringStream.str(), "");
+
+}
+TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_duplicate_names)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput =
+            "begin objective\n"
+            "    type maximize stiffness\n"
+            "    load ids 1\n"
+            "    boundary condition ids 1 2 3\n"
+            "    code plato_analyze\n"
+            "    number processors 2\n"
+            "end objective\n"
+            "begin loads\n"
+            "    traction sideset name 1 value 0 -3e3 0 load id 1\n"
+            "end loads\n"
+            "begin material 1\n"
+            "    poissons ratio 0.3\n"
+            "    youngs modulus 1e8\n"
+            "end material\n"
+            "begin boundary conditions\n"
+            "    fixed displacement nodeset name 1 bc id 1\n"
+            "    fixed displacement nodeset name 1 x bc id 2\n"
+            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
+            "end boundary conditions\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.publicParseMaterials(iss), true);
+
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);
+    std::ostringstream tOStringStream;
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), false);
     EXPECT_EQ(tOStringStream.str(), "");
 
 }
@@ -3550,8 +3695,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseMaterials(iss), true);
 
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    DefaultInputGenerator_UnitTester tGenerator(tInputData);
     std::ostringstream tOStringStream;
-    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
     EXPECT_EQ(tOStringStream.str(), gThermalGoldString);
 
 }
@@ -3607,8 +3754,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseMaterials(iss), true);
 
+    const XMLGen::InputData& tInputData = tester.getInputData();
+    DefaultInputGenerator_UnitTester tGenerator(tInputData);
     std::ostringstream tOStringStream;
-    EXPECT_EQ(tester.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
     EXPECT_EQ(tOStringStream.str(), gThermomechanicalGoldString);
 
 }

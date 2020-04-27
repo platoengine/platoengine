@@ -57,7 +57,7 @@ namespace XMLGen
 
 
 /******************************************************************************/
-SalinasInputDeckWriter::SalinasInputDeckWriter(InputData &aInputData) :
+SalinasInputDeckWriter::SalinasInputDeckWriter(const InputData &aInputData) :
         mInputData(aInputData)
 /******************************************************************************/
 {
@@ -73,14 +73,16 @@ void SalinasInputDeckWriter::generate(bool tHasUncertainties, bool tRequestedVon
 {
     for(size_t i=0; i<mInputData.objectives.size(); ++i)
     {
-        XMLGen::Objective& cur_obj = mInputData.objectives[i];
+        const XMLGen::Objective& cur_obj = mInputData.objectives[i];
         if(!cur_obj.code_name.compare("sierra_sd"))
         {
+            bool tNormalizeObjective = true;
+
             // Check for reasons for turning local objective normalization off.
             if(tHasUncertainties)
-                cur_obj.normalize_objective = "false";
+                tNormalizeObjective = false;
             if(cur_obj.type == "stress constrained mass minimization")
-                cur_obj.normalize_objective = "false";
+                tNormalizeObjective = false;
 
             bool frf = false;
             if(cur_obj.type.compare("match frf data") == 0)
@@ -98,7 +100,7 @@ void SalinasInputDeckWriter::generate(bool tHasUncertainties, bool tRequestedVon
                 writeEchoBlock(fp, frf);
                 writeMaterialBlocks(fp, frf);
                 writeBlockBlocks(fp, frf);
-                writeTOBlock(fp, cur_obj, frf);
+                writeTOBlock(fp, cur_obj, frf, tNormalizeObjective);
                 writeFileBlock(fp);
                 writeLoadsBlock(fp, cur_obj, frf);
                 writeBoundaryBlock(fp, cur_obj);
@@ -402,7 +404,7 @@ void SalinasInputDeckWriter::writeMaterialBlocks(FILE *aFilePtr, const bool &aFR
 }
 
 void SalinasInputDeckWriter::writeTOBlock(FILE *aFilePtr, const Objective &aObjective,
-                                          const bool &aFRF)
+                                          const bool &aFRF, const bool &aNormalizeObjective)
 {
     fprintf(aFilePtr, "TOPOLOGY-OPTIMIZATION\n");
     fprintf(aFilePtr, "  algorithm = plato_engine\n");
@@ -578,7 +580,7 @@ void SalinasInputDeckWriter::writeTOBlock(FILE *aFilePtr, const Objective &aObje
         }
         fprintf(aFilePtr, "\n");
     }
-    if(aObjective.normalize_objective == "false")
+    if(aNormalizeObjective == false)
         fprintf(aFilePtr, "  objective_normalization false\n");
     fprintf(aFilePtr, "END\n");
 }

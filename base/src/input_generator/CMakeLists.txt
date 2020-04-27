@@ -4,10 +4,14 @@
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
                       PlatoAnalyzeInputDeckWriter.cpp
+                      DefaultInputGenerator.cpp
+                      ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                       XMLGeneratorUtilities.cpp
                       SalinasInputDeckWriter.cpp)
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp 
+                      DefaultInputGenerator.hpp 
+                      ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
                       XMLGeneratorDataStruct.hpp
                       PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp

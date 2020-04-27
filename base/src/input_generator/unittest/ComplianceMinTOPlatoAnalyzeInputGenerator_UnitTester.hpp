@@ -41,50 +41,40 @@
  */
 
 /*
- * SalinasInputDeckWriter.hpp
+ * ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp
  *
- *  Created on: Nov 20, 2019
+ *  Created on: Apr 27, 2020
  *
  */
 
-#ifndef SRC_SALINASINPUTDECKWRITER_HPP_
-#define SRC_SALINASINPUTDECKWRITER_HPP_
+#ifndef SRC_COMPLIANCEMINTOPLATOANALYZEINPUTGENERATOR_UNIT_TESTERHPP_
+#define SRC_COMPLIANCEMINTOPLATOANALYZEINPUTGENERATOR_UNIT_TESTERHPP_
 
-#include "Plato_Parser.hpp"
+#include <string>
+#include <map>
+#include <vector>
+#include <fstream>
+
 #include "XMLGeneratorDataStruct.hpp"
+#include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
 
-namespace XMLGen
-{
 
-class SalinasInputDeckWriter
+class ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester : public XMLGen::ComplianceMinTOPlatoAnalyzeInputGenerator
 {
 
 public:
-    SalinasInputDeckWriter(const InputData &aInputData);
-    ~SalinasInputDeckWriter();
-    void generate(bool aHasUncertainties, bool aRequestedVonMises, std::ostringstream *aStringStream = NULL);
+    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester(const XMLGen::InputData &aInputData);
+    ~ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester();
+    bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
+    bool publicGenerateInterfaceXML(std::ostringstream *aStringStream = NULL);
+
 
 protected:
 
-private:
-    void writeSolutionBlock(FILE *aFilePtr, const Objective &aObjective);
-    void writeParametersBlock(FILE *aFilePtr, const Objective &aObjective);
-    void writeFRFRelatedBlocks(FILE *aFilePtr, const Objective &aObjective, const bool &aFRF);
-    void writeGDSWBlock(FILE *aFilePtr, const Objective &aObjective);
-    void writeOutputsBlock(FILE *aFilePtr, const bool &aFRF);
-    void writeEchoBlock(FILE *aFilePtr, const bool &aFRF);
-    void writeMaterialBlocks(FILE *aFilePtr, const bool &aFRF);
-    void writeBlockBlocks(FILE *aFilePtr, const bool &aFRF);
-    void writeTOBlock(FILE *aFilePtr, const Objective &aObjective, const bool &aFRF,
-                      const bool& aNormalizeObjective);
-    void writeFileBlock(FILE *aFilePtr);
-    void writeLoadsBlock(FILE *aFilePtr, const Objective &aObjective, const bool &aFRF);
-    void writeBoundaryBlock(FILE *aFilePtr, const Objective &aObjective);
 
-    const InputData &mInputData;
-    FILE *mFilePointer;
+private:
+
 };
 
-}
 
-#endif /* SRC_SALINASINPUTDECKWRITER_HPP_ */
+#endif /* SRC_COMPLIANCEMINTOPLATOANALYZEINPUTGENERATOR_UNIT_TESTERHPP_ */
