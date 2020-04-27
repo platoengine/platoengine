@@ -723,7 +723,7 @@ inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInpu
 {
     if(aInput.empty())
     {
-        THROWERR("Generate Material SROMS: Input container of materials is empty.")
+        THROWERR("Build Material SROMS: Input container of materials is empty.")
     }
     Plato::srom::check_input_set_of_materials(aInput);
 
@@ -1996,6 +1996,12 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test2)
             }
         }
     }
+}
+
+TEST(PlatoTest, SROM_AssignMaterialCaseIdentificationNumber_Error)
+{
+    std::vector<Plato::srom::RandomMaterialCase> tRandomMaterialCases;
+    EXPECT_THROW(Plato::srom::assign_material_case_identification_number(tRandomMaterialCases), std::runtime_error);
 }
 
 TEST(PlatoTest, SROM_AssignMaterialCaseIdentificationNumber)
