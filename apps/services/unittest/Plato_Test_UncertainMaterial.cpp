@@ -1998,5 +1998,107 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test2)
     }
 }
 
+TEST(PlatoTest, SROM_AssignMaterialCaseIdentificationNumber)
+{
+    // 1.1 MATERIAL CASE 1: CREATE RANDOM MATERIAL 1
+    Plato::srom::RandomMaterial tRandomMaterial11;
+    tRandomMaterial11.blockID("1");
+    tRandomMaterial11.category("isotropic");
+    tRandomMaterial11.append("elastic modulus", "homogeneous", "1e9");
+    tRandomMaterial11.append("poissons ratio", "homogeneous", "0.32");
+    Plato::srom::RandomMaterialCase tRandomMatCase1;
+    tRandomMatCase1.append("2", tRandomMaterial11);
+
+    // 1.2 MATERIAL CASE 1: CREATE RANDOM MATERIAL 2
+    Plato::srom::RandomMaterial tRandomMaterial12;
+    tRandomMaterial12.blockID("2");
+    tRandomMaterial12.category("isotropic");
+    tRandomMaterial12.append("elastic modulus", "homogeneous", "8.0");
+    tRandomMaterial12.append("poissons ratio", "homogeneous", "0.28");
+    tRandomMatCase1.append("3", tRandomMaterial12);
+    tRandomMatCase1.probability(0.4875);
+
+    // 2.1 MATERIAL CASE 2: CREATE RANDOM MATERIAL 1
+    Plato::srom::RandomMaterial tRandomMaterial21;
+    tRandomMaterial21.blockID("1");
+    tRandomMaterial21.category("isotropic");
+    tRandomMaterial21.append("elastic modulus", "homogeneous", "1e9");
+    tRandomMaterial21.append("poissons ratio", "homogeneous", "0.27");
+    Plato::srom::RandomMaterialCase tRandomMatCase2;
+    tRandomMatCase2.append("2", tRandomMaterial21);
+
+    // 2.2 MATERIAL CASE 2: CREATE RANDOM MATERIAL 2
+    Plato::srom::RandomMaterial tRandomMaterial22;
+    tRandomMaterial22.blockID("2");
+    tRandomMaterial22.category("isotropic");
+    tRandomMaterial22.append("elastic modulus", "homogeneous", "8.0");
+    tRandomMaterial22.append("poissons ratio", "homogeneous", "0.28");
+    tRandomMatCase2.append("3", tRandomMaterial22);
+    tRandomMatCase2.probability(0.1625);
+
+    // 3.1 MATERIAL CASE 3: CREATE RANDOM MATERIAL 1
+    Plato::srom::RandomMaterial tRandomMaterial31;
+    tRandomMaterial31.blockID("1");
+    tRandomMaterial31.category("isotropic");
+    tRandomMaterial31.append("elastic modulus", "homogeneous", "1e9");
+    tRandomMaterial31.append("poissons ratio", "homogeneous", "0.32");
+    Plato::srom::RandomMaterialCase tRandomMatCase3;
+    tRandomMatCase3.append("2", tRandomMaterial31);
+
+    // 3.2 MATERIAL CASE 3: CREATE RANDOM MATERIAL 2
+    Plato::srom::RandomMaterial tRandomMaterial32;
+    tRandomMaterial32.blockID("2");
+    tRandomMaterial32.category("isotropic");
+    tRandomMaterial32.append("elastic modulus", "homogeneous", "17.0");
+    tRandomMaterial32.append("poissons ratio", "homogeneous", "0.28");
+    tRandomMatCase3.append("3", tRandomMaterial32);
+    tRandomMatCase3.probability(0.2625);
+
+    // 4.1 MATERIAL CASE 4: CREATE RANDOM MATERIAL 1
+    Plato::srom::RandomMaterial tRandomMaterial41;
+    tRandomMaterial41.blockID("1");
+    tRandomMaterial41.category("isotropic");
+    tRandomMaterial41.append("elastic modulus", "homogeneous", "1e9");
+    tRandomMaterial41.append("poissons ratio", "homogeneous", "0.27");
+    Plato::srom::RandomMaterialCase tRandomMatCase4;
+    tRandomMatCase4.append("2", tRandomMaterial41);
+
+    // 4.2 MATERIAL CASE 4: CREATE RANDOM MATERIAL 2
+    Plato::srom::RandomMaterial tRandomMaterial42;
+    tRandomMaterial42.blockID("2");
+    tRandomMaterial42.category("isotropic");
+    tRandomMaterial42.append("elastic modulus", "homogeneous", "17.0");
+    tRandomMaterial42.append("poissons ratio", "homogeneous", "0.28");
+    tRandomMatCase4.append("3", tRandomMaterial42);
+    tRandomMatCase4.probability(0.0875);
+
+    // 5. APPEND RANDOM MATERIAL CASES
+    std::vector<Plato::srom::RandomMaterialCase> tRandomMaterialCases;
+    tRandomMaterialCases.push_back(tRandomMatCase1);
+    tRandomMaterialCases.push_back(tRandomMatCase2);
+    tRandomMaterialCases.push_back(tRandomMatCase3);
+    tRandomMaterialCases.push_back(tRandomMatCase4);
+
+    // 6. APPEND DETERMINISTIC MATERIAL.
+    Plato::srom::Material tDeterministicMaterial;
+    tDeterministicMaterial.blockID("3");
+    tDeterministicMaterial.materialID("4");
+    tDeterministicMaterial.category("isotropic");
+    tDeterministicMaterial.append("poissons ratio", "homogeneous", "0.4");
+    tDeterministicMaterial.append("elastic modulus", "homogeneous", "1.0");
+    std::vector<Plato::srom::Material> tDeterministicMaterialSet;
+    tDeterministicMaterialSet.push_back(tDeterministicMaterial);
+    EXPECT_NO_THROW(Plato::srom::append_deterministic_materials(tDeterministicMaterialSet, tRandomMaterialCases));
+    EXPECT_NO_THROW(Plato::srom::assign_material_case_identification_number(tRandomMaterialCases));
+
+    // 7. TEST RESULTS
+    std::vector<std::string> tGoldIDs = {"1", "2", "3", "4"};
+    for(auto& tMaterialCase : tRandomMaterialCases)
+    {
+        auto tIndex = &tMaterialCase - &tRandomMaterialCases[0];
+        ASSERT_STREQ(tGoldIDs[tIndex].c_str(), tMaterialCase.caseID().c_str());
+    }
+}
+
 }
 // namespace UncertainMaterial
