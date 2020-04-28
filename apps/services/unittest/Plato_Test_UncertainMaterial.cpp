@@ -49,7 +49,7 @@
 #include "gtest/gtest.h"
 
 #include "Plato_SromSolve.hpp"
-#include "Plato_SromXMLUtils.hpp"
+#include "Plato_UniqueCounter.hpp"
 #include "Plato_RandomMaterialMetadata.hpp"
 
 namespace Plato

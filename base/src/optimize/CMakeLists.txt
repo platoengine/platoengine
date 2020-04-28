@@ -155,7 +155,7 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_SromConstraint.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
-                        Plato_SromXMLUtils.hpp
+                        Plato_SromLoadUtils.hpp
                         Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
