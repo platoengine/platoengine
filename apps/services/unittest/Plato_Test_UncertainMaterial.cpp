@@ -619,10 +619,12 @@ public:
 // struct RandomMaterialCase
 
 /******************************************************************************//**
- * \brief Assign an identification number to each randome material case in the set.
- * \param [out] aRandomMaterialCases random material cases
+ * \fn assign_material_case_identification_number
+ * \brief Assign an identification number to each random material case in the set.
+ * \param [out] aRandomMaterialCases set of random material cases
 **********************************************************************************/
-inline void assign_material_case_identification_number(std::vector<Plato::srom::RandomMaterialCase> & aRandomMaterialCases)
+inline void assign_material_case_identification_number
+(std::vector<Plato::srom::RandomMaterialCase> & aRandomMaterialCases)
 {
     if(aRandomMaterialCases.empty())
     {
@@ -637,8 +639,17 @@ inline void assign_material_case_identification_number(std::vector<Plato::srom::
         tRandomMaterialCase.caseID(tID);
     }
 }
+// function assign_material_case_identification_number
 
-inline void define_deterministic_material(const Plato::srom::Material& aInMaterial, Plato::srom::RandomMaterial& aOutMaterial)
+/******************************************************************************//**
+ * \fn define_deterministic_material
+ * \brief Define a deterministic material for a random material case.
+ * \param [in]  aInMaterial  deterministic material metadata
+ * \param [out] aOutMaterial deterministic material for a random material case
+**********************************************************************************/
+inline void define_deterministic_material
+(const Plato::srom::Material& aInMaterial,
+ Plato::srom::RandomMaterial& aOutMaterial)
 {
     aOutMaterial.probability(1.0);
     aOutMaterial.blockID(aInMaterial.blockID());
@@ -650,9 +661,17 @@ inline void define_deterministic_material(const Plato::srom::Material& aInMateri
         aOutMaterial.append(tVariable.mTag, tVariable.mAttribute, tVariable.mValue);
     }
 }
+// function define_deterministic_material
 
-inline void append_deterministic_materials(const std::vector<Plato::srom::Material>& tDeterministicMaterials,
-                                           std::vector<Plato::srom::RandomMaterialCase>& RandomMaterialCases)
+/******************************************************************************//**
+ * \fn append_deterministic_materials
+ * \brief Append deterministic materials to set of random material cases.
+ * \param [in]  tDeterministicMaterials  list of deterministic materials
+ * \param [out] RandomMaterialCases      list of random material cases
+**********************************************************************************/
+inline void append_deterministic_materials
+(const std::vector<Plato::srom::Material>& tDeterministicMaterials,
+ std::vector<Plato::srom::RandomMaterialCase>& RandomMaterialCases)
 {
     if(tDeterministicMaterials.empty())
     {
@@ -678,10 +697,19 @@ inline void append_deterministic_materials(const std::vector<Plato::srom::Materi
         }
     }
 }
+// function append_deterministic_materials
 
-inline void split_random_and_deterministic_materials(const std::vector<Plato::srom::Material>& aMaterials,
-                                                     std::vector<Plato::srom::Material>& aRandomMats,
-                                                     std::vector<Plato::srom::Material>& aDeterministicMats)
+/******************************************************************************//**
+ * \fn split_random_and_deterministic_materials
+ * \brief Split materials into lists of random and deterministic materials.
+ * \param [in]  aMaterials         list of materials
+ * \param [out] aRandomMats        list of random materials
+ * \param [out] aDeterministicMats list of deterministic materials
+**********************************************************************************/
+inline void split_random_and_deterministic_materials
+(const std::vector<Plato::srom::Material>& aMaterials,
+ std::vector<Plato::srom::Material>& aRandomMats,
+ std::vector<Plato::srom::Material>& aDeterministicMats)
 {
     if(aMaterials.empty())
     {
@@ -700,10 +728,19 @@ inline void split_random_and_deterministic_materials(const std::vector<Plato::sr
         }
     }
 }
+// function split_random_and_deterministic_materials
 
-inline void initialize_random_material_set(const Plato::srom::Material& aMaterial,
-                                           const Plato::srom::SromVariable& aSromVariable,
-                                           std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
+/******************************************************************************//**
+ * \fn initialize_random_material_set
+ * \brief Initialize random material set.
+ * \param [in]  aMaterial          material metadata
+ * \param [in]  aSromVariable      Stochastic Reduced Order Model (SROM) variable metadata
+ * \param [out] aRandomMaterialSet list of random materials
+**********************************************************************************/
+inline void initialize_random_material_set
+(const Plato::srom::Material& aMaterial,
+ const Plato::srom::SromVariable& aSromVariable,
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
 {
     for(auto& tSample : aSromVariable.mSampleProbPairs.mSamples)
     {
@@ -721,10 +758,19 @@ inline void initialize_random_material_set(const Plato::srom::Material& aMateria
         aRandomMaterialSet.push_back(tRandomMaterial);
     }
 }
+// function initialize_random_material_set
 
-inline void update_random_material_set(const Plato::srom::Material& aMaterial,
-                                       const Plato::srom::SromVariable& aSromVariable,
-                                       std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
+/******************************************************************************//**
+ * \fn update_random_material_set
+ * \brief Update random material set.
+ * \param [in]  aMaterial          material metadata
+ * \param [in]  aSromVariable      Stochastic Reduced Order Model (SROM) variable metadata
+ * \param [out] aRandomMaterialSet list of random materials
+**********************************************************************************/
+inline void update_random_material_set
+(const Plato::srom::Material& aMaterial,
+ const Plato::srom::SromVariable& aSromVariable,
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
 {
     auto tOriginalRandomMaterialSet = aRandomMaterialSet;
 
@@ -766,7 +812,15 @@ inline void update_random_material_set(const Plato::srom::Material& aMaterial,
         }
     }
 }
+// function update_random_material_set
 
+/******************************************************************************//**
+ * \fn append_random_material_properties
+ * \brief Append random material properties to random material.
+ * \param [in]  aMaterial          material metadata
+ * \param [in]  aSromVariables     list of Stochastic Reduced Order Model (SROM) variables
+ * \param [out] aRandomMaterialSet list of random materials
+**********************************************************************************/
 inline void append_random_material_properties
 (const Plato::srom::Material& aMaterial,
  const std::vector<Plato::srom::SromVariable>& aSromVariables,
@@ -784,13 +838,20 @@ inline void append_random_material_properties
         }
     }
 }
+// function append_random_material_properties
 
+/******************************************************************************//**
+ * \fn append_deterministic_material_properties
+ * \brief Append deterministic material properties to random material.
+ * \param [in]  aMaterial          material metadata
+ * \param [out] aRandomMaterialSet list of random materials
+**********************************************************************************/
 inline void append_deterministic_material_properties
 (const Plato::srom::Material &aMaterial,
- std::vector<Plato::srom::RandomMaterial>& aMaterialsSet)
+ std::vector<Plato::srom::RandomMaterial>& aRandomMaterialSet)
 {
     auto tDeterministicVars = aMaterial.deterministicVars();
-    for(auto& tRandomMaterial : aMaterialsSet)
+    for(auto& tRandomMaterial : aRandomMaterialSet)
     {
         for(auto& tVar : tDeterministicVars)
         {
@@ -798,7 +859,15 @@ inline void append_deterministic_material_properties
         }
     }
 }
+// function append_deterministic_material_properties
 
+/******************************************************************************//**
+ * \fn build_random_material_set
+ * \brief Build set of random materials.
+ * \param [in]  aMaterial          material metadata
+ * \param [in]  aSromVariables     list of Stochastic Reduced Order Model (SROM) variables
+ * \param [out] aRandomMaterials   list of random materials
+**********************************************************************************/
 inline void build_random_material_set
 (const Plato::srom::Material& aMaterial,
  const std::vector<Plato::srom::SromVariable>& aSromVariables,
@@ -812,7 +881,14 @@ inline void build_random_material_set
     Plato::srom::append_random_material_properties(aMaterial, aSromVariables, aRandomMaterials);
     Plato::srom::append_deterministic_material_properties(aMaterial, aRandomMaterials);
 }
+// function build_random_material_set
 
+/******************************************************************************//**
+ * \fn initialize_random_material_cases
+ * \brief Initialize list of random material cases.
+ * \param [in]  aRandomMaterials       list of random materials
+ * \param [out] aRandomMaterialCases   list of random material cases
+**********************************************************************************/
 inline void initialize_random_material_cases
 (const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
  std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
@@ -832,7 +908,14 @@ inline void initialize_random_material_cases
         aRandomMaterialCases.push_back(tRandomMaterialCase);
     }
 }
+// function initialize_random_material_cases
 
+/******************************************************************************//**
+ * \fn update_random_material_cases
+ * \brief Update list of random material cases.
+ * \param [in]  aRandomMaterials       list of random materials
+ * \param [out] aRandomMaterialCases   list of random material cases
+**********************************************************************************/
 inline void update_random_material_cases
 (const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
  std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
@@ -878,7 +961,14 @@ inline void update_random_material_cases
         }
     }
 }
+// function update_random_material_cases
 
+/******************************************************************************//**
+ * \fn append_random_material_set
+ * \brief Append random material set to list of random material cases.
+ * \param [in]  aRandomMaterials       list of random materials
+ * \param [out] aRandomMaterialCases   list of random material cases
+**********************************************************************************/
 inline void append_random_material_set
 (const std::vector<Plato::srom::RandomMaterial>& aRandomMaterials,
  std::vector<Plato::srom::RandomMaterialCase>& aRandomMaterialCases)
@@ -897,7 +987,18 @@ inline void append_random_material_set
         Plato::srom::update_random_material_cases(aRandomMaterials, aRandomMaterialCases);
     }
 }
+// function append_random_material_set
 
+/******************************************************************************//**
+ * \fn check_material_set
+ * \brief Check if list of materials is properly defined.
+ * \param [in]  aRandomMaterials       list of random materials
+ * \param [out] aRandomMaterialCases   list of random material cases
+ * \note The following criteria must be met to consider the material defined:
+ *       1. material and block identification numbers are defined;
+ *       2. number of defined material properties must be at least one.
+ *       3. material identification number is unique, i.e. duplicate material identification numbers are not permitted.
+**********************************************************************************/
 inline void check_material_set(const std::vector<Plato::srom::Material>& aMaterials)
 {
     std::vector<int> tIDs;
@@ -918,7 +1019,14 @@ inline void check_material_set(const std::vector<Plato::srom::Material>& aMateri
         THROWERR(tMsg.str().c_str())
     }
 }
+// function check_material_set
 
+/******************************************************************************//**
+ * \fn build_material_sroms
+ * \brief Build material Stochastic Reduced Order Models (SROMs).
+ * \param [in]  aInput    list of materials
+ * \param [out] aOutput   list of random material cases
+**********************************************************************************/
 inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInput,
                                  std::vector<Plato::srom::RandomMaterialCase>& aOutput)
 {
@@ -958,6 +1066,7 @@ inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInpu
     Plato::srom::append_deterministic_materials(tDeterministicMaterials, aOutput);
     Plato::srom::assign_material_case_identification_number(aOutput);
 }
+// function build_material_sroms
 
 }
 // namespace srom
