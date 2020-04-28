@@ -161,7 +161,9 @@ inline bool check_input_upper_bound(const Plato::srom::RandomVariable & aMyRando
  * \param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool define_distribution(const Plato::srom::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
+inline bool define_distribution
+(const Plato::srom::RandomVariable & aMyRandomVar,
+ Plato::SromInputs<double> & aInput)
 {
     if(aMyRandomVar.mStatistics.mDistribution == "normal")
     {
@@ -248,7 +250,9 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
  * \param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool define_input_statistics(const Plato::srom::RandomVariable & aMyRandomVar, Plato::SromInputs<double> & aInput)
+inline bool define_input_statistics
+(const Plato::srom::RandomVariable & aMyRandomVar,
+ Plato::SromInputs<double> & aInput)
 {
     if(Plato::srom::check_input_statistics(aMyRandomVar) == false)
     {
@@ -274,8 +278,9 @@ inline bool define_input_statistics(const Plato::srom::RandomVariable & aMyRando
  * \param [out] aOutputMetaData output metadata for the SROM problem
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool compute_uniform_random_variable_statistics(const Plato::SromInputs<double> & aInputMetaData,
-                                                       std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
+inline bool compute_uniform_random_variable_statistics
+(const Plato::SromInputs<double> & aInputMetaData,
+ std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
 {
     aOutputMetaData.clear();
 
@@ -299,8 +304,9 @@ inline bool compute_uniform_random_variable_statistics(const Plato::SromInputs<d
  * \param [out] aOutputMetaData output metadata for the SROM problem
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool compute_random_variable_statistics(const Plato::SromInputs<double> & aInputMetaData,
-                                               std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
+inline bool compute_random_variable_statistics
+(const Plato::SromInputs<double> & aInputMetaData,
+ std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
 {
     switch(aInputMetaData.mDistribution)
     {
@@ -340,9 +346,10 @@ inline bool compute_random_variable_statistics(const Plato::SromInputs<double> &
  * \param [out] aMyRandomVariable random variable
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromOutputs<double>> aMySromSolution,
-                                                  const Plato::srom::RandomVariable & aMyVariable,
-                                                  Plato::srom::SromVariable & aMyRandomVariable)
+inline bool post_process_sample_probability_pairs
+(const std::vector<Plato::SromOutputs<double>> aMySromSolution,
+ const Plato::srom::RandomVariable & aMyVariable,
+ Plato::srom::SromVariable & aMyRandomVariable)
 {
     if(aMySromSolution.size() <= 0)
     {
@@ -378,8 +385,9 @@ inline bool post_process_sample_probability_pairs(const std::vector<Plato::SromO
  * \param [out] aMySampleProbPairs set of sample-probability pairs
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool compute_sample_probability_pairs(const std::vector<Plato::srom::RandomVariable> & aSetRandomVariables,
-                                             std::vector<Plato::srom::SromVariable> & aMySampleProbPairs)
+inline bool compute_sample_probability_pairs
+(const std::vector<Plato::srom::RandomVariable> & aSetRandomVariables,
+ std::vector<Plato::srom::SromVariable> & aMySampleProbPairs)
 {
     if(aSetRandomVariables.size() <= 0)
     {
