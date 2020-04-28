@@ -8,9 +8,25 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace XMLGen
 {
+
+enum struct Arch
+{
+  CEE,
+  SUMMIT
+};
+
+struct UncertaintyMetaData
+{
+  size_t numSamples;
+  size_t numVariables;
+  size_t numPeformers;
+  std::vector<size_t> randomVariableIndices;
+  std::vector<size_t> deterministicVariableIndices;
+};
 
 struct Uncertainty
 {
@@ -274,22 +290,29 @@ struct InputData
     std::string mUseNormalizationInAggregator;
 
     bool mPlatoAnalyzePerformerExists;
+    bool mAllPerformersArePlatoAnalyze;
+    bool mAllObjectivesAreComplianceMinimization;
+
+    bool m_UseLaunch;
+    bool m_HasUncertainties;
+    bool m_RequestedVonMisesOutput;
+    bool m_UseNewPlatoAnalyzeUncertaintyWorkflow;
+    Arch m_Arch;
+    std::string m_filterType_identity_generatorName;
+    std::string m_filterType_identity_XMLName;
+    std::string m_filterType_kernel_generatorName;
+    std::string m_filterType_kernel_XMLName;
+    std::string m_filterType_kernelThenHeaviside_generatorName;
+    std::string m_filterType_kernelThenHeaviside_XMLName;
+    std::string m_filterType_kernelThenTANH_generatorName;
+    std::string m_filterType_kernelThenTANH_XMLName;
+    std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
+    XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
+    std::string input_generator_version;
+
 };
 
-struct UncertaintyMetaData
-{
-  size_t numSamples;
-  size_t numVariables;
-  size_t numPeformers;
-  std::vector<size_t> randomVariableIndices;
-  std::vector<size_t> deterministicVariableIndices;
-};
 
-enum struct Arch
-{
-  CEE,
-  SUMMIT
-};
 
 }
 // namespace XMLGen

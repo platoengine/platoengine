@@ -88,6 +88,13 @@ bool XMLGenerator_UnitTester::publicParseTokens(char *buffer, std::vector<std::s
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicLookForPlatoAnalyzePerformers()
+/******************************************************************************/
+{
+    return lookForPlatoAnalyzePerformers();
+}
+
+/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseObjectives(std::istream &sin)
 /******************************************************************************/
 {
@@ -183,13 +190,6 @@ bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
 /******************************************************************************/
 {
     return parseUncertainties(sin);
-}
-
-/******************************************************************************/
-bool XMLGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
-/******************************************************************************/
-{
-    return generatePlatoAnalyzeInputDecks(aStringStream);
 }
 
 /******************************************************************************/
