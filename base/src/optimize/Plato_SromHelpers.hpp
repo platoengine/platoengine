@@ -41,14 +41,18 @@
 */
 
 /*
- * Plato_SROM_Metadata.hpp
+ * Plato_SromHelpers.hpp
  *
- *  Created on: June 18, 2019
+ *  Created on: Apr 28, 2020
  */
 
 #pragma once
 
-#include "Plato_RandomLoadMetadata.hpp"
+#include <cmath>
+#include <sstream>
+#include <iomanip>
+
+#include "Plato_Macros.hpp"
 
 namespace Plato
 {
@@ -57,12 +61,28 @@ namespace srom
 {
 
 /******************************************************************************//**
- * \fn build_load_sroms
- * \brief Build the stochastic reduced order model given a set of random loads
- * \param [in] aInput  input metadata
- * \param [in] aOutput output metadata
+ * \fn to_string
+ * \brief Convert double to string.
+ * \param [in] aInput     floating-point number
+ * \param [in] aPrecision precision (default = 16 digits)
+ * \return converted floating-point number as a value of type string
+ * \note If precision < 0, set precision to its default value, which is '6' digits.
+ * \note If precision is infinite or NaN, set precision to its default value, which is '0' digits.
 **********************************************************************************/
-bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput);
+inline std::string to_string(const double& aInput, int aPrecision = 16)
+{
+    if(std::isfinite(aInput) == false)
+    {
+        THROWERR("Convert double to string: detected a non-finite floating-point number.")
+    }
+
+    std::ostringstream tValueString;
+    tValueString << std::fixed; // forces fix-point notation instead of default scientific notation
+    tValueString << std::setprecision(aPrecision); // sets precision for fixed-point notation
+    tValueString << aInput;
+    return (tValueString.str());
+}
+// function to_string
 
 }
 // namespace srom

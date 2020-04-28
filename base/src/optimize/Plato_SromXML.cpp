@@ -48,9 +48,14 @@
 #include <iostream>
 
 #include "Plato_SromXML.hpp"
+#include "Plato_SromSolve.hpp"
+#include "Plato_SromMetadata.hpp"
 #include "Plato_SromXMLUtils.hpp"
 
 namespace Plato
+{
+
+namespace srom
 {
 
 bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput)
@@ -66,7 +71,7 @@ bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::Ou
     for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
     {
         std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-        if(Plato::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
+        if(Plato::srom::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
         {
             std::ostringstream tMsg;
             tMsg << "FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
@@ -109,6 +114,9 @@ bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::Ou
 
     return(true);
 }
+
+}
+// namespace srom
 
 } // namespace Plato
 

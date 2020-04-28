@@ -41,15 +41,14 @@
 */
 
 /*
- * Plato_SromMetadata.hpp
+ * Plato_RandomLoadMetadata.hpp
  *
- *  Created on: June 18, 2019
+ *  Created on: Apr 28, 2020
  */
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "Plato_SromMetadata.hpp"
 
 namespace Plato
 {
@@ -58,78 +57,79 @@ namespace srom
 {
 
 /******************************************************************************//**
- * \struct Statistics
- * \brief Statistics metadata for Stochastic Reduced Order Model (SROM) problem.
+ * \struct Load
+ * \brief Load metadata for Stochastic Reduced Order Model (SROM) problem.
 **********************************************************************************/
-struct Statistics
+struct Load
 {
-    bool mReadStatsFromFile = false;     /*!< true = read statistics from file, false = solve SROM problem */
-    std::string mNumSamples;        /*!< number of samples */
-    std::string mDistribution;      /*!< probability distribution */
-    std::string mMean;              /*!< probability distribution mean */
-    std::string mUpperBound;        /*!< probability distribution upper bound */
-    std::string mLowerBound;        /*!< probability distribution lower bound */
-    std::string mStandardDeviation; /*!< probability distribution standard deviation */
+    int mAppID; /*!< application, i.e. side/node, set identification number */
+    std::string mAppName; /*!< application, i.e. side/node, set identification number */
+    std::string mLoadID; /*!< global load identification number */
+    std::string mAppType; /*!< application type, e.g. side/node set, etc. */
+    std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
+    std::vector<std::string> mValues; /*!< load magnitudes, e.g. \f$F = \{F_x, F_y, F_z\}\f$. */
+    std::vector<Plato::srom::RandomVariable> mRandomVars; /*!< set of random variables, e.g. rotations, \f$\theta = \{\theta_x, \theta_y, \theta_z\}\f$. */
 };
-// struct Statistics
+// struct Load
 
 /******************************************************************************//**
- * \struct RandomVariable
- * \brief Random variable metadata for Stochastic Reduced Order Model (SROM) problem.
+ * \struct RandomRotations
+ * \brief Random rotations metadata for Stochastic Reduced Order Model (SROM) problem.
 **********************************************************************************/
-struct RandomVariable
+struct RandomRotations
 {
-    std::string mTag;                    /*!< label, e.g. angle variation */
-    std::string mAttribute;              /*!< random variable attribute, e.g. rotation axis */
-    Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
-
-    /******************************************************************************//**
-     * \fn Read statistics from text file, true = read statistics from file or \n
-     * false = solve SROM problem to compute statistics.
-     * \return flag
-    **********************************************************************************/
-    bool readStats() const
-    {
-        return (mStatistics.mReadStatsFromFile);
-    }
+    double mProbability; /*!< probability associated with this angle variation */
+    std::vector<double> mRotations; /*!< vector of angle variations, e.g. /f$(\theta_x, \theta_y, \theta_z)/f$ */
 };
-// struct RandomVariable
+// struct RandomRotations
 
 /******************************************************************************//**
- * \struct DeterministicVariable
- * \brief Metadata used to describe a deterministic variable.
+ * \struct RandomLoad
+ * \brief Random load metadata for Stochastic Reduced Order Model (SROM) problem.
 **********************************************************************************/
-struct DeterministicVariable
+struct RandomLoad
 {
-    std::string mTag;        /*!< main variable attribute , e.g. Poisson's ratio */
-    std::string mValue;      /*!< attribute's deterministic value */
-    std::string mAttribute;  /*!< attribute's category, e.g. homogeneous or heterogeneous */
+    int mAppID; /*!< application set identification number */
+    int mLoadID; /*!< load identification number */
+    double mProbability; /*!< probability associated with this random load */
+    std::string mAppType; /*!< application type, e.g. sideset, nodeset, etc. */
+    std::string mAppName; /*!< application name. */
+    std::string mLoadType; /*!< load type, e.g. pressure, traction, etc. */
+    std::vector<double> mLoadValues; /*!< load components, e.g. /f$(f_x, f_y, f_z)/f$ */
 };
-// struct DeterministicVariable
+// struct RandomLoad
 
 /******************************************************************************//**
- * \struct SampleProbabilityPairs
- * \brief Sample-Probability pairs defined by the Stochastic Reduced Order Model (SROM) problem.
+ * \struct RandomLoadCase
+ * \brief Random load case metadata for Stochastic Reduced Order Model (SROM) problem.
 **********************************************************************************/
-struct SampleProbabilityPairs
+struct RandomLoadCase
 {
-    int mNumSamples; /*!< total number of samples */
-    std::vector<double> mSamples; /*!< sample set */
-    std::vector<double> mProbabilities; /*!< probability set  */
+    int mLoadCaseID; /*!< random load case global identification number */
+    double mProbability; /*!< probability associated with this random load case */
+    std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 };
-// struct SampleProbabilityPairs
+// struct RandomLoadCase
 
 /******************************************************************************//**
- * \struct SromVariable
- * \brief Stochastic Reduced Order Model (SROM) variable metadata for SROM problem.
+ * \struct OutputMetaData
+ * \brief Output metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
 **********************************************************************************/
-struct SromVariable
+struct OutputMetaData
 {
-    std::string mTag;        /*!< label, e.g. angle variation, elastic modulus */
-    std::string mAttribute;  /*!< SROM variable attribute, e.g. rotation axis, homogeneous */
-    Plato::srom::SampleProbabilityPairs mSampleProbPairs; /*!< sample-probability pair for this random variable */
+    std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
 };
-// struct SromVariable
+// struct OutputMetaData
+
+/******************************************************************************//**
+ * \struct InputMetaData
+ * \brief Input metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
+**********************************************************************************/
+struct InputMetaData
+{
+    std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
+};
+// struct InputMetaData
 
 }
 // namespace srom

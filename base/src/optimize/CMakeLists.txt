@@ -149,7 +149,9 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_Distribution.hpp
                         Plato_NormalDistribution.hpp
                         Plato_UniformDistribution.hpp
+                        Plato_SromSolve.hpp
                         Plato_SromUtilis.hpp
+                        Plato_SromHelpers.hpp
                         Plato_SromConstraint.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
@@ -157,6 +159,8 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
+                        Plato_RandomLoadMetadata.hpp
+                        Plato_RandomMaterialMetadata.hpp
                         Plato_LinearCriterionHessian.hpp
                         Plato_CentralDifferenceHessian.hpp
                         Plato_OptimizerUtilities.hpp

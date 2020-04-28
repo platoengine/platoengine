@@ -49,6 +49,7 @@
 #include "gtest/gtest.h"
 
 #include "Plato_SromXMLUtils.hpp"
+#include "Plato_SromSolve.hpp"
 #include "Plato_SromXML.hpp"
 
 namespace PlatoUncertainLoadGeneratorXMLTest
@@ -57,52 +58,52 @@ namespace PlatoUncertainLoadGeneratorXMLTest
 TEST(PlatoTest, check_input_mean)
 {
     Plato::srom::RandomVariable tMyRandomVar;
-    ASSERT_FALSE(Plato::check_input_mean(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_mean(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mMean = "5";
-    ASSERT_TRUE(Plato::check_input_mean(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_mean(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_lower_bound)
 {
     Plato::srom::RandomVariable tMyRandomVar;
-    ASSERT_FALSE(Plato::check_input_lower_bound(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_lower_bound(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mLowerBound = "5";
-    ASSERT_TRUE(Plato::check_input_lower_bound(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_lower_bound(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_upper_bound)
 {
     Plato::srom::RandomVariable tMyRandomVar;
-    ASSERT_FALSE(Plato::check_input_upper_bound(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_upper_bound(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mUpperBound = "5";
-    ASSERT_TRUE(Plato::check_input_upper_bound(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_upper_bound(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_standard_deviation)
 {
     Plato::srom::RandomVariable tMyRandomVar;
-    ASSERT_FALSE(Plato::check_input_standard_deviation(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_standard_deviation(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    ASSERT_TRUE(Plato::check_input_standard_deviation(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_standard_deviation(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_number_samples)
 {
     Plato::srom::RandomVariable tMyRandomVar;
-    ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mNumSamples = "-1";
-    ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mNumSamples = "0";
-    ASSERT_FALSE(Plato::check_input_number_samples(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
     tMyRandomVar.mStatistics.mNumSamples = "2";
-    ASSERT_TRUE(Plato::check_input_number_samples(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_number_samples(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_uniform)
@@ -114,29 +115,29 @@ TEST(PlatoTest, check_input_statistics_uniform)
     tMyRandomVar.mStatistics.mDistribution = "uniform";
 
     // TEST UNDEFINED UPPER BOUND
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
     tMyRandomVar.mStatistics.mLowerBound = "";
     tMyRandomVar.mStatistics.mUpperBound = "135";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "";
     tMyRandomVar.mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
     tMyRandomVar.mStatistics.mNumSamples = "0";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "-1";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
     tMyRandomVar.mStatistics.mNumSamples = "4";
-    ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_normal)
@@ -152,40 +153,40 @@ TEST(PlatoTest, check_input_statistics_normal)
     tMyRandomVar.mStatistics.mDistribution = "normal";
 
     // TEST UNDEFINED MEAN
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
     tMyRandomVar.mStatistics.mMean = "80";
     tMyRandomVar.mStatistics.mUpperBound = "";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
     tMyRandomVar.mStatistics.mLowerBound = "";
     tMyRandomVar.mStatistics.mUpperBound = "95";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "";
     tMyRandomVar.mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
     tMyRandomVar.mStatistics.mNumSamples = "0";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "-1";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
     tMyRandomVar.mStatistics.mNumSamples = "4";
     tMyRandomVar.mStatistics.mNumSamples = "4";
     tMyRandomVar.mStatistics.mStandardDeviation = "";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
     tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, check_input_statistics_beta)
@@ -201,39 +202,39 @@ TEST(PlatoTest, check_input_statistics_beta)
     tMyRandomVar.mStatistics.mDistribution = "beta";
 
     // TEST UNDEFINED MEAN
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
     tMyRandomVar.mStatistics.mMean = "80";
     tMyRandomVar.mStatistics.mUpperBound = "";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
     tMyRandomVar.mStatistics.mLowerBound = "";
     tMyRandomVar.mStatistics.mUpperBound = "95";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "";
     tMyRandomVar.mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
     tMyRandomVar.mStatistics.mNumSamples = "0";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
     tMyRandomVar.mStatistics.mNumSamples = "-1";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
     tMyRandomVar.mStatistics.mNumSamples = "4";
     tMyRandomVar.mStatistics.mStandardDeviation = "";
-    ASSERT_FALSE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
     tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    ASSERT_TRUE(Plato::check_input_statistics(tMyRandomVar));
+    ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
 TEST(PlatoTest, define_input_statistics)
@@ -250,11 +251,11 @@ TEST(PlatoTest, define_input_statistics)
 
     // TEST UNDEFINED PARAMETER
     Plato::SromInputs<double> tSromInputs;
-    ASSERT_FALSE(Plato::define_input_statistics(tMyRandomVar, tSromInputs));
+    ASSERT_FALSE(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs));
 
     // TEST SUCCESS
     tMyRandomVar.mStatistics.mMean = "80";
-    ASSERT_TRUE(Plato::define_input_statistics(tMyRandomVar, tSromInputs));
+    ASSERT_TRUE(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs));
 
     ASSERT_EQ(4u, tSromInputs.mNumSamples);
     ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
@@ -272,19 +273,19 @@ TEST(PlatoTest, define_distribution)
     Plato::SromInputs<double> tSromInputs;
 
     tMyRandomVar.mStatistics.mDistribution = "normal";
-    ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
+    ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::normal, tSromInputs.mDistribution);
 
     tMyRandomVar.mStatistics.mDistribution = "beta";
-    ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
+    ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
 
     tMyRandomVar.mStatistics.mDistribution = "uniform";
-    ASSERT_TRUE(Plato::define_distribution(tMyRandomVar, tSromInputs));
+    ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::uniform, tSromInputs.mDistribution);
 
     tMyRandomVar.mStatistics.mDistribution = "lognormal";
-    ASSERT_FALSE(Plato::define_distribution(tMyRandomVar, tSromInputs));
+    ASSERT_FALSE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
 }
 
 TEST(PlatoTest, compute_uniform_random_variable_statistics)
@@ -295,7 +296,7 @@ TEST(PlatoTest, compute_uniform_random_variable_statistics)
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistrubtionName::uniform;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_TRUE(Plato::compute_uniform_random_variable_statistics(tSromInputs, tSromOutputs));
+    ASSERT_TRUE(Plato::srom::compute_uniform_random_variable_statistics(tSromInputs, tSromOutputs));
 
     // TEST RESULTS
     double tSum = 0;
@@ -319,7 +320,7 @@ TEST(PlatoTest, compute_random_variable_statistics_error)
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistrubtionName::undefined;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_FALSE(Plato::compute_random_variable_statistics(tSromInputs, tSromOutputs));
+    ASSERT_FALSE(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs));
 
     std::system("rm -f plato_cdf_output.txt");
     std::system("rm -f plato_srom_diagnostics.txt");
@@ -334,7 +335,7 @@ TEST(PlatoTest, compute_random_variable_statistics)
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistrubtionName::uniform;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_TRUE(Plato::compute_random_variable_statistics(tSromInputs, tSromOutputs));
+    ASSERT_TRUE(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs));
 
     // TEST RESULTS
     double tSum = 0;
@@ -371,7 +372,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
 
     // SOLVE SROM PROBLEM
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
+    Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
 
     // TEST RESULTS
     ASSERT_EQ(1u, tMySampleProbPairs.size());
@@ -430,7 +431,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
 
     // SOLVE SROM PROBLEM
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
+    Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs);
 
     // TEST RESULTS - RANDOM VARIABLE ONE
     ASSERT_EQ(2u, tMySampleProbPairs.size());
@@ -497,7 +498,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_distribution)
 
     // SOLVE SROM PROBLEM
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_empty_random_var_set)
@@ -505,7 +506,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_empty_random_var_set)
     // SOLVE SROM PROBLEM
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistics_uniform)
@@ -523,27 +524,27 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistic
 
     // TEST UNDEFINED UPPER BOUND
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED LOWER BOUND
     tRandomVarsSet[0].mStatistics.mLowerBound = "";
     tRandomVarsSet[0].mStatistics.mUpperBound = "135";
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
     tRandomVarsSet[0].mStatistics.mNumSamples = "";
     tRandomVarsSet[0].mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NUMBER OF SAMPLES = 0
     tRandomVarsSet[0].mStatistics.mNumSamples = "0";
     tRandomVarsSet[0].mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
     tRandomVarsSet[0].mStatistics.mNumSamples = "-1";
     tRandomVarsSet[0].mStatistics.mLowerBound = "65";
-    ASSERT_FALSE(Plato::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
 TEST(PlatoTest, post_process_random_load_error)
@@ -2218,7 +2219,7 @@ TEST(PlatoTest, generate_load_sroms_error)
 {
     Plato::srom::InputMetaData tInputs;
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_FALSE(Plato::build_load_sroms(tInputs, tOutputs));
+    ASSERT_FALSE(Plato::srom::build_load_sroms(tInputs, tOutputs));
 }
 
 TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
@@ -2301,7 +2302,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::srom::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(16u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES
@@ -2516,7 +2517,7 @@ TEST(PlatoTest, update_objectives_load_cases_from_parsed_data)
             Plato::srom::InputMetaData tInputs;
             tInputs.mLoads = tLoads;
             Plato::srom::OutputMetaData tOutputs;
-            ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
+            ASSERT_TRUE(Plato::srom::build_load_sroms(tInputs, tOutputs));
 
             int tStartingLoadCaseID = tNewLoadCases.size() + 1;
             tCurObj.load_case_ids.clear();
@@ -2677,7 +2678,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::srom::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(16u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES
@@ -2802,7 +2803,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
 
     // CALL FUNCTION TO BE TESTED
     Plato::srom::OutputMetaData tOutputs;
-    ASSERT_TRUE(Plato::build_load_sroms(tInputs, tOutputs));
+    ASSERT_TRUE(Plato::srom::build_load_sroms(tInputs, tOutputs));
     ASSERT_EQ(4u, tOutputs.mLoadCases.size());
 
     // SET GOLD VALUES
