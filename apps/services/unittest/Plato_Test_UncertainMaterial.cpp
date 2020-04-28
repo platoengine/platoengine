@@ -15,17 +15,33 @@ namespace Plato
 namespace srom
 {
 
-inline std::string to_string(const double& aInput, double aPrecision = 16)
+/******************************************************************************//**
+ * \fn to_string
+ * \brief Convert double to string.
+ * \param [in] aInput     floating-point number
+ * \param [in] aPrecision precision (default = 16 digits)
+ * \return converted floating-point number as a value of type string
+ * \note If precision < 0, set precision to its default value, which is '6' digits.
+ * \note If precision is infinite or NaN, set precision to its default value, which is '0' digits.
+**********************************************************************************/
+inline std::string to_string(const double& aInput, int aPrecision = 16)
 {
+    if(std::isfinite(aInput) == false)
+    {
+        THROWERR("Convert double to string: detected a non-finite floating-point number.")
+    }
+
     std::ostringstream tValueString;
     tValueString << std::fixed; // forces fix-point notation instead of default scientific notation
     tValueString << std::setprecision(aPrecision); // sets precision for fixed-point notation
     tValueString << aInput;
     return (tValueString.str());
 }
+// function to_string
 
 /******************************************************************************//**
- * \brief Deterministic variable metadata for Stochastic Reduced Order Model (SROM) problem.
+ * \struct DeterministicVariable
+ * \brief Metadata used to describe a deterministic variable.
 **********************************************************************************/
 struct DeterministicVariable
 {
@@ -35,6 +51,10 @@ struct DeterministicVariable
 };
 // struct DeterministicVariable
 
+/******************************************************************************//**
+ * \struct Material
+ * \brief Metadata used to describe a material.
+**********************************************************************************/
 struct Material
 {
 private:
@@ -46,15 +66,27 @@ private:
     std::vector<Plato::srom::DeterministicVariable> mDeterministicVars; /*!< deterministic material property */
 
 public:
+    /******************************************************************************//**
+     * \brief Checks if material is random.
+     * \return flag - true if material is random
+    **********************************************************************************/
     bool isRandom() const
     {
         return (!mRandomVars.empty());
     }
+
+    /******************************************************************************//**
+     * \brief Checks if material is deterministic.
+     * \return flag - true if material is deterministic
+    **********************************************************************************/
     bool isDeterministic() const
     {
         return (mRandomVars.empty());
     }
 
+    /******************************************************************************//**
+     * \brief Checks if material is properly defined.
+    **********************************************************************************/
     void check() const
     {
         if(mBlockID.empty())
@@ -77,32 +109,64 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * \brief Set block identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
     void blockID(const std::string& aID)
     {
         mBlockID = aID;
     }
+
+    /******************************************************************************//**
+     * \brief Return block identification number.
+     * \return block identification number
+    **********************************************************************************/
     std::string blockID() const
     {
         return (mBlockID);
     }
 
+    /******************************************************************************//**
+     * \brief Set material identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
     void materialID(const std::string& aID)
     {
         mMaterialID = aID;
     }
+
+    /******************************************************************************//**
+     * \brief Return material identification number.
+     * \return material identification number
+    **********************************************************************************/
     std::string materialID() const
     {
         return (mMaterialID);
     }
 
+    /******************************************************************************//**
+     * \brief Set material category, e.g. isotropic, orthotropic, etc.
+     * \param [in] aCategory material category
+    **********************************************************************************/
     void category(const std::string& aCategory)
     {
         mCategory = aCategory;
     }
+
+    /******************************************************************************//**
+     * \brief Return material category.
+     * \return material category
+    **********************************************************************************/
     std::string category() const
     {
         return mCategory;
     }
+
+    /******************************************************************************//**
+     * \brief Return tags of material properties that define the material.
+     * \return list with material property tags
+    **********************************************************************************/
     std::vector<std::string> tags() const
     {
         std::vector<std::string> tTags;
@@ -122,6 +186,30 @@ public:
         return (tTags);
     }
 
+    /******************************************************************************//**
+     * \brief Return list of random material properties that define the material.
+     * \return list of random material properties
+    **********************************************************************************/
+    std::vector<Plato::srom::RandomVariable> randomVars() const
+    {
+        return (mRandomVars);
+    }
+
+    /******************************************************************************//**
+     * \brief Return list of deterministic material properties that define the material.
+     * \return list of deterministic material properties
+    **********************************************************************************/
+    std::vector<Plato::srom::DeterministicVariable> deterministicVars() const
+    {
+        return (mDeterministicVars);
+    }
+
+    /******************************************************************************//**
+     * \brief Append random material property.
+     * \param [in] aTag       material property tag/label
+     * \param [in] aAttribute material property attribute
+     * \param [in] aStats     material property statistics metadata
+    **********************************************************************************/
     void append(const std::string &aTag,
                 const std::string &aAttribute,
                 const Plato::srom::Statistics &aStats)
@@ -132,11 +220,13 @@ public:
         tVariable.mAttribute = aAttribute;
         mRandomVars.push_back(tVariable);
     }
-    std::vector<Plato::srom::RandomVariable> randomVars() const
-    {
-        return (mRandomVars);
-    }
 
+    /******************************************************************************//**
+     * \brief Append deterministic material property.
+     * \param [in] aTag       material property tag/label
+     * \param [in] aAttribute material property attribute
+     * \param [in] aValue     material property value
+    **********************************************************************************/
     void append(const std::string &aTag,
                 const std::string &aAttribute,
                 const std::string &aValue)
@@ -146,10 +236,6 @@ public:
         tVariable.mValue = aValue;
         tVariable.mAttribute = aAttribute;
         mDeterministicVars.push_back(tVariable);
-    }
-    std::vector<Plato::srom::DeterministicVariable> deterministicVars() const
-    {
-        return (mDeterministicVars);
     }
 };
 // struct Material
@@ -166,6 +252,9 @@ private:
     MaterialProps mTags; /*!< map between material property tag/label and its attribute and value, i.e. tags(tag,(attribute,value)) */
 
 public:
+    /******************************************************************************//**
+     * \brief Checks if random material is properly defined.
+    **********************************************************************************/
     void check() const
     {
         if(mBlockID.empty())
@@ -207,42 +296,82 @@ public:
         }
     }
 
+    /******************************************************************************//**
+     * \brief Set block identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
     void blockID(const std::string& aID)
     {
         mBlockID = aID;
     }
+
+    /******************************************************************************//**
+     * \brief Return block identification number.
+     * \return block identification number
+    **********************************************************************************/
     std::string blockID() const
     {
         return (mBlockID);
     }
 
+    /******************************************************************************//**
+     * \brief Set random material identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
     void materialID(const std::string& aID)
     {
         mMaterialID = aID;
     }
+
+    /******************************************************************************//**
+     * \brief Return random material identification number.
+     * \return random material identification number
+    **********************************************************************************/
     std::string materialID() const
     {
         return (mMaterialID);
     }
 
+    /******************************************************************************//**
+     * \brief Set random material category, e.g. isotropic, orthotropic, etc.
+     * \param [in] aCategory random material category
+    **********************************************************************************/
     void category(const std::string& aCategory)
     {
         mCategory = aCategory;
     }
+
+    /******************************************************************************//**
+     * \brief Return random material category, e.g. isotropic, orthotropic, etc.
+     * \return random material category
+    **********************************************************************************/
     std::string category() const
     {
         return mCategory;
     }
 
+    /******************************************************************************//**
+     * \brief Set random material probability.
+     * \param [in] aProbability random material probability
+    **********************************************************************************/
     void probability(const double& aProbability)
     {
         mProbability = aProbability;
     }
+
+    /******************************************************************************//**
+     * \brief Return random material probability.
+     * \return random material probability
+    **********************************************************************************/
     double probability() const
     {
         return mProbability;
     }
 
+    /******************************************************************************//**
+     * \brief Return random material property value.
+     * \param [in] aTag random material property label
+    **********************************************************************************/
     std::string value(const std::string& aTag) const
     {
         auto tItr = mTags.find(aTag);
@@ -254,6 +383,11 @@ public:
         }
         return (tItr->second.second);
     }
+
+    /******************************************************************************//**
+     * \brief Return random material property attribute.
+     * \param [in] aTag random material property label
+    **********************************************************************************/
     std::string attribute(const std::string& aTag) const
     {
         auto tItr = mTags.find(aTag);
@@ -265,6 +399,11 @@ public:
         }
         return (tItr->second.first);
     }
+
+    /******************************************************************************//**
+     * \brief Return tags of random material properties that define the material.
+     * \return list with random material property tags
+    **********************************************************************************/
     std::vector<std::string> tags() const
     {
         std::vector<std::string> tTags;
@@ -274,6 +413,13 @@ public:
         }
         return tTags;
     }
+
+    /******************************************************************************//**
+     * \brief Append random material property.
+     * \param [in] aTag       random material property tag/label
+     * \param [in] aAttribute random material property attribute
+     * \param [in] aValue     random material property value
+    **********************************************************************************/
     void append(const std::string& aTag, const std::string& aAttribute, const std::string& aValue)
     {
         mTags.insert(std::pair<std::string, std::pair<std::string, std::string>>
@@ -290,31 +436,66 @@ private:
     std::map<std::string, Plato::srom::RandomMaterial> mMaterialCases; /*!< random material cases, map(material_id, random material) */
 
 public:
-    void caseID(const std::string& aCaseID)
-    {
-        mCaseID = aCaseID;
-    }
-    std::string caseID() const
-    {
-        return (mCaseID);
-    }
-    void probability(const double& aProbability)
-    {
-        mProbability = aProbability;
-    }
-    double probability() const
-    {
-        return (mProbability);
-    }
+    /******************************************************************************//**
+     * \brief Return number of materials that define the random material case.
+     * \return number of materials
+    **********************************************************************************/
     size_t numMaterials() const
     {
         return (mMaterialCases.size());
     }
+
+    /******************************************************************************//**
+     * \brief Set random material case identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void caseID(const std::string& aCaseID)
+    {
+        mCaseID = aCaseID;
+    }
+
+    /******************************************************************************//**
+     * \brief Return random material case identification number.
+     * \return random material case identification number
+    **********************************************************************************/
+    std::string caseID() const
+    {
+        return (mCaseID);
+    }
+
+    /******************************************************************************//**
+     * \brief Set random material case probability.
+     * \param [in] aProbability random material case probability
+    **********************************************************************************/
+    void probability(const double& aProbability)
+    {
+        mProbability = aProbability;
+    }
+
+    /******************************************************************************//**
+     * \brief Return random material case probability.
+     * \return random material case probability
+    **********************************************************************************/
+    double probability() const
+    {
+        return (mProbability);
+    }
+
+    /******************************************************************************//**
+     * \brief Return string with random material case probability.
+     * \return random material case probability
+    **********************************************************************************/
     std::string probabilityToString() const
     {
         auto tOutput = Plato::srom::to_string(mProbability);
         return (tOutput);
     }
+
+    /******************************************************************************//**
+     * \brief Return block identification number for material with input identification number.
+     * \param [in] aMaterialID material identification number
+     * \return block identification number
+    **********************************************************************************/
     std::string blockID(const std::string& aMaterialID) const
     {
         auto tItr = mMaterialCases.find(aMaterialID);
@@ -326,6 +507,12 @@ public:
         }
         return (tItr->second.blockID());
     }
+
+    /******************************************************************************//**
+     * \brief Return category for material with input identification number.
+     * \param [in] aMaterialID material identification number
+     * \return material category
+    **********************************************************************************/
     std::string category(const std::string& aMaterialID) const
     {
         auto tItr = mMaterialCases.find(aMaterialID);
@@ -337,17 +524,13 @@ public:
         }
         return (tItr->second.category());
     }
-    std::vector<std::string> tags(const std::string& aMaterialID) const
-    {
-        auto tItr = mMaterialCases.find(aMaterialID);
-        if(tItr == mMaterialCases.end())
-        {
-            std::ostringstream tMsg;
-            tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
-            THROWERR(tMsg.str().c_str())
-        }
-        return (tItr->second.tags());
-    }
+
+    /******************************************************************************//**
+     * \brief Return material property value for material with input identification number and tag.
+     * \param [in] aMaterialID material identification number
+     * \param [in] aTag        material property tag
+     * \return material property value
+    **********************************************************************************/
     std::string value(const std::string& aMaterialID, const std::string& aTag) const
     {
         auto tItr = mMaterialCases.find(aMaterialID);
@@ -359,6 +542,13 @@ public:
         }
         return (tItr->second.value(aTag));
     }
+
+    /******************************************************************************//**
+     * \brief Return material property attribute for material with input identification number and tag.
+     * \param [in] aMaterialID material identification number
+     * \param [in] aTag        material property tag
+     * \return material property attribute
+    **********************************************************************************/
     std::string attribute(const std::string& aMaterialID, const std::string& aTag) const
     {
         auto tItr = mMaterialCases.find(aMaterialID);
@@ -370,6 +560,28 @@ public:
         }
         return (tItr->second.attribute(aTag));
     }
+
+    /******************************************************************************//**
+     * \brief Return material property tags for material with input identification number.
+     * \param [in] aMaterialID material identification number
+     * \return list of material property tags
+    **********************************************************************************/
+    std::vector<std::string> tags(const std::string& aMaterialID) const
+    {
+        auto tItr = mMaterialCases.find(aMaterialID);
+        if(tItr == mMaterialCases.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
+            THROWERR(tMsg.str().c_str())
+        }
+        return (tItr->second.tags());
+    }
+
+    /******************************************************************************//**
+     * \brief Return material identification numbers for this random material case.
+     * \return list of material identification numbers
+    **********************************************************************************/
     std::vector<std::string> materialIDs() const
     {
         std::vector<std::string> tIDs;
@@ -379,6 +591,11 @@ public:
         }
         return tIDs;
     }
+
+    /******************************************************************************//**
+     * \brief Return list of random materials that define this random material case.
+     * \return list of random materials
+    **********************************************************************************/
     std::vector<Plato::srom::RandomMaterial> materials() const
     {
         std::vector<Plato::srom::RandomMaterial> tMaterials;
@@ -388,6 +605,12 @@ public:
         }
         return tMaterials;
     }
+
+    /******************************************************************************//**
+     * \brief Append random material.
+     * \param [in] aMaterialID random material identification number
+     * \param [in] aMaterial   random material metadata
+    **********************************************************************************/
     void append(const std::string& aMaterialID, const Plato::srom::RandomMaterial& aMaterial)
     {
         mMaterialCases.insert(std::pair<std::string, Plato::srom::RandomMaterial>(aMaterialID, aMaterial));
@@ -2360,6 +2583,16 @@ TEST(PlatoTest, SROM_CheckMaterialSet)
 
     // 3. CALL FUNCTION - EXPECTS ERROR DUE TO DUPLICATE MATERIAL IDENTIFICATION NUMBER
     EXPECT_THROW(Plato::srom::check_material_set(tMaterialSet), std::runtime_error);
+}
+
+TEST(PlatoTest, SROM_ToString_ErrorAndDefaultValues)
+{
+    EXPECT_THROW(Plato::srom::to_string(std::numeric_limits<double>::infinity()), std::runtime_error);
+    EXPECT_THROW(Plato::srom::to_string(std::numeric_limits<double>::quiet_NaN()), std::runtime_error);
+    auto tOutput = Plato::srom::to_string(1.0, std::numeric_limits<int>::quiet_NaN());
+    ASSERT_STREQ("1", tOutput.c_str());
+    tOutput = Plato::srom::to_string(1.0, std::numeric_limits<int>::infinity());
+    ASSERT_STREQ("1", tOutput.c_str());
 }
 
 }
