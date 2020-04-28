@@ -58,7 +58,9 @@ namespace Plato
 namespace srom
 {
 
-bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput)
+bool build_load_sroms
+(const Plato::srom::InputMetaData & aInput,
+ Plato::srom::OutputMetaData & aOutput)
 {
     aOutput.mLoadCases.clear();
     std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;

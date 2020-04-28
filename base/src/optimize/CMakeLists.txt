@@ -156,6 +156,7 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
                         Plato_SromLoadUtils.hpp
+                        Plato_SromMaterialUtils.hpp
                         Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
