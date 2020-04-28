@@ -54,11 +54,6 @@ public:
     {
         return (mRandomVars.empty());
     }
-    bool undefined() const
-    {
-        auto tIsMaterialUndefined = mDeterministicVars.empty() && mRandomVars.empty();
-        return tIsMaterialUndefined;
-    }
 
     void check() const
     {
@@ -125,24 +120,6 @@ public:
         }
 
         return (tTags);
-    }
-    std::vector<std::string> attributes() const
-    {
-        std::vector<std::string> tAttributes;
-
-        // append random variables tags
-        for(auto& tRandomVar : mRandomVars)
-        {
-            tAttributes.push_back(tRandomVar.mAttribute);
-        }
-
-        // append deterministic variables tags
-        for(auto& tDeterministicVar : mDeterministicVars)
-        {
-            tAttributes.push_back(tDeterministicVar.mAttribute);
-        }
-
-        return (tAttributes);
     }
 
     void append(const std::string &aTag,
@@ -301,10 +278,6 @@ public:
     {
         mTags.insert(std::pair<std::string, std::pair<std::string, std::string>>
             (aTag, std::pair<std::string, std::string>(aAttribute, aValue)));
-    }
-    size_t size() const
-    {
-        return (mTags.size());
     }
 };
 // struct RandomMaterial
