@@ -154,6 +154,7 @@ protected:
     bool checkForNodesetSidesetNameConflicts();
     void addComputeObjectiveValueOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
     void addComputeObjectiveGradientOperationForNewUncertaintyWorkflow(pugi::xml_node &aNode);
+    bool addDefinesToDoc(pugi::xml_document& doc);
 
     const InputData &m_InputData;
 
@@ -202,7 +203,6 @@ protected:
 
 private:
     void addVersionEntryToDoc(pugi::xml_document& doc);
-    bool addDefinesToDoc(pugi::xml_document& doc);
     size_t stringToSizeT(const std::string& aString);
     size_t getGreatestDivisor(const size_t& aDividend, size_t aDivisor);
     virtual size_t computeNumberOfNodesNeeded();

@@ -60,9 +60,6 @@ namespace XMLGen
                      const std::string &name,
                      const std::string &type,
                      const std::string &value);
-    void getUncertaintyFlags(const InputData &aInputData,
-                         bool &aHasUncertainties,
-                         bool &aRequestedVonMisesOutput);
     bool addChild(pugi::xml_node parent_node, 
               const std::string &name, 
               const std::string &value);

@@ -41,14 +41,14 @@
  */
 
 /*
- * DefaultInputGenerator.hpp
+ * ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.hpp
  *
- *  Created on: Apr 16, 2020
+ *  Created on: Apr 27, 2020
  *
  */
 
-#ifndef SRC_DEFAULTINPUTGENERATOR_UNIT_TESTERHPP_
-#define SRC_DEFAULTINPUTGENERATOR_UNIT_TESTERHPP_
+#ifndef SRC_COMPLIANCEMINTOPLATOANALYZEUNCERTINPUTGENERATOR_UNIT_TESTERHPP_
+#define SRC_COMPLIANCEMINTOPLATOANALYZEUNCERTINPUTGENERATOR_UNIT_TESTERHPP_
 
 #include <string>
 #include <map>
@@ -56,15 +56,15 @@
 #include <fstream>
 
 #include "XMLGeneratorDataStruct.hpp"
-#include "DefaultInputGenerator.hpp"
+#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
 
 
-class DefaultInputGenerator_UnitTester : public XMLGen::DefaultInputGenerator
+class ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester : public XMLGen::ComplianceMinTOPlatoAnalyzeUncertInputGenerator
 {
 
 public:
-    DefaultInputGenerator_UnitTester(const XMLGen::InputData &aInputData);
-    ~DefaultInputGenerator_UnitTester();
+    ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester(const XMLGen::InputData &aInputData);
+    ~ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester();
     bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
     bool publicGenerateInterfaceXML(std::ostringstream *aStringStream = NULL);
 
@@ -77,4 +77,4 @@ private:
 };
 
 
-#endif /* SRC_DEFAULTINPUTGENERATOR_UNIT_TESTERHPP_ */
+#endif /* SRC_COMPLIANCEMINTOPLATOANALYZEUNCERTINPUTGENERATOR_UNIT_TESTERHPP_ */

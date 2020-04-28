@@ -70,6 +70,7 @@
 #include "XMLG_Macros.hpp"
 #include "DefaultInputGenerator.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
+#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
 
 namespace XMLGen
 {
@@ -137,7 +138,7 @@ bool XMLGenerator::generate()
         }
     }
 
-    getUncertaintyFlags(m_InputData, m_InputData.m_HasUncertainties, m_InputData.m_RequestedVonMisesOutput);
+    getUncertaintyFlags();
 
     if(!runSROMForUncertainVariables())
     {
@@ -172,6 +173,12 @@ bool XMLGenerator::generate()
             case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
             {
                 ComplianceMinTOPlatoAnalyzeInputGenerator tGenerator(m_InputData);
+                tGenerator.generateInputFiles();
+                break;
+            }
+            case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
+            {
+                ComplianceMinTOPlatoAnalyzeUncertInputGenerator tGenerator(m_InputData);
                 tGenerator.generateInputFiles();
                 break;
             }
@@ -216,9 +223,9 @@ ProblemType XMLGenerator::identifyPlatoAnalyzeProblemTypes()
             if(m_InputData.mAllObjectivesAreComplianceMinimization)
             {
                 if(m_InputData.m_HasUncertainties == false)
-                {
                     tProblemType = COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE;
-                }
+                else
+                    tProblemType = COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES;
             }
         }
     }
@@ -4007,6 +4014,35 @@ std::string XMLGenerator::toUpper(const std::string &s)
   }
   return ret;
 }
+
+/******************************************************************************/
+void XMLGenerator::getUncertaintyFlags()
+/******************************************************************************/
+{
+    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    {
+        const XMLGen::Objective cur_obj = m_InputData.objectives[i];
+        for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
+        {
+            std::string cur_load_string = cur_obj.load_case_ids[k];
+            for(size_t j=0; m_InputData.m_RequestedVonMisesOutput == false && j<cur_obj.output_for_plotting.size(); j++)
+            {
+                if(cur_obj.output_for_plotting[j] == "vonmises")
+                {
+                    m_InputData.m_RequestedVonMisesOutput = true;
+                }
+            }
+            for(size_t j=0; m_InputData.m_HasUncertainties == false && j<m_InputData.uncertainties.size(); ++j)
+            {
+                if(cur_load_string == m_InputData.uncertainties[j].id)
+                {
+                    m_InputData.m_HasUncertainties = true;
+                }
+            }
+        }
+    }
+}
+
 
 
 

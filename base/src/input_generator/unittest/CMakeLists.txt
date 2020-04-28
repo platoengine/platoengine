@@ -5,10 +5,12 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGenerator_UnitTester.cpp
                                       DefaultInputGenerator_UnitTester.cpp
                                       ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.cpp
+                                      ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.cpp
                                       Plato_Test_XMLGenerator.cpp
                                       ../XMLGenerator.cpp
                                       ../XMLGeneratorUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
+                                      ../ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp
                                       ../PlatoAnalyzeInputDeckWriter.cpp
                                       ../SalinasInputDeckWriter.cpp)

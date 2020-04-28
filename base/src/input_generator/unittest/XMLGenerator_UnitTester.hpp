@@ -61,6 +61,7 @@ public:
     XMLGenerator_UnitTester();
     ~XMLGenerator_UnitTester();
 
+    void publicGetUncertaintyFlags();
     bool publicParseSingleValue(const std::vector<std::string> &aTokens,
                                 const std::vector<std::string> &aInputStrings,
                                 std::string &aReturnStringValue);
