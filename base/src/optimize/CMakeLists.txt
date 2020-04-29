@@ -4,7 +4,6 @@ set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_OptimizersIO_Utilities.cpp
                         Plato_OptimizersIO.cpp
-                        Plato_SromXML.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
