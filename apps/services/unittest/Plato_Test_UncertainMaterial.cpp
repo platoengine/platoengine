@@ -1,44 +1,44 @@
 /*
-//@HEADER
-// *************************************************************************
-//   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
-//                    Solutions of Sandia, LLC (NTESS).
-//
-// Under the terms of Contract DE-NA0003525 with NTESS,
-// the U.S. Government retains certain rights in this software.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-// 1. Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//
-// 2. Redistributions in binary form must reproduce the above copyright
-// notice, this list of conditions and the following disclaimer in the
-// documentation and/or other materials provided with the distribution.
-//
-// 3. Neither the name of the Sandia Corporation nor the names of the
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY SANDIA CORPORATION "AS IS" AND ANY
-// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SANDIA CORPORATION OR THE
-// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Questions? Contact the Plato team (plato3D-help@sandia.gov)
-//
-// *************************************************************************
-//@HEADER
-*/
+ //@HEADER
+ // *************************************************************************
+ //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
+ //                    Solutions of Sandia, LLC (NTESS).
+ //
+ // Under the terms of Contract DE-NA0003525 with NTESS,
+ // the U.S. Government retains certain rights in this software.
+ //
+ // Redistribution and use in source and binary forms, with or without
+ // modification, are permitted provided that the following conditions are
+ // met:
+ //
+ // 1. Redistributions of source code must retain the above copyright
+ // notice, this list of conditions and the following disclaimer.
+ //
+ // 2. Redistributions in binary form must reproduce the above copyright
+ // notice, this list of conditions and the following disclaimer in the
+ // documentation and/or other materials provided with the distribution.
+ //
+ // 3. Neither the name of the Sandia Corporation nor the names of the
+ // contributors may be used to endorse or promote products derived from
+ // this software without specific prior written permission.
+ //
+ // THIS SOFTWARE IS PROVIDED BY SANDIA CORPORATION "AS IS" AND ANY
+ // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ // PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL SANDIA CORPORATION OR THE
+ // CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ // EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ // PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ // PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ // LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ //
+ // Questions? Contact the Plato team (plato3D-help@sandia.gov)
+ //
+ // *************************************************************************
+ //@HEADER
+ */
 
 /*
  * Plato_Test_UncertainMaterial.cpp
@@ -48,10 +48,54 @@
 
 #include "gtest/gtest.h"
 
+#include <locale>
 #include "Plato_SromMaterialUtils.hpp"
 
 namespace PlatoTestUncertainMaterial
 {
+
+TEST(PlatoTest, SROM_ToLower)
+{
+    auto tOutput = Plato::srom::tolower("TOLOWER");
+    ASSERT_STREQ("tolower", tOutput.c_str());
+}
+
+TEST(PlatoTest, SROM_WriteAndReadData)
+{
+    std::string tFilename("test.csv");
+    std::vector<Plato::srom::DataPairs> aGoldDataSet;
+    aGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
+    aGoldDataSet[0].second =
+        {0.0566042854783908, 1.68480606445034, 1.50875023647275, 4.1493585768893, 4.97033414937478,
+         2.29710545085141, 0.139247472523297, -1.10469284708504, 0.820970613576648, 6.26911462024901};
+    aGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
+    aGoldDataSet[1].second =
+        {0.0199137673514845, 0.0609654445695039, 0.0734112647021622, 0.372421165435386, 0.12736459057163,
+         0.24272587457853, 0.0138153553915423, 0.00559607595111409, 0.0638507181006206, 0.0199357433480253};
+    Plato::srom::write_data(tFilename, aGoldDataSet);
+
+    auto tInputDataSet = Plato::srom::read_sample_probability_pairs(tFilename);
+    ASSERT_EQ(2u, tInputDataSet.size());
+    ASSERT_EQ(10u, tInputDataSet[0].second.size());
+    ASSERT_EQ(10u, tInputDataSet[1].second.size());
+    ASSERT_STREQ("samples", tInputDataSet[0].first.c_str());
+    ASSERT_STREQ("probabilities", tInputDataSet[1].first.c_str());
+
+    const double tTolerance = 1e-8;
+    for(auto& tSample : tInputDataSet[0].second)
+    {
+        auto tIndex = &tSample - &tInputDataSet[0].second[0];
+        ASSERT_NEAR(aGoldDataSet[0].second[tIndex], tSample, tTolerance);
+    }
+
+    for(auto& tProb : tInputDataSet[1].second)
+    {
+        auto tIndex = &tProb - &tInputDataSet[1].second[0];
+        ASSERT_NEAR(aGoldDataSet[1].second[tIndex], tProb, tTolerance);
+    }
+
+    std::system("rm -f test.csv");
+}
 
 TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
 {
@@ -83,10 +127,10 @@ TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Bet
     // TEST RESULTS
     double tSum = 0;
     double tTolerance = 1e-4;
-    const Plato::srom::SampleProbabilityPairs& tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
-    std::vector<double> tGoldSamples = {1312017818.6197019, 659073448.54796219, 656356599.33196139};
-    std::vector<double> tGoldProbabilities = {0.43210087774761252, 0.31840063469163404, 0.24868340186995475};
-    for(int tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
+    const Plato::srom::SampleProbabilityPairs &tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
+    std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
+    std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
+    for (int tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairs.mProbabilities[tIndex];
         ASSERT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tTolerance);
@@ -241,16 +285,16 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialSet)
     tSromVariable.mTag = "poissons ratio";
     tSromVariable.mAttribute = "homogeneous";
     tSromVariable.mSampleProbPairs.mNumSamples = 2;
-    tSromVariable.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariable.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariable.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariable.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
     std::vector<Plato::srom::RandomMaterial> tRandomMaterialSet;
     EXPECT_NO_THROW(Plato::srom::initialize_random_material_set(tMaterial, tSromVariable, tRandomMaterialSet));
 
     const double tTolerance = 1e-4;
     ASSERT_EQ(2u, tRandomMaterialSet.size());
-    const std::vector<double> tGoldProbs = {0.75, 0.25};
-    const std::vector<std::string> tGoldSamples = {"0.3200000000000000", "0.2700000000000000"};
-    for(auto& tRandomMaterial : tRandomMaterialSet)
+    const std::vector<double> tGoldProbs = { 0.75, 0.25 };
+    const std::vector<std::string> tGoldSamples = { "0.3200000000000000", "0.2700000000000000" };
+    for (auto &tRandomMaterial : tRandomMaterialSet)
     {
         ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
         ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
@@ -261,7 +305,7 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialSet)
 
         auto tTags = tRandomMaterial.tags();
         ASSERT_EQ(1u, tTags.size());
-        for(auto& tTag : tTags)
+        for (auto &tTag : tTags)
         {
             ASSERT_STREQ("poissons ratio", tTag.c_str());
             ASSERT_STREQ("homogeneous", tRandomMaterial.attribute(tTag).c_str());
@@ -299,8 +343,8 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialSet)
     tSromVariableOne.mTag = "poissons ratio";
     tSromVariableOne.mAttribute = "homogeneous";
     tSromVariableOne.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableOne.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariableOne.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariableOne.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariableOne.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
     std::vector<Plato::srom::RandomMaterial> tRandomMaterialSet;
     EXPECT_NO_THROW(Plato::srom::initialize_random_material_set(tMaterial, tSromVariableOne, tRandomMaterialSet));
 
@@ -309,22 +353,19 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialSet)
     tSromVariableTwo.mTag = "elastic modulus";
     tSromVariableTwo.mAttribute = "homogeneous";
     tSromVariableTwo.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableTwo.mSampleProbPairs.mSamples = {1e9, 2.5e9};
-    tSromVariableTwo.mSampleProbPairs.mProbabilities = {0.45, 0.55};
+    tSromVariableTwo.mSampleProbPairs.mSamples = { 1e9, 2.5e9 };
+    tSromVariableTwo.mSampleProbPairs.mProbabilities = { 0.45, 0.55 };
     EXPECT_NO_THROW(Plato::srom::update_random_material_set(tMaterial, tSromVariableTwo, tRandomMaterialSet));
     ASSERT_EQ(4u, tRandomMaterialSet.size());
 
-    const std::vector<double> tGoldProbs = {0.3375, 0.1125, 0.4125, 0.1375};
-    const std::vector<std::string> tGoldTags = {"elastic modulus", "poissons ratio"};
-    const std::vector<std::vector<std::string>> tGoldSamples =
-        { {"1000000000.0000000000000000", "0.3200000000000000"},
-          {"1000000000.0000000000000000", "0.2700000000000000"},
-          {"2500000000.0000000000000000", "0.3200000000000000"},
-          {"2500000000.0000000000000000", "0.2700000000000000"}};
+    const std::vector<double> tGoldProbs = { 0.3375, 0.1125, 0.4125, 0.1375 };
+    const std::vector<std::string> tGoldTags = { "elastic modulus", "poissons ratio" };
+    const std::vector<std::vector<std::string>> tGoldSamples = { { "1000000000.0000000000000000", "0.3200000000000000" }, { "1000000000.0000000000000000",
+        "0.2700000000000000" }, { "2500000000.0000000000000000", "0.3200000000000000" }, { "2500000000.0000000000000000", "0.2700000000000000" } };
 
     double tProbSum = 0;
     const double tTolerance = 1e-4;
-    for(auto& tRandomMaterial : tRandomMaterialSet)
+    for (auto &tRandomMaterial : tRandomMaterialSet)
     {
         ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
         ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
@@ -336,7 +377,7 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialSet)
 
         auto tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
-        for(auto& tTag : tTags)
+        for (auto &tTag : tTags)
         {
             auto tTagIndex = &tTag - &tTags[0];
             ASSERT_STREQ(tGoldTags[tTagIndex].c_str(), tTag.c_str());
@@ -376,15 +417,15 @@ TEST(PlatoTest, SROM_AppendRandomMaterialProperties)
     tSromVariableOne.mTag = "poissons ratio";
     tSromVariableOne.mAttribute = "homogeneous";
     tSromVariableOne.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableOne.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariableOne.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariableOne.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariableOne.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     Plato::srom::SromVariable tSromVariableTwo;
     tSromVariableTwo.mTag = "elastic modulus";
     tSromVariableTwo.mAttribute = "homogeneous";
     tSromVariableTwo.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableTwo.mSampleProbPairs.mSamples = {1e9, 2.5e9};
-    tSromVariableTwo.mSampleProbPairs.mProbabilities = {0.45, 0.55};
+    tSromVariableTwo.mSampleProbPairs.mSamples = { 1e9, 2.5e9 };
+    tSromVariableTwo.mSampleProbPairs.mProbabilities = { 0.45, 0.55 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSet;
     tSromVariableSet.push_back(tSromVariableOne);
@@ -395,17 +436,14 @@ TEST(PlatoTest, SROM_AppendRandomMaterialProperties)
     EXPECT_NO_THROW(Plato::srom::append_random_material_properties(tMaterial, tSromVariableSet, tRandomMaterialSet));
     ASSERT_EQ(4u, tRandomMaterialSet.size());
 
-    const std::vector<double> tGoldProbs = {0.3375, 0.1125, 0.4125, 0.1375};
-    const std::vector<std::string> tGoldTags = {"elastic modulus", "poissons ratio"};
-    const std::vector<std::vector<std::string>> tGoldSamples =
-        { {"1000000000.0000000000000000", "0.3200000000000000"},
-          {"1000000000.0000000000000000", "0.2700000000000000"},
-          {"2500000000.0000000000000000", "0.3200000000000000"},
-          {"2500000000.0000000000000000", "0.2700000000000000"}};
+    const std::vector<double> tGoldProbs = { 0.3375, 0.1125, 0.4125, 0.1375 };
+    const std::vector<std::string> tGoldTags = { "elastic modulus", "poissons ratio" };
+    const std::vector<std::vector<std::string>> tGoldSamples = { { "1000000000.0000000000000000", "0.3200000000000000" }, { "1000000000.0000000000000000",
+        "0.2700000000000000" }, { "2500000000.0000000000000000", "0.3200000000000000" }, { "2500000000.0000000000000000", "0.2700000000000000" } };
 
     double tProbSum = 0;
     const double tTolerance = 1e-4;
-    for(auto& tRandomMaterial : tRandomMaterialSet)
+    for (auto &tRandomMaterial : tRandomMaterialSet)
     {
         ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
         ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
@@ -417,7 +455,7 @@ TEST(PlatoTest, SROM_AppendRandomMaterialProperties)
 
         auto tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
-        for(auto& tTag : tTags)
+        for (auto &tTag : tTags)
         {
             auto tTagIndex = &tTag - &tTags[0];
             ASSERT_STREQ(tGoldTags[tTagIndex].c_str(), tTag.c_str());
@@ -454,8 +492,8 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterialProperties)
     tSromVariable.mTag = "poissons ratio";
     tSromVariable.mAttribute = "homogeneous";
     tSromVariable.mSampleProbPairs.mNumSamples = 2;
-    tSromVariable.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariable.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariable.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariable.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSet;
     tSromVariableSet.push_back(tSromVariable);
@@ -467,11 +505,11 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterialProperties)
     EXPECT_NO_THROW(Plato::srom::append_deterministic_material_properties(tMaterial, tRandomMaterialSet));
 
     const double tTolerance = 1e-4;
-    const std::vector<double> tGoldProbs = {0.75, 0.25};
-    const std::vector<std::string> tGoldTags = {"elastic modulus", "poissons ratio"};
-    const std::vector<std::vector<std::string>> tGoldSamples = { {"1e9", "0.3200000000000000"}, {"1e9", "0.2700000000000000"}};
+    const std::vector<double> tGoldProbs = { 0.75, 0.25 };
+    const std::vector<std::string> tGoldTags = { "elastic modulus", "poissons ratio" };
+    const std::vector<std::vector<std::string>> tGoldSamples = { { "1e9", "0.3200000000000000" }, { "1e9", "0.2700000000000000" } };
 
-    for(auto& tRandomMaterial : tRandomMaterialSet)
+    for (auto &tRandomMaterial : tRandomMaterialSet)
     {
         ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
         ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
@@ -482,7 +520,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterialProperties)
 
         auto tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
-        for(auto& tTag : tTags)
+        for (auto &tTag : tTags)
         {
             auto tTagIndex = &tTag - &tTags[0];
             ASSERT_STREQ(tGoldTags[tTagIndex].c_str(), tTag.c_str());
@@ -518,8 +556,8 @@ TEST(PlatoTest, SROM_BuildRandomMaterialSet)
     tSromVariable.mTag = "poissons ratio";
     tSromVariable.mAttribute = "homogeneous";
     tSromVariable.mSampleProbPairs.mNumSamples = 2;
-    tSromVariable.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariable.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariable.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariable.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSet;
     tSromVariableSet.push_back(tSromVariable);
@@ -529,11 +567,11 @@ TEST(PlatoTest, SROM_BuildRandomMaterialSet)
     EXPECT_NO_THROW(Plato::srom::build_random_material_set(tMaterial, tSromVariableSet, tRandomMaterialSet));
 
     const double tTolerance = 1e-4;
-    const std::vector<double> tGoldProbs = {0.75, 0.25};
-    const std::vector<std::string> tGoldTags = {"elastic modulus", "poissons ratio"};
-    const std::vector<std::vector<std::string>> tGoldSamples = { {"1e9", "0.3200000000000000"}, {"1e9", "0.2700000000000000"}};
+    const std::vector<double> tGoldProbs = { 0.75, 0.25 };
+    const std::vector<std::string> tGoldTags = { "elastic modulus", "poissons ratio" };
+    const std::vector<std::vector<std::string>> tGoldSamples = { { "1e9", "0.3200000000000000" }, { "1e9", "0.2700000000000000" } };
 
-    for(auto& tRandomMaterial : tRandomMaterialSet)
+    for (auto &tRandomMaterial : tRandomMaterialSet)
     {
         ASSERT_STREQ("1", tRandomMaterial.blockID().c_str());
         ASSERT_STREQ("2", tRandomMaterial.materialID().c_str());
@@ -544,7 +582,7 @@ TEST(PlatoTest, SROM_BuildRandomMaterialSet)
 
         auto tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
-        for(auto& tTag : tTags)
+        for (auto &tTag : tTags)
         {
             auto tTagIndex = &tTag - &tTags[0];
             ASSERT_STREQ(tGoldTags[tTagIndex].c_str(), tTag.c_str());
@@ -587,8 +625,8 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialCases)
     tSromVariable.mTag = "poissons ratio";
     tSromVariable.mAttribute = "homogeneous";
     tSromVariable.mSampleProbPairs.mNumSamples = 2;
-    tSromVariable.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariable.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariable.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariable.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSet;
     tSromVariableSet.push_back(tSromVariable);
@@ -603,14 +641,12 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialCases)
     EXPECT_NO_THROW(Plato::srom::initialize_random_material_cases(tRandomMaterialSet, tRandomMaterialCases));
     ASSERT_EQ(2u, tRandomMaterialCases.size());
 
-
     const double tTolerance = 1e-4;
-    const std::vector<double> tGoldProbs = {0.75, 0.25};
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"elastic modulus", "poissons ratio"}, {"elastic modulus", "poissons ratio"} };
-    const std::vector<std::vector<std::string>> tGoldSamples = { {"1e9", "0.3200000000000000"}, {"1e9", "0.2700000000000000"}};
+    const std::vector<double> tGoldProbs = { 0.75, 0.25 };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" } };
+    const std::vector<std::vector<std::string>> tGoldSamples = { { "1e9", "0.3200000000000000" }, { "1e9", "0.2700000000000000" } };
 
-    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    for (auto &tRandomMaterialCase : tRandomMaterialCases)
     {
         ASSERT_EQ(1u, tRandomMaterialCase.numMaterials());
 
@@ -619,7 +655,7 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialCases)
 
         auto tMaterialIDs = tRandomMaterialCase.materialIDs();
         ASSERT_EQ(1u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             ASSERT_STREQ("2", tMatID.c_str());
             ASSERT_STREQ("1", tRandomMaterialCase.blockID(tMatID).c_str());
@@ -627,7 +663,7 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialCases)
 
             auto tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -671,8 +707,8 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
     tSromVariableOne.mTag = "poissons ratio";
     tSromVariableOne.mAttribute = "homogeneous";
     tSromVariableOne.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableOne.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariableOne.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariableOne.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariableOne.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSetOne;
     tSromVariableSetOne.push_back(tSromVariableOne);
@@ -711,8 +747,8 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
     tSromVariableTwo.mTag = "elastic modulus";
     tSromVariableTwo.mAttribute = "homogeneous";
     tSromVariableTwo.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableTwo.mSampleProbPairs.mSamples = {8, 17};
-    tSromVariableTwo.mSampleProbPairs.mProbabilities = {0.65, 0.35};
+    tSromVariableTwo.mSampleProbPairs.mSamples = { 8, 17 };
+    tSromVariableTwo.mSampleProbPairs.mProbabilities = { 0.65, 0.35 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSetTwo;
     tSromVariableSetTwo.push_back(tSromVariableTwo);
@@ -729,24 +765,15 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
     // TEST RESULTS
     const double tTolerance = 1e-4;
     const std::vector<double> tGoldProbs = { 0.4875, 0.1625, 0.2625, 0.0875 };
-    const std::vector<std::vector<std::string>> tGoldMatIDs =
-        { {"2", "3"}, {"2", "3"}, {"2", "3"}, {"2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs =
-        { {"1", "2"}, {"1", "2"}, {"1", "2"}, {"1", "2"} };
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"} };
-    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples =
-        {
-          { {"1e9", "0.3200000000000000"}, {"8.0000000000000000", "0.28"} },
-          { {"1e9", "0.2700000000000000"}, {"8.0000000000000000", "0.28"} },
-          { {"1e9", "0.3200000000000000"}, {"17.0000000000000000", "0.28"} },
-          { {"1e9", "0.2700000000000000"}, {"17.0000000000000000", "0.28"} },
-        };
+    const std::vector<std::vector<std::string>> tGoldMatIDs = { { "2", "3" }, { "2", "3" }, { "2", "3" }, { "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2" }, { "1", "2" }, { "1", "2" }, { "1", "2" } };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" }, {
+        "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" } };
+    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples = { { { "1e9", "0.3200000000000000" }, { "8.0000000000000000", "0.28" } }, { { "1e9",
+        "0.2700000000000000" }, { "8.0000000000000000", "0.28" } }, { { "1e9", "0.3200000000000000" }, { "17.0000000000000000", "0.28" } }, { { "1e9",
+        "0.2700000000000000" }, { "17.0000000000000000", "0.28" } }, };
 
-    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    for (auto &tRandomMaterialCase : tRandomMaterialCases)
     {
         ASSERT_EQ(2u, tRandomMaterialCase.numMaterials());
 
@@ -755,7 +782,7 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
 
         auto tMaterialIDs = tRandomMaterialCase.materialIDs();
         ASSERT_EQ(2u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
@@ -764,7 +791,7 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
 
             auto tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -808,8 +835,8 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
     tSromVariableOne.mTag = "poissons ratio";
     tSromVariableOne.mAttribute = "homogeneous";
     tSromVariableOne.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableOne.mSampleProbPairs.mSamples = {0.32, 0.27};
-    tSromVariableOne.mSampleProbPairs.mProbabilities = {0.75, 0.25};
+    tSromVariableOne.mSampleProbPairs.mSamples = { 0.32, 0.27 };
+    tSromVariableOne.mSampleProbPairs.mProbabilities = { 0.75, 0.25 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSetOne;
     tSromVariableSetOne.push_back(tSromVariableOne);
@@ -847,8 +874,8 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
     tSromVariableTwo.mTag = "elastic modulus";
     tSromVariableTwo.mAttribute = "homogeneous";
     tSromVariableTwo.mSampleProbPairs.mNumSamples = 2;
-    tSromVariableTwo.mSampleProbPairs.mSamples = {8, 17};
-    tSromVariableTwo.mSampleProbPairs.mProbabilities = {0.65, 0.35};
+    tSromVariableTwo.mSampleProbPairs.mSamples = { 8, 17 };
+    tSromVariableTwo.mSampleProbPairs.mProbabilities = { 0.65, 0.35 };
 
     std::vector<Plato::srom::SromVariable> tSromVariableSetTwo;
     tSromVariableSetTwo.push_back(tSromVariableTwo);
@@ -864,24 +891,15 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
     // TEST RESULTS
     const double tTolerance = 1e-4;
     const std::vector<double> tGoldProbs = { 0.4875, 0.1625, 0.2625, 0.0875 };
-    const std::vector<std::vector<std::string>> tGoldMatIDs =
-        { {"2", "3"}, {"2", "3"}, {"2", "3"}, {"2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs =
-        { {"1", "2"}, {"1", "2"}, {"1", "2"}, {"1", "2"} };
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"} };
-    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples =
-        {
-          { {"1e9", "0.3200000000000000"}, {"8.0000000000000000", "0.28"} },
-          { {"1e9", "0.2700000000000000"}, {"8.0000000000000000", "0.28"} },
-          { {"1e9", "0.3200000000000000"}, {"17.0000000000000000", "0.28"} },
-          { {"1e9", "0.2700000000000000"}, {"17.0000000000000000", "0.28"} },
-        };
+    const std::vector<std::vector<std::string>> tGoldMatIDs = { { "2", "3" }, { "2", "3" }, { "2", "3" }, { "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2" }, { "1", "2" }, { "1", "2" }, { "1", "2" } };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" }, {
+        "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" } };
+    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples = { { { "1e9", "0.3200000000000000" }, { "8.0000000000000000", "0.28" } }, { { "1e9",
+        "0.2700000000000000" }, { "8.0000000000000000", "0.28" } }, { { "1e9", "0.3200000000000000" }, { "17.0000000000000000", "0.28" } }, { { "1e9",
+        "0.2700000000000000" }, { "17.0000000000000000", "0.28" } }, };
 
-    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    for (auto &tRandomMaterialCase : tRandomMaterialCases)
     {
         ASSERT_EQ(2u, tRandomMaterialCase.numMaterials());
 
@@ -890,7 +908,7 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
 
         auto tMaterialIDs = tRandomMaterialCase.materialIDs();
         ASSERT_EQ(2u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
@@ -899,7 +917,7 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
 
             auto tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -1098,24 +1116,14 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test1)
 
     const double tTolerance = 1e-4;
     const std::vector<double> tGoldProbs = { 0.4875, 0.1625, 0.2625, 0.0875 };
-    const std::vector<std::vector<std::string>> tGoldMatIDs =
-        { {"2", "3"}, {"2", "3"}, {"2", "3"}, {"2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs =
-        { {"1", "2"}, {"1", "2"}, {"1", "2"}, {"1", "2"} };
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"} };
-    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples =
-        {
-          { {"1e9", "0.32"}, {"8.0", "0.28"} },
-          { {"1e9", "0.27"}, {"8.0", "0.28"} },
-          { {"1e9", "0.32"}, {"17.0", "0.28"} },
-          { {"1e9", "0.27"}, {"17.0", "0.28"} },
-        };
+    const std::vector<std::vector<std::string>> tGoldMatIDs = { { "2", "3" }, { "2", "3" }, { "2", "3" }, { "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2" }, { "1", "2" }, { "1", "2" }, { "1", "2" } };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" }, {
+        "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" } };
+    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples = { { { "1e9", "0.32" }, { "8.0", "0.28" } },
+        { { "1e9", "0.27" }, { "8.0", "0.28" } }, { { "1e9", "0.32" }, { "17.0", "0.28" } }, { { "1e9", "0.27" }, { "17.0", "0.28" } }, };
 
-    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    for (auto &tRandomMaterialCase : tRandomMaterialCases)
     {
         ASSERT_EQ(2u, tRandomMaterialCase.numMaterials());
 
@@ -1124,7 +1132,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test1)
 
         auto tMaterialIDs = tRandomMaterialCase.materialIDs();
         ASSERT_EQ(2u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
@@ -1133,7 +1141,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test1)
 
             auto tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -1238,24 +1246,15 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test2)
 
     const double tTolerance = 1e-4;
     const std::vector<double> tGoldProbs = { 0.4875, 0.1625, 0.2625, 0.0875 };
-    const std::vector<std::vector<std::string>> tGoldMatIDs =
-        { {"2", "3", "4"}, {"2", "3", "4"}, {"2", "3", "4"}, {"2", "3", "4"} };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs =
-        { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"},
-          {"elastic modulus", "poissons ratio"} };
-    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples =
-        {
-          { {"1e9", "0.32"}, {"8.0", "0.28"}, {"1.0", "0.4"} },
-          { {"1e9", "0.27"}, {"8.0", "0.28"}, {"1.0", "0.4"} },
-          { {"1e9", "0.32"}, {"17.0", "0.28"}, {"1.0", "0.4"} },
-          { {"1e9", "0.27"}, {"17.0", "0.28"}, {"1.0", "0.4"} },
-        };
+    const std::vector<std::vector<std::string>> tGoldMatIDs = { { "2", "3", "4" }, { "2", "3", "4" }, { "2", "3", "4" }, { "2", "3", "4" } };
+    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" }, {
+        "elastic modulus", "poissons ratio" }, { "elastic modulus", "poissons ratio" } };
+    const std::vector<std::vector<std::vector<std::string>>> tGoldSamples = { { { "1e9", "0.32" }, { "8.0", "0.28" }, { "1.0", "0.4" } }, { { "1e9", "0.27" }, {
+        "8.0", "0.28" }, { "1.0", "0.4" } }, { { "1e9", "0.32" }, { "17.0", "0.28" }, { "1.0", "0.4" } }, { { "1e9", "0.27" }, { "17.0", "0.28" }, { "1.0",
+        "0.4" } }, };
 
-    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    for (auto &tRandomMaterialCase : tRandomMaterialCases)
     {
         ASSERT_EQ(3u, tRandomMaterialCase.numMaterials());
 
@@ -1264,7 +1263,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test2)
 
         auto tMaterialIDs = tRandomMaterialCase.materialIDs();
         ASSERT_EQ(3u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
@@ -1273,7 +1272,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterials_Test2)
 
             auto tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -1384,8 +1383,8 @@ TEST(PlatoTest, SROM_AssignMaterialCaseIdentificationNumber)
     EXPECT_NO_THROW(Plato::srom::assign_material_case_identification_number(tRandomMaterialCases));
 
     // 7. TEST RESULTS
-    std::vector<std::string> tGoldIDs = {"1", "2", "3", "4"};
-    for(auto& tMaterialCase : tRandomMaterialCases)
+    std::vector<std::string> tGoldIDs = { "1", "2", "3", "4" };
+    for (auto &tMaterialCase : tRandomMaterialCases)
     {
         auto tIndex = &tMaterialCase - &tRandomMaterialCases[0];
         ASSERT_STREQ(tGoldIDs[tIndex].c_str(), tMaterialCase.caseID().c_str());
@@ -1459,39 +1458,24 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
 
     // 4 TEST RESULTS
     const double tTolerance = 1e-4;
-    std::vector<std::string> tGoldIDs = {"1", "2", "3", "4", "5", "6", "7", "8"};
-    const std::vector<double> tGoldProbs = { 0.1482212, 0.1440202, 0.0924449, 0.0898248,
-                                             0.1641386, 0.1594865, 0.1023726, 0.0994711 };
-    const std::vector<std::vector<std::string>> tGoldMatIDs =
-        { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
-          {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs =
-        { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
-          {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
-    const std::vector<std::vector<std::string>> tGoldTags =
-        { {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"},
-          {"poissons ratio", "youngs modulus"}
-        };
-    const std::vector<std::vector<std::vector<double>>> tGoldSamples =
-        {
-          { {0.2575729129623087, 7.6968145268325285},  {0.25, 3.0}, {0.3448799880969564, 1.0} },
-          { {0.2575729129623087, 12.8669604630312087}, {0.25, 3.0}, {0.3448799880969564, 1.0} },
-          { {0.3659845788546486, 7.6968145268325285},  {0.25, 3.0}, {0.3448799880969564, 1.0} },
-          { {0.3659845788546486, 12.8669604630312087}, {0.25, 3.0}, {0.3448799880969564, 1.0} },
-          { {0.2575729129623087, 7.6968145268325285},  {0.25, 3.0}, {0.2121659959660376, 1.0} },
-          { {0.2575729129623087, 12.8669604630312087}, {0.25, 3.0}, {0.2121659959660376, 1.0} },
-          { {0.3659845788546486, 7.6968145268325285},  {0.25, 3.0}, {0.2121659959660376, 1.0} },
-          { {0.3659845788546486, 12.8669604630312087}, {0.25, 3.0}, {0.2121659959660376, 1.0} }
-        };
+    std::vector<std::string> tGoldIDs = { "1", "2", "3", "4", "5", "6", "7", "8" };
+    const std::vector<double> tGoldProbs = { 0.1482212, 0.1440202, 0.0924449, 0.0898248, 0.1641386, 0.1594865, 0.1023726, 0.0994711 };
+    const std::vector<std::vector<std::string>> tGoldMatIDs = { { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, {
+        "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" },
+        { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" } };
+    const std::vector<std::vector<std::string>> tGoldTags = { { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, {
+        "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio",
+        "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" } };
+    const std::vector<std::vector<std::vector<double>>> tGoldSamples = { { { 0.2575729129623087, 7.6968145268325285 }, { 0.25, 3.0 },
+        { 0.3448799880969564, 1.0 } }, { { 0.2575729129623087, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486,
+        7.6968145268325285 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.3448799880969564,
+        1.0 } }, { { 0.2575729129623087, 7.6968145268325285 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.2575729129623087, 12.8669604630312087 }, {
+        0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.3659845788546486, 7.6968145268325285 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { {
+        0.3659845788546486, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } } };
 
     double tProbSum = 0;
-    for(auto& tRandomMatCase : tRandomMaterialCaseSet)
+    for (auto &tRandomMatCase : tRandomMaterialCaseSet)
     {
         ASSERT_EQ(3u, tRandomMatCase.numMaterials());
         auto tCaseIndex = &tRandomMatCase - &tRandomMaterialCaseSet[0];
@@ -1501,7 +1485,7 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
 
         auto tMaterialIDs = tRandomMatCase.materialIDs();
         ASSERT_EQ(3u, tMaterialIDs.size());
-        for(auto& tMatID : tMaterialIDs)
+        for (auto &tMatID : tMaterialIDs)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
@@ -1510,7 +1494,7 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
 
             auto tTags = tRandomMatCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
-            for(auto& tTag : tTags)
+            for (auto &tTag : tTags)
             {
                 auto tTagIndex = &tTag - &tTags[0];
                 ASSERT_STREQ(tGoldTags[tCaseIndex][tTagIndex].c_str(), tTag.c_str());
@@ -1604,9 +1588,8 @@ TEST(PlatoTest, SROM_ToString)
     tRandomMaterialSet.push_back(tRandomMatCase4);
 
     // 6. TEST FUNCTION THAT CONVERTS DOUBLE PROBABILITY VALUES INTO STRING
-    const std::vector<std::string> tGoldProbs =
-        { "0.4875000000000000", "0.1625000000000000", "0.2625000000000000", "0.0875000000000000" };
-    for(auto& tRandomMatCase : tRandomMaterialSet)
+    const std::vector<std::string> tGoldProbs = { "0.4875000000000000", "0.1625000000000000", "0.2625000000000000", "0.0875000000000000" };
+    for (auto &tRandomMatCase : tRandomMaterialSet)
     {
         auto tCaseIndex = &tRandomMatCase - &tRandomMaterialSet[0];
         ASSERT_STREQ(tGoldProbs[tCaseIndex].c_str(), tRandomMatCase.probabilityToString().c_str());

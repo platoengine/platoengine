@@ -61,6 +61,24 @@ namespace srom
 {
 
 /******************************************************************************//**
+ * \fn tolower
+ * \brief Convert uppercase word to lowercase.
+ * \param [in] aInput word
+ * \return lowercase word
+**********************************************************************************/
+inline std::string tolower(const std::string& aInput)
+{
+    std::locale tLocale;
+    std::ostringstream tOutput;
+    for (auto& tChar : aInput)
+    {
+        tOutput << std::tolower(tChar,tLocale);
+    }
+    return (tOutput.str());
+}
+// function tolower
+
+/******************************************************************************//**
  * \fn to_string
  * \brief Convert double to string.
  * \param [in] aInput     floating-point number
@@ -82,7 +100,169 @@ inline std::string to_string(const double& aInput, int aPrecision = 16)
     tValueString << aInput;
     return (tValueString.str());
 }
+
 // function to_string
+/******************************************************************************//**
+ * \fn write_data
+ *
+ * \brief Make a CSV file with one or more columns of floating-point values \n
+ *   Each column of data is represented by the pair <column name, column data> \n
+ *   as std::pair<std::string, std::vector<double>> (i.e. Plato::srom::SampleProbPairs). \n
+ *
+ * \param [in] aFilename   filename with sample-probability pair information
+ * \param [in] aDataset    sample-probability pairs
+ * \param [in] aPrecision  floating-point number precision (default = 16 digits)
+ *
+ * \note All columns should have the same size, i.e. the same number of rows.
+**********************************************************************************/
+using DataPairs = std::pair<std::string, std::vector<double>>;
+inline void write_data
+(const std::string &aFilename,
+ const std::vector<DataPairs> &aDataset,
+ int aPrecision = 16)
+{
+    // Create an output filestream object
+    std::ofstream tMyFile(aFilename);
+    tMyFile << std::fixed;
+    tMyFile << std::setprecision(aPrecision);
+
+    // Send column names to the stream
+    for (size_t tColumn = 0; tColumn < aDataset.size(); ++tColumn)
+    {
+        tMyFile << aDataset.at(tColumn).first;
+        if (tColumn != aDataset.size() - 1) { tMyFile << ","; } // No comma at end of line
+    }
+    tMyFile << "\n";
+
+    // Send data to the stream
+    for (size_t tRow = 0; tRow < aDataset.at(0).second.size(); ++tRow)
+    {
+        for (size_t tColumn = 0; tColumn < aDataset.size(); ++tColumn)
+        {
+            tMyFile << aDataset.at(tColumn).second.at(tRow);
+            if (tColumn != aDataset.size() - 1) { tMyFile << ","; } // No comma at end of line
+        }
+        tMyFile << "\n";
+    }
+
+    // Close the file
+    tMyFile.close();
+}
+// function write_data
+
+/******************************************************************************//**
+ * \fn read_column_names
+ * \brief Read the column names from the CSV file.
+ * \param [in] aMyFile CSV file
+ * \param [in] aResult sample probability pairs
+**********************************************************************************/
+inline void read_column_names
+(std::ifstream& aMyFile,
+ std::vector<DataPairs>& aResult)
+{
+    std::string tLine, tColumnName;
+    if(aMyFile.good())
+    {
+        // Extract the first line in the file
+        std::getline(aMyFile, tLine);
+
+        // Create a stringstream from line
+        std::stringstream tStringStream(tLine);
+
+        // Extract each column name
+        while(std::getline(tStringStream, tColumnName, ','))
+        {
+            // Initialize and add <colname, int vector> pairs to result
+            auto tLowerCaseName = Plato::srom::tolower(tColumnName);
+            aResult.push_back( { tLowerCaseName, std::vector<double>{} } );
+        }
+    }
+    else
+    {
+        THROWERR("Read Column Names: Input file stream is corrupted.")
+    }
+}
+// function read_column_names
+
+/******************************************************************************//**
+ * \fn read_data
+ * \brief Read data from CSV file line by line
+ * \param [in] aMyFile CSV file
+ * \param [in] aResult sample probability pairs
+**********************************************************************************/
+inline void read_data
+(std::ifstream& aMyFile,
+ std::vector<DataPairs>& aResult)
+{
+    if (aMyFile.good())
+    {
+        std::string tLine;
+        double tValue = 0;
+        while (std::getline(aMyFile, tLine))
+        {
+            // Create a stringstream of the current line
+            std::stringstream tStringStream(tLine);
+
+            // Keep track of the current column index
+            size_t tColIdx = 0;
+
+            // Extract each integer
+            while (tStringStream >> tValue)
+            {
+                // Add the current integer to the 'colIdx' column's values vector
+                aResult.at(tColIdx).second.push_back(tValue);
+
+                // If the next token is a comma, ignore it and move on
+                if (tStringStream.peek() == ',')
+                {
+                    tStringStream.ignore();
+                }
+
+                // Increment the column index
+                tColIdx++;
+            }
+        }
+    }
+    else
+    {
+        THROWERR("Read Data: Input file stream is corrupted.")
+    }
+}
+// function read_data
+
+/******************************************************************************//**
+ * \fn read_sample_probability_pairs
+ * \brief Read a CSV file into a vector of <DataPairs> where each pair represents \n
+ *   <column name, column values>
+ * \param [in] aFilename filename with sample-probability pair information
+**********************************************************************************/
+inline std::vector<DataPairs>
+read_sample_probability_pairs
+(const std::string &aFilename)
+{
+    // Create an input filestream
+    std::ifstream tMyFile(aFilename);
+
+    // Make sure the file is open
+    if (!tMyFile.is_open())
+    {
+        std::ostringstream tMsg;
+        tMsg << "Read Sample Probability Pairs: Could not open file with tag '" << aFilename << "'.";
+        THROWERR(tMsg.str().c_str())
+    }
+
+    // Create a vector of <string, double vector> pairs to store the result
+    std::vector<DataPairs> tResult;
+
+    Plato::srom::read_column_names(tMyFile, tResult);
+    Plato::srom::read_data(tMyFile, tResult);
+
+    // Close file
+    tMyFile.close();
+
+    return tResult;
+}
+// funciton read_sample_probability_pairs
 
 }
 // namespace srom

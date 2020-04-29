@@ -66,6 +66,7 @@ namespace srom
 **********************************************************************************/
 struct Statistics
 {
+    std::string mFile;              /*!< filename: contains sample-probability pairs */
     std::string mNumSamples;        /*!< number of samples */
     std::string mDistribution;      /*!< probability distribution */
     std::string mMean;              /*!< probability distribution mean */
@@ -116,7 +117,6 @@ struct RandomVariable
 {
 private:
     std::string mTag;                    /*!< label, e.g. angle variation */
-    std::string mFile;                   /*!< file name: contains sample-probability pairs information */
     std::string mAttribute;              /*!< random variable attribute, e.g. rotation axis */
     Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
 
@@ -137,7 +137,7 @@ public:
             THROWERR("Random Variable: Random variable attribute is not defined.")
         }
 
-        if(mFile.empty())
+        if(mStatistics.mFile.empty())
         {
             try
             {
@@ -171,7 +171,7 @@ public:
     **********************************************************************************/
     void file(const std::string& aFile)
     {
-        mFile = aFile;
+        mStatistics.mFile = aFile;
     }
 
     /******************************************************************************//**
@@ -271,7 +271,7 @@ public:
     **********************************************************************************/
     std::string file() const
     {
-        return mFile;
+        return mStatistics.mFile;
     }
 
     /******************************************************************************//**
@@ -355,20 +355,6 @@ public:
     {
         mTag = aTag;
         mStatistics = aStats;
-        mAttribute = aAttribute;
-    }
-
-    /******************************************************************************//**
-     * \fn define
-     * \brief Define a random variable.
-     * \param [in] aTag       random variable tag/label
-     * \param [in] aAttribute random variable attribute
-     * \param [in] aFile      name of file with sample-probability pair information
-    **********************************************************************************/
-    void define(const std::string& aTag, const std::string& aAttribute, const std::string& aFile)
-    {
-        mTag = aTag;
-        mFile = aFile;
         mAttribute = aAttribute;
     }
 };
