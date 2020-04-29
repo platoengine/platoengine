@@ -60,11 +60,15 @@
 #include "XMLGeneratorDataStruct.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_SromMetadata.hpp"
+#include "Plato_SromSolve.hpp"
 #include "Plato_Macros.hpp"
 
 using namespace XMLGen;
 
 namespace Plato
+{
+
+namespace srom
 {
 
 struct VariableType
@@ -76,6 +80,7 @@ struct VariableType
     };
 
 };
+
 
 struct RotationAxis
 {
@@ -91,19 +96,19 @@ struct RotationAxis
  * \param [in] aStringAxis rotation axis
  * \param [out] aEnumAxis rotation axis
 **********************************************************************************/
-inline void rotation_axis_string_to_enum(const std::string & aStringAxis, Plato::RotationAxis::type_t & aEnumAxis)
+inline void rotation_axis_string_to_enum(const std::string & aStringAxis, Plato::srom::RotationAxis::type_t & aEnumAxis)
 {
     if(aStringAxis == "x")
     {
-        aEnumAxis = Plato::RotationAxis::x;
+        aEnumAxis = Plato::srom::RotationAxis::x;
     }
     else if(aStringAxis == "y")
     {
-        aEnumAxis = Plato::RotationAxis::y;
+        aEnumAxis = Plato::srom::RotationAxis::y;
     }
     else if(aStringAxis == "z")
     {
-        aEnumAxis = Plato::RotationAxis::z;
+        aEnumAxis = Plato::srom::RotationAxis::z;
     }
     else
     {
@@ -112,20 +117,20 @@ inline void rotation_axis_string_to_enum(const std::string & aStringAxis, Plato:
 }
 
 /******************************************************************************//**
- * \brief transform string with variable type to an enum (Plato::VariableType)
+ * \brief transform string with variable type to an enum (Plato::srom::VariableType)
  * \param [in] aStringVarType string variable type
  * \param [out] aEnumVarType enum variable type
  * \return flag (true = no error, false = error, string variable type is not defined/supported)
 **********************************************************************************/
-inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plato::VariableType::type_t& aEnumVarType)
+inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plato::srom::VariableType::type_t& aEnumVarType)
 {
     if(aStringVarType == "material")
     {
-        aEnumVarType = Plato::VariableType::MATERIAL;
+        aEnumVarType = Plato::srom::VariableType::MATERIAL;
     }
     else if(aStringVarType == "load")
     {
-        aEnumVarType = Plato::VariableType::LOAD;
+        aEnumVarType = Plato::srom::VariableType::LOAD;
     }
     else
     {
@@ -242,7 +247,7 @@ inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCas
                               std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
 {
     Plato::UniqueCounter tUniqueLoadIDCounter;
-    if(Plato::initialize_load_id_counter(aInputLoadCases, tUniqueLoadIDCounter) == false)
+    if(Plato::srom::initialize_load_id_counter(aInputLoadCases, tUniqueLoadIDCounter) == false)
     {
         PRINTERR("FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n");
         return (false);
@@ -251,36 +256,8 @@ inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCas
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputLoadCases.size(); tLoadCaseIndex++)
     {
         const XMLGen::LoadCase& tOldLoadCase = aInputLoadCases[tLoadCaseIndex];
-        Plato::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
+        Plato::srom::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
     }
-
-    return (true);
-}
-
-/******************************************************************************//**
- * \brief Set the statistics associated with the input random variable
- * \param [in] aRandomVariable random variable metadata
- * \param [in] aStatistics random variable statistics metadata
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-inline bool set_random_variable_statistics(const XMLGen::Uncertainty &aRandomVariable, Plato::srom::Statistics& aStatistics)
-{
-    bool tInputStatisticsError = aRandomVariable.mean.empty() || aRandomVariable.upper.empty() || aRandomVariable.lower.empty()
-            || aRandomVariable.num_samples.empty() || aRandomVariable.distribution.empty() || aRandomVariable.standard_deviation.empty();
-    if(tInputStatisticsError == true)
-    {
-        std::ostringstream tMsg;
-        tMsg << "STATISTICS FOR RANDOM VARIABLE #" << aRandomVariable.id << " WERE NOT PROPERLY DEFINED.\n";
-        PRINTERR(tMsg.str().c_str());
-        return (false);
-    }
-
-    aStatistics.mMean = aRandomVariable.mean;
-    aStatistics.mUpperBound = aRandomVariable.upper;
-    aStatistics.mLowerBound = aRandomVariable.lower;
-    aStatistics.mNumSamples = aRandomVariable.num_samples;
-    aStatistics.mDistribution = aRandomVariable.distribution;
-    aStatistics.mStandardDeviation = aRandomVariable.standard_deviation;
 
     return (true);
 }
@@ -407,11 +384,11 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
     for(size_t tRandomVarIndex = 0; tRandomVarIndex < tNumRandomVars; ++tRandomVarIndex)
     {
         const XMLGen::Uncertainty& tRandomVariable = aRandomVariables[tRandomVarIndex];
-        Plato::VariableType::type_t tVarType = Plato::VariableType::UNDEFINED;
-        Plato::variable_type_string_to_enum(tRandomVariable.variable_type, tVarType);
-        if(tVarType == Plato::VariableType::LOAD)
+        Plato::srom::VariableType::type_t tVarType = Plato::srom::VariableType::UNDEFINED;
+        Plato::srom::variable_type_string_to_enum(tRandomVariable.variable_type, tVarType);
+        if(tVarType == Plato::srom::VariableType::LOAD)
         {
-            Plato::create_random_loads_from_uncertainty(tRandomVariable, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aLoad);
+            Plato::srom::create_random_loads_from_uncertainty(tRandomVariable, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aLoad);
         }
     }
 }
@@ -432,7 +409,7 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
         if(aRandomLoadIDs.find(tCurLoadCaseID) == aRandomLoadIDs.end())
         {
             Plato::srom::Load tNewLoad;
-            Plato::create_deterministic_load_variable(aNewLoadCases[tLoadCaseIndex], tNewLoad);
+            Plato::srom::create_deterministic_load_variable(aNewLoadCases[tLoadCaseIndex], tNewLoad);
             aDeterministicLoads.push_back(tNewLoad);
         }
     }
@@ -453,16 +430,16 @@ inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInpu
 {
     std::vector<XMLGen::LoadCase> tNewSetLoadCases;
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    Plato::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
+    Plato::srom::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
 
     std::set<int> tRandomLoadIDs;
-    Plato::create_random_load_variables(aUncertainties,
-                                        tNewSetLoadCases,
-                                        tOriginalToNewLoadCaseMap,
-                                        tRandomLoadIDs,
-                                        aLoads);
+    Plato::srom::create_random_load_variables(aUncertainties,
+                                              tNewSetLoadCases,
+                                              tOriginalToNewLoadCaseMap,
+                                              tRandomLoadIDs,
+                                              aLoads);
 
-    Plato::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, aLoads);
+    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, aLoads);
 
     return (true);
 }
@@ -476,8 +453,8 @@ inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInpu
 inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDegrees,
                                   std::vector<double>& aVectorToRotate)
 {
-    const bool tBadNumberDetected = Plato::check_vector3d_values(aVectorToRotate) == false;
-    const bool tBadRotationDetected = Plato::check_vector3d_values(aRotatioAnglesInDegrees) == false;
+    const bool tBadNumberDetected = Plato::srom::check_vector3d_values(aVectorToRotate) == false;
+    const bool tBadRotationDetected = Plato::srom::check_vector3d_values(aRotatioAnglesInDegrees) == false;
     if(tBadRotationDetected || tBadNumberDetected)
     {
         PRINTERR("A NON-FINITE NUMBER WAS DETECTED.\n");
@@ -537,13 +514,13 @@ inline bool expand_load_sample_probability_pair(const std::vector<Plato::srom::S
 
     for(size_t tRandVarIndex = 0; tRandVarIndex < aMySampleProbPairs.size(); tRandVarIndex++)
     {
-        Plato::RotationAxis::type_t tMyAxis = Plato::RotationAxis::x;
-        Plato::rotation_axis_string_to_enum(aMySampleProbPairs[tRandVarIndex].mAttribute, tMyAxis);
-        if(tMyAxis == Plato::RotationAxis::x)
+        Plato::srom::RotationAxis::type_t tMyAxis = Plato::srom::RotationAxis::x;
+        Plato::srom::rotation_axis_string_to_enum(aMySampleProbPairs[tRandVarIndex].mAttribute, tMyAxis);
+        if(tMyAxis == Plato::srom::RotationAxis::x)
         {
             aMyXaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
         }
-        else if(tMyAxis == Plato::RotationAxis::y)
+        else if(tMyAxis == Plato::srom::RotationAxis::y)
         {
             aMyYaxisSampleProbPairs = aMySampleProbPairs[tRandVarIndex].mSampleProbPairs;
         }
@@ -758,31 +735,31 @@ inline bool expand_random_rotations(const Plato::srom::SampleProbabilityPairs& a
 
     if(tRotateAboutX && tRotateAboutY && tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_xyz(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_xyz(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_xy(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_xy(aMyXaxisSampleProbPairs, aMyYaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && !tRotateAboutY && tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_xz(aMyXaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_xz(aMyXaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && tRotateAboutY && tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_yz(aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_yz(aMyYaxisSampleProbPairs, aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(tRotateAboutX && !tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_x(aMyXaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_x(aMyXaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && tRotateAboutY && !tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_y(aMyYaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_y(aMyYaxisSampleProbPairs, aMyRandomRotations);
     }
     else if(!tRotateAboutX && !tRotateAboutY && tRotateAboutZ)
     {
-        Plato::compute_random_rotations_about_z(aMyZaxisSampleProbPairs, aMyRandomRotations);
+        Plato::srom::compute_random_rotations_about_z(aMyZaxisSampleProbPairs, aMyRandomRotations);
     }
     else
     {
@@ -807,7 +784,7 @@ inline bool check_expand_random_loads_inputs(const std::vector<double> & aMyOrig
         PRINTERR("VECTOR OF RANDOM ROTATIONS IS EMPTY.\n");
         return (false);
     }
-    else if(Plato::check_vector3d_values(aMyOriginalLoad) == false)
+    else if(Plato::srom::check_vector3d_values(aMyOriginalLoad) == false)
     {
         PRINTERR("A NON-FINITE NUMBER WAS DETECTED IN VECTOR 3D.\n");
         return (false);
@@ -827,7 +804,7 @@ inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
                                 const std::vector<Plato::srom::RandomRotations> & aMyRandomRotations,
                                 std::vector<Plato::srom::RandomLoad> & aMyRandomLoads)
 {
-    if(Plato::check_expand_random_loads_inputs(aMyOriginalLoad, aMyRandomRotations) == false)
+    if(Plato::srom::check_expand_random_loads_inputs(aMyOriginalLoad, aMyRandomRotations) == false)
     {
         PRINTERR("ONE OF THE INPUT ARGUMENTS IS NOT PROPERLY DEFINED.\n");
         return (false);
@@ -839,7 +816,7 @@ inline bool expand_random_loads(const std::vector<double> & aMyOriginalLoad,
         Plato::srom::RandomLoad tMyRandomLoad;
         tMyRandomLoad.mLoadValues = aMyOriginalLoad;
         tMyRandomLoad.mProbability = aMyRandomRotations[tIndex].mProbability;
-        if(Plato::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotations, tMyRandomLoad.mLoadValues) == false)
+        if(Plato::srom::apply_rotation_matrix(aMyRandomRotations[tIndex].mRotations, tMyRandomLoad.mLoadValues) == false)
         {
             PRINTERR("APPLICATION OF ROTATION MATRIX WAS UNSUCCESSFUL.\n");
             return (false);
@@ -922,7 +899,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
 
     if(aOldRandomLoadCases.empty())
     {
-        if(Plato::update_initial_random_load_case(aNewSetRandomLoads, aOldRandomLoadCases) == false)
+        if(Plato::srom::update_initial_random_load_case(aNewSetRandomLoads, aOldRandomLoadCases) == false)
         {
             PRINTERR("FUNCTION FAILED WHILE TRYING TO UPDATE THE FIRST RANDOM LOAD CASE.\n");
             return (false);
@@ -930,7 +907,7 @@ inline bool expand_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
     } // if-else statement
     else
     {
-        if(Plato::update_random_load_cases(aNewSetRandomLoads, aOldRandomLoadCases) == false)
+        if(Plato::srom::update_random_load_cases(aNewSetRandomLoads, aOldRandomLoadCases) == false)
         {
             PRINTERR("FUNCTION FAILED WHILE TRYING TO ADD A NEW RANDOM LOAD CASE.\n");
             return (false);
@@ -1048,7 +1025,7 @@ inline bool set_load_components(const std::vector<std::string> & aInput, std::ve
 **********************************************************************************/
 inline bool set_random_load_parameters(const Plato::srom::Load & aOriginalLoad, std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
 {
-    if(Plato::check_load_parameters(aOriginalLoad) == false)
+    if(Plato::srom::check_load_parameters(aOriginalLoad) == false)
     {
         PRINTERR("ONE OR MORE LOAD PARAMETERS ARE NOT DEFINED.\n");
         return (false);
@@ -1075,13 +1052,13 @@ inline bool generate_set_random_rotations(const std::vector<Plato::srom::SromVar
                                           std::vector<Plato::srom::RandomRotations> & aMySetRandomRotation)
 {
     Plato::srom::SampleProbabilityPairs tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs;
-    if(Plato::expand_load_sample_probability_pair(aMySampleProbPairs,  tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs) == false)
+    if(Plato::srom::expand_load_sample_probability_pair(aMySampleProbPairs,  tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs) == false)
     {
         PRINTERR("FAILED TO EXPAND SAMPLE-PROBABILITY PAIRS.\n");
         return (false);
     }
 
-    Plato::expand_random_rotations(tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs, aMySetRandomRotation);
+    Plato::srom::expand_random_rotations(tXaxisSampleProbPairs, tYaxisSampleProbPairs, tZaxisSampleProbPairs, aMySetRandomRotation);
 
     return (true);
 }
@@ -1099,19 +1076,19 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
 {
     std::vector<double> tMyOriginalLoadComponents;
     tMyOriginalLoadComponents.resize(3, 0.0);
-    if(Plato::set_load_components(aOriginalLoad.mValues, tMyOriginalLoadComponents) == false)
+    if(Plato::srom::set_load_components(aOriginalLoad.mValues, tMyOriginalLoadComponents) == false)
     {
         PRINTERR("FAILED TO SET ARRAY OF LOAD COMPONENTS.\n");
         return (false);
     }
 
-    if(Plato::expand_random_loads(tMyOriginalLoadComponents, aSetRandomRotations, aSetRandomLoads) == false)
+    if(Plato::srom::expand_random_loads(tMyOriginalLoadComponents, aSetRandomRotations, aSetRandomLoads) == false)
     {
         PRINTERR("FAILED TO EXPAND SET OF RANDOM LOADS.\n");
         return (false);
     }
 
-    if(Plato::set_random_load_parameters(aOriginalLoad, aSetRandomLoads) == false)
+    if(Plato::srom::set_random_load_parameters(aOriginalLoad, aSetRandomLoads) == false)
     {
         PRINTERR("FAILED TO SET LOAD TYPE, APPLICATION TYPE AND APPLICATION IDENTIFIER.\n");
         return (false);
@@ -1149,7 +1126,7 @@ inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDet
 {
     for(size_t tIndex = 0; tIndex < aDeterministicLoads.size(); tIndex++)
     {
-        if(Plato::check_load_parameters(aDeterministicLoads[tIndex]) == false)
+        if(Plato::srom::check_load_parameters(aDeterministicLoads[tIndex]) == false)
         {
             std::ostringstream tMsg;
             tMsg << "UNDEFINED PARAMETER FOR DETERMINISTIC LOAD #" << tIndex << ".\n";
@@ -1185,7 +1162,7 @@ inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDe
             tLoad.mAppID = aDeterministicLoads[tLoadIndex].mAppID;
             tLoad.mAppType = aDeterministicLoads[tLoadIndex].mAppType;
             tLoad.mLoadType = aDeterministicLoads[tLoadIndex].mLoadType;
-            Plato::set_load_components(aDeterministicLoads[tLoadIndex].mValues, tLoad.mLoadValues);
+            Plato::srom::set_load_components(aDeterministicLoads[tLoadIndex].mValues, tLoad.mLoadValues);
             tRandomLoadCase.mLoads.push_back(tLoad);
         }
     }
@@ -1197,8 +1174,9 @@ inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDe
  * \param [out] aSetLoadCases set of random load cases
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Load>& aDeterministicLoads,
-                                              std::vector<Plato::srom::RandomLoadCase> & aSetRandomLoadCases)
+inline bool generate_output_random_load_cases
+(const std::vector<Plato::srom::Load>& aDeterministicLoads,
+ std::vector<Plato::srom::RandomLoadCase> & aSetRandomLoadCases)
 {
     if(aSetRandomLoadCases.empty())
     {
@@ -1206,17 +1184,89 @@ inline bool generate_output_random_load_cases(const std::vector<Plato::srom::Loa
         return (false);
     }
 
-    if(Plato::check_deterministic_loads(aDeterministicLoads) == false)
+    if(Plato::srom::check_deterministic_loads(aDeterministicLoads) == false)
     {
         PRINTERR("AN ERROR WAS DETECTED WITH THE INPUT SET OF DETERMINISTIC LOADS.\n");
         return (false);
     }
 
-    Plato::append_deterministic_loads(aDeterministicLoads, aSetRandomLoadCases);
-    Plato::assign_load_case_identification_number(aSetRandomLoadCases);
+    Plato::srom::append_deterministic_loads(aDeterministicLoads, aSetRandomLoadCases);
+    Plato::srom::assign_load_case_identification_number(aSetRandomLoadCases);
 
     return (true);
 }
+// function generate_output_random_load_cases
+
+/******************************************************************************//**
+ * \fn build_load_sroms
+ * \brief Build set of random load cases using Stochastic Reduced Order Models (SROMs).
+ * \param [in] aLoads  set of loads
+ * \param [in] aOutput set of random load cases
+**********************************************************************************/
+bool build_load_sroms
+(const std::vector<Plato::srom::Load>& aLoads,
+ std::vector<Plato::srom::RandomLoadCase>& aOutput)
+{
+    aOutput.clear();
+    std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;
+    if(Plato::srom::expand_random_and_deterministic_loads(aLoads, tRandomLoads, tDeterministicLoads) == false)
+    {
+        PRINTERR("FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n");
+        return (false);
+    }
+
+    for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
+    {
+        Plato::srom::set_random_variables_id(tRandomLoads[tLoadIndex].mRandomVars);
+
+        std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
+        if(Plato::srom::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
+        {
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
+            PRINTERR(tMsg.str().c_str());
+            return (false);
+        }
+
+        std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
+        if(Plato::srom::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation) == false)
+        {
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
+            PRINTERR(tMsg.str().c_str());
+            return (false);
+        }
+
+        std::vector<Plato::srom::RandomLoad> tMySetRandomLoads;
+        if(Plato::srom::generate_set_random_loads(tRandomLoads[tLoadIndex], tMySetRandomRotation, tMySetRandomLoads) == false)
+        {
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
+            PRINTERR(tMsg.str().c_str());
+            return (false);
+        }
+
+        if(Plato::srom::expand_random_load_cases(tMySetRandomLoads, aOutput) == false)
+        {
+            std::ostringstream tMsg;
+            tMsg << "FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
+            PRINTERR(tMsg.str().c_str());
+            return (false);
+        }
+    }
+
+    if(Plato::srom::generate_output_random_load_cases(tDeterministicLoads, aOutput) == false)
+    {
+        PRINTERR("FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n");
+        return (false);
+    }
+
+    return(true);
+}
+// function build_load_sroms
+
+}
+// namespace srom
 
 }
 // namespace Plato

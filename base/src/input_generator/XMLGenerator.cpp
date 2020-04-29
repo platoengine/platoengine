@@ -285,14 +285,14 @@ bool XMLGenerator::runSROMForUncertainVariables()
         }
 
         std::vector<Plato::srom::Load> tLoads;
-        Plato::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+        Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
 
         if(tCurObjUncertainties.size() > 0)
         {
             Plato::srom::InputMetaData tInputs;
             tInputs.mLoads = tLoads;
             Plato::srom::OutputMetaData tOutputs;
-            Plato::srom::build_load_sroms(tInputs, tOutputs);
+            Plato::srom::build_sroms(tInputs, tOutputs);
 
             int tStartingLoadCaseID = tNewLoadCases.size() + 1;
             tCurObj.load_case_ids.clear();

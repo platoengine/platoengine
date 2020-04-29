@@ -45,11 +45,7 @@
  *
  *  Created on: June 18, 2019
  */
-#include <iostream>
 
-#include "Plato_SromXML.hpp"
-#include "Plato_SromSolve.hpp"
-#include "Plato_SromMetadata.hpp"
 #include "Plato_SromLoadUtils.hpp"
 
 namespace Plato
@@ -58,66 +54,6 @@ namespace Plato
 namespace srom
 {
 
-bool build_load_sroms
-(const Plato::srom::InputMetaData & aInput,
- Plato::srom::OutputMetaData & aOutput)
-{
-    aOutput.mLoadCases.clear();
-    std::vector<Plato::srom::Load> tRandomLoads, tDeterministicLoads;
-    if(Plato::expand_random_and_deterministic_loads(aInput.mLoads, tRandomLoads, tDeterministicLoads) == false)
-    {
-        PRINTERR("FAILED TO GENERATE THE SETS OF RANDOM AND DETERMINISTIC LOADS.\n");
-        return (false);
-    }
-
-    for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
-    {
-        Plato::srom::set_random_variables_id(tRandomLoads[tLoadIndex].mRandomVars);
-
-        std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-        if(Plato::srom::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
-        {
-            std::ostringstream tMsg;
-            tMsg << "FAILED TO COMPUTE THE SAMPLE-PROBABILITY PAIRS FOR LOAD #" << tLoadIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-
-        std::vector<Plato::srom::RandomRotations> tMySetRandomRotation;
-        if(Plato::generate_set_random_rotations(tMySampleProbPairs, tMySetRandomRotation) == false)
-        {
-            std::ostringstream tMsg;
-            tMsg << "FAILED TO GENERATE SET OF RANDOM ROTATIONS FOR LOAD #" << tLoadIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-
-        std::vector<Plato::srom::RandomLoad> tMySetRandomLoads;
-        if(Plato::generate_set_random_loads(tRandomLoads[tLoadIndex], tMySetRandomRotation, tMySetRandomLoads) == false)
-        {
-            std::ostringstream tMsg;
-            tMsg << "FAILED TO GENERATE SET OF RANDOM LOADS FOR LOAD #" << tLoadIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-
-        if(Plato::expand_random_load_cases(tMySetRandomLoads, aOutput.mLoadCases) == false)
-        {
-            std::ostringstream tMsg;
-            tMsg << "FAILED TO EXPAND RANDOM LOAD CASES FOR LOAD #" << tLoadIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-    }
-
-    if(Plato::generate_output_random_load_cases(tDeterministicLoads, aOutput.mLoadCases) == false)
-    {
-        PRINTERR("FAILED TO GENERATE SET OF OUTPUT RANDOM LOAD CASES.\n");
-        return (false);
-    }
-
-    return(true);
-}
 
 }
 // namespace srom

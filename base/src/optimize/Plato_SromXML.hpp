@@ -41,14 +41,14 @@
 */
 
 /*
- * Plato_SROM_Metadata.hpp
+ * Plato_SromXML.hpp
  *
  *  Created on: June 18, 2019
  */
 
 #pragma once
 
-#include "Plato_RandomLoadMetadata.hpp"
+#include "Plato_SromLoadUtils.hpp"
 
 namespace Plato
 {
@@ -57,12 +57,18 @@ namespace srom
 {
 
 /******************************************************************************//**
- * \fn build_load_sroms
- * \brief Build the stochastic reduced order model given a set of random loads
+ * \fn build_sroms
+ * \brief Build Stochastic Reduced Order Models (SROMs)
  * \param [in] aInput  input metadata
  * \param [in] aOutput output metadata
 **********************************************************************************/
-bool build_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput);
+inline bool build_sroms
+(const Plato::srom::InputMetaData & aInput,
+ Plato::srom::OutputMetaData & aOutput)
+{
+    Plato::srom::build_load_sroms(aInput.mLoads, aOutput.mLoadCases);
+    return (true);
+}
 
 }
 // namespace srom
