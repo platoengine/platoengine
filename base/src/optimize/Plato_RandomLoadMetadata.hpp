@@ -111,26 +111,6 @@ struct RandomLoadCase
 };
 // struct RandomLoadCase
 
-/******************************************************************************//**
- * \struct OutputMetaData
- * \brief Output metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
-**********************************************************************************/
-struct OutputMetaData
-{
-    std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
-};
-// struct OutputMetaData
-
-/******************************************************************************//**
- * \struct InputMetaData
- * \brief Input metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
-**********************************************************************************/
-struct InputMetaData
-{
-    std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
-};
-// struct InputMetaData
-
 }
 // namespace srom
 
