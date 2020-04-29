@@ -49,6 +49,7 @@
 #pragma once
 
 #include "Plato_Macros.hpp"
+#include "Plato_SromHelpers.hpp"
 #include "Plato_SromMetadata.hpp"
 #include "Plato_SromProbDataStruct.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
@@ -451,6 +452,42 @@ inline void set_random_variables_id
 // function set_random_variables_id
 
 /******************************************************************************//**
+ * \fn post_process_sample_probability_pairs
+ * \brief Post-process sample-probability pairs read from an user-defined file \n
+ *   into an SROM variable.
+ * \param [in] aRandomVar       random variable metadata
+ * \param [in] aSampleProbPairs sample-probability pairs read from a file
+ * \return sample-probability pairs in Plato format
+**********************************************************************************/
+inline Plato::srom::SromVariable
+post_process_sample_probability_pairs
+(const Plato::srom::RandomVariable& aRandomVar,
+ const std::vector<DataPairs>& aSampleProbPairs)
+{
+    if(aSampleProbPairs.empty())
+    {
+        THROWERR("Post Process Sample Probability Pairs: List of sample-probability pairs read from a file is empty.")
+    }
+
+    Plato::srom::SromVariable tOutput;
+    tOutput.mTag = aRandomVar.tag();
+    tOutput.mAttribute = aRandomVar.attribute();
+
+    const auto tNumSamples = aSampleProbPairs[0].second.size();
+    tOutput.mSampleProbPairs.mNumSamples = tNumSamples;
+    tOutput.mSampleProbPairs.mSamples.resize(tNumSamples);
+    tOutput.mSampleProbPairs.mProbabilities.resize(tNumSamples);
+
+    for(auto& tSample : aSampleProbPairs[0].second)
+    {
+        auto tIndex = &tSample - &aSampleProbPairs[0].second[0];
+        tOutput.mSampleProbPairs.mSamples[tIndex] = tSample;
+        tOutput.mSampleProbPairs.mProbabilities[tIndex] = aSampleProbPairs[1].second[tIndex];
+    }
+    return tOutput;
+}
+
+/******************************************************************************//**
  * \fn compute_sample_probability_pairs
  * \brief Compute the sample-probability pairs for the set of random variables
  * \param [in] aSetRandomVariables set of input random variables
@@ -470,10 +507,23 @@ inline bool compute_sample_probability_pairs
     aMySampleProbPairs.clear();
     for(auto& tRandomVar : aSetRandomVariables)
     {
+        tRandomVar.check();
         try
         {
-            auto tSampleProbPairs = Plato::srom::solve_srom_problem(tRandomVar);
-            aMySampleProbPairs.push_back(tSampleProbPairs);
+            if (tRandomVar.file().empty())
+            {
+                // solve srom problem: sample-probability pairs must be computed by plato
+                auto tSampleProbPairs = Plato::srom::solve_srom_problem(tRandomVar);
+                aMySampleProbPairs.push_back(tSampleProbPairs);
+            }
+            else
+            {
+                // read sample-probability pairs from an user-provided file
+                auto tFilename = tRandomVar.file();
+                auto tSampleProbPairsFromFile = Plato::srom::read_sample_probability_pairs(tFilename);
+                auto tSampleProbPairs = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairsFromFile);
+                aMySampleProbPairs.push_back(tSampleProbPairs);
+            }
         }
         catch(std::exception& tError)
         {

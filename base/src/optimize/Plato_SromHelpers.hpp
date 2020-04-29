@@ -51,6 +51,7 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 
 #include "Plato_Macros.hpp"
 
@@ -116,6 +117,7 @@ inline std::string to_string(const double& aInput, int aPrecision = 16)
  * \note All columns should have the same size, i.e. the same number of rows.
 **********************************************************************************/
 using DataPairs = std::pair<std::string, std::vector<double>>;
+
 inline void write_data
 (const std::string &aFilename,
  const std::vector<DataPairs> &aDataset,
