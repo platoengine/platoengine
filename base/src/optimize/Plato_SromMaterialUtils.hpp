@@ -443,7 +443,7 @@ inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInpu
         tMaterial.check();
         if(tMaterial.isDeterministic())
         {
-            THROWERR("Generate Material SROMS: Detected a deterministic material while looping over random materials set.")
+            THROWERR("Build Material SROMS: Detected a deterministic material while looping over random materials set.")
         }
 
         auto tRandomVariables = tMaterial.randomVars();
@@ -453,7 +453,7 @@ inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInpu
         if(Plato::srom::compute_sample_probability_pairs(tRandomVariables, tMySampleProbPairs) == false)
         {
             std::ostringstream tMsg;
-            tMsg << "Generate Material SROMS: Failed to compute Sample-Probability pairs for material "
+            tMsg << "Build Material SROMS: Failed to compute Sample-Probability pairs for material "
                 << "with identification number '" << tMaterial.materialID() << "' in block with identification "
                 << "number '" << tMaterial.blockID() << "'.";
             PRINTERR(tMsg.str().c_str());
