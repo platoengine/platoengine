@@ -41,38 +41,40 @@
 */
 
 /*
- * DefaultInputGenerator_UnitTester.cpp
+ * ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.cpp
  *
- *  Created on: Apr 16, 2020
+ *  Created on: Apr 27, 2020
  *
  */
 
-#include "DefaultInputGenerator_UnitTester.hpp"
+#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.hpp"
 
 /******************************************************************************/
-DefaultInputGenerator_UnitTester::DefaultInputGenerator_UnitTester(const XMLGen::InputData& aInputData) :
-DefaultInputGenerator(aInputData) 
+ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester(const XMLGen::InputData& aInputData) :
+ComplianceMinTOPlatoAnalyzeUncertInputGenerator(aInputData) 
 /******************************************************************************/
 {
 }
 
 /******************************************************************************/
-DefaultInputGenerator_UnitTester::~DefaultInputGenerator_UnitTester()
+ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::~ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester()
 /******************************************************************************/
 {
 }
 
 /******************************************************************************/
-bool DefaultInputGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
+bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
     return generatePlatoAnalyzeInputDecks(aStringStream);
 }
 
 /******************************************************************************/
-bool DefaultInputGenerator_UnitTester::publicGenerateInterfaceXML(std::ostringstream *aStringStream)
+bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::publicGenerateInterfaceXML(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
     return generateInterfaceXML(aStringStream);
 }
+
+
 

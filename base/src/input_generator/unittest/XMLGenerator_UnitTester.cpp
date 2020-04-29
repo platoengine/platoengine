@@ -81,6 +81,13 @@ bool XMLGenerator_UnitTester::publicParseSingleUnLoweredValue(const std::vector<
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicGetUncertaintyFlags()
+/******************************************************************************/
+{
+    return getUncertaintyFlags();
+}
+
+/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseTokens(char *buffer, std::vector<std::string> &tokens)
 /******************************************************************************/
 {

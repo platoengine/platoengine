@@ -50,6 +50,7 @@
 #include "XMLGenerator_UnitTester.hpp"
 #include "DefaultInputGenerator_UnitTester.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
+#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
 #include <cmath>
@@ -3523,6 +3524,7 @@ TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeWriter)
             "    boundary condition ids 1 2 3\n"
             "    code plato_analyze\n"
             "    number processors 2\n"
+            "   analyze new workflow true\n"
             "end objective\n"
             "begin loads\n"
             "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
@@ -3557,6 +3559,172 @@ TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeWriter)
     std::ostringstream tOStringStream;
     EXPECT_EQ(tGenerator.publicGenerateInterfaceXML(&tOStringStream), true);
     EXPECT_EQ(tOStringStream.str(), gInterfaceXMLCompMinTOPAGoldString);
+}
+
+TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeUncertWriter)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tester_new;
+    std::istringstream iss;
+    std::string stringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    type angle variation\n"
+        "    load 10\n"
+        "    axis X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    // do parse
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseObjectives(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseLoads(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseBCs(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseBlocks(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseMaterials(iss), true);
+    iss.clear();
+    iss.seekg(0);
+    tester_new.publicParseOptimizationParameters(iss);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester_new.publicParseUncertainties(iss), true);
+    tester_new.publicGetUncertaintyFlags();
+    EXPECT_EQ(tester_new.publicRunSROMForUncertainVariables(), true);
+    EXPECT_EQ(tester_new.publicDistributeObjectivesForGenerate(), true);
+    tester_new.publicLookForPlatoAnalyzePerformers();
+    const XMLGen::InputData& tInputData = tester_new.getInputData();
+    ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester tGenerator(tInputData);;
+    std::ostringstream tOStringStream;
+ //   EXPECT_EQ(tGenerator.publicGenerateInterfaceXML(), true);
+    EXPECT_EQ(tGenerator.publicGenerateInterfaceXML(&tOStringStream), true);
+    std::ostringstream tInputDeckStreamNew;
+    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tInputDeckStreamNew), true);
+    
+
+    // Generate interface.xml using the old writer
+    XMLGenerator_UnitTester tester_old;
+    std::istringstream iss_old;
+    std::string stringInput_old =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    type angle variation\n"
+        "    load 10\n"
+        "    axis X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "    input generator version old\n"
+        "end optimization parameters\n";
+
+    // do parse
+    iss_old.str(stringInput_old);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseObjectives(iss_old), true);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseLoads(iss_old), true);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseBCs(iss_old), true);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseMaterials(iss_old), true);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseBlocks(iss_old), true);
+    iss_old.clear();
+    iss_old.seekg(0);
+    tester_old.publicParseOptimizationParameters(iss_old);
+    iss_old.clear();
+    iss_old.seekg(0);
+    EXPECT_EQ(tester_old.publicParseUncertainties(iss_old), true);
+    tester_old.publicGetUncertaintyFlags();
+    EXPECT_EQ(tester_old.publicRunSROMForUncertainVariables(), true);
+    EXPECT_EQ(tester_old.publicDistributeObjectivesForGenerate(), true);
+    tester_old.publicLookForPlatoAnalyzePerformers();
+    const XMLGen::InputData& tInputData_old = tester_old.getInputData();
+    DefaultInputGenerator_UnitTester tGenerator_old(tInputData_old);
+    std::ostringstream tOStringStream_old;
+ //   EXPECT_EQ(tGenerator_old.publicGenerateInterfaceXML(), true);
+    EXPECT_EQ(tGenerator_old.publicGenerateInterfaceXML(&tOStringStream_old), true);
+    std::ostringstream tInputDeckStreamOld;
+    EXPECT_EQ(tGenerator_old.publicGeneratePlatoAnalyzeInputDecks(&tInputDeckStreamOld), true);
+
+    EXPECT_EQ(tOStringStream_old.str(), tOStringStream.str());
+    EXPECT_EQ(tInputDeckStreamOld.str(), tInputDeckStreamNew.str());
 }
 
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_names)
