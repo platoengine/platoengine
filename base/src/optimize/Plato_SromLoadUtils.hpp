@@ -352,14 +352,14 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
                                                const XMLGen::Uncertainty &aRandomVariable)
 {
     Plato::srom::RandomVariable tNewVariable;
-    tNewVariable.mTag = aRandomVariable.type;
-    tNewVariable.mAttribute = aRandomVariable.axis;
-    tNewVariable.mStatistics.mDistribution = aRandomVariable.distribution;
-    tNewVariable.mStatistics.mLowerBound = aRandomVariable.lower;
-    tNewVariable.mStatistics.mMean = aRandomVariable.mean;
-    tNewVariable.mStatistics.mNumSamples = aRandomVariable.num_samples;
-    tNewVariable.mStatistics.mStandardDeviation = aRandomVariable.standard_deviation;
-    tNewVariable.mStatistics.mUpperBound = aRandomVariable.upper;
+    tNewVariable.tag(aRandomVariable.type);
+    tNewVariable.attribute(aRandomVariable.axis);
+    tNewVariable.mean(aRandomVariable.mean);
+    tNewVariable.lower(aRandomVariable.lower);
+    tNewVariable.upper(aRandomVariable.upper);
+    tNewVariable.samples(aRandomVariable.num_samples);
+    tNewVariable.distribution(aRandomVariable.distribution);
+    tNewVariable.deviation(aRandomVariable.standard_deviation);
     aRandomLoad.mRandomVars.push_back(tNewVariable);
 }
 

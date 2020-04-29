@@ -68,16 +68,16 @@ namespace srom
 **********************************************************************************/
 inline bool check_input_number_samples(const Plato::srom::RandomVariable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStatistics.mNumSamples.empty() == true)
+    if(aMyRandomVar.samples().empty() == true)
     {
         PRINTERR("Check Input Number Samples: NUMBER OF SAMPLES IS NOT DEFINED.\n");
         return (false);
     }
-    else if(std::atof(aMyRandomVar.mStatistics.mNumSamples.c_str()) <= 0)
+    else if(std::atof(aMyRandomVar.samples().c_str()) <= 0)
     {
         std::ostringstream tMsg;
         tMsg << "Check Input Number Samples: NUMBER OF SAMPLES SHOULD BE GREATER THAN ZERO. " << "INPUT NUMBER OF SAMPLES = "
-             << std::atoi(aMyRandomVar.mStatistics.mNumSamples.c_str()) << ".\n";
+             << std::atoi(aMyRandomVar.samples().c_str()) << ".\n";
         PRINTERR(tMsg.str().c_str());
         return (false);
     }
@@ -94,7 +94,7 @@ inline bool check_input_number_samples(const Plato::srom::RandomVariable & aMyRa
 **********************************************************************************/
 inline bool check_input_standard_deviation(const Plato::srom::RandomVariable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStatistics.mStandardDeviation.empty() == true)
+    if(aMyRandomVar.deviation().empty() == true)
     {
         PRINTERR("Check Input Standard Deviation: STANDARD DEVIATION IS NOT DEFINED.\n");
         return (false);
@@ -111,7 +111,7 @@ inline bool check_input_standard_deviation(const Plato::srom::RandomVariable & a
 **********************************************************************************/
 inline bool check_input_mean(const Plato::srom::RandomVariable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStatistics.mMean.empty() == true)
+    if(aMyRandomVar.mean().empty() == true)
     {
         PRINTERR("Check Input Mean: MEAN IS NOT DEFINED.\n");
         return (false);
@@ -128,7 +128,7 @@ inline bool check_input_mean(const Plato::srom::RandomVariable & aMyRandomVar)
 **********************************************************************************/
 inline bool check_input_lower_bound(const Plato::srom::RandomVariable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStatistics.mLowerBound.empty() == true)
+    if(aMyRandomVar.lower().empty() == true)
     {
         PRINTERR("Check Input Lower Bound: LOWER BOUND IS NOT DEFINED.\n");
         return (false);
@@ -145,7 +145,7 @@ inline bool check_input_lower_bound(const Plato::srom::RandomVariable & aMyRando
 **********************************************************************************/
 inline bool check_input_upper_bound(const Plato::srom::RandomVariable & aMyRandomVar)
 {
-    if(aMyRandomVar.mStatistics.mUpperBound.empty() == true)
+    if(aMyRandomVar.upper().empty() == true)
     {
         PRINTERR("Check Input Upper Bound: UPPER BOUND IS NOT DEFINED.\n");
         return (false);
@@ -165,22 +165,22 @@ inline bool define_distribution
 (const Plato::srom::RandomVariable & aMyRandomVar,
  Plato::SromInputs<double> & aInput)
 {
-    if(aMyRandomVar.mStatistics.mDistribution == "normal")
+    if(aMyRandomVar.distribution() == "normal")
     {
         aInput.mDistribution = Plato::DistrubtionName::normal;
     }
-    else if(aMyRandomVar.mStatistics.mDistribution == "uniform")
+    else if(aMyRandomVar.distribution() == "uniform")
     {
         aInput.mDistribution = Plato::DistrubtionName::uniform;
     }
-    else if(aMyRandomVar.mStatistics.mDistribution == "beta")
+    else if(aMyRandomVar.distribution() == "beta")
     {
         aInput.mDistribution = Plato::DistrubtionName::beta;
     }
     else
     {
         std::ostringstream tMsg;
-        tMsg << "Define Distribution: DISTRIBUTION = " << aMyRandomVar.mStatistics.mDistribution
+        tMsg << "Define Distribution: DISTRIBUTION = " << aMyRandomVar.distribution()
              << " IS NOT DEFINED. OPTIONS ARE NORMAL, UNIFORM AND BETA.\n";
         PRINTERR(tMsg.str().c_str());
         return (false);
@@ -200,12 +200,13 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
 {
     std::locale tLocale;
     std::stringstream tOutput;
-    for(std::string::size_type tIndex = 0; tIndex < aMyRandomVar.mStatistics.mDistribution.length(); ++tIndex)
+    auto tDistribution = aMyRandomVar.distribution();
+    for(std::string::size_type tIndex = 0; tIndex < tDistribution.length(); ++tIndex)
     {
-        tOutput << std::toupper(aMyRandomVar.mStatistics.mDistribution[tIndex], tLocale);
+        tOutput << std::toupper(tDistribution[tIndex], tLocale);
     }
 
-    if(aMyRandomVar.mStatistics.mDistribution == "beta" || aMyRandomVar.mStatistics.mDistribution == "normal")
+    if(aMyRandomVar.distribution() == "beta" || aMyRandomVar.distribution() == "normal")
     {
         bool tIsMeanDefined = Plato::srom::check_input_mean(aMyRandomVar);
         bool tIsLowerBoundDefined = Plato::srom::check_input_lower_bound(aMyRandomVar);
@@ -223,7 +224,7 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
             return (false);
         }
     }
-    else if(aMyRandomVar.mStatistics.mDistribution == "uniform")
+    else if(aMyRandomVar.distribution() == "uniform")
     {
         bool tIsLowerBoundDefined = Plato::srom::check_input_lower_bound(aMyRandomVar);
         bool tIsUpperBoundDefined = Plato::srom::check_input_upper_bound(aMyRandomVar);
@@ -259,12 +260,12 @@ inline bool define_input_statistics
         return (false);
     }
 
-    aInput.mMean = std::atof(aMyRandomVar.mStatistics.mMean.c_str());
-    aInput.mLowerBound = std::atof(aMyRandomVar.mStatistics.mLowerBound.c_str());
-    aInput.mUpperBound = std::atof(aMyRandomVar.mStatistics.mUpperBound.c_str());
-    const double tStdDev = std::atof(aMyRandomVar.mStatistics.mStandardDeviation.c_str());
+    aInput.mMean = std::atof(aMyRandomVar.mean().c_str());
+    aInput.mLowerBound = std::atof(aMyRandomVar.lower().c_str());
+    aInput.mUpperBound = std::atof(aMyRandomVar.upper().c_str());
+    const double tStdDev = std::atof(aMyRandomVar.deviation().c_str());
     aInput.mVariance = tStdDev * tStdDev;
-    const int tNumSamples = std::atoi(aMyRandomVar.mStatistics.mNumSamples.c_str());
+    const int tNumSamples = std::atoi(aMyRandomVar.samples().c_str());
     aInput.mNumSamples = tNumSamples;
 
     return (true);
@@ -360,8 +361,8 @@ inline bool post_process_sample_probability_pairs
     aMyRandomVariable.mSampleProbPairs.mSamples.clear();
     aMyRandomVariable.mSampleProbPairs.mProbabilities.clear();
 
-    aMyRandomVariable.mTag = aMyVariable.mTag;
-    aMyRandomVariable.mAttribute = aMyVariable.mAttribute;
+    aMyRandomVariable.mTag = aMyVariable.tag();
+    aMyRandomVariable.mAttribute = aMyVariable.attribute();
 
     const size_t tNumSamples = aMySromSolution.size();
     aMyRandomVariable.mSampleProbPairs.mNumSamples = tNumSamples;

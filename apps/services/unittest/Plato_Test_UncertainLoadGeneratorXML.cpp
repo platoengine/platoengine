@@ -60,7 +60,7 @@ TEST(PlatoTest, check_input_mean)
     Plato::srom::RandomVariable tMyRandomVar;
     ASSERT_FALSE(Plato::srom::check_input_mean(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mMean = "5";
+    tMyRandomVar.mean("5");
     ASSERT_TRUE(Plato::srom::check_input_mean(tMyRandomVar));
 }
 
@@ -69,7 +69,7 @@ TEST(PlatoTest, check_input_lower_bound)
     Plato::srom::RandomVariable tMyRandomVar;
     ASSERT_FALSE(Plato::srom::check_input_lower_bound(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mLowerBound = "5";
+    tMyRandomVar.lower("5");
     ASSERT_TRUE(Plato::srom::check_input_lower_bound(tMyRandomVar));
 }
 
@@ -78,7 +78,7 @@ TEST(PlatoTest, check_input_upper_bound)
     Plato::srom::RandomVariable tMyRandomVar;
     ASSERT_FALSE(Plato::srom::check_input_upper_bound(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mUpperBound = "5";
+    tMyRandomVar.upper("5");
     ASSERT_TRUE(Plato::srom::check_input_upper_bound(tMyRandomVar));
 }
 
@@ -87,7 +87,7 @@ TEST(PlatoTest, check_input_standard_deviation)
     Plato::srom::RandomVariable tMyRandomVar;
     ASSERT_FALSE(Plato::srom::check_input_standard_deviation(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.deviation("5");
     ASSERT_TRUE(Plato::srom::check_input_standard_deviation(tMyRandomVar));
 }
 
@@ -96,13 +96,13 @@ TEST(PlatoTest, check_input_number_samples)
     Plato::srom::RandomVariable tMyRandomVar;
     ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mNumSamples = "-1";
+    tMyRandomVar.samples("-1");
     ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mNumSamples = "0";
+    tMyRandomVar.samples("0");
     ASSERT_FALSE(Plato::srom::check_input_number_samples(tMyRandomVar));
 
-    tMyRandomVar.mStatistics.mNumSamples = "2";
+    tMyRandomVar.samples("2");
     ASSERT_TRUE(Plato::srom::check_input_number_samples(tMyRandomVar));
 }
 
@@ -110,33 +110,33 @@ TEST(PlatoTest, check_input_statistics_uniform)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mDistribution = "uniform";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.distribution("uniform");
 
     // TEST UNDEFINED UPPER BOUND
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mStatistics.mLowerBound = "";
-    tMyRandomVar.mStatistics.mUpperBound = "135";
+    tMyRandomVar.lower("");
+    tMyRandomVar.upper("135");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.samples("");
+    tMyRandomVar.lower("65");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mStatistics.mNumSamples = "0";
+    tMyRandomVar.samples("0");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "-1";
+    tMyRandomVar.samples("-1");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mStatistics.mNumSamples = "4";
+    tMyRandomVar.samples("4");
     ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
@@ -144,48 +144,47 @@ TEST(PlatoTest, check_input_statistics_normal)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
-    tMyRandomVar.mStatistics.mUpperBound = "95";
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    tMyRandomVar.mStatistics.mDistribution = "normal";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.samples("4");
+    tMyRandomVar.lower("65");
+    tMyRandomVar.upper("95");
+    tMyRandomVar.deviation("5");
+    tMyRandomVar.distribution("normal");
 
     // TEST UNDEFINED MEAN
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
-    tMyRandomVar.mStatistics.mMean = "80";
-    tMyRandomVar.mStatistics.mUpperBound = "";
+    tMyRandomVar.mean("80");
+    tMyRandomVar.upper("");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mStatistics.mLowerBound = "";
-    tMyRandomVar.mStatistics.mUpperBound = "95";
+    tMyRandomVar.lower("");
+    tMyRandomVar.upper("95");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.samples("");
+    tMyRandomVar.lower("65");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mStatistics.mNumSamples = "0";
+    tMyRandomVar.samples("0");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "-1";
+    tMyRandomVar.samples("-1");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mStandardDeviation = "";
+    tMyRandomVar.samples("4");
+    tMyRandomVar.deviation("");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.deviation("5");
     ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
@@ -193,47 +192,47 @@ TEST(PlatoTest, check_input_statistics_beta)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
-    tMyRandomVar.mStatistics.mUpperBound = "95";
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    tMyRandomVar.mStatistics.mDistribution = "beta";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.samples("4");
+    tMyRandomVar.lower("65");
+    tMyRandomVar.upper("95");
+    tMyRandomVar.deviation("5");
+    tMyRandomVar.distribution("beta");
 
     // TEST UNDEFINED MEAN
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED UPPER BOUND
-    tMyRandomVar.mStatistics.mMean = "80";
-    tMyRandomVar.mStatistics.mUpperBound = "";
+    tMyRandomVar.mean("80");
+    tMyRandomVar.upper("");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED LOWER BOUND
-    tMyRandomVar.mStatistics.mLowerBound = "";
-    tMyRandomVar.mStatistics.mUpperBound = "95";
+    tMyRandomVar.lower("");
+    tMyRandomVar.upper("95");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
+    tMyRandomVar.samples("");
+    tMyRandomVar.lower("65");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NUMBER OF SAMPLES = 0
-    tMyRandomVar.mStatistics.mNumSamples = "0";
+    tMyRandomVar.samples("0");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tMyRandomVar.mStatistics.mNumSamples = "-1";
+    tMyRandomVar.samples("-1");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST UNDEFINED STANDARD DEVIATION
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mStandardDeviation = "";
+    tMyRandomVar.samples("4");
+    tMyRandomVar.deviation("");
     ASSERT_FALSE(Plato::srom::check_input_statistics(tMyRandomVar));
 
     // TEST SUCCESS
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
+    tMyRandomVar.deviation("5");
     ASSERT_TRUE(Plato::srom::check_input_statistics(tMyRandomVar));
 }
 
@@ -241,20 +240,20 @@ TEST(PlatoTest, define_input_statistics)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mNumSamples = "4";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
-    tMyRandomVar.mStatistics.mUpperBound = "95";
-    tMyRandomVar.mStatistics.mStandardDeviation = "5";
-    tMyRandomVar.mStatistics.mDistribution = "beta";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.samples("4");
+    tMyRandomVar.lower("65");
+    tMyRandomVar.upper("95");
+    tMyRandomVar.deviation("5");
+    tMyRandomVar.distribution("beta");
 
     // TEST UNDEFINED PARAMETER
     Plato::SromInputs<double> tSromInputs;
     ASSERT_FALSE(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs));
 
     // TEST SUCCESS
-    tMyRandomVar.mStatistics.mMean = "80";
+    tMyRandomVar.mean("80");
     ASSERT_TRUE(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs));
 
     ASSERT_EQ(4u, tSromInputs.mNumSamples);
@@ -272,19 +271,19 @@ TEST(PlatoTest, define_distribution)
     Plato::srom::RandomVariable tMyRandomVar;
     Plato::SromInputs<double> tSromInputs;
 
-    tMyRandomVar.mStatistics.mDistribution = "normal";
+    tMyRandomVar.distribution("normal");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::normal, tSromInputs.mDistribution);
 
-    tMyRandomVar.mStatistics.mDistribution = "beta";
+    tMyRandomVar.distribution("beta");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
 
-    tMyRandomVar.mStatistics.mDistribution = "uniform";
+    tMyRandomVar.distribution("uniform");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
     ASSERT_EQ(Plato::DistrubtionName::uniform, tSromInputs.mDistribution);
 
-    tMyRandomVar.mStatistics.mDistribution = "lognormal";
+    tMyRandomVar.distribution("lognormal");
     ASSERT_FALSE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
 }
 
@@ -359,14 +358,14 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mDistribution = "beta";
-    tMyRandomVar.mStatistics.mMean = "85";
-    tMyRandomVar.mStatistics.mUpperBound = "65";
-    tMyRandomVar.mStatistics.mLowerBound = "135";
-    tMyRandomVar.mStatistics.mStandardDeviation = "15";
-    tMyRandomVar.mStatistics.mNumSamples = "3";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.distribution("beta");
+    tMyRandomVar.mean("85");
+    tMyRandomVar.upper("65");
+    tMyRandomVar.lower("135");
+    tMyRandomVar.deviation("15");
+    tMyRandomVar.samples("3");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
@@ -408,25 +407,25 @@ TEST(PlatoTest, compute_sample_probability_pairs_TwoRandVars)
 
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVarOne;
-    tMyRandomVarOne.mTag = "random rotation";
-    tMyRandomVarOne.mAttribute = "x";
-    tMyRandomVarOne.mStatistics.mDistribution = "beta";
-    tMyRandomVarOne.mStatistics.mMean = "85";
-    tMyRandomVarOne.mStatistics.mLowerBound = "65";
-    tMyRandomVarOne.mStatistics.mUpperBound = "135";
-    tMyRandomVarOne.mStatistics.mStandardDeviation = "15";
-    tMyRandomVarOne.mStatistics.mNumSamples = "3";
+    tMyRandomVarOne.tag("random rotation");
+    tMyRandomVarOne.attribute("x");
+    tMyRandomVarOne.distribution("beta");
+    tMyRandomVarOne.mean("85");
+    tMyRandomVarOne.lower("65");
+    tMyRandomVarOne.upper("135");
+    tMyRandomVarOne.deviation("15");
+    tMyRandomVarOne.samples("3");
     tRandomVarsSet.push_back(tMyRandomVarOne);
 
     Plato::srom::RandomVariable tMyRandomVarTwo;
-    tMyRandomVarTwo.mTag = "random rotation";
-    tMyRandomVarTwo.mAttribute = "y";
-    tMyRandomVarTwo.mStatistics.mNumSamples = "4";
-    tMyRandomVarTwo.mStatistics.mDistribution = "beta";
-    tMyRandomVarTwo.mStatistics.mMean = "70";
-    tMyRandomVarTwo.mStatistics.mLowerBound = "50";
-    tMyRandomVarTwo.mStatistics.mUpperBound = "120";
-    tMyRandomVarTwo.mStatistics.mStandardDeviation = "15";
+    tMyRandomVarTwo.tag("random rotation");
+    tMyRandomVarTwo.attribute("y");
+    tMyRandomVarTwo.samples("4");
+    tMyRandomVarTwo.distribution("beta");
+    tMyRandomVarTwo.mean("70");
+    tMyRandomVarTwo.lower("50");
+    tMyRandomVarTwo.upper("120");
+    tMyRandomVarTwo.deviation("15");
     tRandomVarsSet.push_back(tMyRandomVarTwo);
 
     // SOLVE SROM PROBLEM
@@ -485,14 +484,14 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_distribution)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mDistribution = "";
-    tMyRandomVar.mStatistics.mMean = "85";
-    tMyRandomVar.mStatistics.mUpperBound = "135";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
-    tMyRandomVar.mStatistics.mStandardDeviation = "15";
-    tMyRandomVar.mStatistics.mNumSamples = "3";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.distribution("");
+    tMyRandomVar.mean("85");
+    tMyRandomVar.upper("135");
+    tMyRandomVar.lower("65");
+    tMyRandomVar.deviation("15");
+    tMyRandomVar.samples("3");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
@@ -513,12 +512,12 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistic
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "random rotation";
-    tMyRandomVar.mAttribute = "x";
-    tMyRandomVar.mStatistics.mDistribution = "uniform";
-    tMyRandomVar.mStatistics.mLowerBound = "65";
-    tMyRandomVar.mStatistics.mUpperBound = "";
-    tMyRandomVar.mStatistics.mNumSamples = "3";
+    tMyRandomVar.tag("random rotation");
+    tMyRandomVar.attribute("x");
+    tMyRandomVar.distribution("uniform");
+    tMyRandomVar.lower("65");
+    tMyRandomVar.upper("");
+    tMyRandomVar.samples("3");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
@@ -527,23 +526,23 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistic
     ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED LOWER BOUND
-    tRandomVarsSet[0].mStatistics.mLowerBound = "";
-    tRandomVarsSet[0].mStatistics.mUpperBound = "135";
+    tRandomVarsSet[0].lower("");
+    tRandomVarsSet[0].upper("135");
     ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST UNDEFINED NUMBER OF SAMPLES
-    tRandomVarsSet[0].mStatistics.mNumSamples = "";
-    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
+    tRandomVarsSet[0].samples("");
+    tRandomVarsSet[0].lower("65");
     ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NUMBER OF SAMPLES = 0
-    tRandomVarsSet[0].mStatistics.mNumSamples = "0";
-    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
+    tRandomVarsSet[0].samples("0");
+    tRandomVarsSet[0].lower("65");
     ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 
     // TEST NEGATIVE NUMBER OF SAMPLES
-    tRandomVarsSet[0].mStatistics.mNumSamples = "-1";
-    tRandomVarsSet[0].mStatistics.mLowerBound = "65";
+    tRandomVarsSet[0].samples("-1");
+    tRandomVarsSet[0].lower("65");
     ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
 }
 
@@ -1624,23 +1623,23 @@ TEST(PlatoTest, expand_random_and_deterministic_loads_only_random_loads)
     tLoad1.mLoadType = "traction";
     tLoad1.mValues = {"1", "2", "3"};
     Plato::srom::RandomVariable tRandVar1;
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "60";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "40";
-    tRandVar1.mStatistics.mUpperBound = "100";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "10";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("60");
+    tRandVar1.samples("2");
+    tRandVar1.lower("40");
+    tRandVar1.upper("100");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("10");
     Plato::srom::RandomVariable tRandVar2;
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "y";
-    tRandVar2.mStatistics.mMean = "65";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "40";
-    tRandVar2.mStatistics.mUpperBound = "100";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "10";
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("y");
+    tRandVar2.mean("65");
+    tRandVar2.samples("2");
+    tRandVar2.lower("40");
+    tRandVar2.upper("100");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("10");
     tLoad1.mRandomVars.push_back(tRandVar2);
     tLoads.push_back(tLoad1);
 
@@ -1650,22 +1649,23 @@ TEST(PlatoTest, expand_random_and_deterministic_loads_only_random_loads)
     tLoad2.mLoadID = 2;
     tLoad2.mLoadType = "traction";
     tLoad2.mValues = {"1", "2", "3"};
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "70";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "45";
-    tRandVar1.mStatistics.mUpperBound = "110";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "15";
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "z";
-    tRandVar2.mStatistics.mMean = "75";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "50";
-    tRandVar2.mStatistics.mUpperBound = "120";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "12";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("70");
+    tRandVar1.samples("2");
+    tRandVar1.lower("45");
+    tRandVar1.upper("110");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("15");
+
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("z");
+    tRandVar2.mean("75");
+    tRandVar2.samples("2");
+    tRandVar2.lower("50");
+    tRandVar2.upper("120");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("12");
     tLoad2.mRandomVars.push_back(tRandVar2);
     tLoads.push_back(tLoad2);
 
@@ -1691,14 +1691,14 @@ TEST(PlatoTest, expand_random_and_deterministic_loads_only_random_loads)
 
         for(size_t tVarIndex = 0; tVarIndex < tRandomLoads[tLoadIndex].mRandomVars.size(); tVarIndex++)
         {
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mTag.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mTag.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mAttribute.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mAttribute.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].tag().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].tag().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].attribute().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].attribute().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mean().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mean().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].samples().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].samples().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].lower().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].lower().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].upper().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].upper().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].distribution().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].distribution().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].deviation().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].deviation().c_str());
         }
     }
 }
@@ -1714,23 +1714,23 @@ TEST(PlatoTest, expand_random_and_deterministic_loads)
     tLoad1.mLoadType = "traction";
     tLoad1.mValues = {"1", "2", "3"};
     Plato::srom::RandomVariable tRandVar1;
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "60";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "40";
-    tRandVar1.mStatistics.mUpperBound = "100";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "10";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("60");
+    tRandVar1.samples("2");
+    tRandVar1.lower("40");
+    tRandVar1.upper("100");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("10");
     Plato::srom::RandomVariable tRandVar2;
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "y";
-    tRandVar2.mStatistics.mMean = "65";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "40";
-    tRandVar2.mStatistics.mUpperBound = "100";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "10";
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("y");
+    tRandVar2.mean("65");
+    tRandVar2.samples("2");
+    tRandVar2.lower("40");
+    tRandVar2.upper("100");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("10");
     tLoad1.mRandomVars.push_back(tRandVar2);
     tLoads.push_back(tLoad1);
 
@@ -1740,22 +1740,23 @@ TEST(PlatoTest, expand_random_and_deterministic_loads)
     tLoad2.mLoadID = 2;
     tLoad2.mLoadType = "traction";
     tLoad2.mValues = {"1", "2", "3"};
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "70";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "45";
-    tRandVar1.mStatistics.mUpperBound = "110";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "15";
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "z";
-    tRandVar2.mStatistics.mMean = "75";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "50";
-    tRandVar2.mStatistics.mUpperBound = "120";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "12";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("70");
+    tRandVar1.samples("2");
+    tRandVar1.lower("45");
+    tRandVar1.upper("110");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("15");
+
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("z");
+    tRandVar2.mean("75");
+    tRandVar2.samples("2");
+    tRandVar2.lower("50");
+    tRandVar2.upper("120");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("12");
     tLoad2.mRandomVars.push_back(tRandVar2);
     tLoads.push_back(tLoad2);
 
@@ -1791,14 +1792,14 @@ TEST(PlatoTest, expand_random_and_deterministic_loads)
 
         for(size_t tVarIndex = 0; tVarIndex < tRandomLoads[tLoadIndex].mRandomVars.size(); tVarIndex++)
         {
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mTag.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mTag.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mAttribute.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mAttribute.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mMean.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mNumSamples.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mLowerBound.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mUpperBound.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mDistribution.c_str());
-            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mStatistics.mStandardDeviation.c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].tag().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].tag().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].attribute().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].attribute().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].mean().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].mean().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].samples().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].samples().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].lower().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].lower().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].upper().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].upper().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].distribution().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].distribution().c_str());
+            ASSERT_STREQ(tLoads[tLoadIndex].mRandomVars[tVarIndex].deviation().c_str(), tRandomLoads[tLoadIndex].mRandomVars[tVarIndex].deviation().c_str());
         }
     }
 
@@ -2232,25 +2233,25 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
     tLoad1.mLoadType = "traction";
     tLoad1.mValues = {"1", "1", "1"};
     Plato::srom::RandomVariable tRandVar1;
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "85";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "65";
-    tRandVar1.mStatistics.mUpperBound = "135";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "15";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("85");
+    tRandVar1.samples("2");
+    tRandVar1.lower("65");
+    tRandVar1.upper("135");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("15");
     // APPEND FIRST RANDOM VARIABLE FOR LOAD 1
     tLoad1.mRandomVars.push_back(tRandVar1);
     Plato::srom::RandomVariable tRandVar2;
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "y";
-    tRandVar2.mStatistics.mMean = "70";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "50";
-    tRandVar2.mStatistics.mUpperBound = "120";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "15";
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("y");
+    tRandVar2.mean("70");
+    tRandVar2.samples("2");
+    tRandVar2.lower("50");
+    tRandVar2.upper("120");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("15");
     // APPEND SECOND RANDOM VARIABLE FOR LOAD 1
     tLoad1.mRandomVars.push_back(tRandVar2);
 
@@ -2265,24 +2266,24 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
     tLoad2.mLoadID = 2;
     tLoad2.mLoadType = "traction";
     tLoad2.mValues = {"1", "1", "1"};
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "85";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "65";
-    tRandVar1.mStatistics.mUpperBound = "135";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "15";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("85");
+    tRandVar1.samples("2");
+    tRandVar1.lower("65");
+    tRandVar1.upper("135");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("15");
     // APPEND FIRST RANDOM VARIABLE FOR LOAD 2
     tLoad2.mRandomVars.push_back(tRandVar1);
-    tRandVar2.mTag = "random rotation";
-    tRandVar2.mAttribute = "y";
-    tRandVar2.mStatistics.mMean = "70";
-    tRandVar2.mStatistics.mNumSamples = "2";
-    tRandVar2.mStatistics.mLowerBound = "50";
-    tRandVar2.mStatistics.mUpperBound = "120";
-    tRandVar2.mStatistics.mDistribution = "beta";
-    tRandVar2.mStatistics.mStandardDeviation = "10";
+    tRandVar2.tag("random rotation");
+    tRandVar2.attribute("y");
+    tRandVar2.mean("70");
+    tRandVar2.samples("2");
+    tRandVar2.lower("50");
+    tRandVar2.upper("120");
+    tRandVar2.distribution("beta");
+    tRandVar2.deviation("10");
     // APPEND SECOND RANDOM VARIABLE FOR LOAD 2
     tLoad2.mRandomVars.push_back(tRandVar2);
 
@@ -2765,14 +2766,14 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     tLoad1.mLoadType = "traction";
     tLoad1.mValues = {"1", "1", "1"};
     Plato::srom::RandomVariable tRandVar1;
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "85";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "65";
-    tRandVar1.mStatistics.mUpperBound = "135";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "15";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("85");
+    tRandVar1.samples("2");
+    tRandVar1.lower("65");
+    tRandVar1.upper("135");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("15");
     // APPEND FIRST RANDOM VARIABLE FOR LOAD 1
     tLoad1.mRandomVars.push_back(tRandVar1);
 
@@ -2787,14 +2788,14 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     tLoad2.mLoadID = 2;
     tLoad2.mLoadType = "pressure";
     tLoad2.mValues = {"1", "1", "1"};
-    tRandVar1.mTag = "random rotation";
-    tRandVar1.mAttribute = "x";
-    tRandVar1.mStatistics.mMean = "85";
-    tRandVar1.mStatistics.mNumSamples = "2";
-    tRandVar1.mStatistics.mLowerBound = "65";
-    tRandVar1.mStatistics.mUpperBound = "135";
-    tRandVar1.mStatistics.mDistribution = "beta";
-    tRandVar1.mStatistics.mStandardDeviation = "10";
+    tRandVar1.tag("random rotation");
+    tRandVar1.attribute("x");
+    tRandVar1.mean("85");
+    tRandVar1.samples("2");
+    tRandVar1.lower("65");
+    tRandVar1.upper("135");
+    tRandVar1.distribution("beta");
+    tRandVar1.deviation("10");
     // APPEND FIRST RANDOM VARIABLE FOR LOAD 2
     tLoad2.mRandomVars.push_back(tRandVar1);
 

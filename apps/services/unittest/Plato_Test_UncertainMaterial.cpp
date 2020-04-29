@@ -50,21 +50,21 @@
 
 #include "Plato_SromMaterialUtils.hpp"
 
-namespace UncertainMaterial
+namespace PlatoTestUncertainMaterial
 {
 
 TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
 {
     // DEFINE INPUTS
     Plato::srom::RandomVariable tMyRandomVar;
-    tMyRandomVar.mTag = "elastic modulus";
-    tMyRandomVar.mAttribute = "homogeneous";
-    tMyRandomVar.mStatistics.mDistribution = "beta";
-    tMyRandomVar.mStatistics.mMean = "1e9";
-    tMyRandomVar.mStatistics.mUpperBound = "1e10";
-    tMyRandomVar.mStatistics.mLowerBound = "1e8";
-    tMyRandomVar.mStatistics.mStandardDeviation = "2e8";
-    tMyRandomVar.mStatistics.mNumSamples = "3";
+    tMyRandomVar.tag("elastic modulus");
+    tMyRandomVar.attribute("homogeneous");
+    tMyRandomVar.distribution("beta");
+    tMyRandomVar.mean("1e9");
+    tMyRandomVar.upper("1e10");
+    tMyRandomVar.lower("1e8");
+    tMyRandomVar.deviation("2e8");
+    tMyRandomVar.samples("3");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
@@ -151,14 +151,14 @@ TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials)
 
     auto tRandomVars = tRandomMaterial[0].randomVars();
     ASSERT_EQ(1u, tRandomVars.size());
-    ASSERT_STREQ("elastic modulus", tRandomVars[0].mTag.c_str());
-    ASSERT_STREQ("homogeneous", tRandomVars[0].mAttribute.c_str());
-    ASSERT_STREQ("1e9", tRandomVars[0].mStatistics.mMean.c_str());
-    ASSERT_STREQ("3", tRandomVars[0].mStatistics.mNumSamples.c_str());
-    ASSERT_STREQ("1e8", tRandomVars[0].mStatistics.mLowerBound.c_str());
-    ASSERT_STREQ("1e10", tRandomVars[0].mStatistics.mUpperBound.c_str());
-    ASSERT_STREQ("beta", tRandomVars[0].mStatistics.mDistribution.c_str());
-    ASSERT_STREQ("2e8", tRandomVars[0].mStatistics.mStandardDeviation.c_str());
+    ASSERT_STREQ("elastic modulus", tRandomVars[0].tag().c_str());
+    ASSERT_STREQ("homogeneous", tRandomVars[0].attribute().c_str());
+    ASSERT_STREQ("1e9", tRandomVars[0].mean().c_str());
+    ASSERT_STREQ("3", tRandomVars[0].samples().c_str());
+    ASSERT_STREQ("1e8", tRandomVars[0].lower().c_str());
+    ASSERT_STREQ("1e10", tRandomVars[0].upper().c_str());
+    ASSERT_STREQ("beta", tRandomVars[0].distribution().c_str());
+    ASSERT_STREQ("2e8", tRandomVars[0].deviation().c_str());
 
     auto tDeterministicVars = tRandomMaterial[0].deterministicVars();
     ASSERT_EQ(1u, tDeterministicVars.size());

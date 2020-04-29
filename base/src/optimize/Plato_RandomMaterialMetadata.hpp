@@ -194,7 +194,7 @@ public:
         // append random variables tags
         for(auto& tRandomVar : mRandomVars)
         {
-            tTags.push_back(tRandomVar.mTag);
+            tTags.push_back(tRandomVar.tag());
         }
 
         // append deterministic variables tags
@@ -235,9 +235,7 @@ public:
                 const Plato::srom::Statistics &aStats)
     {
         Plato::srom::RandomVariable tVariable;
-        tVariable.mTag = aTag;
-        tVariable.mStatistics = aStats;
-        tVariable.mAttribute = aAttribute;
+        tVariable.define(aTag, aAttribute, aStats);
         mRandomVars.push_back(tVariable);
     }
 
