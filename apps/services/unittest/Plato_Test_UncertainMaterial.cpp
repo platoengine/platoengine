@@ -63,16 +63,16 @@ TEST(PlatoTest, SROM_ToLower)
 TEST(PlatoTest, SROM_WriteAndReadData)
 {
     std::string tFilename("test.csv");
-    std::vector<Plato::srom::DataPairs> aGoldDataSet;
-    aGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
-    aGoldDataSet[0].second =
+    std::vector<Plato::srom::DataPairs> tGoldDataSet;
+    tGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
+    tGoldDataSet[0].second =
         {0.0566042854783908, 1.68480606445034, 1.50875023647275, 4.1493585768893, 4.97033414937478,
          2.29710545085141, 0.139247472523297, -1.10469284708504, 0.820970613576648, 6.26911462024901};
-    aGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
-    aGoldDataSet[1].second =
+    tGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
+    tGoldDataSet[1].second =
         {0.0199137673514845, 0.0609654445695039, 0.0734112647021622, 0.372421165435386, 0.12736459057163,
          0.24272587457853, 0.0138153553915423, 0.00559607595111409, 0.0638507181006206, 0.0199357433480253};
-    Plato::srom::write_data(tFilename, aGoldDataSet);
+    Plato::srom::write_data(tFilename, tGoldDataSet);
 
     auto tInputDataSet = Plato::srom::read_sample_probability_pairs(tFilename);
     ASSERT_EQ(2u, tInputDataSet.size());
@@ -85,13 +85,157 @@ TEST(PlatoTest, SROM_WriteAndReadData)
     for(auto& tSample : tInputDataSet[0].second)
     {
         auto tIndex = &tSample - &tInputDataSet[0].second[0];
-        ASSERT_NEAR(aGoldDataSet[0].second[tIndex], tSample, tTolerance);
+        ASSERT_NEAR(tGoldDataSet[0].second[tIndex], tSample, tTolerance);
     }
 
     for(auto& tProb : tInputDataSet[1].second)
     {
         auto tIndex = &tProb - &tInputDataSet[1].second[0];
-        ASSERT_NEAR(aGoldDataSet[1].second[tIndex], tProb, tTolerance);
+        ASSERT_NEAR(tGoldDataSet[1].second[tIndex], tProb, tTolerance);
+    }
+
+    std::system("rm -f test.csv");
+}
+
+TEST(PlatoTest, SROM_SetRandomVariablesId)
+{
+    std::vector<Plato::srom::RandomVariable> tRandomVariableSet;
+    tRandomVariableSet.push_back(Plato::srom::RandomVariable());
+    tRandomVariableSet.push_back(Plato::srom::RandomVariable());
+    tRandomVariableSet.push_back(Plato::srom::RandomVariable());
+    Plato::srom::set_random_variables_id(tRandomVariableSet);
+    ASSERT_EQ(0, tRandomVariableSet[0].id());
+    ASSERT_EQ(1, tRandomVariableSet[1].id());
+    ASSERT_EQ(2, tRandomVariableSet[2].id());
+}
+
+TEST(PlatoTest, SROM_PostProcessSampleProbabilityPairs_Error)
+{
+    Plato::srom::RandomVariable tRandomVar;
+    tRandomVar.id(0);
+    tRandomVar.tag("traction force");
+    tRandomVar.attribute("magnitude");
+    std::vector<Plato::srom::DataPairs> tSampleProbPairs;
+    EXPECT_THROW(Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairs), std::runtime_error);
+}
+
+TEST(PlatoTest, SROM_PostProcessSampleProbabilityPairs)
+{
+    // DEFINE INPUTS
+    Plato::srom::RandomVariable tRandomVar;
+    tRandomVar.tag("traction force");
+    tRandomVar.attribute("magnitude");
+
+    std::vector<Plato::srom::DataPairs> tSampleProbPairs;
+    tSampleProbPairs.push_back( { "Samples", std::vector<double>{} } );
+    tSampleProbPairs[0].second =
+        {0.0566042854783908, 1.68480606445034, 1.50875023647275, 4.1493585768893, 4.97033414937478,
+         2.29710545085141, 0.139247472523297, -1.10469284708504, 0.820970613576648, 6.26911462024901};
+    tSampleProbPairs.push_back( { "Probabilities", std::vector<double>{} } );
+    tSampleProbPairs[1].second =
+        {0.0199137673514845, 0.0609654445695039, 0.0734112647021622, 0.372421165435386, 0.12736459057163,
+         0.24272587457853, 0.0138153553915423, 0.00559607595111409, 0.0638507181006206, 0.0199357433480253};
+
+    // CALL FUNCTION
+    auto tSromVariable = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairs);
+
+    // TEST RESULTS
+    ASSERT_EQ(10, tSromVariable.mSampleProbPairs.mNumSamples);
+    ASSERT_STREQ("traction force", tSromVariable.mTag.c_str());
+    ASSERT_STREQ("magnitude", tSromVariable.mAttribute.c_str());
+
+    const double tTolerance = 1e-8;
+    for(auto& tSample : tSromVariable.mSampleProbPairs.mSamples)
+    {
+        auto tIndex = &tSample - &tSromVariable.mSampleProbPairs.mSamples[0];
+        ASSERT_NEAR(tSampleProbPairs[0].second[tIndex], tSample, tTolerance);
+    }
+
+    for(auto& tProb : tSromVariable.mSampleProbPairs.mProbabilities)
+    {
+        auto tIndex = &tProb - &tSromVariable.mSampleProbPairs.mProbabilities[0];
+        ASSERT_NEAR(tSampleProbPairs[1].second[tIndex], tProb, tTolerance);
+    }
+}
+
+TEST(PlatoTest, SROM_SolveSromProblem)
+{
+    // DEFINE INPUTS
+    Plato::srom::RandomVariable tMyRandomVar;
+    tMyRandomVar.tag("elastic modulus");
+    tMyRandomVar.attribute("homogeneous");
+    tMyRandomVar.distribution("beta");
+    tMyRandomVar.mean("1e9");
+    tMyRandomVar.upper("1e10");
+    tMyRandomVar.lower("1e8");
+    tMyRandomVar.deviation("2e8");
+    tMyRandomVar.samples("3");
+
+    auto tSamplerProbPairs = Plato::srom::solve_srom_problem(tMyRandomVar);
+
+    double tSum = 0;
+    double tTolerance = 1e-4;
+    std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
+    std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
+    for (int tIndex = 0; tIndex < tSamplerProbPairs.mSampleProbPairs.mNumSamples; tIndex++)
+    {
+        tSum += tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex];
+        ASSERT_NEAR(tGoldSamples[tIndex], tSamplerProbPairs.mSampleProbPairs.mSamples[tIndex], tTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex], tTolerance);
+    }
+    tTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+}
+
+TEST(PlatoTest, SROM_ReadSampleProbabilityPairs)
+{
+    // DEFINE RANDOM VARIABLE
+    Plato::srom::RandomVariable tMyRandomVar;
+    tMyRandomVar.id(0);
+    tMyRandomVar.tag("traction force");
+    tMyRandomVar.attribute("magnitude");
+    tMyRandomVar.file("test.csv");
+    std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
+    tRandomVarsSet.push_back(tMyRandomVar);
+
+    // CREATE CSV FILE WITH SAMPLE-PROB PAIRS
+    std::string tFilename("test.csv");
+    std::vector<Plato::srom::DataPairs> tGoldDataSet;
+    tGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
+    tGoldDataSet[0].second =
+        {0.0566042854783908, 1.68480606445034, 1.50875023647275, 4.1493585768893, 4.97033414937478,
+         2.29710545085141, 0.139247472523297, -1.10469284708504, 0.820970613576648, 6.26911462024901};
+    tGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
+    tGoldDataSet[1].second =
+        {0.0199137673514845, 0.0609654445695039, 0.0734112647021622, 0.372421165435386, 0.12736459057163,
+         0.24272587457853, 0.0138153553915423, 0.00559607595111409, 0.0638507181006206, 0.0199357433480253};
+    Plato::srom::write_data(tFilename, tGoldDataSet);
+
+    // COMPUTE SAMPLE-PROB PAIRS
+    std::vector<Plato::srom::SromVariable> tSampleProbPairSet;
+    Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tSampleProbPairSet);
+
+    const double tTolerance = 1e-8;
+    for(auto& tSampleProbPair : tSampleProbPairSet)
+    {
+        ASSERT_STREQ("traction force", tSampleProbPair.mTag.c_str());
+        ASSERT_STREQ("magnitude", tSampleProbPair.mAttribute.c_str());
+
+        for(auto& tSample : tSampleProbPair.mSampleProbPairs.mSamples)
+        {
+            auto tIndex = &tSample - &tSampleProbPair.mSampleProbPairs.mSamples[0];
+            ASSERT_NEAR(tGoldDataSet[0].second[tIndex], tSample, tTolerance);
+        }
+
+        for(auto& tProb : tSampleProbPair.mSampleProbPairs.mProbabilities)
+        {
+            auto tIndex = &tProb - &tSampleProbPair.mSampleProbPairs.mProbabilities[0];
+            ASSERT_NEAR(tGoldDataSet[1].second[tIndex], tProb, tTolerance);
+        }
     }
 
     std::system("rm -f test.csv");
