@@ -2473,9 +2473,6 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
     std::vector<Plato::srom::Load> tLoads;
     Plato::srom::generate_srom_load_inputs(tLoadCases, tUncertainties, tLoads);
 
-    Plato::srom::InputMetaData tInputs;
-    tInputs.mLoads = tLoads;
-
     // CALL FUNCTION TO BE TESTED
     std::vector<Plato::srom::RandomLoadCase> tOutput;
     ASSERT_TRUE(Plato::srom::build_load_sroms(tLoads, tOutput));
