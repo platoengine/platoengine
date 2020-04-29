@@ -497,7 +497,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_distribution)
 
     // SOLVE SROM PROBLEM
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 }
 
 TEST(PlatoTest, compute_sample_probability_pairs_error_empty_random_var_set)
@@ -523,27 +523,27 @@ TEST(PlatoTest, compute_sample_probability_pairs_error_undefined_input_statistic
 
     // TEST UNDEFINED UPPER BOUND
     std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 
     // TEST UNDEFINED LOWER BOUND
     tRandomVarsSet[0].lower("");
     tRandomVarsSet[0].upper("135");
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 
     // TEST UNDEFINED NUMBER OF SAMPLES
     tRandomVarsSet[0].samples("");
     tRandomVarsSet[0].lower("65");
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 
     // TEST NUMBER OF SAMPLES = 0
     tRandomVarsSet[0].samples("0");
     tRandomVarsSet[0].lower("65");
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 
     // TEST NEGATIVE NUMBER OF SAMPLES
     tRandomVarsSet[0].samples("-1");
     tRandomVarsSet[0].lower("65");
-    ASSERT_FALSE(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs));
+    EXPECT_THROW(Plato::srom::compute_sample_probability_pairs(tRandomVarsSet, tMySampleProbPairs), std::runtime_error);
 }
 
 TEST(PlatoTest, post_process_random_load_error)

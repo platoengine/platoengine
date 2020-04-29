@@ -218,8 +218,8 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
         if(tStatisticsDefined == false)
         {
             std::ostringstream tMsg;
-            tMsg << "Check Input Statistics: FULL SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
-                 << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            tMsg << "Check Input Statistics: Input statistics metadata for distribution '" << tOutput.str().c_str()
+                 << "' are not completely defined.\n";
             PRINTERR(tMsg.str().c_str());
             return (false);
         }
@@ -233,8 +233,8 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
         if(tStatisticsDefined == false)
         {
             std::ostringstream tMsg;
-            tMsg << "Check Input Statistics: SET OF INPUT STATISTICS FOR THE " << tOutput.str().c_str()
-                 << " DISTRIBUTION IS NOT PROPERLY DEFINED.\n";
+            tMsg << "Check Input Statistics: Input statistics metadata for distribution '" << tOutput.str().c_str()
+                 << "' are not completely defined.\n";
             PRINTERR(tMsg.str().c_str());
             return (false);
         }
@@ -379,6 +379,77 @@ inline bool post_process_sample_probability_pairs
 }
 // function post_process_sample_probability_pairs
 
+
+/******************************************************************************//**
+ * \fn solve_srom_problem
+ * \brief Compute sample-probability pairs by solving the Stochastic Reduced Order \n
+ *    Model (SROM) problem.
+ * \param [in] tRandomVar random variable metadata
+ * \return SROM variable metadata
+**********************************************************************************/
+inline Plato::srom::SromVariable
+solve_srom_problem
+(const Plato::srom::RandomVariable& tRandomVar)
+{
+    Plato::SromInputs<double> tSromInputs;
+    if(Plato::srom::define_distribution(tRandomVar, tSromInputs) == false)
+    {
+        std::ostringstream tMsg;
+        tMsg << "Solve SROM Problem: Probability distribution is not defined for random variable with tag '"
+            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
+            << "'.\n";
+        THROWERR(tMsg.str().c_str());
+    }
+
+    if(Plato::srom::define_input_statistics(tRandomVar, tSromInputs) == false)
+    {
+        std::ostringstream tMsg;
+        tMsg << "Solve SROM Problem: Input statistics metadata is corrupted for random variable with tag '"
+            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
+            << "'.\n";
+        THROWERR(tMsg.str().c_str());
+    }
+
+    std::vector<Plato::SromOutputs<double>> tSromOutputs;
+    if(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs) == false)
+    {
+        std::ostringstream tMsg;
+        tMsg << "Solve SROM Problem: Sample probability pairs were not computed for random variable with tag '"
+            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
+            << "'.\n";
+        THROWERR(tMsg.str().c_str());
+    }
+
+    Plato::srom::SromVariable tSampleProbPair;
+    if(Plato::srom::post_process_sample_probability_pairs(tSromOutputs, tRandomVar, tSampleProbPair) == false)
+    {
+        std::ostringstream tMsg;
+        tMsg << "Solve SROM Problem: Post-processing of sample probability pairs failed for random variable with tag '"
+            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
+            << "'.\n";
+        THROWERR(tMsg.str().c_str());
+    }
+
+    return tSampleProbPair;
+}
+// function solve_srom_problem
+
+/******************************************************************************//**
+ * \fn set_random_variables_id
+ * \brief Set random variable identification numbers
+ * \param [out] aSetRandomVariables set of random variables
+**********************************************************************************/
+inline void set_random_variables_id
+(std::vector<Plato::srom::RandomVariable> & aRandomVariableSet)
+{
+    for(auto& tRandomVar : aRandomVariableSet)
+    {
+        auto tIndex = &tRandomVar - &aRandomVariableSet[0];
+        tRandomVar.id(tIndex);
+    }
+}
+// function set_random_variables_id
+
 /******************************************************************************//**
  * \fn compute_sample_probability_pairs
  * \brief Compute the sample-probability pairs for the set of random variables
@@ -392,53 +463,26 @@ inline bool compute_sample_probability_pairs
 {
     if(aSetRandomVariables.size() <= 0)
     {
-        PRINTERR("INPUT SET OF RANDOM VARIABLES IS EMPTY.\n");
+        PRINTERR("Compute Sample Probability Pairs: Input set of random variables is empty.\n");
         return (false);
     }
 
-    std::ostringstream tMsg;
     aMySampleProbPairs.clear();
-
-    const size_t tNumRandomVariables = aSetRandomVariables.size();
-    for(size_t tRandomVarIndex = 0; tRandomVarIndex < tNumRandomVariables; tRandomVarIndex++)
+    for(auto& tRandomVar : aSetRandomVariables)
     {
-        // pose uncertainty
-        Plato::SromInputs<double> tSromInputs;
-        const Plato::srom::RandomVariable & tMyRandomVar = aSetRandomVariables[tRandomVarIndex];
-        if(Plato::srom::define_distribution(tMyRandomVar, tSromInputs) == false)
+        try
         {
-            tMsg << "Compute Sample Probability Pairs: PROBABILITY DISTIRBUTION WAS NOT DEFINED FOR RANDOM VARIABLE #"
-                << tRandomVarIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
+            auto tSampleProbPairs = Plato::srom::solve_srom_problem(tRandomVar);
+            aMySampleProbPairs.push_back(tSampleProbPairs);
         }
-
-        if(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs) == false)
+        catch(std::exception& tError)
         {
-            tMsg << "Compute Sample Probability Pairs: SET OF INPUT STATISTICS FOR THE SROM PROBLEM IS NOT PROPERLY DEFINED FOR RANDOM VARIABLE #"
-                 << tRandomVarIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
+            std::ostringstream tMsg;
+            tMsg << "Compute Sample Probability Pairs: Sample probability pairs were not computed for random variable with tag '"
+                << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
+                << "' due to the following error: "  << tError.what();
+            THROWERR(tMsg.str().c_str());
         }
-
-        std::vector<Plato::SromOutputs<double>> tSromOutputs;
-        if(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs) == false)
-        {
-            tMsg << "Compute Sample Probability Pairs: STATISTICS FOR RANDOM VARIABLE #"
-                << tRandomVarIndex << " WERE NOT COMPUTED.\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-
-        Plato::srom::SromVariable tMySampleProbPairs;
-        if(Plato::srom::post_process_sample_probability_pairs(tSromOutputs, tMyRandomVar, tMySampleProbPairs) == false)
-        {
-            tMsg << "Compute Sample Probability Pairs: SAMPLE PROBABILITY PAIR POST PROCESSING FAILED FOR RANDOM VARIABLE #"
-                << tRandomVarIndex << ".\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
-        }
-        aMySampleProbPairs.push_back(tMySampleProbPairs);
     }
 
     return (true);

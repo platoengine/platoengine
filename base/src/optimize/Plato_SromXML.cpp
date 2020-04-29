@@ -72,6 +72,8 @@ bool build_load_sroms
 
     for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoads.size(); tLoadIndex++)
     {
+        Plato::srom::set_random_variables_id(tRandomLoads[tLoadIndex].mRandomVars);
+
         std::vector<Plato::srom::SromVariable> tMySampleProbPairs;
         if(Plato::srom::compute_sample_probability_pairs(tRandomLoads[tLoadIndex].mRandomVars, tMySampleProbPairs) == false)
         {

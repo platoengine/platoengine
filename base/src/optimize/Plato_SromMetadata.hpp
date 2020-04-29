@@ -116,6 +116,7 @@ struct Statistics
 struct RandomVariable
 {
 private:
+    int mID = 0;                             /*!< random variable identification number */
     std::string mTag;                    /*!< label, e.g. angle variation */
     std::string mAttribute;              /*!< random variable attribute, e.g. rotation axis */
     Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
@@ -152,6 +153,16 @@ public:
                 THROWERR(tMsg.str().c_str())
             }
         }
+    }
+
+    /******************************************************************************//**
+     * \fn id
+     * \brief Set a random variable identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void id(const int& aID)
+    {
+        mID = aID;
     }
 
     /******************************************************************************//**
@@ -252,6 +263,16 @@ public:
     void statistics(const Plato::srom::Statistics& aStats)
     {
         mStatistics = aStats;
+    }
+
+    /******************************************************************************//**
+     * \fn id
+     * \brief Return random variable identification number.
+     * \return identification number
+    **********************************************************************************/
+    int id() const
+    {
+        return mID;
     }
 
     /******************************************************************************//**
