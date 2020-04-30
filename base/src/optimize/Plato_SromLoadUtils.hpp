@@ -1203,7 +1203,7 @@ inline bool generate_output_random_load_cases
  * \param [in] aLoads  set of loads
  * \param [in] aOutput set of random load cases
 **********************************************************************************/
-bool build_load_sroms
+inline bool build_load_sroms
 (const std::vector<Plato::srom::Load>& aLoads,
  std::vector<Plato::srom::RandomLoadCase>& aOutput)
 {

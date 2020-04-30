@@ -1647,6 +1647,10 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
         }
     }
     EXPECT_NEAR(1.0, tProbSum, tTolerance);
+
+    std::system("rm -f plato_cdf_output.txt");
+    std::system("rm -f plato_srom_diagnostics.txt");
+    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, SROM_ToString)

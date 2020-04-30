@@ -65,7 +65,6 @@
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "SalinasInputDeckWriter.hpp"
 #include "Plato_FreeFunctions.hpp"
-#include "Plato_SromLoadUtils.hpp"
 #include "Plato_SromXML.hpp"
 #include "XMLG_Macros.hpp"
 #include "DefaultInputGenerator.hpp"
