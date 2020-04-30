@@ -49,6 +49,7 @@
 #pragma once
 
 #include <cmath>
+#include <locale>
 #include <sstream>
 #include <iomanip>
 #include <fstream>

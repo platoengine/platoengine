@@ -48,7 +48,6 @@
 
 #include "gtest/gtest.h"
 
-#include <locale>
 #include "Plato_SromMaterialUtils.hpp"
 
 namespace PlatoTestUncertainMaterial
