@@ -67,7 +67,7 @@ class ComplianceMinTOPlatoAnalyzeUncertInputGenerator : public DefaultInputGener
 
 public:
     ComplianceMinTOPlatoAnalyzeUncertInputGenerator(const InputData& aInputData);
-    ~ComplianceMinTOPlatoAnalyzeUncertInputGenerator();
+    virtual ~ComplianceMinTOPlatoAnalyzeUncertInputGenerator();
     virtual bool generateInputFiles();
 
 

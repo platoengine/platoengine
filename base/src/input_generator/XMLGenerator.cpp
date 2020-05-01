@@ -114,51 +114,12 @@ XMLGenerator::~XMLGenerator()
 {
 }
 
-/******************************************************************************/
-bool XMLGenerator::generate()
-/******************************************************************************/
+/******************************************************************************//**
+ * \fn wirteInputFiles
+ * \brief Write input files, i.e. write all the XML files needed by Plato.
+**********************************************************************************/
+void XMLGenerator::wirteInputFiles()
 {
-    /////////////////////////////////////////////////
-    // Parse input and gather various info
-    /////////////////////////////////////////////////
-    
-    if(!parseFile())
-    {
-        std::cout << "Failed to parse input file." << std::endl;
-        return false;
-    }
-
-    if(m_InputData.optimization_type == "shape" && m_InputData.csm_filename.length() > 0)
-    {
-        if(!parseCSMFile())
-        {
-            std::cout << "Failed to parse CSM file" << std::endl;
-            return false;
-        }
-    }
-
-    getUncertaintyFlags();
-
-    if(!runSROMForUncertainVariables())
-    {
-        std::cout << "Failed to expand uncertainties in file generation" << std::endl;
-        return false;
-    }
-
-    // NOTE: modifies objectives to resolves distribution
-    if(!distributeObjectivesForGenerate())
-    {
-        std::cout << "Failed to distribute objectives in file generation" << std::endl;
-        return false;
-    }
-
-    lookForPlatoAnalyzePerformers();
-    
-    ProblemType tProblemType = getProblemType();
-
-    /////////////////////////////////////////////////
-    // Write input files 
-    /////////////////////////////////////////////////
 
     if(m_InputData.input_generator_version == "old")
     {
@@ -167,6 +128,7 @@ bool XMLGenerator::generate()
     }
     else
     {
+        ProblemType tProblemType = this->getProblemType();
         switch(tProblemType)
         {
             case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
@@ -189,6 +151,49 @@ bool XMLGenerator::generate()
             }
         }
     }
+}
+
+/******************************************************************************/
+bool XMLGenerator::generate()
+/******************************************************************************/
+{
+    /////////////////////////////////////////////////
+    // Parse input and gather various info
+    /////////////////////////////////////////////////
+    
+    if(!parseFile())
+    {
+        PRINTERR("Failed to parse input file.")
+        return false;
+    }
+
+    if(m_InputData.optimization_type == "shape" && m_InputData.csm_filename.length() > 0)
+    {
+        if(!parseCSMFile())
+        {
+            PRINTERR("Failed to parse CSM file.")
+            return false;
+        }
+    }
+
+    this->getUncertaintyFlags();
+
+    if(!runSROMForUncertainVariables())
+    {
+        PRINTERR("Failed to expand uncertainties in file generation.")
+        return false;
+    }
+
+    // NOTE: modifies objectives to resolves distribution
+    if(!distributeObjectivesForGenerate())
+    {
+        PRINTERR("Failed to distribute objectives in file generation.")
+        return false;
+    }
+
+    this->lookForPlatoAnalyzePerformers();
+    this->wirteInputFiles();
+
     return true;
 }
 

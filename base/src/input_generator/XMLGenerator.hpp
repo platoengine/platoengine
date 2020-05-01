@@ -155,6 +155,7 @@ private:
     void putLoadInLoadCase(XMLGen::Load& new_load);
     bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
     void createNewLoadCase(XMLGen::Load& new_load);
+    void wirteInputFiles();
 };
 
 }
