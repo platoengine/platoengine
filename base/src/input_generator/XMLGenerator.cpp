@@ -294,7 +294,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         if(tCurObjUncertainties.size() > 0)
         {
             Plato::srom::InputMetaData tInputs;
-            tInputs.usecase("loads");
+            tInputs.usecase("load");
             tInputs.loads(tLoads);
             Plato::srom::OutputMetaData tOutputs;
             Plato::srom::build_sroms(tInputs, tOutputs);

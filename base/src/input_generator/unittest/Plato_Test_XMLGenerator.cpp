@@ -55,10 +55,606 @@
 #include "XML_GoldValues.hpp"
 #include <cmath>
 
+#include <numeric>
+#include "XMLG_Macros.hpp"
+
 const int MAX_CHARS_PER_LINE = 512;
+
+namespace XMLGen
+{
+
+inline bool parse_single_value
+(const std::vector<std::string> &aTokens,
+ const std::vector<std::string> &aInputStrings,
+ std::string &aReturnStringValue)
+{
+    aReturnStringValue = "";
+    if(aInputStrings.size() < 1 || aTokens.size() < 1 || aTokens.size() < aInputStrings.size())
+    {
+        return false;
+    }
+
+    for(auto& tString : aInputStrings)
+    {
+        auto tIndex = &tString - &aInputStrings[0];
+        if(aTokens[tIndex].compare(tString))
+        {
+            return false;
+        }
+    }
+
+    if(aTokens.size() == (aInputStrings.size() + 1))
+    {
+        auto tIndex = aTokens.size() + 1;
+        aReturnStringValue = aTokens[tIndex];
+    }
+
+    return true;
+}
+
+inline std::string to_lower(const std::string &aInput)
+{
+    char tBuffer[500];
+    std::string tOutput;
+    if (aInput.size() > 500)
+    {
+        tOutput = "";
+    }
+    else
+    {
+        for (size_t tIndex = 0; tIndex < aInput.size(); ++tIndex)
+        {
+            tBuffer[tIndex] = tolower(aInput[tIndex]);
+        }
+        tBuffer[aInput.size()] = '\0';
+        tOutput = tBuffer;
+    }
+    return tOutput;
+}
+
+/******************************************************************************/
+inline void to_lower(std::vector<std::string>& aInput)
+/******************************************************************************/
+{
+    for(auto& tToken : aInput)
+    {
+        auto tIndex = &tToken - &aInput[0];
+        aInput[tIndex] = XMLGen::to_lower(tToken);
+    }
+}
+
+inline bool parse_tokens(char *aBuffer, std::vector<std::string> &aTokens)
+{
+    const std::string tDELIMITER = " \t";
+    constexpr int tMAX_TOKENS_PER_LINE = 5000;
+    const char* tToken[tMAX_TOKENS_PER_LINE] = {}; // initialize to 0
+
+    // parse the line
+    tToken[0] = std::strtok(aBuffer, tDELIMITER.c_str()); // first token
+
+    // If there is a comment...
+    if(tToken[0] && std::strlen(tToken[0]) > 1 && tToken[0][0] == '/' && tToken[0][1] == '/')
+    {
+        aTokens.clear();
+        return true;
+    }
+
+    int tN = 0;
+    if (tToken[0]) // zero if line is blank
+    {
+        for (tN = 1; tN < tMAX_TOKENS_PER_LINE; tN++)
+        {
+            tToken[tN] = std::strtok(0, tDELIMITER.c_str()); // subsequent tokens
+            if (!tToken[tN])
+            {
+                break; // no more tokens
+            }
+        }
+    }
+    for(int tIndex=0; tIndex<tN; ++tIndex)
+    {
+        aTokens.push_back(tToken[tIndex]);
+    }
+
+    return true;
+}
+
+inline std::string transform_tag_values(const std::vector<std::string>& aTokens)
+{
+    std::ostringstream tOutput;
+    for(auto& tToken : aTokens)
+    {
+        tOutput << tToken;
+        auto tIndex = &tToken - &aTokens[0];
+        if(tIndex != aTokens.size() - 1)
+        {
+            tOutput << " ";
+        }
+    }
+    return (tOutput.str());
+}
+
+using UseCaseTags = std::map<std::string, std::pair<std::vector<std::string>,std::string>>;
+inline void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags)
+{
+    for (auto &tTag : aTags)
+    {
+        std::vector<size_t> tMatch(tTag.second.first.size());
+        for (auto &tToken : tTag.second.first)
+        {
+            auto tIndex = &tToken - &tTag.second.first[0];
+            tMatch[tIndex] = tToken == aTokens[tIndex] ? 1 : 0;
+        }
+        auto tSum = std::accumulate(tMatch.begin(), tMatch.end(), 0);
+        bool tFoundMatch = tSum == tMatch.size() ? true : false;
+        if (tFoundMatch)
+        {
+            auto tBeginItr = aTokens.begin();
+            auto tBeginIndex = tMatch.size();
+            std::vector<std::string> tTokenList;
+            for (auto tItr = std::next(tBeginItr, tBeginIndex); tItr != aTokens.end(); tItr++)
+            {
+                tTokenList.push_back(tItr.operator*());
+            }
+            tTag.second.second = XMLGen::transform_tag_values(tTokenList);
+        }
+    }
+}
+
+class ParseUncertainty
+{
+private:
+    XMLGen::UseCaseTags mTags;
+    std::vector<XMLGen::Uncertainty> mData;
+
+private:
+    void initialize()
+    {
+        mTags.insert({ "id", { {"id"}, "" } });
+        mTags.insert({ "tag", { {"tag"}, "" } });
+        mTags.insert({ "mean", { {"mean"}, "" } });
+        mTags.insert({ "category", { {"category"}, "" } });
+        mTags.insert({ "attribute", { {"attribute"}, "" } });
+        mTags.insert({ "distribution", { {"distribution"}, "" } });
+        mTags.insert({ "num samples", { {"num", "samples"}, "" } });
+        mTags.insert({ "lower bound", { {"lower", "bound"}, "" } });
+        mTags.insert({ "upper bound", { {"upper", "bound"}, "" } });
+        mTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
+    }
+
+    void parseMetadata(std::istream& aInputFile)
+    {
+        char tBuffer[MAX_CHARS_PER_LINE];
+        // found an uncertainty. parse it.
+        while (!aInputFile.eof())
+        {
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer, MAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer, tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            if (XMLGen::parse_single_value(tTokens, std::vector<std::string> { "end", "uncertainty" }, tTag))
+            {
+                break;
+            }
+
+            XMLGen::parse_tag_values(tTokens, mTags);
+        }
+    }
+
+    void setMetadata(XMLGen::Uncertainty& aMetadata)
+    {
+        aMetadata.type = mTags.find("tag")->second.second;
+        aMetadata.axis = mTags.find("attribute")->second.second;
+        aMetadata.id = mTags.find("id")->second.second;
+        aMetadata.mean = mTags.find("mean")->second.second;
+        aMetadata.lower = mTags.find("lower bound")->second.second;
+        aMetadata.upper = mTags.find("upper bound")->second.second;
+        aMetadata.num_samples = mTags.find("num samples")->second.second;
+        aMetadata.distribution = mTags.find("distribution")->second.second;
+        aMetadata.standard_deviation = mTags.find("standard deviation")->second.second;
+
+        auto tItr = mTags.find("category");
+        if(mTags.find("category") != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.variable_type = tItr->second.second;
+        }
+    }
+
+    void checkCategory(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.variable_type.empty())
+        {
+            THROWERR("Parse Uncertainty: 'category' keyword is empty.")
+        }
+
+        std::vector<std::string> tValidTags = {"load", "material"};
+        if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.variable_type) == tValidTags.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Uncertainty: 'category' keyword '" << aMetadata.variable_type << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+
+    void checkTag(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.type.empty())
+        {
+            THROWERR("Parse Uncertainty: 'tag' keyword is empty.")
+        }
+
+        std::vector<std::string> tValidTags = {"angle variation", "poissons ratio", "elastic modulus", "yield stress"};
+        if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.type) == tValidTags.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Uncertainty: 'tag' keyword '" << aMetadata.type << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+
+    void checkAttribute(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.axis.empty())
+        {
+            THROWERR("Parse Uncertainty: 'attribute' keyword is empty.")
+        }
+
+        std::vector<std::string> tValidTags = {"x", "y", "z", "homogeneous"};
+        if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.axis) == tValidTags.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Uncertainty: 'attribute' keyword '" << aMetadata.axis << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+
+    void checkDistribution(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.axis.empty())
+        {
+            THROWERR("Parse Uncertainty: 'distribution' keyword is empty.")
+        }
+
+        std::vector<std::string> tValidTags = {"normal", "beta", "uniform"};
+        if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.distribution) == tValidTags.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Uncertainty: 'distribution' keyword '" << aMetadata.distribution << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+
+    void checkMean(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.mean.empty())
+        {
+            THROWERR("Parse Uncertainty: 'mean' keyword is empty.")
+        }
+    }
+
+    void checkID(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.id.empty())
+        {
+            THROWERR("Parse Uncertainty: 'id' keyword is empty.")
+        }
+    }
+
+    void checkNumSamples(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.num_samples.empty())
+        {
+            THROWERR("Parse Uncertainty: 'num samples' keyword is empty.")
+        }
+    }
+
+    void checkLowerBound(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.lower.empty())
+        {
+            THROWERR("Parse Uncertainty: 'lower bound' keyword is empty.")
+        }
+    }
+
+    void checkUpperBound(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.upper.empty())
+        {
+            THROWERR("Parse Uncertainty: 'upper bound' keyword is empty.")
+        }
+    }
+
+    void checkStandardDeviation(const XMLGen::Uncertainty& aMetadata)
+    {
+        if(aMetadata.standard_deviation.empty())
+        {
+            THROWERR("Parse Uncertainty: 'standard deviation' keyword is empty.")
+        }
+    }
+
+    void checkBeta(const XMLGen::Uncertainty& aMetadata)
+    {
+        this->checkMean(aMetadata);
+        this->checkLowerBound(aMetadata);
+        this->checkUpperBound(aMetadata);
+        this->checkNumSamples(aMetadata);
+        this->checkStandardDeviation(aMetadata);
+    }
+
+    void checkNormal(const XMLGen::Uncertainty& aMetadata)
+    {
+        this->checkMean(aMetadata);
+        this->checkNumSamples(aMetadata);
+        this->checkStandardDeviation(aMetadata);
+    }
+
+    void checkUniform(const XMLGen::Uncertainty& aMetadata)
+    {
+        this->checkNumSamples(aMetadata);
+        this->checkLowerBound(aMetadata);
+        this->checkUpperBound(aMetadata);
+    }
+
+    void checkStatistics(const XMLGen::Uncertainty& aMetadata)
+    {
+        this->checkDistribution(aMetadata);
+        if(aMetadata.distribution == "beta")
+        {
+            this->checkBeta(aMetadata);
+        }
+        else if(aMetadata.distribution == "normal")
+        {
+            this->checkNormal(aMetadata);
+        }
+        else if(aMetadata.distribution == "uniform")
+        {
+            this->checkUniform(aMetadata);
+        }
+    }
+
+    void checkMetadata(const XMLGen::Uncertainty& aMetadata)
+    {
+        this->checkID(aMetadata);
+        this->checkTag(aMetadata);
+        this->checkCategory(aMetadata);
+        this->checkAttribute(aMetadata);
+        this->checkStatistics(aMetadata);
+    }
+
+public:
+    ParseUncertainty() :
+        mTags(),
+        mData()
+    {
+        this->initialize();
+    }
+
+    std::vector<XMLGen::Uncertainty> data() const
+    {
+        return mData;
+    }
+
+    void parse(std::istream& aInputFile)
+    {
+        if(mTags.empty())
+        {
+            THROWERR("Parse Uncertainty: List of valid keywords is empty.")
+        }
+
+        mData.clear();
+        char tBuffer[MAX_CHARS_PER_LINE];
+        while (!aInputFile.eof())
+        {
+            // read an entire line into memory
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer, MAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer, tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            std::vector<std::string> tMatchTokens;
+            if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","uncertainty"}, tTag))
+            {
+                XMLGen::Uncertainty tMetadata;
+                this->parseMetadata(aInputFile);
+                this->setMetadata(tMetadata);
+                this->checkMetadata(tMetadata);
+                mData.push_back(tMetadata);
+            }
+        }
+    }
+};
+
+}
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ParseTagValues)
+{
+    XMLGen::UseCaseTags tTags;
+    tTags.insert({ "tag", { {"tag"}, "" } });
+    tTags.insert({ "attribute", { {"attribute"}, "" } });
+    tTags.insert({ "load", { {"load"}, "" } });
+    tTags.insert({ "mean", { {"mean"}, "" } });
+    tTags.insert({ "distribution", { {"distribution"}, "" } });
+    tTags.insert({ "num samples", { {"num", "samples"}, "" } });
+    tTags.insert({ "lower bound", { {"lower", "bound"}, "" } });
+    tTags.insert({ "upper bound", { {"upper", "bound"}, "" } });
+    tTags.insert({ "category", { {"category"}, "" } });
+    tTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
+
+    XMLGen::parse_tag_values(std::vector<std::string>{"tag", "angle", "variation"}, tTags);
+    ASSERT_STREQ("angle variation", tTags.find("tag")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"attribute", "x"}, tTags);
+    ASSERT_STREQ("x", tTags.find("attribute")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"load", "10"}, tTags);
+    ASSERT_STREQ("10", tTags.find("load")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"mean", "1"}, tTags);
+    ASSERT_STREQ("1", tTags.find("mean")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"distribution", "beta"}, tTags);
+    ASSERT_STREQ("beta", tTags.find("distribution")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"num", "samples", "4"}, tTags);
+    ASSERT_STREQ("4", tTags.find("num samples")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"lower", "bound", "0.5"}, tTags);
+    ASSERT_STREQ("0.5", tTags.find("lower bound")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"upper", "bound", "2"}, tTags);
+    ASSERT_STREQ("2", tTags.find("upper bound")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"category", "load"}, tTags);
+    ASSERT_STREQ("load", tTags.find("category")->second.second.c_str());
+    XMLGen::parse_tag_values(std::vector<std::string>{"standard", "deviation", "0.2"}, tTags);
+    ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.second.c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    tag angle variation\n"
+        "    id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    tUncertainty.parse(tInputs);
+
+    auto tMetadata = tUncertainty.data();
+    ASSERT_STREQ("10", tMetadata[0].id.c_str());
+    ASSERT_STREQ("x", tMetadata[0].axis.c_str());
+    ASSERT_STREQ("0.0", tMetadata[0].mean.c_str());
+    ASSERT_STREQ("45.0", tMetadata[0].upper.c_str());
+    ASSERT_STREQ("-45.0", tMetadata[0].lower.c_str());
+    ASSERT_STREQ("2", tMetadata[0].num_samples.c_str());
+    ASSERT_STREQ("beta", tMetadata[0].distribution.c_str());
+    ASSERT_STREQ("load", tMetadata[0].variable_type.c_str());
+    ASSERT_STREQ("angle variation", tMetadata[0].type.c_str());
+    ASSERT_STREQ("22.5", tMetadata[0].standard_deviation.c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    tag angle variation\n"
+        "    id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin uncertainty\n"
+        "    category material\n"
+        "    id 1\n"
+        "    tag poissons ratio\n"
+        "    attribute homogeneous\n"
+        "    distribution beta\n"
+        "    mean 0.28\n"
+        "    upper bound 0.4\n"
+        "    lower bound 0.2\n"
+        "    standard deviation 0.05\n"
+        "    num samples 3\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    tUncertainty.parse(tInputs);
+
+    std::vector<std::string> tGoldID = {"10", "1"};
+    std::vector<std::string> tGoldMean = {"0.0", "0.28"};
+    std::vector<std::string> tGoldUpper = {"45.0", "0.4"};
+    std::vector<std::string> tGoldNumSamples = {"2", "3"};
+    std::vector<std::string> tGoldLower = {"-45.0", "0.2"};
+    std::vector<std::string> tGoldStdDev = {"22.5", "0.05"};
+    std::vector<std::string> tGoldCategory = {"load", "material"};
+    std::vector<std::string> tGoldDistribution = {"beta", "beta"};
+    std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
+    std::vector<std::string> tGoldTag = {"angle variation", "poissons ratio"};
+    auto tMetadata = tUncertainty.data();
+    for (auto& tVar : tMetadata)
+    {
+        auto tIndex = &tVar - &tMetadata[0];
+        ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id.c_str());
+        ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean.c_str());
+        ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper.c_str());
+        ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower.c_str());
+        ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.axis.c_str());
+        ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.variable_type.c_str());
+        ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.num_samples.c_str());
+        ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.standard_deviation.c_str());
+        ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution.c_str());
+    }
+}
+
 TEST(PlatoTestXMLGenerator, parseSingleValue)
 {
     XMLGenerator_UnitTester tester;

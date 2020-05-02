@@ -30,7 +30,7 @@ struct UncertaintyMetaData
 
 struct Uncertainty
 {
-    std::string variable_type; // Load or material
+    std::string variable_type = "load"; // Load or material
     std::string type; // currently always "angle variation"
     std::string id; // which random variable to vary
     std::string axis; // x, y, z
