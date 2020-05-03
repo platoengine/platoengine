@@ -48,6 +48,7 @@
 
 #include "gtest/gtest.h"
 
+#include "Plato_SromLoadUtilsXML.hpp"
 #include "Plato_SromLoadUtils.hpp"
 #include "Plato_SromSolve.hpp"
 #include "Plato_SromXML.hpp"

@@ -57,6 +57,10 @@
 #include <utility>
 #include <string>
 #include <map>
+
+#include "Plato_SromXML.hpp"
+#include "Plato_SromLoadUtilsXML.hpp"
+
 #include "XMLGenerator.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
@@ -65,7 +69,7 @@
 #include "PlatoAnalyzeInputDeckWriter.hpp"
 #include "SalinasInputDeckWriter.hpp"
 #include "Plato_FreeFunctions.hpp"
-#include "Plato_SromXML.hpp"
+
 #include "XMLG_Macros.hpp"
 #include "DefaultInputGenerator.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
@@ -247,7 +251,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         std::vector<double> tLoadCaseProbabilities;
         if(m_InputData.objectives.size() > 1)
         {
-          std::cout << "ERROR: Only one objective is supported for uncertain loads" << std::endl;
+          std::cout << "ERROR: Only one objective is supported for optimization under uncertainty." << std::endl;
           return false;
         }
         if(m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
@@ -261,7 +265,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         }
         if(m_InputData.objectives[0].weight != "1")
         {
-          std::cout << "Objective weight must be equal to 1 for uncertain loads" << std::endl;
+          std::cout << "Objective weight must be equal to 1 for optimization under uncertainty." << std::endl;
         }
 
         std::vector<XMLGen::LoadCase> tCurObjLoadCases;

@@ -49,7 +49,10 @@
 #pragma once
 
 #include <cmath>
+#include <cfloat>
+#include <vector>
 #include <locale>
+#include <utility>
 #include <sstream>
 #include <iomanip>
 #include <fstream>

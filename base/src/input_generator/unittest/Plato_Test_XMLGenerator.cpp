@@ -210,9 +210,10 @@ private:
 private:
     void initialize()
     {
-        mTags.insert({ "id", { {"id"}, "" } });
         mTags.insert({ "tag", { {"tag"}, "" } });
         mTags.insert({ "mean", { {"mean"}, "" } });
+        mTags.insert({ "load id", { {"load","id"}, "" } });
+        mTags.insert({ "material id", { {"material","id"}, "" } });
         mTags.insert({ "category", { {"category"}, "" } });
         mTags.insert({ "attribute", { {"attribute"}, "" } });
         mTags.insert({ "distribution", { {"distribution"}, "" } });
@@ -243,23 +244,38 @@ private:
         }
     }
 
+    void setCategory(XMLGen::Uncertainty& aMetadata)
+    {
+        auto tItr = mTags.find("category");
+        if(tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.variable_type = tItr->second.second;
+        }
+    }
+
+    void setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
+    {
+        aMetadata.id = aMetadata.variable_type == "load"
+            ? mTags.find("load id")->second.second : mTags.find("material id")->second.second;
+        if(aMetadata.id.empty())
+        {
+            THROWERR("Parse Uncertainty: Failed to parse identification number.")
+        }
+
+    }
+
     void setMetadata(XMLGen::Uncertainty& aMetadata)
     {
+        this->setCategory(aMetadata);
+        this->setIdentificationNumber(aMetadata);
         aMetadata.type = mTags.find("tag")->second.second;
-        aMetadata.axis = mTags.find("attribute")->second.second;
-        aMetadata.id = mTags.find("id")->second.second;
         aMetadata.mean = mTags.find("mean")->second.second;
+        aMetadata.axis = mTags.find("attribute")->second.second;
         aMetadata.lower = mTags.find("lower bound")->second.second;
         aMetadata.upper = mTags.find("upper bound")->second.second;
         aMetadata.num_samples = mTags.find("num samples")->second.second;
         aMetadata.distribution = mTags.find("distribution")->second.second;
         aMetadata.standard_deviation = mTags.find("standard deviation")->second.second;
-
-        auto tItr = mTags.find("category");
-        if(mTags.find("category") != mTags.end() && !tItr->second.second.empty())
-        {
-            aMetadata.variable_type = tItr->second.second;
-        }
     }
 
     void checkCategory(const XMLGen::Uncertainty& aMetadata)
@@ -466,6 +482,7 @@ public:
         }
     }
 };
+// class ParseUncertainty
 
 }
 
@@ -539,7 +556,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
         "end block\n"
         "begin uncertainty\n"
         "    tag angle variation\n"
-        "    id 10\n"
+        "    load id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 0.0\n"
@@ -599,8 +616,8 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
         "   material 1\n"
         "end block\n"
         "begin uncertainty\n"
+        "    load id 10\n"
         "    tag angle variation\n"
-        "    id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 0.0\n"
@@ -611,7 +628,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
         "end uncertainty\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    id 1\n"
+        "    material id 1\n"
         "    tag poissons ratio\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"

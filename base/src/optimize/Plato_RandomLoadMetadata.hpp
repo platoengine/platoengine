@@ -57,6 +57,35 @@ namespace srom
 {
 
 /******************************************************************************//**
+ * \struct VariableType
+ * \brief Defines random variable type.
+**********************************************************************************/
+struct VariableType
+{
+
+    enum type_t
+    {
+        LOAD, MATERIAL, UNDEFINED
+    };
+
+};
+// struct VariableType
+
+/******************************************************************************//**
+ * \struct RotationAxis
+ * \brief Defines load rotation axis
+**********************************************************************************/
+struct RotationAxis
+{
+
+    enum type_t
+    {
+        x, y, z
+    };
+};
+// struct RotationAxis
+
+/******************************************************************************//**
  * \struct Load
  * \brief Load metadata for Stochastic Reduced Order Model (SROM) problem.
 **********************************************************************************/
