@@ -54,6 +54,8 @@
 #include "Plato_RandomLoadMetadata.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 #include "Plato_UniqueCounter.hpp"
+#include "Plato_FreeFunctions.hpp"
+#include "Plato_SromXML.hpp"
 #include "Plato_Macros.hpp"
 
 namespace Plato
@@ -347,7 +349,7 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
 // function create_deterministic_load_variables
 
 /******************************************************************************//**
- * \brief Generate array of deterministic and random loads in the format expected
+ * \brief Generate array of deterministic and random loads in the format expected \n
  * by the stochastic reduced order model application programming interface.
  * \param [in] aInputLoadCases set of load cases created by the XML generator
  * \param [in] aUncertainties set of random variables created by the XML generator
@@ -372,6 +374,80 @@ inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInpu
     return (true);
 }
 // function generate_srom_load_inputs
+
+/******************************************************************************//**
+ * \fn preprocess_srom_problem_load_inputs
+ * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
+ * \param [in/out] aInputMetadata Plato problem input metadata
+ * \param [in/out] aLoadCases     set of load case metadata
+ * \param [in/out] aUncertainties set of uncertainty metadata
+**********************************************************************************/
+inline void preprocess_srom_problem_load_inputs
+(XMLGen::InputData& aInputMetadata,
+ std::vector<XMLGen::LoadCase>& aLoadCases,
+ std::vector<XMLGen::Uncertainty>& aUncertainties)
+{
+    XMLGen::Objective &tCurObj = aInputMetadata.objectives[0];
+    for (size_t tLoadCaseID = 0; tLoadCaseID < tCurObj.load_case_ids.size(); ++tLoadCaseID)
+    {
+        const std::string &tCurLoadCaseID = tCurObj.load_case_ids[tLoadCaseID];
+        for (size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputMetadata.load_cases.size(); ++tLoadCaseIndex)
+        {
+            if (aInputMetadata.load_cases[tLoadCaseIndex].id == tCurLoadCaseID)
+            {
+                aLoadCases.push_back(aInputMetadata.load_cases[tLoadCaseIndex]);
+                tLoadCaseIndex = aInputMetadata.load_cases.size();
+            }
+        }
+        for (size_t tUncertaintyIndex = 0; tUncertaintyIndex < aInputMetadata.uncertainties.size(); ++tUncertaintyIndex)
+        {
+            if (aInputMetadata.uncertainties[tUncertaintyIndex].id == tCurLoadCaseID)
+            {
+                aUncertainties.push_back(aInputMetadata.uncertainties[tUncertaintyIndex]);
+                aInputMetadata.mObjectiveLoadCaseIndexToUncertaintyIndex[tLoadCaseID] = tUncertaintyIndex;
+            }
+        }
+    }
+}
+// function preprocess_srom_problem_load_inputs
+
+inline void postprocess_srom_problem_load_outputs
+(const Plato::srom::OutputMetaData& aOutputs,
+ XMLGen::InputData& aInputData,
+ std::vector<XMLGen::LoadCase>& aNewLoadCases,
+ std::vector<double>& aLoadCaseProbabilities)
+{
+    int tStartingLoadCaseID = aNewLoadCases.size() + 1;
+    XMLGen::Objective &tCurObj = aInputData.objectives[0];
+    tCurObj.load_case_ids.clear();
+    tCurObj.load_case_weights.clear();
+    for (size_t tLoadCaseIndex = 0; tLoadCaseIndex < aOutputs.mLoadCases.size(); ++tLoadCaseIndex)
+    {
+        XMLGen::LoadCase tNewLoadCase;
+        auto tLoadCaseID = Plato::to_string(tStartingLoadCaseID);
+        tNewLoadCase.id = tLoadCaseID;
+        for (size_t aLoadIndex = 0; aLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].mLoads.size(); ++aLoadIndex)
+        {
+            XMLGen::Load tNewLoad;
+            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadType;
+            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppType;
+            tNewLoad.app_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppID);
+            tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppName;
+            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadValues.size(); ++tDim)
+            {
+                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadValues[tDim]));
+            }
+            tNewLoad.load_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadID);
+            tNewLoadCase.loads.push_back(tNewLoad);
+        }
+        aNewLoadCases.push_back(tNewLoadCase);
+        aLoadCaseProbabilities.push_back(aOutputs.mLoadCases[tLoadCaseIndex].mProbability);
+        tCurObj.load_case_ids.push_back(tLoadCaseID);
+        tCurObj.load_case_weights.push_back("1");
+        tStartingLoadCaseID++;
+    }
+}
+// function postprocess_srom_problem_load_outputs
 
 }
 // namespace srom

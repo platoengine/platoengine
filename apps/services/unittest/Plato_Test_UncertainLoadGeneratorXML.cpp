@@ -2197,13 +2197,13 @@ TEST(PlatoTest, generate_output_random_load_cases)
             {0.160857230304970, 0.118639480992335, 0.0847557373684797,  0.0867412302322639, 0.0639755795613402, 0.0457039880311642,
              0.101584192161421, 0.0749229351531628, 0.0535247504591439, 0.0923587620945064, 0.0681187633233061, 0.0486638677597447};
     std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
-    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12};
+    std::vector<std::string> tGoldLoadCaseIDs = {"1", "2", "3", "4", "5", "6" , "7", "8", "9", "10", "11", "12"};
 
     const double tTolerance = 1e-6;
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tSetRandomLoadCases.size(); tLoadCaseIndex++)
     {
         const Plato::srom::RandomLoadCase& tLoadCase = tSetRandomLoadCases[tLoadCaseIndex];
-        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_STREQ(tGoldLoadCaseIDs[tLoadCaseIndex].c_str(), tLoadCase.mCaseID.c_str());
         ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
         const size_t tNumLoads = tLoadCase.mLoads.size();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
@@ -2308,7 +2308,8 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
     ASSERT_EQ(16u, tOutputs.size());
 
     // SET GOLD VALUES
-    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    std::vector<std::string> tGoldLoadCaseIDs =
+        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
     std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
     { { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
       { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
@@ -2357,7 +2358,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
     {
         const Plato::srom::RandomLoadCase& tLoadCase = tOutputs[tLoadCaseIndex];
         tSum += tLoadCase.mProbability;
-        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_STREQ(tGoldLoadCaseIDs[tLoadCaseIndex].c_str(), tLoadCase.mCaseID.c_str());
         ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
         const size_t tNumLoads = tLoadCase.mLoads.size();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
@@ -2480,7 +2481,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
     ASSERT_EQ(16u, tOutput.size());
 
     // SET GOLD VALUES
-    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    std::vector<std::string> tGoldLoadCaseIDs = {"1", "2", "3", "4", "5", "6" , "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
     std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
     { { {1.571521544770223, -0.6912988161476783, -0.228967205328253}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
       { {1.243876404316842, -0.6912988161476783, -0.987358819060539}, {1.45459857379489, -0.6912988161476783, -0.6373766044550824}, {1, 2, 3} },
@@ -2529,7 +2530,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
     {
         const Plato::srom::RandomLoadCase& tLoadCase = tOutput[tLoadCaseIndex];
         tSum += tLoadCase.mProbability;
-        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_STREQ(tGoldLoadCaseIDs[tLoadCaseIndex].c_str(), tLoadCase.mCaseID.c_str());
         ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
         const size_t tNumLoads = tLoadCase.mLoads.size();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
@@ -2605,7 +2606,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     ASSERT_EQ(4u, tOutputs.size());
 
     // SET GOLD VALUES
-    std::vector<int> tGoldLoadCaseIDs = {1, 2, 3, 4};
+    std::vector<std::string> tGoldLoadCaseIDs = {"1", "2", "3", "4"};
     std::vector<std::vector<std::vector<double>>> tGoldLoadCases =
     { { {1.0, -0.691298816147678, 1.2337365791743464}, {1.0, -0.99362231248073574, 1.006337269577369} },
       { {1.0, -1.217465750016941, 0.7195673335662809}, {1.0, -0.99362231248073574, 1.006337269577369} },
@@ -2631,7 +2632,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     {
         const Plato::srom::RandomLoadCase& tLoadCase = tOutputs[tLoadCaseIndex];
         tSum += tLoadCase.mProbability;
-        ASSERT_EQ(tGoldLoadCaseIDs[tLoadCaseIndex], tLoadCase.mLoadCaseID);
+        ASSERT_STREQ(tGoldLoadCaseIDs[tLoadCaseIndex].c_str(), tLoadCase.mCaseID.c_str());
         ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.mProbability, tTolerance);
         const size_t tNumLoads = tLoadCase.mLoads.size();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)

@@ -76,7 +76,7 @@ struct InputMetaData
 {
 private:
     /*!< defines non-deterministic use case: 1) load, 2) material, and 3) mix (load and material) */
-    std::string mUseCase;
+    std::string mUseCase = "load";
 
     std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
     std::vector<Plato::srom::Material> mMaterials; /*!< set of materials */

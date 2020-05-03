@@ -784,7 +784,7 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
     {
         Plato::srom::RandomLoadCase& tMyLoadCase = aSetLoadCases[tLoadCaseIndex];
-        tMyLoadCase.mLoadCaseID = tLoadCaseCounter.assignNextUnique();
+        tMyLoadCase.mCaseID = std::to_string(tLoadCaseCounter.assignNextUnique());
         for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.mLoads.size(); tLoadIndex++)
         {
             tMyLoadCase.mLoads[tLoadIndex].mLoadID = tLoadCounter.assignNextUnique();

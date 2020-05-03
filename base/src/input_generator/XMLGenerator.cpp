@@ -247,100 +247,54 @@ bool XMLGenerator::runSROMForUncertainVariables()
 {
     if(m_InputData.uncertainties.size() > 0)
     {
-        std::vector<XMLGen::LoadCase> tNewLoadCases;
-        std::vector<double> tLoadCaseProbabilities;
-        if(m_InputData.objectives.size() > 1)
+        if (m_InputData.objectives.size() > 1)
         {
-          std::cout << "ERROR: Only one objective is supported for optimization under uncertainty." << std::endl;
-          return false;
-        }
-        if(m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
-        {
-          if(m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].num_samples)
-          {
-            std::cout << "Number of processors must be equal to number of samples "
-                      << "with legacy plato analyze uncerainty workflow" << std::endl;
+            std::cout << "ERROR: Only one objective is supported for optimization under uncertainty problem." << std::endl;
             return false;
-          }
         }
-        if(m_InputData.objectives[0].weight != "1")
+        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
         {
-          std::cout << "Objective weight must be equal to 1 for optimization under uncertainty." << std::endl;
+            if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].num_samples)
+            {
+                std::cout << "Number of processors must be equal to number of samples " << "with legacy plato analyze uncerainty workflow" << std::endl;
+                return false;
+            }
+        }
+        if (m_InputData.objectives[0].weight != "1")
+        {
+            std::cout << "Objective weight must be equal to 1 for optimization under uncertainty problem." << std::endl;
+            return false;
         }
 
         std::vector<XMLGen::LoadCase> tCurObjLoadCases;
         std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
-        XMLGen::Objective &tCurObj = m_InputData.objectives[0];
-        for(size_t j=0; j<tCurObj.load_case_ids.size(); ++j)
-        {
-            const std::string &tCurID = tCurObj.load_case_ids[j];
-            for(size_t k=0; k<m_InputData.load_cases.size(); ++k)
-            {
-                if(m_InputData.load_cases[k].id == tCurID)
-                {
-                    tCurObjLoadCases.push_back(m_InputData.load_cases[k]);
-                    k=m_InputData.load_cases.size();
-                }
-            }
-            for(size_t k=0; k<m_InputData.uncertainties.size(); ++k)
-            {
-                if(m_InputData.uncertainties[k].id == tCurID)
-                {
-                  tCurObjUncertainties.push_back(m_InputData.uncertainties[k]);
-                  m_InputData.mObjectiveLoadCaseIndexToUncertaintyIndex[j] = k;
-                }
-            }
-        }
+        Plato::srom::preprocess_srom_problem_load_inputs(m_InputData, tCurObjLoadCases, tCurObjUncertainties);
 
         std::vector<Plato::srom::Load> tLoads;
         Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
 
-        if(tCurObjUncertainties.size() > 0)
-        {
-            Plato::srom::InputMetaData tInputs;
-            tInputs.usecase("load");
-            tInputs.loads(tLoads);
-            Plato::srom::OutputMetaData tOutputs;
-            Plato::srom::build_sroms(tInputs, tOutputs);
-
-            int tStartingLoadCaseID = tNewLoadCases.size() + 1;
-            tCurObj.load_case_ids.clear();
-            tCurObj.load_case_weights.clear();
-            for(size_t j=0; j<tOutputs.mLoadCases.size(); ++j)
-            {
-                XMLGen::LoadCase tNewLoadCase;
-                tNewLoadCase.id = Plato::to_string(tStartingLoadCaseID);
-                for(size_t k=0; k<tOutputs.mLoadCases[j].mLoads.size(); ++k)
-                {
-                    XMLGen::Load tNewLoad;
-                    tNewLoad.type = tOutputs.mLoadCases[j].mLoads[k].mLoadType;
-                    tNewLoad.app_type = tOutputs.mLoadCases[j].mLoads[k].mAppType;
-                    tNewLoad.app_id = Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mAppID);
-                    tNewLoad.app_name = tOutputs.mLoadCases[j].mLoads[k].mAppName;
-                    for(size_t h=0; h<tOutputs.mLoadCases[j].mLoads[k].mLoadValues.size(); ++h)
-                        tNewLoad.values.push_back(Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadValues[h]));
-                    tNewLoad.load_id = Plato::to_string(tOutputs.mLoadCases[j].mLoads[k].mLoadID);
-                    tNewLoadCase.loads.push_back(tNewLoad);
-                }
-                tNewLoadCases.push_back(tNewLoadCase);
-                tLoadCaseProbabilities.push_back(tOutputs.mLoadCases[j].mProbability);
-                tCurObj.load_case_ids.push_back(Plato::to_string(tStartingLoadCaseID));
-                tCurObj.load_case_weights.push_back("1");
-                tStartingLoadCaseID++;
-            }
-        }
-        else
+        if(tCurObjUncertainties.size() <= 0)
         {
             std::cout << "Objective has no associated uncertainty" << std::endl;
             return false;
         }
 
+        Plato::srom::InputMetaData tSromInputs;
+        tSromInputs.loads(tLoads);
+        Plato::srom::OutputMetaData tSromOutputs;
+        Plato::srom::build_sroms(tSromInputs, tSromOutputs);
+
+        std::vector<XMLGen::LoadCase> tNewLoadCases;
+        std::vector<double> tLoadCaseProbabilities;
+        Plato::srom::postprocess_srom_problem_load_outputs(tSromOutputs, m_InputData, tNewLoadCases, tLoadCaseProbabilities);
         m_InputData.load_cases = tNewLoadCases;
         m_InputData.load_case_probabilities = tLoadCaseProbabilities;
-        if(!generateUncertaintyMetaData())
-          return false;
-    }
 
+        if (!generateUncertaintyMetaData())
+        {
+            return false;
+        }
+    }
 
     return true;
 }

@@ -4019,7 +4019,6 @@ TEST(PlatoTestXMLGenerator,uncertainty_sierra)
     {
       XMLGen::Load load = loads[j];
       EXPECT_EQ(load.type, "traction");
-      std::vector<std::string> values = load.values;
       EXPECT_EQ(load.values, gold_values[loads.size()*i+j]);
     }
   }

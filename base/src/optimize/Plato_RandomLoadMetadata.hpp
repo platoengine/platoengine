@@ -134,7 +134,7 @@ struct RandomLoad
 **********************************************************************************/
 struct RandomLoadCase
 {
-    int mLoadCaseID; /*!< random load case global identification number */
+    std::string mCaseID; /*!< random load case global identification number */
     double mProbability; /*!< probability associated with this random load case */
     std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 };
