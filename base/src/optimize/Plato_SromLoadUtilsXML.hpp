@@ -429,8 +429,8 @@ inline void postprocess_srom_problem_load_outputs
         for (size_t aLoadIndex = 0; aLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].numLoads(); ++aLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadType;
-            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppType;
+            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].loadType(aLoadIndex);
+            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].applicationType(aLoadIndex);
             tNewLoad.app_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppID);
             tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppName;
             for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadValues.size(); ++tDim)

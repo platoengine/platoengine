@@ -187,6 +187,24 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return random load type, e.g. pressure, traction, etc.
+     * \return [in] aLoadIndex random load index
+    **********************************************************************************/
+    std::string loadType(const size_t& aLoadIndex) const
+    {
+        return (mLoads[aLoadIndex].mLoadType);
+    }
+
+    /******************************************************************************//**
+     * \brief Return random load application type, e.g. side set, node set, etc.
+     * \return [in] aLoadIndex random load index
+    **********************************************************************************/
+    std::string applicationType(const size_t& aLoadIndex) const
+    {
+        return (mLoads[aLoadIndex].mAppType);
+    }
+
+    /******************************************************************************//**
      * \brief Append random load to random load case.
      * \param [in] aLoad random load
     **********************************************************************************/

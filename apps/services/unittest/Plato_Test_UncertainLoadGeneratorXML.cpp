@@ -1980,8 +1980,8 @@ TEST(PlatoTest, append_deterministic_loads)
         ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[0], tTolerance);
         ASSERT_NEAR(2.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[1], tTolerance);
         ASSERT_NEAR(3.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[2], tTolerance);
-        ASSERT_STREQ(tLoadDet1.mAppType.c_str(), tRandomLoadCases[tLoadCaseIndex].mLoads[1].mAppType.c_str());
-        ASSERT_STREQ(tLoadDet1.mLoadType.c_str(), tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadType.c_str());
+        ASSERT_STREQ(tLoadDet1.mAppType.c_str(), tRandomLoadCases[tLoadCaseIndex].applicationType(1).c_str());
+        ASSERT_STREQ(tLoadDet1.mLoadType.c_str(), tRandomLoadCases[tLoadCaseIndex].loadType(1).c_str());
     }
 }
 
@@ -2366,8 +2366,8 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
-            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
-            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
+            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
@@ -2538,8 +2538,8 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
-            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
-            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
+            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
@@ -2640,8 +2640,8 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
             ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
-            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mAppType.c_str());
-            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.mLoads[tLoadIndex].mLoadType.c_str());
+            ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
             EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.mLoads[tLoadIndex].mLoadValues[1], tTolerance);
             EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.mLoads[tLoadIndex].mLoadValues[2], tTolerance);
