@@ -518,7 +518,7 @@ inline bool update_initial_random_load_case(const std::vector<Plato::srom::Rando
         Plato::srom::RandomLoadCase tNewRandomLoadCase;
         const Plato::srom::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tLoadIndex];
         tNewRandomLoadCase.mLoads.push_back(tMyNewRandomLoad);
-        tNewRandomLoadCase.mProbability = tMyNewRandomLoad.mProbability;
+        tNewRandomLoadCase.probability(tMyNewRandomLoad.mProbability);
         tNewSetRandomLoadCase.push_back(tNewRandomLoadCase);
     } // index over new random loads
 
@@ -546,7 +546,8 @@ inline bool update_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
         {
             tTempRandomLoadCases[tOldLoadCaseIndex].mLoads.push_back(tMyNewRandomLoad);
             Plato::srom::RandomLoadCase& tMyTempRandomLoadCase = tTempRandomLoadCases[tOldLoadCaseIndex];
-            tMyTempRandomLoadCase.mProbability = tMyTempRandomLoadCase.mProbability * tMyNewRandomLoad.mProbability;
+            auto tProbability = tMyTempRandomLoadCase.probability() * tMyNewRandomLoad.mProbability;
+            tMyTempRandomLoadCase.probability(tProbability);
             tNewSetRandomLoadCase.push_back(tMyTempRandomLoadCase);
         } // index over old random load cases
     } // index over new random loads
@@ -784,7 +785,7 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
     {
         Plato::srom::RandomLoadCase& tMyLoadCase = aSetLoadCases[tLoadCaseIndex];
-        tMyLoadCase.mCaseID = std::to_string(tLoadCaseCounter.assignNextUnique());
+        tMyLoadCase.caseID(std::to_string(tLoadCaseCounter.assignNextUnique()));
         for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.mLoads.size(); tLoadIndex++)
         {
             tMyLoadCase.mLoads[tLoadIndex].mLoadID = tLoadCounter.assignNextUnique();

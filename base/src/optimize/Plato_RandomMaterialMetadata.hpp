@@ -500,7 +500,7 @@ public:
 
     /******************************************************************************//**
      * \brief Set random material case probability.
-     * \param [in] aProbability random material case probability
+     * \param [in] aProbability probability
     **********************************************************************************/
     void probability(const double& aProbability)
     {
@@ -509,7 +509,7 @@ public:
 
     /******************************************************************************//**
      * \brief Return random material case probability.
-     * \return random material case probability
+     * \return probability
     **********************************************************************************/
     double probability() const
     {

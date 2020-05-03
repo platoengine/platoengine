@@ -134,9 +134,48 @@ struct RandomLoad
 **********************************************************************************/
 struct RandomLoadCase
 {
+private:
     std::string mCaseID; /*!< random load case global identification number */
     double mProbability; /*!< probability associated with this random load case */
+
+public:
     std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
+
+    /******************************************************************************//**
+     * \brief Return random load case case identification number.
+     * \return identification number
+    **********************************************************************************/
+    std::string caseID() const
+    {
+        return mCaseID;
+    }
+
+    /******************************************************************************//**
+     * \brief Set random load case case identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void caseID(const std::string& aID)
+    {
+        mCaseID = aID;
+    }
+
+    /******************************************************************************//**
+     * \brief Return random load case probability.
+     * \return probability
+    **********************************************************************************/
+    double probability() const
+    {
+        return mProbability;
+    }
+
+    /******************************************************************************//**
+     * \brief Set random load case case probability.
+     * \param [in] aProbability probability
+    **********************************************************************************/
+    void probability(const double& aProbability)
+    {
+        mProbability = aProbability;
+    }
 };
 // struct RandomLoadCase
 

@@ -441,7 +441,7 @@ inline void postprocess_srom_problem_load_outputs
             tNewLoadCase.loads.push_back(tNewLoad);
         }
         aNewLoadCases.push_back(tNewLoadCase);
-        aLoadCaseProbabilities.push_back(aOutputs.mLoadCases[tLoadCaseIndex].mProbability);
+        aLoadCaseProbabilities.push_back(aOutputs.mLoadCases[tLoadCaseIndex].probability());
         tCurObj.load_case_ids.push_back(tLoadCaseID);
         tCurObj.load_case_weights.push_back("1");
         tStartingLoadCaseID++;
