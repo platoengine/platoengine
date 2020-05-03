@@ -517,7 +517,7 @@ inline bool update_initial_random_load_case(const std::vector<Plato::srom::Rando
     {
         Plato::srom::RandomLoadCase tNewRandomLoadCase;
         const Plato::srom::RandomLoad& tMyNewRandomLoad = aNewSetRandomLoads[tLoadIndex];
-        tNewRandomLoadCase.mLoads.push_back(tMyNewRandomLoad);
+        tNewRandomLoadCase.append(tMyNewRandomLoad);
         tNewRandomLoadCase.probability(tMyNewRandomLoad.mProbability);
         tNewSetRandomLoadCase.push_back(tNewRandomLoadCase);
     } // index over new random loads
@@ -544,7 +544,7 @@ inline bool update_random_load_cases(const std::vector<Plato::srom::RandomLoad> 
         std::vector<Plato::srom::RandomLoadCase> tTempRandomLoadCases = aOldRandomLoadCases;
         for(size_t tOldLoadCaseIndex = 0; tOldLoadCaseIndex < aOldRandomLoadCases.size(); tOldLoadCaseIndex++)
         {
-            tTempRandomLoadCases[tOldLoadCaseIndex].mLoads.push_back(tMyNewRandomLoad);
+            tTempRandomLoadCases[tOldLoadCaseIndex].append(tMyNewRandomLoad);
             Plato::srom::RandomLoadCase& tMyTempRandomLoadCase = tTempRandomLoadCases[tOldLoadCaseIndex];
             auto tProbability = tMyTempRandomLoadCase.probability() * tMyNewRandomLoad.mProbability;
             tMyTempRandomLoadCase.probability(tProbability);
@@ -786,7 +786,7 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
     {
         Plato::srom::RandomLoadCase& tMyLoadCase = aSetLoadCases[tLoadCaseIndex];
         tMyLoadCase.caseID(std::to_string(tLoadCaseCounter.assignNextUnique()));
-        for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.mLoads.size(); tLoadIndex++)
+        for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.numLoads(); tLoadIndex++)
         {
             tMyLoadCase.mLoads[tLoadIndex].mLoadID = tLoadCounter.assignNextUnique();
         }
@@ -839,7 +839,7 @@ inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDe
             tLoad.mAppType = aDeterministicLoads[tLoadIndex].mAppType;
             tLoad.mLoadType = aDeterministicLoads[tLoadIndex].mLoadType;
             Plato::srom::set_load_components(aDeterministicLoads[tLoadIndex].mValues, tLoad.mLoadValues);
-            tRandomLoadCase.mLoads.push_back(tLoad);
+            tRandomLoadCase.append(tLoad);
         }
     }
 }

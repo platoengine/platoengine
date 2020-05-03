@@ -426,7 +426,7 @@ inline void postprocess_srom_problem_load_outputs
         XMLGen::LoadCase tNewLoadCase;
         auto tLoadCaseID = Plato::to_string(tStartingLoadCaseID);
         tNewLoadCase.id = tLoadCaseID;
-        for (size_t aLoadIndex = 0; aLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].mLoads.size(); ++aLoadIndex)
+        for (size_t aLoadIndex = 0; aLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].numLoads(); ++aLoadIndex)
         {
             XMLGen::Load tNewLoad;
             tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadType;

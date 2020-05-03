@@ -142,6 +142,15 @@ public:
     std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 
     /******************************************************************************//**
+     * \brief Return number of loads in random load case.
+     * \return number of loads
+    **********************************************************************************/
+    size_t numLoads() const
+    {
+        return (mLoads.size());
+    }
+
+    /******************************************************************************//**
      * \brief Return random load case case identification number.
      * \return identification number
     **********************************************************************************/
@@ -169,12 +178,21 @@ public:
     }
 
     /******************************************************************************//**
-     * \brief Set random load case case probability.
+     * \brief Set random load case probability.
      * \param [in] aProbability probability
     **********************************************************************************/
     void probability(const double& aProbability)
     {
         mProbability = aProbability;
+    }
+
+    /******************************************************************************//**
+     * \brief Append random load to random load case.
+     * \param [in] aLoad random load
+    **********************************************************************************/
+    void append(const Plato::srom::RandomLoad& aLoad)
+    {
+        mLoads.push_back(aLoad);
     }
 };
 // struct RandomLoadCase
