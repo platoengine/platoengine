@@ -188,7 +188,8 @@ public:
 
     /******************************************************************************//**
      * \brief Return random load type, e.g. pressure, traction, etc.
-     * \return [in] aLoadIndex random load index
+     * \param [in] aLoadIndex random load index
+     * \return load type
     **********************************************************************************/
     std::string loadType(const size_t& aLoadIndex) const
     {
@@ -196,8 +197,19 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return random load application set, e.g. side set, identification number.
+     * \param [in] aLoadIndex random load index
+     * \return identification number
+    **********************************************************************************/
+    std::string applicationID(const size_t& aLoadIndex) const
+    {
+        return (std::to_string(mLoads[aLoadIndex].mAppID));
+    }
+
+    /******************************************************************************//**
      * \brief Return random load application type, e.g. side set, node set, etc.
-     * \return [in] aLoadIndex random load index
+     * \param [in] aLoadIndex random load index
+     * \return application type
     **********************************************************************************/
     std::string applicationType(const size_t& aLoadIndex) const
     {

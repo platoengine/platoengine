@@ -1975,7 +1975,7 @@ TEST(PlatoTest, append_deterministic_loads)
     {
         ASSERT_EQ(2u, tRandomLoadCases[tLoadCaseIndex].numLoads());
         // EXPECT VALUES FOR DETERMINISTIC LOAD
-        ASSERT_EQ(3, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mAppID);
+        ASSERT_STREQ("3", tRandomLoadCases[tLoadCaseIndex].applicationID(1).c_str());
         ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mProbability, tTolerance);
         ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[0], tTolerance);
         ASSERT_NEAR(2.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mLoadValues[1], tTolerance);
@@ -2344,9 +2344,9 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
               {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"},
               {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"} };
 
-    std::vector<std::vector<int>> tGoldAppIDs =
-            { {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3},
-              {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3} };
+    std::vector<std::vector<std::string>> tGoldAppIDs =
+            { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
+              {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
 
     std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
                                      25, 26 ,27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41 ,42 ,43, 44, 45, 46, 47, 48};
@@ -2365,7 +2365,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
         {
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
-            ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
+            ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
@@ -2516,9 +2516,9 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
               {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"},
               {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"}, {"traction", "traction", "pressure"} };
 
-    std::vector<std::vector<int>> tGoldAppIDs =
-            { {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3},
-              {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3} };
+    std::vector<std::vector<std::string>> tGoldAppIDs =
+            { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
+              {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
 
     std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
                                      25, 26 ,27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41 ,42 ,43, 44, 45, 46, 47, 48};
@@ -2537,7 +2537,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
         {
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
-            ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
+            ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
@@ -2621,7 +2621,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     std::vector<std::vector<std::string>> tGoldLoadType =
             { {"traction", "pressure"}, {"traction", "pressure"}, {"traction", "pressure"}, {"traction", "pressure"} };
 
-    std::vector<std::vector<int>> tGoldAppIDs = { {1, 2}, {1, 2}, {1, 2}, {1, 2} };
+    std::vector<std::vector<std::string>> tGoldAppIDs = { {"1", "2"}, {"1", "2"}, {"1", "2"}, {"1", "2"} };
 
     std::vector<int> tGoldLoadIDs = {1, 2, 3, 4, 5, 6 , 7, 8};
 
@@ -2639,7 +2639,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
         {
             size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
             ASSERT_EQ(tGoldLoadIDs[tIndex], tLoadCase.mLoads[tLoadIndex].mLoadID);
-            ASSERT_EQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex], tLoadCase.mLoads[tLoadIndex].mAppID);
+            ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
             EXPECT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.mLoads[tLoadIndex].mLoadValues[0], tTolerance);
