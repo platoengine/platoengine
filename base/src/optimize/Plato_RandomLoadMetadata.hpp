@@ -227,6 +227,47 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return random load identification number.
+     * \param [in] aLoadIndex random load index
+     * \return identification number
+    **********************************************************************************/
+    std::string loadID(const size_t& aLoadIndex) const
+    {
+        return (std::to_string(mLoads[aLoadIndex].mLoadID));
+    }
+
+    /******************************************************************************//**
+     * \brief Set random load identification number.
+     * \param [in] aLoadIndex random load index
+     * \param [in] aLoadID    identification number
+    **********************************************************************************/
+    void loadID(const size_t& aLoadIndex, const int& aLoadID)
+    {
+        mLoads[aLoadIndex].mLoadID = aLoadID;
+    }
+
+    /******************************************************************************//**
+     * \brief Return number of random load components.
+     * \param [in] aLoadIndex random load index
+     * \return number of components
+    **********************************************************************************/
+    size_t numLoadValues(const size_t& aLoadIndex) const
+    {
+        return (mLoads[aLoadIndex].mLoadValues.size());
+    }
+
+    /******************************************************************************//**
+     * \brief Return random load value.
+     * \param [in] aLoadIndex random load index
+     * \param [in] aDimIndex  dimension index, i.e. component index
+     * \return value
+    **********************************************************************************/
+    double loadValue(const size_t& aLoadIndex, const size_t& aDimIndex) const
+    {
+        return (mLoads[aLoadIndex].mLoadValues[aDimIndex]);
+    }
+
+    /******************************************************************************//**
      * \brief Append random load to random load case.
      * \param [in] aLoad random load
     **********************************************************************************/

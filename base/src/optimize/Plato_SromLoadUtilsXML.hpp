@@ -433,11 +433,11 @@ inline void postprocess_srom_problem_load_outputs
             tNewLoad.app_id = aOutputs.mLoadCases[tLoadCaseIndex].applicationID(tLoadIndex);
             tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].applicationType(tLoadIndex);
             tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].applicationName(tLoadIndex);
-            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadValues.size(); ++tDim)
+            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].numLoadValues(tLoadIndex); ++tDim)
             {
-                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadValues[tDim]));
+                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].loadValue(tLoadIndex, tDim)));
             }
-            tNewLoad.load_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadID);
+            tNewLoad.load_id = aOutputs.mLoadCases[tLoadCaseIndex].loadID(tLoadIndex);
             tNewLoadCase.loads.push_back(tNewLoad);
         }
         aNewLoadCases.push_back(tNewLoadCase);

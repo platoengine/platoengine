@@ -788,7 +788,8 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
         tMyLoadCase.caseID(std::to_string(tLoadCaseCounter.assignNextUnique()));
         for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.numLoads(); tLoadIndex++)
         {
-            tMyLoadCase.mLoads[tLoadIndex].mLoadID = tLoadCounter.assignNextUnique();
+            auto tLoadID = tLoadCounter.assignNextUnique();
+            tMyLoadCase.loadID(tLoadIndex, tLoadID);
         }
     }
 }
