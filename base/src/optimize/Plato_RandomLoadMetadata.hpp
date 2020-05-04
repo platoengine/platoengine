@@ -217,6 +217,16 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return random load application set, e.g. side set, name.
+     * \param [in] aLoadIndex random load index
+     * \return application set name
+    **********************************************************************************/
+    std::string applicationName(const size_t& aLoadIndex) const
+    {
+        return (mLoads[aLoadIndex].mAppName);
+    }
+
+    /******************************************************************************//**
      * \brief Append random load to random load case.
      * \param [in] aLoad random load
     **********************************************************************************/

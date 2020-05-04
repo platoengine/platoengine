@@ -426,18 +426,18 @@ inline void postprocess_srom_problem_load_outputs
         XMLGen::LoadCase tNewLoadCase;
         auto tLoadCaseID = Plato::to_string(tStartingLoadCaseID);
         tNewLoadCase.id = tLoadCaseID;
-        for (size_t aLoadIndex = 0; aLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].numLoads(); ++aLoadIndex)
+        for (size_t tLoadIndex = 0; tLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].loadType(aLoadIndex);
-            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].applicationType(aLoadIndex);
-            tNewLoad.app_id = aOutputs.mLoadCases[tLoadCaseIndex].applicationID(aLoadIndex);
-            tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mAppName;
-            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadValues.size(); ++tDim)
+            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].loadType(tLoadIndex);
+            tNewLoad.app_id = aOutputs.mLoadCases[tLoadCaseIndex].applicationID(tLoadIndex);
+            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].applicationType(tLoadIndex);
+            tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].applicationName(tLoadIndex);
+            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadValues.size(); ++tDim)
             {
-                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadValues[tDim]));
+                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadValues[tDim]));
             }
-            tNewLoad.load_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[aLoadIndex].mLoadID);
+            tNewLoad.load_id = Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].mLoads[tLoadIndex].mLoadID);
             tNewLoadCase.loads.push_back(tNewLoad);
         }
         aNewLoadCases.push_back(tNewLoadCase);
