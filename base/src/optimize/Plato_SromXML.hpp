@@ -63,8 +63,50 @@ namespace srom
 **********************************************************************************/
 struct OutputMetaData
 {
+private:
     std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
     std::vector<Plato::srom::RandomMaterialCase> mMaterialCases; /*!< set of random material cases */
+
+public:
+    /******************************************************************************//**
+     * \fn loadCases
+     * \brief Set container of load cases.
+     * \param [in] aCases load cases
+    **********************************************************************************/
+    void loadCases(const std::vector<Plato::srom::RandomLoadCase>& aCases)
+    {
+        mLoadCases = aCases;
+    }
+
+    /******************************************************************************//**
+     * \fn materialCases
+     * \brief Set container of material cases.
+     * \param [in] aCases material cases
+    **********************************************************************************/
+    void materialCases(const std::vector<Plato::srom::RandomMaterialCase>& aCases)
+    {
+        mMaterialCases = aCases;
+    }
+
+    /******************************************************************************//**
+     * \fn loadCases
+     * \brief Return container of load cases.
+     * \return load cases
+    **********************************************************************************/
+    std::vector<Plato::srom::RandomLoadCase> loadCases() const
+    {
+        return mLoadCases;
+    }
+
+    /******************************************************************************//**
+     * \fn materialCases
+     * \brief Return container of material cases.
+     * \return material cases
+    **********************************************************************************/
+    std::vector<Plato::srom::RandomMaterialCase> materialCases() const
+    {
+        return mMaterialCases;
+    }
 };
 // struct OutputMetaData
 
@@ -159,11 +201,16 @@ inline void build_sroms
 {
     if(aInput.usecase() == "load")
     {
-        Plato::srom::build_load_sroms(aInput.loads(), aOutput.mLoadCases);
+        std::vector<Plato::srom::RandomLoadCase> tLoadCases;
+        Plato::srom::build_load_sroms(aInput.loads(), tLoadCases);
+        aOutput.loadCases(tLoadCases);
+
     }
     else if(aInput.usecase() == "material")
     {
-        Plato::srom::build_material_sroms(aInput.materials(), aOutput.mMaterialCases);
+        std::vector<Plato::srom::RandomMaterialCase> tMaterialCases;
+        Plato::srom::build_material_sroms(aInput.materials(), tMaterialCases);
+        aOutput.materialCases(tMaterialCases);
     }
     else
     {

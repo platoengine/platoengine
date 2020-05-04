@@ -421,27 +421,30 @@ inline void postprocess_srom_problem_load_outputs
     XMLGen::Objective &tCurObj = aInputData.objectives[0];
     tCurObj.load_case_ids.clear();
     tCurObj.load_case_weights.clear();
-    for (size_t tLoadCaseIndex = 0; tLoadCaseIndex < aOutputs.mLoadCases.size(); ++tLoadCaseIndex)
+    auto tLoadCases = aOutputs.loadCases();
+    for(auto& tLoadCase : tLoadCases)
     {
         XMLGen::LoadCase tNewLoadCase;
         auto tLoadCaseID = Plato::to_string(tStartingLoadCaseID);
         tNewLoadCase.id = tLoadCaseID;
-        for (size_t tLoadIndex = 0; tLoadIndex < aOutputs.mLoadCases[tLoadCaseIndex].numLoads(); ++tLoadIndex)
+        auto tLoadCaseIndex = &tLoadCase - &tLoadCases[0];
+
+        for (size_t tLoadIndex = 0; tLoadIndex < tLoadCases[tLoadCaseIndex].numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.type = aOutputs.mLoadCases[tLoadCaseIndex].loadType(tLoadIndex);
-            tNewLoad.app_id = aOutputs.mLoadCases[tLoadCaseIndex].applicationID(tLoadIndex);
-            tNewLoad.app_type = aOutputs.mLoadCases[tLoadCaseIndex].applicationType(tLoadIndex);
-            tNewLoad.app_name = aOutputs.mLoadCases[tLoadCaseIndex].applicationName(tLoadIndex);
-            for (size_t tDim = 0; tDim < aOutputs.mLoadCases[tLoadCaseIndex].numLoadValues(tLoadIndex); ++tDim)
+            tNewLoad.type = tLoadCases[tLoadCaseIndex].loadType(tLoadIndex);
+            tNewLoad.app_id = tLoadCases[tLoadCaseIndex].applicationID(tLoadIndex);
+            tNewLoad.app_type = tLoadCases[tLoadCaseIndex].applicationType(tLoadIndex);
+            tNewLoad.app_name = tLoadCases[tLoadCaseIndex].applicationName(tLoadIndex);
+            for (size_t tDim = 0; tDim < tLoadCases[tLoadCaseIndex].numLoadValues(tLoadIndex); ++tDim)
             {
-                tNewLoad.values.push_back(Plato::to_string(aOutputs.mLoadCases[tLoadCaseIndex].loadValue(tLoadIndex, tDim)));
+                tNewLoad.values.push_back(Plato::to_string(tLoadCases[tLoadCaseIndex].loadValue(tLoadIndex, tDim)));
             }
-            tNewLoad.load_id = aOutputs.mLoadCases[tLoadCaseIndex].loadID(tLoadIndex);
+            tNewLoad.load_id = tLoadCases[tLoadCaseIndex].loadID(tLoadIndex);
             tNewLoadCase.loads.push_back(tNewLoad);
         }
         aNewLoadCases.push_back(tNewLoadCase);
-        aLoadCaseProbabilities.push_back(aOutputs.mLoadCases[tLoadCaseIndex].probability());
+        aLoadCaseProbabilities.push_back(tLoadCases[tLoadCaseIndex].probability());
         tCurObj.load_case_ids.push_back(tLoadCaseID);
         tCurObj.load_case_weights.push_back("1");
         tStartingLoadCaseID++;
