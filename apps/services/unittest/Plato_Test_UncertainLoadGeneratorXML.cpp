@@ -1482,12 +1482,10 @@ TEST(PlatoTest, expand_random_load_cases_one_load)
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tRandomLoadCases.size(); tLoadCaseIndex++)
     {
         const Plato::srom::RandomLoadCase& tRandomLoadCase = tRandomLoadCases[tLoadCaseIndex];
-        const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[0];
-
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][0], tRandomLoad.mLoadValues[0], tTolerance);
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][1], tRandomLoad.mLoadValues[1], tTolerance);
-        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][2], tRandomLoad.mLoadValues[2], tTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tLoadCaseIndex], tRandomLoad.mProbability, tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][0], tRandomLoadCase.loadValue(0,0), tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][1], tRandomLoadCase.loadValue(0,1), tTolerance);
+        ASSERT_NEAR(tGoldLoads[tLoadCaseIndex][2], tRandomLoadCase.loadValue(0,2), tTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tLoadCaseIndex], tRandomLoadCase.loadProbability(0), tTolerance);
         tSum += tRandomLoadCase.probability();
     }
 
@@ -1592,10 +1590,9 @@ TEST(PlatoTest, expand_random_load_cases_two_load)
         ASSERT_NEAR(tGoldProbabilities[tLoadCaseIndex], tRandomLoadCase.probability(), tTolerance);
         for(size_t tLoadIndex = 0; tLoadIndex < tRandomLoadCase.numLoads(); tLoadIndex++)
         {
-            const Plato::srom::RandomLoad& tRandomLoad = tRandomLoadCase.mLoads[tLoadIndex];
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tRandomLoad.mLoadValues[0], tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tRandomLoad.mLoadValues[1], tTolerance);
-            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tRandomLoad.mLoadValues[2], tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tRandomLoadCase.loadValue(tLoadIndex,0), tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tRandomLoadCase.loadValue(tLoadIndex,1), tTolerance);
+            ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tRandomLoadCase.loadValue(tLoadIndex,2), tTolerance);
         }
         tSum += tRandomLoadCase.probability();
     }
@@ -1979,7 +1976,7 @@ TEST(PlatoTest, append_deterministic_loads)
         ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].loadValue(1,0), tTolerance);
         ASSERT_NEAR(2.0, tRandomLoadCases[tLoadCaseIndex].loadValue(1,1), tTolerance);
         ASSERT_NEAR(3.0, tRandomLoadCases[tLoadCaseIndex].loadValue(1,2), tTolerance);
-        ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].mLoads[1].mProbability, tTolerance);
+        ASSERT_NEAR(1.0, tRandomLoadCases[tLoadCaseIndex].loadProbability(1), tTolerance);
         ASSERT_STREQ(tLoadDet1.mAppType.c_str(), tRandomLoadCases[tLoadCaseIndex].applicationType(1).c_str());
         ASSERT_STREQ(tLoadDet1.mLoadType.c_str(), tRandomLoadCases[tLoadCaseIndex].loadType(1).c_str());
     }

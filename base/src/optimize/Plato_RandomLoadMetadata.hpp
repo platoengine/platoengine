@@ -137,10 +137,9 @@ struct RandomLoadCase
 private:
     std::string mCaseID; /*!< random load case global identification number */
     double mProbability; /*!< probability associated with this random load case */
-
-public:
     std::vector<Plato::srom::RandomLoad> mLoads; /*!< set of random loads associated with this random load case */
 
+public:
     /******************************************************************************//**
      * \brief Return number of loads in random load case.
      * \return number of loads
@@ -184,6 +183,16 @@ public:
     void probability(const double& aProbability)
     {
         mProbability = aProbability;
+    }
+
+    /******************************************************************************//**
+     * \brief Return random load probability.
+     * \param [in] aLoadIndex random load index
+     * \return probability
+    **********************************************************************************/
+    double loadProbability(const size_t& aLoadIndex) const
+    {
+        return (mLoads[aLoadIndex].mProbability);
     }
 
     /******************************************************************************//**
