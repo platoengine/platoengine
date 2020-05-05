@@ -487,8 +487,335 @@ public:
 
 }
 
+namespace Plato
+{
+
+namespace srom
+{
+
+
+}
+
+}
+
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tInputSS;
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    tInputSS.str(tStringInput);
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    auto tInputData = tTester.getInputData();
+
+    Plato::srom::InputMetaData tSromInputs;
+    EXPECT_THROW(Plato::srom::preprocess_nondeterministic_load_inputs(tInputData, tSromInputs), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tInputSS;
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    type angle variation\n"
+        "    load 10\n"
+        "    axis X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    tInputSS.str(tStringInput);
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    auto tInputData = tTester.getInputData();
+
+    Plato::srom::InputMetaData tSromInputs;
+    Plato::srom::preprocess_nondeterministic_load_inputs(tInputData, tSromInputs);
+
+    // 1 TEST RESULTS
+    auto tLoads = tSromInputs.loads();
+    auto tMaterials = tSromInputs.materials();
+    ASSERT_FALSE(tLoads.empty());
+    ASSERT_TRUE(tMaterials.empty());
+
+    // 1.1. TEST INTEGERS
+    ASSERT_EQ(1u, tLoads.size());
+    ASSERT_EQ(0, tLoads[0].mAppID);
+
+    // 1.2. TEST STRINGS
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
+    ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
+    ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[0].c_str());
+    ASSERT_STREQ("-5e4", tLoads[0].mValues[1].c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[2].c_str());
+
+    // 1.3. TEST STATISTICS
+    ASSERT_FALSE(tLoads[0].mRandomVars.empty());
+    ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
+    ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
+
+    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
+    ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
+    ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
+    ASSERT_STREQ("-45.0", tLoads[0].mRandomVars[0].lower().c_str());
+    ASSERT_STREQ("45.0", tLoads[0].mRandomVars[0].upper().c_str());
+    ASSERT_STREQ("0.0", tLoads[0].mRandomVars[0].mean().c_str());
+    ASSERT_STREQ("2", tLoads[0].mRandomVars[0].samples().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tInputSS;
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    type angle variation\n"
+        "    load 10\n"
+        "    axis X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    tInputSS.str(tStringInput);
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    auto tInputData = tTester.getInputData();
+
+    // CALL FUNCTION
+    Plato::srom::InputMetaData tSromInputs;
+    tSromInputs.usecase(Plato::srom::usecase::UNDEFINED);
+    EXPECT_THROW(Plato::srom::preprocess_srom_problem_inputs(tInputData, tSromInputs), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tInputSS;
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity coefficient .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    type angle variation\n"
+        "    load 10\n"
+        "    axis X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    tInputSS.str(tStringInput);
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    auto tInputData = tTester.getInputData();
+
+    // CALL FUNCTION
+    Plato::srom::InputMetaData tSromInputs;
+    tSromInputs.usecase(Plato::srom::usecase::LOAD);
+    Plato::srom::preprocess_srom_problem_inputs(tInputData, tSromInputs);
+
+    // 1 TEST RESULTS
+    auto tLoads = tSromInputs.loads();
+    auto tMaterials = tSromInputs.materials();
+    ASSERT_FALSE(tLoads.empty());
+    ASSERT_TRUE(tMaterials.empty());
+
+    // 1.1. TEST INTEGERS
+    ASSERT_EQ(1u, tLoads.size());
+    ASSERT_EQ(0, tLoads[0].mAppID);
+
+    // 1.2. TEST STRINGS
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
+    ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
+    ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[0].c_str());
+    ASSERT_STREQ("-5e4", tLoads[0].mValues[1].c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[2].c_str());
+
+    // 1.3. TEST STATISTICS
+    ASSERT_FALSE(tLoads[0].mRandomVars.empty());
+    ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
+    ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
+
+    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
+    ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
+    ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
+    ASSERT_STREQ("-45.0", tLoads[0].mRandomVars[0].lower().c_str());
+    ASSERT_STREQ("45.0", tLoads[0].mRandomVars[0].upper().c_str());
+    ASSERT_STREQ("0.0", tLoads[0].mRandomVars[0].mean().c_str());
+    ASSERT_STREQ("2", tLoads[0].mRandomVars[0].samples().c_str());
+}
 
 TEST(PlatoTestXMLGenerator, DefineSromProblemUseCase)
 {

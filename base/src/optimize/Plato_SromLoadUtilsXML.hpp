@@ -504,6 +504,67 @@ inline void postprocess_srom_problem_load_outputs
 }
 // function postprocess_srom_problem_load_outputs
 
+/******************************************************************************//**
+ * \fn preprocess_nondeterministic_load_inputs
+ * \brief Pre-process non-deterministic load inputs.
+ * \param [in/out] aInputMetadata  Plato problem input metadata
+ * \param [in/out] aSromInputs     Stochastic Reduced Order Model (SROM) problem metadata
+**********************************************************************************/
+inline void preprocess_nondeterministic_load_inputs
+(XMLGen::InputData& aInputMetadata,
+ Plato::srom::InputMetaData& aSromInputs)
+{
+    std::vector<XMLGen::LoadCase> tCurObjLoadCases;
+    std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
+    Plato::srom::preprocess_srom_problem_load_inputs(aInputMetadata, tCurObjLoadCases, tCurObjUncertainties);
+    if(tCurObjUncertainties.empty())
+    {
+        THROWERR(std::string("Pre-process Non-Deterministic Load Inputs: Requested a stochastic use case; ")
+            + "however, the objective has no associated non-deterministic inputs, i.e. no uncertainty block is defined.")
+    }
+
+    std::vector<Plato::srom::Load> tLoads;
+    Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+    aSromInputs.loads(tLoads);
+}
+// function preprocess_nondeterministic_load_inputs
+
+/******************************************************************************//**
+ * \fn preprocess_srom_problem_inputs
+ * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
+ * \param [in/out] aInputMetadata  Plato problem input metadata
+ * \param [in/out] aSromInputs     SROM problem metadata
+**********************************************************************************/
+inline void preprocess_srom_problem_inputs
+(XMLGen::InputData& aInputMetadata,
+ Plato::srom::InputMetaData& aSromInputs)
+{
+    switch(aSromInputs.usecase())
+    {
+        case Plato::srom::usecase::LOAD:
+        {
+            Plato::srom::preprocess_nondeterministic_load_inputs(aInputMetadata, aSromInputs);
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL:
+        {
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
+        {
+            Plato::srom::preprocess_nondeterministic_load_inputs(aInputMetadata, aSromInputs);
+            break;
+        }
+        default:
+        case Plato::srom::usecase::UNDEFINED:
+        {
+            THROWERR("Pre-process SROM Problem Inputs: Detected an undefined SROM problem use case.")
+            break;
+        }
+    }
+}
+// function preprocess_srom_problem_inputs
+
 }
 // namespace srom
 

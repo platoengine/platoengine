@@ -116,7 +116,7 @@ struct Statistics
 struct RandomVariable
 {
 private:
-    int mID = 0;                             /*!< random variable identification number */
+    int mID = 0;                         /*!< random variable identification number */
     std::string mTag;                    /*!< label, e.g. angle variation */
     std::string mAttribute;              /*!< random variable attribute, e.g. rotation axis */
     Plato::srom::Statistics mStatistics; /*!< statistics for this random variable */
