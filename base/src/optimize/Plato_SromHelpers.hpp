@@ -66,6 +66,14 @@ namespace srom
 {
 
 /******************************************************************************//**
+ * \struct Stochastic Reduced Order Model (SROM) problem use cases.
+**********************************************************************************/
+enum struct usecase
+{
+    UNDEFINED = 0, LOAD = 1, MATERIAL = 2, MATERIAL_PLUS_LOAD = 3
+};
+
+/******************************************************************************//**
  * \fn tolower
  * \brief Convert uppercase word to lowercase.
  * \param [in] aInput word
@@ -82,6 +90,41 @@ inline std::string tolower(const std::string& aInput)
     return (tOutput.str());
 }
 // function tolower
+
+/******************************************************************************//**
+ * \fn to_string
+ * \brief Convert usecase enum to string.
+ * \param [in] aInput usecase enum
+ * \return converted usecase enum as a value of type string
+**********************************************************************************/
+inline std::string to_string(const Plato::srom::usecase& aInput)
+{
+    std::string tOutput;
+    switch(aInput)
+    {
+        case Plato::srom::usecase::LOAD:
+        {
+            tOutput = "LOAD";
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL:
+        {
+            tOutput = "MATERIAL";
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
+        {
+            tOutput = "MATERIAL PLUS LOAD";
+            break;
+        }
+        default:
+        {
+            tOutput = "UNDEFINED";
+        }
+    }
+    return tOutput;
+}
+// function to_string
 
 /******************************************************************************//**
  * \fn to_string

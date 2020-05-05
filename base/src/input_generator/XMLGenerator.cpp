@@ -270,14 +270,14 @@ bool XMLGenerator::runSROMForUncertainVariables()
         std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
         Plato::srom::preprocess_srom_problem_load_inputs(m_InputData, tCurObjLoadCases, tCurObjUncertainties);
 
-        std::vector<Plato::srom::Load> tLoads;
-        Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
-
         if(tCurObjUncertainties.size() <= 0)
         {
             std::cout << "Objective has no associated uncertainty" << std::endl;
             return false;
         }
+
+        std::vector<Plato::srom::Load> tLoads;
+        Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
 
         Plato::srom::InputMetaData tSromInputs;
         tSromInputs.loads(tLoads);

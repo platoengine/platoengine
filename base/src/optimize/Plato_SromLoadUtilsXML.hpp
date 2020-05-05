@@ -376,6 +376,50 @@ inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInpu
 // function generate_srom_load_inputs
 
 /******************************************************************************//**
+ * \fn define_srom_problem_usecase
+ * \brief Define use case for Stochastic Reduced Order Model (SROM) problem
+ * \param [in]  aUncertaintySet    set of input uncertainty blocks
+ * \param [out] aSromInputMetadata SROM input metadata
+**********************************************************************************/
+inline void define_srom_problem_usecase
+(const std::vector<XMLGen::Uncertainty>& aUncertaintySet,
+ Plato::srom::InputMetaData& aSromInputMetadata)
+{
+    std::vector<std::string> tCategory;
+    std::vector<std::string> tSupportedCategories = {"load", "material"};
+    for(auto& tUncertainty : aUncertaintySet)
+    {
+        auto tIsSupported = std::find(tSupportedCategories.begin(), tSupportedCategories.end(), tUncertainty.variable_type) != tSupportedCategories.end();
+        if (!tIsSupported)
+        {
+            THROWERR(std::string("Define SROM Problem Use Case: Uncertainty category '") + tUncertainty.variable_type + "' is not supported.")
+        }
+        tCategory.push_back(tUncertainty.variable_type);
+    }
+
+    bool tFoundLoadUseCase = std::find(tCategory.begin(), tCategory.end(), "load") != tCategory.end();
+    bool tFoundMaterialUseCase = std::find(tCategory.begin(), tCategory.end(), "material") != tCategory.end();
+    if(tFoundLoadUseCase && !tFoundMaterialUseCase)
+    {
+        aSromInputMetadata.usecase(Plato::srom::usecase::LOAD);
+    }
+    else if(!tFoundLoadUseCase && tFoundMaterialUseCase)
+    {
+        aSromInputMetadata.usecase(Plato::srom::usecase::MATERIAL);
+    }
+    else if(tFoundLoadUseCase && tFoundMaterialUseCase)
+    {
+        aSromInputMetadata.usecase(Plato::srom::usecase::MATERIAL_PLUS_LOAD);
+    }
+    else
+    {
+        aSromInputMetadata.usecase(Plato::srom::usecase::UNDEFINED);
+        THROWERR(std::string("Define SROM Problem Use Case: Identified an undefined SROM problem use-case."))
+    }
+}
+// function define_srom_problem_usecase
+
+/******************************************************************************//**
  * \fn preprocess_srom_problem_load_inputs
  * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
  * \param [in/out] aInputMetadata Plato problem input metadata
@@ -411,6 +455,14 @@ inline void preprocess_srom_problem_load_inputs
 }
 // function preprocess_srom_problem_load_inputs
 
+/******************************************************************************//**
+ * \fn postprocess_srom_problem_load_outputs
+ * \brief Post-process Stochastic Reduced Order Model (SROM) problem outputs.
+ * \param [in/out] aOutputs               SROM problem output metadata
+ * \param [in/out] aInputData             Plato problem metadata
+ * \param [in/out] aNewLoadCases          load case metadata
+ * \param [in/out] aLoadCaseProbabilities load case probabilities
+**********************************************************************************/
 inline void postprocess_srom_problem_load_outputs
 (const Plato::srom::OutputMetaData& aOutputs,
  XMLGen::InputData& aInputData,

@@ -110,7 +110,7 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
     Plato::srom::InputMetaData tInput;
     Plato::srom::OutputMetaData tOutput;
     tInput.materials(tMaterialSet);
-    tInput.usecase("Material");
+    tInput.usecase(Plato::srom::usecase::MATERIAL);
     EXPECT_NO_THROW(Plato::srom::build_sroms(tInput, tOutput));
     ASSERT_EQ(8u, tOutput.materialCases().size());
 
