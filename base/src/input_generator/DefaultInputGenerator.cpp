@@ -736,7 +736,7 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
                     n6.append_attribute("name") = string_var;
                     addNTVParameter(n6, "Function Type", "string", "SIMP");
                     addNTVParameter(n6, "Minimum", "double", "0.001");
-                    addNTVParameter(n6, "Penalization Parameter", "double", m_InputData.materials[0].penalty_exponent);
+                    addNTVParameter(n6, "Penalization Parameter", "double", m_InputData.materials[0].property("penalty exponent"));
                 }
                 addNTVParameter(n4, "Spatial Filter", "int", "0");
             }
@@ -760,14 +760,14 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
                 n6.append_attribute("name") = "Material";
                 for(size_t n=0; n<m_InputData.materials.size(); n++)
                 {
-                    if(m_InputData.materials[n].material_id.compare(m_InputData.blocks[j].material_id) == 0)
+                    if(m_InputData.materials[n].id().compare(m_InputData.blocks[j].material_id) == 0)
                     {
-                        if(!m_InputData.materials[n].youngs_modulus.empty())
-                            addNTVParameter(n6, "Elastic Modulus", "double", m_InputData.materials[n].youngs_modulus);
-                        if(!m_InputData.materials[n].poissons_ratio.empty())
-                            addNTVParameter(n6, "Poissons Ratio", "double", m_InputData.materials[n].poissons_ratio);
-                        if(!m_InputData.materials[n].thermal_conductivity.empty())
-                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].thermal_conductivity);
+                        if(!m_InputData.materials[n].property("youngs modulus").empty())
+                            addNTVParameter(n6, "Elastic Modulus", "double", m_InputData.materials[n].property("youngs modulus"));
+                        if(!m_InputData.materials[n].property("poissons ratio").empty())
+                            addNTVParameter(n6, "Poissons Ratio", "double", m_InputData.materials[n].property("poissons ratio"));
+                        if(!m_InputData.materials[n].property("thermal conductivity").empty())
+                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].property("thermal conductivity"));
                         break;
                     }
                 }
@@ -1177,8 +1177,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkfl
 
   n4 = n3.append_child("ParameterList");
   n4.append_attribute("name") = "Isotropic Linear Elastic";
-  addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].poissons_ratio.c_str());
-  addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].youngs_modulus.c_str());
+  addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].property("poissons ratio").c_str());
+  addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].property("youngs modulus").c_str());
 
 
   n3 = n2.append_child("ParameterList");
@@ -1330,15 +1330,15 @@ bool DefaultInputGenerator::generateLightMPInputDecks()
                 node1 = doc.append_child("material");
                 node2 = node1.append_child("id");
                 node3 = node2.append_child(pugi::node_pcdata);
-                node3.set_value(m_InputData.materials[n].material_id.c_str());
+                node3.set_value(m_InputData.materials[n].id().c_str());
 
                 node1 = node1.append_child("linear_elastic");
                 node2 = node1.append_child("poissons_ratio");
                 node3 = node2.append_child(pugi::node_pcdata);
-                node3.set_value(m_InputData.materials[n].poissons_ratio.c_str());
+                node3.set_value(m_InputData.materials[n].property("poissons ratio").c_str());
                 node2 = node1.append_child("youngs_modulus");
                 node3 = node2.append_child(pugi::node_pcdata);
-                node3.set_value(m_InputData.materials[n].youngs_modulus.c_str());
+                node3.set_value(m_InputData.materials[n].property("youngs modulus").c_str());
             }
 
             node1 = doc.append_child("mesh");
@@ -1840,7 +1840,7 @@ bool DefaultInputGenerator::generateLightMPOperationsXML()
       tmp_node1 = tmp_node.append_child("SIMP");
       if(m_InputData.materials.size() > 0)
       {
-        addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].penalty_exponent.c_str());
+        addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
       }
       addChild(tmp_node1, "MinimumValue", "0.001");
 
@@ -2409,7 +2409,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].penalty_exponent.c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
 
@@ -2423,7 +2423,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].penalty_exponent.c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
             tmp_node1 = tmp_node.append_child("OutputValue");
@@ -2439,7 +2439,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].penalty_exponent.c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
             tmp_node1 = tmp_node.append_child("OutputGradient");
@@ -2462,7 +2462,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
                 tmp_node1 = tmp_node.append_child("SIMP");
                 if(m_InputData.materials.size() > 0)
                 {
-                    addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].penalty_exponent.c_str());
+                    addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
                 }
                 addChild(tmp_node1, "MinimumValue", "0.001");
                 tmp_node1 = tmp_node.append_child("OutputHessian");

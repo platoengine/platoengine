@@ -389,10 +389,11 @@ inline void define_srom_problem_usecase
     std::vector<std::string> tSupportedCategories = {"load", "material"};
     for(auto& tUncertainty : aUncertaintySet)
     {
-        auto tIsSupported = std::find(tSupportedCategories.begin(), tSupportedCategories.end(), tUncertainty.variable_type) != tSupportedCategories.end();
+        auto tMyCategory = Plato::srom::tolower(tUncertainty.variable_type);
+        auto tIsSupported = std::find(tSupportedCategories.begin(), tSupportedCategories.end(), tMyCategory) != tSupportedCategories.end();
         if (!tIsSupported)
         {
-            THROWERR(std::string("Define SROM Problem Use Case: Uncertainty category '") + tUncertainty.variable_type + "' is not supported.")
+            THROWERR(std::string("Define SROM Problem Use Case: Uncertainty category '") + tMyCategory + "' is not supported.")
         }
         tCategory.push_back(tUncertainty.variable_type);
     }
@@ -564,6 +565,60 @@ inline void preprocess_srom_problem_inputs
     }
 }
 // function preprocess_srom_problem_inputs
+
+/******************************************************************************//**
+ * \fn post_process_nondeterministic_load_outputs
+ * \brief Post-process non-deterministic load outputs.
+ * \param [in/out] aSromOutputs    SROM problem output metadata
+ * \param [in/out] aInputMetadata  Plato problem input metadata
+**********************************************************************************/
+inline void post_process_nondeterministic_load_outputs
+(const Plato::srom::OutputMetaData& aSromOutputs,
+ XMLGen::InputData& aInputMetadata)
+{
+    std::vector<double> tLoadCaseProbabilities;
+    std::vector<XMLGen::LoadCase> tNewLoadCases;
+    Plato::srom::postprocess_srom_problem_load_outputs(aSromOutputs, aInputMetadata, tNewLoadCases, tLoadCaseProbabilities);
+    aInputMetadata.load_cases = tNewLoadCases;
+    aInputMetadata.load_case_probabilities = tLoadCaseProbabilities;
+}
+// function post_process_nondeterministic_load_outputs
+
+/******************************************************************************//**
+ * \fn postprocess_srom_problem_outputs
+ * \brief Post-process Stochastic Reduced Order Model (SROM) problem outputs.
+ * \param [in/out] aSromOutputs    SROM problem output metadata
+ * \param [in/out] aInputMetadata  Plato problem input metadata
+**********************************************************************************/
+inline void postprocess_srom_problem_outputs
+(const Plato::srom::OutputMetaData& aSromOutputs,
+ XMLGen::InputData& aInputMetadata)
+{
+    switch(aSromOutputs.usecase())
+    {
+        case Plato::srom::usecase::LOAD:
+        {
+            Plato::srom::post_process_nondeterministic_load_outputs(aSromOutputs, aInputMetadata);
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL:
+        {
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
+        {
+            Plato::srom::post_process_nondeterministic_load_outputs(aSromOutputs, aInputMetadata);
+            break;
+        }
+        default:
+        case Plato::srom::usecase::UNDEFINED:
+        {
+            THROWERR("Post-process SROM Problem Outputs: Detected an undefined SROM problem use case.")
+            break;
+        }
+    }
+}
+// function postprocess_srom_problem_outputs
 
 }
 // namespace srom

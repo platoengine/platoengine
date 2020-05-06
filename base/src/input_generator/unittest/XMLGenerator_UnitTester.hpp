@@ -93,12 +93,12 @@ public:
     std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}
     std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area;}
     std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
-    std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].material_id;}
-    std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].penalty_exponent;}
-    std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].youngs_modulus;}
-    std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].poissons_ratio;}
-    std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].thermal_conductivity;}
-    std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].density;}
+    std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}
+    std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty exponent");}
+    std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs modulus");}
+    std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons ratio");}
+    std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal conductivity");}
+    std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].property("density");}
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
     size_t getNumObjectives() {return m_InputData.objectives.size();}

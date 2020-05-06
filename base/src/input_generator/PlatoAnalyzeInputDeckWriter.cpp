@@ -405,22 +405,22 @@ void PlatoAnalyzeInputDeckWriter::addPAMaterialModelBlock(pugi::xml_node aNode, 
     {
         if(std::strcmp(aMaterialModelName, "Isotropic Linear Thermal") == 0)
         {
-            addNTVParameter(tPugiNode2, "Conductivity Coefficient", "double", mInputData.materials[0].thermal_conductivity);
-            addNTVParameter(tPugiNode2, "Mass Density", "double", mInputData.materials[0].density);
-            addNTVParameter(tPugiNode2, "Specific Heat", "double", mInputData.materials[0].specific_heat);
+            addNTVParameter(tPugiNode2, "Conductivity Coefficient", "double", mInputData.materials[0].property("thermal conductivity"));
+            addNTVParameter(tPugiNode2, "Mass Density", "double", mInputData.materials[0].property("density"));
+            addNTVParameter(tPugiNode2, "Specific Heat", "double", mInputData.materials[0].property("specific heat"));
         }
         else if(std::strcmp(aMaterialModelName, "Isotropic Linear Thermoelastic") == 0)
         {
-            addNTVParameter(tPugiNode2, "Poissons Ratio", "double", mInputData.materials[0].poissons_ratio); // Assuming 1 material!!!
-            addNTVParameter(tPugiNode2, "Youngs Modulus", "double", mInputData.materials[0].youngs_modulus);
-            addNTVParameter(tPugiNode2, "Thermal Expansion Coefficient", "double", mInputData.materials[0].thermal_expansion);
-            addNTVParameter(tPugiNode2, "Thermal Conductivity Coefficient", "double", mInputData.materials[0].thermal_conductivity);
-            addNTVParameter(tPugiNode2, "Reference Temperature", "double", mInputData.materials[0].reference_temperature);
+            addNTVParameter(tPugiNode2, "Poissons Ratio", "double", mInputData.materials[0].property("poissons ratio")); // Assuming 1 material!!!
+            addNTVParameter(tPugiNode2, "Youngs Modulus", "double", mInputData.materials[0].property("youngs modulus"));
+            addNTVParameter(tPugiNode2, "Thermal Expansion Coefficient", "double", mInputData.materials[0].property("thermal expansion"));
+            addNTVParameter(tPugiNode2, "Thermal Conductivity Coefficient", "double", mInputData.materials[0].property("thermal conductivity"));
+            addNTVParameter(tPugiNode2, "Reference Temperature", "double", mInputData.materials[0].property("reference temperature"));
         }
         else if(std::strcmp(aMaterialModelName, "Isotropic Linear Elastic") == 0)
         {
-            addNTVParameter(tPugiNode2, "Poissons Ratio", "double", mInputData.materials[0].poissons_ratio); // Assuming 1 material!!!
-            addNTVParameter(tPugiNode2, "Youngs Modulus", "double", mInputData.materials[0].youngs_modulus);
+            addNTVParameter(tPugiNode2, "Poissons Ratio", "double", mInputData.materials[0].property("poissons ratio")); // Assuming 1 material!!!
+            addNTVParameter(tPugiNode2, "Youngs Modulus", "double", mInputData.materials[0].property("youngs modulus"));
         }
     }
 }

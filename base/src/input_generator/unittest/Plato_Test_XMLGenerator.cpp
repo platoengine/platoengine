@@ -47,15 +47,18 @@
  */
 
 #include <gtest/gtest.h>
+
+#include <map>
+#include <cmath>
+#include <numeric>
+
 #include "XMLGenerator_UnitTester.hpp"
 #include "DefaultInputGenerator_UnitTester.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
 #include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
-#include <cmath>
 
-#include <numeric>
 #include "XMLG_Macros.hpp"
 #include "Plato_SromLoadUtilsXML.hpp"
 
@@ -493,6 +496,117 @@ namespace Plato
 namespace srom
 {
 
+enum struct category
+{
+    MATERIAL = 0, LOAD = 1, UNDEFINED = 2,
+};
+
+using UncertaintyCategories = std::map<Plato::srom::category, std::vector<XMLGen::Uncertainty>>;
+inline void split_uncertainty_categories
+(const XMLGen::InputData& aMetadata, Plato::srom::UncertaintyCategories& aCategories)
+{
+    aCategories.clear();
+    for(auto& tUncertainty : aMetadata.uncertainties)
+    {
+        auto tCategory = Plato::srom::tolower(tUncertainty.variable_type);
+        auto tIsLoad = tCategory == "load" ? true : false;
+        auto tIsMaterial = tCategory == "material" ? true : false;
+        if (tIsLoad && !tIsMaterial)
+        {
+            aCategories[Plato::srom::category::LOAD].push_back(tUncertainty);
+        }
+        else if (tIsMaterial && !tIsLoad)
+        {
+            aCategories[Plato::srom::category::MATERIAL].push_back(tUncertainty);
+        }
+        else if (tIsMaterial && tIsLoad)
+        {
+            THROWERR(std::string("Split Uncertainty Categories: A non-deterministic variable cannot be two categories at once.")
+                + " A non-deterministic variable must be an unique category.")
+        }
+        else if (!tIsMaterial && !tIsLoad)
+        {
+            THROWERR(std::string("Split Uncertainty Categories: Non-deterministic category '") + tCategory + "' is not supported.")
+        }
+    }
+}
+
+using RandomMatPropMap = std::map<std::string, std::map<std::string, XMLGen::Uncertainty>>;
+inline void build_material_id_to_random_material_map
+(const std::vector<XMLGen::Uncertainty>& aRandomMatProperties, Plato::srom::RandomMatPropMap& aMap)
+{
+    aMap.clear();
+    for(auto& tRandomMatProp : aRandomMatProperties)
+    {
+        aMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
+    }
+}
+
+inline void append_random_material
+(const XMLGen::Material& tMaterial,
+ const Plato::srom::RandomMatPropMap& aRandomMatMap,
+ Plato::srom::Material& tSromMaterial)
+{
+    // material has random properties
+    auto tMatID = tMaterial.id();
+    auto tRandMatMapItr = aRandomMatMap.find(tMatID);
+    auto tTags = tMaterial.tags();
+    for (auto &tTag : tTags)
+    {
+        auto tIterator = tRandMatMapItr->second.find(tTag);
+        if (tIterator != tRandMatMapItr->second.end())
+        {
+            // property is random
+            Plato::srom::Statistics tStats;
+            tStats.mFile = tIterator->second.file;
+            tStats.mMean = tIterator->second.mean;
+            tStats.mUpperBound = tIterator->second.upper;
+            tStats.mUpperBound = tIterator->second.upper;
+            tStats.mNumSamples = tIterator->second.num_samples;
+            tStats.mDistribution = tIterator->second.distribution;
+            tStats.mStandardDeviation = tIterator->second.standard_deviation;
+            tSromMaterial.append(tTag, tMaterial.attribute(), tStats);
+        }
+        else
+        {
+            // property is deterministic
+            tSromMaterial.append(tTag, tMaterial.attribute(), tMaterial.property(tTag));
+        }
+    }
+}
+
+inline void preprocess_material_properties
+(const std::vector<XMLGen::Material>& aAllMaterials,
+ const Plato::srom::RandomMatPropMap& aRandomMatMap,
+ Plato::srom::InputMetaData& aSromInputs)
+{
+    for(auto& tMaterial : aAllMaterials)
+    {
+        Plato::srom::Material tSromMaterial;
+        if(aRandomMatMap.find(tMaterial.id()) != aRandomMatMap.end())
+        {
+            // material has random properties
+            Plato::srom::append_random_material(tMaterial, aRandomMatMap, tSromMaterial);
+        }
+        else
+        {
+            // material is deterministic
+            auto tTags = tMaterial.tags();
+            for(auto& tTag : tTags)
+            {
+                tSromMaterial.append(tTag, tMaterial.attribute(), tMaterial.property(tTag));
+            }
+        }
+        aSromInputs.append(tSromMaterial);
+    }
+}
+
+inline void preprocess_nondeterministic_material_inputs
+(XMLGen::InputData& aInputMetadata,
+ Plato::srom::InputMetaData& aSromInputs)
+{
+   // auto tRandomMaterialIDs = Plato::srom::gather_nondeterministic_materials(aInputMetadata);
+}
 
 }
 

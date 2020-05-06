@@ -64,6 +64,7 @@ namespace srom
 struct OutputMetaData
 {
 private:
+    Plato::srom::usecase mUseCase;
     std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
     std::vector<Plato::srom::RandomMaterialCase> mMaterialCases; /*!< set of random material cases */
 
@@ -107,6 +108,29 @@ public:
     {
         return mMaterialCases;
     }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Return use case tag.
+     * \return use case tag
+    **********************************************************************************/
+    Plato::srom::usecase usecase() const
+    {
+        return mUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Set use case tag. Options are:\n
+     *   -# load: use case only has non-deterministic loads,
+     *   -# material: use case only has non-deterministic materials, and
+     *   -# mix: use case has non-deterministic loads and materials.
+     * \param[in] use case tag
+    **********************************************************************************/
+    void usecase(const Plato::srom::usecase& aUseCase)
+    {
+        mUseCase = aUseCase;
+    }
 };
 // struct OutputMetaData
 
@@ -145,7 +169,7 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn loads
+     * \fn materials
      * \brief Return set of materials.
      * \return set of materials
     **********************************************************************************/
@@ -178,13 +202,33 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn loads
+     * \fn materials
      * \brief Initialize set of materials.
      * \param [in] aMaterials set of materials
     **********************************************************************************/
     void materials(const std::vector<Plato::srom::Material>& aMaterials)
     {
         mMaterials = aMaterials;
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append load.
+     * \param [in] aLoad load metadata
+    **********************************************************************************/
+    void append(const Plato::srom::Load& aLoad)
+    {
+        mLoads.push_back(aLoad);
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append material.
+     * \param [in] aMaterial material metadata
+    **********************************************************************************/
+    void append(const Plato::srom::Material& aMaterial)
+    {
+        mMaterials.push_back(aMaterial);
     }
 };
 // struct InputMetaData
@@ -225,6 +269,7 @@ inline void build_sroms
             THROWERR(tMsg.str().c_str())
         }
     }
+    aOutput.usecase(aInput.usecase());
 }
 // function build_sroms
 

@@ -10,6 +10,9 @@
 #include <vector>
 #include <map>
 
+#include "Plato_FreeFunctions.hpp"
+#include "XMLG_Macros.hpp"
+
 namespace XMLGen
 {
 
@@ -40,6 +43,7 @@ struct Uncertainty
     std::string lower; // scalar value
     std::string standard_deviation; // scalar value
     std::string num_samples; // integer value
+    std::string file = ""; // filename with sample-probability pairs
 };
 
 struct Load
@@ -157,18 +161,104 @@ struct Block
     std::string element_type;
 };
 
+/******************************************************************************//**
+ * \struct Material
+ * \brief Material metadata for Plato problems.
+**********************************************************************************/
 struct Material
 {
-    std::string material_id;
-    std::string poissons_ratio;
-    std::string youngs_modulus;
-    std::string thermal_conductivity;
-    std::string thermal_expansion;
-    std::string reference_temperature;
-    std::string density;
-    std::string penalty_exponent;
-    std::string specific_heat;
+private:
+    std::string mID; /*!< material identification number */
+    std::string mAttribute = "homogeneous";  /*!< material attribute */
+    std::map<std::string, std::string> mProperties; /*!< list of material properties, map<tag,value> */
+
+public:
+    /******************************************************************************//**
+     * \fn id
+     * \brief Return material identification number.
+     * \return identification number
+    **********************************************************************************/
+    std::string id() const
+    {
+        return mID;
+    }
+
+    /******************************************************************************//**
+     * \fn id
+     * \brief Set material identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void id(const std::string& aID)
+    {
+        mID = aID;
+    }
+    /******************************************************************************//**
+     * \fn attribute
+     * \brief Return material attribute.
+     * \return attribute
+    **********************************************************************************/
+    std::string attribute() const
+    {
+        return mAttribute;
+    }
+
+    /******************************************************************************//**
+     * \fn attribute
+     * \brief Set material attribute.
+     * \param [in] aAttribute attribute
+    **********************************************************************************/
+    void attribute(const std::string& aAttribute)
+    {
+        mAttribute = aAttribute;
+    }
+
+    /******************************************************************************//**
+     * \fn property
+     * \brief Return material property value.
+     * \param [in] aTag material property tag
+     * \return material property value
+    **********************************************************************************/
+    std::string property(const std::string& aTag) const
+    {
+        auto tTag = Plato::tolower(aTag);
+        auto tItr = mProperties.find(tTag);
+        if(tItr == mProperties.end())
+        {
+            THROWERR(std::string("XMLGenn Material: Material property '") + aTag + "' is not supported.")
+        }
+        return (tItr->second);
+    }
+
+    /******************************************************************************//**
+     * \fn property
+     * \brief Set material property value.
+     * \param [in] aTag   material property tag
+     * \param [in] aValue material property value
+    **********************************************************************************/
+    void property(const std::string& aTag, const std::string& aValue)
+    {
+        if(aTag.empty()) { THROWERR("XMLGenn Material: Material property tag is empty.") }
+        if(aValue.empty()) { THROWERR("XMLGenn Material: Material property value is empty.") }
+        auto tTag = Plato::tolower(aTag);
+        mProperties[aTag] = aValue;
+    }
+
+    /******************************************************************************//**
+     * \fn tags
+     * \brief Return list of material property tags.
+     * \return material property tags
+    **********************************************************************************/
+    std::vector<std::string> tags() const
+    {
+        std::vector<std::string> tTags;
+        for(auto& tProperty : mProperties)
+        {
+            tTags.push_back(tProperty.first);
+        }
+        return tTags;
+    }
 };
+// struct Material
 
 struct InputData
 {

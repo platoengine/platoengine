@@ -47,10 +47,12 @@
 
 #pragma once
 
-#include <cstddef>
 #include <vector>
 #include <cfloat>
 #include <string>
+#include <locale>
+#include <sstream>
+#include <cstddef>
 
 namespace Plato
 {
@@ -75,5 +77,23 @@ std::string to_string(const double d);
 std::string to_string(const float f);
 std::string to_string(const int d);
 std::string to_string(const size_t d);
+
+/******************************************************************************//**
+ * \fn tolower
+ * \brief Convert uppercase word to lowercase.
+ * \param [in] aInput word
+ * \return lowercase word
+**********************************************************************************/
+inline std::string tolower(const std::string& aInput)
+{
+    std::locale tLocale;
+    std::ostringstream tOutput;
+    for (auto& tChar : aInput)
+    {
+        tOutput << std::tolower(tChar,tLocale);
+    }
+    return (tOutput.str());
+}
+// function tolower
 
 } // end namespace Plato
