@@ -603,11 +603,98 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error1)
 
 TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error2)
 {
-    // UNSUPPORTED USE CASE
+    // UNSUPPORTED CATEGORY, I.E. USE CASE
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(XMLGen::Uncertainty());
     tMetadata.uncertainties[0].variable_type = "boundary condition";
     EXPECT_THROW(Plato::srom::split_uncertainties_into_categories(tMetadata), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
+{
+    // 1. POSE DATA
+    XMLGen::Uncertainty tCase1;
+    tCase1.variable_type = "load";
+    tCase1.axis = "x";
+    tCase1.distribution = "beta";
+    tCase1.id = "2";
+    tCase1.lower = "-2";
+    tCase1.upper = "2";
+    tCase1.mean = "0";
+    tCase1.standard_deviation = "0.2";
+    tCase1.num_samples = "12";
+    tCase1.type = "angle variation";
+
+    XMLGen::Uncertainty tCase2;
+    tCase2.variable_type = "load";
+    tCase2.axis = "y";
+    tCase2.distribution = "beta";
+    tCase2.id = "20";
+    tCase2.lower = "-20";
+    tCase2.upper = "20";
+    tCase2.mean = "2";
+    tCase2.standard_deviation = "2";
+    tCase2.num_samples = "8";
+    tCase2.type = "angle variation";
+
+    XMLGen::Uncertainty tCase3;
+    tCase3.variable_type = "material";
+    tCase3.axis = "homogeneous";
+    tCase3.distribution = "beta";
+    tCase3.id = "3";
+    tCase3.lower = "0.2";
+    tCase3.upper = "0.35";
+    tCase3.mean = "0.27";
+    tCase3.standard_deviation = "0.05";
+    tCase3.num_samples = "6";
+    tCase3.type = "poissons ratio";
+
+    XMLGen::InputData tMetadata;
+    tMetadata.uncertainties.push_back(tCase1);
+    tMetadata.uncertainties.push_back(tCase2);
+    tMetadata.uncertainties.push_back(tCase3);
+
+    auto tCategoriesMap = Plato::srom::split_uncertainties_into_categories(tMetadata);
+    ASSERT_EQ(2u, tCategoriesMap.size());
+
+    // 2.1 TEST LOADS
+    auto tLoads = tCategoriesMap.find(Plato::srom::category::LOAD);
+    ASSERT_EQ(2u, tLoads->second.size());
+    ASSERT_STREQ("load", tLoads->second[0].variable_type.c_str());
+    ASSERT_STREQ("angle variation", tLoads->second[0].type.c_str());
+    ASSERT_STREQ("x", tLoads->second[0].axis.c_str());
+    ASSERT_STREQ("2", tLoads->second[0].id.c_str());
+    ASSERT_STREQ("2", tLoads->second[0].upper.c_str());
+    ASSERT_STREQ("-2", tLoads->second[0].lower.c_str());
+    ASSERT_STREQ("0", tLoads->second[0].mean.c_str());
+    ASSERT_STREQ("0.2", tLoads->second[0].standard_deviation.c_str());
+    ASSERT_STREQ("12", tLoads->second[0].num_samples.c_str());
+    ASSERT_STREQ("beta", tLoads->second[0].distribution.c_str());
+
+    ASSERT_STREQ("load", tLoads->second[1].variable_type.c_str());
+    ASSERT_STREQ("angle variation", tLoads->second[1].type.c_str());
+    ASSERT_STREQ("y", tLoads->second[1].axis.c_str());
+    ASSERT_STREQ("20", tLoads->second[1].id.c_str());
+    ASSERT_STREQ("20", tLoads->second[1].upper.c_str());
+    ASSERT_STREQ("-20", tLoads->second[1].lower.c_str());
+    ASSERT_STREQ("2", tLoads->second[1].mean.c_str());
+    ASSERT_STREQ("2", tLoads->second[1].standard_deviation.c_str());
+    ASSERT_STREQ("8", tLoads->second[1].num_samples.c_str());
+    ASSERT_STREQ("beta", tLoads->second[1].distribution.c_str());
+
+    // 2.2 TEST MATERIALS
+    auto tMaterials = tCategoriesMap.find(Plato::srom::category::MATERIAL);
+    ASSERT_EQ(1u, tMaterials->second.size());
+    ASSERT_STREQ("material", tMaterials->second[0].variable_type.c_str());
+    ASSERT_STREQ("poissons ratio", tMaterials->second[0].type.c_str());
+    ASSERT_STREQ("homogeneous", tMaterials->second[0].axis.c_str());
+    ASSERT_STREQ("3", tMaterials->second[0].id.c_str());
+    ASSERT_STREQ("0.35", tMaterials->second[0].upper.c_str());
+    ASSERT_STREQ("0.2", tMaterials->second[0].lower.c_str());
+    ASSERT_STREQ("0.27", tMaterials->second[0].mean.c_str());
+    ASSERT_STREQ("0.05", tMaterials->second[0].standard_deviation.c_str());
+    ASSERT_STREQ("6", tMaterials->second[0].num_samples.c_str());
+    ASSERT_STREQ("beta", tMaterials->second[0].distribution.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
