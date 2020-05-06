@@ -315,7 +315,7 @@ void PlatoAnalyzeInputDeckWriter::buildMaximizeHeatConductionParamsForPlatoAnaly
     pugi::xml_node tPugiNode1, tPugiNode2;
 
     addNTVParameter(aNode, "Physics", "string", "Thermal");
-    addNTVParameter(aNode, "PDE Constraint", "string", "Thermostatics");
+    addNTVParameter(aNode, "PDE Constraint", "string", "Elliptic");
     addNTVParameter(aNode, "Constraint", "string", "My Volume");
     addNTVParameter(aNode, "Objective", "string", "My Internal Thermal Energy");
     addNTVParameter(aNode, "Self-Adjoint", "bool", "false");
@@ -326,7 +326,7 @@ void PlatoAnalyzeInputDeckWriter::buildMaximizeHeatConductionParamsForPlatoAnaly
     // Internal Elastic Energy Objective
     addPAObjectiveBlock(aNode, "My Internal Thermal Energy");
     // Thermostatics
-    addPAPDEConstraintBlock(aNode, "Thermostatics");
+    addPAPDEConstraintBlock(aNode, "Elliptic");
     // Material Model
     addPAMaterialModelBlock(aNode, "Isotropic Linear Thermal");
 
