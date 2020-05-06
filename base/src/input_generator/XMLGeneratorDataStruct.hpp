@@ -396,7 +396,6 @@ struct InputData
     std::string m_filterType_kernelThenHeaviside_XMLName;
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
-    std::map<size_t,size_t> mObjectiveLoadCaseIndexToUncertaintyIndex;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;
 

@@ -496,50 +496,16 @@ namespace Plato
 namespace srom
 {
 
-enum struct category
-{
-    MATERIAL = 0, LOAD = 1, UNDEFINED = 2,
-};
-
-using UncertaintyCategories = std::map<Plato::srom::category, std::vector<XMLGen::Uncertainty>>;
-inline void split_uncertainty_categories
-(const XMLGen::InputData& aMetadata, Plato::srom::UncertaintyCategories& aCategories)
-{
-    aCategories.clear();
-    for(auto& tUncertainty : aMetadata.uncertainties)
-    {
-        auto tCategory = Plato::srom::tolower(tUncertainty.variable_type);
-        auto tIsLoad = tCategory == "load" ? true : false;
-        auto tIsMaterial = tCategory == "material" ? true : false;
-        if (tIsLoad && !tIsMaterial)
-        {
-            aCategories[Plato::srom::category::LOAD].push_back(tUncertainty);
-        }
-        else if (tIsMaterial && !tIsLoad)
-        {
-            aCategories[Plato::srom::category::MATERIAL].push_back(tUncertainty);
-        }
-        else if (tIsMaterial && tIsLoad)
-        {
-            THROWERR(std::string("Split Uncertainty Categories: A non-deterministic variable cannot be two categories at once.")
-                + " A non-deterministic variable must be an unique category.")
-        }
-        else if (!tIsMaterial && !tIsLoad)
-        {
-            THROWERR(std::string("Split Uncertainty Categories: Non-deterministic category '") + tCategory + "' is not supported.")
-        }
-    }
-}
-
 using RandomMatPropMap = std::map<std::string, std::map<std::string, XMLGen::Uncertainty>>;
-inline void build_material_id_to_random_material_map
-(const std::vector<XMLGen::Uncertainty>& aRandomMatProperties, Plato::srom::RandomMatPropMap& aMap)
+inline Plato::srom::RandomMatPropMap build_material_id_to_random_material_map
+(const std::vector<XMLGen::Uncertainty>& aRandomMatProperties)
 {
-    aMap.clear();
+    Plato::srom::RandomMatPropMap tMap;
     for(auto& tRandomMatProp : aRandomMatProperties)
     {
-        aMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
+        tMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
     }
+    return tMap;
 }
 
 inline void append_random_material
@@ -580,6 +546,11 @@ inline void preprocess_material_properties
  const Plato::srom::RandomMatPropMap& aRandomMatMap,
  Plato::srom::InputMetaData& aSromInputs)
 {
+    if(aAllMaterials.empty())
+    {
+        THROWERR("Pre-process Material Properties: Materials list is empty. Plato problem has no material defined in the input file.")
+    }
+
     for(auto& tMaterial : aAllMaterials)
     {
         Plato::srom::Material tSromMaterial;
@@ -602,10 +573,18 @@ inline void preprocess_material_properties
 }
 
 inline void preprocess_nondeterministic_material_inputs
-(XMLGen::InputData& aInputMetadata,
- Plato::srom::InputMetaData& aSromInputs)
+(XMLGen::InputData& aInputMetadata, Plato::srom::InputMetaData& aSromInputs)
 {
-   // auto tRandomMaterialIDs = Plato::srom::gather_nondeterministic_materials(aInputMetadata);
+    auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
+    auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::MATERIAL);
+    if(tIterator == tCategoriesToUncertaintiesMap.end())
+    {
+        THROWERR(std::string("Pre-process Non-Deterministic Material Inputs: Requested a stochastic use case; ")
+            + "however, the objective has no associated non-deterministic materials, i.e. no uncertainty block "
+            + "is associated with a material identification number.")
+    }
+    auto tMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
+    Plato::srom::preprocess_material_properties(aInputMetadata.materials, tMap, aSromInputs);
 }
 
 }
@@ -614,6 +593,22 @@ inline void preprocess_nondeterministic_material_inputs
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error1)
+{
+    // EMPTY UNCERTAINTY LIST
+    XMLGen::InputData tMetadata;
+    EXPECT_THROW(Plato::srom::split_uncertainties_into_categories(tMetadata), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error2)
+{
+    // UNSUPPORTED USE CASE
+    XMLGen::InputData tMetadata;
+    tMetadata.uncertainties.push_back(XMLGen::Uncertainty());
+    tMetadata.uncertainties[0].variable_type = "boundary condition";
+    EXPECT_THROW(Plato::srom::split_uncertainties_into_categories(tMetadata), std::runtime_error);
+}
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
 {

@@ -65,6 +65,55 @@ namespace srom
 {
 
 /******************************************************************************//**
+ * \enum Non-deterministic variable's category.  Is the non-deterministic variable \n
+ * a material property or a load?
+**********************************************************************************/
+enum struct category
+{
+    MATERIAL = 0, LOAD = 1, UNDEFINED = 2,
+};
+// enum struct category
+
+/*!< map from non-deterministic variable's category to list of non-deterministic variables' metadata */
+using UncertaintyCategories = std::map<Plato::srom::category, std::vector<XMLGen::Uncertainty>>;
+/******************************************************************************//**
+ * \fn split_uncertainty_categories
+ * \brief Split input uncertainties into categories.
+ * \param [in]  aMetadata Plato problem input metadata
+ * \return map from non-deterministic variable category to list of non-deterministic variables' metadata
+**********************************************************************************/
+inline UncertaintyCategories split_uncertainties_into_categories(const XMLGen::InputData& aMetadata)
+{
+    if(aMetadata.uncertainties.empty())
+    {
+        THROWERR(std::string("Split Uncertainty Into Categories: Input list of uncertainties is empty. ")
+            + "Requested a stochastic use case but no uncertainty block was defined.")
+    }
+
+    Plato::srom::UncertaintyCategories tCategories;
+    for(auto& tUncertainty : aMetadata.uncertainties)
+    {
+        auto tCategory = Plato::srom::tolower(tUncertainty.variable_type);
+        auto tIsLoad = tCategory == "load" ? true : false;
+        auto tIsMaterial = tCategory == "material" ? true : false;
+        if (tIsLoad && !tIsMaterial)
+        {
+            tCategories[Plato::srom::category::LOAD].push_back(tUncertainty);
+        }
+        else if (tIsMaterial && !tIsLoad)
+        {
+            tCategories[Plato::srom::category::MATERIAL].push_back(tUncertainty);
+        }
+        else if (!tIsMaterial && !tIsLoad)
+        {
+            THROWERR(std::string("Split Uncertainty Into Categories: Non-deterministic category '") + tCategory + "' is not supported.")
+        }
+    }
+    return tCategories;
+}
+// function split_uncertainty_categories
+
+/******************************************************************************//**
  * \brief transform string with variable type to an enum (Plato::srom::VariableType)
  * \param [in] aStringVarType string variable type
  * \param [out] aEnumVarType enum variable type
@@ -161,26 +210,29 @@ inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
 
 /******************************************************************************//**
  * \brief Expand old set of load cases into an array of new load cases with one load
+ *
  * \param [in] aOldLoadCase old set of load cases
  * \param [in] aNewLoadCaseList new set of load cases re-formatted to create the
  *             stochastic reduced order models (srom)
- * \param [in] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
+ * \param [in] aOriginalToNewLoadCaseMap map between original load case IDs and \n
+ *   new load case IDs, i.e. map<old_load_case_id,new_load_case_id>
+ *
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
+inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aOldLoadCases,
                               std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
                               std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
 {
     Plato::UniqueCounter tUniqueLoadIDCounter;
-    if(Plato::srom::initialize_load_id_counter(aInputLoadCases, tUniqueLoadIDCounter) == false)
+    if(Plato::srom::initialize_load_id_counter(aOldLoadCases, tUniqueLoadIDCounter) == false)
     {
         PRINTERR("FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n");
         return (false);
     }
 
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aInputLoadCases.size(); tLoadCaseIndex++)
+    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aOldLoadCases.size(); tLoadCaseIndex++)
     {
-        const XMLGen::LoadCase& tOldLoadCase = aInputLoadCases[tLoadCaseIndex];
+        const XMLGen::LoadCase& tOldLoadCase = aOldLoadCases[tLoadCaseIndex];
         Plato::srom::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
     }
 
@@ -357,21 +409,23 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
  *                    by the Stochastic Reduced Order Model (SROM) interface
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool generate_srom_load_inputs(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
-                                      const std::vector<XMLGen::Uncertainty> &aUncertainties,
-                                      std::vector<Plato::srom::Load> &aLoads)
+inline std::vector<Plato::srom::Load>
+generate_srom_load_inputs
+(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
+ const std::vector<XMLGen::Uncertainty> &aUncertainties)
 {
     std::vector<XMLGen::LoadCase> tNewSetLoadCases;
     std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
     Plato::srom::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
 
     std::set<int> tRandomLoadIDs;
+    std::vector<Plato::srom::Load> tLoads;
     Plato::srom::create_random_load_variables
-        (aUncertainties, tNewSetLoadCases, tOriginalToNewLoadCaseMap, tRandomLoadIDs, aLoads);
+        (aUncertainties, tNewSetLoadCases, tOriginalToNewLoadCaseMap, tRandomLoadIDs, tLoads);
 
-    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, aLoads);
+    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, tLoads);
 
-    return (true);
+    return (tLoads);
 }
 // function generate_srom_load_inputs
 
@@ -427,11 +481,11 @@ inline void define_srom_problem_usecase
  * \param [in/out] aLoadCases     set of load case metadata
  * \param [in/out] aUncertainties set of uncertainty metadata
 **********************************************************************************/
-inline void preprocess_srom_problem_load_inputs
-(XMLGen::InputData& aInputMetadata,
- std::vector<XMLGen::LoadCase>& aLoadCases,
- std::vector<XMLGen::Uncertainty>& aUncertainties)
+inline std::vector<XMLGen::LoadCase>
+preprocess_srom_problem_load_inputs
+(XMLGen::InputData& aInputMetadata)
 {
+    std::vector<XMLGen::LoadCase> tLoadCases;
     XMLGen::Objective &tCurObj = aInputMetadata.objectives[0];
     for (size_t tLoadCaseID = 0; tLoadCaseID < tCurObj.load_case_ids.size(); ++tLoadCaseID)
     {
@@ -440,19 +494,12 @@ inline void preprocess_srom_problem_load_inputs
         {
             if (aInputMetadata.load_cases[tLoadCaseIndex].id == tCurLoadCaseID)
             {
-                aLoadCases.push_back(aInputMetadata.load_cases[tLoadCaseIndex]);
+                tLoadCases.push_back(aInputMetadata.load_cases[tLoadCaseIndex]);
                 tLoadCaseIndex = aInputMetadata.load_cases.size();
             }
         }
-        for (size_t tUncertaintyIndex = 0; tUncertaintyIndex < aInputMetadata.uncertainties.size(); ++tUncertaintyIndex)
-        {
-            if (aInputMetadata.uncertainties[tUncertaintyIndex].id == tCurLoadCaseID)
-            {
-                aUncertainties.push_back(aInputMetadata.uncertainties[tUncertaintyIndex]);
-                aInputMetadata.mObjectiveLoadCaseIndexToUncertaintyIndex[tLoadCaseID] = tUncertaintyIndex;
-            }
-        }
     }
+    return tLoadCases;
 }
 // function preprocess_srom_problem_load_inputs
 
@@ -515,17 +562,17 @@ inline void preprocess_nondeterministic_load_inputs
 (XMLGen::InputData& aInputMetadata,
  Plato::srom::InputMetaData& aSromInputs)
 {
-    std::vector<XMLGen::LoadCase> tCurObjLoadCases;
-    std::vector<XMLGen::Uncertainty> tCurObjUncertainties;
-    Plato::srom::preprocess_srom_problem_load_inputs(aInputMetadata, tCurObjLoadCases, tCurObjUncertainties);
-    if(tCurObjUncertainties.empty())
+    auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
+    auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::LOAD);
+    if(tIterator == tCategoriesToUncertaintiesMap.end())
     {
         THROWERR(std::string("Pre-process Non-Deterministic Load Inputs: Requested a stochastic use case; ")
-            + "however, the objective has no associated non-deterministic inputs, i.e. no uncertainty block is defined.")
+            + "however, the objective has no associated non-deterministic loads, i.e. no uncertainty block "
+            + "is associated with a load identification number.")
     }
 
-    std::vector<Plato::srom::Load> tLoads;
-    Plato::srom::generate_srom_load_inputs(tCurObjLoadCases,tCurObjUncertainties,tLoads);
+    auto tActiveLoadCases = Plato::srom::preprocess_srom_problem_load_inputs(aInputMetadata);
+    auto tLoads = Plato::srom::generate_srom_load_inputs(tActiveLoadCases, tIterator->second);
     aSromInputs.loads(tLoads);
 }
 // function preprocess_nondeterministic_load_inputs
