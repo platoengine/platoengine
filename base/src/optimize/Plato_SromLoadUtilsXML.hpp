@@ -198,6 +198,41 @@ inline void append_material_properties
 // function append_material_properties
 
 /******************************************************************************//**
+ * \fn preprocess_nondeterministic_material_inputs
+ * \brief Pre-process non-deterministic material inputs, i.e. prepare inputs for \n
+ *   Stochastic Reducded Order Model (SROM) problem.
+ * \param [in] aInputMetadata  Plato problem input metadata
+ * \param [in] aSromInputs     SROM problem input metadata
+**********************************************************************************/
+inline void preprocess_nondeterministic_material_inputs
+(XMLGen::InputData& aInputMetadata, Plato::srom::InputMetaData& aSromInputs)
+{
+    if(aInputMetadata.materials.empty())
+    {
+        THROWERR(std::string("Pre-Process Non-Deterministic Material Inputs: Input list of materials is empty. ")
+            + "Plato problem has no material defined in input file.")
+    }
+
+    auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
+    auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::MATERIAL);
+    if(tIterator == tCategoriesToUncertaintiesMap.end())
+    {
+        THROWERR(std::string("Pre-Process Non-Deterministic Material Inputs: Requested a stochastic use case; ")
+            + "however, the objective has no associated non-deterministic materials, i.e. no uncertainty block "
+            + "is associated with a material identification number.")
+    }
+
+    auto aRandomMatPropMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
+    for(auto& tMaterial : aInputMetadata.materials)
+    {
+        Plato::srom::Material tSromMaterial;
+        Plato::srom::append_material_properties(tMaterial, aRandomMatPropMap, tSromMaterial);
+        aSromInputs.append(tSromMaterial);
+    }
+}
+// function preprocess_nondeterministic_material_inputs
+
+/******************************************************************************//**
  * \brief transform string with variable type to an enum (Plato::srom::VariableType)
  * \param [in] aStringVarType string variable type
  * \param [out] aEnumVarType enum variable type
@@ -567,10 +602,10 @@ inline void define_srom_problem_usecase
 **********************************************************************************/
 inline std::vector<XMLGen::LoadCase>
 preprocess_srom_problem_load_inputs
-(XMLGen::InputData& aInputMetadata)
+(const XMLGen::InputData& aInputMetadata)
 {
     std::vector<XMLGen::LoadCase> tLoadCases;
-    XMLGen::Objective &tCurObj = aInputMetadata.objectives[0];
+    const XMLGen::Objective &tCurObj = aInputMetadata.objectives[0];
     for (size_t tLoadCaseID = 0; tLoadCaseID < tCurObj.load_case_ids.size(); ++tLoadCaseID)
     {
         const std::string &tCurLoadCaseID = tCurObj.load_case_ids[tLoadCaseID];
@@ -643,14 +678,14 @@ inline void postprocess_srom_problem_load_outputs
  * \param [in/out] aSromInputs     Stochastic Reduced Order Model (SROM) problem metadata
 **********************************************************************************/
 inline void preprocess_nondeterministic_load_inputs
-(XMLGen::InputData& aInputMetadata,
+(const XMLGen::InputData& aInputMetadata,
  Plato::srom::InputMetaData& aSromInputs)
 {
     auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
     auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::LOAD);
     if(tIterator == tCategoriesToUncertaintiesMap.end())
     {
-        THROWERR(std::string("Pre-process Non-Deterministic Load Inputs: Requested a stochastic use case; ")
+        THROWERR(std::string("Pre-Process Non-Deterministic Load Inputs: Requested a stochastic use case; ")
             + "however, the objective has no associated non-deterministic loads, i.e. no uncertainty block "
             + "is associated with a load identification number.")
     }
@@ -680,6 +715,7 @@ inline void preprocess_srom_problem_inputs
         }
         case Plato::srom::usecase::MATERIAL:
         {
+            Plato::srom::preprocess_nondeterministic_material_inputs(aInputMetadata, aSromInputs);
             break;
         }
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
@@ -690,7 +726,7 @@ inline void preprocess_srom_problem_inputs
         default:
         case Plato::srom::usecase::UNDEFINED:
         {
-            THROWERR("Pre-process SROM Problem Inputs: Detected an undefined SROM problem use case.")
+            THROWERR("Pre-Process SROM Problem Inputs: Detected an undefined SROM problem use case.")
             break;
         }
     }
@@ -744,7 +780,7 @@ inline void postprocess_srom_problem_outputs
         default:
         case Plato::srom::usecase::UNDEFINED:
         {
-            THROWERR("Post-process SROM Problem Outputs: Detected an undefined SROM problem use case.")
+            THROWERR("Post-Process SROM Problem Outputs: Detected an undefined SROM problem use case.")
             break;
         }
     }

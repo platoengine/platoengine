@@ -278,7 +278,7 @@ public:
     /******************************************************************************//**
      * \fn tag
      * \brief Return random variable tag.
-     * return tag
+     * \return tag
     **********************************************************************************/
     std::string tag() const
     {
@@ -288,7 +288,7 @@ public:
     /******************************************************************************//**
      * \fn file
      * \brief Return name of file with sample-probability pair information.
-     * return filename
+     * \return filename
     **********************************************************************************/
     std::string file() const
     {
@@ -298,7 +298,7 @@ public:
     /******************************************************************************//**
      * \fn attribute
      * \brief Return random variable attribute.
-     * return filename
+     * \return filename
     **********************************************************************************/
     std::string attribute() const
     {
@@ -308,7 +308,7 @@ public:
     /******************************************************************************//**
      * \fn mean
      * \brief Return random variable mean.
-     * return mean
+     * \return mean
     **********************************************************************************/
     std::string mean() const
     {
@@ -318,7 +318,7 @@ public:
     /******************************************************************************//**
      * \fn samples
      * \brief Return number of random variable samples.
-     * return number of samples
+     * \return number of samples
     **********************************************************************************/
     std::string samples() const
     {
@@ -328,7 +328,7 @@ public:
     /******************************************************************************//**
      * \fn lower
      * \brief Return random variable lower bound.
-     * return lower bound
+     * \return lower bound
     **********************************************************************************/
     std::string lower() const
     {
@@ -338,7 +338,7 @@ public:
     /******************************************************************************//**
      * \fn upper
      * \brief Return random variable upper bound.
-     * return upper bound
+     * \return upper bound
     **********************************************************************************/
     std::string upper() const
     {
@@ -348,7 +348,7 @@ public:
     /******************************************************************************//**
      * \fn deviation
      * \brief Return random variable standard deviation.
-     * return standard deviation
+     * \return standard deviation
     **********************************************************************************/
     std::string deviation() const
     {
@@ -358,7 +358,7 @@ public:
     /******************************************************************************//**
      * \fn distribution
      * \brief Return random variable distribution.
-     * return distribution
+     * \return distribution
     **********************************************************************************/
     std::string distribution() const
     {
@@ -396,7 +396,7 @@ public:
     /******************************************************************************//**
      * \fn tag
      * \brief Return deterministic variable tag.
-     * return tag
+     * \return tag
     **********************************************************************************/
     std::string tag() const
     {
@@ -416,7 +416,7 @@ public:
     /******************************************************************************//**
      * \fn value
      * \brief Return deterministic variable value.
-     * return value
+     * \return value
     **********************************************************************************/
     std::string value() const
     {
@@ -436,7 +436,7 @@ public:
     /******************************************************************************//**
      * \fn attribute
      * \brief Return deterministic variable attribute.
-     * return attribute
+     * \return attribute
     **********************************************************************************/
     std::string attribute() const
     {
