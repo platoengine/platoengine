@@ -50,13 +50,12 @@ inline void define_deterministic_material
  Plato::srom::RandomMaterial& aOutMaterial)
 {
     aOutMaterial.probability(1.0);
-    aOutMaterial.blockID(aInMaterial.blockID());
     aOutMaterial.category(aInMaterial.category());
     aOutMaterial.materialID(aInMaterial.materialID());
     auto tDeterministicVars = aInMaterial.deterministicVars();
     for (auto& tVariable : tDeterministicVars)
     {
-        aOutMaterial.append(tVariable.mTag, tVariable.mAttribute, tVariable.mValue);
+        aOutMaterial.append(tVariable.tag(), tVariable.attribute(), tVariable.value());
     }
 }
 // function define_deterministic_material
@@ -84,7 +83,7 @@ inline void append_deterministic_materials
             {
                 std::ostringstream tMsg;
                 tMsg << "Append Deterministic Materials: Material with identification number '" << tMaterial.materialID()
-                    << "' in block with identification number '" << tMaterial.blockID() << "' is not defined.";
+                    << "' in block with identification number '" << "' is not defined.";
                 THROWERR(tMsg.str().c_str())
             }
             tMaterial.check();
@@ -143,7 +142,6 @@ inline void initialize_random_material_set
     for(auto& tSample : aSromVariable.mSampleProbPairs.mSamples)
     {
         Plato::srom::RandomMaterial tRandomMaterial;
-        tRandomMaterial.blockID(aMaterial.blockID());
         tRandomMaterial.category(aMaterial.category());
         tRandomMaterial.materialID(aMaterial.materialID());
 
@@ -187,7 +185,6 @@ inline void update_random_material_set
         for(auto& tOriginalRandomMaterial : tOriginalRandomMaterialSet)
         {
             Plato::srom::RandomMaterial tNewRandomMaterial;
-            tNewRandomMaterial.blockID(aMaterial.blockID());
             tNewRandomMaterial.category(aMaterial.category());
             tNewRandomMaterial.materialID(aMaterial.materialID());
 
@@ -253,7 +250,7 @@ inline void append_deterministic_material_properties
     {
         for(auto& tVar : tDeterministicVars)
         {
-            tRandomMaterial.append(tVar.mTag, tVar.mAttribute, tVar.mValue);
+            tRandomMaterial.append(tVar.tag(), tVar.attribute(), tVar.value());
         }
     }
 }
@@ -454,8 +451,8 @@ inline void build_material_sroms(const std::vector<Plato::srom::Material>& aInpu
         {
             std::ostringstream tMsg;
             tMsg << "Build Material SROMS: Failed to compute Sample-Probability pairs for material "
-                << "with identification number '" << tMaterial.materialID() << "' in block with identification "
-                << "number '" << tMaterial.blockID() << "'.";
+                << "with identification number '" << tMaterial.materialID() << "' and category '"
+                << tMaterial.category() << "'.";
             PRINTERR(tMsg.str().c_str());
         }
 

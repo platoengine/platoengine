@@ -496,85 +496,15 @@ namespace Plato
 namespace srom
 {
 
-using RandomMatPropMap = std::map<std::string, std::map<std::string, XMLGen::Uncertainty>>;
-inline Plato::srom::RandomMatPropMap build_material_id_to_random_material_map
-(const std::vector<XMLGen::Uncertainty>& aRandomMatProperties)
-{
-    Plato::srom::RandomMatPropMap tMap;
-    for(auto& tRandomMatProp : aRandomMatProperties)
-    {
-        tMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
-    }
-    return tMap;
-}
-
-inline void append_random_material
-(const XMLGen::Material& tMaterial,
- const Plato::srom::RandomMatPropMap& aRandomMatMap,
- Plato::srom::Material& tSromMaterial)
-{
-    // material has random properties
-    auto tMatID = tMaterial.id();
-    auto tRandMatMapItr = aRandomMatMap.find(tMatID);
-    auto tTags = tMaterial.tags();
-    for (auto &tTag : tTags)
-    {
-        auto tIterator = tRandMatMapItr->second.find(tTag);
-        if (tIterator != tRandMatMapItr->second.end())
-        {
-            // property is random
-            Plato::srom::Statistics tStats;
-            tStats.mFile = tIterator->second.file;
-            tStats.mMean = tIterator->second.mean;
-            tStats.mUpperBound = tIterator->second.upper;
-            tStats.mUpperBound = tIterator->second.upper;
-            tStats.mNumSamples = tIterator->second.num_samples;
-            tStats.mDistribution = tIterator->second.distribution;
-            tStats.mStandardDeviation = tIterator->second.standard_deviation;
-            tSromMaterial.append(tTag, tMaterial.attribute(), tStats);
-        }
-        else
-        {
-            // property is deterministic
-            tSromMaterial.append(tTag, tMaterial.attribute(), tMaterial.property(tTag));
-        }
-    }
-}
-
-inline void preprocess_material_properties
-(const std::vector<XMLGen::Material>& aAllMaterials,
- const Plato::srom::RandomMatPropMap& aRandomMatMap,
- Plato::srom::InputMetaData& aSromInputs)
-{
-    if(aAllMaterials.empty())
-    {
-        THROWERR("Pre-process Material Properties: Materials list is empty. Plato problem has no material defined in the input file.")
-    }
-
-    for(auto& tMaterial : aAllMaterials)
-    {
-        Plato::srom::Material tSromMaterial;
-        if(aRandomMatMap.find(tMaterial.id()) != aRandomMatMap.end())
-        {
-            // material has random properties
-            Plato::srom::append_random_material(tMaterial, aRandomMatMap, tSromMaterial);
-        }
-        else
-        {
-            // material is deterministic
-            auto tTags = tMaterial.tags();
-            for(auto& tTag : tTags)
-            {
-                tSromMaterial.append(tTag, tMaterial.attribute(), tMaterial.property(tTag));
-            }
-        }
-        aSromInputs.append(tSromMaterial);
-    }
-}
-
 inline void preprocess_nondeterministic_material_inputs
 (XMLGen::InputData& aInputMetadata, Plato::srom::InputMetaData& aSromInputs)
 {
+    if(aInputMetadata.materials.empty())
+    {
+        THROWERR(std::string("Pre-process Non-Deterministic Material Inputs: Input list of materials is empty. ")
+            + "Plato problem has no material defined in input file.")
+    }
+
     auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
     auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::MATERIAL);
     if(tIterator == tCategoriesToUncertaintiesMap.end())
@@ -583,8 +513,14 @@ inline void preprocess_nondeterministic_material_inputs
             + "however, the objective has no associated non-deterministic materials, i.e. no uncertainty block "
             + "is associated with a material identification number.")
     }
-    auto tMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
-    Plato::srom::preprocess_material_properties(aInputMetadata.materials, tMap, aSromInputs);
+
+    auto aRandomMatPropMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
+    for(auto& tMaterial : aInputMetadata.materials)
+    {
+        Plato::srom::Material tSromMaterial;
+        Plato::srom::append_material_properties(tMaterial, aRandomMatPropMap, tSromMaterial);
+        aSromInputs.append(tSromMaterial);
+    }
 }
 
 }
@@ -593,6 +529,234 @@ inline void preprocess_nondeterministic_material_inputs
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendRandomMaterial_Error)
+{
+    XMLGen::Material tMaterial;
+    Plato::srom::Material tSromMaterial;
+    Plato::srom::RandomMatPropMap tEmptyMap;
+    EXPECT_THROW(Plato::srom::append_material_properties(tMaterial, tEmptyMap, tSromMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
+{
+    // 1. BUILD RANDOM MATERIAL VARIABLE
+    XMLGen::Uncertainty tCase1;
+    tCase1.id = "3";
+    tCase1.axis = "homogeneous";
+    tCase1.type = "poissons ratio";
+    tCase1.variable_type = "material";
+    tCase1.distribution = "beta";
+    tCase1.lower = "0.2";
+    tCase1.upper = "0.35";
+    tCase1.mean = "0.27";
+    tCase1.num_samples = "6";
+    tCase1.standard_deviation = "0.05";
+
+    // 2. BUILD RANDOM MATERIAL MAP
+    std::vector<XMLGen::Uncertainty> tRandomVars;
+    tRandomVars.push_back(tCase1);
+    auto tRandomMaterialMap = Plato::srom::build_material_id_to_random_material_map(tRandomVars);
+
+    // 3. BUILD DETERMINISTIC MATERIAL METADATA
+    XMLGen::Material tMaterial;
+    tMaterial.id("30");
+    tMaterial.category("isotropic");
+    tMaterial.property("youngs modulus", "0.5");
+    tMaterial.property("poissons ratio", "0.3");
+
+    // 4. APPEND MATERIAL TO SROM MATERIAL METADATA
+    Plato::srom::Material tSromMaterial;
+    EXPECT_NO_THROW(Plato::srom::append_material_properties(tMaterial, tRandomMaterialMap, tSromMaterial));
+
+    // 5. TEST RESULTS
+    ASSERT_FALSE(tSromMaterial.isRandom());
+    ASSERT_TRUE(tSromMaterial.isDeterministic());
+    ASSERT_TRUE(tSromMaterial.randomVars().empty());
+    ASSERT_EQ(2u, tSromMaterial.deterministicVars().size());
+    ASSERT_STREQ("30", tSromMaterial.materialID().c_str());
+    ASSERT_STREQ("isotropic", tSromMaterial.category().c_str());
+    ASSERT_STREQ("poissons ratio", tSromMaterial.tags()[0].c_str());
+    ASSERT_STREQ("youngs modulus", tSromMaterial.tags()[1].c_str());
+
+    ASSERT_STREQ("0.3", tSromMaterial.deterministicVars()[0].value().c_str());
+    ASSERT_STREQ("poissons ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[0].attribute().c_str());
+    ASSERT_STREQ("0.5", tSromMaterial.deterministicVars()[1].value().c_str());
+    ASSERT_STREQ("youngs modulus", tSromMaterial.deterministicVars()[1].tag().c_str());
+    ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[1].attribute().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
+{
+    // 1. BUILD RANDOM MATERIAL MAP
+    XMLGen::Uncertainty tCase1;
+    tCase1.id = "3";
+    tCase1.axis = "homogeneous";
+    tCase1.type = "poissons ratio";
+    tCase1.variable_type = "material";
+    tCase1.distribution = "beta";
+    tCase1.lower = "0.2";
+    tCase1.upper = "0.35";
+    tCase1.mean = "0.27";
+    tCase1.num_samples = "6";
+    tCase1.standard_deviation = "0.05";
+
+    XMLGen::Uncertainty tCase2;
+    tCase2.id = "30";
+    tCase2.axis = "homogeneous";
+    tCase2.type = "youngs modulus";
+    tCase2.variable_type = "material";
+    tCase2.distribution = "beta";
+    tCase2.lower = "1";
+    tCase2.upper = "2";
+    tCase2.mean = "0.2";
+    tCase2.num_samples = "8";
+    tCase2.standard_deviation = "0.15";
+
+    std::vector<XMLGen::Uncertainty> tRandomVars;
+    tRandomVars.push_back(tCase1);
+    tRandomVars.push_back(tCase2);
+    auto tRandomMaterialMap = Plato::srom::build_material_id_to_random_material_map(tRandomVars);
+
+    // 2. BUILD MATERIAL METADATA
+    XMLGen::Material tMaterial;
+    tMaterial.id("30");
+    tMaterial.category("isotropic");
+    tMaterial.property("youngs modulus", "0.5");
+    tMaterial.property("poissons ratio", "0.3");
+
+    // 3. APPEND MATERIAL TO SROM MATERIAL METADATA
+    Plato::srom::Material tSromMaterial;
+    EXPECT_NO_THROW(Plato::srom::append_material_properties(tMaterial, tRandomMaterialMap, tSromMaterial));
+
+    // 4. TEST RESULTS
+    ASSERT_TRUE(tSromMaterial.isRandom());
+    ASSERT_FALSE(tSromMaterial.isDeterministic());
+    ASSERT_EQ(1u, tSromMaterial.randomVars().size());
+    ASSERT_EQ(1u, tSromMaterial.deterministicVars().size());
+    ASSERT_STREQ("30", tSromMaterial.materialID().c_str());
+    ASSERT_STREQ("isotropic", tSromMaterial.category().c_str());
+    ASSERT_STREQ("youngs modulus", tSromMaterial.tags()[0].c_str());
+    ASSERT_STREQ("poissons ratio", tSromMaterial.tags()[1].c_str());
+
+    ASSERT_STREQ("0.3", tSromMaterial.deterministicVars()[0].value().c_str());
+    ASSERT_STREQ("poissons ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[0].attribute().c_str());
+
+    ASSERT_EQ(0, tSromMaterial.randomVars()[0].id());
+    ASSERT_TRUE(tSromMaterial.randomVars()[0].file().empty());
+    ASSERT_STREQ("0.2", tSromMaterial.randomVars()[0].mean().c_str());
+    ASSERT_STREQ("2", tSromMaterial.randomVars()[0].upper().c_str());
+    ASSERT_STREQ("1", tSromMaterial.randomVars()[0].lower().c_str());
+    ASSERT_STREQ("8", tSromMaterial.randomVars()[0].samples().c_str());
+    ASSERT_STREQ("0.15", tSromMaterial.randomVars()[0].deviation().c_str());
+    ASSERT_STREQ("beta", tSromMaterial.randomVars()[0].distribution().c_str());
+    ASSERT_STREQ("youngs modulus", tSromMaterial.randomVars()[0].tag().c_str());
+    ASSERT_STREQ("homogeneous", tSromMaterial.randomVars()[0].attribute().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
+{
+    XMLGen::Uncertainty tCase1;
+    tCase1.id = "3";
+    tCase1.axis = "homogeneous";
+    tCase1.type = "poissons ratio";
+    tCase1.variable_type = "material";
+    tCase1.distribution = "beta";
+    tCase1.lower = "0.2";
+    tCase1.upper = "0.35";
+    tCase1.mean = "0.27";
+    tCase1.num_samples = "6";
+    tCase1.standard_deviation = "0.05";
+
+    XMLGen::Uncertainty tCase2;
+    tCase2.variable_type = "load";
+    tCase2.axis = "y";
+    tCase2.distribution = "beta";
+    tCase2.id = "20";
+    tCase2.lower = "-20";
+    tCase2.upper = "20";
+    tCase2.mean = "2";
+    tCase2.standard_deviation = "2";
+    tCase2.num_samples = "8";
+    tCase2.type = "angle variation";
+
+    std::vector<XMLGen::Uncertainty> tRandomVars;
+    tRandomVars.push_back(tCase1);
+    tRandomVars.push_back(tCase2);
+
+    EXPECT_THROW(Plato::srom::build_material_id_to_random_material_map(tRandomVars), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
+{
+    XMLGen::Uncertainty tCase1;
+    tCase1.id = "3";
+    tCase1.axis = "homogeneous";
+    tCase1.type = "poissons ratio";
+    tCase1.variable_type = "material";
+    tCase1.distribution = "beta";
+    tCase1.lower = "0.2";
+    tCase1.upper = "0.35";
+    tCase1.mean = "0.27";
+    tCase1.num_samples = "6";
+    tCase1.standard_deviation = "0.05";
+
+    XMLGen::Uncertainty tCase2;
+    tCase2.id = "30";
+    tCase2.axis = "homogeneous";
+    tCase2.type = "youngs modulus";
+    tCase2.variable_type = "material";
+    tCase2.distribution = "beta";
+    tCase2.lower = "1";
+    tCase2.upper = "2";
+    tCase2.mean = "0.2";
+    tCase2.num_samples = "8";
+    tCase2.standard_deviation = "0.15";
+
+    std::vector<XMLGen::Uncertainty> tRandomVars;
+    tRandomVars.push_back(tCase1);
+    tRandomVars.push_back(tCase2);
+
+    auto tRandomVarMap = Plato::srom::build_material_id_to_random_material_map(tRandomVars);
+    ASSERT_EQ(2u, tRandomVarMap.size());
+    std::vector<std::string> tGoldIDs = {"3", "30"};
+    std::vector<std::string> tGoldTags = {"poissons ratio", "youngs modulus"};
+    auto tGoldIdIterator = tGoldIDs.begin();
+    auto tGoldTagIterator = tGoldTags.begin();
+    for(auto& tRandomVar : tRandomVarMap)
+    {
+        ASSERT_STREQ(tGoldIdIterator->c_str(), tRandomVar.first.c_str());
+        ASSERT_STREQ(tGoldTagIterator->c_str(), tRandomVar.second.begin()->first.c_str());
+        std::advance(tGoldIdIterator, 1);
+        std::advance(tGoldTagIterator, 1);
+    }
+
+    // TEST MATERIAL 1
+    ASSERT_TRUE(tRandomVarMap.find("3")->second.find("poissons ratio")->second.file.empty());
+    ASSERT_STREQ("3", tRandomVarMap.find("3")->second.find("poissons ratio")->second.id.c_str());
+    ASSERT_STREQ("0.27", tRandomVarMap.find("3")->second.find("poissons ratio")->second.mean.c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("3")->second.find("poissons ratio")->second.lower.c_str());
+    ASSERT_STREQ("0.35", tRandomVarMap.find("3")->second.find("poissons ratio")->second.upper.c_str());
+    ASSERT_STREQ("6", tRandomVarMap.find("3")->second.find("poissons ratio")->second.num_samples.c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("3")->second.find("poissons ratio")->second.axis.c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("3")->second.find("poissons ratio")->second.distribution.c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("3")->second.find("poissons ratio")->second.variable_type.c_str());
+    ASSERT_STREQ("0.05", tRandomVarMap.find("3")->second.find("poissons ratio")->second.standard_deviation.c_str());
+
+    // TEST MATERIAL 2
+    ASSERT_TRUE(tRandomVarMap.find("30")->second.find("youngs modulus")->second.file.empty());
+    ASSERT_STREQ("30", tRandomVarMap.find("30")->second.find("youngs modulus")->second.id.c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("30")->second.find("youngs modulus")->second.mean.c_str());
+    ASSERT_STREQ("1", tRandomVarMap.find("30")->second.find("youngs modulus")->second.lower.c_str());
+    ASSERT_STREQ("2", tRandomVarMap.find("30")->second.find("youngs modulus")->second.upper.c_str());
+    ASSERT_STREQ("8", tRandomVarMap.find("30")->second.find("youngs modulus")->second.num_samples.c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("30")->second.find("youngs modulus")->second.axis.c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("30")->second.find("youngs modulus")->second.distribution.c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("30")->second.find("youngs modulus")->second.variable_type.c_str());
+    ASSERT_STREQ("0.15", tRandomVarMap.find("30")->second.find("youngs modulus")->second.standard_deviation.c_str());
+}
 
 TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error1)
 {

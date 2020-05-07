@@ -169,7 +169,8 @@ struct Material
 {
 private:
     std::string mID; /*!< material identification number */
-    std::string mAttribute = "homogeneous";  /*!< material attribute */
+    std::string mCategory = "isotropic";  /*!< material category, default: isotropic */
+    std::string mAttribute = "homogeneous";  /*!< material attribute, default: homogeneous */
     std::map<std::string, std::string> mProperties; /*!< list of material properties, map<tag,value> */
 
 public:
@@ -192,6 +193,7 @@ public:
     {
         mID = aID;
     }
+
     /******************************************************************************//**
      * \fn attribute
      * \brief Return material attribute.
@@ -210,6 +212,26 @@ public:
     void attribute(const std::string& aAttribute)
     {
         mAttribute = aAttribute;
+    }
+
+    /******************************************************************************//**
+     * \fn category
+     * \brief Return material category.
+     * \return category
+    **********************************************************************************/
+    std::string category() const
+    {
+        return mCategory;
+    }
+
+    /******************************************************************************//**
+     * \fn category
+     * \brief Set material category.
+     * \param [in] aCategory category
+    **********************************************************************************/
+    void category(const std::string& aCategory)
+    {
+        mCategory = aCategory;
     }
 
     /******************************************************************************//**

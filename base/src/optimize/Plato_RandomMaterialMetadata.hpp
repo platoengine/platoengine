@@ -78,7 +78,6 @@ namespace srom
 struct Material
 {
 private:
-    std::string mBlockID;     /*!< element block identification number */
     std::string mCategory;    /*!< isotropic, orthotropic, anisotropic, etc. */
     std::string mMaterialID;  /*!< material identification number */
 
@@ -109,11 +108,6 @@ public:
     **********************************************************************************/
     void check() const
     {
-        if(mBlockID.empty())
-        {
-            THROWERR("SROM::Material: Material block identification number is not defined.")
-        }
-
         if(mMaterialID.empty())
         {
             THROWERR("SROM::Material: Material identification number is not defined.")
@@ -123,28 +117,10 @@ public:
         if(tNumMaterialProperties == static_cast<size_t>(0))
         {
             std::ostringstream tMsg;
-            tMsg << "SROM Material: Material properties for material with identification number '" << mMaterialID.c_str()
-                << "' and block with identification number '" << mBlockID << "' are not defined.";
+            tMsg << "SROM Material: Material properties for material with identification number '"
+                << mMaterialID.c_str() << "' are not defined.";
             THROWERR(tMsg.str().c_str())
         }
-    }
-
-    /******************************************************************************//**
-     * \brief Set block identification number.
-     * \param [in] aID identification number
-    **********************************************************************************/
-    void blockID(const std::string& aID)
-    {
-        mBlockID = aID;
-    }
-
-    /******************************************************************************//**
-     * \brief Return block identification number.
-     * \return block identification number
-    **********************************************************************************/
-    std::string blockID() const
-    {
-        return (mBlockID);
     }
 
     /******************************************************************************//**
@@ -200,7 +176,7 @@ public:
         // append deterministic variables tags
         for(auto& tDeterministicVar : mDeterministicVars)
         {
-            tTags.push_back(tDeterministicVar.mTag);
+            tTags.push_back(tDeterministicVar.tag());
         }
 
         return (tTags);
@@ -250,9 +226,9 @@ public:
                 const std::string &aValue)
     {
         Plato::srom::DeterministicVariable tVariable;
-        tVariable.mTag = aTag;
-        tVariable.mValue = aValue;
-        tVariable.mAttribute = aAttribute;
+        tVariable.tag(aTag);
+        tVariable.value(aValue);
+        tVariable.attribute(aAttribute);
         mDeterministicVars.push_back(tVariable);
     }
 };
@@ -272,7 +248,6 @@ struct RandomMaterial
 {
 private:
     double mProbability;       /*!< probability for this material instance */
-    std::string mBlockID;      /*!< element block identification number */
     std::string mCategory;     /*!< isotropic, orthotropic, anisotropic, etc. */
     std::string mMaterialID;   /*!< material identification number */
 
@@ -284,11 +259,6 @@ public:
     **********************************************************************************/
     void check() const
     {
-        if(mBlockID.empty())
-        {
-            THROWERR("SROM::RandomMaterial: Material block identification number is not defined.")
-        }
-
         if(mMaterialID.empty())
         {
             THROWERR("SROM::RandomMaterial: Material identification number is not defined.")
@@ -298,8 +268,7 @@ public:
         {
             std::ostringstream tMsg;
             tMsg << "SROM::RandomMaterial: Tags for random material with material identification number '"
-                << mMaterialID << "', block identification number '" << mBlockID << ", and category '"<< mCategory
-                << "' are not defined.";
+                << mMaterialID << ", and category '"<< mCategory << "' are not defined.";
             THROWERR(tMsg.str().c_str())
         }
 
@@ -307,8 +276,7 @@ public:
         {
             std::ostringstream tMsg;
             tMsg << "SROM::RandomMaterial: Probability for random material with material identification number '"
-                << mMaterialID << "', block identification number '" << mBlockID << ", and category '"<< mCategory
-                << "' is not a finite number.";
+                << mMaterialID << ", and category '"<< mCategory  << "' is not a finite number.";
             THROWERR(tMsg.str().c_str())
         }
 
@@ -316,29 +284,10 @@ public:
         {
             std::ostringstream tMsg;
             tMsg << "SROM::RandomMaterial: Probability for random material with material identification number '"
-                << mMaterialID << "', block identification number '" << mBlockID << ", and category '"<< mCategory
-                << "' is not a positive number or it's set to zero." << "The probability value is set to '"
-                << mProbability << "'.";
+                << mMaterialID << ", and category '"<< mCategory << "' is not a positive number or it's set to zero."
+                << "The probability value is set to '" << mProbability << "'.";
             THROWERR(tMsg.str().c_str())
         }
-    }
-
-    /******************************************************************************//**
-     * \brief Set block identification number.
-     * \param [in] aID identification number
-    **********************************************************************************/
-    void blockID(const std::string& aID)
-    {
-        mBlockID = aID;
-    }
-
-    /******************************************************************************//**
-     * \brief Return block identification number.
-     * \return block identification number
-    **********************************************************************************/
-    std::string blockID() const
-    {
-        return (mBlockID);
     }
 
     /******************************************************************************//**
@@ -524,23 +473,6 @@ public:
     {
         auto tOutput = Plato::srom::to_string(mProbability);
         return (tOutput);
-    }
-
-    /******************************************************************************//**
-     * \brief Return block identification number for material with input identification number.
-     * \param [in] aMaterialID material identification number
-     * \return block identification number
-    **********************************************************************************/
-    std::string blockID(const std::string& aMaterialID) const
-    {
-        auto tItr = mMaterialMap.find(aMaterialID);
-        if(tItr == mMaterialMap.end())
-        {
-            std::ostringstream tMsg;
-            tMsg << "Random Material Case: Material with identification number '" << aMaterialID.c_str() << "' is not defined.";
-            THROWERR(tMsg.str().c_str())
-        }
-        return (tItr->second.blockID());
     }
 
     /******************************************************************************//**

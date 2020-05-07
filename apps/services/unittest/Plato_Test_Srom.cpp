@@ -57,7 +57,6 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
 {
     // 1.1 BUILD MATERIAL ONE
     Plato::srom::Material tMaterial1;
-    tMaterial1.blockID("1");
     tMaterial1.materialID("1");
     tMaterial1.category("isotropic");
     Plato::srom::Statistics tElasticModulusStats1;
@@ -79,7 +78,6 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
 
     // 1.2 BUILD MATERIAL TWO
     Plato::srom::Material tMaterial2;
-    tMaterial2.blockID("2");
     tMaterial2.materialID("2");
     tMaterial2.category("isotropic");
     tMaterial2.append("youngs modulus", "homogeneous", "3.0");
@@ -87,7 +85,6 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
 
     // 1.3 BUILD MATERIAL THREE
     Plato::srom::Material tMaterial3;
-    tMaterial3.blockID("3");
     tMaterial3.materialID("3");
     tMaterial3.category("isotropic");
     tMaterial3.append("youngs modulus", "homogeneous", "1.0");
@@ -120,8 +117,6 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
     const std::vector<double> tGoldProbs = { 0.1482212, 0.1440202, 0.0924449, 0.0898248, 0.1641386, 0.1594865, 0.1023726, 0.0994711 };
     const std::vector<std::vector<std::string>> tGoldMatIDs = { { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, {
         "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" } };
-    const std::vector<std::vector<std::string>> tGoldBlockIDs = { { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" },
-        { "1", "2", "3" }, { "1", "2", "3" }, { "1", "2", "3" } };
     const std::vector<std::vector<std::string>> tGoldTags = { { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, {
         "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio",
         "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" } };
@@ -148,7 +143,6 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
         {
             auto tMatIdIndex = &tMatID - &tMaterialIDs[0];
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
-            ASSERT_STREQ(tGoldBlockIDs[tCaseIndex][tMatIdIndex].c_str(), tRandomMatCase.blockID(tMatID).c_str());
             ASSERT_STREQ("isotropic", tRandomMatCase.category(tMatID).c_str());
 
             auto tTags = tRandomMatCase.tags(tMatID);

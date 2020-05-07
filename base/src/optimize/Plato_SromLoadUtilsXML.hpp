@@ -113,6 +113,90 @@ inline UncertaintyCategories split_uncertainties_into_categories(const XMLGen::I
 }
 // function split_uncertainty_categories
 
+/*!< map from material identification number to map between material tag and list of non-deterministic variables' metadata */
+using RandomMatPropMap = std::map<std::string, std::map<std::string, XMLGen::Uncertainty>>;
+/******************************************************************************//**
+ * \fn build_material_id_to_random_material_map
+ * \brief Build map from material identification number to material tag-uncertainty pair.
+ * \param [in] aRandomMatProperties list of random material properties and its metadata
+ * \return map from material identification number to map between material tag and \n
+ * list of non-deterministic variables' metadata
+**********************************************************************************/
+inline Plato::srom::RandomMatPropMap build_material_id_to_random_material_map
+(const std::vector<XMLGen::Uncertainty>& aRandomMatProperties)
+{
+    Plato::srom::RandomMatPropMap tMap;
+    for(auto& tRandomMatProp : aRandomMatProperties)
+    {
+        auto tIsMaterial = tRandomMatProp.variable_type == "material" ? true : false;
+        if(!tIsMaterial)
+        {
+            THROWERR(std::string("Build Material ID to Random Material Map: Random variable with tag '")
+                + tRandomMatProp.type + "' is not a material.")
+        }
+        tMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
+    }
+    return tMap;
+}
+// function build_material_id_to_random_material_map
+
+/******************************************************************************//**
+ * \fn append_material_properties
+ * \brief Append material properties.
+ * \param [in]  aMaterial      input material metadata
+ * \param [in]  aRandomMatMap  map from material identification number to map between \n
+ *   material tag and list of non-deterministic variables' metadata
+ * \param [out] aSromMaterial  Stochastic Reduced Order Model (SROM) material metadata
+**********************************************************************************/
+inline void append_material_properties
+(const XMLGen::Material& aMaterial,
+ const Plato::srom::RandomMatPropMap& aRandomMatMap,
+ Plato::srom::Material& aSromMaterial)
+{
+    if(aRandomMatMap.empty())
+    {
+        THROWERR(std::string("Append Random Material: Map from material identification number ")
+            + "to map from material tag to list of non-deterministic variables' metadata is empty.")
+    }
+
+    auto tMatID = aMaterial.id();
+    aSromMaterial.materialID(tMatID);
+    aSromMaterial.category(aMaterial.category());
+    auto tTags = aMaterial.tags();
+
+    for (auto &tTag : tTags)
+    {
+        auto tRandMatMapItr = aRandomMatMap.find(tMatID);
+        auto tIsMaterialRandom = tRandMatMapItr != aRandomMatMap.end() ? true : false;
+        if(tIsMaterialRandom)
+        {
+            auto tIterator = tRandMatMapItr->second.find(tTag);
+            auto tIsMaterialPropertyRandom = tIterator != tRandMatMapItr->second.end() ? true : false;
+            if(tIsMaterialPropertyRandom)
+            {
+                Plato::srom::Statistics tStats;
+                tStats.mFile = tIterator->second.file;
+                tStats.mMean = tIterator->second.mean;
+                tStats.mUpperBound = tIterator->second.upper;
+                tStats.mLowerBound = tIterator->second.lower;
+                tStats.mNumSamples = tIterator->second.num_samples;
+                tStats.mDistribution = tIterator->second.distribution;
+                tStats.mStandardDeviation = tIterator->second.standard_deviation;
+                aSromMaterial.append(tTag, aMaterial.attribute(), tStats);
+            }
+            else
+            {
+                aSromMaterial.append(tTag, aMaterial.attribute(), aMaterial.property(tTag));
+            }
+        }
+        else
+        {
+            aSromMaterial.append(tTag, aMaterial.attribute(), aMaterial.property(tTag));
+        }
+    }
+}
+// function append_material_properties
+
 /******************************************************************************//**
  * \brief transform string with variable type to an enum (Plato::srom::VariableType)
  * \param [in] aStringVarType string variable type

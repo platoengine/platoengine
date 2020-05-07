@@ -387,9 +387,71 @@ public:
 **********************************************************************************/
 struct DeterministicVariable
 {
+private:
     std::string mTag;        /*!< main variable attribute , e.g. Poisson's ratio */
     std::string mValue;      /*!< attribute's deterministic value */
     std::string mAttribute;  /*!< attribute's category, e.g. homogeneous or heterogeneous */
+
+public:
+    /******************************************************************************//**
+     * \fn tag
+     * \brief Return deterministic variable tag.
+     * return tag
+    **********************************************************************************/
+    std::string tag() const
+    {
+        return mTag;
+    }
+
+    /******************************************************************************//**
+     * \fn tag
+     * \brief Set a deterministic variable tag.
+     * \param [in] aTag deterministic variable tag/label
+    **********************************************************************************/
+    void tag(const std::string& aTag)
+    {
+        mTag = aTag;
+    }
+
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return deterministic variable value.
+     * return value
+    **********************************************************************************/
+    std::string value() const
+    {
+        return mValue;
+    }
+
+    /******************************************************************************//**
+     * \fn value
+     * \brief Set a deterministic variable value.
+     * \param [in] aValue deterministic variable value
+    **********************************************************************************/
+    void value(const std::string& aValue)
+    {
+        mValue = aValue;
+    }
+
+    /******************************************************************************//**
+     * \fn attribute
+     * \brief Return deterministic variable attribute.
+     * return attribute
+    **********************************************************************************/
+    std::string attribute() const
+    {
+        return mAttribute;
+    }
+
+    /******************************************************************************//**
+     * \fn attribute
+     * \brief Set a deterministic variable attribute.
+     * \param [in] aAttribute deterministic variable attribute
+    **********************************************************************************/
+    void attribute(const std::string& aAttribute)
+    {
+        mAttribute = aAttribute;
+    }
 };
 // struct DeterministicVariable
 
