@@ -17,6 +17,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorDataStruct.hpp
                       PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp
+                      XMLGeneratorParser.hpp
                       SalinasInputDeckWriter.hpp)
 
 find_package(MPI)

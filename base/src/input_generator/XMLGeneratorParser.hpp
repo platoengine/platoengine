@@ -170,10 +170,10 @@ using UseCaseTags = std::map<std::string, std::pair<std::vector<std::string>,std
 **********************************************************************************/
 inline void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags)
 {
-    for (auto &tTag : aTags)
+    for (auto& tTag : aTags)
     {
         std::vector<size_t> tMatch(tTag.second.first.size());
-        for (auto &tToken : tTag.second.first)
+        for (auto& tToken : tTag.second.first)
         {
             auto tIndex = &tToken - &tTag.second.first[0];
             tMatch[tIndex] = tToken == aTokens[tIndex] ? 1 : 0;
@@ -248,7 +248,6 @@ private:
             {
                 break;
             }
-
             XMLGen::parse_tag_values(tTokens, mTags);
         }
     }
@@ -335,7 +334,8 @@ private:
             THROWERR("Parse Uncertainty: 'tag' keyword is empty.")
         }
 
-        std::vector<std::string> tValidTags = {"angle variation", "poissons ratio", "elastic modulus", "yield stress"};
+        std::vector<std::string> tValidTags = {"angle variation", "poissons ratio", "elastic modulus",
+            "yield stress", "thermal conductivity", "density"};
         if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.type) == tValidTags.end())
         {
             std::ostringstream tMsg;

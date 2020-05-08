@@ -721,6 +721,7 @@ inline void preprocess_srom_problem_inputs
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
             Plato::srom::preprocess_nondeterministic_load_inputs(aInputMetadata, aSromInputs);
+            Plato::srom::preprocess_nondeterministic_material_inputs(aInputMetadata, aSromInputs);
             break;
         }
         default:

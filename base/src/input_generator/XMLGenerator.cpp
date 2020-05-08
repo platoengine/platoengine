@@ -62,6 +62,7 @@
 #include "Plato_SromLoadUtilsXML.hpp"
 
 #include "XMLGenerator.hpp"
+#include "XMLGeneratorParser.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
@@ -1720,271 +1721,12 @@ void XMLGenerator::createNewLoadCase(XMLGen::Load& new_load)
 
 
 /******************************************************************************/
-bool XMLGenerator::parseUncertainties(std::istream &fin)
+bool XMLGenerator::parseUncertainties(std::istream &aInputFile)
 /******************************************************************************/
 {
-    std::vector<std::string> tInputStringList;
-    char buf[MAX_CHARS_PER_LINE];
-    std::vector<std::string> tokens;
-    std::string tStringValue;
-    const std::string error_prestring = "ERROR:XMLGenerator:parseUncertainties: ";
-
-    // read each line of the file
-    while (!fin.eof())
-    {
-        // read an entire line into memory
-        fin.getline(buf, MAX_CHARS_PER_LINE);
-        tokens.clear();
-        parseTokens(buf, tokens);
-
-        // process the tokens
-        if(tokens.size() > 0)
-        {
-            for(size_t j=0; j<tokens.size(); ++j)
-                tokens[j] = toLower(tokens[j]);
-
-            if(parseSingleValue(tokens, tInputStringList = {"begin","uncertainty"}, tStringValue))
-            {
-                XMLGen::Uncertainty new_uncertainty;
-                new_uncertainty.variable_type = "load"; // default until user is allowed to set it
-                // found an uncertainty. parse it.
-                while (!fin.eof())
-                {
-                    tokens.clear();
-                    fin.getline(buf, MAX_CHARS_PER_LINE);
-                    parseTokens(buf, tokens);
-                    // process the tokens
-                    if(tokens.size() > 0)
-                    {
-                        std::vector<std::string> unlowered_tokens = tokens;
-
-                        for(size_t j=0; j<tokens.size(); ++j)
-                            tokens[j] = toLower(tokens[j]);
-
-                        // begin uncertainty
-                        //      variable_type load or material
-                        //      type angle variation
-                        //      axis STRING
-                        //      load INTEGER
-                        //      distribution STRING
-                        //      mean VALUE
-                        //      lower bound VALUE
-                        //      upper bound VALUE
-                        //      standard deviation VALUE
-                        //      num samples INTEGER
-                        // end uncertainty
-
-                        if(parseSingleValue(tokens, tInputStringList = {"end","uncertainty"}, tStringValue))
-                        {
-                            break;
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"type"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No type specified after \"type\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.type = tokens[1];
-                            for(size_t j=2; j<tokens.size(); ++j)
-                            {
-                                new_uncertainty.type += " ";
-                                new_uncertainty.type += tokens[j];
-                            }
-                            if(new_uncertainty.type != "angle variation")
-                            {
-                                std::cout << error_prestring << "Unmatched uncertainty type.\n";
-                                return false;
-                            }
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"axis"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No axis specified after \"axis\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.axis = tokens[1];
-                            if(new_uncertainty.axis != "x" &&
-                                    new_uncertainty.axis != "y" &&
-                                    new_uncertainty.axis != "z")
-                            {
-                                std::cout << error_prestring << "Unmatched uncertainty axis.\n";
-                                return false;
-                            }
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"load"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No load specified after \"load\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.id = tokens[1];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"variable", "type"}, tStringValue))
-                        {
-                            if(tokens.size() < 3)
-                            {
-                                std::cout << error_prestring << "No load specified after \"variable type\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.variable_type = tokens[2];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"distribution"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No distribution specified after \"distribution\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.distribution = tokens[1];
-                            if(new_uncertainty.distribution != "beta" &&
-                                    new_uncertainty.distribution != "uniform" &&
-                                    new_uncertainty.distribution != "normal")
-                            {
-                                std::cout << error_prestring << "Unmatched uncertainty distribution.\n";
-                                return false;
-                            }
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"mean"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No mean specified after \"mean\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.mean = tokens[1];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"lower", "bound"}, tStringValue))
-                        {
-                            if(tokens.size() < 3)
-                            {
-                                std::cout << error_prestring << "No lower bound specified after \"lower bound\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.lower = tokens[2];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"upper", "bound"}, tStringValue))
-                        {
-                            if(tokens.size() < 3)
-                            {
-                                std::cout << error_prestring << "No load specified after \"upper bound\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.upper = tokens[2];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"standard", "deviation"}, tStringValue))
-                        {
-                            if(tokens.size() < 3)
-                            {
-                                std::cout << error_prestring << "No standard deviation specified after \"standard deviation\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.standard_deviation = tokens[2];
-                        }
-                        else if(parseSingleValue(tokens, tInputStringList = {"num", "samples"}, tStringValue))
-                        {
-                            if(tokens.size() < 2)
-                            {
-                                std::cout << error_prestring << "No samples specified after \"num samples\" keyword.\n";
-                                return false;
-                            }
-                            new_uncertainty.num_samples = tokens[2];
-                        }
-                        else
-                        {
-                            PrintUnrecognizedTokens(tokens);
-                            std::cout << "ERROR:XMLGenerator:parseUncertainties: Unrecognized keywords.\n";
-                            return false;
-                        }
-                    }
-                }
-
-                // check that uncertainty well specified
-                if(new_uncertainty.type == "angle variation")
-                {
-                    if(new_uncertainty.axis != "x" &&
-                            new_uncertainty.axis != "y" &&
-                            new_uncertainty.axis != "z")
-                    {
-                        std::cout << error_prestring << "Angular variation requires valid \"axis\" keyword.\n";
-                        return false;
-                    }
-                }
-                else
-                {
-                    std::cout << error_prestring << "Unmatched or absent uncertainty \"type\" keyword.\n";
-                    return false;
-                }
-
-                // check that distribution well specified
-                if(new_uncertainty.distribution == "beta")
-                {
-                    if(new_uncertainty.lower == "")
-                    {
-                        std::cout << error_prestring << "Beta distribution requires \"lower\" keyword.\n";
-                        return false;
-                    }
-                    if(new_uncertainty.upper == "")
-                    {
-                        std::cout << error_prestring << "Beta distribution requires \"upper\" keyword.\n";
-                        return false;
-                    }
-                    if(new_uncertainty.standard_deviation == "")
-                    {
-                        std::cout << error_prestring << "Beta distribution requires \"standard deviation\" keyword.\n";
-                        return false;
-                    }
-                    if(new_uncertainty.mean == "")
-                    {
-                        std::cout << error_prestring << "Beta distribution requires \"mean\" keyword.\n";
-                        return false;
-                    }
-                }
-                else if(new_uncertainty.distribution == "uniform")
-                {
-                    if(new_uncertainty.lower == "")
-                    {
-                        std::cout << error_prestring << "Uniform distribution requires \"lower\" keyword.\n";
-                        return false;
-                    }
-                    if(new_uncertainty.upper == "")
-                    {
-                        std::cout << error_prestring << "Uniform distribution requires \"upper\" keyword.\n";
-                        return false;
-                    }
-                }
-                else if(new_uncertainty.distribution == "normal")
-                {
-                    if(new_uncertainty.standard_deviation == "")
-                    {
-                        std::cout << error_prestring << "Normal distribution requires \"standard deviation\" keyword.\n";
-                        return false;
-                    }
-                    if(new_uncertainty.mean == "")
-                    {
-                        std::cout << error_prestring << "Normal distribution requires \"mean\" keyword.\n";
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-
-                // check samples
-                if(new_uncertainty.num_samples == "")
-                {
-                    std::cout << error_prestring << "Uncertainty requires \"num samples\" keyword.\n";
-                    return false;
-                }
-
-                m_InputData.uncertainties.push_back(new_uncertainty);
-            }
-        }
-    }
-
+    XMLGen::ParseUncertainty tParseUncertainty;
+    tParseUncertainty.parse(aInputFile);
+    m_InputData.uncertainties = tParseUncertainty.data();
     return true;
 }
 
@@ -3673,7 +3415,7 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
               }
               new_material.property("poissons ratio", tStringValue);
             }
-            else if(parseSingleValue(tokens, tInputStringList = {"thermal","conductivity","coefficient"}, tStringValue))
+            else if(parseSingleValue(tokens, tInputStringList = {"thermal","conductivity"}, tStringValue))
             {
               if(tStringValue == "")
               {
@@ -3857,43 +3599,44 @@ bool XMLGenerator::find_tokens(std::vector<std::string> &tokens,
 bool XMLGenerator::parseFile()
 /******************************************************************************/
 {
-  std::ifstream fin;
-  fin.open(m_InputFilename.c_str()); // open a file
-  if (!fin.good())
+  std::ifstream tInputFile;
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  if (!tInputFile.good())
   {
     std::cout << "Failed to open " << m_InputFilename << "." << std::endl;
     return false; // exit if file not found
   }
 
-  parseBCs(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseLoads(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseObjectives(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseOptimizationParameters(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseConstraints(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseMesh(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseMaterials(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseBlocks(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseCodePaths(fin);
-  fin.close();
-  fin.open(m_InputFilename.c_str()); // open a file
-  parseUncertainties(fin);
-  fin.close();
+  parseBCs(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseLoads(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseObjectives(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseOptimizationParameters(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseConstraints(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseMesh(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseMaterials(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseBlocks(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseCodePaths(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseUncertainties(tInputFile);
+  tInputFile.close();
 
   // If we will need to run the prune_and_refine executable for any
   // reason we need to have our "run" mesh name not be the same
