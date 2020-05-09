@@ -969,6 +969,150 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
 }
 
+TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
+{
+    // Generate interface.xml using the new writer
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tInputSS;
+    std::string tStringInput =
+        "begin objective\n"
+        "   type maximize stiffness\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1\n"
+        "   analyze new workflow true\n"
+        "   number ranks 1\n"
+        "end objective\n"
+        "begin boundary conditions\n"
+        "   fixed displacement nodeset name 1 bc id 11\n"
+        "end boundary conditions\n"
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "penalty exponent 3\n"
+            "youngs modulus 1e6\n"
+            "poissons ratio 0.33\n"
+            "thermal conductivity .02\n"
+            "density .001\n"
+        "end material\n"
+        "begin block 1\n"
+        "   material 1\n"
+        "end block\n"
+        "begin uncertainty\n"
+        "    category material\n"
+        "    tag thermal conductivity\n"
+        "    material id 1\n"
+        "    attribute homogeneous\n"
+        "    distribution beta\n"
+        "    mean 0.02\n"
+        "    upper bound 0.04\n"
+        "    lower bound 0.01\n"
+        "    standard deviation 0.0075\n"
+        "    num samples 8\n"
+        "end uncertainty\n"
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin optimization parameters\n"
+        "end optimization parameters\n";
+
+    tInputSS.str(tStringInput);
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseMaterials(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+
+    // CALL FUNCTION
+    Plato::srom::InputMetaData tSromInputs;
+    auto tInputData = tTester.getInputData();
+    EXPECT_FALSE(tInputData.uncertainties.empty());
+    EXPECT_EQ(2u, tInputData.uncertainties.size());
+    tSromInputs.usecase(Plato::srom::usecase::MATERIAL_PLUS_LOAD);
+    Plato::srom::preprocess_srom_problem_inputs(tInputData, tSromInputs);
+
+    // 1 TEST RESULTS
+    auto tLoads = tSromInputs.loads();
+    auto tMaterials = tSromInputs.materials();
+    ASSERT_FALSE(tLoads.empty());
+    ASSERT_FALSE(tMaterials.empty());
+
+    // 1.1. TEST MATERIAL INTEGERS
+    ASSERT_EQ(1u, tMaterials.size());
+    EXPECT_TRUE(tMaterials[0].isRandom());
+    EXPECT_FALSE(tMaterials[0].isDeterministic());
+
+    // 1.2. TEST MATERIAL STRINGS
+    ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
+    ASSERT_EQ(5u, tMaterials[0].tags().size());
+
+    // 1.3. TEST MATERIAL STATISTICS
+    ASSERT_FALSE(tMaterials[0].randomVars().empty());
+    ASSERT_FALSE(tMaterials[0].deterministicVars().empty());
+    ASSERT_EQ(1u, tMaterials[0].randomVars().size());
+    ASSERT_EQ(4u, tMaterials[0].deterministicVars().size());
+    ASSERT_EQ(0, tMaterials[0].randomVars()[0].id());
+
+    ASSERT_STREQ("8", tMaterials[0].randomVars()[0].samples().c_str());
+    ASSERT_STREQ("0.02", tMaterials[0].randomVars()[0].mean().c_str());
+    ASSERT_STREQ("0.01", tMaterials[0].randomVars()[0].lower().c_str());
+    ASSERT_STREQ("0.04", tMaterials[0].randomVars()[0].upper().c_str());
+    ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
+    ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
+    ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
+    ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
+
+    // 2.1. TEST LOAD INTEGERS
+    ASSERT_EQ(1u, tLoads.size());
+    ASSERT_EQ(0, tLoads[0].mAppID);
+
+    // 2.2. TEST LOAD STRINGS
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
+    ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
+    ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[0].c_str());
+    ASSERT_STREQ("-5e4", tLoads[0].mValues[1].c_str());
+    ASSERT_STREQ("0", tLoads[0].mValues[2].c_str());
+
+    // 2.3. TEST LOAD STATISTICS
+    ASSERT_FALSE(tLoads[0].mRandomVars.empty());
+    ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
+    ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
+
+    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
+    ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
+    ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
+    ASSERT_STREQ("-45.0", tLoads[0].mRandomVars[0].lower().c_str());
+    ASSERT_STREQ("45.0", tLoads[0].mRandomVars[0].upper().c_str());
+    ASSERT_STREQ("0.0", tLoads[0].mRandomVars[0].mean().c_str());
+    ASSERT_STREQ("2", tLoads[0].mRandomVars[0].samples().c_str());
+}
+
 TEST(PlatoTestXMLGenerator, DefineSromProblemUseCase)
 {
     // 1.1 - SET LOAD USE CASE - Define Uncertainty Metadata

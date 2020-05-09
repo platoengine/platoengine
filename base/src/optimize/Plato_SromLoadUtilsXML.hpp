@@ -106,7 +106,8 @@ inline UncertaintyCategories split_uncertainties_into_categories(const XMLGen::I
         }
         else if (!tIsMaterial && !tIsLoad)
         {
-            THROWERR(std::string("Split Uncertainty Into Categories: Non-deterministic category '") + tCategory + "' is not supported.")
+            THROWERR(std::string("Split Uncertainty Into Categories: Non-deterministic category '")
+                + tCategory + "' is not supported.")
         }
     }
     return tCategories;

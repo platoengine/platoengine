@@ -208,11 +208,14 @@ private:
 
 private:
     /******************************************************************************//**
-     * \fn initialize
-     * \brief Initialize map from valid tags to valid tokens-value pairs.
+     * \fn clearTags
+     * \brief Removes all elements from the map container (which are destroyed), \n
+     *   leaving the container with a size of 0. The map container defines the map \n
+     *   from valid tags to valid tokens-value pairs.
     **********************************************************************************/
-    void initialize()
+    void clearTags()
     {
+        mTags.clear();
         mTags.insert({ "tag", { {"tag"}, "" } });
         mTags.insert({ "mean", { {"mean"}, "" } });
         mTags.insert({ "load id", { {"load","id"}, "" } });
@@ -540,17 +543,6 @@ private:
 
 public:
     /******************************************************************************//**
-     * \fn ParseUncertainty
-     * \brief Class constructor.
-    **********************************************************************************/
-    ParseUncertainty() :
-        mTags(),
-        mData()
-    {
-        this->initialize();
-    }
-
-    /******************************************************************************//**
      * \fn data
      * \brief Return list of uncertainty metadata.
      * \return list of uncertainty metadata
@@ -567,11 +559,6 @@ public:
     **********************************************************************************/
     void parse(std::istream& aInputFile)
     {
-        if(mTags.empty())
-        {
-            THROWERR("Parse Uncertainty: List of valid keywords is empty.")
-        }
-
         mData.clear();
         constexpr int MAX_CHARS_PER_LINE = 512;
         std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
@@ -588,6 +575,7 @@ public:
             if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","uncertainty"}, tTag))
             {
                 XMLGen::Uncertainty tMetadata;
+                this->clearTags();
                 this->parseMetadata(aInputFile);
                 this->setMetadata(tMetadata);
                 this->checkMetadata(tMetadata);
