@@ -59,9 +59,9 @@
 #include <map>
 
 #include "Plato_SromXML.hpp"
-#include "Plato_SromLoadUtilsXML.hpp"
-
 #include "XMLGenerator.hpp"
+
+#include "../optimize/Plato_SromXMLGenTools.hpp"
 #include "XMLGeneratorParser.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"

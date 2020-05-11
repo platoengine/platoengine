@@ -52,6 +52,7 @@
 #include <cmath>
 #include <numeric>
 
+#include "Plato_SromXMLGenTools.hpp"
 #include "XMLGenerator_UnitTester.hpp"
 #include "DefaultInputGenerator_UnitTester.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
@@ -61,7 +62,6 @@
 
 #include "XMLG_Macros.hpp"
 #include "XMLGeneratorParser.hpp"
-#include "Plato_SromLoadUtilsXML.hpp"
 
 const int MAX_CHARS_PER_LINE = 512;
 
@@ -672,7 +672,8 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
 
     // 1.1. TEST INTEGERS
     ASSERT_EQ(1u, tLoads.size());
-    ASSERT_EQ(0, tLoads[0].mAppID);
+    ASSERT_EQ(2147483647, tLoads[0].mAppID);
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
 
     // 1.2. TEST STRINGS
     ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
@@ -839,7 +840,8 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
 
     // 1.1. TEST INTEGERS
     ASSERT_EQ(1u, tLoads.size());
-    ASSERT_EQ(0, tLoads[0].mAppID);
+    ASSERT_EQ(2147483647, tLoads[0].mAppID); // not defined, thus it takes the value std::numeric_limit::max
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
 
     // 1.2. TEST STRINGS
     ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
@@ -1087,7 +1089,8 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
 
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(1u, tLoads.size());
-    ASSERT_EQ(0, tLoads[0].mAppID);
+    ASSERT_EQ(2147483647, tLoads[0].mAppID); // not defined, thus it takes the value std::numeric_limit::max
+    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
 
     // 2.2. TEST LOAD STRINGS
     ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
