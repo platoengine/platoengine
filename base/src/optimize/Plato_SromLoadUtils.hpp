@@ -829,18 +829,18 @@ inline void append_deterministic_loads(const std::vector<Plato::srom::Load>& aDe
         return; // return, there are no deterministic loads to append
     }
 
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
+    for(auto& tLoadCase : aSetLoadCases)
     {
-        Plato::srom::RandomLoadCase& tRandomLoadCase = aSetLoadCases[tLoadCaseIndex];
-        for(size_t tLoadIndex = 0; tLoadIndex < aDeterministicLoads.size(); tLoadIndex++)
+        for(auto& tDeterministicLoad : aDeterministicLoads)
         {
             Plato::srom::RandomLoad tLoad;
+            tLoad.mIsRandom = false;
             tLoad.mProbability = 1.0;
-            tLoad.mAppID = aDeterministicLoads[tLoadIndex].mAppID;
-            tLoad.mAppType = aDeterministicLoads[tLoadIndex].mAppType;
-            tLoad.mLoadType = aDeterministicLoads[tLoadIndex].mLoadType;
-            Plato::srom::set_load_components(aDeterministicLoads[tLoadIndex].mValues, tLoad.mLoadValues);
-            tRandomLoadCase.append(tLoad);
+            tLoad.mAppID = tDeterministicLoad.mAppID;
+            tLoad.mAppType = tDeterministicLoad.mAppType;
+            tLoad.mLoadType = tDeterministicLoad.mLoadType;
+            Plato::srom::set_load_components(tDeterministicLoad.mValues, tLoad.mLoadValues);
+            tLoadCase.append(tLoad);
         }
     }
 }

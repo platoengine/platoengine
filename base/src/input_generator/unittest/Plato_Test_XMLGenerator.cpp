@@ -62,6 +62,7 @@
 
 #include "XMLG_Macros.hpp"
 #include "XMLGeneratorParser.hpp"
+#include "XMLGeneratorRandomMetaData.hpp"
 
 const int MAX_CHARS_PER_LINE = 512;
 
@@ -70,18 +71,6 @@ namespace Plato
 
 namespace srom
 {
-
-using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
-struct RandomUseCase
-{
-    size_t mNumSamples;
-    size_t mNumPeformers;
-
-    Plato::srom::MaterialSet mMaterials;
-    // LOADS
-    // BCS
-    // ETC
-};
 
 inline void postprocess_material_outputs
 (const Plato::srom::OutputMetaData& aOutput,
@@ -96,6 +85,84 @@ inline void postprocess_material_outputs
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Set_ErrorUndefinedLoadCaseID)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::LoadCase tLoadCase;
+    EXPECT_THROW(tMetaData.set(tLoadCase), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Set_ErrorUndefinedLoadSet)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::LoadCase tLoadCase;
+    tLoadCase.id = "1";
+    EXPECT_THROW(tMetaData.set(tLoadCase), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Append_ErrorUndefinedBlockID)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    EXPECT_THROW(tMetaData.append("", tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Append_ErrorUndefinedMaterialID)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Append_ErrorUndefinedCategory)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.id("2");
+    tMaterial.category("");
+    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Append_ErrorUndefinedAttribute)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.id("2");
+    tMaterial.category("isotropic");
+    tMaterial.attribute("");
+    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Append_ErrorUndefinedProperties)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.id("2");
+    tMaterial.category("isotropic");
+    tMaterial.attribute("heterogeneous");
+    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_ErrorUndefinedProbability)
+{
+    XMLGen::RandomUseCase tMetaData;
+    EXPECT_THROW(tMetaData.probability(""), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, RandomUseCase_Material_ErrorUndefinedBlockID)
+{
+    XMLGen::RandomUseCase tMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.id("2");
+    tMaterial.category("isotropic");
+    tMaterial.attribute("heterogeneous");
+    tMaterial.property("elastic modulus", "1");
+    tMaterial.property("poissons ratio", "0.3");
+    EXPECT_NO_THROW(tMetaData.append("1", tMaterial));
+
+    EXPECT_THROW(tMetaData.material("20"), std::runtime_error);
+}
 
 TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error1)
 {

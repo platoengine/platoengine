@@ -118,6 +118,7 @@ struct RandomRotations
 **********************************************************************************/
 struct RandomLoad
 {
+    bool mIsRandom = true; /*!< is load random, default = true */
     int mAppID; /*!< application set identification number */
     int mLoadID; /*!< load identification number */
     double mProbability; /*!< probability associated with this random load */
