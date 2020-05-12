@@ -50,6 +50,7 @@ inline void define_deterministic_material
  Plato::srom::RandomMaterial& aOutMaterial)
 {
     aOutMaterial.probability(1.0);
+    aOutMaterial.blockID(aInMaterial.blockID());
     aOutMaterial.category(aInMaterial.category());
     aOutMaterial.materialID(aInMaterial.materialID());
     auto tDeterministicVars = aInMaterial.deterministicVars();
@@ -142,6 +143,7 @@ inline void initialize_random_material_set
     for(auto& tSample : aSromVariable.mSampleProbPairs.mSamples)
     {
         Plato::srom::RandomMaterial tRandomMaterial;
+        tRandomMaterial.blockID(aMaterial.blockID());
         tRandomMaterial.category(aMaterial.category());
         tRandomMaterial.materialID(aMaterial.materialID());
 
@@ -185,6 +187,7 @@ inline void update_random_material_set
         for(auto& tOriginalRandomMaterial : tOriginalRandomMaterialSet)
         {
             Plato::srom::RandomMaterial tNewRandomMaterial;
+            tNewRandomMaterial.blockID(aMaterial.blockID());
             tNewRandomMaterial.category(aMaterial.category());
             tNewRandomMaterial.materialID(aMaterial.materialID());
 

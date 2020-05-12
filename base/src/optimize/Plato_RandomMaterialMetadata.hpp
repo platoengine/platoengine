@@ -588,6 +588,20 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return material block identification numbers for this random material case.
+     * \return list of material block identification numbers
+    **********************************************************************************/
+    std::vector<std::string> blockIDs() const
+    {
+        std::vector<std::string> tIDs;
+        for(auto& tItr : mMaterialMap)
+        {
+            tIDs.push_back(tItr.second.blockID());
+        }
+        return tIDs;
+    }
+
+    /******************************************************************************//**
      * \brief Return material identification numbers for this random material case.
      * \return list of material identification numbers
     **********************************************************************************/
