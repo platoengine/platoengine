@@ -78,6 +78,7 @@ namespace srom
 struct Material
 {
 private:
+    std::string mBlockID;     /*!< material block identification number */
     std::string mCategory;    /*!< isotropic, orthotropic, anisotropic, etc. */
     std::string mMaterialID;  /*!< material identification number */
 
@@ -121,6 +122,26 @@ public:
                 << mMaterialID.c_str() << "' are not defined.";
             THROWERR(tMsg.str().c_str())
         }
+    }
+
+    /******************************************************************************//**
+     * \fn blockID
+     * \brief Set material block identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void blockID(const std::string& aID)
+    {
+        mBlockID = aID;
+    }
+
+    /******************************************************************************//**
+     * \fn blockID
+     * \brief Return material block identification number.
+     * \return material block identification number
+    **********************************************************************************/
+    std::string blockID() const
+    {
+        return (mBlockID);
     }
 
     /******************************************************************************//**
@@ -248,6 +269,7 @@ struct RandomMaterial
 {
 private:
     double mProbability;       /*!< probability for this material instance */
+    std::string mBlockID;      /*!< material block identification number */
     std::string mCategory;     /*!< isotropic, orthotropic, anisotropic, etc. */
     std::string mMaterialID;   /*!< material identification number */
 
@@ -288,6 +310,26 @@ public:
                 << "The probability value is set to '" << mProbability << "'.";
             THROWERR(tMsg.str().c_str())
         }
+    }
+
+    /******************************************************************************//**
+     * \fn blockID
+     * \brief Set material block identification number.
+     * \param [in] aID identification number
+    **********************************************************************************/
+    void blockID(const std::string& aID)
+    {
+        mBlockID = aID;
+    }
+
+    /******************************************************************************//**
+     * \fn blockID
+     * \brief Return material block identification number.
+     * \return material block identification number
+    **********************************************************************************/
+    std::string blockID() const
+    {
+        return (mBlockID);
     }
 
     /******************************************************************************//**

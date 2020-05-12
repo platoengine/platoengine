@@ -29,18 +29,18 @@ inline void preprocess_srom_problem_inputs
     {
         case Plato::srom::usecase::LOAD:
         {
-            Plato::srom::preprocess_nondeterministic_load_inputs(aInputMetadata, aSromInputs);
+            Plato::srom::preprocess_load_inputs(aInputMetadata, aSromInputs);
             break;
         }
         case Plato::srom::usecase::MATERIAL:
         {
-            Plato::srom::preprocess_nondeterministic_material_inputs(aInputMetadata, aSromInputs);
+            Plato::srom::preprocess_material_inputs(aInputMetadata, aSromInputs);
             break;
         }
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
-            Plato::srom::preprocess_nondeterministic_load_inputs(aInputMetadata, aSromInputs);
-            Plato::srom::preprocess_nondeterministic_material_inputs(aInputMetadata, aSromInputs);
+            Plato::srom::preprocess_load_inputs(aInputMetadata, aSromInputs);
+            Plato::srom::preprocess_material_inputs(aInputMetadata, aSromInputs);
             break;
         }
         default:
@@ -67,7 +67,7 @@ inline void postprocess_srom_problem_outputs
     {
         case Plato::srom::usecase::LOAD:
         {
-            Plato::srom::post_process_nondeterministic_load_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_load_outputs(aSromOutputs, aInputMetadata);
             break;
         }
         case Plato::srom::usecase::MATERIAL:
@@ -76,7 +76,7 @@ inline void postprocess_srom_problem_outputs
         }
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
-            Plato::srom::post_process_nondeterministic_load_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_load_outputs(aSromOutputs, aInputMetadata);
             break;
         }
         default:

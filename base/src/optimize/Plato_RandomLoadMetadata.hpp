@@ -284,6 +284,15 @@ public:
     {
         mLoads.push_back(aLoad);
     }
+
+    /******************************************************************************//**
+     * \brief Return a const reference to the set of random loads.
+     * \return const reference to the set of random loads
+    **********************************************************************************/
+    const std::vector<Plato::srom::RandomLoad>& loads() const
+    {
+        return mLoads;
+    }
 };
 // struct RandomLoadCase
 

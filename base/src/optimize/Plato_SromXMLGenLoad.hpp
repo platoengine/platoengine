@@ -523,24 +523,24 @@ inline void postprocess_srom_problem_load_outputs
         XMLGen::LoadCase tNewLoadCase;
         auto tLoadCaseID = Plato::to_string(tStartingLoadCaseID);
         tNewLoadCase.id = tLoadCaseID;
-        auto tLoadCaseIndex = &tLoadCase - &tLoadCases[0];
 
-        for (size_t tLoadIndex = 0; tLoadIndex < tLoadCases[tLoadCaseIndex].numLoads(); ++tLoadIndex)
+        for (size_t tLoadIndex = 0; tLoadIndex < tLoadCase.numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.type = tLoadCases[tLoadCaseIndex].loadType(tLoadIndex);
-            tNewLoad.app_id = tLoadCases[tLoadCaseIndex].applicationID(tLoadIndex);
-            tNewLoad.app_type = tLoadCases[tLoadCaseIndex].applicationType(tLoadIndex);
-            tNewLoad.app_name = tLoadCases[tLoadCaseIndex].applicationName(tLoadIndex);
-            for (size_t tDim = 0; tDim < tLoadCases[tLoadCaseIndex].numLoadValues(tLoadIndex); ++tDim)
+            tNewLoad.type = tLoadCase.loadType(tLoadIndex);
+            tNewLoad.app_id = tLoadCase.applicationID(tLoadIndex);
+            tNewLoad.app_type = tLoadCase.applicationType(tLoadIndex);
+            tNewLoad.app_name = tLoadCase.applicationName(tLoadIndex);
+            for (size_t tDim = 0; tDim < tLoadCase.numLoadValues(tLoadIndex); ++tDim)
             {
-                tNewLoad.values.push_back(Plato::to_string(tLoadCases[tLoadCaseIndex].loadValue(tLoadIndex, tDim)));
+                tNewLoad.values.push_back(Plato::to_string(tLoadCase.loadValue(tLoadIndex, tDim)));
             }
-            tNewLoad.load_id = tLoadCases[tLoadCaseIndex].loadID(tLoadIndex);
+            tNewLoad.load_id = tLoadCase.loadID(tLoadIndex);
             tNewLoadCase.loads.push_back(tNewLoad);
         }
+
         aNewLoadCases.push_back(tNewLoadCase);
-        aLoadCaseProbabilities.push_back(tLoadCases[tLoadCaseIndex].probability());
+        aLoadCaseProbabilities.push_back(tLoadCase.probability());
         tCurObj.load_case_ids.push_back(tLoadCaseID);
         tCurObj.load_case_weights.push_back("1");
         tStartingLoadCaseID++;
@@ -549,12 +549,12 @@ inline void postprocess_srom_problem_load_outputs
 // function postprocess_srom_problem_load_outputs
 
 /******************************************************************************//**
- * \fn preprocess_nondeterministic_load_inputs
+ * \fn preprocess_load_inputs
  * \brief Pre-process non-deterministic load inputs.
  * \param [in/out] aInputMetadata  Plato problem input metadata
  * \param [in/out] aSromInputs     Stochastic Reduced Order Model (SROM) problem metadata
 **********************************************************************************/
-inline void preprocess_nondeterministic_load_inputs
+inline void preprocess_load_inputs
 (const XMLGen::InputData& aInputMetadata,
  Plato::srom::InputMetaData& aSromInputs)
 {
@@ -571,25 +571,25 @@ inline void preprocess_nondeterministic_load_inputs
     auto tLoads = Plato::srom::generate_srom_load_inputs(tActiveLoadCases, tIterator->second);
     aSromInputs.loads(tLoads);
 }
-// function preprocess_nondeterministic_load_inputs
+// function preprocess_load_inputs
 
 /******************************************************************************//**
- * \fn post_process_nondeterministic_load_outputs
+ * \fn postprocess_load_outputs
  * \brief Post-process non-deterministic load outputs.
  * \param [in/out] aSromOutputs    SROM problem output metadata
- * \param [in/out] aInputMetadata  Plato problem input metadata
+ * \param [in/out] aInputMetaData  Plato problem input metadata
 **********************************************************************************/
-inline void post_process_nondeterministic_load_outputs
+inline void postprocess_load_outputs
 (const Plato::srom::OutputMetaData& aSromOutputs,
- XMLGen::InputData& aInputMetadata)
+ XMLGen::InputData& aInputMetaData)
 {
     std::vector<double> tLoadCaseProbabilities;
     std::vector<XMLGen::LoadCase> tNewLoadCases;
-    Plato::srom::postprocess_srom_problem_load_outputs(aSromOutputs, aInputMetadata, tNewLoadCases, tLoadCaseProbabilities);
-    aInputMetadata.load_cases = tNewLoadCases;
-    aInputMetadata.load_case_probabilities = tLoadCaseProbabilities;
+    Plato::srom::postprocess_srom_problem_load_outputs(aSromOutputs, aInputMetaData, tNewLoadCases, tLoadCaseProbabilities);
+    aInputMetaData.load_cases = tNewLoadCases;
+    aInputMetaData.load_case_probabilities = tLoadCaseProbabilities;
 }
-// function post_process_nondeterministic_load_outputs
+// function postprocess_load_outputs
 
 }
 // namespace srom

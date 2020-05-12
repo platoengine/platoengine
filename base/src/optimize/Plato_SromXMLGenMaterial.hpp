@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <unordered_map>
+
 #include "Plato_SromXMLGenHelpers.hpp"
 #include "Plato_SromXML.hpp"
 
@@ -100,13 +102,75 @@ inline void append_material_properties
 // function append_material_properties
 
 /******************************************************************************//**
- * \fn preprocess_nondeterministic_material_inputs
+ * \fn build_block_id_to_material_id_map
+ * \brief Build map between material identification number and block identification number.
+ * \param [in] aInputMetaData Plato problem input metadata
+ * \return map between material identification number and block identification number
+**********************************************************************************/
+inline std::unordered_map<std::string, std::string>
+build_material_id_to_block_id_map(XMLGen::InputData& aInputMetaData)
+{
+    if(aInputMetaData.materials.empty())
+    {
+        THROWERR(std::string("Build Block ID To Material ID Map: Input material container is empty. ")
+            + " Material block is not defined in the input file.")
+    }
+
+    if(aInputMetaData.blocks.empty())
+    {
+        THROWERR(std::string("Build Block ID To Material ID Map: Input block container is empty. ")
+            + " Block block is not defined in the input file.")
+    }
+
+    std::unordered_map<std::string, std::string> tMap;
+    for(auto& tBlock : aInputMetaData.blocks)
+    {
+        tMap.insert({tBlock.material_id, tBlock.block_id});
+    }
+    return tMap;
+}
+// function build_block_id_to_material_id_map
+
+/******************************************************************************//**
+ * \fn set_block_identification_number
+ * \brief Set block identification number to material.
+ * \param [in]  aMap      map between material identification number and block identification number
+ * \param [out] aMaterial material metadata
+**********************************************************************************/
+inline void set_block_identification_number
+(const std::unordered_map<std::string, std::string>& aMap,
+ Plato::srom::Material& aMaterial)
+{
+    auto tMaterialID = aMaterial.materialID();
+    if(tMaterialID.empty())
+    {
+        THROWERR("Set Block Identification Number: Material identification number is empty, i.e. is not defined.")
+    }
+
+    auto tIterator = aMap.find(tMaterialID);
+    if(tIterator == aMap.end())
+    {
+        THROWERR(std::string("Set Block Identification Number: No Block owns material with identification number '") + tMaterialID + "'.")
+    }
+
+    if(tIterator->second.empty())
+    {
+        THROWERR(std::string("Set Block Identification Number: Material with identification number '")
+            + tMaterialID + "' has an empty block identification number, i.e. block id is not defined.")
+    }
+
+    aMaterial.blockID(tIterator->second);
+}
+// function set_block_identification_number
+
+/******************************************************************************//**
+ * \fn preprocess_material_inputs
  * \brief Pre-process non-deterministic material inputs, i.e. prepare inputs for \n
  *   Stochastic Reducded Order Model (SROM) problem.
  * \param [in] aInputMetadata  Plato problem input metadata
  * \param [in] aSromInputs     SROM problem input metadata
 **********************************************************************************/
-inline void preprocess_nondeterministic_material_inputs
+inline void preprocess_material_inputs
 (XMLGen::InputData& aInputMetadata, Plato::srom::InputMetaData& aSromInputs)
 {
     if(aInputMetadata.materials.empty())
@@ -124,15 +188,17 @@ inline void preprocess_nondeterministic_material_inputs
             + "is associated with a material identification number.")
     }
 
-    auto aRandomMatPropMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
+    auto tMaterialIDtoBlockID = Plato::srom::build_material_id_to_block_id_map(aInputMetadata);
+    auto tRandomMatPropMap = Plato::srom::build_material_id_to_random_material_map(tIterator->second);
     for(auto& tMaterial : aInputMetadata.materials)
     {
         Plato::srom::Material tSromMaterial;
-        Plato::srom::append_material_properties(tMaterial, aRandomMatPropMap, tSromMaterial);
+        Plato::srom::append_material_properties(tMaterial, tRandomMatPropMap, tSromMaterial);
+        Plato::srom::set_block_identification_number(tMaterialIDtoBlockID, tSromMaterial);
         aSromInputs.append(tSromMaterial);
     }
 }
-// function preprocess_nondeterministic_material_inputs
+// function preprocess_material_inputs
 
 }
 // namespace srom

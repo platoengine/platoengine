@@ -292,9 +292,9 @@ bool XMLGenerator::generateUncertaintyMetaData()
     return false;
   m_InputData.m_UncertaintyMetaData.numSamples = m_InputData.load_cases.size();
   if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
-    m_InputData.m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].num_ranks.c_str());
+    m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].num_ranks);
   else
-    m_InputData.m_UncertaintyMetaData.numPeformers = std::atoi(m_InputData.objectives[0].atmost_total_num_processors.c_str());
+    m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
   if(m_InputData.m_UncertaintyMetaData.numSamples % m_InputData.m_UncertaintyMetaData.numPeformers != 0)
   {
     std::cout << "Number of samples must divide evenly into number of processors" << std::endl;

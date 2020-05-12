@@ -65,15 +65,175 @@
 
 const int MAX_CHARS_PER_LINE = 512;
 
+namespace Plato
+{
+
+namespace srom
+{
+
+using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
+struct RandomUseCase
+{
+    size_t mNumSamples;
+    size_t mNumPeformers;
+
+    Plato::srom::MaterialSet mMaterials;
+    // LOADS
+    // BCS
+    // ETC
+};
+
+inline void postprocess_material_outputs
+(const Plato::srom::OutputMetaData& aOutput,
+ XMLGen::InputData& aInputMetaData)
+{
+
+}
+
+}
+
+}
+
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error1)
+{
+    // ERROR - EMPTY MATERIAL ID
+    Plato::srom::Material tMaterial;
+    tMaterial.category("isotropic");
+    tMaterial.append("poissons ratio", "homogeneous", "0.35");
+    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+
+    std::unordered_map<std::string, std::string> tMap;
+    EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error2)
+{
+    // ERROR - MATERIAL ID IS NOT OWN BY ANY BLOCK ON THE LIST
+    Plato::srom::Material tMaterial;
+    tMaterial.materialID("1");
+    tMaterial.category("isotropic");
+    tMaterial.append("poissons ratio", "homogeneous", "0.35");
+    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+
+    std::unordered_map<std::string, std::string> tMap;
+    EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error3)
+{
+    // ERROR - EMPTY BLOCK ID
+    Plato::srom::Material tMaterial;
+    tMaterial.materialID("1");
+    tMaterial.category("isotropic");
+    tMaterial.append("poissons ratio", "homogeneous", "0.35");
+    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+
+    std::unordered_map<std::string, std::string> tMap;
+    tMap.insert({"1", ""});
+    EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber1)
+{
+    Plato::srom::Material tMaterial;
+    tMaterial.materialID("1");
+    tMaterial.category("isotropic");
+    tMaterial.append("poissons ratio", "homogeneous", "0.35");
+    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+
+    std::unordered_map<std::string, std::string> tMap;
+    tMap.insert({"1", "10"});
+    EXPECT_TRUE(tMaterial.blockID().empty());
+    EXPECT_NO_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial));
+    ASSERT_STREQ("10", tMaterial.blockID().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber2)
+{
+    Plato::srom::Material tMaterial;
+    tMaterial.materialID("1");
+    tMaterial.category("isotropic");
+    tMaterial.append("poissons ratio", "homogeneous", "0.35");
+    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+
+    std::unordered_map<std::string, std::string> tMap;
+    tMap.insert({"1", "10"});
+    tMap.insert({"2", "1"});
+    tMap.insert({"13", "14"});
+    EXPECT_TRUE(tMaterial.blockID().empty());
+    EXPECT_NO_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial));
+    ASSERT_STREQ("10", tMaterial.blockID().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap_Error1)
+{
+    XMLGen::InputData tInputMetaData;
+    EXPECT_THROW(Plato::srom::build_material_id_to_block_id_map(tInputMetaData), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap_Error2)
+{
+    XMLGen::Material tMaterial;
+    tMaterial.id("30");
+    tMaterial.category("isotropic");
+    tMaterial.property("youngs modulus", "0.5");
+    tMaterial.property("poissons ratio", "0.3");
+
+    XMLGen::InputData tInputMetaData;
+    tInputMetaData.materials.push_back(tMaterial);
+
+    EXPECT_THROW(Plato::srom::build_material_id_to_block_id_map(tInputMetaData), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap)
+{
+    // BUILD MATERIALS AND BLOCKS
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("30");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("youngs modulus", "0.5");
+    tMaterial1.property("poissons ratio", "0.3");
+
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("3");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("youngs modulus", "0.5");
+    tMaterial2.property("poissons ratio", "0.3");
+
+    XMLGen::Block tBlock1;
+    tBlock1.block_id = "1";
+    tBlock1.material_id = "30";
+    tBlock1.element_type = "tet4";
+
+    XMLGen::Block tBlock2;
+    tBlock2.block_id = "2";
+    tBlock2.material_id = "3";
+    tBlock2.element_type = "tet4";
+
+    // APPEND MATERIALS AND BLOCKS
+    XMLGen::InputData tInputMetaData;
+    tInputMetaData.blocks.push_back(tBlock1);
+    tInputMetaData.blocks.push_back(tBlock2);
+    tInputMetaData.materials.push_back(tMaterial1);
+    tInputMetaData.materials.push_back(tMaterial2);
+
+    // BUILD MAP
+    auto tMap = Plato::srom::build_material_id_to_block_id_map(tInputMetaData);
+
+    // TEST RESULTS
+    ASSERT_STREQ("1", tMap.find("30")->second.c_str());
+    ASSERT_STREQ("2", tMap.find("3")->second.c_str());
+}
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error1)
 {
     // ERROR - INPUT MATERIAL CONTAINER IS EMPTY
     XMLGen::InputData tInputMetadata;
     Plato::srom::InputMetaData tSromInputs;
-    EXPECT_THROW(Plato::srom::preprocess_nondeterministic_material_inputs(tInputMetadata, tSromInputs), std::runtime_error);
+    EXPECT_THROW(Plato::srom::preprocess_material_inputs(tInputMetadata, tSromInputs), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
@@ -103,7 +263,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
 
     // ERROR - NO RANDOM MATERIAL PROPERTIES
     Plato::srom::InputMetaData tSromInputs;
-    EXPECT_THROW(Plato::srom::preprocess_nondeterministic_material_inputs(tMetadata, tSromInputs), std::runtime_error);
+    EXPECT_THROW(Plato::srom::preprocess_material_inputs(tMetadata, tSromInputs), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
@@ -166,10 +326,23 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tMaterial2.property("poissons ratio", "0.3");
     tMetadata.materials.push_back(tMaterial2);
 
+    // 3. POSE MATERIAL BLOCKS
+    XMLGen::Block tBlock1;
+    tBlock1.block_id = "1";
+    tBlock1.material_id = "30";
+    tBlock1.element_type = "tet4";
+    tMetadata.blocks.push_back(tBlock1);
+
+    XMLGen::Block tBlock2;
+    tBlock2.block_id = "2";
+    tBlock2.material_id = "3";
+    tBlock2.element_type = "tet4";
+    tMetadata.blocks.push_back(tBlock2);
+
     // 3. CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
     tSromInputs.usecase(Plato::srom::usecase::MATERIAL);
-    EXPECT_NO_THROW(Plato::srom::preprocess_nondeterministic_material_inputs(tMetadata, tSromInputs));
+    EXPECT_NO_THROW(Plato::srom::preprocess_material_inputs(tMetadata, tSromInputs));
     ASSERT_EQ(2u, tSromInputs.materials().size());
 
     // 4.1 TEST RESULTS
@@ -177,6 +350,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
 
     // 4.2 DETERMINISTIC MATERIAL
     ASSERT_EQ(2u, tMaterials[0].tags().size());
+    ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("30", tMaterials[0].materialID().c_str());
     ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
     ASSERT_STREQ("poissons ratio", tMaterials[0].tags()[0].c_str());
@@ -193,6 +367,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     ASSERT_STREQ("homogeneous", tMaterials[0].deterministicVars()[1].attribute().c_str());
 
     // 4.3 NON-DETERMINISTIC MATERIAL
+    ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
     ASSERT_STREQ("3", tMaterials[1].materialID().c_str());
     ASSERT_STREQ("isotropic", tMaterials[1].category().c_str());
     ASSERT_STREQ("poissons ratio", tMaterials[1].tags()[0].c_str());
@@ -594,10 +769,13 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     auto tInputData = tTester.getInputData();
 
     Plato::srom::InputMetaData tSromInputs;
-    EXPECT_THROW(Plato::srom::preprocess_nondeterministic_load_inputs(tInputData, tSromInputs), std::runtime_error);
+    EXPECT_THROW(Plato::srom::preprocess_load_inputs(tInputData, tSromInputs), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
@@ -659,10 +837,13 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     auto tInputData = tTester.getInputData();
 
     Plato::srom::InputMetaData tSromInputs;
-    Plato::srom::preprocess_nondeterministic_load_inputs(tInputData, tSromInputs);
+    Plato::srom::preprocess_load_inputs(tInputData, tSromInputs);
 
     // 1 TEST RESULTS
     auto tLoads = tSromInputs.loads();
@@ -758,6 +939,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     auto tInputData = tTester.getInputData();
 
     // CALL FUNCTION
@@ -825,6 +1009,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     auto tInputData = tTester.getInputData();
 
     // CALL FUNCTION
@@ -930,6 +1117,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -950,8 +1140,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     EXPECT_FALSE(tMaterials[0].isDeterministic());
 
     // 1.2. TEST STRINGS
-    ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
+    ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST STATISTICS
@@ -1042,6 +1233,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1062,6 +1256,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     EXPECT_FALSE(tMaterials[0].isDeterministic());
 
     // 1.2. TEST STRINGS
+    ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
@@ -1087,6 +1282,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     EXPECT_TRUE(tMaterials[1].isDeterministic());
 
     // 2.2. TEST STRINGS
+    ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
     ASSERT_STREQ("isotropic", tMaterials[1].category().c_str());
     ASSERT_STREQ("2", tMaterials[1].materialID().c_str());
     ASSERT_EQ(3u, tMaterials[1].tags().size());
@@ -1179,6 +1375,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1333,6 +1532,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1354,8 +1556,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     EXPECT_FALSE(tMaterials[0].isDeterministic());
 
     // 1.2. TEST MATERIAL STRINGS
-    ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
+    ASSERT_STREQ("isotropic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST MATERIAL STATISTICS
@@ -1378,8 +1581,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     EXPECT_FALSE(tMaterials[1].isRandom());
     EXPECT_TRUE(tMaterials[1].isDeterministic());
 
-    ASSERT_STREQ("isotropic", tMaterials[1].category().c_str());
+    ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
     ASSERT_STREQ("2", tMaterials[1].materialID().c_str());
+    ASSERT_STREQ("isotropic", tMaterials[1].category().c_str());
     ASSERT_EQ(3u, tMaterials[1].tags().size());
 
     ASSERT_STREQ("3", tMaterials[1].deterministicVars()[0].value().c_str());
@@ -1494,6 +1698,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+
     auto tInputData = tTester.getInputData();
     ASSERT_EQ(2u, tInputData.load_cases.size());
     for(auto& tLoadCase : tInputData.load_cases)
