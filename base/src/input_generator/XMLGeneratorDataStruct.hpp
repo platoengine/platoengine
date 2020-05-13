@@ -6,11 +6,13 @@
 
 #pragma once
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include <map>
 
 #include "Plato_FreeFunctions.hpp"
+#include "Plato_SromHelpers.hpp"
 #include "XMLG_Macros.hpp"
 
 namespace XMLGen
@@ -170,8 +172,7 @@ struct Material
 private:
     std::string mID; /*!< material identification number */
     std::string mCategory = "isotropic";  /*!< material category, default: isotropic */
-    std::string mAttribute = "homogeneous";  /*!< material attribute, default: homogeneous */
-    std::map<std::string, std::string> mProperties; /*!< list of material properties, map<tag,value> */
+    std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:
     /******************************************************************************//**
@@ -199,19 +200,15 @@ public:
      * \brief Return material attribute.
      * \return attribute
     **********************************************************************************/
-    std::string attribute() const
+    std::string attribute(const std::string& aTag) const
     {
-        return mAttribute;
-    }
-
-    /******************************************************************************//**
-     * \fn attribute
-     * \brief Set material attribute.
-     * \param [in] aAttribute attribute
-    **********************************************************************************/
-    void attribute(const std::string& aAttribute)
-    {
-        mAttribute = aAttribute;
+        auto tTag = Plato::tolower(aTag);
+        auto tItr = mProperties.find(tTag);
+        if(tItr == mProperties.end())
+        {
+            THROWERR(std::string("XMLGenn Material: Material property '") + aTag + "' is not supported.")
+        }
+        return (tItr->second.first);
     }
 
     /******************************************************************************//**
@@ -248,21 +245,23 @@ public:
         {
             THROWERR(std::string("XMLGenn Material: Material property '") + aTag + "' is not supported.")
         }
-        return (tItr->second);
+        return (tItr->second.second);
     }
 
     /******************************************************************************//**
      * \fn property
      * \brief Set material property value.
-     * \param [in] aTag   material property tag
-     * \param [in] aValue material property value
+     * \param [in] aTag       material property tag
+     * \param [in] aValue     material property value
+     * \param [in] aAttribute material attribute
     **********************************************************************************/
-    void property(const std::string& aTag, const std::string& aValue)
+    void property(const std::string& aTag, const std::string& aValue, std::string aAttribute = "homogeneous")
     {
         if(aTag.empty()) { THROWERR("XMLGenn Material: Material property tag is empty.") }
         if(aValue.empty()) { THROWERR("XMLGenn Material: Material property value is empty.") }
+        if(aAttribute.empty()) { THROWERR("XMLGenn Material: Material property attribute is empty.") }
         auto tTag = Plato::tolower(aTag);
-        mProperties[aTag] = aValue;
+        mProperties[aTag] = std::make_pair(aAttribute, aValue);
     }
 
     /******************************************************************************//**
@@ -281,6 +280,160 @@ public:
     }
 };
 // struct Material
+
+/*!< map between block identification number and material metadata */
+using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
+/******************************************************************************//**
+ * \struct RandomUseCaseMetaData
+ * \brief Random use case metadata.
+**********************************************************************************/
+struct RandomUseCaseMetaData
+{
+private:
+    std::string mProbability; /*!< random use case probability */
+    XMLGen::LoadCase mLoadCase; /*!< load case metadata */
+    XMLGen::MaterialSet mMaterials; /*!< materials metadata */
+    Plato::srom::usecase mUseCase = Plato::srom::usecase::UNDEFINED; /*!< use case type */
+
+private:
+    /******************************************************************************//**
+     * \fn check
+     * \brief Check input material metadata.
+     * \param [in] aMaterial material metadata
+    **********************************************************************************/
+    void check(const XMLGen::Material& aMaterial)
+    {
+        if(aMaterial.id().empty())
+        {
+            THROWERR("Random Use Case: Material identification number is empty, i.e. material id is not defined.")
+        }
+        if(aMaterial.category().empty())
+        {
+            THROWERR("Random Use Case: Material category is empty, i.e. category is not defined.")
+        }
+        if(aMaterial.tags().empty())
+        {
+            THROWERR("Random Use Case: Material properties are empty, i.e. properties are not defined.")
+        }
+    }
+
+    /******************************************************************************//**
+     * \fn check
+     * \brief Check load case metadata.
+     * \param [in] aLoadCase load case metadata
+    **********************************************************************************/
+    void check(const XMLGen::LoadCase& aLoadCase)
+    {
+        if(aLoadCase.id.empty())
+        {
+            THROWERR("Random Use Case: Load case identification number is empty, i.e. load case id is not defined.")
+        }
+        if(aLoadCase.loads.empty())
+        {
+            THROWERR("Random Use Case: Load case loads container is empty, i.e. set of loads is not defined.")
+        }
+    }
+
+public:
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Set random use case.
+     * \param [in] aUseCase random use case type
+    **********************************************************************************/
+    void usecase(const Plato::srom::usecase& aUseCase)
+    {
+        mUseCase = aUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Return random use case.
+     * \return random use case type
+    **********************************************************************************/
+    Plato::srom::usecase usecase() const
+    {
+        return mUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn probability
+     * \brief Set random use case probability.
+     * \param [in] aProbability random use case probability
+    **********************************************************************************/
+    void probability(const std::string& aProbability)
+    {
+        if(aProbability.empty())
+        {
+            THROWERR("Random Use Case: Probability is empty, i.e. probability is not defined.")
+        }
+        mProbability = aProbability;
+    }
+
+    /******************************************************************************//**
+     * \fn probability
+     * \brief Return random use case probability.
+     * \return random use case probability
+    **********************************************************************************/
+    std::string probability() const
+    {
+        return mProbability;
+    }
+
+    /******************************************************************************//**
+     * \fn loads
+     * \brief Return load case metadata.
+     * \return load case metadata
+    **********************************************************************************/
+    XMLGen::LoadCase loads() const
+    {
+        return mLoadCase;
+    }
+
+    /******************************************************************************//**
+     * \fn material
+     * \brief Return material metadata.
+     * \param [in] aBlockID block identification number
+     * \return material metadata
+    **********************************************************************************/
+    XMLGen::Material material(const std::string& aBlockID) const
+    {
+        auto tIterator = mMaterials.find(aBlockID);
+        if(tIterator == mMaterials.end())
+        {
+            THROWERR(std::string("Random Use Case: Did not find a material block with identification number '")
+                + aBlockID + "' in material set.")
+        }
+        return (tIterator->second);
+    }
+
+    /******************************************************************************//**
+     * \fn set
+     * \brief Set load case metadata.
+     * \param [in] aLoadCase load case metadata
+    **********************************************************************************/
+    void set(const XMLGen::LoadCase& aLoadCase)
+    {
+        this->check(aLoadCase);
+        mLoadCase = aLoadCase;
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append material metadata.
+     * \param [in] aBlockID block identification number
+     * \param [in] aMaterial material metadata
+    **********************************************************************************/
+    void append(const std::string& aBlockID, const XMLGen::Material& aMaterial)
+    {
+        if(aBlockID.empty())
+        {
+            THROWERR("Random Use Case: Material block identification number empty, i.e. block id is not defined.")
+        }
+        this->check(aMaterial);
+        mMaterials.insert({aBlockID, aMaterial});
+    }
+};
+// struct RandomUseCaseMetaData
 
 struct InputData
 {
@@ -418,6 +571,8 @@ struct InputData
     std::string m_filterType_kernelThenHeaviside_XMLName;
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
+
+    std::vector<XMLGen::RandomUseCaseMetaData> mRandomUseCaseMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;
 

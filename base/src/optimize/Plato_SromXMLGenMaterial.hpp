@@ -86,16 +86,16 @@ inline void append_material_properties
                 tStats.mNumSamples = tIterator->second.num_samples;
                 tStats.mDistribution = tIterator->second.distribution;
                 tStats.mStandardDeviation = tIterator->second.standard_deviation;
-                aSromMaterial.append(tTag, aMaterial.attribute(), tStats);
+                aSromMaterial.append(tTag, aMaterial.attribute(tTag), tStats);
             }
             else
             {
-                aSromMaterial.append(tTag, aMaterial.attribute(), aMaterial.property(tTag));
+                aSromMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
             }
         }
         else
         {
-            aSromMaterial.append(tTag, aMaterial.attribute(), aMaterial.property(tTag));
+            aSromMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
         }
     }
 }
@@ -199,6 +199,56 @@ inline void preprocess_material_inputs
     }
 }
 // function preprocess_material_inputs
+
+/******************************************************************************//**
+ * \fn postprocess_material_outputs
+ * \brief Post-process non-deterministic material outputs, i.e. prepare outputs for \n
+ *   XML Generator tool.
+ * \param [in] aOutput         SROM problem output metadata
+ * \param [in] aXMLGenMetaData Plato problem metadata
+**********************************************************************************/
+inline void postprocess_material_outputs
+(const Plato::srom::OutputMetaData& aOutput,
+ XMLGen::InputData& aXMLGenMetaData)
+{
+    auto tRandomMaterialCases = aOutput.materials();
+    if(tRandomMaterialCases.empty())
+    {
+        THROWERR("Post-Process Material Outputs: Container of random material cases is empty.")
+    }
+
+    double tSum = 0;
+    for(auto& tRandomMaterialCase : tRandomMaterialCases)
+    {
+        XMLGen::RandomUseCaseMetaData tNewRandomUseCaseMetaData;
+        tNewRandomUseCaseMetaData.usecase(aOutput.usecase());
+        auto tRandomMaterials = tRandomMaterialCase.materials();
+        for(auto& tRandomMaterial : tRandomMaterials)
+        {
+            XMLGen::Material tNewMaterial;
+            tNewMaterial.id(tRandomMaterial.materialID());
+            tNewMaterial.category(tRandomMaterial.category());
+            auto tTags = tRandomMaterial.tags();
+            for(auto& tTag : tTags)
+            {
+                tNewMaterial.property(tTag, tRandomMaterial.value(tTag), tRandomMaterial.attribute(tTag));
+            }
+            tNewRandomUseCaseMetaData.append(tRandomMaterial.blockID(), tNewMaterial);
+        }
+        tSum += tRandomMaterialCase.probability();
+        tNewRandomUseCaseMetaData.probability(Plato::srom::to_string(tRandomMaterialCase.probability()));
+        aXMLGenMetaData.mRandomUseCaseMetaData.push_back(tNewRandomUseCaseMetaData);
+    }
+
+    constexpr double tTolerance = 1e-2;
+    if(std::abs(1.0 - tSum) > tTolerance)
+    {
+        THROWERR(std::string("Post-Process Material Outputs: The sum of the random use case probabilities is '")
+            + std::to_string(tSum) + "'. The sum of these probabilities must yield a value greater than '0.99', "
+            + "but less or equal to 1.0.")
+    }
+}
+// function postprocess_material_outputs
 
 }
 // namespace srom

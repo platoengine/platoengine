@@ -51,6 +51,7 @@
 #include <map>
 #include <cmath>
 #include <vector>
+#include <unordered_map>
 
 #include "Plato_Macros.hpp"
 #include "Plato_SromHelpers.hpp"
@@ -453,12 +454,14 @@ public:
  *     -# random material case probability,
  *     -# case identification number, and
  *     -# list of random materials
+ *     -# map between material identification number and block identification number
 **********************************************************************************/
 struct RandomMaterialCase
 {
 private:
     double mProbability; /*!< probability associated with this random load case */
     std::string mCaseID; /*!< random material case identification number */
+    std::unordered_map<std::string, std::string> mBlockIDMap; /*!< map(material_id, block_id) */
     std::map<std::string, Plato::srom::RandomMaterial> mMaterialMap; /*!< map(material_id, random material) */
 
 public:
@@ -588,6 +591,22 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return material block identification number.
+     * \param [in] aMaterialID material identification number
+     * \return material block identification number
+    **********************************************************************************/
+    std::string blockID(const std::string& aMaterialID) const
+    {
+        auto tIterator = mBlockIDMap.find(aMaterialID);
+        if(tIterator == mBlockIDMap.end())
+        {
+            THROWERR(std::string("Random Material Case: Material with identification number '"
+                + aMaterialID + "' is not defined in the material set."))
+        }
+        return (tIterator->second);
+    }
+
+    /******************************************************************************//**
      * \brief Return material block identification numbers for this random material case.
      * \return list of material block identification numbers
     **********************************************************************************/
@@ -637,6 +656,7 @@ public:
     void append(const std::string& aMaterialID, const Plato::srom::RandomMaterial& aMaterial)
     {
         mMaterialMap.insert(std::pair<std::string, Plato::srom::RandomMaterial>(aMaterialID, aMaterial));
+        mBlockIDMap.insert({aMaterialID, aMaterial.blockID()});
     }
 };
 // struct RandomMaterialCase

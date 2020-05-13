@@ -72,11 +72,13 @@ inline void postprocess_srom_problem_outputs
         }
         case Plato::srom::usecase::MATERIAL:
         {
+            Plato::srom::postprocess_material_outputs(aSromOutputs, aInputMetadata);
             break;
         }
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
             Plato::srom::postprocess_load_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_material_outputs(aSromOutputs, aInputMetadata);
             break;
         }
         default:

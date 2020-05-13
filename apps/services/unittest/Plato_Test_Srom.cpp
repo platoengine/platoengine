@@ -112,7 +112,7 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
     tInput.materials(tMaterialSet);
     tInput.usecase(Plato::srom::usecase::MATERIAL);
     EXPECT_NO_THROW(Plato::srom::build_sroms(tInput, tOutput));
-    ASSERT_EQ(8u, tOutput.materialCases().size());
+    ASSERT_EQ(8u, tOutput.materials().size());
 
     // 4 TEST RESULTS
     const double tTolerance = 1e-4;
@@ -135,7 +135,7 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
         0.3659845788546486, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } } };
 
     double tProbSum = 0;
-    auto tMaterialCases = tOutput.materialCases();
+    auto tMaterialCases = tOutput.materials();
     for (auto &tRandomMatCase : tMaterialCases)
     {
         ASSERT_EQ(3u, tRandomMatCase.numMaterials());

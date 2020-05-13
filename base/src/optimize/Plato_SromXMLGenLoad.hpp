@@ -517,7 +517,7 @@ inline void postprocess_srom_problem_load_outputs
     XMLGen::Objective &tCurObj = aInputData.objectives[0];
     tCurObj.load_case_ids.clear();
     tCurObj.load_case_weights.clear();
-    auto tLoadCases = aOutputs.loadCases();
+    auto tLoadCases = aOutputs.loads();
     for(auto& tLoadCase : tLoadCases)
     {
         XMLGen::LoadCase tNewLoadCase;
