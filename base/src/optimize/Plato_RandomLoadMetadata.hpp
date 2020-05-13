@@ -142,6 +142,20 @@ private:
 
 public:
     /******************************************************************************//**
+     * \brief Return true if load is random.
+     * \return flag
+    **********************************************************************************/
+    bool isRandom(const size_t& aLoadIndex) const
+    {
+        if(aLoadIndex >= mLoads.size())
+        {
+            THROWERR(std::string("Random Load Case: The loads container has size '") + std::to_string(mLoads.size())
+                + "'. Input load index '" + std::to_string(aLoadIndex)  + "' is greater than the size of the loads container.")
+        }
+        return (mLoads[aLoadIndex].mIsRandom);
+    }
+
+    /******************************************************************************//**
      * \brief Return number of loads in random load case.
      * \return number of loads
     **********************************************************************************/

@@ -201,6 +201,40 @@ inline void preprocess_material_inputs
 // function preprocess_material_inputs
 
 /******************************************************************************//**
+ * \fn build_material_set
+ * \brief Build material set.
+ * \param aRandomMaterialCase random material case
+ * \return material set
+**********************************************************************************/
+inline XMLGen::MaterialSet build_material_set
+(const Plato::srom::RandomMaterialCase& aRandomMaterialCase)
+{
+    if(aRandomMaterialCase.materials().empty())
+    {
+        THROWERR(std::string("Build Material Set: List of materials in random material case with identification number '")
+            + aRandomMaterialCase.caseID() + "' is empty.");
+    }
+
+    auto tRandomMaterials = aRandomMaterialCase.materials();
+    std::unordered_map<std::string, XMLGen::Material> tBlockIDtoMaterialMap;
+    for(auto& tRandomMaterial : tRandomMaterials)
+    {
+        XMLGen::Material tNewMaterial;
+        tNewMaterial.id(tRandomMaterial.materialID());
+        tNewMaterial.category(tRandomMaterial.category());
+        auto tTags = tRandomMaterial.tags();
+        for(auto& tTag : tTags)
+        {
+            tNewMaterial.property(tTag, tRandomMaterial.value(tTag), tRandomMaterial.attribute(tTag));
+        }
+        tBlockIDtoMaterialMap.insert({tRandomMaterial.blockID(), tNewMaterial});
+    }
+    XMLGen::MaterialSet tMaterialSet = std::make_pair(aRandomMaterialCase.probability(), tBlockIDtoMaterialMap);
+    return tMaterialSet;
+}
+// function build_material_set
+
+/******************************************************************************//**
  * \fn postprocess_material_outputs
  * \brief Post-process non-deterministic material outputs, i.e. prepare outputs for \n
  *   XML Generator tool.
@@ -220,24 +254,11 @@ inline void postprocess_material_outputs
     double tSum = 0;
     for(auto& tRandomMaterialCase : tRandomMaterialCases)
     {
-        XMLGen::RandomUseCaseMetaData tNewRandomUseCaseMetaData;
-        tNewRandomUseCaseMetaData.usecase(aOutput.usecase());
-        auto tRandomMaterials = tRandomMaterialCase.materials();
-        for(auto& tRandomMaterial : tRandomMaterials)
-        {
-            XMLGen::Material tNewMaterial;
-            tNewMaterial.id(tRandomMaterial.materialID());
-            tNewMaterial.category(tRandomMaterial.category());
-            auto tTags = tRandomMaterial.tags();
-            for(auto& tTag : tTags)
-            {
-                tNewMaterial.property(tTag, tRandomMaterial.value(tTag), tRandomMaterial.attribute(tTag));
-            }
-            tNewRandomUseCaseMetaData.append(tRandomMaterial.blockID(), tNewMaterial);
-        }
+        auto tMaterialSet = Plato::srom::build_material_set(tRandomMaterialCase);
+        XMLGen::RandomMetaData tNewRandomMetaData;
+        tNewRandomMetaData.allocate(tMaterialSet);
         tSum += tRandomMaterialCase.probability();
-        tNewRandomUseCaseMetaData.probability(Plato::srom::to_string(tRandomMaterialCase.probability()));
-        aXMLGenMetaData.mRandomUseCaseMetaData.push_back(tNewRandomUseCaseMetaData);
+        aXMLGenMetaData.mRandomMetaData.push_back(tNewRandomMetaData);
     }
 
     constexpr double tTolerance = 1e-2;

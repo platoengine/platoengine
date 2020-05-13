@@ -801,12 +801,13 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
 **********************************************************************************/
 inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
-    for(size_t tIndex = 0; tIndex < aDeterministicLoads.size(); tIndex++)
+    for(auto& tLoad : aDeterministicLoads)
     {
-        if(Plato::srom::check_load_parameters(aDeterministicLoads[tIndex]) == false)
+        auto tIndex = &tLoad - &aDeterministicLoads[0];
+        if(Plato::srom::check_load_parameters(tLoad) == false)
         {
             std::ostringstream tMsg;
-            tMsg << "UNDEFINED PARAMETER FOR DETERMINISTIC LOAD #" << tIndex << ".\n";
+            tMsg << "Check Deterministic Loads: Parameters of deterministic load number '" << tIndex << "' are not all defined.\n";
             PRINTERR(tMsg.str().c_str());
             return (false);
         }

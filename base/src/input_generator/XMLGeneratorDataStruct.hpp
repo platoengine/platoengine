@@ -24,30 +24,6 @@ enum struct Arch
   SUMMIT
 };
 
-struct UncertaintyMetaData
-{
-  size_t numSamples;
-  size_t numVariables;
-  size_t numPeformers;
-  std::vector<size_t> randomVariableIndices;
-  std::vector<size_t> deterministicVariableIndices;
-};
-
-struct Uncertainty
-{
-    std::string variable_type = "load"; // Load or material
-    std::string type; // currently always "angle variation"
-    std::string id; // which random variable to vary
-    std::string axis; // x, y, z
-    std::string distribution; // normal, uniform, beta
-    std::string mean; // scalar value
-    std::string upper; // scalar value
-    std::string lower; // scalar value
-    std::string standard_deviation; // scalar value
-    std::string num_samples; // integer value
-    std::string file = ""; // filename with sample-probability pairs
-};
-
 struct Load
 {
     std::string type; // traction, heat flux, force, pressure ...
@@ -281,19 +257,20 @@ public:
 };
 // struct Material
 
-/*!< map between block identification number and material metadata */
-using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
+/*!< load case - probability pair */
+using LoadSet = std::pair<double, XMLGen::LoadCase>;
+/*!< random material case probability - map between block identification number and \n
+ *   material metadata pair, i.e. pair<probability, map<block id, material metadata>> */
+using MaterialSet = std::pair<double, std::unordered_map<std::string, XMLGen::Material>>;
 /******************************************************************************//**
  * \struct RandomUseCaseMetaData
  * \brief Random use case metadata.
 **********************************************************************************/
-struct RandomUseCaseMetaData
+struct RandomMetaData
 {
 private:
-    std::string mProbability; /*!< random use case probability */
-    XMLGen::LoadCase mLoadCase; /*!< load case metadata */
-    XMLGen::MaterialSet mMaterials; /*!< materials metadata */
-    Plato::srom::usecase mUseCase = Plato::srom::usecase::UNDEFINED; /*!< use case type */
+    XMLGen::LoadSet mLoadSet; /*!< load case - probability pair */
+    XMLGen::MaterialSet mMaterialSet; /*!< map between block id and material metadata - probability pair */
 
 private:
     /******************************************************************************//**
@@ -336,57 +313,13 @@ private:
 
 public:
     /******************************************************************************//**
-     * \fn usecase
-     * \brief Set random use case.
-     * \param [in] aUseCase random use case type
-    **********************************************************************************/
-    void usecase(const Plato::srom::usecase& aUseCase)
-    {
-        mUseCase = aUseCase;
-    }
-
-    /******************************************************************************//**
-     * \fn usecase
-     * \brief Return random use case.
-     * \return random use case type
-    **********************************************************************************/
-    Plato::srom::usecase usecase() const
-    {
-        return mUseCase;
-    }
-
-    /******************************************************************************//**
-     * \fn probability
-     * \brief Set random use case probability.
-     * \param [in] aProbability random use case probability
-    **********************************************************************************/
-    void probability(const std::string& aProbability)
-    {
-        if(aProbability.empty())
-        {
-            THROWERR("Random Use Case: Probability is empty, i.e. probability is not defined.")
-        }
-        mProbability = aProbability;
-    }
-
-    /******************************************************************************//**
-     * \fn probability
-     * \brief Return random use case probability.
-     * \return random use case probability
-    **********************************************************************************/
-    std::string probability() const
-    {
-        return mProbability;
-    }
-
-    /******************************************************************************//**
      * \fn loads
      * \brief Return load case metadata.
      * \return load case metadata
     **********************************************************************************/
-    XMLGen::LoadCase loads() const
+    XMLGen::LoadSet loads() const
     {
-        return mLoadCase;
+        return mLoadSet;
     }
 
     /******************************************************************************//**
@@ -397,8 +330,8 @@ public:
     **********************************************************************************/
     XMLGen::Material material(const std::string& aBlockID) const
     {
-        auto tIterator = mMaterials.find(aBlockID);
-        if(tIterator == mMaterials.end())
+        auto tIterator = mMaterialSet.second.find(aBlockID);
+        if(tIterator == mMaterialSet.second.end())
         {
             THROWERR(std::string("Random Use Case: Did not find a material block with identification number '")
                 + aBlockID + "' in material set.")
@@ -407,33 +340,66 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn set
-     * \brief Set load case metadata.
-     * \param [in] aLoadCase load case metadata
+     * \fn allocate
+     * \brief Allocate, i.e. set, load set.
+     * \param [in] aLoadSet load set metadata
     **********************************************************************************/
-    void set(const XMLGen::LoadCase& aLoadCase)
+    void allocate(const XMLGen::LoadSet& aLoadset)
     {
-        this->check(aLoadCase);
-        mLoadCase = aLoadCase;
+        this->check(aLoadset.second);
+        mLoadSet = aLoadset;
     }
 
     /******************************************************************************//**
-     * \fn append
-     * \brief Append material metadata.
-     * \param [in] aBlockID block identification number
-     * \param [in] aMaterial material metadata
+     * \fn allocate
+     * \brief Allocate, i.e. set, material set.
+     * \param [in] aMaterialSet material set metadata
     **********************************************************************************/
-    void append(const std::string& aBlockID, const XMLGen::Material& aMaterial)
+    void allocate(const XMLGen::MaterialSet& aMaterialSet)
     {
-        if(aBlockID.empty())
+        if(aMaterialSet.second.empty())
         {
-            THROWERR("Random Use Case: Material block identification number empty, i.e. block id is not defined.")
+            THROWERR("Random MetaData: Block identification number to material metadata is empty.")
         }
-        this->check(aMaterial);
-        mMaterials.insert({aBlockID, aMaterial});
+
+        for(auto& tPair : aMaterialSet.second)
+        {
+            if(tPair.first.empty())
+            {
+                THROWERR(std::string("Random MetaData: Block identification number for material with identification number '") + "' is empty.")
+            }
+            this->check(tPair.second);
+        }
+        mMaterialSet = aMaterialSet;
     }
 };
-// struct RandomUseCaseMetaData
+// struct RandomMetaData
+
+struct UncertaintyMetaData
+{
+  size_t numSamples;
+  size_t numVariables;
+  size_t numPeformers;
+  std::vector<size_t> randomVariableIndices;
+  std::vector<size_t> deterministicVariableIndices;
+};
+// struct UncertaintyMetaData
+
+struct Uncertainty
+{
+    std::string variable_type = "load"; // Load or material
+    std::string type; // currently always "angle variation"
+    std::string id; // which random variable to vary
+    std::string axis; // x, y, z
+    std::string distribution; // normal, uniform, beta
+    std::string mean; // scalar value
+    std::string upper; // scalar value
+    std::string lower; // scalar value
+    std::string standard_deviation; // scalar value
+    std::string num_samples; // integer value
+    std::string file = ""; // filename with sample-probability pairs
+};
+// struct Uncertainty
 
 struct InputData
 {
@@ -572,7 +538,7 @@ struct InputData
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
 
-    std::vector<XMLGen::RandomUseCaseMetaData> mRandomUseCaseMetaData;
+    std::vector<XMLGen::RandomMetaData> mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;
 

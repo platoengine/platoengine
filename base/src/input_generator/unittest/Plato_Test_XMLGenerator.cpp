@@ -141,6 +141,74 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs_ErrorInaccurateSamples)
     EXPECT_THROW(Plato::srom::postprocess_material_outputs(tOutput, tXMLGenMetaData), std::runtime_error);
 }
 
+TEST(PlatoTestXMLGenerator, BuildMaterialSet_ErrorEmptyMaterialList)
+{
+    Plato::srom::RandomMaterialCase tRandMaterialCase;
+    EXPECT_THROW(Plato::srom::build_material_set(tRandMaterialCase), std::runtime_error);
+}
+
+
+TEST(PlatoTestXMLGenerator, BuildMaterialSet)
+{
+    // POSE DATA
+    Plato::srom::RandomMaterial tRandMaterial1;
+    tRandMaterial1.blockID("0");
+    tRandMaterial1.materialID("10");
+    tRandMaterial1.category("isotropic");
+    tRandMaterial1.append("youngs modulus", "homogeneous", "1");
+    tRandMaterial1.append("poissons ratio", "homogeneous", "0.3");
+
+    Plato::srom::RandomMaterial tRandMaterial2;
+    tRandMaterial2.blockID("1");
+    tRandMaterial2.materialID("11");
+    tRandMaterial2.category("isotropic");
+    tRandMaterial2.append("youngs modulus", "homogeneous", "2");
+    tRandMaterial2.append("poissons ratio", "homogeneous", "0.33");
+
+    Plato::srom::RandomMaterialCase tRandMaterialCase;
+    tRandMaterialCase.caseID("0");
+    tRandMaterialCase.probability(0.5);
+    tRandMaterialCase.append("10", tRandMaterial1);
+    tRandMaterialCase.append("11", tRandMaterial2);
+
+    // CALL FUNCTION
+    auto tMaterialSet = Plato::srom::build_material_set(tRandMaterialCase);
+
+    // TEST DATA
+    const double tTolerance = 1e-6;
+    ASSERT_NEAR(0.5, tMaterialSet.first, tTolerance);
+
+    std::vector<std::string> tGoldPropertiesMatOne = {"0.3" , "1"};
+    std::vector<std::string> tGoldPropertiesMatTwo = {"0.33" , "2"};
+
+    for(auto& tPair : tMaterialSet.second)
+    {
+        // unordered map; thus, if statement
+        if(tPair.first == "0")
+        {
+            ASSERT_STREQ("10", tPair.second.id().c_str());
+            ASSERT_STREQ("isotropic", tPair.second.category().c_str());
+            auto tTags = tPair.second.tags();
+            for(auto& tTag : tTags)
+            {
+                auto tTagIndex = &tTag - &tTags[0];
+                ASSERT_STREQ(tGoldPropertiesMatOne[tTagIndex].c_str(), tPair.second.property(tTag).c_str());
+            }
+        }
+        else
+        {
+            ASSERT_STREQ("11", tPair.second.id().c_str());
+            ASSERT_STREQ("isotropic", tPair.second.category().c_str());
+            auto tTags = tPair.second.tags();
+            for(auto& tTag : tTags)
+            {
+                auto tTagIndex = &tTag - &tTags[0];
+                ASSERT_STREQ(tGoldPropertiesMatTwo[tTagIndex].c_str(), tPair.second.property(tTag).c_str());
+            }
+        }
+    }
+}
+
 TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
 {
     Plato::srom::OutputMetaData tOutput;
@@ -204,13 +272,10 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
           { {"0.3" , "1"}  , {"0.33", "2"  } },
           { {"0.31", "1.1"}, {"0.35", "2.2"} }
         };
-    EXPECT_FALSE(tXMLGenMetaData.mRandomUseCaseMetaData.empty());
-    for(auto& tRandomUseCase : tXMLGenMetaData.mRandomUseCaseMetaData)
+    EXPECT_FALSE(tXMLGenMetaData.mRandomMetaData.empty());
+    for(auto& tRandomUseCase : tXMLGenMetaData.mRandomMetaData)
     {
-        EXPECT_TRUE(tRandomUseCase.loads().loads.empty());
-        ASSERT_STREQ("0.5000000000000000", tRandomUseCase.probability().c_str());
-        ASSERT_EQ(Plato::srom::usecase::MATERIAL, tRandomUseCase.usecase());
-        auto tCaseIndex = &tRandomUseCase - &tXMLGenMetaData.mRandomUseCaseMetaData[0];
+        auto tCaseIndex = &tRandomUseCase - &tXMLGenMetaData.mRandomMetaData[0];
         for(auto& tBlockID : tBlockIDs)
         {
             auto tBlockIndex = &tBlockID - &tBlockIDs[0];
@@ -227,68 +292,78 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
     }
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Set_ErrorUndefinedLoadCaseID)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Set_ErrorUndefinedLoadCaseID)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
-    XMLGen::LoadCase tLoadCase;
-    EXPECT_THROW(tMetaData.set(tLoadCase), std::runtime_error);
+    XMLGen::RandomMetaData tMetaData;
+    XMLGen::LoadSet tLoadSet = std::make_pair(0.5, XMLGen::LoadCase());
+    EXPECT_THROW(tMetaData.allocate(tLoadSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Set_ErrorUndefinedLoadSet)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Set_ErrorUndefinedLoadsContainer)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::LoadCase tLoadCase;
     tLoadCase.id = "1";
-    EXPECT_THROW(tMetaData.set(tLoadCase), std::runtime_error);
+    auto tLoadSet = std::make_pair(0.5, tLoadCase);
+    EXPECT_THROW(tMetaData.allocate(tLoadSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Append_ErrorUndefinedBlockID)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedBlockID)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
-    EXPECT_THROW(tMetaData.append("", tMaterial), std::runtime_error);
+    std::unordered_map<std::string, XMLGen::Material> tMaterialMap;
+    tMaterialMap.insert({"", tMaterial});
+    auto tMaterialSet = std::make_pair(0.5, tMaterialMap);
+    EXPECT_THROW(tMetaData.allocate(tMaterialSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Append_ErrorUndefinedMaterialID)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedMaterialID)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
-    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+    std::unordered_map<std::string, XMLGen::Material> tMaterialMap;
+    tMaterialMap.insert({"1", tMaterial});
+    auto tMaterialSet = std::make_pair(0.5, tMaterialMap);
+    EXPECT_THROW(tMetaData.allocate(tMaterialSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Append_ErrorUndefinedCategory)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedCategory)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
     tMaterial.id("2");
     tMaterial.category("");
-    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+    std::unordered_map<std::string, XMLGen::Material> tMaterialMap;
+    tMaterialMap.insert({"1", tMaterial});
+    auto tMaterialSet = std::make_pair(0.5, tMaterialMap);
+    EXPECT_THROW(tMetaData.allocate(tMaterialSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Append_ErrorUndefinedProperties)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedProperties)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
     tMaterial.id("2");
     tMaterial.category("isotropic");
-    EXPECT_THROW(tMetaData.append("1", tMaterial), std::runtime_error);
+    std::unordered_map<std::string, XMLGen::Material> tMaterialMap;
+    tMaterialMap.insert({"1", tMaterial});
+    auto tMaterialSet = std::make_pair(0.5, tMaterialMap);
+    EXPECT_THROW(tMetaData.allocate(tMaterialSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_ErrorUndefinedProbability)
+TEST(PlatoTestXMLGenerator, RandomMetaData_Material_ErrorUndefinedBlockID)
 {
-    XMLGen::RandomUseCaseMetaData tMetaData;
-    EXPECT_THROW(tMetaData.probability(""), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, RandomUseCaseMetaData_Material_ErrorUndefinedBlockID)
-{
-    XMLGen::RandomUseCaseMetaData tMetaData;
+    XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
     tMaterial.id("2");
     tMaterial.category("isotropic");
     tMaterial.property("elastic modulus", "1", "homogeneous");
     tMaterial.property("poissons ratio", "0.3", "heterogeneous");
-    EXPECT_NO_THROW(tMetaData.append("1", tMaterial));
+    std::unordered_map<std::string, XMLGen::Material> tMaterialMap;
+    tMaterialMap.insert({"1", tMaterial});
+    auto tMaterialSet = std::make_pair(0.5, tMaterialMap);
+    EXPECT_NO_THROW(tMetaData.allocate(tMaterialSet));
 
     EXPECT_THROW(tMetaData.material("20"), std::runtime_error);
 }
