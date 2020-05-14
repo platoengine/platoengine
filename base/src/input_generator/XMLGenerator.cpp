@@ -274,17 +274,14 @@ bool XMLGenerator::runSROMForUncertainVariables()
         Plato::srom::postprocess_srom_problem_outputs(tSromOutputs, m_InputData);
         Plato::srom::check_output(m_InputData.mRandomMetaData);
 
-        if (!generateUncertaintyMetaData())
-        {
-            return false;
-        }
+        this->setNumPerformers()
     }
 
     return true;
 }
 
 /******************************************************************************/
-bool XMLGenerator::generateUncertaintyMetaData()
+void XMLGenerator::setNumPerformers()
 /******************************************************************************/
 {
     if (m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
@@ -298,11 +295,8 @@ bool XMLGenerator::generateUncertaintyMetaData()
 
     if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPeformers != 0)
     {
-        std::cout << "Number of samples must divide evenly into number of processors" << std::endl;
-        return false;
+        THROWERR("Set Number for Performers: Number of samples must divide evenly into number of processors.");
     }
-
-  return true;
 }
 
 /******************************************************************************/

@@ -97,7 +97,7 @@ protected:
     bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool runSROMForUncertainVariables();
-    bool generateUncertaintyMetaData();
+    void setNumPerformers();
     bool distributeObjectivesForGenerate();
     bool parseFile();
     bool parseMesh(std::istream &fin);

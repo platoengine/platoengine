@@ -12,11 +12,16 @@
 namespace XMLGen
 {
 
+/******************************************************************************//**
+ * \enum \struct High-Performance Platform
+ * \brief Denotes the High-Performance Platform use to run stochastic use cases.
+**********************************************************************************/
 enum struct Arch
 {
   CEE,
   SUMMIT
 };
+// enum struct Arch
 
 /*!< map between block identification number and material metadata, i.e. map<block id, material metadata> */
 using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
@@ -320,6 +325,11 @@ public:
         mRandomMaterials.push_back(aMaterialSet);
     }
 
+    /******************************************************************************//**
+     * \fn sample
+     * \brief Return const reference to sample's metadata.
+     * \param [in] aIndex sample index
+    **********************************************************************************/
     const XMLGen::RandomSample& sample(const size_t& aIndex) const
     {
         if(aIndex >= mSamples.size())
@@ -344,3 +354,4 @@ public:
 // struct RandomMetaData
 
 }
+// namespace XMLGen
