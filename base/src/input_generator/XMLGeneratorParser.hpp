@@ -208,12 +208,10 @@ private:
 
 private:
     /******************************************************************************//**
-     * \fn clearTags
-     * \brief Removes all elements from the map container (which are destroyed), \n
-     *   leaving the container with a size of 0. The map container defines the map \n
-     *   from valid tags to valid tokens-value pairs.
+     * \fn allocate
+     * \brief Allocate map from valid tags to valid tokens-value pair
     **********************************************************************************/
-    void clearTags()
+    void allocate()
     {
         mTags.clear();
         mTags.insert({ "tag", { {"tag"}, "" } });
@@ -227,6 +225,18 @@ private:
         mTags.insert({ "lower bound", { {"lower", "bound"}, "" } });
         mTags.insert({ "upper bound", { {"upper", "bound"}, "" } });
         mTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
+    }
+
+    /******************************************************************************//**
+     * \fn erase
+     * \brief Erases value key content in map from valid tags to valid tokens-value pair.
+    **********************************************************************************/
+    void erase()
+    {
+        for(auto& tTag : mTags)
+        {
+            tTag.second.second.clear();
+        }
     }
 
     /******************************************************************************//**
@@ -560,6 +570,7 @@ public:
     void parse(std::istream& aInputFile)
     {
         mData.clear();
+        this->allocate();
         constexpr int MAX_CHARS_PER_LINE = 512;
         std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
         while (!aInputFile.eof())
@@ -575,7 +586,7 @@ public:
             if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","uncertainty"}, tTag))
             {
                 XMLGen::Uncertainty tMetadata;
-                this->clearTags();
+                this->erase();
                 this->parseMetadata(aInputFile);
                 this->setMetadata(tMetadata);
                 this->checkMetadata(tMetadata);

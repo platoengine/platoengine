@@ -274,7 +274,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         Plato::srom::postprocess_srom_problem_outputs(tSromOutputs, m_InputData);
         Plato::srom::check_output(m_InputData.mRandomMetaData);
 
-        this->setNumPerformers()
+        this->setNumPerformers();
     }
 
     return true;
