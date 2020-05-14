@@ -170,11 +170,7 @@ public:
     std::string getAlbanyPath() {return m_InputData.albany_path;}
     std::string getLightMPPath() {return m_InputData.lightmp_path;}
     std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
-    size_t      getNumSamples() {return m_InputData.m_UncertaintyMetaData.numSamples;}
-    size_t      getNumVariables() {return m_InputData.m_UncertaintyMetaData.numVariables;}
     size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPeformers;}
-    std::vector<size_t> getRandomVariableIndices() {return m_InputData.m_UncertaintyMetaData.randomVariableIndices;}
-    std::vector<size_t> getDeterministicVariableIndices() {return m_InputData.m_UncertaintyMetaData.deterministicVariableIndices;}
     void clearInputData();
     XMLGen::InputData* exposeInputData() {return &m_InputData;}
 

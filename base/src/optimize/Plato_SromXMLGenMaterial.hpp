@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 
+#include "XMLGeneratorDataStruct.hpp"
+
 #include "Plato_SromXMLGenHelpers.hpp"
 #include "Plato_SromXML.hpp"
 
@@ -206,7 +208,7 @@ inline void preprocess_material_inputs
  * \param aRandomMaterialCase random material case
  * \return material set
 **********************************************************************************/
-inline XMLGen::MaterialSet build_material_set
+inline XMLGen::RandomMaterialCase build_material_set
 (const Plato::srom::RandomMaterialCase& aRandomMaterialCase)
 {
     if(aRandomMaterialCase.materials().empty())
@@ -229,7 +231,7 @@ inline XMLGen::MaterialSet build_material_set
         }
         tBlockIDtoMaterialMap.insert({tRandomMaterial.blockID(), tNewMaterial});
     }
-    XMLGen::MaterialSet tMaterialSet = std::make_pair(aRandomMaterialCase.probability(), tBlockIDtoMaterialMap);
+    XMLGen::RandomMaterialCase tMaterialSet = std::make_pair(aRandomMaterialCase.probability(), tBlockIDtoMaterialMap);
     return tMaterialSet;
 }
 // function build_material_set
@@ -255,10 +257,8 @@ inline void postprocess_material_outputs
     for(auto& tRandomMaterialCase : tRandomMaterialCases)
     {
         auto tMaterialSet = Plato::srom::build_material_set(tRandomMaterialCase);
-        XMLGen::RandomMetaData tNewRandomMetaData;
-        tNewRandomMetaData.allocate(tMaterialSet);
+        aXMLGenMetaData.mRandomMetaData.append(tMaterialSet);
         tSum += tRandomMaterialCase.probability();
-        aXMLGenMetaData.mRandomMetaData.push_back(tNewRandomMetaData);
     }
 
     constexpr double tTolerance = 1e-2;

@@ -4934,7 +4934,7 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
   pugi::xml_node tTmpNode = doc.append_child("Define");
   tTmpNode.append_attribute("name") = "NumSamples";
   tTmpNode.append_attribute("type") = "int";
-  std::string tNumSamplesString = Plato::to_string(m_InputData.m_UncertaintyMetaData.numSamples);
+  std::string tNumSamplesString = Plato::to_string(m_InputData.mRandomMetaData.numSamples());
   tTmpNode.append_attribute("value") = tNumSamplesString.c_str();
 
   tTmpNode = doc.append_child("Define");
@@ -5000,18 +5000,11 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tLoadCases.size(); ++tLoadCaseIndex)
     {
       XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
-      if(load_case.loads.size() != m_InputData.m_UncertaintyMetaData.numVariables)
-      {
-        std::cerr << "Error: Load case size does not match number of loads in uncertainty metadata" << std::endl;
-        return false;
-      }
-
       XMLGen::Load tRandomLoad = load_case.loads[tRandomLoadIndex];
       tXValuesForRandomLoadIndex.push_back(tRandomLoad.values[0]);
       tYValuesForRandomLoadIndex.push_back(tRandomLoad.values[1]);
       tZValuesForRandomLoadIndex.push_back(tRandomLoad.values[2]);
       tProbabilitiesForLoadCaseIndex.push_back(Plato::to_string(m_InputData.load_case_probabilities[tLoadCaseIndex]));
-
     }
 
     std::string tXValuesString = makeValuesString(tXValuesForRandomLoadIndex);

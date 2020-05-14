@@ -272,6 +272,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         Plato::srom::OutputMetaData tSromOutputs;
         Plato::srom::build_sroms(tSromInputs, tSromOutputs);
         Plato::srom::postprocess_srom_problem_outputs(tSromOutputs, m_InputData);
+        Plato::srom::check_output(m_InputData.mRandomMetaData);
 
         if (!generateUncertaintyMetaData())
         {
@@ -286,150 +287,21 @@ bool XMLGenerator::runSROMForUncertainVariables()
 bool XMLGenerator::generateUncertaintyMetaData()
 /******************************************************************************/
 {
-  if(!getSizeOfLoadCases())
-    return false;
-  if(!getIndicesOfDeterministicAndRandomVariables())
-    return false;
-  m_InputData.m_UncertaintyMetaData.numSamples = m_InputData.load_cases.size();
-  if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
-    m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].num_ranks);
-  else
-    m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
-  if(m_InputData.m_UncertaintyMetaData.numSamples % m_InputData.m_UncertaintyMetaData.numPeformers != 0)
-  {
-    std::cout << "Number of samples must divide evenly into number of processors" << std::endl;
-    return false;
-  }
-    
-  return true;
-}
-
-/******************************************************************************/
-bool XMLGenerator::getSizeOfLoadCases()
-/******************************************************************************/
-{
-  std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
-
-  size_t tLoadCaseSize = tLoadCases[0].loads.size();
-
-  for(auto load_case:tLoadCases)
-  {
-    std::vector<XMLGen::Load> tLoads = load_case.loads;
-    if(tLoads.size() != tLoadCaseSize)
+    if (m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
     {
-      std::cout << "Error: Uncertainty workflow only supports load cases that all have the same size" << std::endl;
-      return false;
+        m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
-  }
-
-  m_InputData.m_UncertaintyMetaData.numVariables = tLoadCaseSize;
-
-  return true;
-}
-
-/******************************************************************************/
-bool XMLGenerator::getIndicesOfDeterministicAndRandomVariables()
-/******************************************************************************/
-{
-  std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
-  if(tLoadCases.size() == 0)
-  {
-    std::cout << "Error: Must have more than zero samples" << std::endl;
-  }
-
-  // only one sample so every load is "deterministic"
-  if(tLoadCases.size() == 1)
-  {
-    for(size_t i = 0; i < m_InputData.m_UncertaintyMetaData.numVariables; ++i)
-      m_InputData.m_UncertaintyMetaData.deterministicVariableIndices.push_back(i);
-    return true;
-  }
-
-  XMLGen::LoadCase tLoadCaseZero = tLoadCases[0];
-  XMLGen::LoadCase tLoadCaseOne = tLoadCases[1];
-
-  for(size_t i = 0; i < m_InputData.m_UncertaintyMetaData.numVariables; ++i)
-  {
-    XMLGen::Load tLoadZero = tLoadCaseZero.loads[i];
-    XMLGen::Load tLoadOne = tLoadCaseOne.loads[i];
-
-    if(tLoadZero.app_name != tLoadOne.app_name)
-    {
-      std::cout << "Error: Uncertainty workflow only supports load cases that all have the same format" << std::endl;
-      return false;
-    }
-
-    if(tLoadZero.values == tLoadOne.values)
-      m_InputData.m_UncertaintyMetaData.deterministicVariableIndices.push_back(i);
     else
-      m_InputData.m_UncertaintyMetaData.randomVariableIndices.push_back(i);
-  }
-
-  verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases();
-  verifyEachLoadHaSSameAppNameAcrossAllLoadCases();
-  verifyEachLoadIsATractionLoad();
-
-  return true;
-}
-
-/******************************************************************************/
-bool XMLGenerator::verifyEachLoadIsATractionLoad()
-/******************************************************************************/
-{
-  std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
-  for(auto load_case:tLoadCases)
-  {
-    for(auto load:load_case.loads)
     {
-      if(load.type != "traction")
-      {
-        std::cout << "ERROR: Only traction loads with uncertainty are currently supported in new uncertainty workflow" << std::endl;
-        return false;
-      }
+        m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
     }
-  }
-  return true;
-}
 
-/******************************************************************************/
-bool XMLGenerator::verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases()
-/******************************************************************************/
-{
-  std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
-  for(auto deterministicVariableIndex:m_InputData.m_UncertaintyMetaData.deterministicVariableIndices)
-  {
-    std::vector<std::string> tDeterministicLoadValues = tLoadCases[0].loads[deterministicVariableIndex].values;
-    for(auto load_case:tLoadCases)
+    if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPeformers != 0)
     {
-      XMLGen::Load tDeterministicLoad = load_case.loads[deterministicVariableIndex];
-      if(tDeterministicLoad.values != tDeterministicLoadValues)
-      {
-        std::cout << "Error: Uncertainty workflow only supports load cases that all have the same format" << std::endl;
+        std::cout << "Number of samples must divide evenly into number of processors" << std::endl;
         return false;
-      }
     }
-  }
-  return true;
-}
 
-/******************************************************************************/
-bool XMLGenerator::verifyEachLoadHaSSameAppNameAcrossAllLoadCases()
-/******************************************************************************/
-{
-  std::vector<XMLGen::LoadCase> tLoadCases = m_InputData.load_cases;
-  for(size_t loadIndex = 0; loadIndex < m_InputData.m_UncertaintyMetaData.numVariables; ++loadIndex)
-  {
-    std::string tAppName = tLoadCases[0].loads[loadIndex].app_name;
-    for(auto load_case:tLoadCases)
-    {
-      XMLGen::Load tLoad = load_case.loads[loadIndex];
-      if(tLoad.app_name != tAppName)
-      {
-        std::cout << "Error: Uncertainty workflow only supports load cases that all have the same format" << std::endl;
-        return false;
-      }
-    }
-  }
   return true;
 }
 
@@ -549,6 +421,7 @@ bool XMLGenerator::distributeObjectivesForGenerate()
           std::cout << "Objective distribution is not supported with new plato analyze uncertainty workflow" << std::endl;
           return false;
         }
+
         if(thisObjective_distributeType == "")
         {
             // no distribute; nothing to do for this objective.
@@ -559,9 +432,8 @@ bool XMLGenerator::distributeObjectivesForGenerate()
 
             // get inputs to distributed
             const size_t total_number_of_tasks = m_InputData.objectives[objective_index].load_case_ids.size();
-            const int num_processors_in_group = std::atoi(m_InputData.objectives[objective_index].num_procs.c_str());
-            const int atmost_processor_count =
-                    std::atoi(m_InputData.objectives[objective_index].atmost_total_num_processors.c_str());
+            const int num_processors_in_group = std::stoi(m_InputData.objectives[objective_index].num_procs);
+            const int atmost_processor_count = std::stoi(m_InputData.objectives[objective_index].atmost_total_num_processors);
             if(num_processors_in_group <= 0 || atmost_processor_count <= 0)
             {
                 std::cout << "ERROR:XMLGenerator:distributeObjectives: read a non-positive processor count.\n";

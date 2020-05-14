@@ -98,11 +98,6 @@ protected:
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool runSROMForUncertainVariables();
     bool generateUncertaintyMetaData();
-    bool getSizeOfLoadCases();
-    bool getIndicesOfDeterministicAndRandomVariables();
-    bool verifyDeterministicLoadsHaveSameValuesAcrossAllLoadCases();
-    bool verifyEachLoadHaSSameAppNameAcrossAllLoadCases();
-    bool verifyEachLoadIsATractionLoad();
     bool distributeObjectivesForGenerate();
     bool parseFile();
     bool parseMesh(std::istream &fin);

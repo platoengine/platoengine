@@ -11,6 +11,9 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       SalinasInputDeckWriter.cpp)
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp 
+                      XMLGeneratorRandomMetadata.hpp
+                      XMLGeneratorMaterialMetadata.hpp 
+                      XMLGeneratorBoundaryMetadata.hpp 
                       DefaultInputGenerator.hpp 
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
                       ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp

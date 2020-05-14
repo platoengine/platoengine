@@ -16,6 +16,19 @@ namespace srom
 {
 
 /******************************************************************************//**
+ * \fn check_output
+ * \brief Check Stochastic Reduced Order Model (SROM) problem outputs are properly formatted.
+ * \param [in] aMetaData Random use case metadata
+**********************************************************************************/
+inline void check_output(const XMLGen::RandomMetaData& aMetaData)
+{
+    Plato::srom::check_output_load_set_size(aMetaData);
+    Plato::srom::check_output_load_set_types(aMetaData);
+    Plato::srom::check_output_load_set_application_name(aMetaData);
+}
+// function check_output
+
+/******************************************************************************//**
  * \fn preprocess_srom_problem_inputs
  * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
  * \param [in/out] aInputMetadata  Plato problem input metadata
@@ -56,29 +69,31 @@ inline void preprocess_srom_problem_inputs
 /******************************************************************************//**
  * \fn postprocess_srom_problem_outputs
  * \brief Post-process Stochastic Reduced Order Model (SROM) problem outputs.
- * \param [in/out] aSromOutputs    SROM problem output metadata
- * \param [in/out] aInputMetadata  Plato problem input metadata
+ * \param [in/out] aSromOutputs     SROM problem output metadata
+ * \param [in/out] aXMLGenMetaData  Plato problem input metadata
 **********************************************************************************/
 inline void postprocess_srom_problem_outputs
 (const Plato::srom::OutputMetaData& aSromOutputs,
- XMLGen::InputData& aInputMetadata)
+ XMLGen::InputData& aXMLGenMetaData)
 {
+    aXMLGenMetaData.mRandomMetaData.clear();
+
     switch(aSromOutputs.usecase())
     {
         case Plato::srom::usecase::LOAD:
         {
-            Plato::srom::postprocess_load_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_load_outputs(aSromOutputs, aXMLGenMetaData);
             break;
         }
         case Plato::srom::usecase::MATERIAL:
         {
-            Plato::srom::postprocess_material_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_material_outputs(aSromOutputs, aXMLGenMetaData);
             break;
         }
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
-            Plato::srom::postprocess_load_outputs(aSromOutputs, aInputMetadata);
-            Plato::srom::postprocess_material_outputs(aSromOutputs, aInputMetadata);
+            Plato::srom::postprocess_load_outputs(aSromOutputs, aXMLGenMetaData);
+            Plato::srom::postprocess_material_outputs(aSromOutputs, aXMLGenMetaData);
             break;
         }
         default:
@@ -88,6 +103,8 @@ inline void postprocess_srom_problem_outputs
             break;
         }
     }
+
+    aXMLGenMetaData.mRandomMetaData.finalize();
 }
 // function postprocess_srom_problem_outputs
 
