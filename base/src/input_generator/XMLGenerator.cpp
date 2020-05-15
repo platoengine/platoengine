@@ -396,33 +396,20 @@ bool XMLGenerator::distributeObjectivesForGenerate()
 /******************************************************************************/
 {
     // for each objective, consider if should distribute
-    size_t objective_index = 0u;
-    if(m_InputData.m_HasUncertainties && m_InputData.objectives.size() != 1)
+    for(auto& tObjective : m_InputData.objectives)
     {
-      std::cout << "Uncertainty problems only support one objective" << std::endl;
-      return false;
-    }
-    while(objective_index < m_InputData.objectives.size())
-    {
-        const std::string thisObjective_distributeType = m_InputData.objectives[objective_index].distribute_objective_type;
-        if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && thisObjective_distributeType != "")
-        {
-          std::cout << "Objective distribution is not supported with new plato analyze uncertainty workflow" << std::endl;
-          return false;
-        }
-
-        if(thisObjective_distributeType == "")
-        {
-            // no distribute; nothing to do for this objective.
-        }
+        auto tObjectiveIndex = &tObjective - &m_InputData.objectives[0];
+        const std::string thisObjective_distributeType = m_InputData.objectives[tObjectiveIndex].distribute_objective_type;
+        if(thisObjective_distributeType.empty())
+        { /* no distribute; nothing to do for this objective.*/ }
         else if(thisObjective_distributeType == "atmost")
         {
             // distribute by "atmost" rule
 
             // get inputs to distributed
-            const size_t total_number_of_tasks = m_InputData.objectives[objective_index].load_case_ids.size();
-            const int num_processors_in_group = std::stoi(m_InputData.objectives[objective_index].num_procs);
-            const int atmost_processor_count = std::stoi(m_InputData.objectives[objective_index].atmost_total_num_processors);
+            const size_t total_number_of_tasks = m_InputData.objectives[tObjectiveIndex].load_case_ids.size();
+            const int num_processors_in_group = std::stoi(m_InputData.objectives[tObjectiveIndex].num_procs);
+            const int atmost_processor_count = std::stoi(m_InputData.objectives[tObjectiveIndex].atmost_total_num_processors);
             if(num_processors_in_group <= 0 || atmost_processor_count <= 0)
             {
                 std::cout << "ERROR:XMLGenerator:distributeObjectives: read a non-positive processor count.\n";
@@ -430,12 +417,12 @@ bool XMLGenerator::distributeObjectivesForGenerate()
             }
 
             // divide up distributed objective
-            const size_t num_distributed_objectives = Plato::divide_up_atmost_processors(total_number_of_tasks,
-                                                                                         num_processors_in_group,
-                                                                                         atmost_processor_count);
+            const size_t num_distributed_objectives =
+                Plato::divide_up_atmost_processors(total_number_of_tasks, num_processors_in_group, atmost_processor_count);
+
             // store original load ids and weights
-            const std::vector<std::string> orig_load_case_ids = m_InputData.objectives[objective_index].load_case_ids;
-            const std::vector<std::string> orig_load_case_weights = m_InputData.objectives[objective_index].load_case_weights;
+            const std::vector<std::string> orig_load_case_ids = m_InputData.objectives[tObjectiveIndex].load_case_ids;
+            const std::vector<std::string> orig_load_case_weights = m_InputData.objectives[tObjectiveIndex].load_case_weights;
 
             const size_t num_loads_this_original_objective = orig_load_case_ids.size();
             if(num_loads_this_original_objective != orig_load_case_weights.size())
@@ -446,19 +433,19 @@ bool XMLGenerator::distributeObjectivesForGenerate()
             }
 
             // clear load ids/weights in preparation for re-allocation
-            m_InputData.objectives[objective_index].load_case_ids.clear();
-            m_InputData.objectives[objective_index].load_case_weights.clear();
+            m_InputData.objectives[tObjectiveIndex].load_case_ids.clear();
+            m_InputData.objectives[tObjectiveIndex].load_case_weights.clear();
 
             // clear distribute type in preparation for completion
-            m_InputData.objectives[objective_index].distribute_objective_type = "";
-            m_InputData.objectives[objective_index].atmost_total_num_processors = "";
+            m_InputData.objectives[tObjectiveIndex].distribute_objective_type = "";
+            m_InputData.objectives[tObjectiveIndex].atmost_total_num_processors = "";
 
             // pushback indices for this distributed objective
-            std::vector<size_t> fromOriginal_newDistributed_objectiveIndices(1u, objective_index);
+            std::vector<size_t> fromOriginal_newDistributed_objectiveIndices(1u, tObjectiveIndex);
             for(size_t distributed_index = 1u; distributed_index < num_distributed_objectives; distributed_index++)
             {
                 fromOriginal_newDistributed_objectiveIndices.push_back(m_InputData.objectives.size());
-                m_InputData.objectives.push_back(m_InputData.objectives[objective_index]);
+                m_InputData.objectives.push_back(m_InputData.objectives[tObjectiveIndex]);
             }
 
             // stride load case ids and weights across distributed objectives
@@ -481,9 +468,6 @@ bool XMLGenerator::distributeObjectivesForGenerate()
                 strided_distributed_index = (strided_distributed_index + 1) % num_distributed_objectives;
             }
         }
-
-        // advance considered objective
-        objective_index++;
     }
 
     // assign names
