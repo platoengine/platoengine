@@ -68,11 +68,79 @@ const int MAX_CHARS_PER_LINE = 512;
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, CheckOutputLoadSetType_Error)
+{
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads[0].type = "traction";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads[0].type = "pressure";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    XMLGen::RandomMetaData tMetaData;
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tMetaData.finalize());
+    ASSERT_EQ(2u, tMetaData.numSamples());
+
+    ASSERT_THROW(Plato::srom::check_output_load_set_types(tMetaData), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, CheckOutputLoadSetSize_Error)
+{
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    tLoadCase1.loads.push_back(XMLGen::Load());
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    XMLGen::RandomMetaData tMetaData;
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tMetaData.finalize());
+    ASSERT_EQ(2u, tMetaData.numSamples());
+
+    ASSERT_THROW(Plato::srom::check_output_load_set_size(tMetaData), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, CheckOutputLoadSetApplicationName_Error)
+{
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads[0].app_name = "sideset";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads[0].app_name = "nodeset";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    XMLGen::RandomMetaData tMetaData;
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tMetaData.finalize());
+    ASSERT_EQ(2u, tMetaData.numSamples());
+
+    ASSERT_THROW(Plato::srom::check_output_load_set_application_name(tMetaData), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs_ErrorEmptyRandomMaterialCases)
 {
     Plato::srom::OutputMetaData tOutput;
     XMLGen::InputData tXMLGenMetaData;
-    EXPECT_THROW(Plato::srom::postprocess_material_outputs(tOutput, tXMLGenMetaData), std::runtime_error);
+    ASSERT_THROW(Plato::srom::postprocess_material_outputs(tOutput, tXMLGenMetaData), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs_ErrorInaccurateSamples)
@@ -2007,105 +2075,6 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     ASSERT_EQ(std::numeric_limits<int>::max(), tLoads[1].mAppID);
     ASSERT_TRUE(tLoads[1].mRandomVars.empty());
 
-}
-
-TEST(PlatoTestXMLGenerator, DefineSromProblemUseCase)
-{
-    // 1.1 - SET LOAD USE CASE - Define Uncertainty Metadata
-    XMLGen::Uncertainty tInput1;
-    tInput1.id = "1";
-    tInput1.axis = "x";
-    tInput1.variable_type = "load";
-    tInput1.type = "angle variation";
-    tInput1.mean = "15";
-    tInput1.upper = "22";
-    tInput1.lower = "12";
-    tInput1.num_samples = "4";
-    tInput1.distribution = "beta";
-    tInput1.standard_deviation = "2";
-
-    XMLGen::Uncertainty tInput2;
-    tInput2.id = "3";
-    tInput2.axis = "y";
-    tInput2.variable_type = "load";
-    tInput2.type = "angle variation";
-    tInput2.mean = "25";
-    tInput2.upper = "32";
-    tInput2.lower = "22";
-    tInput2.num_samples = "2";
-    tInput2.distribution = "beta";
-    tInput2.standard_deviation = "1.5";
-
-    std::vector<XMLGen::Uncertainty> tUncertaintySet1;
-    tUncertaintySet1.push_back(tInput1);
-    tUncertaintySet1.push_back(tInput2);
-
-    // 1.2 Define SROM Input Metadata
-    Plato::srom::InputMetaData tInputMetaData;
-
-    // 1.3 Test usecase = LOAD
-    EXPECT_NO_THROW(Plato::srom::define_srom_problem_usecase(tUncertaintySet1, tInputMetaData));
-    ASSERT_EQ(Plato::srom::usecase::LOAD, tInputMetaData.usecase());
-
-    // 2.1 - SET MATERIAL USE CASE - Define Uncertainty Metadata
-    XMLGen::Uncertainty tInput3;
-    tInput3.id = "10";
-    tInput3.axis = "homogeneous";
-    tInput3.variable_type = "material";
-    tInput3.type = "poissons ratio";
-    tInput3.mean = "25";
-    tInput3.upper = "32";
-    tInput3.lower = "22";
-    tInput3.num_samples = "2";
-    tInput3.distribution = "beta";
-    tInput3.standard_deviation = "1.5";
-
-    XMLGen::Uncertainty tInput4;
-    tInput4.id = "11";
-    tInput4.axis = "homogeneous";
-    tInput4.variable_type = "material";
-    tInput4.type = "elastic modulus";
-    tInput4.mean = "25";
-    tInput4.upper = "32";
-    tInput4.lower = "22";
-    tInput4.num_samples = "2";
-    tInput4.distribution = "beta";
-    tInput4.standard_deviation = "1.5";
-
-    std::vector<XMLGen::Uncertainty> tUncertaintySet2;
-    tUncertaintySet2.push_back(tInput3);
-    tUncertaintySet2.push_back(tInput4);
-
-    // 2.2 Test usecase = MATERIAL
-    EXPECT_NO_THROW(Plato::srom::define_srom_problem_usecase(tUncertaintySet2, tInputMetaData));
-    ASSERT_EQ(Plato::srom::usecase::MATERIAL, tInputMetaData.usecase());
-
-    // 3.1 - SET MATERIAL PLUS LOAD USE CASE - Define Uncertainty Metadata
-    std::vector<XMLGen::Uncertainty> tUncertaintySet3;
-    tUncertaintySet3.push_back(tInput2);
-    tUncertaintySet3.push_back(tInput3);
-    tUncertaintySet3.push_back(tInput4);
-
-    // 3.2 Test usecase = MATERIAL PLUS LOAD
-    EXPECT_NO_THROW(Plato::srom::define_srom_problem_usecase(tUncertaintySet3, tInputMetaData));
-    ASSERT_EQ(Plato::srom::usecase::MATERIAL_PLUS_LOAD, tInputMetaData.usecase());
-
-    // 4.1 - SET MATERIAL UNDEFINED USE CASE - Define Uncertainty Metadata
-    XMLGen::Uncertainty tInput5;
-    tInput5.id = "8";
-    tInput5.axis = "function";
-    tInput5.variable_type = "boundary condition";
-    tInput5.type = "displacement";
-    tInput5.mean = "25";
-    tInput5.upper = "32";
-    tInput5.lower = "22";
-    tInput5.num_samples = "2";
-    tInput5.distribution = "beta";
-    tInput5.standard_deviation = "1.5";
-    tUncertaintySet3.push_back(tInput5);
-
-    // 4.2 Test usecase = UNDEFINED
-    EXPECT_THROW(Plato::srom::define_srom_problem_usecase(tUncertaintySet3, tInputMetaData), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, ParseTagValues)

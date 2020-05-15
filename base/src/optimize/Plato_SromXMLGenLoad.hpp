@@ -416,51 +416,6 @@ generate_srom_load_inputs
 // function generate_srom_load_inputs
 
 /******************************************************************************//**
- * \fn define_srom_problem_usecase
- * \brief Define use case for Stochastic Reduced Order Model (SROM) problem
- * \param [in]  aUncertaintySet    set of input uncertainty blocks
- * \param [out] aSromInputMetadata SROM input metadata
-**********************************************************************************/
-inline void define_srom_problem_usecase
-(const std::vector<XMLGen::Uncertainty>& aUncertaintySet,
- Plato::srom::InputMetaData& aSromInputMetadata)
-{
-    std::vector<std::string> tCategory;
-    std::vector<std::string> tSupportedCategories = {"load", "material"};
-    for(auto& tUncertainty : aUncertaintySet)
-    {
-        auto tMyCategory = Plato::srom::tolower(tUncertainty.variable_type);
-        auto tIsSupported = std::find(tSupportedCategories.begin(), tSupportedCategories.end(), tMyCategory) != tSupportedCategories.end();
-        if (!tIsSupported)
-        {
-            THROWERR(std::string("Define SROM Problem Use Case: Uncertainty category '") + tMyCategory + "' is not supported.")
-        }
-        tCategory.push_back(tUncertainty.variable_type);
-    }
-
-    bool tFoundLoadUseCase = std::find(tCategory.begin(), tCategory.end(), "load") != tCategory.end();
-    bool tFoundMaterialUseCase = std::find(tCategory.begin(), tCategory.end(), "material") != tCategory.end();
-    if(tFoundLoadUseCase && !tFoundMaterialUseCase)
-    {
-        aSromInputMetadata.usecase(Plato::srom::usecase::LOAD);
-    }
-    else if(!tFoundLoadUseCase && tFoundMaterialUseCase)
-    {
-        aSromInputMetadata.usecase(Plato::srom::usecase::MATERIAL);
-    }
-    else if(tFoundLoadUseCase && tFoundMaterialUseCase)
-    {
-        aSromInputMetadata.usecase(Plato::srom::usecase::MATERIAL_PLUS_LOAD);
-    }
-    else
-    {
-        aSromInputMetadata.usecase(Plato::srom::usecase::UNDEFINED);
-        THROWERR(std::string("Define SROM Problem Use Case: Identified an undefined SROM problem use-case."))
-    }
-}
-// function define_srom_problem_usecase
-
-/******************************************************************************//**
  * \fn preprocess_srom_problem_load_inputs
  * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
  * \param [in/out] aInputMetadata Plato problem input metadata
@@ -591,8 +546,8 @@ inline void check_output_load_set_types
             {
                 auto tLoadIndex = &tLoad - &tLoadUseCase.loads[0];
                 THROWERR(std::string("Check Output Load Set Application Name: Error with Sample '") + std::to_string(tSampleIndex)
-                    + "'. Uncertainty workflow only supports load cases that all have the same format. Load '" + std::to_string(tLoadIndex)
-                    + "' has type '" + tLoad.type + "' and expected the load to be of type 'traction'.")
+                    + "'. Uncertainty workflow only supports load cases that all have the same format. Load '"
+                    + std::to_string(tLoadIndex) + "' has its type set to '" + tLoad.type + "' and expected 'traction'.")
             }
         }
     }
@@ -617,8 +572,11 @@ inline void check_output_load_set_application_name
             auto tLoadIndex = &tLoad - &tLoadUseCaseOne.loads[0];
             if(tLoad.app_name != tLoadUseCaseTwo.loads[tLoadIndex].app_name)
             {
-                THROWERR(std::string("Check Output Load Set Application Name: Error with Sample '") + std::to_string(tIndex)
-                    + "'. Uncertainty workflow only supports load cases that all have the same format.")
+                std::ostringstream tMsg;
+                tMsg << "Check Output Load Set Application Name: Uncertainty workflow only supports load cases that all have the same mesh set format. "
+                    << "Sample '" << std::to_string(tIndex) << "' has its application name set to '" << tLoad.app_name << "' and Sample '"
+                    << std::to_string(tIndex + 1u) << "' has its application name set to '" << tLoadUseCaseTwo.loads[tLoadIndex].app_name << "'.";
+                THROWERR(tMsg.str())
             }
         }
     }

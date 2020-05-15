@@ -108,6 +108,22 @@ inline void postprocess_srom_problem_outputs
 }
 // function postprocess_srom_problem_outputs
 
+/******************************************************************************//**
+ * \fn solve
+ * \brief Solve optimization problem to form stochastic reduced order model.
+ * \param [in/out] aXMLGenMetaData  Plato problem input metadata
+**********************************************************************************/
+inline void solve(XMLGen::InputData& aXMLGenMetaData)
+{
+    Plato::srom::InputMetaData tSromInputs;
+    Plato::srom::preprocess_srom_problem_inputs(aXMLGenMetaData, tSromInputs);
+    Plato::srom::OutputMetaData tSromOutputs;
+    Plato::srom::build_sroms(tSromInputs, tSromOutputs);
+    Plato::srom::postprocess_srom_problem_outputs(tSromOutputs, aXMLGenMetaData);
+    Plato::srom::check_output(aXMLGenMetaData.mRandomMetaData);
+}
+// function solve
+
 }
 // namespace srom
 

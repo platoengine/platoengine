@@ -267,12 +267,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
             return false;
         }
 
-        Plato::srom::InputMetaData tSromInputs;
-        Plato::srom::preprocess_srom_problem_inputs(m_InputData, tSromInputs);
-        Plato::srom::OutputMetaData tSromOutputs;
-        Plato::srom::build_sroms(tSromInputs, tSromOutputs);
-        Plato::srom::postprocess_srom_problem_outputs(tSromOutputs, m_InputData);
-        Plato::srom::check_output(m_InputData.mRandomMetaData);
+        Plato::srom::solve(m_InputData);
 
         this->setNumPerformers();
     }
