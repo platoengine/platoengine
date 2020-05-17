@@ -371,8 +371,8 @@ void XMLGenerator::lookForPlatoAnalyzePerformers()
 {
     m_InputData.mPlatoAnalyzePerformerExists = false;
     m_InputData.mAllPerformersArePlatoAnalyze = false;
+    size_t tNumObjectiveCriteria = 0;
     size_t tNumPlatoAnalyzePerformers = 0;
-    size_t tNumComplianceMinimizationObjectives = 0;
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         if(m_InputData.objectives[i].code_name == "plato_analyze")
@@ -382,12 +382,12 @@ void XMLGenerator::lookForPlatoAnalyzePerformers()
         }
         if(m_InputData.objectives[i].code_name == "plato_analyze")
         {
-            tNumComplianceMinimizationObjectives++;
+            tNumObjectiveCriteria++;
         }
     }
     if(tNumPlatoAnalyzePerformers == m_InputData.objectives.size())
         m_InputData.mAllPerformersArePlatoAnalyze = true;
-    if(tNumComplianceMinimizationObjectives == m_InputData.objectives.size())
+    if(tNumObjectiveCriteria == m_InputData.objectives.size())
         m_InputData.mAllObjectivesAreComplianceMinimization = true;
 }
 
