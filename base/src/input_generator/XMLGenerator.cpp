@@ -123,7 +123,7 @@ XMLGenerator::~XMLGenerator()
  * \fn wirteInputFiles
  * \brief Write input files, i.e. write all the XML files needed by Plato.
 **********************************************************************************/
-void XMLGenerator::wirteInputFiles()
+void XMLGenerator::writeInputFiles()
 {
 
     if(m_InputData.input_generator_version == "old")
@@ -197,7 +197,7 @@ bool XMLGenerator::generate()
     }
 
     this->lookForPlatoAnalyzePerformers();
-    this->wirteInputFiles();
+    this->writeInputFiles();
 
     return true;
 }

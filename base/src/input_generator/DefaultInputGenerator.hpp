@@ -193,12 +193,6 @@ protected:
      * @brief Set parameters associated with the Globally Convergent Method of Moving Asymptotes algorithm
      * @param [in] aXMLnode data structure with information parsed from XML input file.
      **********************************************************************************/
-    bool setGCMMAoptions(const pugi::xml_node & aXMLnode);
-
-    /******************************************************************************//**
-     * @brief Set parameters associated with the Globally Convergent Method of Moving Asymptotes algorithm
-     * @param [in] aXMLnode data structure with information parsed from XML input file.
-     **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
 
 private:

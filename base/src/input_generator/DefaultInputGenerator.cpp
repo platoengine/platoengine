@@ -5578,7 +5578,6 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     this->setOptimizerMethod(tMiscNode);
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
-    this->setGCMMAoptions(tTmpNode);
     this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
@@ -5930,7 +5929,6 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     this->setOptimizerMethod(tMiscNode);
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
-    this->setGCMMAoptions(tTmpNode);
     this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
@@ -6716,46 +6714,6 @@ bool DefaultInputGenerator::setKelleySachsAlgorithmOptions(const pugi::xml_node 
 }
 
 /**********************************************************************************/
-bool DefaultInputGenerator::setGCMMAoptions(const pugi::xml_node & aXMLnode)
-/**********************************************************************************/
-{
-    if(m_InputData.mInnerKKTtoleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAInnerKKTTolerance", m_InputData.mInnerKKTtoleranceGCMMA);
-    }
-    if(m_InputData.mOuterKKTtoleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAOuterKKTTolerance", m_InputData.mOuterKKTtoleranceGCMMA);
-    }
-    if(m_InputData.mInnerControlStagnationToleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAInnerControlStagnationTolerance", m_InputData.mInnerControlStagnationToleranceGCMMA);
-    }
-    if(m_InputData.mOuterControlStagnationToleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAOuterControlStagnationTolerance", m_InputData.mOuterControlStagnationToleranceGCMMA);
-    }
-    if(m_InputData.mOuterObjectiveStagnationToleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAOuterObjectiveStagnationTolerance", m_InputData.mOuterObjectiveStagnationToleranceGCMMA);
-    }
-    if(m_InputData.mMaxInnerIterationsGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAMaxInnerIterations", m_InputData.mMaxInnerIterationsGCMMA);
-    }
-    if(m_InputData.mOuterStationarityToleranceGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAOuterStationarityTolerance", m_InputData.mOuterStationarityToleranceGCMMA);
-    }
-    if(m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA.size() > 0)
-    {
-        addChild(aXMLnode, "GCMMAInitialMovingAsymptoteScaleFactor", m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA);
-    }
-
-    return (true);
-}
-
-/**********************************************************************************/
 bool DefaultInputGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
 /**********************************************************************************/
 {
@@ -6778,10 +6736,6 @@ bool DefaultInputGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
     if(m_InputData.mMMAMaxNumSubProblemIterations.size() > 0)
     {
         addChild(aXMLnode, "MaxNumSubProblemIter", m_InputData.mMMAMaxNumSubProblemIterations);
-    }
-    if(m_InputData.mMMAMaxTrustRegionIterations.size() > 0)
-    {
-        addChild(aXMLnode, "MaxNumTrustRegionIter", m_InputData.mMMAMaxTrustRegionIterations);
     }
     if(m_InputData.mMMAControlStagnationTolerance.size() > 0)
     {

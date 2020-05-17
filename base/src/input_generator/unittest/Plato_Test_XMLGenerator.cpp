@@ -5341,10 +5341,6 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
     ASSERT_EQ(3u, tNumObjectives);
 
     ASSERT_EQ(tNumSamples % tNumObjectives, 0u);
-
-    /*auto tNumSamplesPerObjective = tNumSamples / tNumObjectives;
-    for (size_t i = 0; i < tNumObjectives; ++i)
-        ASSERT_EQ(tNumSamplesPerObjective, tTester.getObjLoadIds(i).size());*/
 }
 
 TEST(PlatoTestXMLGenerator, uncertainty_sierra)
@@ -5436,12 +5432,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
 
     auto tNumObjectives = tTester.getNumObjectives();
     ASSERT_EQ(3u, tNumObjectives);
-
     ASSERT_EQ(tNumSamples % tNumObjectives, 0u);
-
-    /*auto tNumSamplesPerObjective = tNumSamples / tNumObjectives;
-    for (size_t i = 0; i < tNumObjectives; ++i)
-        ASSERT_EQ(tNumSamplesPerObjective, tTester.getObjLoadIds(i).size());*/
 }
 
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
