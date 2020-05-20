@@ -335,9 +335,11 @@ inline void append_random_tractions_to_define_xml_file
     for(auto tLoadItr = aRandomLoadsMetaData.second.begin(); tLoadItr != aRandomLoadsMetaData.second.end(); ++tLoadItr)
     {
         auto tLoadIndex = std::distance(aRandomLoadsMetaData.second.begin(), tLoadItr);
+        std::cout << "tLoadIndex = " << tLoadIndex << "\n";
         for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
         {
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
+            std::cout << "tDimIndex = " << tDimIndex << "\n";
             auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_Axis-" + tValidAxis[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
             XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
@@ -362,6 +364,68 @@ inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, WriteDefineXmlFile)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2 SET NUM PERFORMERS
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    tUncertaintyMetaData.numPeformers = 2;
+
+    // CALL FUNCTION
+    XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData);
+
+}
 
 TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_1LoadPerLoadCase_3Dim)
 {
