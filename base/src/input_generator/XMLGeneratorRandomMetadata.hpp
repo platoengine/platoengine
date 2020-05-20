@@ -102,16 +102,6 @@ public:
 
     /******************************************************************************//**
      * \struct material
-     * \brief Return material metadata set.
-     * \return material metadata set
-    **********************************************************************************/
-    XMLGen::MaterialSet material() const
-    {
-        return (mSample.first);
-    }
-
-    /******************************************************************************//**
-     * \struct material
      * \brief Return material metadata.
      * \return material metadata
     **********************************************************************************/
@@ -134,6 +124,21 @@ public:
     {
         mSampleDrawn.first = true;
         mSample.first = aMaterial;
+    }
+
+    /******************************************************************************//**
+     * \struct material
+     * \brief Set materials metadata.
+     * \param [in] aMaterial materials metadata
+    **********************************************************************************/
+    std::vector<std::string> materialBlockIDs() const
+    {
+        std::vector<std::string> tIDs;
+        for(auto& tPair : mSample.first)
+        {
+            tIDs.push_back(tPair.first);
+        }
+        return tIDs;
     }
 };
 // struct RandomSample
@@ -349,34 +354,6 @@ public:
     std::vector<XMLGen::RandomSample> samples() const
     {
         return mSamples;
-    }
-
-    /******************************************************************************//**
-     * \fn numLoads
-     * \brief Return number of materials in one sample.
-     * \return number of loads
-    **********************************************************************************/
-    size_t numLoads() const
-    {
-        if(mRandomLoads.empty())
-        {
-            THROWERR("Random MetaData: Set of random load cases is not defined.")
-        }
-        return (mRandomLoads[0].second.loads.size());
-    }
-
-    /******************************************************************************//**
-     * \fn numMaterials
-     * \brief Return number of materials in one sample.
-     * \return number of materials
-    **********************************************************************************/
-    size_t numMaterials() const
-    {
-        if(mRandomMaterials.empty())
-        {
-            THROWERR("Random MetaData: Set of random materials is not defined.")
-        }
-        return (mRandomMaterials[0].second.size());
     }
 };
 // struct RandomMetaData

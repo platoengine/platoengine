@@ -84,7 +84,7 @@ inline void append_deterministic_materials
             {
                 std::ostringstream tMsg;
                 tMsg << "Append Deterministic Materials: Material with identification number '" << tMaterial.materialID()
-                    << "' in block with identification number '" << "' is not defined.";
+                    << "' in block with identification number '" << "' is a random material.";
                 THROWERR(tMsg.str().c_str())
             }
             tMaterial.check();

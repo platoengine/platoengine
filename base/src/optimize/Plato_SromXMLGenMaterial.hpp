@@ -253,20 +253,10 @@ inline void postprocess_material_outputs
         THROWERR("Post-Process Material Outputs: Container of random material cases is empty.")
     }
 
-    double tSum = 0;
     for(auto& tRandomMaterialCase : tRandomMaterialCases)
     {
         auto tMaterialSet = Plato::srom::build_material_set(tRandomMaterialCase);
         aXMLGenMetaData.mRandomMetaData.append(tMaterialSet);
-        tSum += tRandomMaterialCase.probability();
-    }
-
-    constexpr double tTolerance = 1e-2;
-    if(std::abs(1.0 - tSum) > tTolerance)
-    {
-        THROWERR(std::string("Post-Process Material Outputs: The sum of the random use case probabilities is '")
-            + std::to_string(tSum) + "'. The sum of these probabilities must yield a value greater than '0.99', "
-            + "but less or equal to 1.0.")
     }
 }
 // function postprocess_material_outputs

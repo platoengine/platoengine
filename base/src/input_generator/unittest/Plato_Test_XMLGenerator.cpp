@@ -331,7 +331,6 @@ prepare_random_tractions_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
-
     auto tSamples = aRandomMetaData.samples();
     for(auto& tSample : tSamples)
     {
@@ -357,6 +356,11 @@ inline void append_probabilities_to_define_xml_file
 (const std::vector<std::string>& aProbabilities,
  pugi::xml_document& aDocument)
 {
+    if(aProbabilities.empty())
+    {
+        THROWERR("Append Probabilities To Define XML File: Input probability container is empty.")
+    }
+
     auto tValues = XMLGen::transform_tokens(aProbabilities);
     XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
 }
@@ -365,6 +369,11 @@ inline void append_random_tractions_to_define_xml_file
 (const std::vector<std::vector<std::vector<std::string>>>& aRandomTractions,
  pugi::xml_document& aDocument)
 {
+    if(aRandomTractions.empty())
+    {
+        return;
+    }
+
     std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
     for(auto tLoadItr = aRandomTractions.begin(); tLoadItr != aRandomTractions.end(); ++tLoadItr)
     {
@@ -379,13 +388,33 @@ inline void append_random_tractions_to_define_xml_file
     }
 }
 
-inline void append_random_material_properties_to_define_xml_file()
+inline std::unordered_map<std::string, std::vector<std::string>>
+prepare_random_material_properties_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
 {
+    std::unordered_map<std::string, std::vector<std::string>> tMatNameToSamplesMap;
+    auto tSamples = aRandomMetaData.samples();
+    for(auto& tSample : tSamples)
+    {
+        auto tBlockIDs = tSample.materialBlockIDs();
+        for(auto& tID : tBlockIDs)
+        {
+            auto tMaterial = tSample.material(tID);
+            auto tTags = tMaterial.tags();
+            for(auto& tTag : tTags)
+            {
+                auto tName = tTag + " " + "blockID-" + tID;
+                tMatNameToSamplesMap[tName].push_back(tMaterial.property(tTag));
+            }
+        }
+    }
 
+    return (tMatNameToSamplesMap);
 }
 
-inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
-                                  const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
+inline void write_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData,
+ const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
 {
     pugi::xml_document tDocument;
     XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
@@ -588,7 +617,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
             for(auto& tSample : tDim)
             {
                 auto tSampleIndex = &tSample - &tDim[0];
-                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -659,7 +688,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
             for(auto& tSample : tDim)
             {
                 auto tSampleIndex = &tSample - &tDim[0];
-                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -738,7 +767,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
             for(auto& tSample : tDim)
             {
                 auto tSampleIndex = &tSample - &tDim[0];
-                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -805,7 +834,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
             for(auto& tSample : tDim)
             {
                 auto tSampleIndex = &tSample - &tDim[0];
-                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -879,7 +908,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
             for(auto& tSample : tDim)
             {
                 auto tSampleIndex = &tSample - &tDim[0];
-                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -942,6 +971,73 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
         std::advance(tTypesIterator, 1);
         ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
         std::advance(tValuesIterator, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
+{
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("poissons ratio", "0.3");
+
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    tMaterialSetOne.insert({"2", tMaterial2});
+    auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
+
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial3;
+    tMaterial3.id("2");
+    tMaterial3.category("isotropic");
+    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("poissons ratio", "0.33");
+    XMLGen::Material tMaterial4;
+    tMaterial4.id("2");
+    tMaterial4.category("isotropic");
+    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("poissons ratio", "0.3");
+
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial3});
+    tMaterialSetTwo.insert({"2", tMaterial4});
+    auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseOne));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseTwo));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // CALL FUNCTION
+    auto tMaterialValues = XMLGen::prepare_random_material_properties_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMaterialValues.empty());
+
+    // POSE GOLD LOAD VALUES AND TEST
+    std::unordered_map<std::string, std::vector<std::string>> tGold =
+            { {"elastic modulus blockID-1", {"1", "1.1"} },
+              {"elastic modulus blockID-2", {"1", "1"} },
+              {"poissons ratio blockID-1", {"0.3", "0.33"} },
+              {"poissons ratio blockID-2", {"0.3", "0.3"} } };
+    for(auto& tPair : tMaterialValues)
+    {
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        ASSERT_STREQ(tGoldItr->first.c_str(), tPair.first.c_str());
+
+        auto tGoldSamplesItr = tGoldItr->second.begin();
+        for(auto& tSample : tPair.second)
+        {
+            ASSERT_STREQ(tGoldSamplesItr.operator*().c_str(), tSample.c_str());
+            std::advance(tGoldSamplesItr, 1);
+        }
     }
 }
 
@@ -1149,68 +1245,11 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs_ErrorEmptyRandomMaterialC
     ASSERT_THROW(Plato::srom::postprocess_material_outputs(tOutput, tXMLGenMetaData), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs_ErrorInaccurateSamples)
-{
-    Plato::srom::OutputMetaData tOutput;
-    tOutput.usecase(Plato::srom::usecase::MATERIAL);
-
-    // CASE 1
-    Plato::srom::RandomMaterial tRandMaterial1;
-    tRandMaterial1.blockID("0");
-    tRandMaterial1.materialID("10");
-    tRandMaterial1.category("isotropic");
-    tRandMaterial1.append("youngs modulus", "homogeneous", "1");
-    tRandMaterial1.append("poissons ratio", "homogeneous", "0.3");
-
-    Plato::srom::RandomMaterial tRandMaterial2;
-    tRandMaterial2.blockID("1");
-    tRandMaterial2.materialID("11");
-    tRandMaterial2.category("isotropic");
-    tRandMaterial2.append("youngs modulus", "homogeneous", "2");
-    tRandMaterial2.append("poissons ratio", "homogeneous", "0.33");
-
-    Plato::srom::RandomMaterialCase tRandMaterialCase1;
-    tRandMaterialCase1.caseID("0");
-    tRandMaterialCase1.probability(0.5);
-    tRandMaterialCase1.append("10", tRandMaterial1);
-    tRandMaterialCase1.append("11", tRandMaterial2);
-
-    // CASE 2
-    Plato::srom::RandomMaterial tRandMaterial3;
-    tRandMaterial3.blockID("0");
-    tRandMaterial3.materialID("10");
-    tRandMaterial3.category("isotropic");
-    tRandMaterial3.append("youngs modulus", "homogeneous", "1.1");
-    tRandMaterial3.append("poissons ratio", "homogeneous", "0.31");
-
-    Plato::srom::RandomMaterial tRandMaterial4;
-    tRandMaterial4.blockID("1");
-    tRandMaterial4.materialID("11");
-    tRandMaterial4.category("isotropic");
-    tRandMaterial4.append("youngs modulus", "homogeneous", "2.2");
-    tRandMaterial4.append("poissons ratio", "homogeneous", "0.35");
-
-    Plato::srom::RandomMaterialCase tRandMaterialCase2;
-    tRandMaterialCase2.caseID("1");
-    tRandMaterialCase2.probability(0.48);
-    tRandMaterialCase2.append("10", tRandMaterial3);
-    tRandMaterialCase2.append("11", tRandMaterial4);
-
-    // APPEND CASES
-    tOutput.append(tRandMaterialCase1);
-    tOutput.append(tRandMaterialCase2);
-
-    // TEST
-    XMLGen::InputData tXMLGenMetaData;
-    EXPECT_THROW(Plato::srom::postprocess_material_outputs(tOutput, tXMLGenMetaData), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, BuildMaterialSet_ErrorEmptyMaterialList)
 {
     Plato::srom::RandomMaterialCase tRandMaterialCase;
     EXPECT_THROW(Plato::srom::build_material_set(tRandMaterialCase), std::runtime_error);
 }
-
 
 TEST(PlatoTestXMLGenerator, BuildMaterialSet)
 {
