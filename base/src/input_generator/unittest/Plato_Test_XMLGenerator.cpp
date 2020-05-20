@@ -312,20 +312,29 @@ allocate_random_tractions_container_for_define_xml_file
     return (tOutput);
 }
 
-using RandomTractions = std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >;
-
-inline RandomTractions prepare_random_tractions_for_define_xml_file
+inline std::vector<std::string>
+prepare_probabilities_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     std::vector<std::string> tProbabilities;
-    auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
-
     auto tSamples = aRandomMetaData.samples();
     for(auto& tSample : tSamples)
     {
         // append probabilities
         tProbabilities.push_back(tSample.probability());
+    }
+    return tProbabilities;
+}
 
+inline std::vector<std::vector<std::vector<std::string>>>
+prepare_random_tractions_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
+
+    auto tSamples = aRandomMetaData.samples();
+    for(auto& tSample : tSamples)
+    {
         auto tLoadCase = tSample.load();
         for(auto& tLoad : tLoadCase.loads)
         {
@@ -341,19 +350,25 @@ inline RandomTractions prepare_random_tractions_for_define_xml_file
             }
         }
     }
-    auto tOutput = std::make_pair(tProbabilities, tValues);
+    return tValues;
+}
 
-    return tOutput;
+inline void append_probabilities_to_define_xml_file
+(const std::vector<std::string>& aProbabilities,
+ pugi::xml_document& aDocument)
+{
+    auto tValues = XMLGen::transform_tokens(aProbabilities);
+    XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
 }
 
 inline void append_random_tractions_to_define_xml_file
-(const RandomTractions& aRandomLoadsMetaData,
+(const std::vector<std::vector<std::vector<std::string>>>& aRandomTractions,
  pugi::xml_document& aDocument)
 {
     std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
-    for(auto tLoadItr = aRandomLoadsMetaData.second.begin(); tLoadItr != aRandomLoadsMetaData.second.end(); ++tLoadItr)
+    for(auto tLoadItr = aRandomTractions.begin(); tLoadItr != aRandomTractions.end(); ++tLoadItr)
     {
-        auto tLoadIndex = std::distance(aRandomLoadsMetaData.second.begin(), tLoadItr);
+        auto tLoadIndex = std::distance(aRandomTractions.begin(), tLoadItr);
         for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
         {
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
@@ -362,9 +377,11 @@ inline void append_random_tractions_to_define_xml_file
             XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
         }
     }
+}
 
-    auto tValues = XMLGen::transform_tokens(aRandomLoadsMetaData.first);
-    XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
+inline void append_random_material_properties_to_define_xml_file()
+{
+
 }
 
 inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
@@ -372,8 +389,10 @@ inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
 {
     pugi::xml_document tDocument;
     XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
-    auto tOutput = XMLGen::prepare_random_tractions_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_random_tractions_to_define_xml_file(tOutput, tDocument);
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(aRandomMetaData);
+    XMLGen::append_random_tractions_to_define_xml_file(tTractionValues, tDocument);
+    auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
+    XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
     tDocument.save_file("defines.xml", "  ");
 }
 
@@ -477,6 +496,50 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile)
     std::system("rm -f defines.xml");
 }
 
+TEST(PlatoTestXMLGenerator, PrepareProbabilitiesForDefineXmlFile)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    tLoadCase1.loads[0].app_name = "sideset";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.values.push_back("11");
+    tLoad2.values.push_back("12");
+    tLoad2.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad2);
+    tLoadCase2.loads[0].app_name = "sideset";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbabilities.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST RESULTS
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbabilities[tIndex].c_str());
+    }
+}
+
 TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_1LoadPerLoadCase_3Dim)
 {
     // 1.1 APPEND LOADS
@@ -509,25 +572,16 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
-    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tTractionValues.empty());
 
-    // 3. POSE GOLD PROBABILITIES AND TEST
-    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    for(auto& tGoldProb : tGoldProbs)
-    {
-        auto tIndex = &tGoldProb - &tGoldProbs[0];
-        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
-    }
-
-    // 4. POSE GOLD LOAD VALUES AND TEST
+    // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         { { {"1", "11"}, {"2", "12"}, {"3", "13"} } };
 
-    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    for(auto& tDims : tTractionValues)
     {
-        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        auto tLoadIndex = &tDims - &tTractionValues[0];
         for(auto& tDim : tDims)
         {
             auto tDimIndex = &tDim - &tDims[0];
@@ -586,28 +640,19 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
-    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tTractionValues.empty());
 
-    // 3. POSE GOLD PROBABILITIES AND TEST
-    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    for(auto& tGoldProb : tGoldProbs)
-    {
-        auto tIndex = &tGoldProb - &tGoldProbs[0];
-        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
-    }
-
-    // 4. POSE GOLD LOAD VALUES AND TEST
+    // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         {
           { {"1", "11"}, {"2", "12"}, {"3", "13"} },
           { {"4", "14"}, {"5", "15"}, {"6", "16"} }
         };
 
-    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    for(auto& tDims : tTractionValues)
     {
-        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        auto tLoadIndex = &tDims - &tTractionValues[0];
         for(auto& tDim : tDims)
         {
             auto tDimIndex = &tDim - &tDims[0];
@@ -674,28 +719,19 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
-    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tTractionValues.empty());
 
-    // 3. POSE GOLD PROBABILITIES AND TEST
-    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    for(auto& tGoldProb : tGoldProbs)
-    {
-        auto tIndex = &tGoldProb - &tGoldProbs[0];
-        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
-    }
-
-    // 4. POSE GOLD LOAD VALUES AND TEST
+    // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         {
           { {"1", "11"}, {"2", "12"}, {"3", "13"} },
           { {"4", "14"}, {"5", "15"}, {"6", "16"} }
         };
 
-    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    for(auto& tDims : tTractionValues)
     {
-        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        auto tLoadIndex = &tDims - &tTractionValues[0];
         for(auto& tDim : tDims)
         {
             auto tDimIndex = &tDim - &tDims[0];
@@ -750,28 +786,19 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
-    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tTractionValues.empty());
 
-    // 3. POSE GOLD PROBABILITIES AND TEST
-    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    for(auto& tGoldProb : tGoldProbs)
-    {
-        auto tIndex = &tGoldProb - &tGoldProbs[0];
-        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
-    }
-
-    // 4. POSE GOLD LOAD VALUES AND TEST
+    // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         {
           { {"1", "11"}, {"2", "12"} },
           { {"4", "14"}, {"5", "15"} }
         };
 
-    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    for(auto& tDims : tTractionValues)
     {
-        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        auto tLoadIndex = &tDims - &tTractionValues[0];
         for(auto& tDim : tDims)
         {
             auto tDimIndex = &tDim - &tDims[0];
@@ -833,28 +860,19 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
-    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tTractionValues.empty());
 
-    // 3. POSE GOLD PROBABILITIES AND TEST
-    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    for(auto& tGoldProb : tGoldProbs)
-    {
-        auto tIndex = &tGoldProb - &tGoldProbs[0];
-        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
-    }
-
-    // 4. POSE GOLD LOAD VALUES AND TEST
+    // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         {
           { {"1", "11"}, {"2", "12"} },
           { {"4", "14"}, {"5", "15"} }
         };
 
-    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    for(auto& tDims : tTractionValues)
     {
-        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        auto tLoadIndex = &tDims - &tTractionValues[0];
         for(auto& tDim : tDims)
         {
             auto tDimIndex = &tDim - &tDims[0];
@@ -867,28 +885,16 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
+TEST(PlatoTestXMLGenerator, AppendProbabilitiesToDefineXmlFile)
 {
-    std::vector<std::string> tProbabilities = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
-    std::vector<std::vector<std::vector<std::string>>> tValues =
-        {
-          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
-          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
-        };
-
     pugi::xml_document tDocument;
-    auto tPair = std::make_pair(tProbabilities, tValues);
-    XMLGen::append_random_tractions_to_define_xml_file(tPair, tDocument);
+    std::vector<std::string> tProbabilities = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    ASSERT_NO_THROW(XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument));
 
     // 4. POSE GOLD VALUES
-    std::vector<std::string> tGoldTypes =
-        {"real", "real", "real", "real", "real", "real", "real"};
-    std::vector<std::string> tGoldNames =
-        {"RandomLoad0_X-Axis", "RandomLoad0_Y-Axis", "RandomLoad0_Z-Axis",
-         "RandomLoad1_X-Axis", "RandomLoad1_Y-Axis", "RandomLoad1_Z-Axis",
-         "Probabilities"};
-    std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16",
-                                            "5.000000000000000000000e-01, 5.000000000000000000000e-01"};
+    std::vector<std::string> tGoldTypes = {"real"};
+    std::vector<std::string> tGoldNames = {"Probabilities"};
+    std::vector<std::string> tGoldValues = {"5.000000000000000000000e-01, 5.000000000000000000000e-01"};
 
     // 4. TEST RESULTS AGAINST GOLD VALUES
     auto tNamesIterator = tGoldNames.begin();
@@ -896,11 +902,45 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
     auto tValuesIterator = tGoldValues.begin();
     for(pugi::xml_node tNode : tDocument.children("Array"))
     {
-        EXPECT_STREQ(tNamesIterator.operator*().c_str(), tNode.attribute("name").value());
+        ASSERT_STREQ(tNamesIterator.operator*().c_str(), tNode.attribute("name").value());
         std::advance(tNamesIterator, 1);
-        EXPECT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
+        ASSERT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
         std::advance(tTypesIterator, 1);
-        EXPECT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        std::advance(tValuesIterator, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
+{
+    std::vector<std::vector<std::vector<std::string>>> tTractionValues =
+        {
+          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
+          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+        };
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_random_tractions_to_define_xml_file(tTractionValues, tDocument));
+
+    // 4. POSE GOLD VALUES
+    std::vector<std::string> tGoldTypes =
+        {"real", "real", "real", "real", "real", "real"};
+    std::vector<std::string> tGoldNames =
+        {"RandomLoad0_X-Axis", "RandomLoad0_Y-Axis", "RandomLoad0_Z-Axis",
+         "RandomLoad1_X-Axis", "RandomLoad1_Y-Axis", "RandomLoad1_Z-Axis"};
+    std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16"};
+
+    // 4. TEST RESULTS AGAINST GOLD VALUES
+    auto tNamesIterator = tGoldNames.begin();
+    auto tTypesIterator = tGoldTypes.begin();
+    auto tValuesIterator = tGoldValues.begin();
+    for(pugi::xml_node tNode : tDocument.children("Array"))
+    {
+        ASSERT_STREQ(tNamesIterator.operator*().c_str(), tNode.attribute("name").value());
+        std::advance(tNamesIterator, 1);
+        ASSERT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
+        std::advance(tTypesIterator, 1);
+        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
         std::advance(tValuesIterator, 1);
     }
 }
