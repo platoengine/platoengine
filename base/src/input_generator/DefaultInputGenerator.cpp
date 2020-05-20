@@ -4941,7 +4941,6 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
   tTmpNode.append_attribute("name") = "NumPerformers";
   tTmpNode.append_attribute("type") = "int";
   size_t tNumPerformers = m_InputData.m_UncertaintyMetaData.numPeformers;
-  size_t tNumSamples = stringToSizeT(tNumSamplesString);
 
   if(tNumPerformers == 0)
   {
@@ -4949,6 +4948,7 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
     return false;
   }
 
+  size_t tNumSamples = stringToSizeT(tNumSamplesString);
   tNumPerformers = getGreatestDivisor(tNumSamples,tNumPerformers);
 
   std::string tNumPerformersString = Plato::to_string(tNumPerformers);

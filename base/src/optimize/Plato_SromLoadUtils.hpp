@@ -94,28 +94,21 @@ inline void rotation_axis_string_to_enum(const std::string & aStringAxis, Plato:
 }
 
 /******************************************************************************//**
- * \brief Check if array's values are finite
- * \param [in] aInput array of values
+ * \brief Return true if container's elements are finite numbers.
+ * \param [in] aInput container
  * \return flag (true = no error, false = error)
 **********************************************************************************/
-inline bool check_vector3d_values(const std::vector<double> & aInput)
+inline bool check_vector_values(const std::vector<double> & aInput)
 {
-    if(std::isfinite(aInput[0]) == false)
+    for(auto& tElement : aInput)
     {
-        PRINTERR("X-COMPONENT IS NOT A FINITE NUMBER.\n");
-        return (false);
+        if(std::isfinite(tElement) == false)
+        {
+            auto tIndex = &tElement - &aInput[0];
+            PRINTERR(std::string("Check Vector Values: Element '") + std::to_string(tIndex) + "' is not a finite number.\n")
+            return (false);
+        }
     }
-    else if(std::isfinite(aInput[1]) == false)
-    {
-        PRINTERR("Y-COMPONENT IS NOT A FINITE NUMBER.\n");
-        return (false);
-    }
-    else if(std::isfinite(aInput[2]) == false)
-    {
-        PRINTERR("Z-COMPONENT IS NOT A FINITE NUMBER.\n");
-        return (false);
-    }
-
     return (true);
 }
 
@@ -128,8 +121,8 @@ inline bool check_vector3d_values(const std::vector<double> & aInput)
 inline bool apply_rotation_matrix(const std::vector<double>& aRotatioAnglesInDegrees,
                                   std::vector<double>& aVectorToRotate)
 {
-    const bool tBadNumberDetected = Plato::srom::check_vector3d_values(aVectorToRotate) == false;
-    const bool tBadRotationDetected = Plato::srom::check_vector3d_values(aRotatioAnglesInDegrees) == false;
+    const bool tBadNumberDetected = Plato::srom::check_vector_values(aVectorToRotate) == false;
+    const bool tBadRotationDetected = Plato::srom::check_vector_values(aRotatioAnglesInDegrees) == false;
     if(tBadRotationDetected || tBadNumberDetected)
     {
         PRINTERR("A NON-FINITE NUMBER WAS DETECTED.\n");
@@ -459,7 +452,7 @@ inline bool check_expand_random_loads_inputs(const std::vector<double> & aMyOrig
         PRINTERR("VECTOR OF RANDOM ROTATIONS IS EMPTY.\n");
         return (false);
     }
-    else if(Plato::srom::check_vector3d_values(aMyOriginalLoad) == false)
+    else if(Plato::srom::check_vector_values(aMyOriginalLoad) == false)
     {
         PRINTERR("A NON-FINITE NUMBER WAS DETECTED IN VECTOR 3D.\n");
         return (false);
@@ -673,22 +666,22 @@ inline bool set_load_components(const std::vector<std::string> & aInput, std::ve
 {
     if(aInput.empty())
     {
-        PRINTERR("INPUT LOAD VECTOR IS EMPTY.\n");
+        PRINTERR("Set Load Components: Input load vector is empty.\n");
         return (false);
     }
 
     if(aInput.size() != static_cast<size_t>(3))
     {
         std::ostringstream tMsg;
-        tMsg << "INPUT DIMENSIONS = " << aInput.size() << ". CURRENTLY, ONLY 3-DIM PROBLEMS ARE SUPPORTED.\n";
+        tMsg << "Set Load Components: Input vector dimensions = " << aInput.size() << ". Only 3-dimensional problems are supported.\n";
         PRINTERR(tMsg.str().c_str());
         return (false);
     }
 
-    aOutput.resize(3, 0.0);
-    aOutput[0] = std::atof(aInput[0].c_str());
-    aOutput[1] = std::atof(aInput[1].c_str());
-    aOutput[2] = std::atof(aInput[2].c_str());
+    for(auto& tElement : aInput)
+    {
+        aOutput.push_back(std::stod(tElement));
+    }
 
     return (true);
 }
@@ -751,7 +744,6 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
                                       std::vector<Plato::srom::RandomLoad> & aSetRandomLoads)
 {
     std::vector<double> tMyOriginalLoadComponents;
-    tMyOriginalLoadComponents.resize(3, 0.0);
     if(Plato::srom::set_load_components(aOriginalLoad.mValues, tMyOriginalLoadComponents) == false)
     {
         PRINTERR("FAILED TO SET ARRAY OF LOAD COMPONENTS.\n");

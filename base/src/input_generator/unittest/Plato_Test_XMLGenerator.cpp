@@ -65,8 +65,860 @@
 
 const int MAX_CHARS_PER_LINE = 512;
 
+namespace XMLGen
+{
+
+struct ParseObjective
+{
+private:
+    XMLGen::UseCaseTags mTags; /*!< map from valid tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    std::vector<XMLGen::Objective> mData; /*!< list of uncertainty metadata */
+
+private:
+    /******************************************************************************//**
+     * \fn allocate
+     * \brief Allocate map from valid tags to valid tokens-value pair
+    **********************************************************************************/
+    void allocate()
+    {
+        mTags.clear();
+        mTags.insert({ "code", { {"code"}, "" } });
+        mTags.insert({ "type", { {"type"}, "" } });
+        mTags.insert({ "name", { {"name"}, "" } });
+        mTags.insert({ "weight", { {"weight"}, "" } });
+        mTags.insert({ "load ids", { {"load", "ids"}, "" } });
+        mTags.insert({ "stress limit", { {"stress", "limit"}, "" } });
+        mTags.insert({ "number ranks", { {"number", "ranks"}, "" } });
+        mTags.insert({ "min frequency", { {"min", "frequency"}, "" } });
+        mTags.insert({ "max frequency", { {"max", "frequency"}, "" } });
+        mTags.insert({ "frequency step", { {"frequency", "step"}, "" } });
+        mTags.insert({ "normalize objective", { {"normalize", "objective"}, "" } });
+        mTags.insert({ "distribute objective", { {"distribute", "objective"}, "" } });
+        mTags.insert({ "ls tet type", { {"ls", "tet", "type"}, "" } });
+        mTags.insert({ "multi load case", { {"multi", "load", "case"}, "" } });
+        mTags.insert({ "limit power max", { {"limit", "power", "max"}, "" } });
+        mTags.insert({ "limit power min", { {"limit", "power", "min"}, "" } });
+        mTags.insert({ "load case weights", { {"load", "case", "weights"}, "" } });
+        mTags.insert({ "limit reset count", { {"limit", "reset", "count"}, "" } });
+        mTags.insert({ "reference frf file", { {"reference", "frf", "file"}, "" } });
+        mTags.insert({ "frf match nodesets", { {"frf", "match", "nodesets"}, "" } });
+        mTags.insert({ "stress ramp factor", { {"stress", "ramp", "factor"}, "" } });
+        mTags.insert({ "stress favor final", { {"stress", "favor", "final"}, "" } });
+        mTags.insert({ "output for plotting", { {"output", "for", "plotting"}, "" } });
+        mTags.insert({ "volume penalty bias", { {"volume", "penalty", "bias"}, "" } });
+        mTags.insert({ "volume penalty power", { {"volume", "penalty", "power"}, "" } });
+        mTags.insert({ "volume misfit target", { {"volume", "misfit", "target"}, "" } });
+        mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
+        mTags.insert({ "stress favor updates", { {"stress", "favor", "updates"}, "" } });
+        mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
+        mTags.insert({ "stress p norm power", { {"stress", "p", "norm", "power"}, "" } });
+        mTags.insert({ "raleigh damping beta", { {"raleigh", "damping", "beta"}, "" } });
+        mTags.insert({ "raleigh damping alpha", { {"raleigh", "damping", "alpha"}, "" } });
+        mTags.insert({ "complex error measure", { {"complex", "error", "measure"}, "" } });
+        mTags.insert({ "relative stress limit", { {"relative", "stress", "limit"}, "" } });
+        mTags.insert({ "volume penalty divisor", { {"volume", "penalty", "divisor"}, "" } });
+        mTags.insert({ "boundary condition ids", { {"boundary", "condition", "ids"}, "" } });
+        mTags.insert({ "weightmass scale factor", { {"weightmass", "scale", "factor"}, "" } });
+        mTags.insert({ "stress inequality power", { {"stress", "inequality", "power"}, "" } });
+        mTags.insert({ "scmm constraint exponent", { {"scmm", "constraint", "exponent"}, "" } });
+        mTags.insert({ "limit reset subfrequency", { {"limit", "reset", "subfrequency"}, "" } });
+        mTags.insert({ "analysis solver tolerance", { {"analysis", "solver", "tolerance"}, "" } });
+        mTags.insert({ "limit power feasible bias", { {"limit", "power", "feasible", "bias"}, "" } });
+        mTags.insert({ "inequality feasibility scale", { {"inequality","feasibility","scale"}, "" } });
+        mTags.insert({ "limit power feasible slope", { {"limit", "power", "feasible", "slope"}, "" } });
+        mTags.insert({ "limit power infeasible bias", { {"limit", "power", "infeasible", "bias"}, "" } });
+        mTags.insert({ "limit power infeasible slope", { {"limit", "power", "infeasible", "slope"}, "" } });
+        mTags.insert({ "distribute objective at most", { {"distribute", "objective", "at", "most"}, "" } });
+        mTags.insert({ "inequality infeasibility scale", { {"inequality", "infeasibility", "scale"}, "" } });
+        mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
+        mTags.insert({ "inequality allowable feasibility upper", { {"inequality", "allowable", "feasibility", "upper"}, "" } });
+    }
+
+    /******************************************************************************//**
+     * \fn erase
+     * \brief Erases value key content in map from valid tags to valid tokens-value pair.
+    **********************************************************************************/
+    void erase()
+    {
+        for(auto& tTag : mTags)
+        {
+            tTag.second.second.clear();
+        }
+    }
+
+    /******************************************************************************//**
+     * \fn parseMetadata
+     * \brief Parse uncertainty blocks.
+     * \param [in] aInputFile input file metadata
+    **********************************************************************************/
+    void parseMetadata(std::istream& aInputFile)
+    {
+        constexpr int tMAX_CHARS_PER_LINE = 512;
+        std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
+        // found an uncertainty. parse it.
+        while (!aInputFile.eof())
+        {
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer.data(), tMAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer.data(), tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            if (XMLGen::parse_single_value(tTokens, std::vector<std::string> { "end", "objective" }, tTag))
+            {
+                break;
+            }
+            XMLGen::parse_tag_values(tTokens, mTags);
+        }
+    }
+
+public:
+    /******************************************************************************//**
+     * \fn data
+     * \brief Return objectives metadata.
+     * \return objectives metadata
+    **********************************************************************************/
+    std::vector<XMLGen::Objective> data() const
+    {
+        return mData;
+    }
+
+    /******************************************************************************//**
+     * \fn parse
+     * \brief Parse objectives metadata.
+     * \param [in] aInputFile input file metadata
+    **********************************************************************************/
+    void parse(std::istream& aInputFile)
+    {
+        mData.clear();
+        this->allocate();
+        constexpr int MAX_CHARS_PER_LINE = 512;
+        std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
+        while (!aInputFile.eof())
+        {
+            // read an entire line into memory
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer.data(), tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            std::vector<std::string> tMatchTokens;
+            if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","objective"}, tTag))
+            {
+                XMLGen::Objective tMetadata;
+                this->erase();
+                this->parseMetadata(aInputFile);
+                //this->setMetadata(tMetadata);
+                //this->checkMetadata(tMetadata);
+                mData.push_back(tMetadata);
+            }
+        }
+    }
+};
+// struct ParseObjective
+
+inline size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor)
+{
+    if (aDivisor == 0u)
+    {
+        THROWERR("Compute Greatest Divisor: Divide by zero.")
+    }
+    while (aDividend % aDivisor != 0u)
+    {
+        --aDivisor;
+    }
+    return aDivisor;
+}
+
+inline void append_attributes
+(const std::string& aNodeName,
+ const std::vector<std::string>& aKeywords,
+ const std::vector<std::string>& aValues,
+ pugi::xml_document& aDocument)
+{
+    auto tNode = aDocument.append_child(aNodeName.c_str());
+    for(auto& tKeyword : aKeywords)
+    {
+        auto tIndex = &tKeyword - &aKeywords[0];
+        tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
+    }
+}
+
+inline void append_basic_attributes_to_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData,
+ const XMLGen::UncertaintyMetaData& aUncertaintyMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aRandomMetaData.numSamples() == 0u)
+        { THROWERR("Append Basic Attributes To Define XML File: Cannot assign zero samples.") }
+    auto tNumSamplesString = std::to_string(aRandomMetaData.numSamples());
+    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamples", "int", tNumSamplesString}, aDocument);
+
+    if(aUncertaintyMetaData.numPeformers == 0u)
+        { THROWERR("Append Basic Attributes To Define XML File: Cannot assign zero MPI processes.") }
+    auto tNumPerformers = XMLGen::compute_greatest_divisor(aRandomMetaData.numSamples(), aUncertaintyMetaData.numPeformers);
+    auto tNumPerformersString = std::to_string(tNumPerformers);
+
+    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumPerformers", "int", tNumPerformersString}, aDocument);
+    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamplesPerPerformer", "int", "{NumSamples/NumPerformers}"}, aDocument);
+
+    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Samples", "int", "0", "{NumSamples-1}"}, aDocument);
+    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Performers", "int", "0", "{NumPerformers-1}"}, aDocument);
+    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"PerformerSamples", "int", "0", "{NumSamplesPerPerformer-1}"}, aDocument);
+}
+
+inline std::string transform_tokens
+(const std::vector<std::string>& aTokens)
+{
+    if(aTokens.empty())
+    {
+        return std::string("");
+    }
+
+    std::string tOutput;
+    auto tEndIndex = aTokens.size() - 1u;
+    auto tEndIterator = std::next(aTokens.begin(), tEndIndex);
+    for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
+    {
+        auto tIndex = std::distance(aTokens.begin(), tItr);
+        tOutput += aTokens[tIndex] + ", ";
+    }
+    tOutput += aTokens[tEndIndex];
+
+    return tOutput;
+}
+
+inline std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >
+prepare_random_tractions_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> > tOutput;
+
+    auto tSamples = aRandomMetaData.samples();
+    for(auto& tSample : tSamples)
+    {
+        // append probabilities
+        tOutput.first.push_back(tSample.probability());
+
+        auto tLoadCase = tSample.load();
+        for(auto& tLoad : tLoadCase.loads)
+        {
+            if(tLoad.mIsRandom)
+            {
+                // allocate storage
+                tOutput.second.push_back({});
+                auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
+                for (auto &tValue : tLoad.values)
+                {
+                    tOutput.second[tLoadIndex].push_back({});
+                }
+
+                // append load values
+                for(auto& tValue : tLoad.values)
+                {
+                    auto tDimIndex = &tValue - &tLoad.values[0];
+                    tOutput.second[tLoadIndex][tDimIndex].push_back(tValue);
+                }
+            }
+        }
+    }
+
+    return tOutput;
+}
+
+inline void append_random_tractions_to_define_xml_file
+(const std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >& aRandomLoadsMetaData,
+ pugi::xml_document& aDocument)
+{
+    std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
+    for(auto tLoadItr = aRandomLoadsMetaData.second.begin(); tLoadItr != aRandomLoadsMetaData.second.end(); ++tLoadItr)
+    {
+        auto tLoadIndex = std::distance(aRandomLoadsMetaData.second.begin(), tLoadItr);
+        for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
+        {
+            auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
+            auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_Axis-" + tValidAxis[tDimIndex];
+            auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
+            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
+        }
+    }
+
+    auto tValues = XMLGen::transform_tokens(aRandomLoadsMetaData.first);
+    XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
+}
+
+inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
+                                  const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
+    auto tOutput = XMLGen::prepare_random_tractions_for_define_xml_file(aRandomMetaData);
+    XMLGen::append_random_tractions_to_define_xml_file(tOutput, tDocument);
+    tDocument.save_file("defines.xml", "  ");
+}
+
+}
+
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_1LoadPerLoadCase_3Dim)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    tLoadCase1.loads[0].app_name = "sideset";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.values.push_back("11");
+    tLoad2.values.push_back("12");
+    tLoad2.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad2);
+    tLoadCase2.loads[0].app_name = "sideset";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
+    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
+    }
+
+    // 4. POSE GOLD LOAD VALUES AND TEST
+    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+        { { {"1", "11"}, {"2", "12"}, {"3", "13"} } };
+
+    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    {
+        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        for(auto& tDim : tDims)
+        {
+            auto tDimIndex = &tDim - &tDims[0];
+            for(auto& tSample : tDim)
+            {
+                auto tSampleIndex = &tSample - &tDim[0];
+                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_2LoadPerLoadCase_3Dim)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = true;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("11");
+    tLoad3.values.push_back("12");
+    tLoad3.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad3);
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("14");
+    tLoad4.values.push_back("15");
+    tLoad4.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad4);
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
+    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
+    }
+
+    // 4. POSE GOLD LOAD VALUES AND TEST
+    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+        {
+          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
+          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+        };
+
+    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    {
+        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        for(auto& tDim : tDims)
+        {
+            auto tDimIndex = &tDim - &tDims[0];
+            for(auto& tSample : tDim)
+            {
+                auto tSampleIndex = &tSample - &tDim[0];
+                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsAnd1DeterministicLoadPerLoadCase_3Dim)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
+    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
+    }
+
+    // 4. POSE GOLD LOAD VALUES AND TEST
+    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+        {
+          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
+          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+        };
+
+    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    {
+        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        for(auto& tDim : tDims)
+        {
+            auto tDimIndex = &tDim - &tDims[0];
+            for(auto& tSample : tDim)
+            {
+                auto tSampleIndex = &tSample - &tDim[0];
+                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_2LoadPerLoadCase_2Dim)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoadCase1.loads.push_back(tLoad2);
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = true;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("11");
+    tLoad3.values.push_back("12");
+    tLoadCase2.loads.push_back(tLoad3);
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("14");
+    tLoad4.values.push_back("15");
+    tLoadCase2.loads.push_back(tLoad4);
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
+    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
+    }
+
+    // 4. POSE GOLD LOAD VALUES AND TEST
+    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+        {
+          { {"1", "11"}, {"2", "12"} },
+          { {"4", "14"}, {"5", "15"} }
+        };
+
+    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    {
+        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        for(auto& tDim : tDims)
+        {
+            auto tDimIndex = &tDim - &tDims[0];
+            for(auto& tSample : tDim)
+            {
+                auto tSampleIndex = &tSample - &tDim[0];
+                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsAnd1DeterministicLoadPerLoadCase_2Dim)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tProbsSetSamplesSetPair = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tProbsSetSamplesSetPair.first.empty());
+    ASSERT_FALSE(tProbsSetSamplesSetPair.second.empty());
+
+    // 3. POSE GOLD PROBABILITIES AND TEST
+    std::vector<std::string> tGoldProbs = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    for(auto& tGoldProb : tGoldProbs)
+    {
+        auto tIndex = &tGoldProb - &tGoldProbs[0];
+        ASSERT_STREQ(tGoldProb.c_str(), tProbsSetSamplesSetPair.first[tIndex].c_str());
+    }
+
+    // 4. POSE GOLD LOAD VALUES AND TEST
+    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+        {
+          { {"1", "11"}, {"2", "12"} },
+          { {"4", "14"}, {"5", "15"} }
+        };
+
+    for(auto& tDims : tProbsSetSamplesSetPair.second)
+    {
+        auto tLoadIndex = &tDims - &tProbsSetSamplesSetPair.second[0];
+        for(auto& tDim : tDims)
+        {
+            auto tDimIndex = &tDim - &tDims[0];
+            for(auto& tSample : tDim)
+            {
+                auto tSampleIndex = &tSample - &tDim[0];
+                EXPECT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
+{
+    std::vector<std::string> tProbabilities = {"5.000000000000000000000e-01", "5.000000000000000000000e-01"};
+    std::vector<std::vector<std::vector<std::string>>> tValues =
+        {
+          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
+          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+        };
+
+    pugi::xml_document tDocument;
+    auto tPair = std::make_pair(tProbabilities, tValues);
+    XMLGen::append_random_tractions_to_define_xml_file(tPair, tDocument);
+
+    // 4. POSE GOLD VALUES
+    std::vector<std::string> tGoldTypes =
+        {"real", "real", "real", "real", "real", "real", "real"};
+    std::vector<std::string> tGoldNames =
+        {"RandomLoad0_Axis-X", "RandomLoad0_Axis-Y", "RandomLoad0_Axis-Z",
+         "RandomLoad1_Axis-X", "RandomLoad1_Axis-Y", "RandomLoad1_Axis-Z",
+         "Probabilities"};
+    std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16",
+                                            "5.000000000000000000000e-01, 5.000000000000000000000e-01"};
+
+    // 4. TEST RESULTS AGAINST GOLD VALUES
+    auto tNamesIterator = tGoldNames.begin();
+    auto tTypesIterator = tGoldTypes.begin();
+    auto tValuesIterator = tGoldValues.begin();
+    for(pugi::xml_node tNode : tDocument.children("Array"))
+    {
+        EXPECT_STREQ(tNamesIterator.operator*().c_str(), tNode.attribute("name").value());
+        std::advance(tNamesIterator, 1);
+        EXPECT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
+        std::advance(tTypesIterator, 1);
+        EXPECT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        std::advance(tValuesIterator, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile_ErrorZeroNumSamples)
+{
+    pugi::xml_document tDocument;
+    XMLGen::RandomMetaData tRandomMetaData;
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    ASSERT_THROW(XMLGen::append_basic_attributes_to_define_xml_file(tRandomMetaData, tUncertaintyMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile_ErrorZeroPerformers)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads[0].app_name = "sideset";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads[0].app_name = "sideset";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    pugi::xml_document tDocument;
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    ASSERT_THROW(XMLGen::append_basic_attributes_to_define_xml_file(tRandomMetaData, tUncertaintyMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads[0].app_name = "sideset";
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads[0].app_name = "sideset";
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2 SET NUM PERFORMERS
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    tUncertaintyMetaData.numPeformers = 2;
+
+    // 3. CALL FUNCTION
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_basic_attributes_to_define_xml_file(tRandomMetaData, tUncertaintyMetaData, tDocument));
+
+    // 4. POSE GOLD VALUES
+    std::vector<std::string> tGoldTypes =
+        {"int", "int", "int", "int", "int", "int"};
+    std::vector<std::string> tGoldNames =
+        {"NumSamples", "NumPerformers", "NumSamplesPerPerformer", "Samples", "Performers", "PerformerSamples"};
+    std::vector<std::string> tGoldValues = {"2", "2", "{NumSamples/NumPerformers}", "", "", ""};
+    std::vector<std::string> tGoldToValues = {"", "", "", "{NumSamples-1}", "{NumPerformers-1}", "{NumSamplesPerPerformer-1}"};
+    std::vector<std::string> tGoldFromValues = {"", "", "", "0", "0", "0"};
+
+    // 4. TEST RESULTS AGAINST GOLD VALUES
+    auto tNamesIterator = tGoldNames.begin();
+    auto tTypesIterator = tGoldTypes.begin();
+    auto tValuesIterator = tGoldValues.begin();
+    auto tToValuesIterator = tGoldToValues.begin();
+    auto tFromValuesIterator = tGoldFromValues.begin();
+    for(pugi::xml_node tNode : tDocument.children("Define"))
+    {
+        ASSERT_STREQ(tNamesIterator.operator*().c_str(), tNode.attribute("name").value());
+        std::advance(tNamesIterator, 1);
+        ASSERT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
+        std::advance(tTypesIterator, 1);
+        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        std::advance(tValuesIterator, 1);
+        ASSERT_STREQ(tToValuesIterator.operator*().c_str(), tNode.attribute("to").value());
+        std::advance(tToValuesIterator, 1);
+        ASSERT_STREQ(tFromValuesIterator.operator*().c_str(), tNode.attribute("from").value());
+        std::advance(tFromValuesIterator, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ComputeGreatestDivisor)
+{
+    size_t tNumSamples = 10;
+    size_t tNumPerformers = 2;
+    auto tOutput = XMLGen::compute_greatest_divisor(tNumSamples, tNumPerformers);
+    ASSERT_EQ(2u, tOutput);
+
+    tNumPerformers = 3;
+    tOutput = XMLGen::compute_greatest_divisor(tNumSamples, tNumPerformers);
+    ASSERT_EQ(2u, tOutput);
+
+    tNumPerformers = 4;
+    tOutput = XMLGen::compute_greatest_divisor(tNumSamples, tNumPerformers);
+    ASSERT_EQ(2u, tOutput);
+
+    tNumPerformers = 6;
+    tOutput = XMLGen::compute_greatest_divisor(tNumSamples, tNumPerformers);
+    ASSERT_EQ(5u, tOutput);
+
+    tNumPerformers = 0;
+    ASSERT_THROW(XMLGen::compute_greatest_divisor(tNumSamples, tNumPerformers), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, TransformTokens)
+{
+    // TEST 1
+    std::vector<std::string> tTokens;
+    auto tOutput = XMLGen::transform_tokens(tTokens);
+    ASSERT_STREQ("", tOutput.c_str());
+
+    // TEST 2
+    tTokens = {"1", "2", "3", "4", "5", "6"};
+    tOutput = XMLGen::transform_tokens(tTokens);
+    ASSERT_STREQ("1, 2, 3, 4, 5, 6", tOutput.c_str());
+}
 
 TEST(PlatoTestXMLGenerator, CheckOutputLoadSetType_Error)
 {

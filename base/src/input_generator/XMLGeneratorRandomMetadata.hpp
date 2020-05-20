@@ -344,11 +344,39 @@ public:
     /******************************************************************************//**
      * \fn samples
      * \brief Return list of random samples.
-     * \return [in] list of random samples
+     * \return list of random samples
     **********************************************************************************/
     std::vector<XMLGen::RandomSample> samples() const
     {
         return mSamples;
+    }
+
+    /******************************************************************************//**
+     * \fn numLoads
+     * \brief Return number of materials in one sample.
+     * \return number of loads
+    **********************************************************************************/
+    size_t numLoads() const
+    {
+        if(mRandomLoads.empty())
+        {
+            THROWERR("Random MetaData: Set of random load cases is not defined.")
+        }
+        return (mRandomLoads[0].second.loads.size());
+    }
+
+    /******************************************************************************//**
+     * \fn numMaterials
+     * \brief Return number of materials in one sample.
+     * \return number of materials
+    **********************************************************************************/
+    size_t numMaterials() const
+    {
+        if(mRandomMaterials.empty())
+        {
+            THROWERR("Random MetaData: Set of random materials is not defined.")
+        }
+        return (mRandomMaterials[0].second.size());
     }
 };
 // struct RandomMetaData

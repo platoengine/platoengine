@@ -1827,7 +1827,7 @@ TEST(PlatoTest, set_load_components_errors)
 
 TEST(PlatoTest, set_load_components)
 {
-    std::vector<double> tFloatLoad(3, 0.0);
+    std::vector<double> tFloatLoad;
     std::vector<std::string> tStringLoad = {"1", "2", "3"};
     ASSERT_TRUE(Plato::srom::set_load_components(tStringLoad, tFloatLoad));
 
