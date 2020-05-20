@@ -327,7 +327,7 @@ prepare_probabilities_for_define_xml_file
 }
 
 inline std::vector<std::vector<std::vector<std::string>>>
-prepare_random_tractions_for_define_xml_file
+prepare_tractions_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
@@ -365,7 +365,7 @@ inline void append_probabilities_to_define_xml_file
     XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
 }
 
-inline void append_random_tractions_to_define_xml_file
+inline void append_tractions_to_define_xml_file
 (const std::vector<std::vector<std::vector<std::string>>>& aRandomTractions,
  pugi::xml_document& aDocument)
 {
@@ -389,7 +389,7 @@ inline void append_random_tractions_to_define_xml_file
 }
 
 inline std::unordered_map<std::string, std::vector<std::string>>
-prepare_random_material_properties_for_define_xml_file
+prepare_material_properties_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     std::unordered_map<std::string, std::vector<std::string>> tMatNameToSamplesMap;
@@ -412,14 +412,30 @@ prepare_random_material_properties_for_define_xml_file
     return (tMatNameToSamplesMap);
 }
 
+inline void append_material_properties_to_define_xml_file
+(const std::unordered_map<std::string, std::vector<std::string>>& aMaterials,
+ pugi::xml_document& aDocument)
+{
+    if(aMaterials.empty())
+    {
+        return;
+    }
+
+    for(auto& tPair : aMaterials)
+    {
+        auto tValues = XMLGen::transform_tokens(tPair.second);
+        XMLGen::append_attributes("Array", {"name", "type", "value"}, {tPair.first, "real", tValues}, aDocument);
+    }
+}
+
 inline void write_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData,
  const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
 {
     pugi::xml_document tDocument;
     XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_random_tractions_to_define_xml_file(tTractionValues, tDocument);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(aRandomMetaData);
+    XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument);
     auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
     XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
     tDocument.save_file("defines.xml", "  ");
@@ -601,7 +617,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -669,7 +685,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -748,7 +764,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -815,7 +831,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -889,7 +905,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_random_tractions_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -940,6 +956,38 @@ TEST(PlatoTestXMLGenerator, AppendProbabilitiesToDefineXmlFile)
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
+{
+    // CALL FUNCTION
+    std::unordered_map<std::string, std::vector<std::string>> tData =
+            { {"elastic modulus blockID-1", {"1", "1.1"} },
+              {"elastic modulus blockID-2", {"1", "1"} },
+              {"poissons ratio blockID-1", {"0.3", "0.33"} },
+              {"poissons ratio blockID-2", {"0.3", "0.3"} } };
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_material_properties_to_define_xml_file(tData, tDocument));
+
+    // POSE GOLD VALUES
+    std::vector<std::string> tGoldNames =
+        {"elastic modulus blockID-1", "elastic modulus blockID-2", "poissons ratio blockID-1","poissons ratio blockID-2"};
+    std::vector<std::string> tGoldValues = {"1, 1.1", "1, 1", "0.3, 0.33", "0.3, 0.3"};
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    for(pugi::xml_node tNode : tDocument.children("Array"))
+    {
+        auto tGoldNameItr = std::find(tGoldNames.begin(), tGoldNames.end(), tNode.attribute("name").value());
+        ASSERT_TRUE(tGoldNameItr != tGoldNames.end());
+        ASSERT_STREQ(tGoldNameItr->c_str(), tNode.attribute("name").value());
+
+        auto tGoldValueItr = std::find(tGoldValues.begin(), tGoldValues.end(), tNode.attribute("value").value());
+        ASSERT_TRUE(tGoldValueItr != tGoldNames.end());
+        ASSERT_STREQ(tGoldValueItr->c_str(), tNode.attribute("value").value());
+
+        ASSERT_STREQ("real", tNode.attribute("type").value());
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
 {
     std::vector<std::vector<std::vector<std::string>>> tTractionValues =
@@ -949,7 +997,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
         };
 
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_random_tractions_to_define_xml_file(tTractionValues, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument));
 
     // 4. POSE GOLD VALUES
     std::vector<std::string> tGoldTypes =
@@ -1017,7 +1065,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // CALL FUNCTION
-    auto tMaterialValues = XMLGen::prepare_random_material_properties_for_define_xml_file(tRandomMetaData);
+    auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tMaterialValues.empty());
 
     // POSE GOLD LOAD VALUES AND TEST
