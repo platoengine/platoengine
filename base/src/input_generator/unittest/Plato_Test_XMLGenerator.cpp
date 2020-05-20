@@ -436,6 +436,8 @@ inline void write_define_xml_file
     XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
     auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(aRandomMetaData);
     XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument);
+    auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(aRandomMetaData);
+    XMLGen::append_material_properties_to_define_xml_file(tMaterialValues, tDocument);
     auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
     XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
     tDocument.save_file("defines.xml", "  ");
