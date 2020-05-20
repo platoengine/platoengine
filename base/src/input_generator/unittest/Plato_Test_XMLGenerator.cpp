@@ -289,58 +289,75 @@ inline std::string transform_tokens
     return tOutput;
 }
 
-inline std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >
-prepare_random_tractions_for_define_xml_file
+inline std::vector<std::vector<std::vector<std::string>>>
+allocate_random_tractions_container_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
-    std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> > tOutput;
+    std::vector<std::vector<std::vector<std::string>>> tOutput;
+    auto tSample = aRandomMetaData.sample(0);
+    auto tLoadCase = tSample.load();
+    for(auto& tLoad : tLoadCase.loads)
+    {
+        if(tLoad.mIsRandom)
+        {
+            // allocate storage
+            tOutput.push_back({});
+            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
+            for (auto &tValue : tLoad.values)
+            {
+                tOutput[tLoadIndex].push_back({});
+            }
+        }
+    }
+    return (tOutput);
+}
+
+using RandomTractions = std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >;
+
+inline RandomTractions prepare_random_tractions_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    std::vector<std::string> tProbabilities;
+    auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
 
     auto tSamples = aRandomMetaData.samples();
     for(auto& tSample : tSamples)
     {
         // append probabilities
-        tOutput.first.push_back(tSample.probability());
+        tProbabilities.push_back(tSample.probability());
 
         auto tLoadCase = tSample.load();
         for(auto& tLoad : tLoadCase.loads)
         {
             if(tLoad.mIsRandom)
             {
-                // allocate storage
-                tOutput.second.push_back({});
+                // append values
                 auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-                for (auto &tValue : tLoad.values)
-                {
-                    tOutput.second[tLoadIndex].push_back({});
-                }
-
-                // append load values
                 for(auto& tValue : tLoad.values)
                 {
                     auto tDimIndex = &tValue - &tLoad.values[0];
-                    tOutput.second[tLoadIndex][tDimIndex].push_back(tValue);
+                    tValues[tLoadIndex][tDimIndex].push_back(tValue);
                 }
             }
         }
     }
+    auto tOutput = std::make_pair(tProbabilities, tValues);
 
     return tOutput;
 }
 
 inline void append_random_tractions_to_define_xml_file
-(const std::pair< std::vector<std::string>, std::vector<std::vector<std::vector<std::string>>> >& aRandomLoadsMetaData,
+(const RandomTractions& aRandomLoadsMetaData,
  pugi::xml_document& aDocument)
 {
     std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
     for(auto tLoadItr = aRandomLoadsMetaData.second.begin(); tLoadItr != aRandomLoadsMetaData.second.end(); ++tLoadItr)
     {
         auto tLoadIndex = std::distance(aRandomLoadsMetaData.second.begin(), tLoadItr);
-        std::cout << "tLoadIndex = " << tLoadIndex << "\n";
         for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
         {
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
-            std::cout << "tDimIndex = " << tDimIndex << "\n";
-            auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_Axis-" + tValidAxis[tDimIndex];
+            auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_" + tValidAxis[tDimIndex] + "-Axis";
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
             XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
         }
@@ -358,6 +375,20 @@ inline void write_define_xml_file(const XMLGen::RandomMetaData& aRandomMetaData,
     auto tOutput = XMLGen::prepare_random_tractions_for_define_xml_file(aRandomMetaData);
     XMLGen::append_random_tractions_to_define_xml_file(tOutput, tDocument);
     tDocument.save_file("defines.xml", "  ");
+}
+
+inline std::stringstream read_data_from_file(const std::string& aFilename)
+{
+    std::ifstream tReadFile;
+    tReadFile.open(aFilename);
+    std::string tInputString;
+    std::stringstream tReadData;
+    while (tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    return (tReadData);
 }
 
 }
@@ -418,13 +449,32 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile)
     ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
-    // 2 SET NUM PERFORMERS
+    // 2. SET NUM PERFORMERS
     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
     tUncertaintyMetaData.numPeformers = 2;
 
-    // CALL FUNCTION
-    XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData);
+    // 3. CALL FUNCTION
+    ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
 
+    // 4. TEST OUTPUT FILE
+    auto tReadData = XMLGen::read_data_from_file("defines.xml");
+
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"2\"/>")
+            + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
+            + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
+            + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
+            + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
+            + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
+            + "<Arrayname=\"RandomLoad0_X-Axis\"type=\"real\"value=\"1,11\"/>"
+            + "<Arrayname=\"RandomLoad0_Y-Axis\"type=\"real\"value=\"2,12\"/>"
+            + "<Arrayname=\"RandomLoad0_Z-Axis\"type=\"real\"value=\"3,13\"/>"
+            + "<Arrayname=\"RandomLoad1_X-Axis\"type=\"real\"value=\"4,14\"/>"
+            + "<Arrayname=\"RandomLoad1_Y-Axis\"type=\"real\"value=\"5,15\"/>"
+            + "<Arrayname=\"RandomLoad1_Z-Axis\"type=\"real\"value=\"6,16\"/>"
+            + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+
+    std::system("rm -f defines.xml");
 }
 
 TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoads_1LoadPerLoadCase_3Dim)
@@ -834,8 +884,8 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
     std::vector<std::string> tGoldTypes =
         {"real", "real", "real", "real", "real", "real", "real"};
     std::vector<std::string> tGoldNames =
-        {"RandomLoad0_Axis-X", "RandomLoad0_Axis-Y", "RandomLoad0_Axis-Z",
-         "RandomLoad1_Axis-X", "RandomLoad1_Axis-Y", "RandomLoad1_Axis-Z",
+        {"RandomLoad0_X-Axis", "RandomLoad0_Y-Axis", "RandomLoad0_Z-Axis",
+         "RandomLoad1_X-Axis", "RandomLoad1_Y-Axis", "RandomLoad1_Z-Axis",
          "Probabilities"};
     std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16",
                                             "5.000000000000000000000e-01, 5.000000000000000000000e-01"};
