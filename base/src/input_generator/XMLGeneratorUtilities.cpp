@@ -207,7 +207,7 @@ pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
 }
 
 /******************************************************************************/
-pugi::xml_node append_attributes
+void append_attributes
 (const std::string& aNodeName,
  const std::vector<std::string>& aKeywords,
  const std::vector<std::string>& aValues,
@@ -219,7 +219,6 @@ pugi::xml_node append_attributes
         auto tIndex = &tKeyword - &aKeywords[0];
         tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
     }
-    return (tNode);
 }
 // function append_attributes
 /******************************************************************************/

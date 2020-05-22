@@ -120,7 +120,7 @@ namespace XMLGen
      * \param [in/out] aDocument  pugi::xml_document
      * \return Newly appended node
     **********************************************************************************/
-    pugi::xml_node append_attributes
+    void append_attributes
     (const std::string& aNodeName,
      const std::vector<std::string>& aKeywords,
      const std::vector<std::string>& aValues,
