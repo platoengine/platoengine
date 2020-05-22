@@ -57,7 +57,9 @@
 #include <utility>
 #include <string>
 #include <map>
+
 #include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
+#include "XMLGeneratorAnalyzeDefinesFileUtilities.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
@@ -87,11 +89,7 @@ ComplianceMinTOPlatoAnalyzeUncertInputGenerator::~ComplianceMinTOPlatoAnalyzeUnc
 bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInputFiles()
 /******************************************************************************/
 {
-    if(!generateDefinesXML())
-    {
-        std::cout << "Failed to generate defines.xml" << std::endl;
-        return false;
-    }
+    XMLGen::write_define_xml_file(m_InputData.mRandomMetaData, m_InputData.m_UncertaintyMetaData);
 
     if(!generateInterfaceXML())
     {
@@ -1154,26 +1152,6 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::outputObjectiveHessianStag
     addChild(output_node, "SharedDataName", "Internal Energy Hessian");
     
     return true;
-}
-
-/******************************************************************************/
-bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateDefinesXML(std::ostringstream *aStringStream)
-/******************************************************************************/
-{
-    pugi::xml_document doc;
-
-    if(!addDefinesToDoc(doc))
-        return false;
-    
-    if(aStringStream)
-    {
-        std::cout << "stringstream" << std::endl;
-        doc.save(*aStringStream, "\t", pugi::format_default & ~pugi::format_indent);
-    }
-    else
-        doc.save_file("defines.xml", "  ");
-
-  return true;
 }
 
 /******************************************************************************/

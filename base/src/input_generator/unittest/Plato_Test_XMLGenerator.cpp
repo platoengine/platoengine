@@ -52,6 +52,9 @@
 #include <cmath>
 #include <numeric>
 
+#include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorAnalyzeDefinesFileUtilities.hpp"
+
 #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGenerator_UnitTester.hpp"
 #include "DefaultInputGenerator_UnitTester.hpp"
@@ -218,249 +221,161 @@ public:
 };
 // struct ParseObjective
 
-inline size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor)
+inline pugi::xml_node
+append_attributes
+(const std::string& aNodeName,
+ const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aNode)
 {
-    if (aDivisor == 0u)
+    auto tNode = aNode.append_child(aNodeName.c_str());
+    for(auto& tKey : aKeys)
     {
-        THROWERR("Compute Greatest Divisor: Divide by zero.")
+        auto tIndex = &tKey - &aKeys[0];
+        tNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
     }
-    while (aDividend % aDivisor != 0u)
-    {
-        --aDivisor;
-    }
-    return aDivisor;
+    return (tNode);
 }
 
-inline void append_attributes
+inline void append_child
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aNode)
+{
+    for (auto tKey : aKeys)
+    {
+        auto tIndex = &tKey - &aKeys[0];
+        auto tLower = Plato::tolower(aValues[tIndex]);
+        if (tLower.compare("ignore") != 0)
+        {
+            auto tChildNode = aNode.append_child(tKey.c_str());
+            tChildNode = tChildNode.append_child(pugi::node_pcdata);
+            tChildNode.set_value(aValues[tIndex].c_str());
+        }
+    }
+}
+
+inline pugi::xml_node
+append_parent_node
 (const std::string& aNodeName,
- const std::vector<std::string>& aKeywords,
+ const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument)
 {
     auto tNode = aDocument.append_child(aNodeName.c_str());
-    for(auto& tKeyword : aKeywords)
-    {
-        auto tIndex = &tKeyword - &aKeywords[0];
-        tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
-    }
+    XMLGen::append_child(aKeys, aValues, tNode);
+    return (tNode);
 }
 
-inline void append_basic_attributes_to_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData,
- const XMLGen::UncertaintyMetaData& aUncertaintyMetaData,
- pugi::xml_document& aDocument)
+inline pugi::xml_node
+append_child_node
+(const std::string& aName,
+ const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node &aParentNode)
 {
-    if(aRandomMetaData.numSamples() == 0u)
-        { THROWERR("Append Basic Attributes To Define XML File: Cannot assign zero samples.") }
-    auto tNumSamplesString = std::to_string(aRandomMetaData.numSamples());
-    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamples", "int", tNumSamplesString}, aDocument);
-
-    if(aUncertaintyMetaData.numPeformers == 0u)
-        { THROWERR("Append Basic Attributes To Define XML File: Cannot assign zero MPI processes.") }
-    auto tNumPerformers = XMLGen::compute_greatest_divisor(aRandomMetaData.numSamples(), aUncertaintyMetaData.numPeformers);
-    auto tNumPerformersString = std::to_string(tNumPerformers);
-
-    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumPerformers", "int", tNumPerformersString}, aDocument);
-    XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamplesPerPerformer", "int", "{NumSamples/NumPerformers}"}, aDocument);
-
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Samples", "int", "0", "{NumSamples-1}"}, aDocument);
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Performers", "int", "0", "{NumPerformers-1}"}, aDocument);
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"PerformerSamples", "int", "0", "{NumSamplesPerPerformer-1}"}, aDocument);
+    auto tChildNode = aParentNode.append_child(aName.c_str());
+    XMLGen::append_child(aKeys, aValues, tChildNode);
+    return (tChildNode);
 }
 
-inline std::string transform_tokens
-(const std::vector<std::string>& aTokens)
+inline void append_control_shared_data(pugi::xml_document& aDocument)
 {
-    if(aTokens.empty())
-    {
-        return std::string("");
-    }
+    // shared data - control, i.e optimization variables
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    auto tSharedDataNode = XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
+    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, tSharedDataNode);
+    XMLGen::append_child({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
 
-    std::string tOutput;
-    auto tEndIndex = aTokens.size() - 1u;
-    auto tEndIterator = std::next(aTokens.begin(), tEndIndex);
-    for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
-    {
-        auto tIndex = std::distance(aTokens.begin(), tItr);
-        tOutput += aTokens[tIndex] + ", ";
-    }
-    tOutput += aTokens[tEndIndex];
-
-    return tOutput;
+    // shared data - topology, i.e. filtered control
+    tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    tSharedDataNode = XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
+    tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, tSharedDataNode);
+    XMLGen::append_child({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
 }
 
-inline std::vector<std::vector<std::vector<std::string>>>
-allocate_random_tractions_container_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
+inline void append_stochastic_qoi_shared_data(pugi::xml_document& aDocument)
 {
-    std::vector<std::vector<std::vector<std::string>>> tOutput;
-    auto tSample = aRandomMetaData.sample(0);
-    auto tLoadCase = tSample.load();
-    for(auto& tLoad : tLoadCase.loads)
-    {
-        if(tLoad.mIsRandom)
-        {
-            // allocate storage
-            tOutput.push_back({});
-            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-            for (auto &tValue : tLoad.values)
-            {
-                tOutput[tLoadIndex].push_back({});
-            }
-        }
-    }
-    return (tOutput);
+    // shared data - QOI statistics
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"VonMises Mean", "Scalar", "Element Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
+    tValues = {"VonMises StdDev", "Scalar", "Element Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
+
+    // shared data - QOI samples
+    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
+    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tValues = {"plato_analyze_{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises",
+        "Scalar", "Element Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
 }
 
-inline std::vector<std::string>
-prepare_probabilities_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
+inline void append_deterministic_constraint_shared_data(pugi::xml_document& aDocument)
 {
-    std::vector<std::string> tProbabilities;
-    auto tSamples = aRandomMetaData.samples();
-    for(auto& tSample : tSamples)
-    {
-        // append probabilities
-        tProbabilities.push_back(tSample.probability());
-    }
-    return tProbabilities;
+    // TODO: FINISH
 }
 
-inline std::vector<std::vector<std::vector<std::string>>>
-prepare_tractions_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
+inline void append_stochastic_objective_shared_data(pugi::xml_document& aDocument)
 {
-    auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
-    auto tSamples = aRandomMetaData.samples();
-    for(auto& tSample : tSamples)
-    {
-        auto tLoadCase = tSample.load();
-        for(auto& tLoad : tLoadCase.loads)
-        {
-            if(tLoad.mIsRandom)
-            {
-                // append values
-                auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-                for(auto& tValue : tLoad.values)
-                {
-                    auto tDimIndex = &tValue - &tLoad.values[0];
-                    tValues[tLoadIndex][tDimIndex].push_back(tValue);
-                }
-            }
-        }
-    }
-    return tValues;
+    // shared data - objective samples
+    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
+    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Objective {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Value",
+        "Scalar", "Global", "1", "plato_analyze_{PerformerIndex}", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
+
+    // shared data - objective gradient samples
+    tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
+    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+    tValues = {"Objective {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Gradient", "Scalar",
+        "Nodal Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
+
+    // shared data - stochastic objective value and gradient
+    tValues = {"Objective Mean Plus StdDev Value", "Scalar", "Global", "1", "plato_analyze_{PerformerIndex}", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
+    tValues = {"Objective Mean Plus StdDev Gradient", "Scalar", "Nodal Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
+    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
 }
 
-inline void append_probabilities_to_define_xml_file
-(const std::vector<std::string>& aProbabilities,
- pugi::xml_document& aDocument)
+inline void append_performers_for_stochastic_problem(pugi::xml_document& aDocument)
 {
-    if(aProbabilities.empty())
-    {
-        THROWERR("Append Probabilities To Define XML File: Input probability container is empty.")
-    }
+    // append plato main performer
+    XMLGen::append_parent_node("Performer", {"Name", "Code", "PerformerID"}, {"PlatoMain", "PlatoMain", "0"}, aDocument);
 
-    auto tValues = XMLGen::transform_tokens(aProbabilities);
-    XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
+    // append plato analyze performer
+    auto tPerformerNode = XMLGen::append_parent_node("Performer", {"PerformerID"}, {"1"}, aDocument);
+    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, tPerformerNode);
+    XMLGen::append_child({"Name", "Code"}, {"plato_analyze_{PerformerIndex}", "plato_analyze"}, tForNode);
 }
 
-inline void append_tractions_to_define_xml_file
-(const std::vector<std::vector<std::vector<std::string>>>& aRandomTractions,
- pugi::xml_document& aDocument)
-{
-    if(aRandomTractions.empty())
-    {
-        return;
-    }
-
-    std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
-    for(auto tLoadItr = aRandomTractions.begin(); tLoadItr != aRandomTractions.end(); ++tLoadItr)
-    {
-        auto tLoadIndex = std::distance(aRandomTractions.begin(), tLoadItr);
-        for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
-        {
-            auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
-            auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_" + tValidAxis[tDimIndex] + "-Axis";
-            auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
-            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
-        }
-    }
-}
-
-inline std::unordered_map<std::string, std::vector<std::string>>
-prepare_material_properties_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
-{
-    std::unordered_map<std::string, std::vector<std::string>> tMatNameToSamplesMap;
-    auto tSamples = aRandomMetaData.samples();
-    for(auto& tSample : tSamples)
-    {
-        auto tBlockIDs = tSample.materialBlockIDs();
-        for(auto& tID : tBlockIDs)
-        {
-            auto tMaterial = tSample.material(tID);
-            auto tTags = tMaterial.tags();
-            for(auto& tTag : tTags)
-            {
-                auto tName = tTag + " " + "blockID-" + tID;
-                tMatNameToSamplesMap[tName].push_back(tMaterial.property(tTag));
-            }
-        }
-    }
-
-    return (tMatNameToSamplesMap);
-}
-
-inline void append_material_properties_to_define_xml_file
-(const std::unordered_map<std::string, std::vector<std::string>>& aMaterials,
- pugi::xml_document& aDocument)
-{
-    if(aMaterials.empty())
-    {
-        return;
-    }
-
-    for(auto& tPair : aMaterials)
-    {
-        auto tValues = XMLGen::transform_tokens(tPair.second);
-        XMLGen::append_attributes("Array", {"name", "type", "value"}, {tPair.first, "real", tValues}, aDocument);
-    }
-}
-
-inline void write_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData,
- const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
+inline void write_interface_xml_file()
 {
     pugi::xml_document tDocument;
-    XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument);
-    auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_material_properties_to_define_xml_file(tMaterialValues, tDocument);
-    auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
-    tDocument.save_file("defines.xml", "  ");
-}
+    XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
+    XMLGen::append_parent_node("Console", {"Verbose"}, {"true"}, tDocument);
+    XMLGen::append_performers_for_stochastic_problem(tDocument);
 
-inline std::stringstream read_data_from_file(const std::string& aFilename)
-{
-    std::ifstream tReadFile;
-    tReadFile.open(aFilename);
-    std::string tInputString;
-    std::stringstream tReadData;
-    while (tReadFile >> tInputString)
-    {
-        tReadData << tInputString.c_str();
-    }
-    tReadFile.close();
-    return (tReadData);
+    // shared data
+    XMLGen::append_control_shared_data(tDocument);
+    XMLGen::append_stochastic_qoi_shared_data(tDocument);
+    XMLGen::append_stochastic_objective_shared_data(tDocument);
+
+    tDocument.save_file("interface.xml", "  ");
 }
 
 }
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
+{
+    XMLGen::write_interface_xml_file();
+}
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
 {

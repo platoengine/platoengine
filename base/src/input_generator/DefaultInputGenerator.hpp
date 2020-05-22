@@ -198,7 +198,6 @@ protected:
 private:
     void addVersionEntryToDoc(pugi::xml_document& doc);
     size_t stringToSizeT(const std::string& aString);
-    size_t getGreatestDivisor(const size_t& aDividend, size_t aDivisor);
     virtual size_t computeNumberOfNodesNeeded();
     virtual void generateBatchScript();
     virtual void generateJSRunScript();

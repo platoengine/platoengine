@@ -206,9 +206,79 @@ pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
     return sd_node;
 }
 
+/******************************************************************************/
+pugi::xml_node append_attributes
+(const std::string& aNodeName,
+ const std::vector<std::string>& aKeywords,
+ const std::vector<std::string>& aValues,
+ pugi::xml_document& aDocument)
+{
+    auto tNode = aDocument.append_child(aNodeName.c_str());
+    for(auto& tKeyword : aKeywords)
+    {
+        auto tIndex = &tKeyword - &aKeywords[0];
+        tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
+    }
+    return (tNode);
+}
+// function append_attributes
+/******************************************************************************/
 
+/******************************************************************************/
+size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor)
+{
+    if (aDivisor == 0u)
+    {
+        THROWERR("Compute Greatest Divisor: Divide by zero.")
+    }
+    while (aDividend % aDivisor != 0u)
+    {
+        --aDivisor;
+    }
+    return aDivisor;
+}
+// compute_greatest_divisor
+/******************************************************************************/
 
+/******************************************************************************/
+std::string transform_tokens(const std::vector<std::string> &aTokens)
+{
+    if(aTokens.empty())
+    {
+        return std::string("");
+    }
+
+    std::string tOutput;
+    auto tEndIndex = aTokens.size() - 1u;
+    auto tEndIterator = std::next(aTokens.begin(), tEndIndex);
+    for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
+    {
+        auto tIndex = std::distance(aTokens.begin(), tItr);
+        tOutput += aTokens[tIndex] + ", ";
+    }
+    tOutput += aTokens[tEndIndex];
+
+    return tOutput;
+}
+// function transform_tokens
+/******************************************************************************/
+
+/******************************************************************************/
+std::stringstream read_data_from_file(const std::string& aFilename)
+{
+    std::ifstream tReadFile;
+    tReadFile.open(aFilename);
+    std::string tInputString;
+    std::stringstream tReadData;
+    while (tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    return (tReadData);
+}
+// function read_data_from_file
+/******************************************************************************/
 
 }
-
-
+// namespace XMLGen

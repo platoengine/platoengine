@@ -4949,7 +4949,7 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
   }
 
   size_t tNumSamples = stringToSizeT(tNumSamplesString);
-  tNumPerformers = getGreatestDivisor(tNumSamples,tNumPerformers);
+  tNumPerformers = XMLGen::compute_greatest_divisor(tNumSamples,tNumPerformers);
 
   std::string tNumPerformersString = Plato::to_string(tNumPerformers);
   tTmpNode.append_attribute("value") = tNumPerformersString.c_str();
@@ -5051,19 +5051,6 @@ std::string DefaultInputGenerator::makeValuesString(const std::vector<std::strin
       tValuesString += ", ";
   }
   return tValuesString;
-}
-
-/******************************************************************************/
-size_t DefaultInputGenerator::getGreatestDivisor(const size_t& aDividend, size_t aDivisor)
-/******************************************************************************/
-{
-  if(aDivisor == 0)
-    throw std::invalid_argument( "Error: divide by zero" );
-  while(aDividend % aDivisor != 0)
-  {
-    --aDivisor;
-  }
-  return aDivisor;
 }
 
 /******************************************************************************/

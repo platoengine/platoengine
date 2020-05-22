@@ -103,6 +103,45 @@ namespace XMLGen
                                                    const std::string &aOwner,
                                                    const std::vector<std::string> &aUsers);
 
+    /******************************************************************************//**
+     * \fn compute_greatest_divisor
+     * \brief Find greatest divisor, i.e. value which yields modulus = 0.
+     * \param [in]     aDividend dividend
+     * \param [in/out] aDivisor  divisor
+    **********************************************************************************/
+    size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor);
+
+    /******************************************************************************//**
+     * \fn append_attributes
+     * \brief Append attributes, i.e. keywords and corresponding values, to pugi::xml_document.
+     * \param [in]     aNodeName  pugi::node name
+     * \param [in]     aKeywords  keywords to append
+     * \param [in]     aValues    values to append
+     * \param [in/out] aDocument  pugi::xml_document
+     * \return Newly appended node
+    **********************************************************************************/
+    pugi::xml_node append_attributes
+    (const std::string& aNodeName,
+     const std::vector<std::string>& aKeywords,
+     const std::vector<std::string>& aValues,
+     pugi::xml_document& aDocument);
+
+    /******************************************************************************//**
+     * \fn transform_tokens
+     * \brief Transform list of tokens into string and return its string value.
+     * \param [in] aTokens list of tokens
+     * \return string value
+    **********************************************************************************/
+    std::string transform_tokens(const std::vector<std::string>& aTokens);
+
+    /******************************************************************************//**
+     * \fn read_data_from_file
+     * \brief Read data from text file and return string metadata.
+     * \param [in] aFilename text filename
+     * \return string metadata
+    **********************************************************************************/
+    std::stringstream read_data_from_file(const std::string& aFilename);
 }
+// namespace XMLGen
 
 #endif /* SRC_XMLGENERATORUTILITIES_HPP_ */
