@@ -151,7 +151,7 @@ void append_tractions_to_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
-std::unordered_map<std::string, std::vector<std::string>>
+std::unordered_map<std::string, std::vector<std::string>> /*!< material property tag to samples map */
 prepare_material_properties_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {

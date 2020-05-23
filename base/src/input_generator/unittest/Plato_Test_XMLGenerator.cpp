@@ -234,7 +234,7 @@ append_attributes
     }
 }
 
-inline void append_child
+inline void append_childs
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_node& aNode)
@@ -252,127 +252,483 @@ inline void append_child
     }
 }
 
-inline void
-append_parent_node
-(const std::string& aNodeName,
- const std::vector<std::string>& aKeys,
+inline void append_stochastic_shared_data
+(const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument)
 {
-    auto tNode = aDocument.append_child(aNodeName.c_str());
-    XMLGen::append_child(aKeys, aValues, tNode);
-}
-
-inline void
-append_child_node
-(const std::string& aName,
- const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_node &aParentNode)
-{
-    auto tChildNode = aParentNode.append_child(aName.c_str());
-    XMLGen::append_child(aKeys, aValues, tChildNode);
-}
-
-inline void append_control_shared_data(pugi::xml_document& aDocument)
-{
-    // shared data - control, i.e. optimization variables
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_child(tKeys, tValues, tSharedDataNode);
     auto tForNode = aDocument.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    XMLGen::append_child({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
-
-    // shared data - topology, i.e. filtered control
-    tSharedDataNode = aDocument.append_child("SharedData");
-    tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_child(tKeys, tValues, tSharedDataNode);
-    tForNode = aDocument.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    XMLGen::append_child({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+    auto tSharedDataNode = tForNode.append_child("SharedData");
+    XMLGen::append_childs(aKeys, aValues, tSharedDataNode);
 }
 
-inline void append_stochastic_qoi_shared_data(pugi::xml_document& aDocument)
+inline void append_stochastic_criterion_shared_data
+(const std::string& aCriterion,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
-    /*
+    // shared data - stochastic criterion value
+    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
+    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
+
+    // shared data - stochastic criterion gradient
+    tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
+    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
+
+    // shared data - statistics on the criterion value
+    tTag = aCriterion + " Value Mean Plus StdDev";
+    auto tSharedData = aDocument.append_child("SharedData");
+    tValues = {tTag, "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    XMLGen::append_childs(tKeys, tValues, tSharedData);
+
+    // shared data - statistics on the criterion gradient
+    tTag = aCriterion + " Gradient Mean Plus StdDev";
+    tSharedData = aDocument.append_child("SharedData");
+    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    XMLGen::append_childs(tKeys, tValues, tSharedData);
+}
+
+inline void append_stochastic_qoi_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
     // shared data - QOI statistics
+    // 1 loop over QOI
+    // 2 define tag/name and set "Name" key
+    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"VonMises Mean", "Scalar", "Element Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
-    tValues = {"VonMises StdDev", "Scalar", "Element Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
-
-    // shared data - QOI samples
-    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
-    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    tValues = {"plato_analyze_{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}_vonmises",
-        "Scalar", "Element Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, aDocument);
-    */
+    std::vector<std::string> tValues = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}", "Scalar",
+                                        "Element Field", "IGNORE", tOwnerName, "PlatoMain"};
+    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
 }
 
-inline void append_deterministic_constraint_shared_data(pugi::xml_document& aDocument)
+inline void append_lower_bounds_shared_data(pugi::xml_document& aDocument)
 {
-    // TODO: FINISH
-}
-
-inline void append_stochastic_objective_shared_data(pugi::xml_document& aDocument)
-{
-    /*
-    // shared data - objective samples
-    auto tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
-    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+    // shared data - lower bound value
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Objective {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Value",
-        "Scalar", "Global", "1", "plato_analyze_{PerformerIndex}", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
+    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    auto tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
 
-    // shared data - objective gradient samples
-    tForNode = XMLGen::append_attributes("For", {"var", "in"}, {"PerformerIndex", "Performers"}, aDocument);
-    XMLGen::append_attributes("For", {"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
-    tValues = {"Objective {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Gradient", "Scalar",
-        "Nodal Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
-
-    // shared data - stochastic objective value and gradient
-    tValues = {"Objective Mean Plus StdDev Value", "Scalar", "Global", "1", "plato_analyze_{PerformerIndex}", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);
-    tValues = {"Objective Mean Plus StdDev Gradient", "Scalar", "Nodal Field", "IGNORE", "plato_analyze_{PerformerIndex}", "PlatoMain"};
-    XMLGen::append_child_node("SharedData", tKeys, tValues, tForNode);*/
+    // shared data - lower bound vector
+    tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
 }
 
-inline void append_performers_for_stochastic_problem(pugi::xml_document& aDocument)
+inline void append_upper_bounds_shared_data(pugi::xml_document& aDocument)
+{
+    // shared data - upper bound value
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Upper Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    auto tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
+
+    // shared data - upper bound vector
+    tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
+}
+
+inline void append_design_volume_shared_data(pugi::xml_document& aDocument)
+{
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Design Volume", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    auto tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
+}
+
+inline void append_criterion_shared_data
+(const std::string& aCriterion,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument,
+ std::string aOwnerName = "")
+{
+    // shared data - deterministic criterion value
+    auto tTag = aCriterion + " Value";
+    auto tOwnerName = aOwnerName.empty() ? aXMLMetaData.objectives[0].performer_name : aOwnerName;
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
+    auto tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
+
+    // shared data - deterministic criterion gradient
+    tTag = aCriterion + " Gradient";
+    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
+    tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
+}
+
+inline void append_topology_shared_data_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tSharedData = aDocument.append_child("SharedData");
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    XMLGen::append_childs(tKeys, tValues, tSharedData);
+    auto tForNode = tSharedData.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    auto tUserName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    XMLGen::append_childs({"UserName"}, {tUserName}, tForNode);
+}
+
+inline void append_control_shared_data_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tSharedData = aDocument.append_child("SharedData");
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    XMLGen::append_childs(tKeys, tValues, tSharedData);
+    auto tForNode = tSharedData.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    XMLGen::append_childs({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
+}
+
+inline void append_performers_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
     // append plato main performer
     auto tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_child({"Name", "Code", "PerformerID"}, {"PlatoMain", "PlatoMain", "0"}, tPerformerNode);
+    XMLGen::append_childs( {"Name", "Code", "PerformerID"}, {"PlatoMain", "PlatoMain", "0"}, tPerformerNode);
 
-    // append plato analyze performer
+    // append performer
     tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_child({"PerformerID"}, {"1"}, tPerformerNode);
+    XMLGen::append_childs( {"PerformerID"}, {"1"}, tPerformerNode);
     auto tForNode = tPerformerNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    XMLGen::append_child({"Name", "Code"}, {"plato_analyze_{PerformerIndex}", "plato_analyze"}, tForNode);
+    XMLGen::append_attributes( {"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    XMLGen::append_childs( {"Name", "Code"}, {tPerformerName, aXMLMetaData.objectives[0].code_name}, tForNode);
 }
 
-inline void write_interface_xml_file()
+inline void append_shared_data_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
+    XMLGen::append_lower_bounds_shared_data(aDocument);
+    XMLGen::append_upper_bounds_shared_data(aDocument);
+    XMLGen::append_design_volume_shared_data(aDocument);
+    XMLGen::append_stochastic_qoi_shared_data(aXMLMetaData, aDocument);
+    XMLGen::append_control_shared_data_for_stochastic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_topology_shared_data_for_stochastic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_stochastic_criterion_shared_data("Objective", aXMLMetaData, aDocument);
+    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_0";
+    XMLGen::append_criterion_shared_data("Constraint", aXMLMetaData, aDocument, tOwnerName);
+}
+
+inline void append_filter_control_operation(pugi::xml_node& aNode)
+{
+    auto tOperationNode = aNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Control", "PlatoMain"}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Field", "Topology"}, tOutputNode);
+}
+
+inline void append_filter_gradient_operation
+(const std::string& aSharedDataName,
+ pugi::xml_node& aNode)
+{
+    auto tOperationNode = aNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
+    tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", aSharedDataName}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aSharedDataName}, tOutputNode);
+}
+
+inline void append_initial_guess_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"},{"Initial Guess"}, tStageNode);
+    auto tOperationNode = tStageNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"},{"Initialize Field", "PlatoMain"}, tOperationNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "Initialized Field"},{"SharedDataName", "Control"}, tOutputNode);
+
+    tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"},{"Control"}, tOutputNode);
+}
+
+inline void append_stochastic_operation
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    auto tForNode = aParentNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+    auto tOperationNode = tForNode.append_child("Operation");
+    XMLGen::append_childs(aKeys, aValues, tOperationNode);
+}
+
+inline void append_cache_state_stage_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Cache State"}, tStageNode);
+    std::vector<std::string> tKeys = {"Name", "PerformerName"};
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    std::vector<std::string> tValues = {"Cache State", tPerformerName};
+    XMLGen::append_stochastic_operation(tKeys, tValues, tStageNode);
+}
+
+inline void append_update_problem_stage_for_stochastic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Update Problem"}, tStageNode);
+    auto tOperationNode = tStageNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", "PlatoMain"}, tOperationNode);
+
+    std::vector<std::string> tKeys = {"Name"};
+    std::vector<std::string> tValues = {"Update Problem"};
+    for(auto tObjective : aXMLMetaData.objectives)
+    {
+        tKeys.push_back("PerformerName");
+        auto tPerformerName = tObjective.performer_name + "_{PerformerIndex}";
+        tValues.push_back(tPerformerName);
+    }
+    XMLGen::append_stochastic_operation(tKeys, tValues, tStageNode);
+}
+
+inline void append_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Update Problem"}, tStageNode);
+    auto tOperationNode = tStageNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", "PlatoMain"}, tOperationNode);
+
+    tOperationNode = tStageNode.append_child("Operation");
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", tObjective.performer_name}, tOperationNode);
+    }
+}
+
+inline void append_lower_bound_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Set Lower Bounds"}, tStageNode);
+    if(aXMLMetaData.optimization_type == "topology")
+    {
+        auto tInputNode = tStageNode.append_child("Input");
+        XMLGen::append_childs({"SharedDataName"}, {"Lower Bound Value"}, tInputNode);
+        auto tOperationNode = tStageNode.append_child("Operation");
+        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Lower Bounds", "PlatoMain"}, tOperationNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Lower Bound Vector", "Lower Bound Vector"}, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Lower Bound Vector", "Lower Bound Vector"}, tOutputNode);
+    }
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Lower Bound Vector"}, tOutputNode);
+}
+
+inline void append_upper_bound_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Set Upper Bounds"}, tStageNode);
+    if(aXMLMetaData.optimization_type == "topology")
+    {
+        auto tInputNode = tStageNode.append_child("Input");
+        XMLGen::append_childs({"SharedDataName"}, {"Upper Bound Value"}, tInputNode);
+        auto tOperationNode = tStageNode.append_child("Operation");
+        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Upper Bounds", "PlatoMain"}, tOperationNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Upper Bound Vector", "Upper Bound Vector"}, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Upper Bound Vector", "Upper Bound Vector"}, tOutputNode);
+    }
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Upper Bound Vector"}, tOutputNode);
+}
+
+inline void append_design_volume_stage(pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Design Domain Volume"}, tStageNode);
+    auto tOperationNode = tStageNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Design Domain Volume", "PlatoMain"}, tOperationNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Design Volume", "Design Volume"}, tOutputNode);
+    tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Design Volume"}, tOutputNode);
+}
+
+inline void append_constraint_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument,
+ std::string aPerformerName = "")
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Constraint Value"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tInputNode);
+    XMLGen::append_filter_control_operation(tStageNode);
+
+    auto tOperationNode = tStageNode.append_child("Operation");
+    auto tPerformerName = aPerformerName.empty() ? aXMLMetaData.objectives[0].performer_name : aPerformerName;
+    XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Constraint Value", tPerformerName}, tOperationNode);
+
+    tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Constraint Value", "Constraint Value"}, tOutputNode);
+
+    tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Constraint Value"}, tOutputNode);
+}
+
+inline void append_constraint_gradient_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument,
+ std::string aPerformerName = "")
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Constraint Gradient"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tInputNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+    auto tOperationNode = tStageNode.append_child("Operation");
+    auto tPerformerName = aPerformerName.empty() ? aXMLMetaData.objectives[0].performer_name : aPerformerName;
+    XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Constraint Gradient", tPerformerName}, tOperationNode);
+    tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", "Constraint Gradient"}, tOutputNode);
+    XMLGen::append_filter_gradient_operation("Constraint Gradient", tStageNode);
+
+    tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Constraint Gradient"}, tOutputNode);
+}
+
+inline void append_objective_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    // Internal Energy
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Objective Value"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tStageNode);
+    XMLGen::append_filter_control_operation(tStageNode);
+
+    auto tForNode = tStageNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tStageNode);
+    auto tOperationNode = tForNode.append_child("Operation");
+    tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tOperationNode = tForNode.append_child("Operation");
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, "Compute Objective Value"}, tStageNode);
+    // TODO: append non-deterministic parameters (material, loads, etc.)
+
+    /*
+    addComputeObjectiveValueOperationForNewUncertaintyWorkflow(tStageNode);
+
+    // AggregateEnergy
+    tOperationNode = tStageNode.append_child("Operation");
+    addChild(tOperationNode, "Name", "AggregateEnergy");
+    addChild(tOperationNode, "PerformerName", "PlatoMain");
+
+    pugi::xml_node for_node = tOperationNode.append_child("For");
+    tForNode.append_attribute("var") = "performerIndex";
+    tForNode.append_attribute("in") = "Performers";
+    tForNode = tForNode.append_child("For");
+    tForNode.append_attribute("var") = "PerformerSampleIndex";
+    tForNode.append_attribute("in") = "PerformerSamples";
+    tInputNode = tForNode.append_child("Input");
+    addChild(tInputNode, "ArgumentName", "Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+    addChild(tInputNode, "SharedDataName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+
+    if(m_InputData.mUseNormalizationInAggregator == "true")
+    {
+        tInputNode = tForNode.append_child("Input");
+        addChild(tInputNode, "ArgumentName", "Normalization Factor {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+        addChild(tInputNode, "SharedDataName", "Initial Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+    }
+
+    auto output_node = tOperationNode.append_child("Output");
+    addChild(output_node, "ArgumentName", "Value");
+    addChild(output_node, "SharedDataName", "Objective Value");
+
+    // If there are uncertainties add an operation for
+    // the objective mean and std deviation.
+    tOperationNode = tStageNode.append_child("Operation");
+    addChild(tOperationNode, "Name", "Stochastic Objective Value");
+    addChild(tOperationNode, "PerformerName", "PlatoMain");
+
+    tForNode = tOperationNode.append_child("For");
+    tForNode.append_attribute("var") = "performerIndex";
+    tForNode.append_attribute("in") = "Performers";
+    tForNode = tForNode.append_child("For");
+    tForNode.append_attribute("var") = "PerformerSampleIndex";
+    tForNode.append_attribute("in") = "PerformerSamples";
+    tInputNode = tForNode.append_child("Input");
+    addChild(tInputNode, "ArgumentName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+    addChild(tInputNode, "SharedDataName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
+
+    output_node = tOperationNode.append_child("Output");
+    std::string tFieldName = "Objective Mean Plus ";
+    tFieldName += m_InputData.objective_number_standard_deviations;
+    tFieldName += " StdDev";
+    addChild(output_node, "ArgumentName", tFieldName);
+    addChild(output_node, "SharedDataName", "Objective Mean Plus StdDev Value");
+
+    output_node = tStageNode.append_child("Output");
+    addChild(output_node, "SharedDataName", "Objective Value");
+    */
+}
+
+inline void write_interface_xml_file_for_stochastic_usecase(const XMLGen::InputData& aXMLMetaData)
+{
+    if(aXMLMetaData.objectives.empty())
+        { THROWERR("Write Interface XML File For Stochastic Use Case: Objective block was not defined.") }
+    if(aXMLMetaData.objectives.size() > 1u)
+        { THROWERR("Write Interface XML File For Stochastic Use Case: Only one objective, i.e. objective block, definition is expected for a stochastic use case.") }
+
     pugi::xml_document tDocument;
     XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
     auto tNode = tDocument.append_child("Console");
-    XMLGen::append_child({"Verbose"}, {"true"}, tNode);
-    XMLGen::append_performers_for_stochastic_problem(tDocument);
+    XMLGen::append_childs({"Verbose"}, {"true"}, tNode);
+    XMLGen::append_performers_for_stochastic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_shared_data_for_stochastic_usecase(aXMLMetaData, tDocument);
 
-    // shared data
-    std::cout << "4\n";
-    XMLGen::append_control_shared_data(tDocument);
-    std::cout << "5\n";
-    /*XMLGen::append_stochastic_qoi_shared_data(tDocument);
-    std::cout << "6\n";
-    XMLGen::append_stochastic_objective_shared_data(tDocument);
-    std::cout << "7\n";*/
+    // stages
+    XMLGen::append_design_volume_stage(tDocument);
+    XMLGen::append_lower_bound_stage(aXMLMetaData, tDocument);
+    XMLGen::append_upper_bound_stage(aXMLMetaData, tDocument);
+    XMLGen::append_initial_guess_stage(aXMLMetaData, tDocument);
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_0";
+    XMLGen::append_constraint_value_stage(aXMLMetaData, tDocument, tPerformerName);
+    XMLGen::append_constraint_gradient_stage(aXMLMetaData, tDocument, tPerformerName);
+    XMLGen::append_cache_state_stage_for_stochastic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_update_problem_stage_for_stochastic_usecase(aXMLMetaData, tDocument);
 
     tDocument.save_file("interface.xml", "  ");
 }
@@ -384,7 +740,13 @@ namespace PlatoTestXMLGenerator
 
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
 {
-    XMLGen::write_interface_xml_file();
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tObjective.performer_name = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.optimization_type = "topology";
+    XMLGen::write_interface_xml_file_for_stochastic_usecase(tXMLMetaData);
 }
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
