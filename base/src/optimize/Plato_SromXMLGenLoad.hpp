@@ -330,8 +330,7 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
         std::string tCurLoadCaseIDString = aNewLoadCases[tIndexIntoNewLoadCaseList].id;
         const int tCurLoadCaseID = std::stoi(tCurLoadCaseIDString);
         aRandomLoadIDs.insert(tCurLoadCaseID);
-        const int tIndexOfRandomLoad =
-            Plato::srom::create_random_load(aNewLoadCases[tIndexIntoNewLoadCaseList], aRandomLoads);
+        const int tIndexOfRandomLoad = Plato::srom::create_random_load(aNewLoadCases[tIndexIntoNewLoadCaseList], aRandomLoads);
         Plato::srom::add_random_variable_to_random_load(aRandomLoads[tIndexOfRandomLoad], aRandomVariable);
     }
 }

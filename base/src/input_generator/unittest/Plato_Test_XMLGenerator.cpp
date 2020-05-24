@@ -225,19 +225,19 @@ inline void
 append_attributes
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
- pugi::xml_node& aNode)
+ pugi::xml_node& aParentNode)
 {
     for(auto& tKey : aKeys)
     {
         auto tIndex = &tKey - &aKeys[0];
-        aNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
+        aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
     }
 }
 
 inline void append_childs
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
- pugi::xml_node& aNode)
+ pugi::xml_node& aParentNode)
 {
     for (auto& tKey : aKeys)
     {
@@ -245,14 +245,14 @@ inline void append_childs
         auto tLower = Plato::tolower(aValues[tIndex]);
         if (tLower.compare("ignore") != 0)
         {
-            auto tChildNode = aNode.append_child(tKey.c_str());
+            auto tChildNode = aParentNode.append_child(tKey.c_str());
             tChildNode = tChildNode.append_child(pugi::node_pcdata);
             tChildNode.set_value(aValues[tIndex].c_str());
         }
     }
 }
 
-inline void append_stochastic_shared_data
+inline void append_nondeterministic_shared_data
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument)
@@ -265,37 +265,37 @@ inline void append_stochastic_shared_data
     XMLGen::append_childs(aKeys, aValues, tSharedDataNode);
 }
 
-inline void append_stochastic_criterion_shared_data
+inline void append_nondeterministic_criterion_shared_data
 (const std::string& aCriterion,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    // shared data - stochastic criterion value
+    // shared data - nondeterministic criterion value
     auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
     auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
-    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
+    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
-    // shared data - stochastic criterion gradient
+    // shared data - nondeterministic criterion gradient
     tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
-    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
+    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
     // shared data - statistics on the criterion value
-    tTag = aCriterion + " Value Mean Plus StdDev";
+    tTag = aCriterion + " Value";
     auto tSharedData = aDocument.append_child("SharedData");
     tValues = {tTag, "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
     XMLGen::append_childs(tKeys, tValues, tSharedData);
 
     // shared data - statistics on the criterion gradient
-    tTag = aCriterion + " Gradient Mean Plus StdDev";
+    tTag = aCriterion + " Gradient";
     tSharedData = aDocument.append_child("SharedData");
     tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
     XMLGen::append_childs(tKeys, tValues, tSharedData);
 }
 
-inline void append_stochastic_qoi_shared_data
+inline void append_qoi_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -306,7 +306,7 @@ inline void append_stochastic_qoi_shared_data
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}", "Scalar",
                                         "Element Field", "IGNORE", tOwnerName, "PlatoMain"};
-    XMLGen::append_stochastic_shared_data(tKeys, tValues, aDocument);
+    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 }
 
 inline void append_lower_bounds_shared_data(pugi::xml_document& aDocument)
@@ -366,7 +366,7 @@ inline void append_criterion_shared_data
     XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
 }
 
-inline void append_topology_shared_data_for_stochastic_usecase
+inline void append_topology_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -380,7 +380,7 @@ inline void append_topology_shared_data_for_stochastic_usecase
     XMLGen::append_childs({"UserName"}, {tUserName}, tForNode);
 }
 
-inline void append_control_shared_data_for_stochastic_usecase
+inline void append_control_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -393,7 +393,7 @@ inline void append_control_shared_data_for_stochastic_usecase
     XMLGen::append_childs({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
 }
 
-inline void append_performers_for_stochastic_usecase
+inline void append_performers_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -410,24 +410,46 @@ inline void append_performers_for_stochastic_usecase
     XMLGen::append_childs( {"Name", "Code"}, {tPerformerName, aXMLMetaData.objectives[0].code_name}, tForNode);
 }
 
-inline void append_shared_data_for_stochastic_usecase
+inline void append_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
     XMLGen::append_lower_bounds_shared_data(aDocument);
     XMLGen::append_upper_bounds_shared_data(aDocument);
     XMLGen::append_design_volume_shared_data(aDocument);
-    XMLGen::append_stochastic_qoi_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_control_shared_data_for_stochastic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_topology_shared_data_for_stochastic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_stochastic_criterion_shared_data("Objective", aXMLMetaData, aDocument);
+    XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_control_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_topology_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_criterion_shared_data("Objective", aXMLMetaData, aDocument);
     auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_0";
     XMLGen::append_criterion_shared_data("Constraint", aXMLMetaData, aDocument, tOwnerName);
 }
 
-inline void append_filter_control_operation(pugi::xml_node& aNode)
+inline void append_filter_criterion_gradient_samples_operation
+(const std::string& aCriterionName,
+ pugi::xml_node& aParentNode)
 {
-    auto tOperationNode = aNode.append_child("Operation");
+    auto tForNode = aParentNode.append_child("For");
+    XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, aParentNode);
+    auto tOperationNode = tForNode.append_child("Operation");
+    tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+    tOperationNode = tForNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
+    tInputNode = tOperationNode.append_child("Input");
+    auto tSharedDataName = aCriterionName + " Gradient" + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", tSharedDataName}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tSharedDataName}, tOutputNode);
+}
+
+inline void append_filter_control_operation
+(pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_childs({"Name", "PerformerName"},{"Filter Control", "PlatoMain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
@@ -435,18 +457,19 @@ inline void append_filter_control_operation(pugi::xml_node& aNode)
     XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Field", "Topology"}, tOutputNode);
 }
 
-inline void append_filter_gradient_operation
-(const std::string& aSharedDataName,
- pugi::xml_node& aNode)
+inline void append_filter_criterion_gradient_operation
+(const std::string& aCriterionName,
+ pugi::xml_node& aParentNode)
 {
-    auto tOperationNode = aNode.append_child("Operation");
+    auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_childs({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
     tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", aSharedDataName}, tInputNode);
+    auto tSharedDataName = aCriterionName + " Gradient";
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", tSharedDataName}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aSharedDataName}, tOutputNode);
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tSharedDataName}, tOutputNode);
 }
 
 inline void append_initial_guess_stage
@@ -464,7 +487,7 @@ inline void append_initial_guess_stage
     XMLGen::append_childs({"SharedDataName"},{"Control"}, tOutputNode);
 }
 
-inline void append_stochastic_operation
+inline void append_nondeterministic_operation
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_node& aParentNode)
@@ -477,7 +500,7 @@ inline void append_stochastic_operation
     XMLGen::append_childs(aKeys, aValues, tOperationNode);
 }
 
-inline void append_cache_state_stage_for_stochastic_usecase
+inline void append_cache_state_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -486,10 +509,10 @@ inline void append_cache_state_stage_for_stochastic_usecase
     std::vector<std::string> tKeys = {"Name", "PerformerName"};
     auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
     std::vector<std::string> tValues = {"Cache State", tPerformerName};
-    XMLGen::append_stochastic_operation(tKeys, tValues, tStageNode);
+    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 
-inline void append_update_problem_stage_for_stochastic_usecase
+inline void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -506,7 +529,7 @@ inline void append_update_problem_stage_for_stochastic_usecase
         auto tPerformerName = tObjective.performer_name + "_{PerformerIndex}";
         tValues.push_back(tPerformerName);
     }
-    XMLGen::append_stochastic_operation(tKeys, tValues, tStageNode);
+    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 
 inline void append_update_problem_stage
@@ -621,114 +644,266 @@ inline void append_constraint_gradient_stage
     XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", "Constraint Gradient"}, tOutputNode);
-    XMLGen::append_filter_gradient_operation("Constraint Gradient", tStageNode);
+    XMLGen::append_filter_criterion_gradient_operation("Constraint", tStageNode);
 
     tOutputNode = tStageNode.append_child("Output");
     XMLGen::append_childs({"SharedDataName"}, {"Constraint Gradient"}, tOutputNode);
 }
 
-inline void append_objective_value_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+inline void append_random_parameters
+(const std::unordered_map<std::string, std::vector<std::string>>& aTagsMap,
+ pugi::xml_node& aParentNode)
 {
-    // Internal Energy
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Calculate Objective Value"}, tStageNode);
-    auto tInputNode = tStageNode.append_child("Input");
-    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tStageNode);
-    XMLGen::append_filter_control_operation(tStageNode);
+    for(auto& tPair : aTagsMap)
+    {
+        for(auto& tTag : tPair.second)
+        {
+            auto tParameterNode = aParentNode.append_child("Parameter");
+            auto tValue = tTag + "[{performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
+            XMLGen::append_childs({"ArgumentName", "ArgumentValue"}, {tTag, tValue}, tParameterNode);
+        }
+    }
+}
 
-    auto tForNode = tStageNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tStageNode);
+inline void append_sample_criterion_value_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tForNode = aParentNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, aParentNode);
     auto tOperationNode = tForNode.append_child("Operation");
     tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tOperationNode = tForNode.append_child("Operation");
+    auto tOperationName = std::string("Compute ") + aCriterionName + " Value";
     auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
-    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, "Compute Objective Value"}, tStageNode);
-    // TODO: append non-deterministic parameters (material, loads, etc.)
+    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
-    /*
-    addComputeObjectiveValueOperationForNewUncertaintyWorkflow(tStageNode);
+    auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    XMLGen::append_random_parameters(tLoadTags, tOperationNode);
+    auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    XMLGen::append_random_parameters(tMaterialTags, tOperationNode);
 
-    // AggregateEnergy
-    tOperationNode = tStageNode.append_child("Operation");
-    addChild(tOperationNode, "Name", "AggregateEnergy");
-    addChild(tOperationNode, "PerformerName", "PlatoMain");
-
-    pugi::xml_node for_node = tOperationNode.append_child("For");
-    tForNode.append_attribute("var") = "performerIndex";
-    tForNode.append_attribute("in") = "Performers";
-    tForNode = tForNode.append_child("For");
-    tForNode.append_attribute("var") = "PerformerSampleIndex";
-    tForNode.append_attribute("in") = "PerformerSamples";
-    tInputNode = tForNode.append_child("Input");
-    addChild(tInputNode, "ArgumentName", "Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-    addChild(tInputNode, "SharedDataName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-
-    if(m_InputData.mUseNormalizationInAggregator == "true")
-    {
-        tInputNode = tForNode.append_child("Input");
-        addChild(tInputNode, "ArgumentName", "Normalization Factor {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-        addChild(tInputNode, "SharedDataName", "Initial Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-    }
-
-    auto output_node = tOperationNode.append_child("Output");
-    addChild(output_node, "ArgumentName", "Value");
-    addChild(output_node, "SharedDataName", "Objective Value");
-
-    // If there are uncertainties add an operation for
-    // the objective mean and std deviation.
-    tOperationNode = tStageNode.append_child("Operation");
-    addChild(tOperationNode, "Name", "Stochastic Objective Value");
-    addChild(tOperationNode, "PerformerName", "PlatoMain");
-
-    tForNode = tOperationNode.append_child("For");
-    tForNode.append_attribute("var") = "performerIndex";
-    tForNode.append_attribute("in") = "Performers";
-    tForNode = tForNode.append_child("For");
-    tForNode.append_attribute("var") = "PerformerSampleIndex";
-    tForNode.append_attribute("in") = "PerformerSamples";
-    tInputNode = tForNode.append_child("Input");
-    addChild(tInputNode, "ArgumentName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-    addChild(tInputNode, "SharedDataName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
-
-    output_node = tOperationNode.append_child("Output");
-    std::string tFieldName = "Objective Mean Plus ";
-    tFieldName += m_InputData.objective_number_standard_deviations;
-    tFieldName += " StdDev";
-    addChild(output_node, "ArgumentName", tFieldName);
-    addChild(output_node, "SharedDataName", "Objective Mean Plus StdDev Value");
-
-    output_node = tStageNode.append_child("Output");
-    addChild(output_node, "SharedDataName", "Objective Value");
-    */
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tArgumentName = aCriterionName + " Value";
+    auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
 }
 
-inline void write_interface_xml_file_for_stochastic_usecase(const XMLGen::InputData& aXMLMetaData)
+inline void append_evaluate_nondeterministic_criterion_value_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Value";
+    XMLGen::append_childs({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, aParentNode);
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+
+    auto tInputNode = tForNode.append_child("Input");
+    auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tSharedDataName = aCriterionName + " Value";
+    auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+}
+
+inline void append_objective_value_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Objective Value"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tStageNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+    XMLGen::append_sample_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
+    XMLGen::append_evaluate_nondeterministic_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
+
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Objective Value"}, tOutputNode);
+}
+
+inline void append_sample_criterion_gradient_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tForNode = aParentNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, aParentNode);
+    auto tOperationNode = tForNode.append_child("Operation");
+    tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tOperationNode = tForNode.append_child("Operation");
+    auto tOperationName = std::string("Compute ") + aCriterionName + " Gradient";
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
+
+    auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    XMLGen::append_random_parameters(tLoadTags, tOperationNode);
+    auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    XMLGen::append_random_parameters(tMaterialTags, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tArgumentName = aCriterionName + " Gradient";
+    auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+}
+
+inline void append_evaluate_nondeterministic_criterion_gradient_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Gradient";
+    XMLGen::append_childs({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, aParentNode);
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+
+    auto tInputNode = tForNode.append_child("Input");
+    auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    tInputNode = tForNode.append_child("Input");
+    tDataName = aCriterionName + " Gradient " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tSharedDataName = aCriterionName + " Gradient";
+    auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
+    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+}
+
+inline void append_objective_gradient_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_childs({"Name"}, {"Calculate Objective Gradient"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tStageNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+    XMLGen::append_sample_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
+    XMLGen::append_filter_criterion_gradient_samples_operation("Objective", tStageNode);
+    XMLGen::append_evaluate_nondeterministic_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
+
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_childs({"SharedDataName"}, {"Objective Gradient"}, tOutputNode);
+}
+
+inline void append_stages_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    // basic stages
+    XMLGen::append_design_volume_stage(aDocument);
+    XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_initial_guess_stage(aXMLMetaData, aDocument);
+    XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+
+    // criteria stages
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_0";
+    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument, tPerformerName);
+    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument, tPerformerName);
+    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+}
+
+inline void append_derivative_checker_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"Package", "CheckGradient", "CheckHessian", "UseUserInitialGuess"};
+    std::vector<std::string> tValues = {"DerivativeChecker", aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
+    XMLGen::append_childs(tKeys, tValues, aParentNode);
+    auto tNode = aParentNode.append_child("Options");
+    XMLGen::append_childs({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
+}
+
+inline void append_optimization_algorithm_option
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::unordered_map<std::string, std::string> tValidOptimizers =
+        { {"oc", "OC"}, {"mma", "MMA"}, {"ksbc", "KSBC"}, {"ksal", "KSAL"} ,
+          {"rol ksbc", "ROL KSBC"}, {"rol ksal", "ROL KSAL"}, {"derivativechecker", "DerivativeChecker"} };
+
+    auto tOptimizerItr = tValidOptimizers.find(aXMLMetaData.optimization_algorithm);
+    if(tOptimizerItr == tValidOptimizers.end())
+    {
+        THROWERR(std::string("Append Optimization Algorithm: Keyword '") + aXMLMetaData.optimization_algorithm
+            + "' is an unknown optimizer option.")
+    }
+
+    if(tOptimizerItr->first.compare("derivativechecker"))
+    {
+        XMLGen::append_derivative_checker_options(aXMLMetaData, aParentNode);
+    }
+    else
+    {
+        XMLGen::append_childs({"Package"}, {tOptimizerItr->second}, aParentNode);
+    }
+}
+
+inline void append_optimization_output_option
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("Output");
+    append_childs({"OutputStage"}, {"Output To File"}, tNode);
+}
+
+inline void append_optimization_cache_stage_option
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("CacheStage");
+    append_childs({"Name"}, {"Cache State"}, tNode);
+}
+
+inline void append_optimization_update_problem_stage_option
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("UpdateProblemStage");
+    append_childs({"Name"}, {"Update Problem"}, tNode);
+}
+
+inline void write_interface_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData)
 {
     if(aXMLMetaData.objectives.empty())
         { THROWERR("Write Interface XML File For Stochastic Use Case: Objective block was not defined.") }
     if(aXMLMetaData.objectives.size() > 1u)
-        { THROWERR("Write Interface XML File For Stochastic Use Case: Only one objective, i.e. objective block, definition is expected for a stochastic use case.") }
+        { THROWERR("Write Interface XML File For Stochastic Use Case: Only one objective, i.e. objective block, definition is expected for a nondeterministic use case.") }
 
     pugi::xml_document tDocument;
     XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
     auto tNode = tDocument.append_child("Console");
     XMLGen::append_childs({"Verbose"}, {"true"}, tNode);
-    XMLGen::append_performers_for_stochastic_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_shared_data_for_stochastic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_shared_data_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_stages_for_nondeterministic_usecase(aXMLMetaData, tDocument);
 
-    // stages
-    XMLGen::append_design_volume_stage(tDocument);
-    XMLGen::append_lower_bound_stage(aXMLMetaData, tDocument);
-    XMLGen::append_upper_bound_stage(aXMLMetaData, tDocument);
-    XMLGen::append_initial_guess_stage(aXMLMetaData, tDocument);
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_0";
-    XMLGen::append_constraint_value_stage(aXMLMetaData, tDocument, tPerformerName);
-    XMLGen::append_constraint_gradient_stage(aXMLMetaData, tDocument, tPerformerName);
-    XMLGen::append_cache_state_stage_for_stochastic_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_update_problem_stage_for_stochastic_usecase(aXMLMetaData, tDocument);
+    // optimizer options
+    auto tOptimizerNode = tDocument.append_child("Optimizer");
+    XMLGen::append_optimization_algorithm_option(aXMLMetaData, tOptimizerNode);
+    XMLGen::append_optimization_update_problem_stage_option(tOptimizerNode);
+    XMLGen::append_optimization_cache_stage_option(tOptimizerNode);
+    XMLGen::append_optimization_output_option(tOptimizerNode);
+    // TODO: FINISH APPENDING OPTIONS AND THINK HOW TO ADD MMA OPTIONS EFFICIENTLY
 
     tDocument.save_file("interface.xml", "  ");
 }
@@ -746,7 +921,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     tObjective.performer_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     tXMLMetaData.optimization_type = "topology";
-    XMLGen::write_interface_xml_file_for_stochastic_usecase(tXMLMetaData);
+    //XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData);
 }
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
@@ -807,10 +982,10 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
         + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
         + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
         + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-        + "<Arrayname=\"poissonsratioblockID-1\"type=\"real\"value=\"0.3,0.33\"/>"
-        + "<Arrayname=\"elasticmodulusblockID-1\"type=\"real\"value=\"1,1.1\"/>"
-        + "<Arrayname=\"poissonsratioblockID-2\"type=\"real\"value=\"0.3,0.3\"/>"
-        + "<Arrayname=\"elasticmodulusblockID-2\"type=\"real\"value=\"1,1\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1\"/>"
         + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
 
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
@@ -825,6 +1000,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
     tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
     tLoad1.values.push_back("2");
@@ -832,6 +1008,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
     tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
     tLoad2.values.push_back("5");
@@ -839,6 +1016,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
     tLoad3.mIsRandom = false;
+    tLoad3.type = "traction";
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("7");
     tLoad3.values.push_back("8");
@@ -850,6 +1028,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
     tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("11");
     tLoad4.values.push_back("12");
@@ -857,6 +1036,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
     tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
     tLoad5.values.push_back("14");
     tLoad5.values.push_back("15");
@@ -887,12 +1067,12 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
             + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
             + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
             + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-            + "<Arrayname=\"RandomLoad0_X-Axis\"type=\"real\"value=\"1,11\"/>"
-            + "<Arrayname=\"RandomLoad0_Y-Axis\"type=\"real\"value=\"2,12\"/>"
-            + "<Arrayname=\"RandomLoad0_Z-Axis\"type=\"real\"value=\"3,13\"/>"
-            + "<Arrayname=\"RandomLoad1_X-Axis\"type=\"real\"value=\"4,14\"/>"
-            + "<Arrayname=\"RandomLoad1_Y-Axis\"type=\"real\"value=\"5,15\"/>"
-            + "<Arrayname=\"RandomLoad1_Z-Axis\"type=\"real\"value=\"6,16\"/>"
+            + "<Arrayname=\"tractionload-id-0x-axis\"type=\"real\"value=\"1,11\"/>"
+            + "<Arrayname=\"tractionload-id-0y-axis\"type=\"real\"value=\"2,12\"/>"
+            + "<Arrayname=\"tractionload-id-0z-axis\"type=\"real\"value=\"3,13\"/>"
+            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"4,14\"/>"
+            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"5,15\"/>"
+            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"6,16\"/>"
             + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
@@ -940,6 +1120,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
     tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
     tLoad1.values.push_back("2");
@@ -947,12 +1128,14 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
     tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
     tLoad2.values.push_back("5");
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("7");
@@ -966,6 +1149,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
     tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("11");
     tLoad4.values.push_back("12");
@@ -973,6 +1157,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
     tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
     tLoad5.values.push_back("14");
     tLoad5.values.push_back("15");
@@ -1005,16 +1190,16 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
         + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
         + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
         + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-        + "<Arrayname=\"RandomLoad0_X-Axis\"type=\"real\"value=\"1,1,11,11\"/>"
-        + "<Arrayname=\"RandomLoad0_Y-Axis\"type=\"real\"value=\"2,2,12,12\"/>"
-        + "<Arrayname=\"RandomLoad0_Z-Axis\"type=\"real\"value=\"3,3,13,13\"/>"
-        + "<Arrayname=\"RandomLoad1_X-Axis\"type=\"real\"value=\"4,4,14,14\"/>"
-        + "<Arrayname=\"RandomLoad1_Y-Axis\"type=\"real\"value=\"5,5,15,15\"/>"
-        + "<Arrayname=\"RandomLoad1_Z-Axis\"type=\"real\"value=\"6,6,16,16\"/>"
-        + "<Arrayname=\"poissonsratioblockID-1\"type=\"real\"value=\"0.3,0.33,0.3,0.33\"/>"
-        + "<Arrayname=\"elasticmodulusblockID-1\"type=\"real\"value=\"1,1.1,1,1.1\"/>"
-        + "<Arrayname=\"poissonsratioblockID-2\"type=\"real\"value=\"0.3,0.3,0.3,0.3\"/>"
-        + "<Arrayname=\"elasticmodulusblockID-2\"type=\"real\"value=\"1,1,1,1\"/>"
+        + "<Arrayname=\"tractionload-id-0x-axis\"type=\"real\"value=\"1,1,11,11\"/>"
+        + "<Arrayname=\"tractionload-id-0y-axis\"type=\"real\"value=\"2,2,12,12\"/>"
+        + "<Arrayname=\"tractionload-id-0z-axis\"type=\"real\"value=\"3,3,13,13\"/>"
+        + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"4,4,14,14\"/>"
+        + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"5,5,15,15\"/>"
+        + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"6,6,16,16\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33,0.3,0.33\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1,1,1.1\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3,0.3,0.3\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1,1,1\"/>"
         + "<Arrayname=\"Probabilities\"type=\"real\"value=\"2.500000000000000000000e-01,"
         + "2.500000000000000000000e-01,2.500000000000000000000e-01,2.500000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
@@ -1441,17 +1626,17 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
 {
     // CALL FUNCTION
     std::unordered_map<std::string, std::vector<std::string>> tData =
-            { {"elastic modulus blockID-1", {"1", "1.1"} },
-              {"elastic modulus blockID-2", {"1", "1"} },
-              {"poissons ratio blockID-1", {"0.3", "0.33"} },
-              {"poissons ratio blockID-2", {"0.3", "0.3"} } };
+            { {"elastic modulus block-id-1", {"1", "1.1"} },
+              {"elastic modulus block-id-2", {"1", "1"} },
+              {"poissons ratio block-id-1", {"0.3", "0.33"} },
+              {"poissons ratio block-id-2", {"0.3", "0.3"} } };
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_material_properties_to_define_xml_file(tData, tDocument));
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldNames =
-        {"elastic modulus blockID-1", "elastic modulus blockID-2", "poissons ratio blockID-1","poissons ratio blockID-2"};
+        {"elastic modulus block-id-1", "elastic modulus block-id-2", "poissons ratio block-id-1","poissons ratio block-id-2"};
     std::vector<std::string> tGoldValues = {"1, 1.1", "1, 1", "0.3, 0.33", "0.3, 0.3"};
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1469,8 +1654,161 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
     }
 }
 
+TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
+{
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("poissons ratio", "0.3");
+
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    tMaterialSetOne.insert({"2", tMaterial2});
+    auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
+
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial3;
+    tMaterial3.id("2");
+    tMaterial3.category("isotropic");
+    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("poissons ratio", "0.33");
+    XMLGen::Material tMaterial4;
+    tMaterial4.id("2");
+    tMaterial4.category("isotropic");
+    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("poissons ratio", "0.3");
+
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial3});
+    tMaterialSetTwo.insert({"2", tMaterial4});
+    auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseOne));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseTwo));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // CALL FUNCTION
+    auto tMap = XMLGen::return_material_properties_tags_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMap.empty());
+
+    // 4. TEST RESULTS
+    std::unordered_map<std::string, std::vector<std::string>> tGold =
+        {
+          {"1", {"elastic modulus block-id-1", "poissons ratio block-id-1"} },
+          {"2", {"elastic modulus block-id-2", "poissons ratio block-id-2"} }
+        };
+
+    for(auto& tPair : tMap)
+    {
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        ASSERT_STREQ(tGoldItr->first.c_str(), tPair.first.c_str());
+        for(auto& tTag : tPair.second)
+        {
+            auto tIndex = &tTag - &tPair.second[0];
+            ASSERT_STREQ(tGoldItr->second[tIndex].c_str(), tTag.c_str());
+        }
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
+{
+    // 1. APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.mIsRandom = false;
+    tLoad3.type = "traction";
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 2. CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 3. CALL FUNCTION
+    auto tMap = XMLGen::return_random_tractions_tags_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMap.empty());
+
+    // 4. TEST RESULTS
+    std::unordered_map<std::string, std::vector<std::string>> tGold =
+        {
+          {"0", {"traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis"} },
+          {"1", {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
+        };
+
+    for(auto& tPair : tMap)
+    {
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        ASSERT_STREQ(tGoldItr->first.c_str(), tPair.first.c_str());
+        for(auto& tTag : tPair.second)
+        {
+            auto tIndex = &tTag - &tPair.second[0];
+            ASSERT_STREQ(tGoldItr->second[tIndex].c_str(), tTag.c_str());
+        }
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
 {
+    std::unordered_map<std::string, std::vector<std::string>> tTractionTags =
+        {
+          {"0", {"traction load-id-0 x-axis","traction load-id-0 y-axis", "traction load-id-0 z-axis"} },
+          {"1", {"traction load-id-1 x-axis","traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
+        };
     std::vector<std::vector<std::vector<std::string>>> tTractionValues =
         {
           { {"1", "11"}, {"2", "12"}, {"3", "13"} },
@@ -1478,14 +1816,15 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
         };
 
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument));
+
+    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, tDocument));
 
     // 4. POSE GOLD VALUES
     std::vector<std::string> tGoldTypes =
         {"real", "real", "real", "real", "real", "real"};
     std::vector<std::string> tGoldNames =
-        {"RandomLoad0_X-Axis", "RandomLoad0_Y-Axis", "RandomLoad0_Z-Axis",
-         "RandomLoad1_X-Axis", "RandomLoad1_Y-Axis", "RandomLoad1_Z-Axis"};
+        {"traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis",
+         "traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"};
     std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16"};
 
     // 4. TEST RESULTS AGAINST GOLD VALUES
@@ -1551,10 +1890,10 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
 
     // POSE GOLD LOAD VALUES AND TEST
     std::unordered_map<std::string, std::vector<std::string>> tGold =
-            { {"elastic modulus blockID-1", {"1", "1.1"} },
-              {"elastic modulus blockID-2", {"1", "1"} },
-              {"poissons ratio blockID-1", {"0.3", "0.33"} },
-              {"poissons ratio blockID-2", {"0.3", "0.3"} } };
+            { {"elastic modulus block-id-1", {"1", "1.1"} },
+              {"elastic modulus block-id-2", {"1", "1"} },
+              {"poissons ratio block-id-1", {"0.3", "0.33"} },
+              {"poissons ratio block-id-2", {"0.3", "0.3"} } };
     for(auto& tPair : tMaterialValues)
     {
         auto tGoldItr = tGold.find(tPair.first);

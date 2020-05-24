@@ -67,14 +67,38 @@ void append_probabilities_to_define_xml_file
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn return_random_tractions_tags_for_define_xml_file
+ * \brief Return random tractions' tags used to define parameters inside the define.xml file.
+ * \param [in] aRandomMetaData random samples metadata
+ * \return traction load index to tags map, i.e. map<load index, vector<tags>>
+**********************************************************************************/
+std::unordered_map<std::string, std::vector<std::string>>
+return_random_tractions_tags_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData);
+
+/******************************************************************************//**
  * \fn append_tractions_to_define_xml_file
  * \brief Append formated tractions to pugi::xml_document.
- * \param [in]     aTractions set of formatted tractions loads
+ * \param [in]     aTags      traction loads' tags
+ * \param [in]     aValues    traction loads' values
  * \param [in/out] aDocument  pugi::xml_document
 **********************************************************************************/
 void append_tractions_to_define_xml_file
-(const std::vector<std::vector<std::vector<std::string>>>& aTractions,
+(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
+ const std::vector<std::vector<std::vector<std::string>>>& aValues,
  pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn return_material_properties_tags_for_define_xml_file
+ * \brief Return material properties' tags used to define parameters inside the \n
+ * define.xml file.
+ * \param [in] aRandomMetaData random samples metadata
+ * \return traction block identification number to material properties' tags map, \n
+ * i.e. map<block id, vector<tags>>
+**********************************************************************************/
+std::unordered_map<std::string, std::vector<std::string>>
+return_material_properties_tags_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData);
 
 /******************************************************************************//**
  * \fn prepare_material_properties_for_define_xml_file

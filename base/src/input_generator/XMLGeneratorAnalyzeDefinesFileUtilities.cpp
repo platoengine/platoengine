@@ -80,6 +80,40 @@ prepare_probabilities_for_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
+std::unordered_map<std::string, std::vector<std::string>>
+return_random_tractions_tags_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    // traction load index to tags map, i.e. map<load index, vector<tags>>
+    std::unordered_map<std::string, std::vector<std::string>> tOutput;
+
+    std::vector<std::string> tValidAxis = {"x", "y", "z"};
+    auto tSample = aRandomMetaData.sample(0);
+    auto tLoadCase = tSample.load();
+
+    for(auto& tLoad : tLoadCase.loads)
+    {
+        auto tLoadTagLower = Plato::tolower(tLoad.type);
+        auto tIsTractionLoad = tLoadTagLower == "traction";
+        if(tLoad.mIsRandom && tIsTractionLoad)
+        {
+            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
+            auto tLoadIndexString = std::to_string(tLoadIndex);
+            for (auto &tValue : tLoad.values)
+            {
+                auto tDimIndex = &tValue - &tLoad.values[0];
+                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis[tDimIndex] + "-axis";
+                tOutput[tLoadIndexString].push_back(tTag);
+            }
+        }
+    }
+
+    return (tOutput);
+}
+// function return_random_tractions_tags_for_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
 std::vector<std::vector<std::vector<std::string>>>
 prepare_tractions_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
@@ -126,22 +160,29 @@ void append_probabilities_to_define_xml_file
 
 /******************************************************************************/
 void append_tractions_to_define_xml_file
-(const std::vector<std::vector<std::vector<std::string>>>& aRandomTractions,
+(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
+ const std::vector<std::vector<std::vector<std::string>>>& aValues,
  pugi::xml_document& aDocument)
 {
-    if(aRandomTractions.empty())
+    if(aValues.empty())
     {
         return;
     }
 
-    std::vector<std::string> tValidAxis = {"X", "Y", "Z"};
-    for(auto tLoadItr = aRandomTractions.begin(); tLoadItr != aRandomTractions.end(); ++tLoadItr)
+    for(auto tLoadItr = aValues.begin(); tLoadItr != aValues.end(); ++tLoadItr)
     {
-        auto tLoadIndex = std::distance(aRandomTractions.begin(), tLoadItr);
+        auto tLoadIndex = std::distance(aValues.begin(), tLoadItr);
+        auto tLoadIndexString = std::to_string(tLoadIndex);
         for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
         {
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
-            auto tTag = std::string("RandomLoad") + std::to_string(tLoadIndex) + "_" + tValidAxis[tDimIndex] + "-Axis";
+            auto tTagItr = aTags.find(tLoadIndexString);
+            if(tTagItr == aTags.end())
+            {
+                THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load index '"
+                    + tLoadIndexString + "' in Load Index to Tags Map. ")
+            }
+            auto tTag = tTagItr->second[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
             XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
         }
@@ -151,11 +192,36 @@ void append_tractions_to_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
+std::unordered_map<std::string, std::vector<std::string>>
+return_material_properties_tags_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    std::unordered_map<std::string, std::vector<std::string>> tBlockIdToTagsMap;
+
+    auto tSample = aRandomMetaData.sample(0);
+    auto tBlockIDs = tSample.materialBlockIDs();
+    for(auto& tID : tBlockIDs)
+    {
+        auto tMaterial = tSample.material(tID);
+        auto tMaterialPropertiesTags = tMaterial.tags();
+        for(auto& tMaterialPropertyTag : tMaterialPropertiesTags)
+        {
+            auto tTag = tMaterialPropertyTag + " block-id-" + tID;
+            tBlockIdToTagsMap[tID].push_back(tTag);
+        }
+    }
+
+    return (tBlockIdToTagsMap);
+}
+// function return_material_properties_tags_for_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
 std::unordered_map<std::string, std::vector<std::string>> /*!< material property tag to samples map */
 prepare_material_properties_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
-    std::unordered_map<std::string, std::vector<std::string>> tMatNameToSamplesMap;
+    std::unordered_map<std::string, std::vector<std::string>> tMatTagToSamplesMap;
     auto tSamples = aRandomMetaData.samples();
     for(auto& tSample : tSamples)
     {
@@ -163,16 +229,16 @@ prepare_material_properties_for_define_xml_file
         for(auto& tID : tBlockIDs)
         {
             auto tMaterial = tSample.material(tID);
-            auto tTags = tMaterial.tags();
-            for(auto& tTag : tTags)
+            auto tMaterialPropertyTags = tMaterial.tags();
+            for(auto& tMaterialPropertyTag : tMaterialPropertyTags)
             {
-                auto tName = tTag + " " + "blockID-" + tID;
-                tMatNameToSamplesMap[tName].push_back(tMaterial.property(tTag));
+                auto tTag = tMaterialPropertyTag + " block-id-" + tID;
+                tMatTagToSamplesMap[tTag].push_back(tMaterial.property(tMaterialPropertyTag));
             }
         }
     }
 
-    return (tMatNameToSamplesMap);
+    return (tMatTagToSamplesMap);
 }
 // function prepare_material_properties_for_define_xml_file
 /******************************************************************************/
@@ -203,12 +269,17 @@ void write_define_xml_file
 {
     pugi::xml_document tDocument;
     XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
+
+    auto tTractionTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aRandomMetaData);
     auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_tractions_to_define_xml_file(tTractionValues, tDocument);
+    XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, tDocument);
+
     auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(aRandomMetaData);
     XMLGen::append_material_properties_to_define_xml_file(tMaterialValues, tDocument);
+
     auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
     XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
+
     tDocument.save_file("defines.xml", "  ");
 }
 // function write_define_xml_file
