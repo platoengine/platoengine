@@ -84,6 +84,11 @@ std::unordered_map<std::string, std::vector<std::string>>
 return_random_tractions_tags_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
+    if(aRandomMetaData.samples().empty())
+    {
+        THROWERR("Return Random Tractions Tags For Define Xml File: Samples vector is empty.")
+    }
+
     // traction load index to tags map, i.e. map<load index, vector<tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
@@ -196,6 +201,11 @@ std::unordered_map<std::string, std::vector<std::string>>
 return_material_properties_tags_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
+    if(aRandomMetaData.samples().empty())
+    {
+        THROWERR("Return Material Properties Tags For Define Xml File: Samples vector is empty.")
+    }
+
     std::unordered_map<std::string, std::vector<std::string>> tBlockIdToTagsMap;
 
     auto tSample = aRandomMetaData.sample(0);

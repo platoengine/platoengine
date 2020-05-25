@@ -90,8 +90,8 @@ struct Constraint
 {
     std::string name;
     std::string type;
-    std::string volume_fraction;
-    std::string volume_absolute;
+    std::string mNormalizedTargetValue;
+    std::string mAbsoluteTargetValue;
     std::string surface_area;
     std::string surface_area_ssid;
     std::string weight;

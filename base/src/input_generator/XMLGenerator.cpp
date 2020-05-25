@@ -3386,7 +3386,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume fraction\".\n";
                 return false;
               }
-              new_constraint.volume_fraction = tStringValue;
+              new_constraint.mNormalizedTargetValue = tStringValue;
             }
             else if(parseSingleValue(tokens, tInputStringList = {"volume","absolute"}, tStringValue))
             {
@@ -3395,7 +3395,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume absolute\".\n";
                 return false;
               }
-              new_constraint.volume_absolute = tStringValue;
+              new_constraint.mAbsoluteTargetValue = tStringValue;
             }
             else if(parseSingleValue(tokens, tInputStringList = {"surface","area","sideset","id"}, tStringValue))
             {

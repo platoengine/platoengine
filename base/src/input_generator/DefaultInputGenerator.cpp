@@ -5698,10 +5698,10 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
                 addChild(tTmpNode, "GradientName", "Volume Gradient");
                 addChild(tTmpNode, "ValueStageName", "Volume");
                 addChild(tTmpNode, "GradientStageName", "Volume Gradient");
-                if(m_InputData.constraints[b].volume_fraction != "")
-                    addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
-                if(m_InputData.constraints[b].volume_absolute != "")
-                    addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
+                if(m_InputData.constraints[b].mNormalizedTargetValue != "")
+                    addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].mNormalizedTargetValue);
+                if(m_InputData.constraints[b].mAbsoluteTargetValue != "")
+                    addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].mAbsoluteTargetValue);
                 addChild(tTmpNode, "Tolerance", "1e-3");
             }
             else if(m_InputData.constraints[b].type == "surface area")
@@ -5725,8 +5725,8 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         addChild(tTmpNode, "ValueStageName", "Constraint");
         addChild(tTmpNode, "GradientName", "Constraint Gradient");
         addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
-        if(m_InputData.constraints[0].volume_absolute != "")
-            addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].volume_absolute);
+        if(m_InputData.constraints[0].mAbsoluteTargetValue != "")
+            addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].mAbsoluteTargetValue);
     }
 
     if(m_InputData.optimization_algorithm != "mma")
@@ -5988,8 +5988,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     addChild(tTmpNode, "ValueStageName", "Constraint");
     addChild(tTmpNode, "GradientName", "Constraint Gradient");
     addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
-    if(m_InputData.constraints[0].volume_absolute != "")
-        addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].volume_absolute);
+    if(m_InputData.constraints[0].mAbsoluteTargetValue != "")
+        addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].mAbsoluteTargetValue);
 
     if(m_InputData.optimization_algorithm != "mma")
     {

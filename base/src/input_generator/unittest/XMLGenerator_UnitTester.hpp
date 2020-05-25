@@ -90,7 +90,7 @@ public:
     void publicLookForPlatoAnalyzePerformers();
     std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name;}
     std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].type;}
-    std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].volume_fraction;}
+    std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].mNormalizedTargetValue;}
     std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area;}
     std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
     std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}

@@ -1470,10 +1470,10 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInterfaceXML(std::
             addChild(tTmpNode, "GradientName", "Volume Gradient");
             addChild(tTmpNode, "ValueStageName", "Volume");
             addChild(tTmpNode, "GradientStageName", "Volume Gradient");
-            if(m_InputData.constraints[b].volume_fraction != "")
-                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].volume_fraction);
-            if(m_InputData.constraints[b].volume_absolute != "")
-                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].volume_absolute);
+            if(m_InputData.constraints[b].mNormalizedTargetValue != "")
+                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].mNormalizedTargetValue);
+            if(m_InputData.constraints[b].mAbsoluteTargetValue != "")
+                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].mAbsoluteTargetValue);
             addChild(tTmpNode, "Tolerance", "1e-3");
         }
         else if(m_InputData.constraints[b].type == "surface area")
