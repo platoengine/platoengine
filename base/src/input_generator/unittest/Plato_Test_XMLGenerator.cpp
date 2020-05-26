@@ -53,7 +53,9 @@
 #include <numeric>
 
 #include "XMLGeneratorUtilities.hpp"
-#include "XMLGeneratorAnalyzeDefinesFileUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorInterfaceFileUtilities.hpp"
+#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 
 #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGenerator_UnitTester.hpp"
@@ -221,254 +223,19 @@ public:
 };
 // struct ParseObjective
 
-inline void set_key_value
-(const std::string& aKey,
- const std::string& aValue,
- std::unordered_map<std::string, std::string>& aKeyToValueMap)
-{
-    auto tItr = aKeyToValueMap.find(aKey);
-    if(tItr == aKeyToValueMap.end())
-    {
-        THROWERR(std::string("Set Key Value: Key '" + aKey + "' is not supported."))
-    }
-    tItr->second = aValue.empty() ? std::string("IGNORE") : aValue;
-}
 
-inline void set_value_keyword_to_ignore_if_empty
-(std::vector<std::string>& aValues)
-{
-    for(auto& tValue : aValues)
-    {
-        auto tMyValue = tValue.empty() ? std::string("IGNORE") : tValue;
-        tValue = tMyValue;
-    }
-}
 
-inline std::vector<std::string> transform_keys
-(const std::unordered_map<std::string, std::string> &aKeyToValueMap)
-{
-    std::vector<std::string> tKeys;
-    for(auto& tPair : aKeyToValueMap)
-    {
-        tKeys.push_back(tPair.first);
-    }
-    return tKeys;
-}
 
-inline std::vector<std::string> transform_values
-(const std::unordered_map<std::string, std::string> &aKeyToValueMap)
-{
-    std::vector<std::string> tValues;
-    for(auto& tPair : aKeyToValueMap)
-    {
-        tValues.push_back(tPair.second);
-    }
-    return tValues;
-}
 
-inline void
-append_attributes
-(const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_node& aParentNode)
-{
-    for(auto& tKey : aKeys)
-    {
-        auto tIndex = &tKey - &aKeys[0];
-        aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
-    }
-}
 
-inline void append_childs
-(const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_node& aParentNode)
-{
-    for (auto& tKey : aKeys)
-    {
-        auto tIndex = &tKey - &aKeys[0];
-        auto tLower = Plato::tolower(aValues[tIndex]);
-        if (tLower.compare("ignore") != 0)
-        {
-            auto tChildNode = aParentNode.append_child(tKey.c_str());
-            tChildNode = tChildNode.append_child(pugi::node_pcdata);
-            tChildNode.set_value(aValues[tIndex].c_str());
-        }
-    }
-}
 
-inline void append_nondeterministic_shared_data
-(const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_document& aDocument)
-{
-    auto tForNode = aDocument.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    tForNode = tForNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
-    auto tSharedDataNode = tForNode.append_child("SharedData");
-    XMLGen::append_childs(aKeys, aValues, tSharedDataNode);
-}
 
-inline void append_nondeterministic_criterion_shared_data
-(const std::string& aCriterion,
- const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // shared data - nondeterministic criterion value
-    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
-    auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
-    // shared data - nondeterministic criterion gradient
-    tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
-    // shared data - statistics on the criterion value
-    tTag = aCriterion + " Value";
-    auto tSharedData = aDocument.append_child("SharedData");
-    tValues = {tTag, "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
-    XMLGen::append_childs(tKeys, tValues, tSharedData);
 
-    // shared data - statistics on the criterion gradient
-    tTag = aCriterion + " Gradient";
-    tSharedData = aDocument.append_child("SharedData");
-    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_childs(tKeys, tValues, tSharedData);
-}
 
-inline void append_qoi_shared_data_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // shared data - QOI statistics
-    // 1 loop over QOI
-    // 2 define tag/name and set "Name" key
-    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}", "Scalar",
-                                        "Element Field", "IGNORE", tOwnerName, "PlatoMain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
-}
 
-inline void append_lower_bounds_shared_data(pugi::xml_document& aDocument)
-{
-    // shared data - lower bound value
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
 
-    // shared data - lower bound vector
-    tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-}
-
-inline void append_upper_bounds_shared_data(pugi::xml_document& aDocument)
-{
-    // shared data - upper bound value
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Upper Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-
-    // shared data - upper bound vector
-    tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-}
-
-inline void append_design_volume_shared_data(pugi::xml_document& aDocument)
-{
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Reference Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-}
-
-inline void append_criterion_shared_data
-(const std::string& aCriterion,
- const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument,
- std::string aOwnerName = "")
-{
-    // shared data - deterministic criterion value
-    auto tTag = aCriterion + " Value";
-    auto tOwnerName = aOwnerName.empty() ? aXMLMetaData.objectives[0].performer_name : aOwnerName;
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-
-    // shared data - deterministic criterion gradient
-    tTag = aCriterion + " Gradient";
-    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_childs(tKeys, tValues, tSharedDataNode);
-}
-
-inline void append_topology_shared_data_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tSharedData = aDocument.append_child("SharedData");
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_childs(tKeys, tValues, tSharedData);
-    auto tForNode = tSharedData.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    auto tUserName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
-    XMLGen::append_childs({"UserName"}, {tUserName}, tForNode);
-}
-
-inline void append_control_shared_data_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tSharedData = aDocument.append_child("SharedData");
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
-    XMLGen::append_childs(tKeys, tValues, tSharedData);
-    auto tForNode = tSharedData.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    XMLGen::append_childs({"UserName"}, {"plato_analyze_{PerformerIndex}"}, tForNode);
-}
-
-inline void append_performers_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // append plato main performer
-    auto tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_childs( {"Name", "Code", "PerformerID"}, {"PlatoMain", "PlatoMain", "0"}, tPerformerNode);
-
-    // append performer
-    tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_childs( {"PerformerID"}, {"1"}, tPerformerNode);
-    auto tForNode = tPerformerNode.append_child("For");
-    XMLGen::append_attributes( {"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
-    XMLGen::append_childs( {"Name", "Code"}, {tPerformerName, aXMLMetaData.objectives[0].code_name}, tForNode);
-}
-
-inline void append_shared_data_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    XMLGen::append_lower_bounds_shared_data(aDocument);
-    XMLGen::append_upper_bounds_shared_data(aDocument);
-    XMLGen::append_design_volume_shared_data(aDocument);
-    XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_control_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_topology_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_criterion_shared_data("Objective", aXMLMetaData, aDocument);
-    auto tOwnerName = aXMLMetaData.objectives[0].performer_name + "_0";
-    XMLGen::append_criterion_shared_data("Constraint", aXMLMetaData, aDocument, tOwnerName);
-}
 
 inline void append_filter_criterion_gradient_samples_operation
 (const std::string& aCriterionName,
@@ -552,7 +319,7 @@ inline void append_cache_state_stage_for_nondeterministic_usecase
     auto tStageNode = aDocument.append_child("Stage");
     XMLGen::append_childs({"Name"}, {"Cache State"}, tStageNode);
     std::vector<std::string> tKeys = {"Name", "PerformerName"};
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
     std::vector<std::string> tValues = {"Cache State", tPerformerName};
     XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
@@ -571,7 +338,7 @@ inline void append_update_problem_stage_for_nondeterministic_usecase
     for(auto tObjective : aXMLMetaData.objectives)
     {
         tKeys.push_back("PerformerName");
-        auto tPerformerName = tObjective.performer_name + "_{PerformerIndex}";
+        auto tPerformerName = tObjective.performer_name + " {PerformerIndex}";
         tValues.push_back(tPerformerName);
     }
     XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
@@ -728,7 +495,7 @@ inline void append_sample_criterion_value_operation
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tOperationNode = tForNode.append_child("Operation");
     auto tOperationName = std::string("Compute ") + aCriterionName + " Value";
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
     XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
@@ -797,7 +564,7 @@ inline void append_sample_criterion_gradient_operation
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tOperationNode = tForNode.append_child("Operation");
     auto tOperationName = std::string("Compute ") + aCriterionName + " Gradient";
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_{PerformerIndex}";
+    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
     XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
@@ -1008,8 +775,8 @@ inline void append_optimization_constraint_option
     {
         XMLGen::set_key_value("AbsoluteTargetValue", tConstraint.mAbsoluteTargetValue, tKeyToValueMap);
         XMLGen::set_key_value("NormalizedTargetValue", tConstraint.mNormalizedTargetValue, tKeyToValueMap);
-        auto tKeys = XMLGen::transform_keys(tKeyToValueMap);
-        auto tValues = XMLGen::transform_values(tKeyToValueMap);
+        auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
+        auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
         auto tNode = aParentNode.append_child("Constraint");
         XMLGen::append_childs(tKeys, tValues, tNode);
     }
@@ -1050,7 +817,9 @@ inline void write_interface_xml_file_for_nondeterministic_usecase
     XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
     auto tNode = tDocument.append_child("Console");
     XMLGen::append_childs({"Verbose"}, {"true"}, tNode);
-    XMLGen::append_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+
+    XMLGen::append_plato_main_performer(tDocument);
+    XMLGen::append_physics_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
     XMLGen::append_shared_data_for_nondeterministic_usecase(aXMLMetaData, tDocument);
     XMLGen::append_stages_for_nondeterministic_usecase(aXMLMetaData, tDocument);
     XMLGen::append_optimizer_options(aXMLMetaData, tDocument);
@@ -1062,6 +831,637 @@ inline void write_interface_xml_file_for_nondeterministic_usecase
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, SetKeyValue)
+{
+    std::unordered_map<std::string, std::string> tKeyToValueMap =
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
+
+    // TEST 1: EMPTY VALUE -> RESULT = IGNORE
+    XMLGen::set_key_value("AbsoluteTargetValue", "", tKeyToValueMap);
+    ASSERT_STREQ("IGNORE", tKeyToValueMap.find("AbsoluteTargetValue")->second.c_str());
+
+    // TEST 2: SET VALUE
+    XMLGen::set_key_value("AbsoluteTargetValue", "10", tKeyToValueMap);
+    ASSERT_STREQ("10", tKeyToValueMap.find("AbsoluteTargetValue")->second.c_str());
+}
+
+TEST(PlatoTestXMLGenerator, SetValueKeywordToIgnoreIfEmpty)
+{
+    // TEST 1: SET EMPTY VALUES TO IGNORE
+    std::vector<std::string> tValues = {"hello", "10", "", ""};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    std::vector<std::string> tGold = {"hello", "10", "IGNORE", "IGNORE"};
+    for(auto& tValue : tValues)
+    {
+        auto tIndex = &tValue - &tValues[0];
+        ASSERT_STREQ(tGold[tIndex].c_str(), tValue.c_str());
+    }
+
+    // TEST 2: NO CHANGE
+    tValues = {"hello", "10"};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    tGold = {"hello", "10"};
+    for(auto& tValue : tValues)
+    {
+        auto tIndex = &tValue - &tValues[0];
+        ASSERT_STREQ(tGold[tIndex].c_str(), tValue.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, TransformKeyTokens)
+{
+    std::unordered_map<std::string, std::string> tKeyToValueMap =
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
+    auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
+
+    std::vector<std::string> tGold = {"ValueName", "ValueStageName", "GradientName", "GradientStageName",
+        "ReferenceValueName", "NormalizedTargetValue", "AbsoluteTargetValue"};
+    ASSERT_EQ(7u, tKeys.size());
+    for(auto& tKey : tKeys)
+    {
+        auto tItr = std::find(tGold.begin(), tGold.end(), tKey);
+        ASSERT_TRUE(tItr != tGold.end());
+        ASSERT_STREQ(tItr->c_str(), tKey.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, TransformValueTokens)
+{
+    std::unordered_map<std::string, std::string> tKeyToValueMap =
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
+    auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
+
+    std::vector<std::string> tGold = {"Constraint Value", "Calculate Constraint Value",
+        "Constraint Gradient", "Calculate Constraint Gradient", "Reference Value", "1", "10"};
+    ASSERT_EQ(7u, tValues.size());
+    for(auto& tValue : tValues)
+    {
+        auto tItr = std::find(tGold.begin(), tGold.end(), tValue);
+        ASSERT_TRUE(tItr != tGold.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendChilds)
+{
+    pugi::xml_document tDocument;
+    auto tSharedData = tDocument.append_child("SharedData");
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    XMLGen::append_childs(tKeys, tValues, tSharedData);
+
+    auto tKeysItr = tKeys.begin();
+    auto tValuesItr = tValues.begin();
+    for(auto& tChild : tSharedData.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendAttributes)
+{
+    pugi::xml_document tDocument;
+    auto tFor = tDocument.append_child("For");
+    ASSERT_STREQ("For", tFor.name());
+    std::vector<std::string> tKeys = {"var", "in"};
+    std::vector<std::string> tValues = {"PerformerIndex", "Performers"};
+    XMLGen::append_attributes(tKeys, tValues, tFor);
+
+    auto tKeysItr = tKeys.begin();
+    auto tValuesItr = tValues.begin();
+    for(auto& tAttribute : tFor.attributes())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tAttribute.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tAttribute.value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNondeterministicSharedData)
+{
+    pugi::xml_document tDocument;
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "PlatoMain"};
+    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, tDocument);
+
+    // TEST RESULTS AGAINS GOLD VALUES
+    std::vector<std::string> tGoldOuterAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldOuterAttributeValues = {"PerformerIndex", "Performers"};
+    auto tOuterForNode = tDocument.child("For");
+    ASSERT_FALSE(tOuterForNode.empty());
+    auto tGoldAttributeKeysItr = tGoldOuterAttributeKeys.begin();
+    auto tGoldAttributeValuesItr = tGoldOuterAttributeValues.begin();
+    for(auto& tAttribute : tOuterForNode.attributes())
+    {
+        ASSERT_STREQ(tGoldAttributeKeysItr->c_str(), tAttribute.name());
+        std::advance(tGoldAttributeKeysItr, 1);
+        ASSERT_STREQ(tGoldAttributeValuesItr->c_str(), tAttribute.value());
+        std::advance(tGoldAttributeValuesItr, 1);
+    }
+
+    std::vector<std::string> tGoldInnerAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldInnerAttributeValues = {"PerformerSampleIndex", "PerformerSamples"};
+    auto tInnerForNode = tOuterForNode.child("For");
+    ASSERT_FALSE(tInnerForNode.empty());
+    tGoldAttributeKeysItr = tGoldInnerAttributeKeys.begin();
+    tGoldAttributeValuesItr = tGoldInnerAttributeValues.begin();
+    for(auto& tAttribute : tInnerForNode.attributes())
+    {
+        ASSERT_STREQ(tGoldAttributeKeysItr->c_str(), tAttribute.name());
+        std::advance(tGoldAttributeKeysItr, 1);
+        ASSERT_STREQ(tGoldAttributeValuesItr->c_str(), tAttribute.value());
+        std::advance(tGoldAttributeValuesItr, 1);
+    }
+
+    auto tSharedData = tInnerForNode.child("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    auto tKeysItr = tKeys.begin();
+    auto tValuesItr = tValues.begin();
+    for(auto& tChild : tSharedData.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldOuterAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldOuterAttributeValues = {"PerformerIndex", "Performers"};
+    std::vector<std::string> tGoldInnerAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldInnerAttributeValues = {"PerformerSampleIndex", "PerformerSamples"};
+
+    std::vector<std::string> tTemp = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Value", tTemp));
+    tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
+
+    tTemp = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "PlatoMain"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
+    tTemp = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Scalar", "Nodal Field", "plato analyze {PerformerIndex}", "PlatoMain"};
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
+
+    auto tKeys = tGoldSharedDataKeys.begin();
+    auto tValues = tGoldSharedDataValues.begin();
+    for (auto &tChild : tDocument.children())
+    {
+        // TEST OUTER LOOP ATTRIBUTES
+        auto tGoldOuterAttributeKeysItr = tGoldOuterAttributeKeys.begin();
+        auto tGoldOuterAttributeValuesItr = tGoldOuterAttributeValues.begin();
+        ASSERT_STREQ("For", tChild.name());
+        for (auto &tAttribute : tChild.attributes())
+        {
+            ASSERT_STREQ(tGoldOuterAttributeKeysItr->c_str(), tAttribute.name());
+            std::advance(tGoldOuterAttributeKeysItr, 1);
+            ASSERT_STREQ(tGoldOuterAttributeValuesItr->c_str(), tAttribute.value());
+            std::advance(tGoldOuterAttributeValuesItr, 1);
+        }
+
+        // TEST INNER LOOP ATTRIBUTES
+        auto tGoldInnerAttributeKeysItr = tGoldInnerAttributeKeys.begin();
+        auto tGoldInnerAttributeValuesItr = tGoldInnerAttributeValues.begin();
+        auto tInnerForNode = tChild.child("For");
+        for (auto &tAttribute : tInnerForNode.attributes())
+        {
+            ASSERT_STREQ(tGoldInnerAttributeKeysItr->c_str(), tAttribute.name());
+            std::advance(tGoldInnerAttributeKeysItr, 1);
+            ASSERT_STREQ(tGoldInnerAttributeValuesItr->c_str(), tAttribute.value());
+            std::advance(tGoldInnerAttributeValuesItr, 1);
+
+            // TEST INNER LOOP SHARED DATA
+            auto tSharedData = tInnerForNode.child("SharedData");
+            ASSERT_FALSE(tSharedData.empty());
+            ASSERT_STREQ("SharedData", tSharedData.name());
+
+            auto tKeysItr = tKeys->second.begin();
+            auto tValuesItr = tValues->second.begin();
+            for (auto &tChild : tSharedData.children())
+            {
+                ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+                std::advance(tKeysItr, 1);
+                ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+                std::advance(tValuesItr, 1);
+            }
+        }
+        std::advance(tKeys, 1);
+        std::advance(tValues, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldOuterAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldOuterAttributeValues = {"PerformerIndex", "Performers"};
+    std::vector<std::string> tGoldInnerAttributeKeys = {"var", "in"};
+    std::vector<std::string> tGoldInnerAttributeValues = {"PerformerSampleIndex", "PerformerSamples"};
+
+    std::vector<std::string> tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
+    tGoldSharedDataKeys.push_back(std::make_pair("Von Mises", tTemp));
+    tTemp = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Scalar", "Element Field", "plato analyze {PerformerIndex}", "PlatoMain"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
+    tGoldSharedDataValues.push_back(std::make_pair("Von Mises", tTemp));
+
+    auto tKeys = tGoldSharedDataKeys.begin();
+    auto tValues = tGoldSharedDataValues.begin();
+    for (auto &tChild : tDocument.children())
+    {
+        // TEST OUTER LOOP ATTRIBUTES
+        auto tGoldOuterAttributeKeysItr = tGoldOuterAttributeKeys.begin();
+        auto tGoldOuterAttributeValuesItr = tGoldOuterAttributeValues.begin();
+        ASSERT_STREQ("For", tChild.name());
+        for (auto &tAttribute : tChild.attributes())
+        {
+            ASSERT_STREQ(tGoldOuterAttributeKeysItr->c_str(), tAttribute.name());
+            std::advance(tGoldOuterAttributeKeysItr, 1);
+            ASSERT_STREQ(tGoldOuterAttributeValuesItr->c_str(), tAttribute.value());
+            std::advance(tGoldOuterAttributeValuesItr, 1);
+        }
+
+        // TEST INNER LOOP ATTRIBUTES
+        auto tGoldInnerAttributeKeysItr = tGoldInnerAttributeKeys.begin();
+        auto tGoldInnerAttributeValuesItr = tGoldInnerAttributeValues.begin();
+        auto tInnerForNode = tChild.child("For");
+        for (auto &tAttribute : tInnerForNode.attributes())
+        {
+            ASSERT_STREQ(tGoldInnerAttributeKeysItr->c_str(), tAttribute.name());
+            std::advance(tGoldInnerAttributeKeysItr, 1);
+            ASSERT_STREQ(tGoldInnerAttributeValuesItr->c_str(), tAttribute.value());
+            std::advance(tGoldInnerAttributeValuesItr, 1);
+
+            // TEST INNER LOOP SHARED DATA
+            auto tSharedData = tInnerForNode.child("SharedData");
+            ASSERT_FALSE(tSharedData.empty());
+            ASSERT_STREQ("SharedData", tSharedData.name());
+
+            auto tKeysItr = tKeys->second.begin();
+            auto tValuesItr = tValues->second.begin();
+            for (auto &tChild : tSharedData.children())
+            {
+                ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+                std::advance(tKeysItr, 1);
+                ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+                std::advance(tValuesItr, 1);
+            }
+        }
+        std::advance(tKeys, 1);
+        std::advance(tValues, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendLowerBoundsSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_lower_bounds_shared_data(tDocument);
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tTemp = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
+    tGoldSharedDataKeys.push_back(std::make_pair("Lower Bound Value", tTemp));
+    tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tGoldSharedDataKeys.push_back(std::make_pair("Lower Bound Vector", tTemp));
+
+    tTemp = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
+    tGoldSharedDataValues.push_back(std::make_pair("Lower Bound Value", tTemp));
+    tTemp = {"Lower Bound Vector", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+    tGoldSharedDataValues.push_back(std::make_pair("Lower Bound Vector", tTemp));
+
+    auto tKeys = tGoldSharedDataKeys.begin();
+    auto tValues = tGoldSharedDataValues.begin();
+    for (auto &tOuterChild : tDocument.children())
+    {
+        auto tKeysItr = tKeys->second.begin();
+        auto tValuesItr = tValues->second.begin();
+        for (auto &tInnerChild : tOuterChild.children())
+        {
+            ASSERT_STREQ(tKeysItr->c_str(), tInnerChild.name());
+            std::advance(tKeysItr, 1);
+            ASSERT_STREQ(tValuesItr->c_str(), tInnerChild.child_value());
+            std::advance(tValuesItr, 1);
+        }
+        std::advance(tKeys, 1);
+        std::advance(tValues, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpperBoundsSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_upper_bounds_shared_data(tDocument);
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tTemp = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
+    tGoldSharedDataKeys.push_back(std::make_pair("Upper Bound Value", tTemp));
+    tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tGoldSharedDataKeys.push_back(std::make_pair("Upper Bound Vector", tTemp));
+
+    tTemp = {"Upper Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
+    tGoldSharedDataValues.push_back(std::make_pair("Upper Bound Value", tTemp));
+    tTemp = {"Upper Bound Vector", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+    tGoldSharedDataValues.push_back(std::make_pair("Upper Bound Vector", tTemp));
+
+    auto tKeys = tGoldSharedDataKeys.begin();
+    auto tValues = tGoldSharedDataValues.begin();
+    for (auto &tOuterChild : tDocument.children())
+    {
+        auto tKeysItr = tKeys->second.begin();
+        auto tValuesItr = tValues->second.begin();
+        for (auto &tInnerChild : tOuterChild.children())
+        {
+            ASSERT_STREQ(tKeysItr->c_str(), tInnerChild.name());
+            std::advance(tKeysItr, 1);
+            ASSERT_STREQ(tValuesItr->c_str(), tInnerChild.child_value());
+            std::advance(tValuesItr, 1);
+        }
+        std::advance(tKeys, 1);
+        std::advance(tValues, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendDesignVolumeSaredData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_design_volume_shared_data(tDocument);
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::string> tGoldValues = {"Reference Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+
+    auto tSharedData = tDocument.child("SharedData");
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    auto tKeysItr = tGoldKeys.begin();
+    auto tValuesItr = tGoldValues.begin();
+    for (auto &tChild : tSharedData.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendCriterionSharedData_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_criterion_shared_data("Objective", tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendCriterionSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_criterion_shared_data("Objective", tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tTemp = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Value", tTemp));
+    tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
+
+    tTemp = {"Objective Value", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
+    std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
+    tTemp = {"Objective Gradient", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
+
+    auto tKeys = tGoldSharedDataKeys.begin();
+    auto tValues = tGoldSharedDataValues.begin();
+    for (auto &tOuterChild : tDocument.children())
+    {
+        auto tKeysItr = tKeys->second.begin();
+        auto tValuesItr = tValues->second.begin();
+        for (auto &tInnerChild : tOuterChild.children())
+        {
+            ASSERT_STREQ(tKeysItr->c_str(), tInnerChild.name());
+            std::advance(tKeysItr, 1);
+            ASSERT_STREQ(tValuesItr->c_str(), tInnerChild.child_value());
+            std::advance(tValuesItr, 1);
+        }
+        std::advance(tKeys, 1);
+        std::advance(tValues, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendControlSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_control_shared_data(tDocument);
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    std::vector<std::string> tGoldValues = {"Control", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+
+    auto tSharedData = tDocument.child("SharedData");
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    auto tKeysItr = tGoldKeys.begin();
+    auto tValuesItr = tGoldValues.begin();
+    for (auto &tChild : tSharedData.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "OwnerName", "UserName", "For"};
+    std::vector<std::string> tGoldValues = {"Topology", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain", ""};
+
+    auto tSharedData = tDocument.child("SharedData");
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    auto tKeysItr = tGoldKeys.begin();
+    auto tValuesItr = tGoldValues.begin();
+    for (auto &tChild : tSharedData.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    tKeysItr = tGoldKeys.begin();
+    tValuesItr = tGoldValues.begin();
+    auto tForNode = tSharedData.child("For");
+    for (auto &tAttribute : tForNode.attributes())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tAttribute.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tAttribute.value());
+        std::advance(tValuesItr, 1);
+    }
+
+    for(auto& tChild : tForNode.children())
+    {
+        ASSERT_STREQ("UserName", tChild.name());
+        ASSERT_STREQ("plato analyze {PerformerIndex}", tChild.child_value());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPlatoMainPerformer)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_plato_main_performer(tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"Name", "Code", "PerformerID"};
+    std::vector<std::string> tGoldValues = {"PlatoMain", "PlatoMain", "0"};
+
+    auto tKeysItr = tGoldKeys.begin();
+    auto tValuesItr = tGoldValues.begin();
+    auto tPerformer = tDocument.child("Performer");
+    for (auto &tChild : tPerformer.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_physics_performers_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "analyze";
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tPerformer = tDocument.child("Performer");
+    std::vector<std::string> tGoldKeys = {"PerformerID", "For"};
+    std::vector<std::string> tGoldValues = {"1", ""};
+    auto tKeysItr = tGoldKeys.begin();
+    auto tValuesItr = tGoldValues.begin();
+    for (auto &tChild : tPerformer.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    tKeysItr = tGoldKeys.begin();
+    tValuesItr = tGoldValues.begin();
+    auto tForNode = tPerformer.child("For");
+    for (auto &tAttribute : tForNode.attributes())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tAttribute.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tAttribute.value());
+        std::advance(tValuesItr, 1);
+    }
+
+    tGoldKeys = {"Name", "Code"};
+    tGoldValues = {"plato analyze {PerformerIndex}", "analyze"};
+    tKeysItr = tGoldKeys.begin();
+    tValuesItr = tGoldValues.begin();
+    for(auto& tChild : tForNode.children())
+    {
+        ASSERT_STREQ(tKeysItr->c_str(), tChild.name());
+        std::advance(tKeysItr, 1);
+        ASSERT_STREQ(tValuesItr->c_str(), tChild.child_value());
+        std::advance(tValuesItr, 1);
+    }
+}
 
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
 {

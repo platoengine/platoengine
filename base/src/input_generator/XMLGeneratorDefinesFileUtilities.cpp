@@ -1,11 +1,11 @@
 /*
- * XMLGeneratorAnalyzeDefinesFileUtilities.cpp
+ * XMLGeneratorDefinesFileUtilities.cpp
  *
  *  Created on: May 20, 2020
  */
 
 #include "XMLGeneratorUtilities.hpp"
-#include "XMLGeneratorAnalyzeDefinesFileUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
 
 namespace XMLGen
 {

@@ -207,6 +207,27 @@ pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
 }
 
 /******************************************************************************/
+void append_childs
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    for (auto& tKey : aKeys)
+    {
+        auto tIndex = &tKey - &aKeys[0];
+        auto tLower = Plato::tolower(aValues[tIndex]);
+        if (tLower.compare("ignore") != 0)
+        {
+            auto tChildNode = aParentNode.append_child(tKey.c_str());
+            tChildNode = tChildNode.append_child(pugi::node_pcdata);
+            tChildNode.set_value(aValues[tIndex].c_str());
+        }
+    }
+}
+// function append_childs
+/******************************************************************************/
+
+/******************************************************************************/
 void append_attributes
 (const std::string& aNodeName,
  const std::vector<std::string>& aKeywords,
@@ -218,6 +239,21 @@ void append_attributes
     {
         auto tIndex = &tKeyword - &aKeywords[0];
         tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
+    }
+}
+// function append_attributes
+/******************************************************************************/
+
+/******************************************************************************/
+void append_attributes
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tKey : aKeys)
+    {
+        auto tIndex = &tKey - &aKeys[0];
+        aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
     }
 }
 // function append_attributes
@@ -277,6 +313,63 @@ std::stringstream read_data_from_file(const std::string& aFilename)
     return (tReadData);
 }
 // function read_data_from_file
+/******************************************************************************/
+
+/******************************************************************************/
+void set_key_value
+(const std::string& aKey,
+ const std::string& aValue,
+ std::unordered_map<std::string, std::string>& aKeyToValueMap)
+{
+    auto tItr = aKeyToValueMap.find(aKey);
+    if(tItr == aKeyToValueMap.end())
+    {
+        THROWERR(std::string("Set Key Value: Key '" + aKey + "' is not supported."))
+    }
+    tItr->second = aValue.empty() ? std::string("IGNORE") : aValue;
+}
+// function set_key_value
+/******************************************************************************/
+
+/******************************************************************************/
+void set_value_keyword_to_ignore_if_empty
+(std::vector<std::string>& aValues)
+{
+    for(auto& tValue : aValues)
+    {
+        auto tMyValue = tValue.empty() ? std::string("IGNORE") : tValue;
+        tValue = tMyValue;
+    }
+}
+// function set_value_keyword_to_ignore_if_empty
+/******************************************************************************/
+
+/******************************************************************************/
+std::vector<std::string> transform_key_tokens
+(const std::unordered_map<std::string, std::string> &aKeyToValueMap)
+{
+    std::vector<std::string> tKeys;
+    for(auto& tPair : aKeyToValueMap)
+    {
+        tKeys.push_back(tPair.first);
+    }
+    return tKeys;
+}
+// function transform_key_tokens
+/******************************************************************************/
+
+/******************************************************************************/
+std::vector<std::string> transform_value_tokens
+(const std::unordered_map<std::string, std::string> &aKeyToValueMap)
+{
+    std::vector<std::string> tValues;
+    for(auto& tPair : aKeyToValueMap)
+    {
+        tValues.push_back(tPair.second);
+    }
+    return tValues;
+}
+// function transform_key_tokens
 /******************************************************************************/
 
 }

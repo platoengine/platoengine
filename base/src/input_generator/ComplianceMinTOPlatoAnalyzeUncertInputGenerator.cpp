@@ -59,7 +59,6 @@
 #include <map>
 
 #include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
-#include "XMLGeneratorAnalyzeDefinesFileUtilities.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
@@ -68,6 +67,7 @@
 #include "SalinasInputDeckWriter.hpp"
 #include "Plato_FreeFunctions.hpp"
 #include "XMLG_Macros.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
 
 namespace XMLGen
 {

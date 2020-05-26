@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorAnalyzeDefinesFileUtilities.hpp
+ * XMLGeneratorDefinesFileUtilities.hpp
  *
  *  Created on: May 20, 2020
  */

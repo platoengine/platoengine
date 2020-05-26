@@ -47,8 +47,7 @@
  *
  */
 
-#ifndef SRC_XMLGENERATORUTILITIES_HPP_
-#define SRC_XMLGENERATORUTILITIES_HPP_
+#pragma once
 
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
@@ -112,19 +111,42 @@ namespace XMLGen
     size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor);
 
     /******************************************************************************//**
+     * \fn append_childs
+     * \brief Append childs to a PUGI XML node.
+     * \param [in]     aKeys        keys to append
+     * \param [in]     aValues      values to append
+     * \param [in/out] aParentNode  PUGI XML node
+    **********************************************************************************/
+    void append_childs
+    (const std::vector<std::string>& aKeys,
+     const std::vector<std::string>& aValues,
+     pugi::xml_node& aParentNode);
+
+    /******************************************************************************//**
      * \fn append_attributes
-     * \brief Append attributes, i.e. keywords and corresponding values, to pugi::xml_document.
+     * \brief Append attributes, i.e. keys and values, to a PUGI XML document.
      * \param [in]     aNodeName  pugi::node name
      * \param [in]     aKeywords  keywords to append
      * \param [in]     aValues    values to append
      * \param [in/out] aDocument  pugi::xml_document
-     * \return Newly appended node
     **********************************************************************************/
     void append_attributes
     (const std::string& aNodeName,
      const std::vector<std::string>& aKeywords,
      const std::vector<std::string>& aValues,
      pugi::xml_document& aDocument);
+
+    /******************************************************************************//**
+     * \fn append_attributes
+     * \brief Append attributes, i.e. keys and values, to a PUGI XML node.
+     * \param [in]     aKeywords   keys to append
+     * \param [in]     aValues     values to append
+     * \param [in/out] aParentNode PUGI XML node
+    **********************************************************************************/
+    void append_attributes
+    (const std::vector<std::string>& aKeywords,
+     const std::vector<std::string>& aValues,
+     pugi::xml_node& aParentNode);
 
     /******************************************************************************//**
      * \fn transform_tokens
@@ -141,7 +163,42 @@ namespace XMLGen
      * \return string metadata
     **********************************************************************************/
     std::stringstream read_data_from_file(const std::string& aFilename);
+
+    /******************************************************************************//**
+     * \fn set_key_value
+     * \brief Set the value associated with the input key.
+     * \param [in]     aKey           parameter key
+     * \param [in]     aValue         parameter value
+     * \param [in/out] aKeyToValueMap parameter key to value map, i.e. map<key,value>
+    **********************************************************************************/
+    void set_key_value
+    (const std::string& aKey,
+     const std::string& aValue,
+     std::unordered_map<std::string, std::string>& aKeyToValueMap);
+
+    /******************************************************************************//**
+     * \fn set_value_keyword_to_ignore_if_empty
+     * \brief If input value keyword is empty, set value keyword to 'IGNORE'.
+     * \param [in/out] aValues list of value keywords
+    **********************************************************************************/
+    void set_value_keyword_to_ignore_if_empty(std::vector<std::string>& aValues);
+
+    /******************************************************************************//**
+     * \fn transform_key_tokens
+     * \brief Return list of key keywords in key to value map.
+     * \param [in] aKeyToValueMap key to value map
+     * \return list of key keywords
+    **********************************************************************************/
+    std::vector<std::string> transform_key_tokens
+    (const std::unordered_map<std::string, std::string> &aKeyToValueMap);
+
+    /******************************************************************************//**
+     * \fn transform_value_tokens
+     * \brief Return list of value keywords in key to value map.
+     * \param [in] aKeyToValueMap key to value map
+     * \return list of value keywords
+    **********************************************************************************/
+    std::vector<std::string> transform_value_tokens
+    (const std::unordered_map<std::string, std::string> &aKeyToValueMap);
 }
 // namespace XMLGen
-
-#endif /* SRC_XMLGENERATORUTILITIES_HPP_ */
