@@ -63,10 +63,18 @@ void append_control_shared_data
 /******************************************************************************//**
  * \fn append_plato_main_performer
  * \brief Append Plato Main performer information to PUGI XML document.
- * \param [in/out] aDocument    pugi::xml_document
+ * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_plato_main_performer
 (pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_filter_control_operation
+ * \brief Append filter control operation to PUGI XML document.
+ * \param [in/out] aDocument pugi::xml_document
+**********************************************************************************/
+void append_filter_control_operation
+(pugi::xml_node& aParentNode);
 
 }
 // namespace XMLGen

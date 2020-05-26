@@ -109,5 +109,19 @@ void append_plato_main_performer
 // function append_plato_main_performer
 /******************************************************************************/
 
+/******************************************************************************/
+void append_filter_control_operation
+(pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Control", "PlatoMain"}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Field", "Topology"}, tOutputNode);
+}
+// function append_filter_control_operation
+/******************************************************************************/
+
 }
 // namespace XMLGen
