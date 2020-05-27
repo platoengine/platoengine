@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 
@@ -239,6 +240,83 @@ void append_update_problem_stage_for_nondeterministic_usecase
     }
 }
 // function append_update_problem_stage_for_nondeterministic_usecase
+/******************************************************************************/
+
+/******************************************************************************/
+void append_nondeterministic_parameters
+(const std::unordered_map<std::string, std::vector<std::string>>& aTagsMap,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tPair : aTagsMap)
+    {
+        for(auto& tTag : tPair.second)
+        {
+            auto tParameterNode = aParentNode.append_child("Parameter");
+            auto tValue = std::string("{") + tTag + "[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
+            XMLGen::append_children({"ArgumentName", "ArgumentValue"}, {tTag, tValue}, tParameterNode);
+        }
+    }
+}
+// function append_nondeterministic_parameters
+/******************************************************************************/
+
+/******************************************************************************/
+void append_sample_objective_value_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tForNode = aParentNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
+        auto tOperationNode = tForNode.append_child("Operation");
+        tForNode = tOperationNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+        tOperationNode = tForNode.append_child("Operation");
+        auto tPerformerName = tObjective.performer_name + " {PerformerIndex}";
+        XMLGen::append_children( { "Name", "PerformerName" }, { "Compute Objective Value", tPerformerName }, tOperationNode);
+
+        auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+        XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
+        auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+        XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
+
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { "Topology", "Topology" }, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        auto tArgumentName = std::string("Objective Value");
+        auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    }
+}
+// function append_sample_objective_value_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_evaluate_nondeterministic_criterion_value_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Value";
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+
+    auto tInputNode = tForNode.append_child("Input");
+    auto tDataName = aCriterionName + " Value " + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tSharedDataName = aCriterionName + " Value";
+    auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev";
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+}
+// function append_evaluate_nondeterministic_criterion_value_operation
 /******************************************************************************/
 
 }

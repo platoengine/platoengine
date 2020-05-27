@@ -121,5 +121,37 @@ void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_nondeterministic_parameters
+ * \brief Append nondeterministic parameters to PUGI XML document.
+ * \param [in]     aTagsMap    parameter identification number to tag map
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_nondeterministic_parameters
+(const std::unordered_map<std::string, std::vector<std::string>>& aTagsMap,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_sample_objective_value_operation
+ * \brief Append sample objective value operation to PUGI XML document.
+ * \param [in]     aXMLMetaData   Plato problem input data
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_sample_objective_value_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_evaluate_nondeterministic_criterion_value_operation
+ * \brief Append evaluate nondeterministic criterion value operation to PUGI XML document.
+ * \param [in]     aCriterionName criterion name, e.g. objective, constraint
+ * \param [in]     aXMLMetaData   Plato problem input data
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_evaluate_nondeterministic_criterion_value_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
 }
 // namespace XMLGen
