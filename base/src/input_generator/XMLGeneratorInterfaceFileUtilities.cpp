@@ -363,17 +363,210 @@ void append_constraint_gradient_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_derivative_checker_options
+void append_derivative_checker_parameters_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    std::vector<std::string> tKeys = {"Package", "CheckGradient", "CheckHessian", "UseUserInitialGuess"};
-    std::vector<std::string> tValues = {"DerivativeChecker", aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
+    std::vector<std::string> tKeys = {"CheckGradient", "CheckHessian", "UseUserInitialGuess"};
+    std::vector<std::string> tValues = {aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
     XMLGen::append_children(tKeys, tValues, aParentNode);
-    auto tNode = aParentNode.append_child("Options");
-    XMLGen::append_children({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
+
+    auto tOptionsNode = aParentNode.append_child("Options");
+    tKeys = {"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"};
+    tValues = {aXMLMetaData.mDerivativeCheckerInitialSuperscript, aXMLMetaData.mDerivativeCheckerFinalSuperscript};
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
-// function append_derivative_checker_options
+// function append_derivative_checker_parameters_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_algorithm_oc_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tConvergenceNode = aParentNode.append_child("Convergence");
+    XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.max_iterations}, tConvergenceNode);
+}
+// function append_optimization_algorithm_oc_parameters_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_algorithm_mma_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"MaxNumOuterIterations", "MoveLimit", "AsymptoteExpansion", "AsymptoteContraction",
+         "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
+    std::vector<std::string> tValues = {aXMLMetaData.max_iterations, aXMLMetaData.mMMAMoveLimit, aXMLMetaData.mMMAAsymptoteExpansion,
+        aXMLMetaData.mMMAAsymptoteContraction, aXMLMetaData.mMMAMaxNumSubProblemIterations, aXMLMetaData.mMMAControlStagnationTolerance,
+        aXMLMetaData.mMMAObjectiveStagnationTolerance};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.append_child("Options");
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+}
+// function append_optimization_algorithm_mma_parameters_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_algorithm_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tLower = Plato::tolower(aXMLMetaData.optimization_algorithm);
+    if(tLower.compare("oc") == 0)
+    {
+        XMLGen::append_optimization_algorithm_oc_parameters_options(aXMLMetaData, aParentNode);
+    }
+    else if(tLower.compare("mma") == 0)
+    {
+        XMLGen::append_optimization_algorithm_mma_parameters_options(aXMLMetaData, aParentNode);
+    }
+    else if(tLower.compare("derivativechecker") == 0)
+    {
+        XMLGen::append_derivative_checker_parameters_options(aXMLMetaData, aParentNode);
+    }
+    else
+    {
+        THROWERR(std::string("Append Optimization Algorithm Options: ") + "Optimization algorithm '"
+            + aXMLMetaData.optimization_algorithm + "' is not supported.")
+    }
+}
+// function append_optimization_algorithm_parameters_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_algorithm_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::unordered_map<std::string, std::string> tValidOptimizers =
+        { {"oc", "OC"}, {"mma", "MMA"}, {"ksbc", "KSBC"}, {"ksal", "KSAL"} ,
+          {"rol ksbc", "ROL KSBC"}, {"rol ksal", "ROL KSAL"}, {"derivativechecker", "DerivativeChecker"} };
+
+    auto tLower = Plato::tolower(aXMLMetaData.optimization_algorithm);
+    auto tOptimizerItr = tValidOptimizers.find(tLower);
+    if(tOptimizerItr == tValidOptimizers.end())
+    {
+        THROWERR(std::string("Append Optimization Algorithm Option: Optimization algorithm '")
+            + aXMLMetaData.optimization_algorithm + "' is not supported.")
+    }
+
+    XMLGen::append_children( { "Package" }, { tOptimizerItr->second }, aParentNode);
+    XMLGen::append_optimization_algorithm_parameters_options(aXMLMetaData, aParentNode);
+}
+// function append_optimization_algorithm_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_output_options
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("Output");
+    append_children({"OutputStage"}, {"Output To File"}, tNode);
+}
+// function append_optimization_output_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_cache_stage_options
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("CacheStage");
+    append_children({"Name"}, {"Cache State"}, tNode);
+}
+// function append_optimization_cache_stage_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_update_problem_stage_options
+(pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("UpdateProblemStage");
+    append_children({"Name"}, {"Update Problem"}, tNode);
+}
+// function append_optimization_cache_stage_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_variables_options
+(pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys =
+        {"ValueName", "InitializationStage", "FilteredName", "LowerBoundValueName", "LowerBoundVectorName",
+         "UpperBoundValueName", "UpperBoundVectorName", "SetLowerBoundsStage", "SetUpperBoundsStage"};
+    std::vector<std::string> tValues =
+        {"Control", "Initial Guess", "Topology", "Lower Bound Value", "Lower Bound Vector",
+         "Upper Bound Value", "Upper Bound Vector", "Set Lower Bounds", "Set Upper Bounds"};
+    auto tNode = aParentNode.append_child("OptimizationVariables");
+    XMLGen::append_children(tKeys, tValues, tNode);
+}
+// function append_optimization_variables_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_objective_options
+(pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName"};
+    std::vector<std::string> tValues = {"Objective Value", "Calculate Objective Value", "Objective Gradient",
+        "Calculate Objective Gradient"};
+    auto tNode = aParentNode.append_child("Objective");
+    XMLGen::append_children(tKeys, tValues, tNode);
+}
+// function append_optimization_objective_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_constraint_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::unordered_map<std::string, std::string> tKeyToValueMap =
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
+
+    for (auto &tConstraint : aXMLMetaData.constraints)
+    {
+        XMLGen::set_key_value("AbsoluteTargetValue", tConstraint.mAbsoluteTargetValue, tKeyToValueMap);
+        XMLGen::set_key_value("NormalizedTargetValue", tConstraint.mNormalizedTargetValue, tKeyToValueMap);
+        auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
+        auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
+        auto tNode = aParentNode.append_child("Constraint");
+        XMLGen::append_children(tKeys, tValues, tNode);
+    }
+}
+// function append_optimization_constraint_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimization_bound_constraints_options
+(const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"Upper", "Lower"};
+    auto tNode = aParentNode.append_child("BoundConstraint");
+    XMLGen::append_children(tKeys, aValues, tNode);
+}
+// function append_optimization_bound_constraints_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_optimizer_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOptimizerNode = aParentNode.append_child("Optimizer");
+    XMLGen::append_optimization_algorithm_options(aXMLMetaData, tOptimizerNode);
+    XMLGen::append_optimization_update_problem_stage_options(tOptimizerNode);
+    XMLGen::append_optimization_cache_stage_options(tOptimizerNode);
+    XMLGen::append_optimization_output_options(tOptimizerNode);
+    XMLGen::append_optimization_variables_options(tOptimizerNode);
+    XMLGen::append_optimization_objective_options(tOptimizerNode);
+    XMLGen::append_optimization_constraint_options(aXMLMetaData, tOptimizerNode);
+    XMLGen::append_optimization_bound_constraints_options({"1.0", "0.0"}, tOptimizerNode);
+}
+// function append_optimizer_options
 /******************************************************************************/
 
 }

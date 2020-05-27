@@ -446,5 +446,35 @@ void append_stages_for_nondeterministic_usecase
 // function append_stages_for_nondeterministic_usecase
 /******************************************************************************/
 
+/******************************************************************************/
+void write_interface_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData)
+{
+    if (aXMLMetaData.objectives.empty())
+    {
+        THROWERR("Write Interface XML File for a Nondeterministic Optimization Use Case: Objective block was not defined.")
+    }
+    if (aXMLMetaData.objectives.size() > 1u)
+    {
+        THROWERR(std::string("Write Interface XML File for a Nondeterministic Optimization Use Case: Only one objective, ")
+            + "i.e. objective block, is expected to be defined for a nondeterministic optimization use case.")
+    }
+
+    pugi::xml_document tDocument;
+    XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
+    auto tNode = tDocument.append_child("Console");
+    XMLGen::append_children({"Verbose"}, {"true"}, tNode);
+
+    XMLGen::append_plato_main_performer(tDocument);
+    XMLGen::append_physics_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_shared_data_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_stages_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_optimizer_options(aXMLMetaData, tDocument);
+
+    tDocument.save_file("interface.xml", "  ");
+}
+// function write_interface_xml_file_for_nondeterministic_usecase
+/******************************************************************************/
+
 }
 // namespace XMLGen

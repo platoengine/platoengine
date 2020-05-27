@@ -205,5 +205,13 @@ void append_stages_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn write_interface_xml_file_for_nondeterministic_usecase
+ * \brief Write interface.xml file for a nondeterministic use case.
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void write_interface_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData);
+
 }
 // namespace XMLGen

@@ -188,6 +188,9 @@ struct InputData
     std::string levelset_material_box_min;
     std::string levelset_material_box_max;
 
+    std::string mDerivativeCheckerFinalSuperscript = "8";
+    std::string mDerivativeCheckerInitialSuperscript = "1";
+
     std::string mInnerKKTtoleranceGCMMA;
     std::string mOuterKKTtoleranceGCMMA;
     std::string mMaxInnerIterationsGCMMA;

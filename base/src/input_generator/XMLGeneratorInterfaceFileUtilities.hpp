@@ -206,12 +206,122 @@ void append_constraint_gradient_stage
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_derivative_checker_options
+ * \fn append_derivative_checker_parameters_options
  * \brief Append derivative checker options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_derivative_checker_options
+void append_derivative_checker_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_algorithm_oc_parameters_options
+ * \brief Append optimality criteria algorithm's options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_optimization_algorithm_oc_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_algorithm_mma_parameters_options
+ * \brief Append Method of Moving Asymptotes (MMA) algorithm's options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_optimization_algorithm_mma_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_algorithm_parameters_options
+ * \brief Append optimization algorithm's options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_optimization_algorithm_parameters_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+ /******************************************************************************//**
+  * \fn append_optimization_algorithm_options
+  * \brief Append optimization algorithm's options to PUGI XML document.
+  * \param [in]     aXMLMetaData Plato problem input data
+  * \param [in/out] aParentNode  pugi::xml_node
+ **********************************************************************************/
+void append_optimization_algorithm_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_algorithm_options
+ * \brief Append optimization output options to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_output_options
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_cache_stage_options
+ * \brief Append optimization cache state options to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_cache_stage_options
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_update_problem_stage_options
+ * \brief Append optimization update problem options to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_update_problem_stage_options
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_variables_options
+ * \brief Append optimization variables options to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_variables_options
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_objective_options
+ * \brief Append optimization objective options to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_objective_options
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_constraint_options
+ * \brief Append optimization constraint options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_optimization_constraint_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimization_bound_constraints_options
+ * \brief Append optimization bound constraints options to PUGI XML document.
+ * \param [in]     aValues     upper and lower bounds, i.e. {upper_value, lower_value}
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_optimization_bound_constraints_options
+(const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_optimizer_options
+ * \brief Append optimizer's options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_optimizer_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
