@@ -79,5 +79,47 @@ void append_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_filter_criterion_gradient_samples_operation
+ * \brief Append filter criterion gradient samples operation to PUGI XML document.
+ * \param [in]     aCriterionName criterion, e.g. objective, constraint, name
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_filter_criterion_gradient_samples_operation
+(const std::string& aCriterionName,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_nondeterministic_operation
+ * \brief Append a nondeterministic operation to PUGI XML document.
+ * \param [in]     aKeys       keys to append
+ * \param [in]     aValues     keys' values to append
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_nondeterministic_operation
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_cache_state_stage_for_nondeterministic_usecase
+ * \brief Append cache state stage for a nondeterministic use case to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_cache_state_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_update_problem_stage_for_nondeterministic_usecase
+ * \brief Append update problem stage for a nondeterministic use case to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_update_problem_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen

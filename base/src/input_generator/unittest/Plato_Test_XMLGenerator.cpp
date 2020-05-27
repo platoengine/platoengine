@@ -237,225 +237,22 @@ public:
 
 
 
-inline void append_filter_criterion_gradient_samples_operation
-(const std::string& aCriterionName,
- pugi::xml_node& aParentNode)
-{
-    auto tForNode = aParentNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
-    auto tOperationNode = tForNode.append_child("Operation");
-    tForNode = tOperationNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-    tOperationNode = tForNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
 
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
-    tInputNode = tOperationNode.append_child("Input");
-    auto tSharedDataName = aCriterionName + " Gradient" + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", tSharedDataName}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tSharedDataName}, tOutputNode);
-}
 
-inline void append_filter_criterion_gradient_operation
-(const std::string& aCriterionName,
- pugi::xml_node& aParentNode)
-{
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
-    tInputNode = tOperationNode.append_child("Input");
-    auto tSharedDataName = aCriterionName + " Gradient";
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Gradient", tSharedDataName}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tSharedDataName}, tOutputNode);
-}
 
-inline void append_initial_guess_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"},{"Initial Guess"}, tStageNode);
-    auto tOperationNode = tStageNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"},{"Initialize Field", "PlatoMain"}, tOperationNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_childs({"ArgumentName", "Initialized Field"},{"SharedDataName", "Control"}, tOutputNode);
 
-    tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"},{"Control"}, tOutputNode);
-}
 
-inline void append_nondeterministic_operation
-(const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_node& aParentNode)
-{
-    auto tForNode = aParentNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    tForNode = tForNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
-    auto tOperationNode = tForNode.append_child("Operation");
-    XMLGen::append_childs(aKeys, aValues, tOperationNode);
-}
 
-inline void append_cache_state_stage_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Cache State"}, tStageNode);
-    std::vector<std::string> tKeys = {"Name", "PerformerName"};
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
-    std::vector<std::string> tValues = {"Cache State", tPerformerName};
-    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
-}
 
-inline void append_update_problem_stage_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Update Problem"}, tStageNode);
-    auto tOperationNode = tStageNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", "PlatoMain"}, tOperationNode);
 
-    std::vector<std::string> tKeys = {"Name"};
-    std::vector<std::string> tValues = {"Update Problem"};
-    for(auto tObjective : aXMLMetaData.objectives)
-    {
-        tKeys.push_back("PerformerName");
-        auto tPerformerName = tObjective.performer_name + " {PerformerIndex}";
-        tValues.push_back(tPerformerName);
-    }
-    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
-}
 
-inline void append_update_problem_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Update Problem"}, tStageNode);
-    auto tOperationNode = tStageNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", "PlatoMain"}, tOperationNode);
 
-    tOperationNode = tStageNode.append_child("Operation");
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        XMLGen::append_childs({"Name", "PerformerName"}, {"Update Problem", tObjective.performer_name}, tOperationNode);
-    }
-}
 
-inline void append_lower_bound_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Set Lower Bounds"}, tStageNode);
-    if(aXMLMetaData.optimization_type == "topology")
-    {
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_childs({"SharedDataName"}, {"Lower Bound Value"}, tInputNode);
-        auto tOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Lower Bounds", "PlatoMain"}, tOperationNode);
-        tInputNode = tOperationNode.append_child("Input");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Lower Bound Vector", "Lower Bound Vector"}, tInputNode);
-        auto tOutputNode = tOperationNode.append_child("Output");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Lower Bound Vector", "Lower Bound Vector"}, tOutputNode);
-    }
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"}, {"Lower Bound Vector"}, tOutputNode);
-}
 
-inline void append_upper_bound_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Set Upper Bounds"}, tStageNode);
-    if(aXMLMetaData.optimization_type == "topology")
-    {
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_childs({"SharedDataName"}, {"Upper Bound Value"}, tInputNode);
-        auto tOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Upper Bounds", "PlatoMain"}, tOperationNode);
-        tInputNode = tOperationNode.append_child("Input");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Upper Bound Vector", "Upper Bound Vector"}, tInputNode);
-        auto tOutputNode = tOperationNode.append_child("Output");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Upper Bound Vector", "Upper Bound Vector"}, tOutputNode);
-    }
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"}, {"Upper Bound Vector"}, tOutputNode);
-}
 
-inline void append_design_volume_stage(pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Calculate Design Domain Volume"}, tStageNode);
-    auto tOperationNode = tStageNode.append_child("Operation");
-    XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Design Domain Volume", "PlatoMain"}, tOperationNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Reference Value", "Reference Value"}, tOutputNode);
-    tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"}, {"Reference Value"}, tOutputNode);
-}
 
-inline void append_constraint_value_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument,
- std::string aPerformerName = "")
-{
-    for(auto& tConstraint : aXMLMetaData.constraints)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        XMLGen::append_childs({"Name", "Type"}, {"Calculate Constraint Value", tConstraint.type}, tStageNode);
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_childs({"SharedDataName"}, {"Control"}, tInputNode);
-        XMLGen::append_filter_control_operation(tStageNode);
 
-        auto tOperationNode = tStageNode.append_child("Operation");
-        auto tPerformerName = aPerformerName.empty() ? aXMLMetaData.objectives[0].performer_name : aPerformerName;
-        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Constraint Value", tPerformerName}, tOperationNode);
 
-        tInputNode = tOperationNode.append_child("Input");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-        auto tOutputNode = tOperationNode.append_child("Output");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Constraint Value", "Constraint Value"}, tOutputNode);
-
-        tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_childs({"SharedDataName"}, {"Constraint Value"}, tOutputNode);
-    }
-}
-
-inline void append_constraint_gradient_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument,
- std::string aPerformerName = "")
-{
-    for(auto& tConstraint : aXMLMetaData.constraints)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        XMLGen::append_childs({"Name", "Type"}, {"Calculate Constraint Gradient", tConstraint.type}, tStageNode);
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_childs({"SharedDataName"}, {"Control"}, tInputNode);
-
-        XMLGen::append_filter_control_operation(tStageNode);
-        auto tOperationNode = tStageNode.append_child("Operation");
-        auto tPerformerName = aPerformerName.empty() ? aXMLMetaData.objectives[0].performer_name : aPerformerName;
-        XMLGen::append_childs({"Name", "PerformerName"}, {"Calculate Constraint Gradient", tPerformerName}, tOperationNode);
-        tInputNode = tOperationNode.append_child("Input");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-        auto tOutputNode = tOperationNode.append_child("Output");
-        XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", "Constraint Gradient"}, tOutputNode);
-        XMLGen::append_filter_criterion_gradient_operation("Constraint", tStageNode);
-
-        tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_childs({"SharedDataName"}, {"Constraint Gradient"}, tOutputNode);
-    }
-}
 
 inline void append_nondeterministic_parameters
 (const std::unordered_map<std::string, std::vector<std::string>>& aTagsMap,
@@ -467,7 +264,7 @@ inline void append_nondeterministic_parameters
         {
             auto tParameterNode = aParentNode.append_child("Parameter");
             auto tValue = tTag + "[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}";
-            XMLGen::append_childs({"ArgumentName", "ArgumentValue"}, {tTag, tValue}, tParameterNode);
+            XMLGen::append_children({"ArgumentName", "ArgumentValue"}, {tTag, tValue}, tParameterNode);
         }
     }
 }
@@ -485,7 +282,7 @@ inline void append_sample_criterion_value_operation
     tOperationNode = tForNode.append_child("Operation");
     auto tOperationName = std::string("Compute ") + aCriterionName + " Value";
     auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
-    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
+    XMLGen::append_children({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
     XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
@@ -493,11 +290,11 @@ inline void append_sample_criterion_value_operation
     XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
     auto tArgumentName = aCriterionName + " Value";
     auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
 }
 
 inline void append_evaluate_nondeterministic_criterion_value_operation
@@ -507,7 +304,7 @@ inline void append_evaluate_nondeterministic_criterion_value_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Value";
-    XMLGen::append_childs({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
 
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
@@ -516,12 +313,12 @@ inline void append_evaluate_nondeterministic_criterion_value_operation
 
     auto tInputNode = tForNode.append_child("Input");
     auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
     auto tSharedDataName = aCriterionName + " Value";
     auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
 }
 
 inline void append_objective_value_stage_for_nondeterministic_usecase
@@ -529,16 +326,16 @@ inline void append_objective_value_stage_for_nondeterministic_usecase
  pugi::xml_document& aDocument)
 {
     auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Calculate Objective Value"}, tStageNode);
+    XMLGen::append_children({"Name"}, {"Calculate Objective Value"}, tStageNode);
     auto tInputNode = tStageNode.append_child("Input");
-    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tInputNode);
+    XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
     XMLGen::append_filter_control_operation(tStageNode);
     XMLGen::append_sample_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
     XMLGen::append_evaluate_nondeterministic_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
 
     auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"}, {"Objective Value"}, tOutputNode);
+    XMLGen::append_children({"SharedDataName"}, {"Objective Value"}, tOutputNode);
 }
 
 inline void append_sample_criterion_gradient_operation
@@ -554,7 +351,7 @@ inline void append_sample_criterion_gradient_operation
     tOperationNode = tForNode.append_child("Operation");
     auto tOperationName = std::string("Compute ") + aCriterionName + " Gradient";
     auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
-    XMLGen::append_childs({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
+    XMLGen::append_children({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
     XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
@@ -562,11 +359,11 @@ inline void append_sample_criterion_gradient_operation
     XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_childs({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
     auto tArgumentName = aCriterionName + " Gradient";
     auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
 }
 
 inline void append_evaluate_nondeterministic_criterion_gradient_operation
@@ -576,7 +373,7 @@ inline void append_evaluate_nondeterministic_criterion_gradient_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Gradient";
-    XMLGen::append_childs({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tForNode = tForNode.append_child("For");
@@ -584,15 +381,15 @@ inline void append_evaluate_nondeterministic_criterion_gradient_operation
 
     auto tInputNode = tForNode.append_child("Input");
     auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
     tInputNode = tForNode.append_child("Input");
     tDataName = aCriterionName + " Gradient " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
     auto tSharedDataName = aCriterionName + " Gradient";
     auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
-    XMLGen::append_childs({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
 }
 
 inline void append_objective_gradient_stage_for_nondeterministic_usecase
@@ -600,9 +397,9 @@ inline void append_objective_gradient_stage_for_nondeterministic_usecase
  pugi::xml_document& aDocument)
 {
     auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_childs({"Name"}, {"Calculate Objective Gradient"}, tStageNode);
+    XMLGen::append_children({"Name"}, {"Calculate Objective Gradient"}, tStageNode);
     auto tInputNode = tStageNode.append_child("Input");
-    XMLGen::append_childs({"SharedDataName"}, {"Control"}, tStageNode);
+    XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageNode);
 
     XMLGen::append_filter_control_operation(tStageNode);
     XMLGen::append_sample_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
@@ -610,25 +407,26 @@ inline void append_objective_gradient_stage_for_nondeterministic_usecase
     XMLGen::append_evaluate_nondeterministic_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
 
     auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_childs({"SharedDataName"}, {"Objective Gradient"}, tOutputNode);
+    XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tOutputNode);
 }
 
 inline void append_stages_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    // basic stages
+    // deterministic stages
     XMLGen::append_design_volume_stage(aDocument);
+    XMLGen::append_initial_guess_stage(aDocument);
     XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
     XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
-    XMLGen::append_initial_guess_stage(aXMLMetaData, aDocument);
+
+    // nondeterministic stages
     XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
     XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
 
     // criteria stages
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + "_0";
-    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument, tPerformerName);
-    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument, tPerformerName);
+    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
+    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
     XMLGen::append_objective_value_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
     XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
 }
@@ -639,9 +437,9 @@ inline void append_derivative_checker_options
 {
     std::vector<std::string> tKeys = {"Package", "CheckGradient", "CheckHessian", "UseUserInitialGuess"};
     std::vector<std::string> tValues = {"DerivativeChecker", aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
-    XMLGen::append_childs(tKeys, tValues, aParentNode);
+    XMLGen::append_children(tKeys, tValues, aParentNode);
     auto tNode = aParentNode.append_child("Options");
-    XMLGen::append_childs({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
+    XMLGen::append_children({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
 }
 
 inline void append_optimization_algorithm_oc_options
@@ -649,7 +447,7 @@ inline void append_optimization_algorithm_oc_options
  pugi::xml_node& aParentNode)
 {
     auto tNode = aParentNode.append_child("Convergence");
-    XMLGen::append_childs({"MaxIterations"}, {aXMLMetaData.max_iterations}, aParentNode);
+    XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.max_iterations}, aParentNode);
 }
 
 inline void append_optimization_algorithm_mma_options
@@ -663,7 +461,7 @@ inline void append_optimization_algorithm_mma_options
         aXMLMetaData.mMMAObjectiveStagnationTolerance};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
-    XMLGen::append_childs(tKeys, tValues, tOptionsNode);
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
 
 inline void append_optimization_algorithm_options
@@ -703,7 +501,7 @@ inline void append_optimization_algorithm_option
     }
     else
     {
-        XMLGen::append_childs({"Package"}, {tOptimizerItr->second}, aParentNode);
+        XMLGen::append_children({"Package"}, {tOptimizerItr->second}, aParentNode);
         XMLGen::append_optimization_algorithm_options(aXMLMetaData, aParentNode);
     }
 }
@@ -712,21 +510,21 @@ inline void append_optimization_output_option
 (pugi::xml_node& aParentNode)
 {
     auto tNode = aParentNode.append_child("Output");
-    append_childs({"OutputStage"}, {"Output To File"}, tNode);
+    append_children({"OutputStage"}, {"Output To File"}, tNode);
 }
 
 inline void append_optimization_cache_stage_option
 (pugi::xml_node& aParentNode)
 {
     auto tNode = aParentNode.append_child("CacheStage");
-    append_childs({"Name"}, {"Cache State"}, tNode);
+    append_children({"Name"}, {"Cache State"}, tNode);
 }
 
 inline void append_optimization_update_problem_stage_option
 (pugi::xml_node& aParentNode)
 {
     auto tNode = aParentNode.append_child("UpdateProblemStage");
-    append_childs({"Name"}, {"Update Problem"}, tNode);
+    append_children({"Name"}, {"Update Problem"}, tNode);
 }
 
 inline void append_optimization_variables_option
@@ -739,7 +537,7 @@ inline void append_optimization_variables_option
         {"Control", "Initial Guess", "Topology", "Lower Bound Value", "Lower Bound Vector",
          "Upper Bound Value", "Upper Bound Vector", "Set Lower Bounds", "Set Upper Bounds"};
     auto tNode = aParentNode.append_child("OptimizationVariables");
-    XMLGen::append_childs(tKeys, tValues, tNode);
+    XMLGen::append_children(tKeys, tValues, tNode);
 }
 
 inline void append_optimization_objective_option
@@ -748,7 +546,7 @@ inline void append_optimization_objective_option
     std::vector<std::string> tKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName"};
     std::vector<std::string> tValues = {"Objective Value", "Calculate Objective Value", "Objective Gradient", "Calculate Objective Gradient"};
     auto tNode = aParentNode.append_child("Objective");
-    XMLGen::append_childs(tKeys, tValues, tNode);
+    XMLGen::append_children(tKeys, tValues, tNode);
 }
 
 inline void append_optimization_constraint_option
@@ -767,7 +565,7 @@ inline void append_optimization_constraint_option
         auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
         auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
         auto tNode = aParentNode.append_child("Constraint");
-        XMLGen::append_childs(tKeys, tValues, tNode);
+        XMLGen::append_children(tKeys, tValues, tNode);
     }
 }
 
@@ -776,7 +574,7 @@ inline void append_optimization_bound_constraints_option
 {
     std::vector<std::string> tKeys = {"Upper", "Lower"};
     auto tNode = aParentNode.append_child("BoundConstraint");
-    XMLGen::append_childs(tKeys, aValues, tNode);
+    XMLGen::append_children(tKeys, aValues, tNode);
 }
 
 inline void append_optimizer_options
@@ -805,7 +603,7 @@ inline void write_interface_xml_file_for_nondeterministic_usecase
     pugi::xml_document tDocument;
     XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
     auto tNode = tDocument.append_child("Console");
-    XMLGen::append_childs({"Verbose"}, {"true"}, tNode);
+    XMLGen::append_children({"Verbose"}, {"true"}, tNode);
 
     XMLGen::append_plato_main_performer(tDocument);
     XMLGen::append_physics_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
@@ -826,6 +624,7 @@ inline void test_children
  const std::vector<std::string>& aValues,
  pugi::xml_node& aParentNode)
 {
+    ASSERT_TRUE(aKeys.size() == aValues.size());
     auto tKeysItr = aKeys.begin();
     auto tValuesItr = aValues.begin();
     for(auto& tChild : aParentNode.children())
@@ -842,6 +641,7 @@ inline void test_attributes
  const std::vector<std::string>& aValues,
  pugi::xml_node& aParentNode)
 {
+    ASSERT_TRUE(aKeys.size() == aValues.size());
     auto tKeysItr = aKeys.begin();
     auto tValuesItr = aValues.begin();
     for(auto& tAttribute : aParentNode.attributes())
@@ -937,7 +737,7 @@ TEST(PlatoTestXMLGenerator, AppendChilds)
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
-    XMLGen::append_childs(tKeys, tValues, tSharedData);
+    XMLGen::append_children(tKeys, tValues, tSharedData);
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 }
 
@@ -1334,6 +1134,494 @@ TEST(PlatoTestXMLGenerator, AppendFilterControlOperation)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 }
 
+TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientSamplesOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_filter_criterion_gradient_samples_operation("Objective", tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOuterFor = tDocument.child("For");
+    std::vector<std::string> tGoldKeys = {"var", "in"};
+    std::vector<std::string> tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
+
+    auto tInnerFor = tOuterFor.child("Operation").child("For");
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
+
+    auto tOperation = tInnerFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
+    tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Filtered Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+
+    auto tInput = tOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    tInput = tOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_filter_criterion_gradient_operation("Objective", tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
+    std::vector<std::string> tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Filtered Gradient", "Objective Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+
+    auto tInput = tOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    tInput = tOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Gradient", "Objective Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitialGuessStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_initial_guess_stage(tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Initial Guess", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Output"};
+    tGoldValues = {"Initialize Field", "PlatoMain", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "Initialized Field"};
+    tGoldValues = {"SharedDataName", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+
+    tOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendNondeterministicOperation)
+{
+    pugi::xml_document tDocument;
+    std::vector<std::string> tKeys = {"Name", "PerformerName"};
+    auto tPerformerName = std::string("plato analyze") + " {PerformerIndex}";
+    std::vector<std::string> tValues = {"Cache State", tPerformerName};
+    XMLGen::append_initial_guess_stage(tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOuterFor = tDocument.child("For");
+    std::vector<std::string> tGoldKeys = {"var", "in"};
+    std::vector<std::string> tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
+
+    auto tInnerFor = tOuterFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
+
+    auto tOperation = tInnerFor.child("Operation");
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+}
+
+TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "For"};
+    std::vector<std::string> tGoldValues = {"Cache State : plato analyze 0", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterFor = tDocument.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
+
+    auto tInnerFor = tOuterFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
+
+    auto tOperation = tInnerFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName"};
+    tGoldValues = {"Cache State", "plato analyze {PerformerIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "For"};
+    std::vector<std::string> tGoldValues = {"Update Problem : plato analyze 0", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterFor = tDocument.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
+
+    auto tInnerFor = tOuterFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
+
+    auto tOperation = tInnerFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName"};
+    tGoldValues = {"Update Problem", "plato analyze {PerformerIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage_ErrorEmptyObjectiveList)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_update_problem_stage(tInputData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+    XMLGen::InputData tInputData;
+    tInputData.objectives.push_back(tObjective);
+
+    ASSERT_NO_THROW(XMLGen::append_update_problem_stage(tInputData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Operation"};
+    std::vector<std::string> tGoldValues = {"Update Problem : plato analyze 0", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName"};
+    tGoldValues = {"Update Problem", "plato analyze"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+}
+
+TEST(PlatoTestXMLGenerator, AppendLowerBoundStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
+    XMLGen::append_lower_bound_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Set Lower Bounds", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterInput = tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Lower Bound Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterInput);
+
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Calculate Lower Bounds", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+    auto tInnerInput = tOperation.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Lower Bound Vector", "Lower Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerInput);
+    auto tInnerOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Lower Bound Vector", "Lower Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerOutput);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Lower Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendLowerBoundStage_TypeNotEqualToplogy)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.optimization_type = "inverse";
+    XMLGen::append_lower_bound_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Output"};
+    std::vector<std::string> tGoldValues = {"Set Lower Bounds", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Lower Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpperBoundStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
+    XMLGen::append_upper_bound_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Set Upper Bounds", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterInput = tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Upper Bound Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterInput);
+
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Calculate Upper Bounds", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+    auto tInnerInput = tOperation.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Upper Bound Vector", "Upper Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerInput);
+    auto tInnerOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Upper Bound Vector", "Upper Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerOutput);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Upper Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpperBoundStage_TypeNotEqualToplogy)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.optimization_type = "inverse";
+    XMLGen::append_upper_bound_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Output"};
+    std::vector<std::string> tGoldValues = {"Set Upper Bounds", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Upper Bound Vector"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendDesignVolumeStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_design_volume_stage(tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Calculate Design Domain Volume", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Output"};
+    tGoldValues = {"Calculate Design Domain Volume", "PlatoMain", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tInnerOutput = tOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Reference Value", "Reference Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerOutput);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Reference Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "volume";
+    tConstraint.mPerformerName = "PlatoMain";
+    XMLGen::InputData tInputData;
+    tInputData.constraints.push_back(tConstraint);
+    XMLGen::append_constraint_value_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Calculate Constraint Value 0", "volume", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterInput = tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterInput);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Constraint Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+
+    auto tFilter = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilter);
+    auto tFilterInput = tFilter.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+    auto tFilterOutput = tFilter.child("Output");
+    tGoldValues = {"Filtered Field", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
+
+    auto tConstraintValue = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Calculate Constraint Value", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintValue);
+    auto tConstraintInput = tConstraintValue.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
+    auto tConstraintOutput = tConstraintValue.child("Output");
+    tGoldValues = {"Constraint Value", "Constraint Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "volume";
+    tConstraint.mPerformerName = "PlatoMain";
+    XMLGen::InputData tInputData;
+    tInputData.constraints.push_back(tConstraint);
+    XMLGen::append_constraint_gradient_stage(tInputData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "Operation", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Calculate Constraint Gradient 0", "volume", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOuterInput = tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterInput);
+
+    auto tOuterOutput = tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Constraint Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+
+    auto tFilter = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilter);
+    auto tFilterInput = tFilter.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+    auto tFilterOutput = tFilter.child("Output");
+    tGoldValues = {"Filtered Field", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
+
+    auto tConstraintGrad = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Calculate Constraint Gradient", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintGrad);
+    auto tConstraintInput = tConstraintGrad.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
+    auto tConstraintOutput = tConstraintGrad.child("Output");
+    tGoldValues = {"Constraint Gradient", "Constraint Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
+
+    tFilter = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Filter Gradient", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilter);
+    tFilterInput = tFilter.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+    tFilterInput = tFilter.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Gradient", "Constraint Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+    tFilterOutput = tFilter.child("Output");
+    tGoldValues = {"Filtered Gradient", "Constraint Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
+}
+
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
 {
     // POSE MATERIAL SET 1
@@ -1437,8 +1725,8 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     // DEFINE OBJECTIVE
     XMLGen::Objective tObjective;
     tObjective.type = "total work";
-    tObjective.code_name = "plato_analyze";
-    tObjective.performer_name = "plato_analyze";
+    tObjective.code_name = "analyze";
+    tObjective.performer_name = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;

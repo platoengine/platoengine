@@ -90,6 +90,7 @@ struct Constraint
 {
     std::string name;
     std::string type;
+    std::string mPerformerName = "PlatoMain";
     std::string mNormalizedTargetValue;
     std::string mAbsoluteTargetValue;
     std::string surface_area;

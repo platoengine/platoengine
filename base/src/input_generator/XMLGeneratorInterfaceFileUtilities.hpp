@@ -71,10 +71,139 @@ void append_plato_main_performer
 /******************************************************************************//**
  * \fn append_filter_control_operation
  * \brief Append filter control operation to PUGI XML document.
- * \param [in/out] aDocument pugi::xml_document
+ * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_filter_control_operation
 (pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_filter_criterion_gradient_operation
+ * \brief Append filter criterion gradient operation to PUGI XML document.
+ * \param [in]     aCriterionName criterion, e.g. objective, constraint, name
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_filter_criterion_gradient_operation
+(const std::string& aCriterionName,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_initial_guess_stage
+ * \brief Append initial field operation to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_initial_field_operation
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_initial_guess_stage
+ * \brief Append initial guess stage to PUGI XML document.
+ * \param [in/out] aDocument pugi::xml_document
+**********************************************************************************/
+void append_initial_guess_stage
+(pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_update_problem_stage
+ * \brief Append initial guess stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_document
+**********************************************************************************/
+void append_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_lower_bound_operation
+ * \brief Append lower bound operation to PUGI XML document.
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_lower_bound_operation
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_lower_bound_stage
+ * \brief Append lower bound stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_document
+**********************************************************************************/
+void append_lower_bound_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_upper_bound_operation
+ * \brief Append upper bound stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_upper_bound_operation
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_upper_bound_stage
+ * \brief Append upper bound stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_upper_bound_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_upper_bound_operation
+ * \brief Append upper bound operation to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_design_volume_operation
+(pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_design_volume_stage
+ * \brief Append design volume stage to PUGI XML document.
+ * \param [in/out] aDocument pugi::xml_document
+**********************************************************************************/
+void append_design_volume_stage
+(pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_constraint_value_operation
+ * \brief Append constraint value operation to PUGI XML document.
+ * \param [in]     aPerformerName operation performer's name
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_constraint_value_operation
+(const std::string& aPerformerName,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_constraint_value_stage
+ * \brief Append constraint value stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_constraint_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_constraint_gradient_operation
+ * \brief Append constraint gradient operation to PUGI XML document.
+ * \param [in]     aPerformerName operation performer's name
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_constraint_gradient_operation
+(const std::string& aPerformerName,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_constraint_gradient_stage
+ * \brief Append constraint gradient stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_constraint_gradient_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 }
 // namespace XMLGen

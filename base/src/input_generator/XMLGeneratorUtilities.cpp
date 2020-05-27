@@ -207,7 +207,7 @@ pugi::xml_node createMultiUserGlobalSharedData(pugi::xml_document &aDoc,
 }
 
 /******************************************************************************/
-void append_childs
+void append_children
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_node& aParentNode)
@@ -224,7 +224,7 @@ void append_childs
         }
     }
 }
-// function append_childs
+// function append_children
 /******************************************************************************/
 
 /******************************************************************************/

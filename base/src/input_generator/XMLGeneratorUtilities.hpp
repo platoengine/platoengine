@@ -111,13 +111,13 @@ namespace XMLGen
     size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor);
 
     /******************************************************************************//**
-     * \fn append_childs
-     * \brief Append childs to a PUGI XML node.
+     * \fn append_children
+     * \brief Append children to a PUGI XML node.
      * \param [in]     aKeys        keys to append
      * \param [in]     aValues      values to append
      * \param [in/out] aParentNode  PUGI XML node
     **********************************************************************************/
-    void append_childs
+    void append_children
     (const std::vector<std::string>& aKeys,
      const std::vector<std::string>& aValues,
      pugi::xml_node& aParentNode);
