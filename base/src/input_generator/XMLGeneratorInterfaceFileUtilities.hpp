@@ -205,5 +205,15 @@ void append_constraint_gradient_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_derivative_checker_options
+ * \brief Append derivative checker options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_derivative_checker_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
 }
 // namespace XMLGen

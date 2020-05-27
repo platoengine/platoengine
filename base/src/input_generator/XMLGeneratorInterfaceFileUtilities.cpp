@@ -362,5 +362,19 @@ void append_constraint_gradient_stage
 // function append_constraint_gradient_stage
 /******************************************************************************/
 
+/******************************************************************************/
+void append_derivative_checker_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"Package", "CheckGradient", "CheckHessian", "UseUserInitialGuess"};
+    std::vector<std::string> tValues = {"DerivativeChecker", aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
+    XMLGen::append_children(tKeys, tValues, aParentNode);
+    auto tNode = aParentNode.append_child("Options");
+    XMLGen::append_children({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
+}
+// function append_derivative_checker_options
+/******************************************************************************/
+
 }
 // namespace XMLGen

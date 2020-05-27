@@ -319,5 +319,132 @@ void append_evaluate_nondeterministic_criterion_value_operation
 // function append_evaluate_nondeterministic_criterion_value_operation
 /******************************************************************************/
 
+/******************************************************************************/
+void append_objective_value_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children({"Name"}, {"Calculate Objective Value"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+    XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
+    XMLGen::append_evaluate_nondeterministic_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
+
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children({"SharedDataName"}, {"Objective Value"}, tOutputNode);
+}
+// function append_objective_value_stage_for_nondeterministic_usecase
+/******************************************************************************/
+
+/******************************************************************************/
+void append_sample_objective_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tForNode = aParentNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
+        auto tOperationNode = tForNode.append_child("Operation");
+        tForNode = tOperationNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+        tOperationNode = tForNode.append_child("Operation");
+        auto tOperationName = std::string("Compute Objective Gradient");
+        auto tPerformerName = tObjective.performer_name + " {PerformerIndex}";
+        XMLGen::append_children( { "Name", "PerformerName" }, { tOperationName, tPerformerName }, tOperationNode);
+
+        auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+        XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
+        auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+        XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
+
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { "Topology", "Topology" }, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        auto tArgumentName = std::string("Objective Gradient");
+        auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+    }
+}
+// function append_sample_objective_gradient_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_evaluate_nondeterministic_criterion_gradient_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Gradient";
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+    tForNode = tForNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+
+    auto tInputNode = tForNode.append_child("Input");
+    auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+    tInputNode = tForNode.append_child("Input");
+    tDataName = aCriterionName + " Gradient " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
+
+    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tSharedDataName = aCriterionName + " Gradient";
+    auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
+    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
+}
+// function append_evaluate_nondeterministic_criterion_gradient_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children({"Name"}, {"Calculate Objective Gradient"}, tStageNode);
+    auto tInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+    XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
+    XMLGen::append_filter_criterion_gradient_samples_operation("Objective", tStageNode);
+    XMLGen::append_evaluate_nondeterministic_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
+
+    auto tOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tOutputNode);
+}
+// function append_objective_gradient_stage_for_nondeterministic_usecase
+/******************************************************************************/
+
+/******************************************************************************/
+void append_stages_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    // deterministic stages
+    XMLGen::append_design_volume_stage(aDocument);
+    XMLGen::append_initial_guess_stage(aDocument);
+    XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
+
+    // nondeterministic stages
+    XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+
+    // criteria stages
+    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
+    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
+    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+}
+// function append_stages_for_nondeterministic_usecase
+/******************************************************************************/
+
 }
 // namespace XMLGen

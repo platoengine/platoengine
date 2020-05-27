@@ -258,126 +258,17 @@ public:
 
 
 
-inline void append_objective_value_stage_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"}, {"Calculate Objective Value"}, tStageNode);
-    auto tInputNode = tStageNode.append_child("Input");
-    XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
-    XMLGen::append_filter_control_operation(tStageNode);
-    XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
-    XMLGen::append_evaluate_nondeterministic_criterion_value_operation("Objective", aXMLMetaData, tStageNode);
 
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children({"SharedDataName"}, {"Objective Value"}, tOutputNode);
-}
 
-inline void append_sample_criterion_gradient_operation
-(const std::string& aCriterionName,
- const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    auto tForNode = aParentNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
-    auto tOperationNode = tForNode.append_child("Operation");
-    tForNode = tOperationNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    tOperationNode = tForNode.append_child("Operation");
-    auto tOperationName = std::string("Compute ") + aCriterionName + " Gradient";
-    auto tPerformerName = aXMLMetaData.objectives[0].performer_name + " {PerformerIndex}";
-    XMLGen::append_children({"PerformerName", "Name"}, {tPerformerName, tOperationName}, tOperationNode);
 
-    auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
-    XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
-    auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
-    XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
 
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    auto tArgumentName = aCriterionName + " Gradient";
-    auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
-}
 
-inline void append_evaluate_nondeterministic_criterion_gradient_operation
-(const std::string& aCriterionName,
- const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    auto tOperationNode = aParentNode.append_child("Operation");
-    auto tOperationName = std::string("Calculate Non-Deterministic ") + aCriterionName + " Gradient";
-    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
-    auto tForNode = tOperationNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    tForNode = tForNode.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
 
-    auto tInputNode = tForNode.append_child("Input");
-    auto tDataName = aCriterionName + " Value " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
-    tInputNode = tForNode.append_child("Input");
-    tDataName = aCriterionName + " Gradient " + "{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
-    auto tOutputNode = tOperationNode.append_child("Output");
-    auto tSharedDataName = aCriterionName + " Gradient";
-    auto tArgumentName = aCriterionName + " Mean Plus " + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
-    XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
-}
 
-inline void append_objective_gradient_stage_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"}, {"Calculate Objective Gradient"}, tStageNode);
-    auto tInputNode = tStageNode.append_child("Input");
-    XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageNode);
 
-    XMLGen::append_filter_control_operation(tStageNode);
-    XMLGen::append_sample_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
-    XMLGen::append_filter_criterion_gradient_samples_operation("Objective", tStageNode);
-    XMLGen::append_evaluate_nondeterministic_criterion_gradient_operation("Objective", aXMLMetaData, tStageNode);
 
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tOutputNode);
-}
-
-inline void append_stages_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // deterministic stages
-    XMLGen::append_design_volume_stage(aDocument);
-    XMLGen::append_initial_guess_stage(aDocument);
-    XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
-    XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
-
-    // nondeterministic stages
-    XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-
-    // criteria stages
-    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
-    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
-    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-}
-
-inline void append_derivative_checker_options
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    std::vector<std::string> tKeys = {"Package", "CheckGradient", "CheckHessian", "UseUserInitialGuess"};
-    std::vector<std::string> tValues = {"DerivativeChecker", aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
-    XMLGen::append_children(tKeys, tValues, aParentNode);
-    auto tNode = aParentNode.append_child("Options");
-    XMLGen::append_children({"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"}, {"1", "8"}, aParentNode);
-}
 
 inline void append_optimization_algorithm_oc_options
 (const XMLGen::InputData& aXMLMetaData,
@@ -552,6 +443,29 @@ inline void write_interface_xml_file_for_nondeterministic_usecase
 }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace PlatoTestXMLGenerator
 {
@@ -1731,7 +1645,6 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
 
 TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperation)
 {
-
     // CALL FUNCTION
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.objective_number_standard_deviations = "1";
@@ -1758,7 +1671,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperatio
     tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
 
-    auto tInput = tOperation.child("Input");
+    auto tInput = tFor.child("Input");
     tGoldKeys = { "ArgumentName", "SharedDataName" };
     tGoldValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
@@ -1766,9 +1679,608 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperatio
 
     auto tOutput = tOperation.child("Output");
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Value",
-        "Objective Mean Plus 1 StdDev"};
+    tGoldValues = {"Objective Value", "Objective Mean Plus 1 StdDev"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
+{
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // POSE OBJECTIVE
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+
+    // DEFINE XML GENERATOR INPUT DATA
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.mRandomMetaData = tRandomMetaData;
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Calculate Objective Value", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tStageInput= tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageInput);
+
+    auto tStageOutput= tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Objective Value"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
+
+    // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
+    auto tFilterOperation = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOperation);
+
+    auto tFilterInput = tFilterOperation.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+
+    auto tFilterOutput = tFilterOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Filtered Field", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
+
+    // ****** 3) TEST RESULTS AGAINST EVALUATE RANDOM OBJECTIVE OPERATION GOLD VALUES ******
+    auto tRandomObjectiveOperation = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "For", "Output"};
+    tGoldValues = {"Calculate Non-Deterministic Objective Value", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tRandomObjectiveOperation);
+
+    auto tFor = tRandomObjectiveOperation.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tFor = tFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tRandomObjectiveInput = tRandomObjectiveOperation.child("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tRandomObjectiveInput);
+
+    auto tRandomObjectiveOutput = tRandomObjectiveOperation.child("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Value", "Objective Mean Plus 1 StdDev"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tRandomObjectiveOutput);
+
+    // ****** 4) TEST RESULTS AGAINST SAMPLE OBJECTIVE GOLD VALUES ******
+    tFor = tStage.next_sibling("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tOperation = tFor.child("Operation");
+    tFor = tOperation.child("For");
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tOperation = tFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
+        "Parameter", "Parameter", "Parameter", "Input", "Output"};
+    tGoldValues = {"Compute Objective Value", "plato analyze {PerformerIndex}",
+        "", "", "", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    // ****** 4.1) TEST PARAMETERS AGAINST GOLD VALUES ******
+    auto tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-0 x-axis",
+                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 y-axis",
+                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 z-axis",
+                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-1 x-axis",
+                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 y-axis",
+                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 z-axis",
+                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    // ****** 4.2) TEST SAMPLE OBJECTIVE OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******
+    tSibling = tOperation.next_sibling("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Topology", "Topology" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Objective Value", "Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+}
+
+TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
+{
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // POSE OBJECTIVE
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+
+    // DEFINE XML GENERATOR INPUT DATA
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.mRandomMetaData = tRandomMetaData;
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    auto tStage = tDocument.append_child("Stage");
+    XMLGen::append_sample_objective_gradient_operation(tXMLMetaData, tStage);
+    ASSERT_FALSE(tStage.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"For"};
+    std::vector<std::string> tGoldValues = {""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+    auto tFor = tStage.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tFor = tFor.child("Operation").child("For");
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tOperation = tFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
+        "Parameter", "Parameter", "Parameter", "Input", "Output"};
+    tGoldValues = {"Compute Objective Gradient", "plato analyze {PerformerIndex}",
+        "", "", "", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    // TEST PARAMETERS AGAINST GOLD VALUES
+    auto tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-0 x-axis",
+                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 y-axis",
+                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 z-axis",
+                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-1 x-axis",
+                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 y-axis",
+                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 z-axis",
+                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    // TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES
+    tSibling = tOperation.next_sibling("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Topology", "Topology" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Objective Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOperation)
+{
+    // CALL FUNCTION
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objective_number_standard_deviations = "1";
+    pugi::xml_document tDocument;
+    auto tStage = tDocument.append_child("Stage");
+    XMLGen::append_evaluate_nondeterministic_criterion_gradient_operation("Objective", tXMLMetaData, tStage);
+    ASSERT_FALSE(tStage.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    std::vector<std::string> tGoldKeys = {"Operation"};
+    std::vector<std::string> tGoldValues = {""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+    auto tOperation = tStage.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "For", "Output"};
+    tGoldValues = {"Calculate Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tFor = tOperation.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tFor = tFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tInput = tFor.next_sibling("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInput);
+    tInput = tFor.next_sibling("Input");
+    tGoldValues = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Gradient", "Objective Mean Plus 1 StdDev Gradient"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUsecase)
+{
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // POSE OBJECTIVE
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato analyze";
+
+    // DEFINE XML GENERATOR INPUT DATA
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.mRandomMetaData = tRandomMetaData;
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
+    auto tStage = tDocument.child("Stage");
+    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "For", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Calculate Objective Gradient", "", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tStageInput= tStage.child("Input");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageInput);
+
+    auto tStageOutput= tStage.child("Output");
+    tGoldKeys = {"SharedDataName"};
+    tGoldValues = {"Objective Gradient"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
+
+    // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
+    auto tFilterOperation = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOperation);
+
+    auto tFilterInput = tFilterOperation.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
+
+    auto tFilterOutput = tFilterOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Filtered Field", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
+
+    // ****** 3) TEST RESULTS AGAINST EVALUATE RANDOM OBJECTIVE GRADIENT OPERATION GOLD VALUES ******
+    auto tRandomObjGradOperation = tStage.next_sibling("Operation");
+    tGoldKeys = {"Name", "PerformerName", "For", "Output"};
+    tGoldValues = {"Calculate Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tRandomObjGradOperation);
+
+    auto tFor = tRandomObjGradOperation.child("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tFor = tFor.child("For");
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tRandomObjectiveInput = tRandomObjGradOperation.child("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tRandomObjectiveInput);
+
+    auto tRandomObjectiveOutput = tRandomObjGradOperation.child("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = {"Objective Gradient", "Objective Mean Plus 1 StdDev Gradient"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tRandomObjectiveOutput);
+
+    // ****** 4) TEST RESULTS AGAINST SAMPLE OBJECTIVE GRADIENT GOLD VALUES ******
+    tFor = tStage.next_sibling("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    tFor = tFor.child("Operation").child("For");
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
+
+    auto tOperation = tFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
+        "Parameter", "Parameter", "Parameter", "Input", "Output"};
+    tGoldValues = {"Compute Objective Gradient", "plato analyze {PerformerIndex}",
+        "", "", "", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    // ****** 4.1) TEST PARAMETERS AGAINST GOLD VALUES ******
+    auto tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-0 x-axis",
+                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 y-axis",
+                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-0 z-axis",
+                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-1 x-axis",
+                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 y-axis",
+                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Parameter");
+    tGoldValues = {"traction load-id-1 z-axis",
+                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    // ****** 4.2) TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******
+    tSibling = tOperation.next_sibling("Input");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Topology", "Topology" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    tSibling = tOperation.next_sibling("Output");
+    tGoldKeys = { "ArgumentName", "SharedDataName" };
+    tGoldValues = { "Objective Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex" };
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSibling);
+
+    // ****** 5) TEST RESULTS AGAINST FILTER GRADIENT OPERATION GOLD VALUES ******
+    auto tOuterFor = tStage.next_sibling("For");
+    tGoldKeys = {"var", "in"};
+    tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
+
+    auto tInnerFor = tOuterFor.child("Operation").child("For");
+    tGoldValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
+
+    auto tFilterGradOperation = tInnerFor.child("Operation");
+    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
+    tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterGradOperation);
+
+    auto tFilterGradOutput = tFilterGradOperation.child("Output");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Filtered Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterGradOutput);
+
+    auto tFilterGradInput = tFilterGradOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Field", "Control"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterGradInput);
+
+    tFilterGradInput = tFilterGradOperation.next_sibling("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterGradInput);
 }
 
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)

@@ -153,5 +153,57 @@ void append_evaluate_nondeterministic_criterion_value_operation
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
+/******************************************************************************//**
+ * \fn append_objective_value_stage_for_nondeterministic_usecase
+ * \brief Append nondeterministic objective value stage to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_objective_value_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_sample_objective_gradient_operation
+ * \brief Append sample criterion gradient operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_sample_objective_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_evaluate_nondeterministic_criterion_gradient_operation
+ * \brief Append evaluate nondeterministic criterion gradient operation to PUGI XML document.
+ * \param [in]     aCriterionName criterion name, e.g. objective, constraint
+ * \param [in]     aXMLMetaData   Plato problem input data
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_evaluate_nondeterministic_criterion_gradient_operation
+(const std::string& aCriterionName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_objective_gradient_stage_for_nondeterministic_usecase
+ * \brief Append objective gradient stage to PUGI XML document.
+ * \param [in]     aXMLMetaData   Plato problem input data
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+void append_objective_gradient_stage_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_stages_for_nondeterministic_usecase
+ * \brief Append stages for a nondeterministic use case to the PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_stages_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen
