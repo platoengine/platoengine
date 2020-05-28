@@ -69,12 +69,5 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::publicGenerateP
     return generatePlatoAnalyzeInputDecks(aStringStream);
 }
 
-/******************************************************************************/
-bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester::publicGenerateInterfaceXML(std::ostringstream *aStringStream)
-/******************************************************************************/
-{
-    return generateInterfaceXML(aStringStream);
-}
-
 
 

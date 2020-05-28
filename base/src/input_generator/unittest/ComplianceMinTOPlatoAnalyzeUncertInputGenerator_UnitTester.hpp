@@ -66,7 +66,6 @@ public:
     ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester(const XMLGen::InputData &aInputData);
     ~ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester();
     bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
-    bool publicGenerateInterfaceXML(std::ostringstream *aStringStream = NULL);
 
 
 protected:

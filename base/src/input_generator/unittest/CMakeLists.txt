@@ -3,6 +3,9 @@
 ###############################################################################
 SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGenerator_UnitTester.cpp
+                                      XMLGeneratorDefineFile_UnitTester.cpp
+                                      XMLGeneratorInterfaceFile_UnitTester.cpp
+                                      XMLGeneratorPlatoMainOperationFile_UnitTester.cpp
                                       DefaultInputGenerator_UnitTester.cpp
                                       ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.cpp
                                       ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.cpp
@@ -18,7 +21,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../PlatoAnalyzeInputDeckWriter.cpp
                                       ../SalinasInputDeckWriter.cpp)
 
-SET(PlatoXMLGenerator_UnitTester_HDRS XMLGenerator_UnitTester.hpp)
+SET(PlatoXMLGenerator_UnitTester_HDRS XMLGenerator_UnitTester.hpp
+                                      XMLGenerator_UnitTester_Tools.hpp)
 
 if(CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -Wno-unused-variable -Wno-write-strings")

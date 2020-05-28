@@ -134,22 +134,24 @@ void append_nondeterministic_parameters
 /******************************************************************************//**
  * \fn append_sample_objective_value_operation
  * \brief Append sample objective value operation to PUGI XML document.
+ * \param [in]     aPerformerName operation's performer name
  * \param [in]     aXMLMetaData   Plato problem input data
  * \param [in/out] aParentNode    pugi::xml_node
 **********************************************************************************/
 void append_sample_objective_value_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const std::string& aPerformerName,
+ const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_evaluate_nondeterministic_criterion_value_operation
- * \brief Append evaluate nondeterministic criterion value operation to PUGI XML document.
- * \param [in]     aCriterionName criterion name, e.g. objective, constraint
- * \param [in]     aXMLMetaData   Plato problem input data
- * \param [in/out] aParentNode    pugi::xml_node
+ * \fn append_evaluate_nondeterministic_objective_value_operation
+ * \brief Append evaluate nondeterministic objective value operation to PUGI XML document.
+ * \param [in]     aOutputSharedDataName output objective value shared data name
+ * \param [in]     aXMLMetaData          Plato problem input data
+ * \param [in/out] aParentNode           pugi::xml_node
 **********************************************************************************/
-void append_evaluate_nondeterministic_criterion_value_operation
-(const std::string& aCriterionName,
+void append_evaluate_nondeterministic_objective_value_operation
+(const std::string& aOutputSharedDataName,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -174,14 +176,14 @@ void append_sample_objective_gradient_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_evaluate_nondeterministic_criterion_gradient_operation
- * \brief Append evaluate nondeterministic criterion gradient operation to PUGI XML document.
- * \param [in]     aCriterionName criterion name, e.g. objective, constraint
- * \param [in]     aXMLMetaData   Plato problem input data
- * \param [in/out] aParentNode    pugi::xml_node
+ * \fn append_evaluate_nondeterministic_objective_gradient_operation
+ * \brief Append evaluate nondeterministic objective gradient operation to PUGI XML document.
+ * \param [in]     aOutputSharedDataName output objective gradient shared data name
+ * \param [in]     aXMLMetaData          Plato problem input data
+ * \param [in/out] aParentNode           pugi::xml_node
 **********************************************************************************/
-void append_evaluate_nondeterministic_criterion_gradient_operation
-(const std::string& aCriterionName,
+void append_evaluate_nondeterministic_objective_gradient_operation
+(const std::string& aOutputSharedDataName,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 

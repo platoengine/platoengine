@@ -73,7 +73,6 @@ public:
 
 protected:
 
-    virtual bool generateInterfaceXML(std::ostringstream *aStringStream = NULL);
     virtual bool generateLaunchScript();
     virtual bool generatePlatoMainOperationsXML();
     virtual bool generatePlatoMainInputDeckXML();

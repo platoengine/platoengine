@@ -39,16 +39,26 @@ void append_design_volume_shared_data
 (pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_criterion_shared_data
- * \brief Append criterion value and gradient shared data to PUGI XML document.
- * \param [in]     aCriterion   criterion name
+ * \fn append_objective_shared_data
+ * \brief Append objective value and gradient shared data to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
  * \param [in]     aOwnerName   name of the application that owns the data (default = "")
 **********************************************************************************/
-void append_criterion_shared_data
-(const std::string& aCriterion,
- const XMLGen::InputData& aXMLMetaData,
+void append_objective_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument,
+ std::string aOwnerName = "");
+
+/******************************************************************************//**
+ * \fn append_constraint_shared_data
+ * \brief Append constraint value and gradient shared data to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+ * \param [in]     aOwnerName   name of the application that owns the data (default = "")
+**********************************************************************************/
+void append_constraint_shared_data
+(const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument,
  std::string aOwnerName = "");
 
@@ -79,11 +89,11 @@ void append_filter_control_operation
 /******************************************************************************//**
  * \fn append_filter_criterion_gradient_operation
  * \brief Append filter criterion gradient operation to PUGI XML document.
- * \param [in]     aCriterionName criterion, e.g. objective, constraint, name
- * \param [in/out] aParentNode    pugi::xml_node
+ * \param [in]     aSharedDataName criterion gradient shared data name
+ * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_filter_criterion_gradient_operation
-(const std::string& aCriterionName,
+(const std::string& aSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -168,11 +178,13 @@ void append_design_volume_stage
 /******************************************************************************//**
  * \fn append_constraint_value_operation
  * \brief Append constraint value operation to PUGI XML document.
- * \param [in]     aPerformerName operation performer's name
- * \param [in/out] aParentNode    pugi::xml_node
+ * \param [in]     aPerformerName  operation performer's name
+ * \param [in]     aSharedDataName constraint value shared data name
+ * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_constraint_value_operation
 (const std::string& aPerformerName,
+ const std::string& aSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -188,11 +200,13 @@ void append_constraint_value_stage
 /******************************************************************************//**
  * \fn append_constraint_gradient_operation
  * \brief Append constraint gradient operation to PUGI XML document.
- * \param [in]     aPerformerName operation performer's name
- * \param [in/out] aParentNode    pugi::xml_node
+ * \param [in]     aPerformerName  operation performer's name
+ * \param [in]     aSharedDataName constraint gradient shared data name
+ * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_constraint_gradient_operation
 (const std::string& aPerformerName,
+ const std::string& aSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -290,10 +304,12 @@ void append_optimization_variables_options
 /******************************************************************************//**
  * \fn append_optimization_objective_options
  * \brief Append optimization objective options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_optimization_objective_options
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_optimization_constraint_options

@@ -3203,6 +3203,7 @@ void DefaultInputGenerator::addFilterInfo(pugi::xml_document &aDoc)
         // kernel is default
         addChild(tmp_node, "Name", m_InputData.m_filterType_kernel_XMLName);
     }
+
     if(m_InputData.filter_radius_scale != "")
     {
         addChild(tmp_node, "Scale", m_InputData.filter_radius_scale);
