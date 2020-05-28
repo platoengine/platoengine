@@ -17,6 +17,13 @@
 namespace XMLGen
 {
 
+struct Output
+{
+    // vector<pair<qoi_shared_data_name, qoi_layout>>, e.g. qoi_layout: element, nodal, etc.
+    std::vector<std::pair<std::string, std::string>> mRandomQuantitiesOfInterest;
+    std::vector<std::pair<std::string, std::string>> mDeterministicQuantitiesOfInterest;
+};
+
 struct Objective
 {
     std::string name;
@@ -269,6 +276,7 @@ struct InputData
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
 
+    XMLGen::Output mOutputMetaData;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;
