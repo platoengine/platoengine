@@ -230,6 +230,28 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox_DoNotDefine)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::append_levelset_material_box(tXMLMetaData, tDocument);
+    auto tMaterialBox = tDocument.child("MaterialBox");
+    ASSERT_TRUE(tMaterialBox.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.levelset_material_box_max = "10";
+    tXMLMetaData.levelset_material_box_min = "-10";
+    XMLGen::append_levelset_material_box(tXMLMetaData, tDocument);
+
+    auto tMaterialBox = tDocument.child("MaterialBox");
+    ASSERT_FALSE(tMaterialBox.empty());
+    PlatoTestXMLGenerator::test_children({"MinCoords", "MaxCoords"}, {"-10", "10"}, tMaterialBox);
+}
+
 TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFileName)
 {
     pugi::xml_document tDocument;
@@ -251,7 +273,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation1)
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "dummy.exo";
     tXMLMetaData.initial_guess_field_name = "Control";
-    XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     auto tOperation = tDocument.child("Operation");
@@ -273,7 +295,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation2)
     tXMLMetaData.run_mesh_name = "dummy.exo";
     tXMLMetaData.restart_iteration = "100";
     tXMLMetaData.initial_guess_field_name = "Control";
-    XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     auto tOperation = tDocument.child("Operation");
