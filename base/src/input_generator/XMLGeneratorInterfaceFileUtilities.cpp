@@ -177,7 +177,7 @@ void append_initial_field_operation
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"},{"Initialize Field", "PlatoMain"}, tOperationNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "Initialized Field"},{"SharedDataName", "Control"}, tOutputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Initialized Field", "Control"}, tOutputNode);
 }
 // function append_initial_field_operation
 /******************************************************************************/

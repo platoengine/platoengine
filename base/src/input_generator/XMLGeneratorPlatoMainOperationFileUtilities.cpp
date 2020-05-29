@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
 namespace XMLGen
@@ -31,23 +32,18 @@ void append_filter_options_to_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_filter_to_plato_main_operation
+void append_filter_options_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    // light input file key to lato main operation XML file key map,
-    // i.e. map<light_input_file_key,plato_main_operation_file_key>
-    std::unordered_map<std::string, std::string> tValidFilters =
-    { {"identity", "Identity"}, {"kernel", "Kernel"}, {"kernel then heaviside", "KernelThenHeaviside"},
-      {"kernel then tanh", "KernelThenTANH"} };
-
-    auto tItr = tValidFilters.find(aXMLMetaData.filter_type);
-    auto tFilterName = tItr != tValidFilters.end() ? tItr->second : "Kernel";
+    XMLGen::ValidFilterKeys tValidKeys;
+    auto tItr = tValidKeys.mKeys.find(aXMLMetaData.filter_type);
+    auto tFilterName = tItr != tValidKeys.mKeys.end() ? tItr->second : "Kernel";
     auto tFilterNode = aDocument.append_child("Filter");
     XMLGen::append_children({"Name"}, {tFilterName}, tFilterNode);
     XMLGen::append_filter_options_to_operation(aXMLMetaData, tFilterNode);
 }
-// function append_filter_to_plato_main_operation
+// function append_filter_options_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -87,16 +83,14 @@ void append_deterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::unordered_map<std::string, std::string> tValidOutputLayouts =
-        { {"element field", "Element Field"}, {"nodal field", "Nodal Field"} };
-
+    XMLGen::ValidLayoutKeys tValidKeys;
     for(auto& tPair : aXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest)
     {
-        auto tValidLayoutItr = tValidOutputLayouts.find(tPair.second);
-        if(tValidLayoutItr == tValidOutputLayouts.end())
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+        if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Deterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' has unsupported layout '" + tPair.second + "'.")
+                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
         }
         auto tInput= aParentNode.append_child("Input");
         XMLGen::append_children( { "ArgumentName", "Layout" }, { tPair.first, tValidLayoutItr->second }, tInput);
@@ -110,18 +104,16 @@ void append_nondeterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::unordered_map<std::string, std::string> tValidOutputLayouts =
-        { {"element field", "Element Field"}, {"nodal field", "Nodal Field"} };
-
+    XMLGen::ValidLayoutKeys tValidKeys;
     for(auto& tPair : aXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest)
     {
         auto tFor = aParentNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
-        auto tValidLayoutItr = tValidOutputLayouts.find(tPair.second);
-        if(tValidLayoutItr == tValidOutputLayouts.end())
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+        if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Nondeterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' has unsupported layout '" + tPair.second + "'.")
+                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
         }
         auto tInput= tFor.append_child("Input");
         auto tSharedDataName = tPair.first + " {SampleIndex}";
@@ -137,7 +129,7 @@ void append_children_to_output_operation
  pugi::xml_node &aParentNode)
 {
     std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations"};
-    std::vector<std::string> tValues = {"PlatoMainOutput", "Plato Main Output", aXMLMetaData.write_restart_file,
+    std::vector<std::string> tValues = {"PlatoMainOutput", "PlatoMainOutput", aXMLMetaData.write_restart_file,
         aXMLMetaData.output_frequency, aXMLMetaData.max_iterations};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
@@ -203,7 +195,7 @@ void append_stochastic_objective_value_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
-    std::vector<std::string> tValues = {"MeanPlusStdDev", "Stochastic Objective Value", "Scalar"};
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "Calculate Non-Deterministic Objective Value", "Scalar"};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tOuterFor = tOperation.append_child("For");
@@ -217,9 +209,9 @@ void append_stochastic_objective_value_to_plato_main_operation
     XMLGen::append_children(tKeys, tValues, tInnerForInput);
 
     auto tOuterOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "Objective Mean"}, tOuterOutput);
     tOuterOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "Objective StdDev"}, tOuterOutput);
     tOuterOutput = tOperation.append_child("Output");
     auto tStatistics = std::string("mean_plus_") + aXMLMetaData.objective_number_standard_deviations + "_std_dev";
     auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.objective_number_standard_deviations + " StdDev";
@@ -273,9 +265,9 @@ void append_stochastic_criterion_value_operation
     XMLGen::append_children(tKeys, tValues, tInnerForInput);
 
     auto tOuterOutput = tCriterionValue.append_child("Output");
-    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "Objective Mean"}, tOuterOutput);
     tOuterOutput = tCriterionValue.append_child("Output");
-    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "Objective StdDev"}, tOuterOutput);
 }
 // function append_stochastic_criterion_value_operation
 /******************************************************************************/
@@ -287,12 +279,53 @@ void append_stochastic_objective_gradient_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
-    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Stochastic Objective Gradient", "Nodal Field"};
+    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Calculate Non-Deterministic Objective Gradient", "Nodal Field"};
     XMLGen::append_children(tKeys, tValues, tOperation);
     XMLGen::append_stochastic_criterion_value_operation(tOperation);
     XMLGen::append_stochastic_criterion_gradient_operation(aXMLMetaData, tOperation);
 }
 // function append_stochastic_objective_gradient_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_nondeterministic_qoi_statistics_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument)
+{
+    XMLGen::ValidLayoutKeys tValidKeys;
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest)
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+        if(tValidLayoutItr == tValidKeys.mKeys.end())
+        {
+            THROWERR(std::string("Append Nondeterministic QOI to Statistics Operation: ")
+                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
+        }
+        auto tName = tPair.first + " Statistics";
+        std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
+        std::vector<std::string> tValues = { "MeanPlusStdDev", tName, tValidLayoutItr->second };
+        XMLGen::append_children(tKeys, tValues, tOperation);
+
+        auto tOuterFor = tOperation.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+        auto tInnerFor = tOuterFor.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+        auto tInput = tInnerFor.append_child("Input");
+        tKeys = {"ArgumentName", "Probability"};
+        tValues = {tPair.first + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+            "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+        XMLGen::append_children(tKeys, tValues, tInput);
+
+        auto tOutput = tOperation.append_child("Output");
+        auto tArgumentName = tPair.first + " Mean";
+        XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", tArgumentName}, tOutput);
+        tOutput = tOperation.append_child("Output");
+        tArgumentName = tPair.first + " StdDev";
+        XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
+    }
+}
+// function append_nondeterministic_qoi_statistics_to_plato_main_operation
 /******************************************************************************/
 
 }

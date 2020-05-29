@@ -24,12 +24,12 @@ void append_filter_options_to_operation
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
- * \fn append_filter_to_plato_main_operation
+ * \fn append_filter_options_to_plato_main_operation
  * \brief Append filter operation to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_filter_to_plato_main_operation
+void append_filter_options_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument);
 
@@ -148,6 +148,17 @@ void append_stochastic_criterion_value_operation
  * \param [in/out] aParentNode  pugi::xml_document
 **********************************************************************************/
 void append_stochastic_objective_gradient_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument);
+
+/******************************************************************************//**
+ * \fn append_nondeterministic_qoi_statistics_to_plato_main_operation
+ * \brief Append nondeterministic Quantities of Interest (QoI) plato main outputs \n
+ * to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_nondeterministic_qoi_statistics_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument);
 

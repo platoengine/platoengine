@@ -613,8 +613,8 @@ TEST(PlatoTestXMLGenerator, AppendInitialGuessStage)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tOutput = tOperation.child("Output");
-    tGoldKeys = {"ArgumentName", "Initialized Field"};
-    tGoldValues = {"SharedDataName", "Control"};
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Initialized Field", "Control"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 
     tOutput = tStage.child("Output");
@@ -629,7 +629,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicOperation)
     std::vector<std::string> tKeys = {"Name", "PerformerName"};
     auto tPerformerName = std::string("plato analyze") + " {PerformerIndex}";
     std::vector<std::string> tValues = {"Cache State", tPerformerName};
-    XMLGen::append_initial_guess_stage(tDocument);
+    XMLGen::append_nondeterministic_operation(tKeys, tValues, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -2437,8 +2437,8 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
     +"<UserName>PlatoMain</UserName></SharedData></For></For><Stage><Name>CalculateDesignDomainVolume</Name><Operation><Name>CalculateDesignDomainVolume</Name><PerformerName>PlatoMain</PerformerName>"
     +"<Output><ArgumentName>ReferenceValue</ArgumentName><SharedDataName>ReferenceValue</SharedDataName></Output></Operation><Output><SharedDataName>ReferenceValue</SharedDataName></Output>"
-    +"</Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>PlatoMain</PerformerName><Output><ArgumentName>SharedDataName</ArgumentName>"
-    +"<InitializedField>Control</InitializedField></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Input><SharedDataName>"
+    +"</Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>PlatoMain</PerformerName><Output><ArgumentName>InitializedField</ArgumentName>"
+    +"<SharedDataName>Control</SharedDataName></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Input><SharedDataName>"
     +"LowerBoundValue</SharedDataName></Input><Operation><Name>CalculateLowerBounds</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>LowerBoundVector</ArgumentName>"
     +"<SharedDataName>LowerBoundVector</SharedDataName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName><SharedDataName>LowerBoundVector</SharedDataName></Output></Operation>"
     +"<Output><SharedDataName>LowerBoundVector</SharedDataName></Output></Stage><Stage><Name>SetUpperBounds</Name><Input><SharedDataName>UpperBoundValue</SharedDataName></Input><Operation>"
@@ -2507,7 +2507,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     +"<Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-    std::system("rm -f interface.xml");
+    //std::system("rm -f interface.xml");
 }
 
 }
