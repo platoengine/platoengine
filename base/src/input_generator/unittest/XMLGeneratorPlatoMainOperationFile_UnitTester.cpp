@@ -111,6 +111,13 @@ void append_initialize_levelset_primitives_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.run_mesh_name.empty())
+    {
+        THROWERR(std::string("Append Initialize Levelset Primitives Operation: ")
+            + "Levelset field was supposed to be initialized by reading it from a user-specified file. "
+            + "However, the 'background mesh' keyword is empty.")
+    }
+
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Method"};
     std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet"};
@@ -229,6 +236,13 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation_ErrorEmptyFileName)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument), std::runtime_error);
+}
 
 TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox_DoNotDefine)
 {
