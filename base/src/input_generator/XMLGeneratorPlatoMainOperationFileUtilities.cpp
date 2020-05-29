@@ -196,5 +196,104 @@ void append_output_to_plato_main_operation
 // function append_output_to_plato_main_operation
 /******************************************************************************/
 
+/******************************************************************************/
+void append_stochastic_objective_value_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "Stochastic Objective Value", "Scalar"};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+
+    auto tOuterFor = tOperation.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    tKeys = {"ArgumentName", "Probability"};
+    tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    XMLGen::append_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    tOuterOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+    tOuterOutput = tOperation.append_child("Output");
+    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.objective_number_standard_deviations + "_std_dev";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.objective_number_standard_deviations + " StdDev";
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {tStatistics, tArgumentName}, tOuterOutput);
+}
+// function append_stochastic_objective_value_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_stochastic_criterion_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tCriterionGradient = aParentNode.append_child("CriterionGradient");
+    XMLGen::append_children({"Layout"}, {"Nodal Field"}, tCriterionGradient);
+
+    auto tOuterFor = tCriterionGradient.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    std::vector<std::string> tKeys = {"ArgumentName", "Probability"};
+    std::vector<std::string> tValues = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    XMLGen::append_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tCriterionGradient.append_child("Output");
+    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.objective_number_standard_deviations + "_std_dev";
+    auto tArgumentName = std::string("Objective Mean Plus ")
+        + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {tStatistics, tArgumentName}, tOuterOutput);
+}
+// function append_stochastic_criterion_gradient_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_stochastic_criterion_value_operation
+(pugi::xml_node& aParentNode)
+{
+    auto tCriterionValue = aParentNode.append_child("CriterionValue");
+    XMLGen::append_children({"Layout"}, {"Global"}, tCriterionValue);
+
+    auto tOuterFor = tCriterionValue.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    std::vector<std::string> tKeys = {"ArgumentName", "Probability"};
+    std::vector<std::string> tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    XMLGen::append_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tCriterionValue.append_child("Output");
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    tOuterOutput = tCriterionValue.append_child("Output");
+    XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+}
+// function append_stochastic_criterion_value_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_stochastic_objective_gradient_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
+    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Stochastic Objective Gradient", "Nodal Field"};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+    XMLGen::append_stochastic_criterion_value_operation(tOperation);
+    XMLGen::append_stochastic_criterion_gradient_operation(aXMLMetaData, tOperation);
+}
+// function append_stochastic_objective_gradient_to_plato_main_operation
+/******************************************************************************/
+
 }
 // namespace XMLGen

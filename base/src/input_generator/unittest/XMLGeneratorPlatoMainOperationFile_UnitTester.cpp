@@ -18,10 +18,11 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData)
 {
     pugi::xml_document tDocument;
-
-    XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
+    auto tInclude = tDocument.append_child("include");
+    XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
     XMLGen::append_filter_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
 
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
@@ -30,6 +31,187 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendStochasticCriterionValueOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::append_stochastic_criterion_value_operation(tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tCriterionValue = tDocument.child("CriterionValue");
+    ASSERT_FALSE(tCriterionValue.empty());
+    ASSERT_STREQ("CriterionValue", tCriterionValue.name());
+    std::vector<std::string> tKeys = {"Layout", "For", "Output", "Output"};
+    std::vector<std::string> tValues = {"Global", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tCriterionValue);
+
+    auto tOuterFor = tCriterionValue.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    ASSERT_FALSE(tInnerForInput.empty());
+    tKeys = {"ArgumentName", "Probability"};
+    tValues ={"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tCriterionValue.child("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    tOuterOutput = tOuterOutput.next_sibling("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendStochasticCriterionGradientOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objective_number_standard_deviations = "2";
+    XMLGen::append_stochastic_criterion_gradient_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tCriterionGradient = tDocument.child("CriterionGradient");
+    ASSERT_FALSE(tCriterionGradient.empty());
+    ASSERT_STREQ("CriterionGradient", tCriterionGradient.name());
+    std::vector<std::string> tKeys = {"Layout", "For", "Output"};
+    std::vector<std::string> tValues = {"Nodal Field", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tCriterionGradient);
+
+    auto tOuterFor = tCriterionGradient.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    ASSERT_FALSE(tInnerForInput.empty());
+    tKeys = {"ArgumentName", "Probability"};
+    tValues ={"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tCriterionGradient.child("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean_plus_2_std_dev", "Objective Mean Plus 2 StdDev Gradient"}, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendStochasticObjectiveGradientToPlatoMainOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objective_number_standard_deviations = "2";
+    XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Layout", "CriterionValue", "CriterionGradient"};
+    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Stochastic Objective Gradient",
+        "Nodal Field", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    // TEST CRITERION VALUE RESULTS AGAINST GOLD VALUES
+    auto tCriterionValue = tOperation.child("CriterionValue");
+    ASSERT_FALSE(tCriterionValue.empty());
+    ASSERT_STREQ("CriterionValue", tCriterionValue.name());
+    tKeys = {"Layout", "For", "Output", "Output"};
+    tValues = {"Global", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tCriterionValue);
+
+    auto tOuterFor = tCriterionValue.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    ASSERT_FALSE(tInnerForInput.empty());
+    tKeys = {"ArgumentName", "Probability"};
+    tValues ={"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tCriterionValue.child("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    tOuterOutput = tOuterOutput.next_sibling("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+
+    // TEST CRITERION GRADIENT RESULTS AGAINST GOLD VALUES
+    auto tCriterionGradient = tOperation.child("CriterionGradient");
+    ASSERT_FALSE(tCriterionGradient.empty());
+    ASSERT_STREQ("CriterionGradient", tCriterionGradient.name());
+    tKeys = {"Layout", "For", "Output"};
+    tValues = {"Nodal Field", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tCriterionGradient);
+
+    tOuterFor = tCriterionGradient.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    tInnerForInput = tInnerFor.append_child("Input");
+    ASSERT_FALSE(tInnerForInput.empty());
+    tKeys = {"ArgumentName", "Probability"};
+    tValues ={"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInnerForInput);
+
+    tOuterOutput = tCriterionGradient.child("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean_plus_2_std_dev", "Objective Mean Plus 2 StdDev Gradient"}, tOuterOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendStochasticObjectiveValueToPlatoMainOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objective_number_standard_deviations = "2";
+    XMLGen::append_stochastic_objective_value_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Layout", "For", "Output", "Output", "Output"};
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "Stochastic Objective Value", "Scalar", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tOuterFor = tOperation.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInnerForInput = tInnerFor.append_child("Input");
+    ASSERT_FALSE(tInnerForInput.empty());
+    tKeys = {"ArgumentName", "Probability"};
+    tValues ={"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+        "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInnerForInput);
+
+    auto tOuterOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "objective_mean"}, tOuterOutput);
+    tOuterOutput = tOuterOutput.next_sibling("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "objective_std_dev"}, tOuterOutput);
+    tOuterOutput = tOuterOutput.next_sibling("Output");
+    ASSERT_FALSE(tOuterOutput.empty());
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean_plus_2_std_dev", "Objective Mean Plus 2 StdDev"}, tOuterOutput);
+}
 
 TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
 {
@@ -287,6 +469,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
 TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objective_number_standard_deviations = "1";
     XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(tXMLMetaData);
 }
 

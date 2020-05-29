@@ -327,7 +327,7 @@ void MeanPlusVarianceGradient::parseInputs(const Plato::data::layout_t& aDataLay
                                            const Plato::InputData& aInput,
                                            std::map<std::string, double> & aOutput)
 {
-    for(auto tInputNode : aInput.getByName<Plato::InputData>("Input"))
+    for(auto& tInputNode : aInput.getByName<Plato::InputData>("Input"))
     {
         std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         this->addLocalArgument(aDataLayout, tInputArgumentName);
@@ -338,7 +338,7 @@ void MeanPlusVarianceGradient::parseInputs(const Plato::data::layout_t& aDataLay
 
 void MeanPlusVarianceGradient::parseCriterionValueArguments(const Plato::InputData& aOperationNode)
 {
-    for(auto tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionValue"))
+    for(auto& tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionValue"))
     {
         mCriterionValueDataLayout = this->parseDataLayout(tCriteriaNode, "CriterionValue");
         this->parseInputs(mCriterionValueDataLayout, tCriteriaNode, mCriterionValueSamplesArgNameToProbability);
@@ -349,7 +349,7 @@ void MeanPlusVarianceGradient::parseCriterionValueArguments(const Plato::InputDa
 
 void MeanPlusVarianceGradient::parseCriterionGradientArguments(const Plato::InputData& aOperationNode)
 {
-    for(auto tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionGradient"))
+    for(auto& tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionGradient"))
     {
         mCriterionGradientDataLayout = this->parseDataLayout(tCriteriaNode, "CriterionGradient");
         this->parseInputs(mCriterionGradientDataLayout, tCriteriaNode, mCriterionGradSamplesArgNameToProbability);
@@ -382,7 +382,7 @@ std::string MeanPlusVarianceGradient::getOutputArgument(const Plato::InputData& 
 
 void MeanPlusVarianceGradient::parseCriterionValueOutputs(const Plato::InputData& aCriteriaNode)
 {
-    for(auto tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
+    for(auto& tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
     {
         const std::string tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionValue");
         const std::string tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);
@@ -393,7 +393,7 @@ void MeanPlusVarianceGradient::parseCriterionValueOutputs(const Plato::InputData
 
 void MeanPlusVarianceGradient::parseCriterionGradientOutputs(const Plato::InputData& aCriteriaNode)
 {
-    for(auto tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
+    for(auto& tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
     {
         const std::string tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionGradient");
         const std::string tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);

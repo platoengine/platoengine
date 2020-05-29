@@ -195,7 +195,7 @@ void MeanPlusVarianceMeasure::parseDataLayout(const Plato::InputData &aOperation
 
 void MeanPlusVarianceMeasure::parseInputs(const Plato::InputData &aOperationNode)
 {
-    for (auto tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
+    for (auto& tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
     {
         std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         this->setMyLocalArgument(tInputArgumentName);
@@ -206,7 +206,7 @@ void MeanPlusVarianceMeasure::parseInputs(const Plato::InputData &aOperationNode
 
 void MeanPlusVarianceMeasure::parseOutputs(const Plato::InputData &aOperationNode)
 {
-    for (auto tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
+    for (auto& tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
     {
         std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "Statistic", true);
         std::string tOutputArgumentName = Plato::Get::String(tOutputNode, "ArgumentName");
