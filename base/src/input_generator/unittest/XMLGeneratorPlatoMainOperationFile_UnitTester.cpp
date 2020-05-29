@@ -245,6 +245,50 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFie
     ASSERT_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation1)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.initial_guess_field_name = "Control";
+    XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "FromFieldOnInputMesh"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "FromFieldOnInputMesh", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("FromFieldOnInputMesh");
+    tKeys = {"Name", "VariableName"}; tValues = {"dummy.exo", "Control"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation2)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.restart_iteration = "100";
+    tXMLMetaData.initial_guess_field_name = "Control";
+    XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "FromFieldOnInputMesh"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "FromFieldOnInputMesh", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("FromFieldOnInputMesh");
+    tKeys = {"Name", "VariableName", "Iteration"};
+    tValues = {"dummy.exo", "Control", "100"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
 TEST(PlatoTestXMLGenerator, AppendInitializeDensityFieldOperation)
 {
     pugi::xml_document tDocument;
