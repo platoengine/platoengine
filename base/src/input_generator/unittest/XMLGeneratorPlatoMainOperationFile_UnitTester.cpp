@@ -65,6 +65,20 @@ void append_initialize_field_from_file_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.run_mesh_name.empty())
+    {
+        THROWERR(std::string("Append Initialize Field From File Operation: ")
+            + "Initial guess was supposed to be initialized by reading it from a user-specified file. "
+            + "However, the 'filename' keyword is empty.")
+    }
+
+    if(aXMLMetaData.initial_guess_field_name.empty())
+    {
+        THROWERR(std::string("Append Initialize Field From File Operation: ")
+            + "Initial guess was supposed to be initialized by reading it from a user-specified field. "
+            + "However, the field's 'name' keyword is empty.")
+    }
+
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Method"};
     std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "FromFieldOnInputMesh"};
@@ -215,6 +229,21 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFileName)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFieldName)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    ASSERT_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument), std::runtime_error);
+}
 
 TEST(PlatoTestXMLGenerator, AppendInitializeDensityFieldOperation)
 {
