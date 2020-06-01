@@ -244,6 +244,59 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation_ErrorEmp
     ASSERT_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation_NoMaterialBoxOption)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    ASSERT_NO_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "PrimitivesLevelSet"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("PrimitivesLevelSet");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("PrimitivesLevelSet", tMethod.name());
+    tKeys = {"BackgroundMeshName"}; tValues = {"dummy.exo"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.levelset_material_box_max = "10";
+    tXMLMetaData.levelset_material_box_min = "-10";
+    ASSERT_NO_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "PrimitivesLevelSet", "MaterialBox"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("PrimitivesLevelSet");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("PrimitivesLevelSet", tMethod.name());
+    tKeys = {"BackgroundMeshName", "MaterialBox"}; tValues = {"dummy.exo", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+
+    auto tMaterialBox = tMethod.child("MaterialBox");
+    ASSERT_FALSE(tMaterialBox.empty());
+    ASSERT_STREQ("MaterialBox", tMaterialBox.name());
+    PlatoTestXMLGenerator::test_children({"MinCoords", "MaxCoords"}, {"-10", "10"}, tMaterialBox);
+
+    tDocument.save_file("dummy.xml", "  ");
+}
+
 TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox_DoNotDefine)
 {
     pugi::xml_document tDocument;
