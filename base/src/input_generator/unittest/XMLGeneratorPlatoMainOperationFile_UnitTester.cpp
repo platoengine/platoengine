@@ -15,212 +15,6 @@
 namespace XMLGen
 {
 
-void append_update_problem_to_plato_main_operation
-(pugi::xml_document& aDocument)
-{
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name"}, {"Update Problem", "Update Problem"}, tOperation);
-}
-
-void append_filter_control_to_plato_main_operation
-(pugi::xml_document& aDocument)
-{
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Control", "False"}, tOperation);
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Filtered Field"}, tOutput);
-}
-
-void append_filter_gradient_to_plato_main_operation
-(pugi::xml_document& aDocument)
-{
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Gradient", "True"}, tOperation);
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
-    tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Gradient"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Filtered Gradient"}, tOutput);
-}
-
-void append_initialize_density_field_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name", "Method"}, {"InitializeField", "Initialize Field", "Uniform"}, tOperation);
-
-    auto tMethod = tOperation.append_child("Uniform");
-    auto tValue = aXMLMetaData.initial_density_value.empty() ? "0.5" : aXMLMetaData.initial_density_value;
-    XMLGen::append_children({"Value"}, {tValue}, tMethod);
-
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Initialized Field"}, tOutput);
-}
-
-void append_initialize_field_from_file_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aXMLMetaData.run_mesh_name.empty())
-    {
-        THROWERR(std::string("Append Initialize Field From File Operation: ")
-            + "Initial guess was supposed to be initialized by reading it from an user-specified file. "
-            + "However, the 'filename' keyword is empty.")
-    }
-
-    if(aXMLMetaData.initial_guess_field_name.empty())
-    {
-        THROWERR(std::string("Append Initialize Field From File Operation: ")
-            + "Initial guess was supposed to be initialized by reading it from an user-specified field. "
-            + "However, the field's 'name' keyword is empty.")
-    }
-
-    auto tOperation = aDocument.append_child("Operation");
-    std::vector<std::string> tKeys = {"Function", "Name", "Method"};
-    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "FromFieldOnInputMesh"};
-    XMLGen::append_children(tKeys, tValues, tOperation);
-
-    auto tMethod = tOperation.append_child("FromFieldOnInputMesh");
-    tKeys = {"Name", "VariableName", "Iteration"};
-    tValues = {aXMLMetaData.run_mesh_name, aXMLMetaData.initial_guess_field_name, aXMLMetaData.restart_iteration};
-    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
-    XMLGen::append_children(tKeys, tValues, tMethod);
-}
-
-void append_levelset_material_box
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    auto tAppendMaterialBox = !aXMLMetaData.levelset_material_box_min.empty() &&
-        !aXMLMetaData.levelset_material_box_max.empty();
-    if(tAppendMaterialBox)
-    {
-        auto tMaterialBox = aParentNode.append_child("MaterialBox");
-        std::vector<std::string> tKeys = {"MinCoords", "MaxCoords"};
-        std::vector<std::string> tValues = {aXMLMetaData.levelset_material_box_min,
-            aXMLMetaData.levelset_material_box_max};
-        XMLGen::append_children(tKeys, tValues, tMaterialBox);
-    }
-}
-
-void append_initialize_levelset_primitives_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aXMLMetaData.run_mesh_name.empty())
-    {
-        THROWERR(std::string("Append Initialize Levelset Primitives Operation: ")
-            + "Levelset field was supposed to be initialized by reading it from an user-specified file. "
-            + "However, the 'background mesh' keyword is empty.")
-    }
-
-    auto tOperation = aDocument.append_child("Operation");
-    std::vector<std::string> tKeys = {"Function", "Name", "Method"};
-    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet"};
-    XMLGen::append_children(tKeys, tValues, tOperation);
-
-    auto tMethod = tOperation.append_child("PrimitivesLevelSet");
-    XMLGen::append_children({"BackgroundMeshName"}, {aXMLMetaData.run_mesh_name}, tMethod);
-    XMLGen::append_levelset_material_box(aXMLMetaData, tMethod);
-}
-
-void append_initialize_levelset_swiss_cheese_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aXMLMetaData.run_mesh_name.empty())
-    {
-        THROWERR(std::string("Append Initialize Levelset Swiss Cheese Operation: ")
-            + "Levelset field was supposed to be initialized by writing it into an user-specified file. "
-            + "However, the 'background mesh' keyword is empty.")
-    }
-
-    auto tOperation = aDocument.append_child("Operation");
-    std::vector<std::string> tKeys = {"Function", "Name", "Method"};
-    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "SwissCheeseLevelSet"};
-    XMLGen::append_children(tKeys, tValues, tOperation);
-
-    auto tMethod = tOperation.append_child("SwissCheeseLevelSet");
-    tKeys = {"BackgroundMeshName", "SphereRadius", "SpherePackingFactor"};
-    tValues = {aXMLMetaData.run_mesh_name, aXMLMetaData.levelset_sphere_radius,
-        aXMLMetaData.levelset_sphere_packing_factor};
-    for(auto& tNodeSet : aXMLMetaData.levelset_nodesets)
-    {
-        tKeys.push_back("NodeSet"); tValues.push_back(tNodeSet);
-    }
-
-    auto tDefineCreateLevelSetSpheresKeyword =
-        aXMLMetaData.levelset_sphere_radius.empty() && aXMLMetaData.levelset_sphere_packing_factor.empty();
-    auto tCreateLevelSetSpheres = tDefineCreateLevelSetSpheresKeyword ? "false" : "true";
-    tKeys.push_back("CreateSpheres"); tValues.push_back(tCreateLevelSetSpheres);
-    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
-    XMLGen::append_children(tKeys, tValues, tMethod);
-}
-
-void append_initialize_levelset_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    XMLGen::ValidLevelSetInitKeys tValidKeys;
-    auto tLowerKey = Plato::tolower(aXMLMetaData.levelset_initialization_method);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Append Initialize Levelset Operation: ") + "Levelset initialization method '"
-            + tLowerKey + "' is not supported.")
-    }
-
-    if(tItr->compare("primitives") == 0)
-    {
-        XMLGen::append_initialize_levelset_primitives_operation(aXMLMetaData, aDocument);
-    }
-    else if(tItr->compare("swiss cheese") == 0)
-    {
-        XMLGen::append_initialize_levelset_swiss_cheese_operation(aXMLMetaData, aDocument);
-    }
-}
-
-void append_initialize_field_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    XMLGen::ValidDiscretizationKeys tValidKeys;
-    auto tLowerKey = Plato::tolower(aXMLMetaData.discretization);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Append Initialize Field to Plato Main Operation: ") + "Discretization method '"
-            + tLowerKey + "' is not supported.")
-    }
-
-    if(tItr->compare("density") == 0)
-    {
-        XMLGen::append_initialize_density_field_operation(aXMLMetaData, aDocument);
-    }
-    else if(tItr->compare("levelset") == 0)
-    {
-        XMLGen::append_initialize_levelset_operation(aXMLMetaData, aDocument);
-    }
-}
-
-void append_initialize_field_to_plato_main_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aXMLMetaData.initial_guess_filename.empty())
-    {
-        XMLGen::append_initialize_field_operation(aXMLMetaData, aDocument);
-    }
-    else
-    {
-        XMLGen::append_initialize_field_from_file_operation(aXMLMetaData, aDocument);
-    }
-}
-
 void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData)
 {
@@ -246,6 +40,168 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_ReadFileKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.initial_guess_filename = "dummy.exo";
+    tXMLMetaData.initial_guess_field_name = "Control";
+    XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "FromFieldOnInputMesh"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "FromFieldOnInputMesh", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("FromFieldOnInputMesh");
+    ASSERT_STREQ("FromFieldOnInputMesh", tMethod.name());
+    tKeys = {"Name", "VariableName"}; tValues = {"dummy.exo", "Control"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_DensityKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.discretization = "density";
+    XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "Uniform", "Output"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "Uniform", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("Uniform");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("Uniform", tMethod.name());
+    PlatoTestXMLGenerator::test_children({"Value"}, {"0.5"}, tMethod);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Initialized Field"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_InvalidKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.discretization = "radial basis";
+    ASSERT_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_LevelSetKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.discretization = "levelset";
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.levelset_initialization_method = "primitives";
+    ASSERT_NO_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "PrimitivesLevelSet"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("PrimitivesLevelSet");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("PrimitivesLevelSet", tMethod.name());
+    tKeys = {"BackgroundMeshName"}; tValues = {"dummy.exo"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_DensityKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.discretization = "density";
+    ASSERT_NO_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "Uniform", "Output"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "Uniform", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("Uniform");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("Uniform", tMethod.name());
+    PlatoTestXMLGenerator::test_children({"Value"}, {"0.5"}, tMethod);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Initialized Field"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_InvalidKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.levelset_initialization_method = "magic";
+    ASSERT_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_PrimitivesKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.levelset_initialization_method = "primitives";
+    ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "PrimitivesLevelSet"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "PrimitivesLevelSet", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("PrimitivesLevelSet");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("PrimitivesLevelSet", tMethod.name());
+    tKeys = {"BackgroundMeshName"}; tValues = {"dummy.exo"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
+
+TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_SwissCheeseKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.levelset_initialization_method = "swiss cheese";
+    ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Method", "SwissCheeseLevelSet", "CreateSpheres"};
+    std::vector<std::string> tValues = {"InitializeField", "Initialize Field", "SwissCheeseLevelSet", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tMethod = tOperation.child("SwissCheeseLevelSet");
+    ASSERT_FALSE(tMethod.empty());
+    ASSERT_STREQ("SwissCheeseLevelSet", tMethod.name());
+    tKeys = {"BackgroundMeshName", "CreateSpheres"}; tValues = {"dummy.exo", "false"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
+}
 
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_ErrorEmptyFileName)
 {
@@ -436,19 +392,11 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFil
     ASSERT_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation_ErrorEmptyFieldName)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    ASSERT_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation1)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.initial_guess_filename = "dummy.exo";
     tXMLMetaData.initial_guess_field_name = "Control";
     ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
@@ -469,8 +417,8 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation2)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
     tXMLMetaData.restart_iteration = "100";
+    tXMLMetaData.initial_guess_filename = "dummy.exo";
     tXMLMetaData.initial_guess_field_name = "Control";
     ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
