@@ -12,6 +12,44 @@ namespace XMLGen
 {
 
 /******************************************************************************/
+bool is_volume_constraint_defined
+(const XMLGen::InputData& aXMLMetaData)
+{
+    auto tVolumeConstraintDefined = false;
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        tVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
+        if (tVolumeConstraintDefined == true)
+        {
+            break;
+        }
+    }
+    return tVolumeConstraintDefined;
+}
+// function is_volume_constraint_defined
+/******************************************************************************/
+
+/******************************************************************************/
+bool is_volume_constraint_defined_and_computed_by_platomain
+(const XMLGen::InputData& aXMLMetaData)
+{
+    auto tIsVolumeDefinedAndComputedByPlatoMain = false;
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        auto tIsVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
+        auto tIsVolumeComputedByPlatoMain = Plato::tolower(tConstraint.mPerformerName).compare("platomain") == 0;
+        tIsVolumeDefinedAndComputedByPlatoMain = tIsVolumeConstraintDefined && tIsVolumeComputedByPlatoMain;
+        if (tIsVolumeDefinedAndComputedByPlatoMain == true)
+        {
+            break;
+        }
+    }
+    return tIsVolumeDefinedAndComputedByPlatoMain;
+}
+//function is_volume_constraint_defined_and_computed_by_platomain
+/******************************************************************************/
+
+/******************************************************************************/
 void append_filter_options_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)

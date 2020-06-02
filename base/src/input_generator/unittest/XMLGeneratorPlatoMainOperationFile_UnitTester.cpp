@@ -15,21 +15,6 @@
 namespace XMLGen
 {
 
-bool is_volume_constraint_defined
-(const XMLGen::InputData& aXMLMetaData)
-{
-    auto tVolumeConstraintDefined = false;
-    for(auto& tConstraint : aXMLMetaData.constraints)
-    {
-        tVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
-        if (tVolumeConstraintDefined == true)
-        {
-            break;
-        }
-    }
-    return tVolumeConstraintDefined;
-}
-
 void append_design_volume_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -41,23 +26,6 @@ void append_design_volume_to_plato_main_operation
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children({"ArgumentName"}, {"Reference Value"}, tOutput);
     }
-}
-
-bool is_volume_constraint_defined_and_computed_by_platomain
-(const XMLGen::InputData& aXMLMetaData)
-{
-    auto tIsVolumeDefinedAndComputedByPlatoMain = false;
-    for(auto& tConstraint : aXMLMetaData.constraints)
-    {
-        auto tIsVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
-        auto tIsVolumeComputedByPlatoMain = Plato::tolower(tConstraint.mPerformerName).compare("platomain") == 0;
-        tIsVolumeDefinedAndComputedByPlatoMain = tIsVolumeConstraintDefined && tIsVolumeComputedByPlatoMain;
-        if (tIsVolumeDefinedAndComputedByPlatoMain == true)
-        {
-            break;
-        }
-    }
-    return tIsVolumeDefinedAndComputedByPlatoMain;
 }
 
 void append_compute_volume_to_plato_main_operation

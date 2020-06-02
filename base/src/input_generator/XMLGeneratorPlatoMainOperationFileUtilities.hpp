@@ -14,6 +14,25 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
+ * \fn is_volume_constraint_defined
+ * \brief Return true if volume constraint is defined.
+ * \param [in] aXMLMetaData Plato problem input data
+ * \return flag
+**********************************************************************************/
+bool is_volume_constraint_defined
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn is_volume_constraint_defined_and_computed_by_platomain
+ * \brief Return true if volume constraint is defined and plato main is responsible \n
+ *  for its calculation.
+ * \param [in] aXMLMetaData Plato problem input data
+ * \return flag
+**********************************************************************************/
+bool is_volume_constraint_defined_and_computed_by_platomain
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
  * \fn append_filter_options_to_operation
  * \brief Append filter options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
