@@ -12,6 +12,36 @@ namespace XMLGen
 {
 
 /******************************************************************************/
+void write_plato_main_operations_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData)
+{
+    pugi::xml_document tDocument;
+    auto tInclude = tDocument.append_child("include");
+
+    XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
+    XMLGen::append_filter_options_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_output_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_initialize_field_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_set_lower_bounds_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_set_upper_bounds_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_design_volume_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_volume_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_volume_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
+
+    XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
+
+    XMLGen::append_update_problem_to_plato_main_operation(tDocument);
+    XMLGen::append_filter_control_to_plato_main_operation(tDocument);
+    XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
+
+    tDocument.save_file("plato_main_operations.xml", "  ");
+}
+// function write_plato_main_operations_xml_file_for_nondeterministic_usecase
+/******************************************************************************/
+
+/******************************************************************************/
 bool is_volume_constraint_defined
 (const XMLGen::InputData& aXMLMetaData)
 {
@@ -603,6 +633,164 @@ void append_initialize_field_to_plato_main_operation
     }
 }
 // function append_initialize_field_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_design_volume_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(XMLGen::is_volume_constraint_defined(aXMLMetaData))
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Calculate Design Domain Volume"}, tOperation);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Reference Value"}, tOutput);
+    }
+}
+// function append_design_volume_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_volume_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(XMLGen::is_volume_constraint_defined_and_computed_by_platomain(aXMLMetaData))
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel"};
+        std::vector<std::string> tValues = {"ComputeVolume", "Calculate Constraint Value", "SIMP"};
+        XMLGen::append_children(tKeys, tValues, tOperation);
+
+        tKeys = {"ArgumentName"}; tValues = {"Topology"};
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children(tKeys, tValues, tInput);
+
+        tKeys = {"ArgumentName"}; tValues = {"Constraint Value"};
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children(tKeys, tValues, tOutput);
+
+        tKeys = {"PenaltyExponent", "MinimumValue"}; tValues = {"1.0", "0.0"};
+        auto tSIMP = tOperation.append_child("SIMP");
+        XMLGen::append_children(tKeys, tValues, tSIMP);
+    }
+}
+// function append_compute_volume_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_volume_gradient_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(XMLGen::is_volume_constraint_defined_and_computed_by_platomain(aXMLMetaData))
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel"};
+        std::vector<std::string> tValues = {"ComputeVolume", "Calculate Constraint Gradient", "SIMP"};
+        XMLGen::append_children(tKeys, tValues, tOperation);
+
+        tKeys = {"ArgumentName"}; tValues = {"Topology"};
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children(tKeys, tValues, tInput);
+
+        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children(tKeys, tValues, tOutput);
+
+        tKeys = {"PenaltyExponent", "MinimumValue"}; tValues = {"1.0", "0.0"};
+        auto tSIMP = tOperation.append_child("SIMP");
+        XMLGen::append_children(tKeys, tValues, tSIMP);
+    }
+}
+// function append_compute_volume_gradient_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_fixed_blocks_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tID : aXMLMetaData.fixed_block_ids)
+    {
+        auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
+        XMLGen::append_children({"Index"}, {tID}, tFixedBlocks);
+    }
+}
+// function append_fixed_blocks_identification_numbers_to_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_fixed_sidesets_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tID : aXMLMetaData.fixed_sideset_ids)
+    {
+        auto tFixedSideSet = aParentNode.append_child("FixedSidesets");
+        XMLGen::append_children({"Index"}, {tID}, tFixedSideSet);
+    }
+}
+// function append_fixed_sidesets_identification_numbers_to_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_fixed_nodesets_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tID : aXMLMetaData.fixed_nodeset_ids)
+    {
+        auto tFixedNodeSet = aParentNode.append_child("FixedNodesets");
+        XMLGen::append_children({"Index"}, {tID}, tFixedNodeSet);
+    }
+}
+// function append_fixed_nodesets_identification_numbers_to_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_set_lower_bounds_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
+    std::vector<std::string> tValues = {"SetLowerBounds", "Calculate Lower Bounds", aXMLMetaData.discretization};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.append_child("Input");
+    XMLGen::append_children({"ArgumentName"}, {"Lower Bound Value"}, tInput);
+    auto tOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"ArgumentName"}, {"Lower Bound Vector"}, tOutput);
+
+    XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+}
+// function append_set_lower_bounds_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_set_upper_bounds_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
+    std::vector<std::string> tValues = {"SetUpperBounds", "Calculate Upper Bounds", aXMLMetaData.discretization};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.append_child("Input");
+    XMLGen::append_children({"ArgumentName"}, {"Upper Bound Value"}, tInput);
+    auto tOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"ArgumentName"}, {"Upper Bound Vector"}, tOutput);
+
+    XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+}
+// function append_set_upper_bounds_to_plato_main_operation
 /******************************************************************************/
 
 }

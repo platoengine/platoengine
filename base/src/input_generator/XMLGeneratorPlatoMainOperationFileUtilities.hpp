@@ -14,6 +14,14 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
+ * \fn write_plato_main_operations_xml_file_for_nondeterministic_usecase
+ * \brief Write Plato main operation xml file for nondeterministic use cases.
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void write_plato_main_operations_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
  * \fn is_volume_constraint_defined
  * \brief Return true if volume constraint is defined.
  * \param [in] aXMLMetaData Plato problem input data
@@ -277,11 +285,91 @@ void append_initialize_field_operation
 
 /******************************************************************************//**
  * \fn append_initialize_field_to_plato_main_operation
- * \brief Append initialize control field to plato main operation XML file.
+ * \brief Append initialize control field to plato main operation to XML file.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_initialize_field_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_design_volume_to_plato_main_operation
+ * \brief Append calculate design volume operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_design_volume_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_volume_to_plato_main_operation
+ * \brief Append compute volume operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_compute_volume_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_volume_gradient_to_plato_main_operation
+ * \brief Append compute volume gradient operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_compute_volume_gradient_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_fixed_blocks_identification_numbers_to_operation
+ * \brief Append fixed blocks identification numbers operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_fixed_blocks_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_fixed_sidesets_identification_numbers_to_operation
+ * \brief Append fixed sidesets identification numbers operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_fixed_sidesets_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_fixed_nodesets_identification_numbers_to_operation
+ * \brief Append fixed nodesets identification numbers operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_fixed_nodesets_identification_numbers_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_set_lower_bounds_to_plato_main_operation
+ * \brief Append set lower bounds operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_set_lower_bounds_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_set_upper_bounds_to_plato_main_operation
+ * \brief Append set upper bounds operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_set_upper_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
