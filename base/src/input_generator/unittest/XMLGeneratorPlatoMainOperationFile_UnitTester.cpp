@@ -9,7 +9,6 @@
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "XMLGeneratorUtilities.hpp"
-#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
