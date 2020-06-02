@@ -171,14 +171,6 @@ TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck_ErrorEmptyMes
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     ASSERT_THROW(XMLGen::append_mesh_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument), std::runtime_error);
-    ASSERT_FALSE(tDocument.empty());
-
-    auto tMesh = tDocument.child("mesh");
-    ASSERT_FALSE(tMesh.empty());
-    ASSERT_STREQ("mesh", tMesh.name());
-    std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
-    std::vector<std::string> tValues = {"unstructured", "exodus", "true", "dummy.exo"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMesh);
 }
 
 TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck)
