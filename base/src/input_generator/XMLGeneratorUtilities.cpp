@@ -53,6 +53,16 @@ namespace XMLGen
 {
 
 /******************************************************************************/
+void append_version_entry(pugi::xml_document& aDocument)
+/******************************************************************************/
+{
+    auto tNode = aDocument.append_child(pugi::node_declaration);
+    tNode.set_name("xml");
+    pugi::xml_attribute tAttribute = tNode.append_attribute("version");
+    tAttribute.set_value("1.0");
+}
+
+/******************************************************************************/
 bool addChild(pugi::xml_node parent_node,
               const std::string &name,
               const std::string &value)

@@ -1,7 +1,7 @@
 /*
  * XMLGeneratorPlatoMainInputDeckFile_UnitTester.cpp
  *
- *  Created on: Jun 2, 2020
+ *  Created on: June 2, 2020
  */
 
 #include <gtest/gtest.h>
@@ -11,96 +11,8 @@
 #include "pugixml.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 
-namespace XMLGen
-{
-
-/*
-void write_plato_main_input_deck_file
-(const XMLGen::InputData& aInputData)
-{
-    pugi::xml_document doc;
-    pugi::xml_node tmp_node1, tmp_node2, tmp_node3;
-
-    // Version entry
-    pugi::xml_node tmp_node = doc.append_child(pugi::node_declaration);
-    tmp_node.set_name("xml");
-    pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-    tmp_att.set_value("1.0");
-
-    // mesh
-    pugi::xml_node mesh_node = doc.append_child("mesh");
-    addChild(mesh_node, "type", "unstructured");
-    addChild(mesh_node, "format", "exodus");
-
-    addChild(mesh_node, "ignore_node_map", "true");
-
-    addChild(mesh_node, "mesh", m_InputData.run_mesh_name.c_str());
-    // just need one block specified here
-    if(m_InputData.blocks.size() > 0)
-    {
-        tmp_node = mesh_node.append_child("block");
-        addChild(tmp_node, "index", m_InputData.blocks[0].block_id.c_str());
-        tmp_node1 = tmp_node.append_child("integration");
-        addChild(tmp_node1, "type", "gauss");
-        addChild(tmp_node1, "order", "2");
-        addChild(tmp_node, "material", m_InputData.blocks[0].material_id.c_str());
-    }
-
-    // output
-    tmp_node = doc.append_child("output");
-    addChild(tmp_node, "file", "platomain");
-    addChild(tmp_node, "format", "exodus");
-
-    // Write the file to disk
-    doc.save_file("plato_main_input_deck.xml", "  ");
-}
-*/
-
-void append_mesh_metadata_to_plato_main_input_deck
-(const XMLGen::InputData& aInputData,
- pugi::xml_document& aDocument)
-{
-    if(aInputData.run_mesh_name.empty())
-    {
-        THROWERR("Append Mesh Metadata To Plato Main Input Deck: Run mesh name in XMLGen::InputData is empty.");
-    }
-
-    auto tMesh = aDocument.append_child("mesh");
-    std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
-    std::vector<std::string> tValues = {"unstructured", "exodus", "true", aInputData.run_mesh_name};
-    XMLGen::append_children(tKeys, tValues, tMesh);
-}
-
-void append_block_metadata_to_plato_main_input_deck
-(const XMLGen::InputData& aInputData,
- pugi::xml_node& aParentNode)
-{
-    if(!aInputData.blocks.empty())
-    {
-        if(aInputData.blocks[0].block_id.empty())
-        {
-            THROWERR("Append Block Identification Number To Plato Main Input Deck: Block ID in XMLGen::InputData.blocks[0] is empty.")
-        }
-
-        if(aInputData.blocks[0].material_id.empty())
-        {
-            THROWERR("Append Block Identification Number To Plato Main Input Deck: Material ID in XMLGen::InputData.blocks[0] is empty.")
-        }
-
-        // note: just need one block specified here
-        auto tBlockNode = aParentNode.append_child("block");
-        std::vector<std::string> tKeys = {"index", "material"};
-        std::vector<std::string> tValues = {aInputData.blocks[0].block_id, aInputData.blocks[0].material_id};
-        XMLGen::append_children(tKeys, tValues, tBlockNode);
-
-        auto tIntegration = tBlockNode.append_child("integration");
-        tKeys = {"type", "order"}; tValues = {"gauss", "2"};
-        XMLGen::append_children(tKeys, tValues, tIntegration);
-    }
-}
-
-}
 
 namespace PlatoTestXMLGenerator
 {
@@ -162,8 +74,6 @@ TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck)
     tKeys = {"type", "order"};
     tValues = {"gauss", "2"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tIntegration);
-
-    tDocument.save_file("dummy.xml", " ");
 }
 
 TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck_ErrorEmptyMeshFile)
@@ -172,13 +82,6 @@ TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck_ErrorEmptyMes
     XMLGen::InputData tXMLMetaData;
     ASSERT_THROW(XMLGen::append_mesh_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument), std::runtime_error);
     ASSERT_FALSE(tDocument.empty());
-
-    auto tMesh = tDocument.child("mesh");
-    ASSERT_FALSE(tMesh.empty());
-    ASSERT_STREQ("mesh", tMesh.name());
-    std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
-    std::vector<std::string> tValues = {"unstructured", "exodus", "true", "dummy.exo"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tMesh);
 }
 
 TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck)
@@ -195,6 +98,45 @@ TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck)
     std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
     std::vector<std::string> tValues = {"unstructured", "exodus", "true", "dummy.exo"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMesh);
+}
+
+TEST(PlatoTestXMLGenerator, AppendOutputMetadataToPlatoMainInputDeck)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_NO_THROW(XMLGen::append_output_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    auto tOutput = tDocument.child("output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("output", tOutput.name());
+    std::vector<std::string> tKeys = {"file", "format"};
+    std::vector<std::string> tValues = {"platomain", "exodus"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, WritePlatoMainInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "dummy.exo";
+    XMLGen::Block tBlock1;
+    tBlock1.block_id = "1";
+    tBlock1.material_id = "11";
+    tXMLMetaData.blocks.push_back(tBlock1);
+    XMLGen::Block tBlock2;
+    tBlock2.block_id = "2";
+    tBlock2.material_id = "12";
+    tXMLMetaData.blocks.push_back(tBlock2);
+    ASSERT_NO_THROW(XMLGen::write_plato_main_input_deck_file(tXMLMetaData));
+
+    auto tReadData = XMLGen::read_data_from_file("plato_main_input_deck.xml");
+    auto tGold =
+      std::string("<?xmlversion=\"1.0\"?><mesh><type>unstructured</type><format>exodus</format>") + 
+      std::string("<ignore_node_map>true</ignore_node_map><mesh>dummy.exo</mesh></mesh><block><index>1</index>") +
+      std::string("<material>11</material><integration><type>gauss</type><order>2</order></integration></block>") + 
+      std::string("<output><file>platomain</file><format>exodus</format></output>");
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    std::system("rm -f plato_main_input_deck.xml");
 }
 
 }

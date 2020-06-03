@@ -52,8 +52,13 @@
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 
+#include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
+#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
+
 namespace XMLGen
 {
+    void append_version_entry(pugi::xml_document& aDocument);
 
     bool addNTVParameter(pugi::xml_node parent_node,
                      const std::string &name,

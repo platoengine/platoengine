@@ -58,11 +58,9 @@
 #include <string>
 #include <map>
 
-#include "XMLGeneratorDefinesFileUtilities.hpp"
-#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
+#include "XMLGeneratorUtilities.hpp"
 
 #include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
-#include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
@@ -100,11 +98,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInputFiles()
         return false;
     }
 
-    if(!generatePlatoMainInputDeckXML())
-    {
-        std::cout << "Failed to generate plato_main_input_deck.xml" << std::endl;
-        return false;
-    }
+    XMLGen::write_plato_main_input_deck_file(m_InputData);
 
     if(!generatePerformerOperationsXML())
     {
