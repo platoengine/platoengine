@@ -91,13 +91,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInputFiles()
 {
     XMLGen::write_define_xml_file(m_InputData.mRandomMetaData, m_InputData.m_UncertaintyMetaData);
     XMLGen::write_interface_xml_file_for_nondeterministic_usecase(m_InputData);
-
-    if(!generatePlatoMainOperationsXML())
-    {
-        std::cout << "Failed to generate plato_main_operations.xml" << std::endl;
-        return false;
-    }
-
+    XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(m_InputData);
     XMLGen::write_plato_main_input_deck_file(m_InputData);
 
     if(!generatePerformerOperationsXML())
