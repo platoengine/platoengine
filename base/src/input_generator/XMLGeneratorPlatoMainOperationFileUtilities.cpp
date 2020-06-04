@@ -17,8 +17,8 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 {
     pugi::xml_document tDocument;
     auto tInclude = tDocument.append_child("include");
-
     XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
+
     XMLGen::append_filter_options_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_initialize_field_to_plato_main_operation(aXMLMetaData, tDocument);
@@ -263,7 +263,7 @@ void append_stochastic_objective_value_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
-    std::vector<std::string> tValues = {"MeanPlusStdDev", "Calculate Non-Deterministic Objective Value", "Scalar"};
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "Compute Non-Deterministic Objective Value", "Scalar"};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tOuterFor = tOperation.append_child("For");
@@ -347,7 +347,7 @@ void append_stochastic_objective_gradient_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Layout"};
-    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Calculate Non-Deterministic Objective Gradient", "Nodal Field"};
+    std::vector<std::string> tValues = {"MeanPlusStdDevGradient", "Compute Non-Deterministic Objective Gradient", "Nodal Field"};
     XMLGen::append_children(tKeys, tValues, tOperation);
     XMLGen::append_stochastic_criterion_value_operation(tOperation);
     XMLGen::append_stochastic_criterion_gradient_operation(aXMLMetaData, tOperation);
@@ -643,7 +643,7 @@ void append_design_volume_to_plato_main_operation
     if(XMLGen::is_volume_constraint_defined(aXMLMetaData))
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Calculate Design Domain Volume"}, tOperation);
+        XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Compute Design Domain Volume"}, tOperation);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children({"ArgumentName"}, {"Reference Value"}, tOutput);
     }
@@ -660,7 +660,7 @@ void append_compute_volume_to_plato_main_operation
     {
         auto tOperation = aDocument.append_child("Operation");
         std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel"};
-        std::vector<std::string> tValues = {"ComputeVolume", "Calculate Constraint Value", "SIMP"};
+        std::vector<std::string> tValues = {"ComputeVolume", "Compute Constraint Value", "SIMP"};
         XMLGen::append_children(tKeys, tValues, tOperation);
 
         tKeys = {"ArgumentName"}; tValues = {"Topology"};
@@ -688,7 +688,7 @@ void append_compute_volume_gradient_to_plato_main_operation
     {
         auto tOperation = aDocument.append_child("Operation");
         std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel"};
-        std::vector<std::string> tValues = {"ComputeVolume", "Calculate Constraint Gradient", "SIMP"};
+        std::vector<std::string> tValues = {"ComputeVolume", "Compute Constraint Gradient", "SIMP"};
         XMLGen::append_children(tKeys, tValues, tOperation);
 
         tKeys = {"ArgumentName"}; tValues = {"Topology"};
@@ -756,7 +756,7 @@ void append_set_lower_bounds_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetLowerBounds", "Calculate Lower Bounds", aXMLMetaData.discretization};
+    std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.discretization};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.append_child("Input");
@@ -778,7 +778,7 @@ void append_set_upper_bounds_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetUpperBounds", "Calculate Upper Bounds", aXMLMetaData.discretization};
+    std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.discretization};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.append_child("Input");

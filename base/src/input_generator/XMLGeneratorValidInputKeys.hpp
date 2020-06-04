@@ -12,6 +12,13 @@
 namespace XMLGen
 {
 
+struct ValidPhysicsPerformerKeys
+{
+    /*!< valid physics performers supported by plato */
+    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd"};
+};
+// struct ValidPhysicsPerformerKeys
+
 struct ValidDiscretizationKeys
 {
     /*!< valid physical design variables, i.e. discretization */

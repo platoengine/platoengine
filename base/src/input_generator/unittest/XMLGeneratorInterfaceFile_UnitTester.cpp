@@ -18,8 +18,8 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, SetKeyValue)
 {
     std::unordered_map<std::string, std::string> tKeyToValueMap =
-        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
-          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
           {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
 
     // TEST 1: EMPTY VALUE -> RESULT = IGNORE
@@ -57,8 +57,8 @@ TEST(PlatoTestXMLGenerator, SetValueKeywordToIgnoreIfEmpty)
 TEST(PlatoTestXMLGenerator, TransformKeyTokens)
 {
     std::unordered_map<std::string, std::string> tKeyToValueMap =
-        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
-          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
           {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
     auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
 
@@ -76,13 +76,13 @@ TEST(PlatoTestXMLGenerator, TransformKeyTokens)
 TEST(PlatoTestXMLGenerator, TransformValueTokens)
 {
     std::unordered_map<std::string, std::string> tKeyToValueMap =
-        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Calculate Constraint Value"},
-          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Calculate Constraint Gradient"},
+        { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
+          {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
           {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
     auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
 
-    std::vector<std::string> tGold = {"Constraint Value", "Calculate Constraint Value",
-        "Constraint Gradient", "Calculate Constraint Gradient", "Reference Value", "1", "10"};
+    std::vector<std::string> tGold = {"Constraint Value", "Compute Constraint Value",
+        "Constraint Gradient", "Compute Constraint Gradient", "Reference Value", "1", "10"};
     ASSERT_EQ(7u, tValues.size());
     for(auto& tValue : tValues)
     {
@@ -364,10 +364,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
 
-    tTemp = {"Objective Value 0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
+    tTemp = {"Objective Value ID-0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
-    tTemp = {"Objective Gradient 0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
+    tTemp = {"Objective Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
     tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -398,10 +398,10 @@ TEST(PlatoTestXMLGenerator, AppendConstraintSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Constraint Gradient", tTemp));
 
-    tTemp = {"Constraint Value 0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
+    tTemp = {"Constraint Value ID-0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Constraint Value", tTemp));
-    tTemp = {"Constraint Gradient 0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
+    tTemp = {"Constraint Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
     tGoldSharedDataValues.push_back(std::make_pair("Constraint Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -775,7 +775,7 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage)
 
     auto tOperation = tStage.child("Operation");
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Calculate Lower Bounds", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Lower Bounds", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tInnerInput = tOperation.child("Input");
     tGoldKeys = {"ArgumentName", "SharedDataName"};
@@ -836,7 +836,7 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage)
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Calculate Upper Bounds", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Upper Bounds", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tInnerInput = tOperation.child("Input");
     ASSERT_FALSE(tInnerInput.empty());
@@ -888,13 +888,13 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeStage)
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Calculate Design Domain Volume", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Design Domain Volume", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Output"};
-    tGoldValues = {"Calculate Design Domain Volume", "PlatoMain", ""};
+    tGoldValues = {"Compute Design Domain Volume", "PlatoMain", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tInnerOutput = tOperation.child("Output");
@@ -925,7 +925,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Calculate Constraint Value 0", "volume", "", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Value ID-0", "volume", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOuterInput = tStage.child("Input");
@@ -937,7 +937,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     auto tOuterOutput = tStage.child("Output");
     ASSERT_FALSE(tOuterOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Constraint Value 0"};
+    tGoldValues = {"Constraint Value ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
 
     auto tOperation = tStage.child("Operation");
@@ -958,7 +958,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Calculate Constraint Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Constraint Value", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
@@ -967,7 +967,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
     auto tConstraintOutput = tOperation.child("Output");
     ASSERT_FALSE(tConstraintOutput.empty());
-    tGoldValues = {"Constraint Value", "Constraint Value 0"};
+    tGoldValues = {"Constraint Value", "Constraint Value ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
 }
 
@@ -986,7 +986,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "Operation", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Calculate Constraint Gradient 0", "volume", "", "", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Gradient ID-0", "volume", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOuterInput = tStage.child("Input");
@@ -998,7 +998,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     auto tOuterOutput = tStage.child("Output");
     ASSERT_FALSE(tOuterOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Constraint Gradient 0"};
+    tGoldValues = {"Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
 
     auto tOperation = tStage.child("Operation");
@@ -1019,7 +1019,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Calculate Constraint Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Constraint Gradient", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
@@ -1028,7 +1028,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
     auto tConstraintOutput = tOperation.child("Output");
     ASSERT_FALSE(tConstraintOutput.empty());
-    tGoldValues = {"Constraint Gradient", "Constraint Gradient 0"};
+    tGoldValues = {"Constraint Gradient", "Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
 
     tOperation = tOperation.next_sibling("Operation");
@@ -1044,11 +1044,11 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     tFilterInput = tFilterInput.next_sibling("Input");
     ASSERT_FALSE(tFilterInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Gradient", "Constraint Gradient 0"};
+    tGoldValues = {"Gradient", "Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterInput);
     tFilterOutput = tOperation.child("Output");
     ASSERT_FALSE(tFilterOutput.empty());
-    tGoldValues = {"Filtered Gradient", "Constraint Gradient 0"};
+    tGoldValues = {"Filtered Gradient", "Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterOutput);
 }
 
@@ -1255,7 +1255,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperatio
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Calculate Non-Deterministic Objective Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Value", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tFor = tOperation.child("For");
@@ -1361,7 +1361,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Calculate Objective Value 0", "", "", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Objective Value ID-0", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -1373,7 +1373,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tStageOutput= tStage.child("Output");
     ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Objective Value 0"};
+    tGoldValues = {"Objective Value ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
@@ -1473,7 +1473,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tStageOperation = tStageOperation.next_sibling("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Calculate Non-Deterministic Objective Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Value", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     tFor = tStageOperation.child("For");
@@ -1497,7 +1497,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tRandomObjectiveOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tRandomObjectiveOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 1 StdDev", "Objective Value 0"};
+    tGoldValues = {"Objective Mean Plus 1 StdDev", "Objective Value ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tRandomObjectiveOutput);
 }
 
@@ -1658,7 +1658,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOpera
     tXMLMetaData.objective_number_standard_deviations = "2";
     pugi::xml_document tDocument;
     auto tStage = tDocument.append_child("Stage");
-    XMLGen::append_evaluate_nondeterministic_objective_gradient_operation("Objective Gradient 0", tXMLMetaData, tStage);
+    XMLGen::append_evaluate_nondeterministic_objective_gradient_operation("Objective Gradient ID-0", tXMLMetaData, tStage);
     ASSERT_FALSE(tStage.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1668,7 +1668,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOpera
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Calculate Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tFor = tOperation.child("For");
@@ -1697,7 +1697,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOpera
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 2 StdDev Gradient", "Objective Gradient 0"};
+    tGoldValues = {"Objective Mean Plus 2 StdDev Gradient", "Objective Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 }
 
@@ -1779,7 +1779,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Calculate Objective Gradient 0", "", "", "", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Objective Gradient ID-0", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -1791,7 +1791,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tStageOutput= tStage.child("Output");
     ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Objective Gradient 0"};
+    tGoldValues = {"Objective Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
@@ -1817,7 +1817,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tStageOperation = tStageOperation.next_sibling("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Calculate Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     auto tFor = tStageOperation.child("For");
@@ -1848,7 +1848,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tOperationOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tOperationOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 3 StdDev Gradient", "Objective Gradient 0"};
+    tGoldValues = {"Objective Mean Plus 3 StdDev Gradient", "Objective Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperationOutput);
 
     // ****** 4) TEST RESULTS AGAINST SAMPLE OBJECTIVE GRADIENT GOLD VALUES ******
@@ -2223,8 +2223,8 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationObjectiveOptions)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tObjectiveNode = tOptimizerNode.child("Objective");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName"};
-    tGoldValues = {"Objective Value 0", "Calculate Objective Value 0", "Objective Gradient 0",
-        "Calculate Objective Gradient 0"};
+    tGoldValues = {"Objective Value ID-0", "Compute Objective Value ID-0", "Objective Gradient ID-0",
+        "Compute Objective Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tObjectiveNode);
 }
 
@@ -2244,8 +2244,8 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tConstraintNode = tOptimizerNode.child("Constraint");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName", "ReferenceValueName"};
-    tGoldValues = {"Constraint Value 0", "Calculate Constraint Value 0", "Constraint Gradient 0",
-        "Calculate Constraint Gradient 0", "Reference Value"};
+    tGoldValues = {"Constraint Value ID-0", "Compute Constraint Value ID-0", "Constraint Gradient ID-0",
+        "Compute Constraint Gradient ID-0", "Reference Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintNode);
 
     // CASE 2: NORMALIZED TARGET VALUE IS DEFINED
@@ -2259,8 +2259,8 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     tConstraintNode = tOptimizerNode.child("Constraint");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName",
         "ReferenceValueName", "NormalizedTargetValue"};
-    tGoldValues = {"Constraint Value 0", "Calculate Constraint Value 0", "Constraint Gradient 0",
-        "Calculate Constraint Gradient 0", "Reference Value", "1.0"};
+    tGoldValues = {"Constraint Value ID-0", "Compute Constraint Value ID-0", "Constraint Gradient ID-0",
+        "Compute Constraint Gradient ID-0", "Reference Value", "1.0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintNode);
 }
 
@@ -2296,219 +2296,219 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorMultipleObjectives)
     ASSERT_THROW(XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData), std::runtime_error);
 }
 
-// TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
-// {
-//     // POSE MATERIAL SET 1
-//     XMLGen::Material tMaterial1;
-//     tMaterial1.id("2");
-//     tMaterial1.category("isotropic");
-//     tMaterial1.property("elastic modulus", "1");
-//     tMaterial1.property("poissons ratio", "0.3");
-//     XMLGen::Material tMaterial2;
-//     tMaterial2.id("2");
-//     tMaterial2.category("isotropic");
-//     tMaterial2.property("elastic modulus", "1");
-//     tMaterial2.property("poissons ratio", "0.3");
+TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
+{
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetOne;
-//     tMaterialSetOne.insert({"1", tMaterial1});
-//     tMaterialSetOne.insert({"2", tMaterial2});
-//     auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    tMaterialSetOne.insert({"2", tMaterial2});
+    auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
 
-//     // POSE MATERIAL SET 2
-//     XMLGen::Material tMaterial3;
-//     tMaterial3.id("2");
-//     tMaterial3.category("isotropic");
-//     tMaterial3.property("elastic modulus", "1.1");
-//     tMaterial3.property("poissons ratio", "0.33");
-//     XMLGen::Material tMaterial4;
-//     tMaterial4.id("2");
-//     tMaterial4.category("isotropic");
-//     tMaterial4.property("elastic modulus", "1");
-//     tMaterial4.property("poissons ratio", "0.3");
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial3;
+    tMaterial3.id("2");
+    tMaterial3.category("isotropic");
+    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("poissons ratio", "0.33");
+    XMLGen::Material tMaterial4;
+    tMaterial4.id("2");
+    tMaterial4.category("isotropic");
+    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetTwo;
-//     tMaterialSetTwo.insert({"1", tMaterial3});
-//     tMaterialSetTwo.insert({"2", tMaterial4});
-//     auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial3});
+    tMaterialSetTwo.insert({"2", tMaterial4});
+    auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
 
-//     // POSE LOAD SET 1
-//     XMLGen::LoadCase tLoadCase1;
-//     tLoadCase1.id = "1";
-//     XMLGen::Load tLoad1;
-//     tLoad1.mIsRandom = true;
-//     tLoad1.type = "traction";
-//     tLoad1.app_name = "sideset";
-//     tLoad1.values.push_back("1");
-//     tLoad1.values.push_back("2");
-//     tLoad1.values.push_back("3");
-//     tLoadCase1.loads.push_back(tLoad1);
-//     XMLGen::Load tLoad2;
-//     tLoad2.mIsRandom = true;
-//     tLoad2.type = "traction";
-//     tLoad2.app_name = "sideset";
-//     tLoad2.values.push_back("4");
-//     tLoad2.values.push_back("5");
-//     tLoad2.values.push_back("6");
-//     tLoadCase1.loads.push_back(tLoad2);
-//     XMLGen::Load tLoad3;
-//     tLoad3.type = "traction";
-//     tLoad3.mIsRandom = false;
-//     tLoad3.app_name = "sideset";
-//     tLoad3.values.push_back("7");
-//     tLoad3.values.push_back("8");
-//     tLoad3.values.push_back("9");
-//     tLoadCase1.loads.push_back(tLoad3); // append deterministic load
-//     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
-//     // POSE LOAD SET 2
-//     XMLGen::LoadCase tLoadCase2;
-//     tLoadCase2.id = "2";
-//     XMLGen::Load tLoad4;
-//     tLoad4.mIsRandom = true;
-//     tLoad4.type = "traction";
-//     tLoad4.app_name = "sideset";
-//     tLoad4.values.push_back("11");
-//     tLoad4.values.push_back("12");
-//     tLoad4.values.push_back("13");
-//     tLoadCase2.loads.push_back(tLoad4);
-//     XMLGen::Load tLoad5;
-//     tLoad5.mIsRandom = true;
-//     tLoad5.type = "traction";
-//     tLoad5.app_name = "sideset";
-//     tLoad5.values.push_back("14");
-//     tLoad5.values.push_back("15");
-//     tLoad5.values.push_back("16");
-//     tLoadCase2.loads.push_back(tLoad5);
-//     tLoadCase2.loads.push_back(tLoad3); // append deterministic load
-//     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
-//     // CONSTRUCT SAMPLES SET
-//     XMLGen::RandomMetaData tRandomMetaData;
-//     ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase1));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase2));
-//     ASSERT_NO_THROW(tRandomMetaData.finalize());
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
 
-//     // DEFINE CONSTRAINT
-//     XMLGen::Constraint tConstraint;
-//     tConstraint.mNormalizedTargetValue = "1.0";
-//     tConstraint.type = "volume";
+    // DEFINE CONSTRAINT
+    XMLGen::Constraint tConstraint;
+    tConstraint.mNormalizedTargetValue = "1.0";
+    tConstraint.type = "volume";
 
-//     // DEFINE OBJECTIVE
-//     XMLGen::Objective tObjective;
-//     tObjective.type = "total work";
-//     tObjective.code_name = "analyze";
-//     tObjective.performer_name = "plato analyze";
+    // DEFINE OBJECTIVE
+    XMLGen::Objective tObjective;
+    tObjective.type = "total work";
+    tObjective.code_name = "analyze";
+    tObjective.performer_name = "plato analyze";
 
-//     // DEFINE XML GENERATOR INPUT DATA
-//     XMLGen::InputData tXMLMetaData;
-//     tXMLMetaData.constraints.push_back(tConstraint);
-//     tXMLMetaData.objectives.push_back(tObjective);
-//     tXMLMetaData.optimization_type = "topology";
-//     tXMLMetaData.max_iterations = "100";
-//     tXMLMetaData.optimization_algorithm = "mma";
-//     tXMLMetaData.objective_number_standard_deviations = "1";
-//     tXMLMetaData.mRandomMetaData = tRandomMetaData;
+    // DEFINE XML GENERATOR INPUT DATA
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.constraints.push_back(tConstraint);
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.max_iterations = "100";
+    tXMLMetaData.optimization_algorithm = "mma";
+    tXMLMetaData.objective_number_standard_deviations = "1";
+    tXMLMetaData.mRandomMetaData = tRandomMetaData;
 
-//     // CALL FUNCTION
-//     XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData);
+    // CALL FUNCTION
+    XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData);
 
-//     // 4. TEST OUTPUT FILE
-//     auto tReadData = XMLGen::read_data_from_file("interface.xml");
-//     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Console><Verbose>true</Verbose></Console><Performer><Name>PlatoMain</Name><Code>PlatoMain</Code>")
-//     +"<PerformerID>0</PerformerID></Performer><Performer><PerformerID>1</PerformerID><Forvar=\"PerformerIndex\"in=\"Performers\"><Name>platoanalyze{PerformerIndex}</Name><Code>analyze</Code>"
-//     +"</For></Performer><SharedData><Name>Control</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData>"
-//     +"<SharedData><Name>LowerBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData>"
-//     +"<SharedData><Name>LowerBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData>"
-//     +"<Name>UpperBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>"
-//     +"UpperBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ReferenceValue</Name>"
-//     +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ObjectiveValue0</Name>"
-//     +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ObjectiveGradient0</Name>"
-//     +"<Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ConstraintValue0</Name><Type>Scalar</Type>"
-//     +"<Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ConstraintGradient0</Name><Type>Scalar</Type>"
-//     +"<Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
-//     +"<SharedData><Name>VonMises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>ElementField</Layout><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
-//     +"<UserName>PlatoMain</UserName></SharedData></For></For><SharedData><Name>Topology</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain"
-//     +"</UserName><Forvar=\"PerformerIndex\"in=\"Performers\"><UserName>platoanalyze{PerformerIndex}</UserName></For></SharedData><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
-//     +"<SharedData><Name>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
-//     +"<UserName>PlatoMain</UserName></SharedData></For></For><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><SharedData><Name>"
-//     +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
-//     +"<UserName>PlatoMain</UserName></SharedData></For></For><Stage><Name>CalculateDesignDomainVolume</Name><Operation><Name>CalculateDesignDomainVolume</Name><PerformerName>PlatoMain</PerformerName>"
-//     +"<Output><ArgumentName>ReferenceValue</ArgumentName><SharedDataName>ReferenceValue</SharedDataName></Output></Operation><Output><SharedDataName>ReferenceValue</SharedDataName></Output>"
-//     +"</Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>PlatoMain</PerformerName><Output><ArgumentName>InitializedField</ArgumentName>"
-//     +"<SharedDataName>Control</SharedDataName></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Input><SharedDataName>"
-//     +"LowerBoundValue</SharedDataName></Input><Operation><Name>CalculateLowerBounds</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>LowerBoundVector</ArgumentName>"
-//     +"<SharedDataName>LowerBoundVector</SharedDataName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName><SharedDataName>LowerBoundVector</SharedDataName></Output></Operation>"
-//     +"<Output><SharedDataName>LowerBoundVector</SharedDataName></Output></Stage><Stage><Name>SetUpperBounds</Name><Input><SharedDataName>UpperBoundValue</SharedDataName></Input><Operation>"
-//     +"<Name>CalculateUpperBounds</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>UpperBoundVector</ArgumentName><SharedDataName>UpperBoundVector</SharedDataName></Input>"
-//     +"<Output><ArgumentName>UpperBoundVector</ArgumentName><SharedDataName>UpperBoundVector</SharedDataName></Output></Operation><Output><SharedDataName>UpperBoundVector</SharedDataName></Output>"
-//     +"</Stage><Stage><Name>CacheState:platoanalyze0</Name><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Name>CacheState</Name>"
-//     +"<PerformerName>platoanalyze{PerformerIndex}</PerformerName></Operation></For></For></Stage><Stage><Name>UpdateProblem:platoanalyze0</Name><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
-//     +"<Operation><Name>UpdateProblem</Name><PerformerName>platoanalyze{PerformerIndex}</PerformerName></Operation></For></For></Stage><Stage><Name>CalculateConstraintValue0</Name><Type>volume</Type>"
-//     +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>"
-//     +"Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>CalculateConstraintValue</Name>"
-//     +"<PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ConstraintValue</ArgumentName>"
-//     +"<SharedDataName>ConstraintValue0</SharedDataName></Output></Operation><Output><SharedDataName>ConstraintValue0</SharedDataName></Output></Stage><Stage><Name>CalculateConstraintGradient0</Name>"
-//     +"<Type>volume</Type><Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName>"
-//     +"<SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>CalculateConstraintGradient</Name>"
-//     +"<PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
-//     +"<SharedDataName>ConstraintGradient0</SharedDataName></Output></Operation><Operation><Name>FilterGradient</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName>"
-//     +"<SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>ConstraintGradient0</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName>"
-//     +"<SharedDataName>ConstraintGradient0</SharedDataName></Output></Operation><Output><SharedDataName>ConstraintGradient0</SharedDataName></Output></Stage><Stage><Name>CalculateObjectiveValue0</Name>"
-//     +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName>"
-//     +"</Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation>"
-//     +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>ComputeObjectiveValue</Name><PerformerName>platoanalyze{PerformerIndex}</PerformerName><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-1x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-1y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-1z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-0x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-0y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName>"
-//     +"<ArgumentValue>{tractionload-id-0z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>elasticmodulusblock-id-2</ArgumentName>"
-//     +"<ArgumentValue>{elasticmodulusblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>poissonsratioblock-id-2</ArgumentName>"
-//     +"<ArgumentValue>{poissonsratioblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>elasticmodulusblock-id-1</ArgumentName>"
-//     +"<ArgumentValue>{elasticmodulusblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName>"
-//     +"<ArgumentValue>{poissonsratioblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName>"
-//     +"</Input><Output><ArgumentName>ObjectiveValue</ArgumentName><SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation>"
-//     +"</For></Operation></For><Operation><Name>CalculateNon-DeterministicObjectiveValue</Name><PerformerName>PlatoMain</PerformerName>"
-//     +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName>"
-//     +"<SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Input></For></For><Output><ArgumentName>ObjectiveMeanPlus1StdDev</ArgumentName><SharedDataName>"
-//     +"ObjectiveValue0</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveValue0</SharedDataName></Output></Stage><Stage><Name>CalculateObjectiveGradient0</Name><Input><SharedDataName>Control</SharedDataName>"
-//     +"</Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName>"
-//     +"<SharedDataName>Topology</SharedDataName></Output></Operation><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>ComputeObjectiveGradient</Name>"
-//     +"<PerformerName>platoanalyze{PerformerIndex}</PerformerName><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><ArgumentValue>{tractionload-id-1x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><ArgumentValue>{tractionload-id-1y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><ArgumentValue>{tractionload-id-1z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><ArgumentValue>{tractionload-id-0x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><ArgumentValue>{tractionload-id-0y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><ArgumentValue>{tractionload-id-0z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>elasticmodulusblock-id-2</ArgumentName><ArgumentValue>{elasticmodulusblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-2</ArgumentName><ArgumentValue>{poissonsratioblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>elasticmodulusblock-id-1</ArgumentName><ArgumentValue>{elasticmodulusblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><ArgumentValue>{poissonsratioblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
-//     +"</Parameter><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName><SharedDataName>"
-//     +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation></For></Operation></For>"
-//     +"<Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>FilterGradient</Name><PerformerName>PlatoMain</PerformerName>"
-//     +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>"
-//     +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName><SharedDataName>"
-//     +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation></For></Operation></For><Operation><Name>CalculateNon-DeterministicObjectiveGradient"
-//     +"</Name><PerformerName>PlatoMain</PerformerName><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>"
-//     +"ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName>"
-//     +"</Input><Input><ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><SharedDataName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName>"
-//     +"</Input></For></For><Output><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName><SharedDataName>ObjectiveGradient0</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveGradient0</SharedDataName>"
-//     +"</Output></Stage><Optimizer><Package>MMA</Package><Options><MaxNumOuterIterations>100</MaxNumOuterIterations></Options><UpdateProblemStage><Name>UpdateProblem</Name></UpdateProblemStage><CacheStage><Name>CacheState</Name>"
-//     +"</CacheStage><Output><OutputStage>OutputToFile</OutputStage></Output><OptimizationVariables><ValueName>Control</ValueName><InitializationStage>InitialGuess</InitializationStage><FilteredName>"
-//     +"Topology</FilteredName><LowerBoundValueName>LowerBoundValue</LowerBoundValueName><LowerBoundVectorName>LowerBoundVector</LowerBoundVectorName><UpperBoundValueName>UpperBoundValue</UpperBoundValueName>"
-//     +"<UpperBoundVectorName>UpperBoundVector</UpperBoundVectorName><SetLowerBoundsStage>SetLowerBounds</SetLowerBoundsStage><SetUpperBoundsStage>SetUpperBounds</SetUpperBoundsStage></OptimizationVariables>"
-//     +"<Objective><GradientStageName>CalculateObjectiveGradient0</GradientStageName><GradientName>ObjectiveGradient0</GradientName><ValueStageName>CalculateObjectiveValue0</ValueStageName><ValueName>ObjectiveValue0</ValueName></Objective>"
-//     +"<Constraint><ReferenceValueName>ReferenceValue</ReferenceValueName><NormalizedTargetValue>1.0</NormalizedTargetValue><GradientStageName>CalculateConstraintGradient0</GradientStageName>"
-//     +"<GradientName>ConstraintGradient0</GradientName><ValueStageName>CalculateConstraintValue0</ValueStageName><ValueName>ConstraintValue0</ValueName></Constraint><BoundConstraint>"
-//     +"<Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
-//     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    // 4. TEST OUTPUT FILE
+    auto tReadData = XMLGen::read_data_from_file("interface.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Console><Verbose>true</Verbose></Console><Performer><Name>PlatoMain</Name><Code>PlatoMain</Code>")
+    +"<PerformerID>0</PerformerID></Performer><Performer><PerformerID>1</PerformerID><Forvar=\"PerformerIndex\"in=\"Performers\"><Name>platoanalyze{PerformerIndex}</Name><Code>analyze</Code>"
+    +"</For></Performer><SharedData><Name>Control</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData>"
+    +"<SharedData><Name>LowerBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData>"
+    +"<SharedData><Name>LowerBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData>"
+    +"<Name>UpperBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>"
+    +"UpperBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ReferenceValue</Name>"
+    +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ObjectiveValueID-0</Name>"
+    +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ObjectiveGradientID-0</Name>"
+    +"<Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ConstraintValueID-0</Name><Type>Scalar</Type>"
+    +"<Layout>Global</Layout><Size>1</Size><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><SharedData><Name>ConstraintGradientID-0</Name><Type>Scalar</Type>"
+    +"<Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain</UserName></SharedData><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
+    +"<SharedData><Name>VonMises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>ElementField</Layout><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
+    +"<UserName>PlatoMain</UserName></SharedData></For></For><SharedData><Name>Topology</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>PlatoMain</OwnerName><UserName>PlatoMain"
+    +"</UserName><Forvar=\"PerformerIndex\"in=\"Performers\"><UserName>platoanalyze{PerformerIndex}</UserName></For></SharedData><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
+    +"<SharedData><Name>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
+    +"<UserName>PlatoMain</UserName></SharedData></For></For><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><SharedData><Name>"
+    +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platoanalyze{PerformerIndex}</OwnerName>"
+    +"<UserName>PlatoMain</UserName></SharedData></For></For><Stage><Name>ComputeDesignDomainVolume</Name><Operation><Name>ComputeDesignDomainVolume</Name><PerformerName>PlatoMain</PerformerName>"
+    +"<Output><ArgumentName>ReferenceValue</ArgumentName><SharedDataName>ReferenceValue</SharedDataName></Output></Operation><Output><SharedDataName>ReferenceValue</SharedDataName></Output>"
+    +"</Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>PlatoMain</PerformerName><Output><ArgumentName>InitializedField</ArgumentName>"
+    +"<SharedDataName>Control</SharedDataName></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Input><SharedDataName>"
+    +"LowerBoundValue</SharedDataName></Input><Operation><Name>ComputeLowerBounds</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>LowerBoundVector</ArgumentName>"
+    +"<SharedDataName>LowerBoundVector</SharedDataName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName><SharedDataName>LowerBoundVector</SharedDataName></Output></Operation>"
+    +"<Output><SharedDataName>LowerBoundVector</SharedDataName></Output></Stage><Stage><Name>SetUpperBounds</Name><Input><SharedDataName>UpperBoundValue</SharedDataName></Input><Operation>"
+    +"<Name>ComputeUpperBounds</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>UpperBoundVector</ArgumentName><SharedDataName>UpperBoundVector</SharedDataName></Input>"
+    +"<Output><ArgumentName>UpperBoundVector</ArgumentName><SharedDataName>UpperBoundVector</SharedDataName></Output></Operation><Output><SharedDataName>UpperBoundVector</SharedDataName></Output>"
+    +"</Stage><Stage><Name>CacheState:platoanalyze0</Name><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Name>CacheState</Name>"
+    +"<PerformerName>platoanalyze{PerformerIndex}</PerformerName></Operation></For></For></Stage><Stage><Name>UpdateProblem:platoanalyze0</Name><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
+    +"<Operation><Name>UpdateProblem</Name><PerformerName>platoanalyze{PerformerIndex}</PerformerName></Operation></For></For></Stage><Stage><Name>ComputeConstraintValueID-0</Name><Type>volume</Type>"
+    +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>"
+    +"Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>ComputeConstraintValue</Name>"
+    +"<PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ConstraintValue</ArgumentName>"
+    +"<SharedDataName>ConstraintValueID-0</SharedDataName></Output></Operation><Output><SharedDataName>ConstraintValueID-0</SharedDataName></Output></Stage><Stage><Name>ComputeConstraintGradientID-0</Name>"
+    +"<Type>volume</Type><Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName>"
+    +"<SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>ComputeConstraintGradient</Name>"
+    +"<PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
+    +"<SharedDataName>ConstraintGradientID-0</SharedDataName></Output></Operation><Operation><Name>FilterGradient</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName>"
+    +"<SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>ConstraintGradientID-0</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName>"
+    +"<SharedDataName>ConstraintGradientID-0</SharedDataName></Output></Operation><Output><SharedDataName>ConstraintGradientID-0</SharedDataName></Output></Stage><Stage><Name>ComputeObjectiveValueID-0</Name>"
+    +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName>"
+    +"</Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation>"
+    +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>ComputeObjectiveValue</Name><PerformerName>platoanalyze{PerformerIndex}</PerformerName><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-1x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-1y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-1z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-0x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-0y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName>"
+    +"<ArgumentValue>{tractionload-id-0z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>elasticmodulusblock-id-2</ArgumentName>"
+    +"<ArgumentValue>{elasticmodulusblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>poissonsratioblock-id-2</ArgumentName>"
+    +"<ArgumentValue>{poissonsratioblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>elasticmodulusblock-id-1</ArgumentName>"
+    +"<ArgumentValue>{elasticmodulusblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName>"
+    +"<ArgumentValue>{poissonsratioblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue></Parameter><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName>"
+    +"</Input><Output><ArgumentName>ObjectiveValue</ArgumentName><SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation>"
+    +"</For></Operation></For><Operation><Name>ComputeNon-DeterministicObjectiveValue</Name><PerformerName>PlatoMain</PerformerName>"
+    +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName>"
+    +"<SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Input></For></For><Output><ArgumentName>ObjectiveMeanPlus1StdDev</ArgumentName><SharedDataName>"
+    +"ObjectiveValueID-0</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveValueID-0</SharedDataName></Output></Stage><Stage><Name>ComputeObjectiveGradientID-0</Name><Input><SharedDataName>Control</SharedDataName>"
+    +"</Input><Operation><Name>FilterControl</Name><PerformerName>PlatoMain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName>"
+    +"<SharedDataName>Topology</SharedDataName></Output></Operation><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>ComputeObjectiveGradient</Name>"
+    +"<PerformerName>platoanalyze{PerformerIndex}</PerformerName><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><ArgumentValue>{tractionload-id-1x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><ArgumentValue>{tractionload-id-1y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><ArgumentValue>{tractionload-id-1z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><ArgumentValue>{tractionload-id-0x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><ArgumentValue>{tractionload-id-0y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><ArgumentValue>{tractionload-id-0z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>elasticmodulusblock-id-2</ArgumentName><ArgumentValue>{elasticmodulusblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-2</ArgumentName><ArgumentValue>{poissonsratioblock-id-2[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>elasticmodulusblock-id-1</ArgumentName><ArgumentValue>{elasticmodulusblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><ArgumentValue>{poissonsratioblock-id-1[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</ArgumentValue>"
+    +"</Parameter><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName><SharedDataName>"
+    +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation></For></Operation></For>"
+    +"<Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Operation><Forvar=\"PerformerIndex\"in=\"Performers\"><Operation><Name>FilterGradient</Name><PerformerName>PlatoMain</PerformerName>"
+    +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>"
+    +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName><SharedDataName>"
+    +"ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName></Output></Operation></For></Operation></For><Operation><Name>ComputeNon-DeterministicObjectiveGradient"
+    +"</Name><PerformerName>PlatoMain</PerformerName><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>"
+    +"ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><SharedDataName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName>"
+    +"</Input><Input><ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><SharedDataName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</SharedDataName>"
+    +"</Input></For></For><Output><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName><SharedDataName>ObjectiveGradientID-0</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveGradientID-0</SharedDataName>"
+    +"</Output></Stage><Optimizer><Package>MMA</Package><Options><MaxNumOuterIterations>100</MaxNumOuterIterations></Options><UpdateProblemStage><Name>UpdateProblem</Name></UpdateProblemStage><CacheStage><Name>CacheState</Name>"
+    +"</CacheStage><Output><OutputStage>OutputToFile</OutputStage></Output><OptimizationVariables><ValueName>Control</ValueName><InitializationStage>InitialGuess</InitializationStage><FilteredName>"
+    +"Topology</FilteredName><LowerBoundValueName>LowerBoundValue</LowerBoundValueName><LowerBoundVectorName>LowerBoundVector</LowerBoundVectorName><UpperBoundValueName>UpperBoundValue</UpperBoundValueName>"
+    +"<UpperBoundVectorName>UpperBoundVector</UpperBoundVectorName><SetLowerBoundsStage>SetLowerBounds</SetLowerBoundsStage><SetUpperBoundsStage>SetUpperBounds</SetUpperBoundsStage></OptimizationVariables>"
+    +"<Objective><GradientStageName>ComputeObjectiveGradientID-0</GradientStageName><GradientName>ObjectiveGradientID-0</GradientName><ValueStageName>ComputeObjectiveValueID-0</ValueStageName><ValueName>ObjectiveValueID-0</ValueName></Objective>"
+    +"<Constraint><ReferenceValueName>ReferenceValue</ReferenceValueName><NormalizedTargetValue>1.0</NormalizedTargetValue><GradientStageName>ComputeConstraintGradientID-0</GradientStageName>"
+    +"<GradientName>ConstraintGradientID-0</GradientName><ValueStageName>ComputeConstraintValueID-0</ValueStageName><ValueName>ConstraintValueID-0</ValueName></Constraint><BoundConstraint>"
+    +"<Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-//     std::system("rm -f interface.xml");
-// }
+    std::system("rm -f interface.xml");
+}
 
 }
 // namespace XMLGeneratorInterfaceFileUnitTester
