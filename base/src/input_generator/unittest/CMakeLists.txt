@@ -19,6 +19,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorRandomInterfaceFileUtilities.cpp
                                       ../XMLGeneratorPlatoMainOperationFileUtilities.cpp
                                       ../XMLGeneratorPlatoMainInputFileUtilities.cpp
+                                      ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                                       ../ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp

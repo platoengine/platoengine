@@ -12,74 +12,74 @@
 namespace PlatoTestXMLGenerator
 {
 
-// TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
-// {
-//     // POSE MATERIAL SET 1
-//     XMLGen::Material tMaterial1;
-//     tMaterial1.id("2");
-//     tMaterial1.category("isotropic");
-//     tMaterial1.property("elastic modulus", "1");
-//     tMaterial1.property("poissons ratio", "0.3");
-//     XMLGen::Material tMaterial2;
-//     tMaterial2.id("2");
-//     tMaterial2.category("isotropic");
-//     tMaterial2.property("elastic modulus", "1");
-//     tMaterial2.property("poissons ratio", "0.3");
+TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
+{
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetOne;
-//     tMaterialSetOne.insert({"1", tMaterial1});
-//     tMaterialSetOne.insert({"2", tMaterial2});
-//     auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    tMaterialSetOne.insert({"2", tMaterial2});
+    auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
 
-//     // POSE MATERIAL SET 2
-//     XMLGen::Material tMaterial3;
-//     tMaterial3.id("2");
-//     tMaterial3.category("isotropic");
-//     tMaterial3.property("elastic modulus", "1.1");
-//     tMaterial3.property("poissons ratio", "0.33");
-//     XMLGen::Material tMaterial4;
-//     tMaterial4.id("2");
-//     tMaterial4.category("isotropic");
-//     tMaterial4.property("elastic modulus", "1");
-//     tMaterial4.property("poissons ratio", "0.3");
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial3;
+    tMaterial3.id("2");
+    tMaterial3.category("isotropic");
+    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("poissons ratio", "0.33");
+    XMLGen::Material tMaterial4;
+    tMaterial4.id("2");
+    tMaterial4.category("isotropic");
+    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetTwo;
-//     tMaterialSetTwo.insert({"1", tMaterial3});
-//     tMaterialSetTwo.insert({"2", tMaterial4});
-//     auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial3});
+    tMaterialSetTwo.insert({"2", tMaterial4});
+    auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);
 
-//     // CONSTRUCT SAMPLES SET
-//     XMLGen::RandomMetaData tRandomMetaData;
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseOne));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseTwo));
-//     ASSERT_NO_THROW(tRandomMetaData.finalize());
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseOne));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCaseTwo));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
 
-//     // SET NUM PERFORMERS
-//     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-//     tUncertaintyMetaData.numPeformers = 2;
+    // SET NUM PERFORMERS
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    tUncertaintyMetaData.numPeformers = 2;
 
-//     // CALL FUNCTION
-//     ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
+    // CALL FUNCTION
+    ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
 
-//     // TEST OUTPUT FILE
-//     auto tReadData = XMLGen::read_data_from_file("defines.xml");
+    // TEST OUTPUT FILE
+    auto tReadData = XMLGen::read_data_from_file("defines.xml");
 
-//     auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"2\"/>")
-//         + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
-//         + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
-//         + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
-//         + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
-//         + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-//         + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33\"/>"
-//         + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1\"/>"
-//         + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3\"/>"
-//         + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1\"/>"
-//         + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"2\"/>")
+        + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
+        + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
+        + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
+        + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
+        + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1\"/>"
+        + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
 
-//     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-//     std::system("rm -f defines.xml");
-// }
+    std::system("rm -f defines.xml");
+}
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
 {
@@ -167,133 +167,133 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     std::system("rm -f defines.xml");
 }
 
-// TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
-// {
-//     // POSE MATERIAL SET 1
-//     XMLGen::Material tMaterial1;
-//     tMaterial1.id("2");
-//     tMaterial1.category("isotropic");
-//     tMaterial1.property("elastic modulus", "1");
-//     tMaterial1.property("poissons ratio", "0.3");
-//     XMLGen::Material tMaterial2;
-//     tMaterial2.id("2");
-//     tMaterial2.category("isotropic");
-//     tMaterial2.property("elastic modulus", "1");
-//     tMaterial2.property("poissons ratio", "0.3");
+TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
+{
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic");
+    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic");
+    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetOne;
-//     tMaterialSetOne.insert({"1", tMaterial1});
-//     tMaterialSetOne.insert({"2", tMaterial2});
-//     auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    tMaterialSetOne.insert({"2", tMaterial2});
+    auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
 
-//     // POSE MATERIAL SET 2
-//     XMLGen::Material tMaterial3;
-//     tMaterial3.id("2");
-//     tMaterial3.category("isotropic");
-//     tMaterial3.property("elastic modulus", "1.1");
-//     tMaterial3.property("poissons ratio", "0.33");
-//     XMLGen::Material tMaterial4;
-//     tMaterial4.id("2");
-//     tMaterial4.category("isotropic");
-//     tMaterial4.property("elastic modulus", "1");
-//     tMaterial4.property("poissons ratio", "0.3");
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial3;
+    tMaterial3.id("2");
+    tMaterial3.category("isotropic");
+    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("poissons ratio", "0.33");
+    XMLGen::Material tMaterial4;
+    tMaterial4.id("2");
+    tMaterial4.category("isotropic");
+    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("poissons ratio", "0.3");
 
-//     XMLGen::MaterialSet tMaterialSetTwo;
-//     tMaterialSetTwo.insert({"1", tMaterial3});
-//     tMaterialSetTwo.insert({"2", tMaterial4});
-//     auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial3});
+    tMaterialSetTwo.insert({"2", tMaterial4});
+    auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
 
-//     // POSE LOAD SET 1
-//     XMLGen::LoadCase tLoadCase1;
-//     tLoadCase1.id = "1";
-//     XMLGen::Load tLoad1;
-//     tLoad1.mIsRandom = true;
-//     tLoad1.type = "traction";
-//     tLoad1.app_name = "sideset";
-//     tLoad1.values.push_back("1");
-//     tLoad1.values.push_back("2");
-//     tLoad1.values.push_back("3");
-//     tLoadCase1.loads.push_back(tLoad1);
-//     XMLGen::Load tLoad2;
-//     tLoad2.mIsRandom = true;
-//     tLoad2.type = "traction";
-//     tLoad2.app_name = "sideset";
-//     tLoad2.values.push_back("4");
-//     tLoad2.values.push_back("5");
-//     tLoad2.values.push_back("6");
-//     tLoadCase1.loads.push_back(tLoad2);
-//     XMLGen::Load tLoad3;
-//     tLoad3.type = "traction";
-//     tLoad3.mIsRandom = false;
-//     tLoad3.app_name = "sideset";
-//     tLoad3.values.push_back("7");
-//     tLoad3.values.push_back("8");
-//     tLoad3.values.push_back("9");
-//     tLoadCase1.loads.push_back(tLoad3); // append deterministic load
-//     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
-//     // POSE LOAD SET 2
-//     XMLGen::LoadCase tLoadCase2;
-//     tLoadCase2.id = "2";
-//     XMLGen::Load tLoad4;
-//     tLoad4.mIsRandom = true;
-//     tLoad4.type = "traction";
-//     tLoad4.app_name = "sideset";
-//     tLoad4.values.push_back("11");
-//     tLoad4.values.push_back("12");
-//     tLoad4.values.push_back("13");
-//     tLoadCase2.loads.push_back(tLoad4);
-//     XMLGen::Load tLoad5;
-//     tLoad5.mIsRandom = true;
-//     tLoad5.type = "traction";
-//     tLoad5.app_name = "sideset";
-//     tLoad5.values.push_back("14");
-//     tLoad5.values.push_back("15");
-//     tLoad5.values.push_back("16");
-//     tLoadCase2.loads.push_back(tLoad5);
-//     tLoadCase2.loads.push_back(tLoad3); // append deterministic load
-//     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
-//     // CONSTRUCT SAMPLES SET
-//     XMLGen::RandomMetaData tRandomMetaData;
-//     ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase1));
-//     ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase2));
-//     ASSERT_NO_THROW(tRandomMetaData.finalize());
+    // CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tRandomMaterialCase2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
 
-//     // SET NUM PERFORMERS
-//     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-//     tUncertaintyMetaData.numPeformers = 2;
+    // SET NUM PERFORMERS
+    XMLGen::UncertaintyMetaData tUncertaintyMetaData;
+    tUncertaintyMetaData.numPeformers = 2;
 
-//     // CALL FUNCTION
-//     ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
+    // CALL FUNCTION
+    ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
 
-//     // TEST OUTPUT FILE
-//     auto tReadData = XMLGen::read_data_from_file("defines.xml");
+    // TEST OUTPUT FILE
+    auto tReadData = XMLGen::read_data_from_file("defines.xml");
 
-//     auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"4\"/>")
-//         + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
-//         + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
-//         + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
-//         + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
-//         + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-//         + "<Arrayname=\"tractionload-id-0x-axis\"type=\"real\"value=\"1,1,11,11\"/>"
-//         + "<Arrayname=\"tractionload-id-0y-axis\"type=\"real\"value=\"2,2,12,12\"/>"
-//         + "<Arrayname=\"tractionload-id-0z-axis\"type=\"real\"value=\"3,3,13,13\"/>"
-//         + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"4,4,14,14\"/>"
-//         + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"5,5,15,15\"/>"
-//         + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"6,6,16,16\"/>"
-//         + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33,0.3,0.33\"/>"
-//         + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1,1,1.1\"/>"
-//         + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3,0.3,0.3\"/>"
-//         + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1,1,1\"/>"
-//         + "<Arrayname=\"Probabilities\"type=\"real\"value=\"2.500000000000000000000e-01,"
-//         + "2.500000000000000000000e-01,2.500000000000000000000e-01,2.500000000000000000000e-01\"/>";
-//     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"4\"/>")
+        + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
+        + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
+        + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
+        + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
+        + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
+        + "<Arrayname=\"tractionload-id-0x-axis\"type=\"real\"value=\"1,1,11,11\"/>"
+        + "<Arrayname=\"tractionload-id-0y-axis\"type=\"real\"value=\"2,2,12,12\"/>"
+        + "<Arrayname=\"tractionload-id-0z-axis\"type=\"real\"value=\"3,3,13,13\"/>"
+        + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"4,4,14,14\"/>"
+        + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"5,5,15,15\"/>"
+        + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"6,6,16,16\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-1\"type=\"real\"value=\"0.3,0.33,0.3,0.33\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-1\"type=\"real\"value=\"1,1.1,1,1.1\"/>"
+        + "<Arrayname=\"poissonsratioblock-id-2\"type=\"real\"value=\"0.3,0.3,0.3,0.3\"/>"
+        + "<Arrayname=\"elasticmodulusblock-id-2\"type=\"real\"value=\"1,1,1,1\"/>"
+        + "<Arrayname=\"Probabilities\"type=\"real\"value=\"2.500000000000000000000e-01,"
+        + "2.500000000000000000000e-01,2.500000000000000000000e-01,2.500000000000000000000e-01\"/>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-//     std::system("rm -f defines.xml");
-// }
+    std::system("rm -f defines.xml");
+}
 
 TEST(PlatoTestXMLGenerator, PrepareProbabilitiesForDefineXmlFile)
 {

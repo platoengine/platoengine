@@ -42,6 +42,7 @@ struct ValidLayoutKeys
     std::unordered_map<std::string, std::string> mKeys =
         { {"element field", "Element Field"}, {"nodal field", "Nodal Field"} };
 };
+// struct ValidLayoutKeys
 
 struct ValidFilterKeys
 {
@@ -52,7 +53,22 @@ struct ValidFilterKeys
     std::unordered_map<std::string, std::string> mKeys = { {"identity", "Identity"},
         {"kernel", "Kernel"}, {"kernel then heaviside", "KernelThenHeaviside"}, {"kernel then tanh", "KernelThenTANH"} };
 };
-// struct ValidKeys
+// struct ValidFilterKeys
+
+struct ValidAnalyzeOutputKeys
+{
+    /*!<
+     * valid plato analyze output keys \n
+     * \brief light-input file output key to plato analyze key map, i.e. map<light_input_file_output key, plato_analyze_output_key>. \n
+     * Basically, this maps connects the key use for any quantity of interest inside Plato's light input file to the key used in \n
+     * Plato Analyze to identify the quantity of interest.
+     **/
+    std::unordered_map<std::string, std::string> mKeys = { {"von_mises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
+      {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
+      {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
+      {"dispy", "Solution Y"}, {"dispz", "Solution Z"} };
+};
+// struct ValidAnalyzeOutputKeys
 
 }
 // namespace XMLGen
