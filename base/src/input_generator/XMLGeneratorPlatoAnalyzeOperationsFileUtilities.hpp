@@ -181,6 +181,16 @@ void append_random_material_properties_to_plato_analyze_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_random_traction_vector_to_plato_analyze_operation
+ * \brief Append random traction vector to the plato analyze operation xml file.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_random_traction_vector_to_plato_analyze_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn write_amgx_input_file
  * \brief Write AMGX input .json file. This file is used to assign values for the \n
  * linear solver parameters. Interested readers can find more information on AMGX \n

@@ -70,7 +70,7 @@ void append_probabilities_to_define_xml_file
  * \fn return_random_tractions_tags_for_define_xml_file
  * \brief Return random tractions' tags used to define parameters inside the define.xml file.
  * \param [in] aRandomMetaData random samples metadata
- * \return traction load index to tags map, i.e. map<load index, vector<tags>>
+ * \return traction load index to tags map, i.e. map<load_index, vector<argument_name_tag>>
 **********************************************************************************/
 std::unordered_map<std::string, std::vector<std::string>>
 return_random_tractions_tags_for_define_xml_file

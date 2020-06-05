@@ -6,6 +6,7 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
@@ -106,6 +107,7 @@ void append_compute_random_objective_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
+        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
         XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
@@ -128,6 +130,7 @@ void append_compute_random_objective_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
+        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
         XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
@@ -150,6 +153,7 @@ void append_compute_random_constraint_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
+        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
         XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
@@ -172,6 +176,7 @@ void append_compute_random_constraint_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
+        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
         XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
@@ -249,6 +254,7 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
     }
 
     XMLGen::ValidAnalyzeMaterialPropertyKeys tValidTags;
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
         auto tMaterialPropertyTag = tPair.second;
@@ -260,7 +266,6 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
         }
         auto tAnalyzeMaterialPropTag = tItr->second;
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tAnalyzeMaterialPropTag;
-        std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
@@ -279,6 +284,7 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
     }
 
     XMLGen::ValidAnalyzeMaterialPropertyKeys tValidTags;
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
         auto tMaterialPropertyTag = tPair.second;
@@ -290,7 +296,6 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
         }
         auto tAnalyzeMaterialPropTag = tItr->second;
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialPropTag;
-        std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
@@ -309,6 +314,30 @@ void append_random_material_properties_to_plato_analyze_operation
     for (auto &tMaterial : tMaterialTags)
     {
         tMatFuncInterface.call(tMaterial.second.first, tMaterial.second.second, aParentNode);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_random_traction_vector_to_plato_analyze_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
+    auto tLoadsTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    for(auto& tPair : tLoadsTags)
+    {
+        auto tLoadIndex = tPair.first;
+        auto tRandomLoadLabel = std::string("[Random Traction Vector Boundary Condition ") + tLoadIndex + "]:";
+        for(auto& tArgumentNameTag : tPair.second)
+        {
+            auto tDim = &tArgumentNameTag - &tPair.second[0];
+            auto tValue = std::string("Values(") + std::to_string(tDim) + ")";
+            auto tTarget = std::string("[Plato Problem]:[Natural Boundary Conditions]:") + tRandomLoadLabel + tValue;
+            std::vector<std::string> tValues = { tArgumentNameTag, tTarget, "0.0" };
+            auto tParameter = aParentNode.append_child("Parameter");
+            XMLGen::append_children(tKeys, tValues, tParameter);
+        }
     }
 }
 /******************************************************************************/

@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 
 namespace XMLGen
@@ -92,10 +93,9 @@ return_random_tractions_tags_for_define_xml_file
     // traction load index to tags map, i.e. map<load index, vector<tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
-    std::vector<std::string> tValidAxis = {"x", "y", "z"};
+    XMLGen::ValidLoadAxisKeys tValidAxis;
     auto tSample = aRandomMetaData.sample(0);
     auto tLoadCase = tSample.load();
-
     for(auto& tLoad : tLoadCase.loads)
     {
         auto tLoadTagLower = Plato::tolower(tLoad.type);
@@ -107,7 +107,7 @@ return_random_tractions_tags_for_define_xml_file
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
-                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis[tDimIndex] + "-axis";
+                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis.mKeys[tDimIndex] + "-axis";
                 tOutput[tLoadIndexString].push_back(tTag);
             }
         }

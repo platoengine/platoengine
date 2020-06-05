@@ -12,6 +12,13 @@
 namespace XMLGen
 {
 
+struct ValidLoadAxisKeys
+{
+    /*!< valid load vector axis, i.e. {x,y,z} axes */
+    std::vector<std::string> mKeys = {"x", "y", "z"};
+};
+// struct ValidLoadAxisKeys
+
 struct ValidPhysicsPerformerKeys
 {
     /*!< valid physics performers supported by plato */
