@@ -59,7 +59,7 @@ public:
         auto tItr = mProperties.find(tTag);
         if(tItr == mProperties.end())
         {
-            THROWERR(std::string("XMLGenn Material: Material property '") + aTag + "' is not supported.")
+            THROWERR(std::string("XML Generator Material: Material property '") + aTag + "' is not supported.")
         }
         return (tItr->second.first);
     }
@@ -96,7 +96,7 @@ public:
         auto tItr = mProperties.find(tTag);
         if(tItr == mProperties.end())
         {
-            THROWERR(std::string("XMLGenn Material: Material property '") + aTag + "' is not defined.")
+            THROWERR(std::string("XML Generator Material: Material property '") + aTag + "' is not defined.")
         }
         return (tItr->second.second);
     }
@@ -110,9 +110,9 @@ public:
     **********************************************************************************/
     void property(const std::string& aTag, const std::string& aValue, std::string aAttribute = "homogeneous")
     {
-        if(aTag.empty()) { THROWERR("XMLGenn Material: Material property tag is empty.") }
-        if(aValue.empty()) { THROWERR("XMLGenn Material: Material property value is empty.") }
-        if(aAttribute.empty()) { THROWERR("XMLGenn Material: Material property attribute is empty.") }
+        if(aTag.empty()) { THROWERR("XML Generator Material: Material property tag is empty.") }
+        if(aValue.empty()) { THROWERR("XML Generator Material: Material property value is empty.") }
+        if(aAttribute.empty()) { THROWERR("XML Generator Material: Material property attribute is empty.") }
         auto tTag = Plato::tolower(aTag);
         mProperties[aTag] = std::make_pair(aAttribute, aValue);
     }

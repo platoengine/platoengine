@@ -275,7 +275,7 @@ void append_sample_objective_value_operation
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
     XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
-    auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+    auto tMaterialTags = XMLGen::return_material_property_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
     XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
@@ -360,7 +360,7 @@ void append_sample_objective_gradient_operation
 
         auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
         XMLGen::append_nondeterministic_parameters(tLoadTags, tOperationNode);
-        auto tMaterialTags = XMLGen::return_material_properties_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
+        auto tMaterialTags = XMLGen::return_material_property_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
         XMLGen::append_nondeterministic_parameters(tMaterialTags, tOperationNode);
 
         auto tInputNode = tOperationNode.append_child("Input");

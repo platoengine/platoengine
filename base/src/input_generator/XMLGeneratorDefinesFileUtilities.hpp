@@ -89,15 +89,15 @@ void append_tractions_to_define_xml_file
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn return_material_properties_tags_for_define_xml_file
- * \brief Return material properties' tags used to define parameters inside the \n
- * define.xml file.
+ * \fn return_material_property_tags_for_define_xml_file
+ * \brief Return map from element block identification number to list of material \n
+ * property argument name tags used to define parameters in the define.xml file.
  * \param [in] aRandomMetaData random samples metadata
- * \return traction block identification number to material properties' tags map, \n
- * i.e. map<block id, vector<tags>>
+ * \return map from element block identification number to list of material property \n
+ * argument name tags, i.e. map<elem_block_id, vector<material_property_argument_name_tag>>
 **********************************************************************************/
 std::unordered_map<std::string, std::vector<std::string>>
-return_material_properties_tags_for_define_xml_file
+return_material_property_tags_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
 
 /******************************************************************************//**

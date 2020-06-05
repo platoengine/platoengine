@@ -59,6 +59,11 @@
 #include <map>
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
+#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
+#include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
 #include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
@@ -93,6 +98,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInputFiles()
     XMLGen::write_interface_xml_file_for_nondeterministic_usecase(m_InputData);
     XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(m_InputData);
     XMLGen::write_plato_main_input_deck_file(m_InputData);
+    XMLGen::write_amgx_input_file();
 
     if(!generatePerformerOperationsXML())
     {
