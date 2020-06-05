@@ -10,6 +10,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorRandomInterfaceFileUtilities.cpp
                       XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoMainInputFileUtilities.cpp
+                      XMLGeneratorLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                       ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                       XMLGeneratorUtilities.cpp
@@ -25,6 +26,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorInterfaceFileUtilities.hpp 
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp
                       XMLGeneratorPlatoMainInputFileUtilities.hpp
+                      XMLGeneratorLaunchScriptUtilities.hpp
                       XMLGeneratorRandomInterfaceFileUtilities.hpp 
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp 
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 

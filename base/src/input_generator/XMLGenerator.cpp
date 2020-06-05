@@ -281,14 +281,14 @@ void XMLGenerator::setNumPerformers()
 {
     if (m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
     {
-        m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].num_ranks);
+        m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
     else
     {
-        m_InputData.m_UncertaintyMetaData.numPeformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
+        m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
     }
 
-    if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPeformers != 0)
+    if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPerformers != 0)
     {
         THROWERR("Set Number for Performers: Number of samples must divide evenly into number of processors.");
     }

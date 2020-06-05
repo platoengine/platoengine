@@ -5235,9 +5235,9 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 
   auto tXMLGenMetadata = tTester.getInputData();
   auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-  size_t numPeformers = tTester.getNumPerformers();
+  size_t numPerformers = tTester.getNumPerformers();
   EXPECT_EQ(tNumSamples,2u);
-  EXPECT_EQ(numPeformers,1u);
+  EXPECT_EQ(numPerformers,1u);
 
   // TEST SAMPLES
   std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
@@ -5324,8 +5324,8 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     auto tXMLGenMetadata = tTester.getInputData();
     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
     EXPECT_EQ(tNumSamples,10u);
-    size_t tNumPeformers = tTester.getNumPerformers();
-    EXPECT_EQ(tNumPeformers,5u);
+    size_t tNumPerformers = tTester.getNumPerformers();
+    EXPECT_EQ(tNumPerformers,5u);
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldLoadCaseProbabilities =
@@ -5445,8 +5445,8 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
     auto tXMLGenMetadata = tTester.getInputData();
     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
     ASSERT_EQ(3u, tNumSamples);
-    size_t tNumPeformers = tTester.getNumPerformers();
-    ASSERT_EQ(3u, tNumPeformers);
+    size_t tNumPerformers = tTester.getNumPerformers();
+    ASSERT_EQ(3u, tNumPerformers);
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldLoadCaseProbabilities =
@@ -5538,8 +5538,8 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
     auto tXMLGenMetadata = tTester.getInputData();
     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
     EXPECT_EQ(3u, tNumSamples);
-    size_t numPeformers = tTester.getNumPerformers();
-    EXPECT_EQ(3u, numPeformers);
+    size_t numPerformers = tTester.getNumPerformers();
+    EXPECT_EQ(3u, numPerformers);
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldLoadCaseProbabilities =

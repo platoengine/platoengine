@@ -170,7 +170,7 @@ public:
     std::string getAlbanyPath() {return m_InputData.albany_path;}
     std::string getLightMPPath() {return m_InputData.lightmp_path;}
     std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
-    size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPeformers;}
+    size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPerformers;}
     void clearInputData();
     XMLGen::InputData* exposeInputData() {return &m_InputData;}
 

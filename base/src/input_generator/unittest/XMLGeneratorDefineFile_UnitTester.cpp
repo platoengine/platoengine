@@ -56,7 +56,7 @@ namespace PlatoTestXMLGenerator
 
 //     // SET NUM PERFORMERS
 //     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-//     tUncertaintyMetaData.numPeformers = 2;
+//     tUncertaintyMetaData.numPerformers = 2;
 
 //     // CALL FUNCTION
 //     ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
@@ -141,7 +141,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
 
     // 2. SET NUM PERFORMERS
     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-    tUncertaintyMetaData.numPeformers = 2;
+    tUncertaintyMetaData.numPerformers = 2;
 
     // 3. CALL FUNCTION
     ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
@@ -264,7 +264,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
 
 //     // SET NUM PERFORMERS
 //     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-//     tUncertaintyMetaData.numPeformers = 2;
+//     tUncertaintyMetaData.numPerformers = 2;
 
 //     // CALL FUNCTION
 //     ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
@@ -1054,7 +1054,7 @@ TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile)
 
     // 2 SET NUM PERFORMERS
     XMLGen::UncertaintyMetaData tUncertaintyMetaData;
-    tUncertaintyMetaData.numPeformers = 2;
+    tUncertaintyMetaData.numPerformers = 2;
 
     // 3. CALL FUNCTION
     pugi::xml_document tDocument;

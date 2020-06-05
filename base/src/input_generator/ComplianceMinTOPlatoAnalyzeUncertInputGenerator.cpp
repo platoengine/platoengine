@@ -121,7 +121,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateLaunchScript()
 /******************************************************************************/
 {
     if(m_InputData.m_Arch == XMLGen::Arch::SUMMIT)
-      generateSummitLaunchScripts();
+      XMLGen::generate_summit_launch_scripts(m_InputData);
     else
     {
       FILE *fp=fopen("mpirun.source", "w");
@@ -276,7 +276,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateLaunchScript()
       else
           fprintf(fp, "plato_main plato_main_input_deck.xml \\\n");
 
-      fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
+      fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers).c_str(), envString.c_str(),separationString.c_str());
       fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
       fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
       if(m_InputData.plato_analyze_path.length() != 0)
@@ -312,7 +312,7 @@ void ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateJSRunScript()
   std::ofstream jsrun;
   jsrun.open("jsrun.source");
   jsrun << "1 : eng : bash engine.sh\n";
-  jsrun << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers) << " : per : bash analyze.sh\n";
+  jsrun << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " : per : bash analyze.sh\n";
   jsrun.close();
 }
 
@@ -337,7 +337,7 @@ void ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateBatchScript()
   batchFile << "date\n";
   batchFile << "jsrun -A eng -n1 -a1 -c1 -g0\n";
 
-  batchFile << "jsrun -A per -n" << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers) << " -a1 -c1 -g1\n";
+  batchFile << "jsrun -A per -n" << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " -a1 -c1 -g1\n";
 
   batchFile << "jsrun -f jsrun.source\n";
   
@@ -350,7 +350,7 @@ size_t ComplianceMinTOPlatoAnalyzeUncertInputGenerator::computeNumberOfNodesNeed
 /******************************************************************************/
 {
   size_t tNumGPUsNeeded;
-  tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPeformers;
+  tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
   size_t tNumGPUsPerNode = 6;
   size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
   if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
@@ -373,49 +373,6 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generatePhysicsInputDecks(
 {
     if(!generatePlatoAnalyzeInputDecks())
       return false;
-    return true;
-}
-
-/******************************************************************************/
-bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generatePlatoMainInputDeckXML()
-/******************************************************************************/
-{
-    pugi::xml_document doc;
-    pugi::xml_node tmp_node1, tmp_node2, tmp_node3;
-
-    // Version entry
-    pugi::xml_node tmp_node = doc.append_child(pugi::node_declaration);
-    tmp_node.set_name("xml");
-    pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-    tmp_att.set_value("1.0");
-
-    // mesh
-    pugi::xml_node mesh_node = doc.append_child("mesh");
-    addChild(mesh_node, "type", "unstructured");
-    addChild(mesh_node, "format", "exodus");
-
-    addChild(mesh_node, "ignore_node_map", "true");
-
-    addChild(mesh_node, "mesh", m_InputData.run_mesh_name.c_str());
-    // just need one block specified here
-    if(m_InputData.blocks.size() > 0)
-    {
-        tmp_node = mesh_node.append_child("block");
-        addChild(tmp_node, "index", m_InputData.blocks[0].block_id.c_str());
-        tmp_node1 = tmp_node.append_child("integration");
-        addChild(tmp_node1, "type", "gauss");
-        addChild(tmp_node1, "order", "2");
-        addChild(tmp_node, "material", m_InputData.blocks[0].material_id.c_str());
-    }
-
-    // output
-    tmp_node = doc.append_child("output");
-    addChild(tmp_node, "file", "platomain");
-    addChild(tmp_node, "format", "exodus");
-
-    // Write the file to disk
-    doc.save_file("plato_main_input_deck.xml", "  ");
-
     return true;
 }
 
@@ -815,69 +772,6 @@ void ComplianceMinTOPlatoAnalyzeUncertInputGenerator::addStochasticObjectiveGrad
     tTmpString += m_InputData.objective_number_standard_deviations;
     tTmpString += " StdDev Gradient";
     addChild(tmp_node2, "ArgumentName", tTmpString);
-}
-
-/******************************************************************************/
-bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generatePlatoMainOperationsXML()
-/******************************************************************************/
-{
-    pugi::xml_document doc;
-    pugi::xml_node tmp_node, tmp_node1, tmp_node2;
-
-    // Version entry
-    tmp_node = doc.append_child(pugi::node_declaration);
-    tmp_node.set_name("xml");
-    pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
-    tmp_att.set_value("1.0");
-
-    pugi::xml_node def_node = doc.append_child("include");
-    def_node.append_attribute("filename") = "defines.xml";
-
-    //////////////////////////////////////////////////
-    // Operations
-    /////////////////////////////////////////////////
-
-    addFilterInfo(doc);
-    addPlatoMainOutputOperation(doc, m_InputData.m_HasUncertainties, m_InputData.m_RequestedVonMisesOutput);
-    addUpdateProblemOperation(doc);
-    addFilterControlOperation(doc);
-    addFilterGradientOperation(doc);
-    if(m_InputData.optimization_algorithm =="ksbc" ||
-                m_InputData.optimization_algorithm == "ksal" ||
-                m_InputData.optimization_algorithm == "rol ksal" ||
-                m_InputData.optimization_algorithm == "rol ksbc")
-    {
-        addFilterHessianOperation(doc);
-    }
-    addInitializeFieldOperation(doc);
-    if(m_InputData.discretization == "density")
-    {
-        addDesignVolumeOperation(doc);
-        addComputeVolumeOperation(doc);
-    }
-    else if(m_InputData.discretization == "levelset")
-    {
-    }
-    if(!addAggregateEnergyOperation(doc))
-        return false;
-    if(!addAggregateGradientOperation(doc))
-        return false;
-    if(m_InputData.optimization_algorithm =="ksbc" ||
-                m_InputData.optimization_algorithm == "ksal" ||
-                m_InputData.optimization_algorithm == "rol ksal" ||
-                m_InputData.optimization_algorithm == "rol ksbc")
-    {
-        addAggregateHessianOperation(doc);
-    }
-    addSetLowerBoundsOperation(doc);
-    addSetUpperBoundsOperation(doc);
-    if(!m_InputData.mPlatoAnalyzePerformerExists)
-        addEnforceBoundsOperationToFile(doc);
-
-    // Write the file to disk
-    doc.save_file("plato_main_operations.xml", "  ");
-
-    return true;
 }
 
 /******************************************************************************/

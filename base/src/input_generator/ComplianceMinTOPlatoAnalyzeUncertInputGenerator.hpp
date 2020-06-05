@@ -74,8 +74,6 @@ public:
 protected:
 
     virtual bool generateLaunchScript();
-    virtual bool generatePlatoMainOperationsXML();
-    virtual bool generatePlatoMainInputDeckXML();
     virtual bool generatePerformerOperationsXML();
     virtual bool generatePlatoAnalyzeOperationsXML();
     virtual bool generatePhysicsInputDecks();

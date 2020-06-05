@@ -56,6 +56,7 @@
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
+#include "XMLGeneratorLaunchScriptUtilities.hpp"
 
 namespace XMLGen
 {

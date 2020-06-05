@@ -355,7 +355,7 @@ bool DefaultInputGenerator::generateLaunchScript()
       if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_InputData.m_HasUncertainties)
       {
 
-          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
+          fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers).c_str(), envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
         if(m_InputData.plato_analyze_path.length() != 0)
@@ -604,7 +604,7 @@ void DefaultInputGenerator::generateJSRunScript()
   jsrun << "1 : eng : bash engine.sh\n";
   if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_InputData.m_HasUncertainties)
   {
-    jsrun << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers) << " : per : bash analyze.sh\n";
+    jsrun << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " : per : bash analyze.sh\n";
   }
   else
   {
@@ -627,7 +627,13 @@ void DefaultInputGenerator::generateBatchScript()
   batchFile << "#BSUB -P <PROJECT>\n";
   batchFile << "#BSUB -W 0:00\n";
 
-  size_t tNumNodesNeeded = computeNumberOfNodesNeeded();
+  size_t tNumGPUsNeeded;
+  if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_InputData.m_HasUncertainties)
+    tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
+  else
+    tNumGPUsNeeded = m_InputData.objectives.size();
+  size_t tNumGPUsPerNode = 6;
+  size_t tNumNodesNeeded = XMLGen::compute_number_of_nodes_needed(tNumGPUsNeeded,tNumGPUsPerNode);
 
   batchFile << "#BSUB -nnodes " << tNumNodesNeeded << "\n";
   batchFile << "#BSUB -J plato\n";
@@ -639,7 +645,7 @@ void DefaultInputGenerator::generateBatchScript()
 
   if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_InputData.m_HasUncertainties)
   {
-    batchFile << "jsrun -A per -n" << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers) << " -a1 -c1 -g1\n";
+    batchFile << "jsrun -A per -n" << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " -a1 -c1 -g1\n";
   }
   else
   {
@@ -661,7 +667,7 @@ size_t DefaultInputGenerator::computeNumberOfNodesNeeded()
 {
   size_t tNumGPUsNeeded;
   if(m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow && m_InputData.m_HasUncertainties)
-    tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPeformers;
+    tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
   else
     tNumGPUsNeeded = m_InputData.objectives.size();
   size_t tNumGPUsPerNode = 6;
@@ -4941,7 +4947,7 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
   tTmpNode = doc.append_child("Define");
   tTmpNode.append_attribute("name") = "NumPerformers";
   tTmpNode.append_attribute("type") = "int";
-  size_t tNumPerformers = m_InputData.m_UncertaintyMetaData.numPeformers;
+  size_t tNumPerformers = m_InputData.m_UncertaintyMetaData.numPerformers;
 
   if(tNumPerformers == 0)
   {

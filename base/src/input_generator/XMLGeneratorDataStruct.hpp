@@ -114,7 +114,7 @@ struct Block
 
 struct UncertaintyMetaData
 {
-  size_t numPeformers = 0;
+  size_t numPerformers = 0;
   std::vector<size_t> randomVariableIndices;
   std::vector<size_t> deterministicVariableIndices;
 };

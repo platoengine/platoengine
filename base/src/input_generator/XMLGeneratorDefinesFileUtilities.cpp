@@ -21,9 +21,9 @@ void append_basic_attributes_to_define_xml_file
     auto tNumSamplesString = std::to_string(aRandomMetaData.numSamples());
     XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamples", "int", tNumSamplesString}, aDocument);
 
-    if(aUncertaintyMetaData.numPeformers == 0u)
+    if(aUncertaintyMetaData.numPerformers == 0u)
         { THROWERR("Append Basic Attributes To Define XML File: Cannot assign zero MPI processes.") }
-    auto tNumPerformers = XMLGen::compute_greatest_divisor(aRandomMetaData.numSamples(), aUncertaintyMetaData.numPeformers);
+    auto tNumPerformers = XMLGen::compute_greatest_divisor(aRandomMetaData.numSamples(), aUncertaintyMetaData.numPerformers);
     auto tNumPerformersString = std::to_string(tNumPerformers);
 
     XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumPerformers", "int", tNumPerformersString}, aDocument);
