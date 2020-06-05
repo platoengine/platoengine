@@ -57,12 +57,12 @@ public:
      * \param [in]     aMaterialCategory material category, e.g. 'isotropic linear elastic'
      * \param [in]     aMaterialTags     material tags, \n
      *   i.e. vector<pair<material_property_argument_name_tag, material_property_tag>>
-     * \param [in/out] aDocument         pugi::xml_document
+     * \param [in/out] aParentNode       pugi::xml_node
     **********************************************************************************/
     void call
     (const std::string &aMaterialCategory,
      const std::vector<std::pair<std::string,std::string>>& aMaterialTags,
-     pugi::xml_document &aDocument);
+     pugi::xml_node &aParentNode);
 };
 // struct MaterialFunctionInterface
 

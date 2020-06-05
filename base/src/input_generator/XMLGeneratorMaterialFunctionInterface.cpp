@@ -29,7 +29,7 @@ void MaterialFunctionInterface::insert()
 void MaterialFunctionInterface::call
 (const std::string &aMaterialCategory,
  const std::vector<std::pair<std::string,std::string>>& aMaterialTags,
- pugi::xml_document &aDocument)
+ pugi::xml_node &aParentNode)
 {
     auto tLowerFuncLabel = Plato::tolower(aMaterialCategory);
     auto tMapItr = mMap.find(tLowerFuncLabel);
@@ -38,12 +38,12 @@ void MaterialFunctionInterface::call
         THROWERR(std::string("Material Function Interface: Did not find function with material category tag '") + aMaterialCategory + "' in function list.")
     }
     auto tTypeCastedFunc =
-        reinterpret_cast<void(*)(const std::vector<std::pair<std::string,std::string>>&, pugi::xml_document&)>(tMapItr->second.first);
+        reinterpret_cast<void(*)(const std::vector<std::pair<std::string,std::string>>&, pugi::xml_node&)>(tMapItr->second.first);
     if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
     {
         THROWERR(std::string("Material Function Interface: Reinterpret cast for function with tag '") + aMaterialCategory + "' failed.")
     }
-    tTypeCastedFunc(aMaterialTags, aDocument);
+    tTypeCastedFunc(aMaterialTags, aParentNode);
 }
 
 }

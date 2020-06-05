@@ -81,46 +81,46 @@ void append_compute_solution_to_plato_analyze_operation
 (pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_compute_objective_value_to_plato_analyze_operation
+ * \fn append_compute_random_objective_value_to_plato_analyze_operation
  * \brief Append compute objective value operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_compute_objective_value_to_plato_analyze_operation
+void append_compute_random_objective_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_compute_objective_gradient_to_plato_analyze_operation
+ * \fn append_compute_random_objective_gradient_to_plato_analyze_operation
  * \brief Append compute objective gradient operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_compute_objective_gradient_to_plato_analyze_operation
+void append_compute_random_objective_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_compute_constraint_value_to_plato_analyze_operation
+ * \fn append_compute_random_constraint_value_to_plato_analyze_operation
  * \brief Append compute constraint value operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_compute_constraint_value_to_plato_analyze_operation
+void append_compute_random_constraint_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_compute_constraint_gradient_to_plato_analyze_operation
+ * \fn append_compute_random_constraint_gradient_to_plato_analyze_operation
  * \brief Append compute constraint gradient operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_compute_constraint_gradient_to_plato_analyze_operation
+void append_compute_random_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
@@ -136,14 +136,14 @@ void append_write_output_to_plato_analyze_operation
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn return_material_property_tags_for_plato_analyze_operation_xml_file
+ * \fn return_random_material_metadata_for_plato_analyze_operation_xml_file
  * \brief Return material metadata needed to write the plato analyze operation xml file.
  * \param [in] aRandomMetaData random samples metadata
  * \return map from element block identification number to material property tags, \n
  * i.e. map< block_id, pair< material_category, vector< pair<material_property_argument_name_tag, material_property_tag> > > >
 **********************************************************************************/
 XMLGen::Analyze::MaterialMetadata
-return_material_metadata_for_plato_analyze_operation_xml_file
+return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
 
 /******************************************************************************//**
@@ -152,11 +152,11 @@ return_material_metadata_for_plato_analyze_operation_xml_file
  * corresponding material property values to the plato analyze operation xml file.
  * \param [in]     aMaterialTags list of material tags, i.e. \n
  * vector<pair<material_property_argument_name_tag, material_property_tag>>
- * \param [in/out] aDocument     pugi::xml_document
+ * \param [in/out] aParentNode    pugi::xml_node
 **********************************************************************************/
 void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_document& aDocument);
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
@@ -164,21 +164,21 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
  * corresponding material property values to the plato analyze operation xml file.
  * \param [in]     aMaterialTags list of material tags, i.e. \n
  * vector<pair<material_property_argument_name_tag, material_property_tag>>
- * \param [in/out] aDocument     pugi::xml_document
+ * \param [in/out] aParentNode   pugi::xml_node
 **********************************************************************************/
 void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_document& aDocument);
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_material_properties_to_plato_analyze_operation
+ * \fn append_random_material_properties_to_plato_analyze_operation
  * \brief Append material properties to the plato analyze operation xml file.
  * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aDocument    pugi::xml_document
+ * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_material_properties_to_plato_analyze_operation
+void append_random_material_properties_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn write_amgx_input_file

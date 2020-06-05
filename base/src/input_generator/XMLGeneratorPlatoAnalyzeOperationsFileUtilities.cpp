@@ -90,7 +90,7 @@ void append_compute_solution_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_compute_objective_value_to_plato_analyze_operation
+void append_compute_random_objective_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -106,12 +106,13 @@ void append_compute_objective_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
+        XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
 /******************************************************************************/
 
 /******************************************************************************/
-void append_compute_objective_gradient_to_plato_analyze_operation
+void append_compute_random_objective_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -127,12 +128,13 @@ void append_compute_objective_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
+        XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
 /******************************************************************************/
 
 /******************************************************************************/
-void append_compute_constraint_value_to_plato_analyze_operation
+void append_compute_random_constraint_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -148,12 +150,13 @@ void append_compute_constraint_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
+        XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
 /******************************************************************************/
 
 /******************************************************************************/
-void append_compute_constraint_gradient_to_plato_analyze_operation
+void append_compute_random_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -169,6 +172,7 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
+        XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
     }
 }
 /******************************************************************************/
@@ -204,7 +208,7 @@ void append_write_output_to_plato_analyze_operation
 
 /******************************************************************************/
 XMLGen::Analyze::MaterialMetadata
-return_material_metadata_for_plato_analyze_operation_xml_file
+return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     if(aRandomMetaData.samples().empty())
@@ -237,7 +241,7 @@ return_material_metadata_for_plato_analyze_operation_xml_file
 /******************************************************************************/
 void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
     if(aMaterialTags.empty())
     {
@@ -258,7 +262,7 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tAnalyzeMaterialPropTag;
         std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
-        auto tParameter = aDocument.append_child("Parameter");
+        auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
     }
 }
@@ -267,7 +271,7 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
 /******************************************************************************/
 void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
     if(aMaterialTags.empty())
     {
@@ -288,22 +292,23 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialPropTag;
         std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
-        auto tParameter = aDocument.append_child("Parameter");
+        auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
     }
 }
 /******************************************************************************/
 
 /******************************************************************************/
-void append_material_properties_to_plato_analyze_operation
+void append_random_material_properties_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
     XMLGen::MaterialFunctionInterface tMatFuncInterface;
-    auto tMaterialTags = XMLGen::return_material_metadata_for_plato_analyze_operation_xml_file(aXMLMetaData.mRandomMetaData);
+    auto tMaterialTags =
+        XMLGen::return_random_material_metadata_for_plato_analyze_operation_xml_file(aXMLMetaData.mRandomMetaData);
     for (auto &tMaterial : tMaterialTags)
     {
-        tMatFuncInterface.call(tMaterial.second.first, tMaterial.second.second, aDocument);
+        tMatFuncInterface.call(tMaterial.second.first, tMaterial.second.second, aParentNode);
     }
 }
 /******************************************************************************/
