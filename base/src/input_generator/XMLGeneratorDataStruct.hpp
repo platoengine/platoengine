@@ -19,7 +19,10 @@ namespace XMLGen
 
 struct Output
 {
-    // vector<pair<qoi_shared_data_name, qoi_layout>>, e.g. qoi_layout: element, nodal, etc.
+    // note: vector<pair<qoi_shared_data_name, qoi_layout>>, where qoi_layout denotes the
+    // data layout, i.e. element, nodal, etc., and qoi_shared_data_name denotes the keyword
+    // used in the plato light-weight input file to denote the output data. the output keyword
+    // is used to define the shared data name in the interface.xml file.
     std::vector<std::pair<std::string, std::string>> mRandomQuantitiesOfInterest;
     std::vector<std::pair<std::string, std::string>> mDeterministicQuantitiesOfInterest;
 };

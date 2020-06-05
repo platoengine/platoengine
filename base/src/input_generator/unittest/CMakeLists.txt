@@ -7,7 +7,6 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGeneratorInterfaceFile_UnitTester.cpp
                                       XMLGeneratorPlatoMainInputDeckFile_UnitTester.cpp
                                       XMLGeneratorPlatoMainOperationFile_UnitTester.cpp
-                                      XMLGeneratorPlatoAnalyzeOperationsFile_UnitTester.cpp
                                       XMLGeneratorLaunchScript_UnitTester.cpp
                                       DefaultInputGenerator_UnitTester.cpp
                                       ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.cpp

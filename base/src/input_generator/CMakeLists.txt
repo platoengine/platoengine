@@ -28,7 +28,6 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorPlatoMainInputFileUtilities.hpp
                       XMLGeneratorLaunchScriptUtilities.hpp
                       XMLGeneratorRandomInterfaceFileUtilities.hpp 
-                      XMLGeneratorPlatoMainOperationFileUtilities.hpp 
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
                       ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp
                       XMLGeneratorDataStruct.hpp

@@ -8,7 +8,6 @@
 
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
-#include "pugixml.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
