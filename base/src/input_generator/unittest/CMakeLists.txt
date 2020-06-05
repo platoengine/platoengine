@@ -15,12 +15,13 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGenerator.cpp
                                       ../XMLGeneratorUtilities.cpp
                                       ../XMLGeneratorDefinesFileUtilities.cpp
+                                      ../XMLGeneratorLaunchScriptUtilities.cpp
                                       ../XMLGeneratorInterfaceFileUtilities.cpp
                                       ../XMLGeneratorMaterialFunctionInterface.cpp
+                                      ../XMLGeneratorPlatoMainInputFileUtilities.cpp
                                       ../XMLGeneratorRandomInterfaceFileUtilities.cpp
                                       ../XMLGeneratorPlatoMainOperationFileUtilities.cpp
-                                      ../XMLGeneratorPlatoMainInputFileUtilities.cpp
-                                      ../XMLGeneratorLaunchScriptUtilities.cpp
+                                      ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                                       ../ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp

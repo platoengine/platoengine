@@ -60,6 +60,7 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorLaunchScriptUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
