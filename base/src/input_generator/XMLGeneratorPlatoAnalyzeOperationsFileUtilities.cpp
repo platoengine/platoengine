@@ -70,6 +70,10 @@ void append_update_problem_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.mProblemUpdateFrequency.empty())
+    {
+        return;
+    }
     auto tIsUpdateFrequencyGreaterThanZero = std::stoi(aXMLMetaData.mProblemUpdateFrequency) > 0;
     if (!aXMLMetaData.mProblemUpdateFrequency.empty() && tIsUpdateFrequencyGreaterThanZero)
     {
@@ -339,6 +343,23 @@ void append_random_traction_vector_to_plato_analyze_operation
             XMLGen::append_children(tKeys, tValues, tParameter);
         }
     }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData)
+{
+    pugi::xml_document tDocument;
+
+    XMLGen::append_write_output_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_update_problem_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
+
+    tDocument.save_file("plato_analyze_operations.xml", "  ");
 }
 /******************************************************************************/
 

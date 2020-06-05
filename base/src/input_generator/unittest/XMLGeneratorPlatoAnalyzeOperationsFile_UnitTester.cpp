@@ -12,28 +12,147 @@
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
-namespace XMLGen
-{
-
-void write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
-(const XMLGen::InputData& aXMLMetaData)
-{
-    pugi::xml_document tDocument;
-
-    XMLGen::append_write_output_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    XMLGen::append_update_problem_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-
-    tDocument.save_file("plato_analyze_operations.xml", "  ");
-}
-
-}
-
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministicUsecase)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mProblemUpdateFrequency = "5";
+    tXMLMetaData.optimization_type = "topology";
+    XMLGen::Constraint tConstraint;
+    tConstraint.mPerformerName = "plato_analyze";
+    tXMLMetaData.constraints.push_back(tConstraint);
+    XMLGen::Objective tObjective;
+    tObjective.performer_name = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispx", "Solution X"});
+    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispy", "Solution Y"});
+    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispz", "Solution Z"});
+
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("2");
+    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.property("youngs modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
+
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("2");
+    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.property("youngs modulus", "1.1");
+    tMaterial2.property("poissons ratio", "0.33");
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial2});
+    auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
+
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.mIsRandom = true;
+    tLoad4.type = "traction";
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.mIsRandom = true;
+    tLoad5.type = "traction";
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // CONSTRUCT SAMPLES SET
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tRandomMaterialCase1));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tRandomMaterialCase2));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
+
+    // CALL FUNCTION
+    XMLGen::write_plato_analyze_operation_xml_file_for_nondeterministic_usecase(tXMLMetaData);
+    auto tData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
+    +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
+    +"</Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output>"
+    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
+    +"<Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output>"
+    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
+    +"<Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output>"
+    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter>"+"<Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"</Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
+    +"</Output><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    std::system("rm -f plato_analyze_operations.xml");
+}
 
 TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
 {
@@ -96,7 +215,6 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::append_random_traction_vector_to_plato_analyze_operation(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", "  ");
 
     auto tParameter = tDocument.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
@@ -250,7 +368,6 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", " ");
 
     // TEST OPERATION I/O ARGUMENTS
     auto tOperation = tDocument.child("Operation");
@@ -673,6 +790,7 @@ TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
         +"\"store_res_history\":0,\"scope\":\"amg\",\"max_levels\":100,\"postsweeps\":1,\"cycle\":\"W\"},\"solver\":\"PBICGSTAB\",\"print_solve_stats\":0,\"obtain_timings\":0,\"max_iters\":1000,"
         +"\"monitor_residual\":1,\"convergence\":\"ABSOLUTE\",\"scope\":\"main\",\"tolerance\":1e-12,\"norm\":\"L2\"}}";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    std::system("rm -f amgx.json");
 }
 
 TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation_NoWriteOutputOperation)

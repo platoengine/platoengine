@@ -191,6 +191,14 @@ void append_random_traction_vector_to_plato_analyze_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+ * \brief Write active Plato Analyze operations to plato_analyze_operation.xml file.
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
  * \fn write_amgx_input_file
  * \brief Write AMGX input .json file. This file is used to assign values for the \n
  * linear solver parameters. Interested readers can find more information on AMGX \n
