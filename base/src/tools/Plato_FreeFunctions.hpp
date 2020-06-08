@@ -96,4 +96,6 @@ inline std::string tolower(const std::string& aInput)
 }
 // function tolower
 
+void system(const char* aString);
+
 } // end namespace Plato

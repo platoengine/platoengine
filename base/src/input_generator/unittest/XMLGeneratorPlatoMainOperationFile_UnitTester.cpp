@@ -1368,7 +1368,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     +"</Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
     +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
-    std::system("rm -f plato_main_operations.xml");
+    Plato::system("rm -f plato_main_operations.xml");
 }
 
 }

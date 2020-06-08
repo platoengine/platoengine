@@ -2507,7 +2507,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     +"<Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-    std::system("rm -f interface.xml");
+    Plato::system("rm -f interface.xml");
 }
 
 }

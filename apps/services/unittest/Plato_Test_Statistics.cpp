@@ -450,7 +450,7 @@ TEST(PlatoTest, PrintCumulativeDistributionFunctionToFile)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
 
     std::stringstream tGold("");
     tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";
@@ -507,7 +507,7 @@ TEST(PlatoTest, OutputCumulativeDistributionFunction)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
 
     std::stringstream tGold("");
     tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";
@@ -1369,7 +1369,7 @@ TEST(PlatoTest, OutputSromDiagnostics)
         tDataFromFile << tData.c_str();
     }
     tInputFile.close();
-    std::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
 
     std::stringstream tGold;
     tGold << "PlatoEnginev.1.0:Copyright2018,NationalTechnology&EngineeringSolutionsofSandia,LLC(NTESS).";

@@ -78,7 +78,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Materials)
 
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-    std::system("rm -f defines.xml");
+    Plato::system("rm -f defines.xml");
 }
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
@@ -164,7 +164,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
             + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-    std::system("rm -f defines.xml");
+    Plato::system("rm -f defines.xml");
 }
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
@@ -292,7 +292,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_MaterialsAndLoads)
         + "2.500000000000000000000e-01,2.500000000000000000000e-01,2.500000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
-    std::system("rm -f defines.xml");
+    Plato::system("rm -f defines.xml");
 }
 
 TEST(PlatoTestXMLGenerator, PrepareProbabilitiesForDefineXmlFile)

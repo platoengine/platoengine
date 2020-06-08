@@ -135,7 +135,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainInputDeck)
       std::string("<material>11</material><integration><type>gauss</type><order>2</order></integration></block>") + 
       std::string("<output><file>platomain</file><format>exodus</format></output>");
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
-    std::system("rm -f plato_main_input_deck.xml");
+    Plato::system("rm -f plato_main_input_deck.xml");
 }
 
 }

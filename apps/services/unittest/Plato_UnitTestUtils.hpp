@@ -56,6 +56,7 @@
 #include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace PlatoTest
 {

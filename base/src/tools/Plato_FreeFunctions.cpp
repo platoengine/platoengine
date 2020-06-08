@@ -97,4 +97,10 @@ std::string to_string(const size_t d)
   return std::to_string(d);
 }
 
+void system(const char* aString)
+{
+  int return_val = std::system(aString);
+  return_val = return_val;
+}
+
 } // end namespace Plato

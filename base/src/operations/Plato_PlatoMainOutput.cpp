@@ -59,6 +59,7 @@
 #include "PlatoApp.hpp"
 #include "Plato_PlatoMainOutput.hpp"
 #include "Plato_OperationsUtilities.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace Plato
 {
@@ -202,7 +203,7 @@ void PlatoMainOutput::extractIsoSurface(int aIteration)
         {
             fprintf(fp, "%s\n", tIterationNumberString.c_str());
             fclose(fp);
-            system("ls Iteration*.exo >> last_time_step.txt");
+            Plato::system("ls Iteration*.exo >> last_time_step.txt");
         }
     }
 #endif
@@ -247,7 +248,7 @@ void PlatoMainOutput::operator()()
                 tTheCommand << "echo end >> commands.txt;";
                 tTheCommand << "algebra " << tInputFilename << " restart_" << tIntegerTime << ".exo < commands.txt > algebra.txt";
                 std::cout << "\nExecuting system call: " << tTheCommand.str() << "\n";
-                system(tTheCommand.str().c_str());
+                Plato::system(tTheCommand.str().c_str());
             }
         }
         else if(mDiscretization == "levelset")
@@ -255,7 +256,7 @@ void PlatoMainOutput::operator()()
             if((tMyRank == 0) && mWriteRestart)
             {
                 std::string tListCommand = "ls -t IterationHistory* > junk.txt";
-                system(tListCommand.c_str());
+                Plato::system(tListCommand.c_str());
                 FILE *tFile = fopen("junk.txt", "r");
                 if(tFile)
                 {
@@ -271,14 +272,14 @@ void PlatoMainOutput::operator()()
                     tCopyCommand += tLastHistFileName;
                     tCopyCommand += " ";
                     tCopyCommand += tNewFilename;
-                    system(tCopyCommand.c_str());
-                    system("rm -f IterationHistory*");
+                    Plato::system(tCopyCommand.c_str());
+                    Plato::system("rm -f IterationHistory*");
                     tFile = fopen("last_time_step.txt", "w");
                     if(tFile)
                     {
                         fprintf(tFile, "%s\n", tIterationString.c_str());
                         fclose(tFile);
-                        system("ls Iteration*.exo >> last_time_step.txt");
+                        Plato::system("ls Iteration*.exo >> last_time_step.txt");
                     }
                 }
             }

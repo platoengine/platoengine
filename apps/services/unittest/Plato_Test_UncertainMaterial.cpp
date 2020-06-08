@@ -49,6 +49,7 @@
 #include "gtest/gtest.h"
 
 #include "Plato_SromMaterialUtils.hpp"
+#include <Plato_UnitTestUtils.hpp>
 
 namespace PlatoTestUncertainMaterial
 {
@@ -93,7 +94,7 @@ TEST(PlatoTest, SROM_WriteAndReadData)
         ASSERT_NEAR(tGoldDataSet[1].second[tIndex], tProb, tTolerance);
     }
 
-    std::system("rm -f test.csv");
+    Plato::system("rm -f test.csv");
 }
 
 TEST(PlatoTest, SROM_SetRandomVariablesId)
@@ -185,9 +186,9 @@ TEST(PlatoTest, SROM_SolveSromProblem)
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
 
-    std::system("rm -f plato_cdf_output.txt");
-    std::system("rm -f plato_srom_diagnostics.txt");
-    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, SROM_ReadSampleProbabilityPairs)
@@ -237,7 +238,7 @@ TEST(PlatoTest, SROM_ReadSampleProbabilityPairs)
         }
     }
 
-    std::system("rm -f test.csv");
+    Plato::system("rm -f test.csv");
 }
 
 TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Beta)
@@ -282,9 +283,9 @@ TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Bet
     tTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tTolerance);
 
-    std::system("rm -f plato_cdf_output.txt");
-    std::system("rm -f plato_srom_diagnostics.txt");
-    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, SROM_SplitRandomAndDeterministicMaterials_Error)
@@ -1591,9 +1592,9 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
     }
     EXPECT_NEAR(1.0, tProbSum, tTolerance);
 
-    std::system("rm -f plato_cdf_output.txt");
-    std::system("rm -f plato_srom_diagnostics.txt");
-    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTest, SROM_ToString)

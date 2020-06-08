@@ -49,6 +49,7 @@
 #include "gtest/gtest.h"
 
 #include "Plato_SromXML.hpp"
+#include <Plato_UnitTestUtils.hpp>
 
 namespace PlatoTestSrom
 {
@@ -168,9 +169,9 @@ TEST(PlatoTest, SROM_BuildSrom_Material)
     }
     EXPECT_NEAR(1.0, tProbSum, tTolerance);
 
-    std::system("rm -f plato_cdf_output.txt");
-    std::system("rm -f plato_srom_diagnostics.txt");
-    std::system("rm -f plato_ksal_algorithm_diagnostics.txt");
+    Plato::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 }
