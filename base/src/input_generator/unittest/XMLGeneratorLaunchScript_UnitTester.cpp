@@ -6,6 +6,7 @@
 #include <Plato_FreeFunctions.hpp>
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorLaunchScriptUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
 {

@@ -59,6 +59,7 @@
 #include <map>
 #include "DefaultInputGenerator.hpp"
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorLaunchScriptUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"

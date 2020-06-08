@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 
 namespace XMLGen
@@ -92,10 +93,9 @@ return_random_tractions_tags_for_define_xml_file
     // traction load index to tags map, i.e. map<load index, vector<tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
-    std::vector<std::string> tValidAxis = {"x", "y", "z"};
+    XMLGen::ValidLoadAxisKeys tValidAxis;
     auto tSample = aRandomMetaData.sample(0);
     auto tLoadCase = tSample.load();
-
     for(auto& tLoad : tLoadCase.loads)
     {
         auto tLoadTagLower = Plato::tolower(tLoad.type);
@@ -107,7 +107,7 @@ return_random_tractions_tags_for_define_xml_file
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
-                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis[tDimIndex] + "-axis";
+                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis.mKeys[tDimIndex] + "-axis";
                 tOutput[tLoadIndexString].push_back(tTag);
             }
         }
@@ -198,12 +198,12 @@ void append_tractions_to_define_xml_file
 
 /******************************************************************************/
 std::unordered_map<std::string, std::vector<std::string>>
-return_material_properties_tags_for_define_xml_file
+return_material_property_tags_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     if(aRandomMetaData.samples().empty())
     {
-        THROWERR("Return Material Properties Tags For Define Xml File: Samples vector is empty.")
+        THROWERR("Return Material Property Tags For Define XML File: Samples vector is empty.")
     }
 
     std::unordered_map<std::string, std::vector<std::string>> tBlockIdToTagsMap;
@@ -216,14 +216,14 @@ return_material_properties_tags_for_define_xml_file
         auto tMaterialPropertiesTags = tMaterial.tags();
         for(auto& tMaterialPropertyTag : tMaterialPropertiesTags)
         {
-            auto tTag = tMaterialPropertyTag + " block-id-" + tID;
-            tBlockIdToTagsMap[tID].push_back(tTag);
+            auto tArgumentNameTag = tMaterialPropertyTag + " block-id-" + tID;
+            tBlockIdToTagsMap[tID].push_back(tArgumentNameTag);
         }
     }
 
     return (tBlockIdToTagsMap);
 }
-// function return_material_properties_tags_for_define_xml_file
+// function return_material_property_tags_for_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/

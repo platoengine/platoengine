@@ -74,30 +74,11 @@ public:
 protected:
 
     virtual bool generateLaunchScript();
-    virtual bool generatePerformerOperationsXML();
-    virtual bool generatePlatoAnalyzeOperationsXML();
     virtual bool generatePhysicsInputDecks();
     virtual bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
-    virtual void outputUpdateProblemStage(pugi::xml_document &doc);
     virtual void outputOutputToFileStage(pugi::xml_document &doc,
                                  const bool &aHasUncertainties,
                                  const bool &aRequestedVonMises);
-    virtual void addStochasticObjectiveValueOperation(pugi::xml_document &aDoc);
-    virtual void addStochasticObjectiveGradientOperation(pugi::xml_document &aDoc);
-    virtual void addVonMisesStatisticsOperation(pugi::xml_document &aDoc);
-    virtual void addPlatoMainOutputOperation(pugi::xml_document &aDoc,
-                                     const bool &aHasUncertainties,
-                                     const bool &aRequestedVonMises);
-    virtual bool addAggregateHessianOperation(pugi::xml_document &aDoc);
-    virtual bool addAggregateEnergyOperation(pugi::xml_document &aDoc);
-    virtual bool addAggregateGradientOperation(pugi::xml_document &aDoc);
-    virtual void outputInitializeOptimizationStage(pugi::xml_document &doc);
-    virtual void outputInitializeOptimizationStageForTO(pugi::xml_document &doc);
-    virtual void outputCacheStateStage(pugi::xml_document &doc, const bool &aHasUncertainties);
-    virtual bool outputObjectiveHessianStage(pugi::xml_document &doc);
-    virtual bool outputObjectiveStage(pugi::xml_document &doc, const bool &aHasUncertainties);
-    virtual bool outputObjectiveGradientStage(pugi::xml_document &doc,
-                                           const bool &aHasUncertainties);
 
 private:
     virtual size_t computeNumberOfNodesNeeded();

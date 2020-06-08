@@ -785,7 +785,7 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // CALL FUNCTION
-    auto tMap = XMLGen::return_material_properties_tags_for_define_xml_file(tRandomMetaData);
+    auto tMap = XMLGen::return_material_property_tags_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tMap.empty());
 
     // 4. TEST RESULTS

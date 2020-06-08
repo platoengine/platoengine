@@ -52,12 +52,6 @@
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 
-#include "XMLGeneratorDefinesFileUtilities.hpp"
-#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
-#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
-#include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
-#include "XMLGeneratorLaunchScriptUtilities.hpp"
-
 namespace XMLGen
 {
     void append_version_entry(pugi::xml_document& aDocument);
