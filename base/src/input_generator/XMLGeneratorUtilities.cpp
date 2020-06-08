@@ -382,5 +382,12 @@ std::vector<std::string> transform_value_tokens
 // function transform_key_tokens
 /******************************************************************************/
 
+void assert_is_positive_integer(const std::string& aString)
+{
+  bool not_a_positive_integer = std::strtol(aString.c_str(), NULL, 0) <= 0l;
+  if(not_a_positive_integer)
+    THROWERR("expected a positive integer\n")
+}
+
 }
 // namespace XMLGen

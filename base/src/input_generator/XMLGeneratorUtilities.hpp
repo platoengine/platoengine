@@ -207,5 +207,7 @@ namespace XMLGen
     **********************************************************************************/
     std::vector<std::string> transform_value_tokens
     (const std::unordered_map<std::string, std::string> &aKeyToValueMap);
+
+    void assert_is_positive_integer(const std::string& aString);
 }
 // namespace XMLGen

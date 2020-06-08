@@ -6,8 +6,10 @@
 
 #include "pugixml.hpp"
 
+#include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorLaunchScriptUtilities.hpp"
+#include <iostream>
 
 namespace XMLGen
 {
@@ -103,51 +105,17 @@ namespace XMLGen
   {
       FILE *fp=fopen("mpirun.source", "w");
 
+      std::string tEnvString;
+      std::string tSeparationString;
+      XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
+
+      std::string tLaunchString;
+      std::string tNumProcsString;
+      XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
+
       XMLGen::append_prune_and_refine_lines_to_mpirun_launch_script(aInputData, fp);
-
-      std::string num_opt_procs = "1";
-      if(!aInputData.num_opt_processors.empty())
-          num_opt_procs = aInputData.num_opt_processors;
-
-      XMLGen::append_decomp_lines_to_mpirun_launch_script(aInputData, fp, num_opt_procs);
-
-#ifndef USING_OPEN_MPI
-      std::string envString = "-env";
-      std::string separationString = " ";
-#else
-      std::string envString = "-x";
-      std::string separationString = "=";
-#endif
-
-      std::string tLaunchString = "";
-      std::string tNumProcsString = "";
-      if(aInputData.m_UseLaunch)
-      {
-          tLaunchString = "launch";
-          tNumProcsString = "-n";
-      }
-      else
-      {
-          tLaunchString = "mpiexec";
-          tNumProcsString = "-np";
-      }
-
-      // Now add the main mpirun call.
-      fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
-      fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-      fprintf(fp, "%s PLATO_APP_FILE%splato_main_operations.xml \\\n", envString.c_str(),separationString.c_str());
-      if(aInputData.plato_main_path.length() != 0)
-          fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.plato_main_path.c_str());
-      else
-          fprintf(fp, "plato_main plato_main_input_deck.xml \\\n");
-
-      fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(aInputData.m_UncertaintyMetaData.numPerformers).c_str(), envString.c_str(),separationString.c_str());
-      fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
-      fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
-      if(aInputData.plato_analyze_path.length() != 0)
-          fprintf(fp, "%s --input-config=plato_analyze_input_deck.xml \\\n", aInputData.plato_analyze_path.c_str());
-      else
-          fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck.xml \\\n");
+      XMLGen::append_decomp_lines_to_mpirun_launch_script(aInputData, fp);
+      XMLGen::append_mpirun_call(aInputData, fp, tEnvString, tSeparationString, tLaunchString, tNumProcsString);
 
       fclose(fp);
   }
@@ -239,36 +207,128 @@ namespace XMLGen
     }
   }
 
-  void append_decomp_lines_to_mpirun_launch_script(const XMLGen::InputData& aInputData, FILE*& fp, std::string& num_opt_procs)
+  void append_decomp_lines_to_mpirun_launch_script(const XMLGen::InputData& aInputData, FILE*& fp)
   {
-    // remember if the run_mesh has been decomposed to this processor count
-    std::map<std::string,int> hasBeenDecompedToThisCount;
+    std::map<std::string,int> hasBeenDecompedForThisNumberOfProcessors;
 
-    // Now do the decomps for the TO run.
+    XMLGen::append_decomp_lines_for_optimizer(aInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
+    XMLGen::append_decomp_lines_for_performers(aInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
+  }
 
-    if(num_opt_procs.compare("1") != 0) {
-        if(++hasBeenDecompedToThisCount[num_opt_procs] == 1)
-        {
-            fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), aInputData.run_mesh_name.c_str());
-        }
+  void append_decomp_lines_for_optimizer(const XMLGen::InputData& aInputData,
+                                              FILE*& fp,
+                                              std::map<std::string,int>& hasBeenDecompedForThisNumberOfProcessors)
+  {
+    if(aInputData.run_mesh_name.empty())
+      THROWERR("Cannot add decomp line: Mesh name not provided\n")
+
+    std::string num_opt_procs = get_num_opt_processors(aInputData);
+    XMLGen::assert_is_positive_integer(num_opt_procs);
+    
+    bool need_to_decompose = num_opt_procs.compare("1") != 0;
+    if(need_to_decompose)
+    {
+      if(hasBeenDecompedForThisNumberOfProcessors[num_opt_procs]++ == 0)
+        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.run_mesh_name);
+      if(aInputData.initial_guess_filename != "")
+        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.initial_guess_filename);
     }
-    if(aInputData.initial_guess_filename != "" && num_opt_procs.compare("1") != 0)
-        fprintf(fp, "decomp -p %s %s\n", num_opt_procs.c_str(), aInputData.initial_guess_filename.c_str());
+  }
+
+  void append_decomp_lines_for_performers(const XMLGen::InputData& aInputData, FILE*& fp,
+                                          std::map<std::string,int>& hasBeenDecompedForThisNumberOfProcessors)
+  {
+    if(aInputData.run_mesh_name.empty())
+      THROWERR("Cannot add decomp line: Mesh name not provided\n")
+
     for(size_t i=0; i<aInputData.objectives.size(); ++i)
     {
-        std::string num_procs = "4";
-        if(!aInputData.objectives[i].num_procs.empty())
-            num_procs = aInputData.objectives[i].num_procs;
-        if(num_procs.compare("1") != 0)
+        std::string num_procs = XMLGen::get_num_procs(aInputData.objectives[i]);
+
+        XMLGen::assert_is_positive_integer(num_procs);
+
+        bool need_to_decompose = num_procs.compare("1") != 0;
+        if(need_to_decompose)
         {
-            if(++hasBeenDecompedToThisCount[num_procs] == 1)
-            {
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), aInputData.run_mesh_name.c_str());
-            }
+            if(hasBeenDecompedForThisNumberOfProcessors[num_procs]++ == 0)
+              XMLGen::append_decomp_line(fp, num_procs, aInputData.run_mesh_name);
             if(aInputData.objectives[i].ref_frf_file.length() > 0)
-                fprintf(fp, "decomp -p %s %s\n", num_procs.c_str(), aInputData.objectives[i].ref_frf_file.c_str());
+              XMLGen::append_decomp_line(fp, num_procs, aInputData.objectives[i].ref_frf_file);
         }
     }
   }
+
+  void append_decomp_line(FILE*& fp, const std::string& num_processors, const std::string& mesh_file_name)
+  {
+    fprintf(fp, "decomp -p %s %s\n", num_processors.c_str(), mesh_file_name.c_str());
+  }
+
+  std::string get_num_procs(const XMLGen::Objective& aObjective)
+  {
+    std::string num_procs = "4";
+    if(!aObjective.num_procs.empty())
+        num_procs = aObjective.num_procs;
+    return num_procs;
+  }
+
+  std::string get_num_opt_processors(const XMLGen::InputData& aInputData)
+  {
+    std::string num_opt_procs = "1";
+    if(!aInputData.num_opt_processors.empty())
+        num_opt_procs = aInputData.num_opt_processors;
+    return num_opt_procs;
+  }
+
+  void determine_mpi_env_and_separation_strings(std::string& envString, std::string& separationString)
+  {
+#ifndef USING_OPEN_MPI
+    envString = "-env";
+    separationString = " ";
+#else
+    envString = "-x";
+    separationString = "=";
+#endif
+  }
+
+  void determine_mpi_launch_strings(const XMLGen::InputData& aInputData, std::string& aLaunchString, std::string& aNumProcsString)
+  {
+    if(aInputData.m_UseLaunch)
+    {
+      aLaunchString = "launch";
+      aNumProcsString = "-n";
+    }
+    else
+    {
+      aLaunchString = "mpiexec";
+      aNumProcsString = "-np";
+    }
+  }
+
+  void append_mpirun_call(const XMLGen::InputData& aInputData, FILE*& fp,
+                          const std::string& envString, const std::string& separationString,
+                          const std::string& tLaunchString, const std::string& tNumProcsString)
+  {
+      std::string num_opt_procs = XMLGen::get_num_opt_processors(aInputData);
+
+      XMLGen::assert_is_positive_integer(num_opt_procs);
+
+    // Now add the main mpirun call.
+    fprintf(fp, "%s %s %s %s PLATO_PERFORMER_ID%s0 \\\n", tLaunchString.c_str(), tNumProcsString.c_str(), num_opt_procs.c_str(), envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_APP_FILE%splato_main_operations.xml \\\n", envString.c_str(),separationString.c_str());
+    if(aInputData.plato_main_path.length() != 0)
+        fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.plato_main_path.c_str());
+    else
+        fprintf(fp, "plato_main plato_main_input_deck.xml \\\n");
+
+    fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(aInputData.m_UncertaintyMetaData.numPerformers).c_str(), envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
+    fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
+    if(aInputData.plato_analyze_path.length() != 0)
+        fprintf(fp, "%s --input-config=plato_analyze_input_deck.xml \\\n", aInputData.plato_analyze_path.c_str());
+    else
+        fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck.xml \\\n");
+  }
+
 }
 // namespace XMLGen
