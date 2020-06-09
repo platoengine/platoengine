@@ -48,6 +48,7 @@
 #include "Plato_Application.hpp"
 #include "Plato_Exceptions.hpp"
 #include "Plato_TimersTree.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 #ifdef GEOMETRY
 #include "Plato_MetaDataMLS.hpp"

@@ -9,6 +9,8 @@
 #include <string>
 #include <typeindex>
 #include <unordered_map>
+#include <vector>
+#include <utility>
 
 #include "pugixml.hpp"
 
