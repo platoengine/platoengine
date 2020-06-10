@@ -481,24 +481,6 @@ inline void preprocess_load_inputs
 // function preprocess_load_inputs
 
 /******************************************************************************//**
- * \fn define_xmlgen_load_name
- * \brief Return name associated with XMLGen::Load with input load index.
- * \param [in] aLoadIndex  load index
- * \param [in] aLoadCase   random load case
- * \return load name
-**********************************************************************************/
-inline std::string define_xmlgen_load_name
-(const std::size_t& aLoadIndex,
- const Plato::srom::RandomLoadCase& aRandomLoadCase)
-{
-    auto tLoadIndex = std::to_string(aLoadIndex);
-    std::string tName = aRandomLoadCase.isRandom(aLoadIndex) ? "random " : "deterministic ";
-    tName += Plato::tolower(aRandomLoadCase.loadType(aLoadIndex)) + " boundary condition " + tLoadIndex;
-    return tName;
-}
-// function define_xmlgen_load_name
-
-/******************************************************************************//**
  * \fn postprocess_load_outputs
  * \brief Post-process non-deterministic load outputs.
  * \param [in/out] aSromOutputs     SROM problem output metadata
@@ -524,8 +506,6 @@ inline void postprocess_load_outputs
         for (size_t tLoadIndex = 0; tLoadIndex < tLoadCase.numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.mName = Plato::srom::define_xmlgen_load_name(tLoadIndex, tLoadCase);
-
             tNewLoad.mIsRandom = tLoadCase.isRandom(tLoadIndex);
             tNewLoad.type = tLoadCase.loadType(tLoadIndex);
             tNewLoad.app_id = tLoadCase.applicationID(tLoadIndex);

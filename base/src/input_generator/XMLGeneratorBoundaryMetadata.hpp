@@ -15,7 +15,6 @@ namespace XMLGen
 struct Load
 {
     bool mIsRandom = false;
-    std::string mName;
     std::string type; // traction, heat flux, force, pressure ...
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id
@@ -27,6 +26,7 @@ struct Load
 
 struct LoadCase
 {
+    std::string mPerformerName = "plato_analyze";
     std::vector<XMLGen::Load> loads;
     std::string id; // note LoadCase id is not necessarily shared with its Loads
 };
