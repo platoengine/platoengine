@@ -462,7 +462,7 @@ bool XMLGenerator::distributeObjectivesForGenerate()
 
                 // remove name in distributed
                 m_InputData.objectives[this_distributed_objectiveIndex].name="";
-                m_InputData.objectives[this_distributed_objectiveIndex].performer_name="";
+                m_InputData.objectives[this_distributed_objectiveIndex].mPerformerName="";
 
                 // advance distributed index
                 strided_distributed_index = (strided_distributed_index + 1) % num_distributed_objectives;
@@ -1185,7 +1185,7 @@ bool XMLGenerator::fillObjectiveAndPerfomerNames()
     // Set the performer names
     for(size_t i=0; i<num_objs; ++i)
     {
-        m_InputData.objectives[i].performer_name =
+        m_InputData.objectives[i].mPerformerName =
                 m_InputData.objectives[i].code_name +
                 "_" + m_InputData.objectives[i].name;
     }

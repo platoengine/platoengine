@@ -151,7 +151,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -219,7 +219,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -350,7 +350,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -438,7 +438,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -484,7 +484,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
     tObjective.code_name = "analyze";
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -657,7 +657,7 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -696,7 +696,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -735,7 +735,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
 
@@ -1147,7 +1147,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;
@@ -1157,7 +1157,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     auto tStage = tDocument.append_child("Stage");
-    XMLGen::append_sample_objective_value_operation(tObjective.performer_name, tXMLMetaData, tStage);
+    XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, tXMLMetaData, tStage);
     ASSERT_FALSE(tStage.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1344,7 +1344,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;
@@ -1562,7 +1562,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;
@@ -1762,7 +1762,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;
@@ -2400,7 +2400,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
     XMLGen::Objective tObjective;
     tObjective.type = "total work";
     tObjective.code_name = "analyze";
-    tObjective.performer_name = "plato analyze";
+    tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
     XMLGen::InputData tXMLMetaData;

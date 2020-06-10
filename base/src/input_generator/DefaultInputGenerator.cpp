@@ -2590,7 +2590,7 @@ void DefaultInputGenerator::addVonMisesStatisticsOperation(pugi::xml_document &a
       {
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         tmp_node1 = tmp_node.append_child("Input");
-        addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
+        addChild(tmp_node1, "ArgumentName", cur_obj.mPerformerName + "_vonmises");
         addChild(tmp_node1, "Probability", Plato::to_string(m_InputData.load_case_probabilities[i]).c_str());
       }
     }
@@ -3310,7 +3310,7 @@ void DefaultInputGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc
           // Only handling vonmises for UQ runs and only one load case
           // per objective/performer.
           tmp_node1 = tmp_node.append_child("Input");
-          addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_vonmises");
+          addChild(tmp_node1, "ArgumentName", cur_obj.mPerformerName + "_vonmises");
           addChild(tmp_node1, "Layout", "Element Field");
         }
         else if(cur_obj.multi_load_case == "true")
@@ -3321,7 +3321,7 @@ void DefaultInputGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc
             for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
             {
               tmp_node1 = tmp_node.append_child("Input");
-              addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+              addChild(tmp_node1, "ArgumentName", cur_obj.mPerformerName + "_load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
               if(cur_obj.output_for_plotting[j] == "vonmises")
                 addChild(tmp_node1, "Layout", "Element Field");
             }
@@ -3332,7 +3332,7 @@ void DefaultInputGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc
           for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
           {
             tmp_node1 = tmp_node.append_child("Input");
-            addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+            addChild(tmp_node1, "ArgumentName", cur_obj.mPerformerName + "_" + cur_obj.output_for_plotting[j]);
             if(cur_obj.output_for_plotting[j] == "vonmises" ||
                 cur_obj.output_for_plotting[j] == "Vonmises")
               addChild(tmp_node1, "Layout", "Element Field");
@@ -3702,7 +3702,7 @@ bool DefaultInputGenerator::outputSurfaceAreaGradientStage(pugi::xml_document &d
     // Compute current surface area gradient
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Compute Surface Area Gradient");
-    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name.c_str());
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].mPerformerName.c_str());
 
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Topology");
@@ -3801,7 +3801,7 @@ bool DefaultInputGenerator::outputConstraintStage(pugi::xml_document &doc)
     // Reinitialize on Change operation
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Reinitialize on Change");
-    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].mPerformerName);
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Parameters");
     addChild(input_node, "SharedDataName", "Design Parameters");
@@ -3809,7 +3809,7 @@ bool DefaultInputGenerator::outputConstraintStage(pugi::xml_document &doc)
     // Compute constraint value operation
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Compute Constraint Value");
-    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].mPerformerName);
 
     pugi::xml_node output_node = op_node.append_child("Output");
     addChild(output_node, "ArgumentName", "Constraint Value");
@@ -3842,7 +3842,7 @@ bool DefaultInputGenerator::outputConstraintGradientStage(pugi::xml_document &do
     // Reinitialize on Change operation
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Reinitialize on Change");
-    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name);
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].mPerformerName);
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Parameters");
     addChild(input_node, "SharedDataName", "Design Parameters");
@@ -3851,7 +3851,7 @@ bool DefaultInputGenerator::outputConstraintGradientStage(pugi::xml_document &do
     op_node = stage_node.append_child("Operation");
     pugi::xml_node op_node2 = op_node.append_child("Operation");
     addChild(op_node2, "Name", "Compute Constraint Gradient");
-    addChild(op_node2, "PerformerName", m_InputData.objectives[0].performer_name);
+    addChild(op_node2, "PerformerName", m_InputData.objectives[0].mPerformerName);
 
     pugi::xml_node tForNode = op_node.append_child("For");
     tForNode.append_attribute("var") = "I";
@@ -3871,7 +3871,7 @@ bool DefaultInputGenerator::outputConstraintGradientStage(pugi::xml_document &do
 
     op_node2 = stage_node.append_child("Operation");
     addChild(op_node2, "Name", "Compute Constraint Sensitivity");
-    addChild(op_node2, "PerformerName", m_InputData.objectives[0].performer_name);
+    addChild(op_node2, "PerformerName", m_InputData.objectives[0].mPerformerName);
     tForNode = op_node2.append_child("For");
     tForNode.append_attribute("var") = "I";
     tForNode.append_attribute("in") = "Parameters";
@@ -3916,7 +3916,7 @@ bool DefaultInputGenerator::outputSurfaceAreaStage(pugi::xml_document &doc)
     // Compute current surface area operation
     op_node = stage_node.append_child("Operation");
     addChild(op_node, "Name", "Compute Surface Area");
-    addChild(op_node, "PerformerName", m_InputData.objectives[0].performer_name.c_str());
+    addChild(op_node, "PerformerName", m_InputData.objectives[0].mPerformerName.c_str());
 
     input_node = op_node.append_child("Input");
     addChild(input_node, "ArgumentName", "Topology");
@@ -3967,7 +3967,7 @@ bool DefaultInputGenerator::outputComputeStateStage(pugi::xml_document &doc)
     {
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute Displacement");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].mPerformerName.c_str());
 
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
@@ -4028,12 +4028,12 @@ bool DefaultInputGenerator::outputObjectiveStage(pugi::xml_document &doc,
           if(cur_obj.code_name == "plato_analyze")
           {
               addChild(op_node, "Name", "Compute Objective Value");
-              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
           }
           else
           {
               addChild(op_node, "Name", "Compute Objective");
-              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
           }
 
           input_node = op_node.append_child("Input");
@@ -4286,7 +4286,7 @@ bool DefaultInputGenerator::outputObjectiveStageForShape(pugi::xml_document &doc
     {
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Reinitialize on Change");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name);
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].mPerformerName);
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Parameters");
         addChild(input_node, "SharedDataName", "Design Parameters");
@@ -4305,7 +4305,7 @@ bool DefaultInputGenerator::outputObjectiveStageForShape(pugi::xml_document &doc
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute Objective Value");
-        addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
 
 
         pugi::xml_node output_node = op_node.append_child("Output");
@@ -4369,7 +4369,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStageForShape(pugi::xml_docum
     {
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Reinitialize on Change");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name);
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].mPerformerName);
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Parameters");
         addChild(input_node, "SharedDataName", "Design Parameters");
@@ -4391,7 +4391,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStageForShape(pugi::xml_docum
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node2 = cur_parent.append_child("Operation");
         addChild(op_node2, "Name", "Compute Objective Gradient");
-        addChild(op_node2, "PerformerName", cur_obj.performer_name.c_str());
+        addChild(op_node2, "PerformerName", cur_obj.mPerformerName.c_str());
     }
 
     pugi::xml_node tForNode = op_node.append_child("For");
@@ -4420,7 +4420,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStageForShape(pugi::xml_docum
     {
         op_node2 = cur_parent.append_child("Operation");
         addChild(op_node2, "Name", "Compute Objective Sensitivity");
-        addChild(op_node2, "PerformerName", m_InputData.objectives[i].performer_name);
+        addChild(op_node2, "PerformerName", m_InputData.objectives[i].mPerformerName);
         tForNode = op_node2.append_child("For");
         tForNode.append_attribute("var") = "I";
         tForNode.append_attribute("in") = "Parameters";
@@ -4508,12 +4508,12 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
         if(cur_obj.code_name == "plato_analyze")
         {
           addChild(op_node, "Name", "Compute Objective Gradient");
-          addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+          addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
         }
         else
         {
           addChild(op_node, "Name", "Compute Gradient");
-          addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+          addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
         }
 
         input_node = op_node.append_child("Input");
@@ -4745,7 +4745,7 @@ bool DefaultInputGenerator::outputObjectiveHessianStage(pugi::xml_document &doc)
       {
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute HessianTimesVector");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].mPerformerName.c_str());
 
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
@@ -4839,7 +4839,7 @@ bool DefaultInputGenerator::outputObjectiveHessianStageForShape(pugi::xml_docume
     {
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute HessianTimesVector");
-        addChild(op_node, "PerformerName", m_InputData.objectives[i].performer_name.c_str());
+        addChild(op_node, "PerformerName", m_InputData.objectives[i].mPerformerName.c_str());
 
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Design Parameters");
@@ -5124,7 +5124,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
       for(size_t i=0; i<m_InputData.objectives.size(); ++i)
       {
         performer_node = doc.append_child("Performer");
-        addChild(performer_node, "Name", m_InputData.objectives[i].performer_name);
+        addChild(performer_node, "Name", m_InputData.objectives[i].mPerformerName);
         addChild(performer_node, "Code", m_InputData.objectives[i].code_name);
         sprintf(tmp_buf, "%d", (int)(i+1));
         addChild(performer_node, "PerformerID", tmp_buf);
@@ -5159,13 +5159,13 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
             sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
           else
             sprintf(tmp_buf, "Internal Energy %d", (int)(i+1));
-          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape")
         {
           // create shared data for objectives
           sprintf(tmp_buf, "Objective %d", (int)(i+1));
-          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
 
         if(m_InputData.mUseNormalizationInAggregator == "true")
@@ -5176,7 +5176,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
               sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
             else
               sprintf(tmp_buf, "Initial Internal Energy %d", (int)(i+1));
-            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
           }
         }
       }
@@ -5203,14 +5203,14 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
             sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
           else
             sprintf(tmp_buf, "Internal Energy %d Gradient", (int)(i+1));
-          createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
+          createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
         else if(m_InputData.optimization_type == "shape" && m_InputData.num_shape_design_variables > 0)
         {
           char tTempBuffer[100];
           sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
           sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
-          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", tTempBuffer, m_InputData.objectives[i].performer_name, "PlatoMain");
+          createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", tTempBuffer, m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
       }
     }
@@ -5260,8 +5260,8 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
           if(m_InputData.m_HasUncertainties)
           {
             // create shared data for vonmises
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
-            createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+            sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), "vonmises");
+            createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
           }
           else if(cur_obj.multi_load_case == "true")
           {
@@ -5271,11 +5271,11 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
               for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
               {
                 // create shared data for objectives
-                sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                sprintf(tmp_buf, "%s_load%s_%s", cur_obj.mPerformerName.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
                 if(cur_obj.output_for_plotting[j] == "vonmises")
-                  createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                  createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
                 else
-                  createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                  createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
               }
             }
           }
@@ -5284,11 +5284,11 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
             for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
             {
               // create shared data for objectives
-              sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+              sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
               if(cur_obj.output_for_plotting[j] == "vonmises")
-                createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
               else
-                createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
             }
           }
         }
@@ -5317,7 +5317,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
           sprintf(tmp_buf, "HessianTimesVector %d", (int)(i+1));
-          createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
+          createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
       }
     }
@@ -5368,14 +5368,14 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
           createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
           sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
           for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-            addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+            addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
         }
         else if(m_InputData.optimization_type == "shape")
         {
           createSingleUserNodalSharedData(doc, "Objective Hessian", "Scalar", "PlatoMain", "PlatoMain");
           sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
           for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-            addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+            addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
         }
       }
     }
@@ -5387,7 +5387,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         std::vector<std::string> tUserNames;
         tUserNames.push_back("PlatoMain");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-            tUserNames.push_back(m_InputData.objectives[i].performer_name);
+            tUserNames.push_back(m_InputData.objectives[i].mPerformerName);
         createMultiUserGlobalSharedData(doc, "Design Parameters", "Scalar", tTempBuffer, "PlatoMain", tUserNames);
     }
     else if(m_InputData.optimization_type == "topology")
@@ -5411,12 +5411,12 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         // Optimization DOFs
         sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-          addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+          addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
 
         // Topology
         sd_node = createSingleUserNodalSharedData(doc, "Topology", "Scalar", "PlatoMain", "PlatoMain");
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-          addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+          addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
       }
     }
 
@@ -5439,18 +5439,18 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
             // if doing levelsets and we will just grab the first performer
             // as the one that will calculate the surface area.
             // Surface Area
-            createSingleUserGlobalSharedData(doc, "Surface Area", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
+            createSingleUserGlobalSharedData(doc, "Surface Area", "Scalar", "1", m_InputData.objectives[0].mPerformerName, "PlatoMain");
 
             // Surface Area Gradient
-            createSingleUserNodalSharedData(doc, "Surface Area Gradient", "Scalar", m_InputData.objectives[0].performer_name, "PlatoMain");
+            createSingleUserNodalSharedData(doc, "Surface Area Gradient", "Scalar", m_InputData.objectives[0].mPerformerName, "PlatoMain");
         }
     }
     else if(m_InputData.optimization_type == "shape")
     {
-        createSingleUserGlobalSharedData(doc, "Constraint", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(doc, "Constraint", "Scalar", "1", m_InputData.objectives[0].mPerformerName, "PlatoMain");
         char tTempBuffer[100];
         sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
-        createSingleUserGlobalSharedData(doc, "Constraint Gradient", "Scalar", tTempBuffer, m_InputData.objectives[0].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(doc, "Constraint Gradient", "Scalar", tTempBuffer, m_InputData.objectives[0].mPerformerName, "PlatoMain");
     }
 
     // Lower Bound Value
@@ -5820,7 +5820,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         tTmpNode = tDoc.append_child("Performer");
-        addChild(tTmpNode, "Name", m_InputData.objectives[i].performer_name);
+        addChild(tTmpNode, "Name", m_InputData.objectives[i].mPerformerName);
         sprintf(tmp_buf, "%d", (int)(i+2));
         addChild(tTmpNode, "PerformerID", tmp_buf);
     }
@@ -5833,7 +5833,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         sprintf(tmp_buf, "Objective %d", (int)(i+1));
-        createSingleUserGlobalSharedData(tDoc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(tDoc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
     }
 
     // Aggregated Objective
@@ -5845,7 +5845,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
         char tTempBuffer[100];
         sprintf(tTempBuffer, "%d", m_InputData.num_shape_design_variables);
         sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
-        createSingleUserGlobalSharedData(tDoc, tmp_buf, "Scalar", tTempBuffer, m_InputData.objectives[i].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(tDoc, tmp_buf, "Scalar", tTempBuffer, m_InputData.objectives[i].mPerformerName, "PlatoMain");
     }
 
     // Aggregated Objective Gradient
@@ -5857,7 +5857,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     std::vector<std::string> tUserNames;
     tUserNames.push_back("PlatoMain");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        tUserNames.push_back(m_InputData.objectives[i].performer_name);
+        tUserNames.push_back(m_InputData.objectives[i].mPerformerName);
     createMultiUserGlobalSharedData(tDoc, "Design Parameters", "Scalar", tmp_buf, "PlatoMain", tUserNames);
 
     // Design Parameter Sensitivities
@@ -5871,14 +5871,14 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     addChild(tTmpNode, "Dynamic", "true");
     addChild(tTmpNode, "OwnerName", "PlatoESP_{I}");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        addChild(tTmpNode, "UserName", m_InputData.objectives[i].performer_name);
+        addChild(tTmpNode, "UserName", m_InputData.objectives[i].mPerformerName);
 
     // Constraint
-    createSingleUserGlobalSharedData(tDoc, "Constraint", "Scalar", "1", m_InputData.objectives[0].performer_name, "PlatoMain");
+    createSingleUserGlobalSharedData(tDoc, "Constraint", "Scalar", "1", m_InputData.objectives[0].mPerformerName, "PlatoMain");
 
     // Constraint Gradient
     sprintf(tmp_buf, "%d", m_InputData.num_shape_design_variables);
-    createSingleUserGlobalSharedData(tDoc, "Constraint Gradient", "Scalar", tmp_buf, m_InputData.objectives[0].performer_name, "PlatoMain");
+    createSingleUserGlobalSharedData(tDoc, "Constraint Gradient", "Scalar", tmp_buf, m_InputData.objectives[0].mPerformerName, "PlatoMain");
 
     // Lower/Upper Bound Vectors
     sprintf(tmp_buf, "%d", m_InputData.num_shape_design_variables);
@@ -6052,12 +6052,12 @@ void DefaultInputGenerator::outputCacheStateStage(pugi::xml_document &doc,
         {
             op_node = cur_parent.append_child("Operation");
             addChild(op_node, "Name", "Cache State");
-            addChild(op_node, "PerformerName", cur_obj.performer_name);
+            addChild(op_node, "PerformerName", cur_obj.mPerformerName);
             if(aHasUncertainties)
             {
                 output_node = op_node.append_child("Output");
                 addChild(output_node, "ArgumentName", "vonmises0");
-                addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "vonmises");
+                addChild(output_node, "SharedDataName", cur_obj.mPerformerName + "_" + "vonmises");
             }
             else if(cur_obj.multi_load_case == "true")
             {
@@ -6070,7 +6070,7 @@ void DefaultInputGenerator::outputCacheStateStage(pugi::xml_document &doc,
                     {
                         output_node = op_node.append_child("Output");
                         addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + buffer);
-                        addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
+                        addChild(output_node, "SharedDataName", cur_obj.mPerformerName + "_" + "load" + cur_load_string + "_" + cur_obj.output_for_plotting[j]);
                     }
                 }
             }
@@ -6080,7 +6080,7 @@ void DefaultInputGenerator::outputCacheStateStage(pugi::xml_document &doc,
                 {
                     output_node = op_node.append_child("Output");
                     addChild(output_node, "ArgumentName", cur_obj.output_for_plotting[j] + "0");
-                    addChild(output_node, "SharedDataName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+                    addChild(output_node, "SharedDataName", cur_obj.mPerformerName + "_" + cur_obj.output_for_plotting[j]);
                 }
             }
         }
@@ -6160,7 +6160,7 @@ void DefaultInputGenerator::outputUpdateProblemStage(pugi::xml_document &doc)
             op_node = stage_node.append_child("Operation");
             addChild(op_node, "Name", "Update Problem");
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
-            addChild(op_node, "PerformerName", cur_obj.performer_name);
+            addChild(op_node, "PerformerName", cur_obj.mPerformerName);
         }
     }
     op_node = stage_node.append_child("Operation");
@@ -6265,12 +6265,12 @@ void DefaultInputGenerator::outputInitializeOptimizationStageForTO(pugi::xml_doc
             if(cur_obj.code_name == "plato_analyze")
             {
               addChild(op_node, "Name", "Compute Objective Value");
-              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
             }
             else
             {
               addChild(op_node, "Name", "Compute Objective");
-              addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+              addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
             }
 
             input_node = op_node.append_child("Input");
@@ -6328,10 +6328,10 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                     {
                         op_node = stage_node.append_child("Operation");
                         addChild(op_node, "Name", "Write Output");
-                        addChild(op_node, "PerformerName", cur_obj.performer_name);
+                        addChild(op_node, "PerformerName", cur_obj.mPerformerName);
                         tFirstTime = false;
                     }
-                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                    sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
                     output_node = op_node.append_child("Output");
                     addChild(output_node, "SharedDataName", tmp_buf);
                     if(cur_obj.output_for_plotting[j] == "dispx")
@@ -6372,8 +6372,8 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
               {
                 XMLGen::Objective cur_obj = m_InputData.objectives[i];
                 input_node = op_node.append_child("Input");
-                addChild(input_node, "ArgumentName", cur_obj.performer_name + "_vonmises");
-                addChild(input_node, "SharedDataName", cur_obj.performer_name + "_vonmises");
+                addChild(input_node, "ArgumentName", cur_obj.mPerformerName + "_vonmises");
+                addChild(input_node, "SharedDataName", cur_obj.mPerformerName + "_vonmises");
               }
             }
             output_node = op_node.append_child("Output");
@@ -6448,7 +6448,7 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
             if(aHasUncertainties)
             {
               input_node = op_node.append_child("Input");
-              sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), "vonmises");
+              sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), "vonmises");
               addChild(input_node, "ArgumentName", tmp_buf);
               addChild(input_node, "SharedDataName", tmp_buf);
             }
@@ -6460,7 +6460,7 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                 for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
                 {
                   input_node = op_node.append_child("Input");
-                  sprintf(tmp_buf, "%s_load%s_%s", cur_obj.performer_name.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
+                  sprintf(tmp_buf, "%s_load%s_%s", cur_obj.mPerformerName.c_str(), cur_load_string.c_str(), cur_obj.output_for_plotting[j].c_str());
                   addChild(input_node, "ArgumentName", tmp_buf);
                   addChild(input_node, "SharedDataName", tmp_buf);
                 }
@@ -6471,7 +6471,7 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
               for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
               {
                 input_node = op_node.append_child("Input");
-                sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
                 addChild(input_node, "ArgumentName", tmp_buf);
                 addChild(input_node, "SharedDataName", tmp_buf);
               }

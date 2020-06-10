@@ -7,63 +7,12 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
 namespace XMLGen
 {
-
-/******************************************************************************/
-bool is_plato_analyze_performer(const std::string& aPerformer)
-{
-    auto tLowerKey = Plato::tolower(aPerformer);
-    auto tIsPlatoAnalyze = tLowerKey.compare("plato_analyze") == 0;
-    return (tIsPlatoAnalyze);
-}
-/******************************************************************************/
-
-/******************************************************************************/
-bool is_topology_optimization_problem(const std::string& aProblemType)
-{
-    auto tLowerKey = Plato::tolower(aProblemType);
-    auto tIsTopologyOptimization = tLowerKey.compare("topology") == 0;
-    return (tIsTopologyOptimization);
-}
-/******************************************************************************/
-
-/******************************************************************************/
-bool is_any_objective_computed_by_plato_analyze
-(const XMLGen::InputData& aXMLMetaData)
-{
-    auto tAtLeastOnePerformerIsPlatoAnalyze = false;
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        if(XMLGen::is_plato_analyze_performer(tObjective.performer_name))
-        {
-            tAtLeastOnePerformerIsPlatoAnalyze = true;
-            break;
-        }
-    }
-    return (tAtLeastOnePerformerIsPlatoAnalyze);
-}
-/******************************************************************************/
-
-/******************************************************************************/
-bool is_any_constraint_computed_by_plato_analyze
-(const XMLGen::InputData& aXMLMetaData)
-{
-    auto tAtLeastOnePerformerIsPlatoAnalyze = false;
-    for(auto& tConstraint : aXMLMetaData.constraints)
-    {
-        if(XMLGen::is_plato_analyze_performer(tConstraint.mPerformerName))
-        {
-            tAtLeastOnePerformerIsPlatoAnalyze = true;
-            break;
-        }
-    }
-    return (tAtLeastOnePerformerIsPlatoAnalyze);
-}
-/******************************************************************************/
 
 /******************************************************************************/
 void append_update_problem_to_plato_analyze_operation
@@ -268,8 +217,8 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
             THROWERR(std::string("Append Isotropic Material Properties to Plato Analyze Operation: Material property tag '")
                 + tMaterialPropertyTag + "' is not recognized.")
         }
-        auto tAnalyzeMaterialPropTag = tItr->second;
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tAnalyzeMaterialPropTag;
+        auto tAnalyzeMaterialTag = tItr->second.first;
+        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tAnalyzeMaterialTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
@@ -298,8 +247,8 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
             THROWERR(std::string("Append Isotropic Thermo-elastic Material Properties to Plato Analyze Operation: Material property tag '")
                 + tMaterialPropertyTag + "' is not recognized.")
         }
-        auto tAnalyzeMaterialPropTag = tItr->second;
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialPropTag;
+        auto tAnalyzeMaterialTag = tItr->second.first;
+        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);

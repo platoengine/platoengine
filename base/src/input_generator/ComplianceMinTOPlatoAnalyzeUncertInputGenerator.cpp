@@ -406,10 +406,10 @@ void ComplianceMinTOPlatoAnalyzeUncertInputGenerator::outputOutputToFileStage(pu
             {
                 op_node = stage_node.append_child("Operation");
                 addChild(op_node, "Name", "Write Output");
-                addChild(op_node, "PerformerName", cur_obj.performer_name);
+                addChild(op_node, "PerformerName", cur_obj.mPerformerName);
                 tFirstTime = false;
             }
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+            sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
             output_node = op_node.append_child("Output");
             addChild(output_node, "SharedDataName", tmp_buf);
             if(cur_obj.output_for_plotting[j] == "dispx")

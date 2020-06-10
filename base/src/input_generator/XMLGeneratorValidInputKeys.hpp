@@ -81,12 +81,15 @@ struct ValidAnalyzeMaterialPropertyKeys
 {
     /*!<
      * valid plato analyze output keys \n
-     * \brief map from plato analyze operation material property key to plato analyze input file material key, i.e. \n
-     * map<plato_analyze_operation_xml_file_material_property_key, plato_analyze_input_xml_file_material_property_key>.
+     * \brief map from plato problem input file material property tag to pair of plato analyze input file material \n
+     *   property tag and its value type, i.e. \n
+     *
+     * map<plato_problem_input_file_material_property_tag, pair<plato_analyze_input_xml_file_material_property_tag, value_type>>.
+     *
      **/
-    std::unordered_map<std::string, std::string> mKeys = { { "youngs modulus", "Youngs Modulus" }, { "poissons ratio", "Poissons Ratio" },
-        { "thermal expansion coefficient", "Thermal Expansion Coefficient" }, { "thermal conductivity coefficient", "Thermal Conductivity Coefficient" },
-        { "reference temperature", "Reference Temperature" } };
+    std::unordered_map<std::string, std::pair<std::string, std::string>> mKeys = { { "youngs modulus", { "Youngs Modulus", "double" } }, { "poissons ratio", { "Poissons Ratio", "double" } },
+        { "thermal expansion coefficient", { "Thermal Expansion Coefficient", "double" } }, { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
+        { "reference temperature", { "Reference Temperature", "double" } } };
 };
 // struct ValidAnalyzeMaterialPropertyKeys
 

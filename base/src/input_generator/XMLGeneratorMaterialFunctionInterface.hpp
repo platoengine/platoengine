@@ -28,10 +28,10 @@ typedef std::unordered_map<std::string, MaterialFunction> MaterialFunctionMap;
 }
 
 /******************************************************************************//**
- * \struct The objective of this C++ struct is to serve as an interface to the \n
- * functions used to append material properties to the plato_analyze_operation.xml \n
- * file. This interface reduces the cyclomatic complexity associated with having
- * multiple material models in Plato Analyze.
+ * \struct The goal of this C++ struct is to provide an interface for the functions \n
+ * used to append material properties, i.e. material models, to plato_analyze_operation.xml \n
+ * file. This interface reduces cyclomatic complexity due to having multiple \n
+ * material models implemented in Plato Analyze.
 **********************************************************************************/
 struct MaterialFunctionInterface
 {
@@ -54,15 +54,13 @@ public:
 
     /******************************************************************************//**
      * \fn call
-     * \brief Call function used to append material properties to the \n
-     *   plato_analyze_operation.xml file.
-     * \param [in]     aMaterialCategory material category, e.g. 'isotropic linear elastic'
-     * \param [in]     aMaterialTags     material tags, \n
-     *   i.e. vector<pair<material_property_argument_name_tag, material_property_tag>>
-     * \param [in/out] aParentNode       pugi::xml_node
+     * \brief Append material properties to plato_analyze_operation.xml file.
+     * \param [in]     aCategory     material category, e.g. 'isotropic linear elastic'
+     * \param [in]     aMaterialTags material tags, i.e. vector<pair<material_property_argument_name_tag, material_property_tag>>
+     * \param [in/out] aParentNode   pugi::xml_node
     **********************************************************************************/
     void call
-    (const std::string &aMaterialCategory,
+    (const std::string &aCategory,
      const std::vector<std::pair<std::string,std::string>>& aMaterialTags,
      pugi::xml_node &aParentNode);
 };

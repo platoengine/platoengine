@@ -24,7 +24,7 @@ struct Material
 {
 private:
     std::string mID; /*!< material identification number */
-    std::string mCategory = "isotropic";  /*!< material category, default: isotropic */
+    std::string mCategory = "isotropic linear elastic";  /*!< material category, default: isotropic */
     std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:

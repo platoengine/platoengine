@@ -481,6 +481,24 @@ inline void preprocess_load_inputs
 // function preprocess_load_inputs
 
 /******************************************************************************//**
+ * \fn define_xmlgen_load_name
+ * \brief Return name associated with XMLGen::Load with input load index.
+ * \param [in] aLoadIndex  load index
+ * \param [in] aLoadCase   random load case
+ * \return load name
+**********************************************************************************/
+inline std::string define_xmlgen_load_name
+(const std::size_t& aLoadIndex,
+ const Plato::srom::RandomLoadCase& aRandomLoadCase)
+{
+    auto tLoadIndex = std::to_string(aLoadIndex);
+    std::string tName = aRandomLoadCase.isRandom(aLoadIndex) ? "random " : "deterministic ";
+    tName += Plato::tolower(aRandomLoadCase.loadType(aLoadIndex)) + " boundary condition " + tLoadIndex;
+    return tName;
+}
+// function define_xmlgen_load_name
+
+/******************************************************************************//**
  * \fn postprocess_load_outputs
  * \brief Post-process non-deterministic load outputs.
  * \param [in/out] aSromOutputs     SROM problem output metadata
@@ -506,8 +524,9 @@ inline void postprocess_load_outputs
         for (size_t tLoadIndex = 0; tLoadIndex < tLoadCase.numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
-            tNewLoad.mIsRandom = tLoadCase.isRandom(tLoadIndex);
+            tNewLoad.mName = Plato::srom::define_xmlgen_load_name(tLoadIndex, tLoadCase);
 
+            tNewLoad.mIsRandom = tLoadCase.isRandom(tLoadIndex);
             tNewLoad.type = tLoadCase.loadType(tLoadIndex);
             tNewLoad.app_id = tLoadCase.applicationID(tLoadIndex);
             tNewLoad.app_type = tLoadCase.applicationType(tLoadIndex);
@@ -538,7 +557,7 @@ inline void check_output_load_set_types
 {
     for(size_t tSampleIndex = 0; tSampleIndex < aMetaData.numSamples(); tSampleIndex++)
     {
-        auto tLoadUseCase = aMetaData.sample(tSampleIndex).load();
+        auto tLoadUseCase = aMetaData.sample(tSampleIndex).loadcase();
         for(auto& tLoad : tLoadUseCase.loads)
         {
             if(tLoad.type != "traction")
@@ -563,8 +582,8 @@ inline void check_output_load_set_application_name
 {
     for(size_t tIndex = 0; tIndex < aMetaData.numSamples() - 1; tIndex++)
     {
-        auto tLoadUseCaseOne = aMetaData.sample(tIndex).load();
-        auto tLoadUseCaseTwo = aMetaData.sample(tIndex + 1u).load();
+        auto tLoadUseCaseOne = aMetaData.sample(tIndex).loadcase();
+        auto tLoadUseCaseTwo = aMetaData.sample(tIndex + 1u).loadcase();
 
         for(auto& tLoad : tLoadUseCaseOne.loads)
         {
@@ -590,13 +609,13 @@ inline void check_output_load_set_application_name
 inline void check_output_load_set_size
 (const XMLGen::RandomMetaData& aMetaData)
 {
-    if(aMetaData.sample(0).loadSampleDrawn() == false) { return; }
+    if(aMetaData.loadSamplesDrawn() == false) { return; }
 
-    const auto tNumLoadsInLoadCase = aMetaData.sample(0).load().loads.size();
+    const auto tNumLoadsInLoadCase = aMetaData.loadcase().loads.size();
     for (size_t tIndex = 1; tIndex < aMetaData.numSamples(); tIndex++)
     {
         auto& tSample = aMetaData.sample(tIndex);
-        if (tSample.load().loads.size() != tNumLoadsInLoadCase)
+        if (tSample.loadcase().loads.size() != tNumLoadsInLoadCase)
         {
             THROWERR(std::string("Check Output Load Set Size: Size mismatch in Sample '") + std::to_string(tIndex)
                + "'. Uncertainty workflow only supports load cases that all have the same size.")

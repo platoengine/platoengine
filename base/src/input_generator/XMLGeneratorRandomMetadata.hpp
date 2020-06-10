@@ -81,10 +81,10 @@ public:
 
     /******************************************************************************//**
      * \struct load
-     * \brief Return load case metadata.
+     * \brief Return constant reference to load case metadata.
      * \return load case metadata
     **********************************************************************************/
-    XMLGen::LoadCase load() const
+    const XMLGen::LoadCase& loadcase() const
     {
         return (mSample.second);
     }
@@ -102,10 +102,10 @@ public:
 
     /******************************************************************************//**
      * \struct material
-     * \brief Return material metadata.
+     * \brief Return constant reference to material metadata.
      * \return material metadata
     **********************************************************************************/
-    XMLGen::Material material(const std::string& aBlockID) const
+    const XMLGen::Material& material(const std::string& aBlockID) const
     {
         auto tIterator = mSample.first.find(aBlockID);
         if (tIterator == mSample.first.end())
@@ -354,6 +354,54 @@ public:
     std::vector<XMLGen::RandomSample> samples() const
     {
         return mSamples;
+    }
+
+    /******************************************************************************//**
+     * \fn materials
+     * \brief Return list of random materials.
+     * \return list of random materials
+    **********************************************************************************/
+    std::vector<XMLGen::Material> materials() const
+    {
+        if(mSamples.empty())
+        {
+            THROWERR("Random MetaData: Samples container is empty.")
+        }
+        std::vector<XMLGen::Material> tMaterials;
+        auto tBlockIDs = mSamples[0].materialBlockIDs();
+        for(auto& tID : tBlockIDs)
+        {
+            tMaterials.push_back(mSamples[0].material(tID));
+        }
+        return tMaterials;
+    }
+
+    /******************************************************************************//**
+     * \fn loadcase
+     * \brief Return random load case.
+     * \return list of random load case
+    **********************************************************************************/
+    XMLGen::LoadCase loadcase() const
+    {
+        if(mSamples.empty())
+        {
+            THROWERR("Random MetaData: Samples container is empty.")
+        }
+        return (mSamples[0].loadcase());
+    }
+
+    /******************************************************************************//**
+     * \fn loadSamplesDrawn
+     * \brief Return true if random load samples were drawn.
+     * \return list of random load case
+    **********************************************************************************/
+    bool loadSamplesDrawn() const
+    {
+        if(mSamples.empty())
+        {
+            THROWERR("Random MetaData: Samples container is empty.")
+        }
+        return (mSamples[0].loadSampleDrawn());
     }
 };
 // struct RandomMetaData

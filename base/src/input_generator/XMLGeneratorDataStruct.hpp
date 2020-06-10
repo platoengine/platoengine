@@ -17,6 +17,16 @@
 namespace XMLGen
 {
 
+struct Physics
+{
+    std::string mPDE = "elliptic";
+    std::string mCategory = "mechanical";
+    std::string mPerformer = "plato_analyze";
+    std::string mSpatialDims = "3";
+    std::string mPenaltyParam = "3";
+    std::string mMinimumErsatzValue = "1e-9";
+};
+
 struct Output
 {
     // note: vector<pair<qoi_shared_data_name, qoi_layout>>, where qoi_layout denotes the
@@ -32,9 +42,12 @@ struct Objective
     std::string name;
     std::string type;
     std::string code_name;
-    std::string performer_name;
+    std::string mPerformerName;
     std::string weight;
     std::string num_procs;
+    std::string mPenaltyParam = "3";
+    std::string mPnormExponent = "6";
+    std::string mMinimumErsatzValue = "1e-9";
     std::string analysis_solver_tolerance;
     std::string multi_load_case;
     std::vector<std::string> output_for_plotting;
@@ -103,6 +116,9 @@ struct Constraint
     std::string mPerformerName = "PlatoMain";
     std::string mNormalizedTargetValue;
     std::string mAbsoluteTargetValue;
+    std::string mPenaltyParam = "3";
+    std::string mPnormExponent = "6";
+    std::string mMinimumErsatzValue = "1e-9";
     std::string surface_area;
     std::string surface_area_ssid;
     std::string weight;
@@ -280,10 +296,10 @@ struct InputData
     std::string m_filterType_kernelThenTANH_XMLName;
 
     XMLGen::Output mOutputMetaData;
+    XMLGen::Physics mPhysicsMetaData;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;
-
 };
 
 

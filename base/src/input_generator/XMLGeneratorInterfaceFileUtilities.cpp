@@ -74,7 +74,7 @@ void append_objective_shared_data
         auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
         // shared data - deterministic criterion value
         auto tTag = std::string("Objective Value ID-") + std::to_string(tIndex);
-        auto tOwnerName = aOwnerName.empty() ? tObjective.performer_name : aOwnerName;
+        auto tOwnerName = aOwnerName.empty() ? tObjective.mPerformerName : aOwnerName;
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain" };
         auto tSharedDataNode = aDocument.append_child("SharedData");
@@ -209,11 +209,11 @@ void append_update_problem_stage
     {
         auto tStageNode = aDocument.append_child("Stage");
         auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Update Problem : ") + tObjective.performer_name + " " + std::to_string(tIndex);
+        auto tStageName = std::string("Update Problem : ") + tObjective.mPerformerName + " " + std::to_string(tIndex);
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
 
         auto tOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children( { "Name", "PerformerName" }, { "Update Problem", tObjective.performer_name }, tOperationNode);
+        XMLGen::append_children( { "Name", "PerformerName" }, { "Update Problem", tObjective.mPerformerName }, tOperationNode);
     }
 }
 // function append_update_problem_stage
