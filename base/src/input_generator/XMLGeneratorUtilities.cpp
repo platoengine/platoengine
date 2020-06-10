@@ -379,13 +379,19 @@ std::vector<std::string> transform_value_tokens
     }
     return tValues;
 }
-// function transform_key_tokens
+// function transform_value_tokens
 /******************************************************************************/
 
 void assert_is_positive_integer(const std::string& aString)
 {
-  bool not_a_positive_integer = std::strtol(aString.c_str(), NULL, 0) <= 0l;
-  if(not_a_positive_integer)
+  if(aString.empty() || !std::isdigit(aString[0]) || aString == "0")
+    THROWERR("expected a positive integer\n")
+
+  char * p;
+  strtol(aString.c_str(), &p, 10);
+  bool is_positive_integer = *p == 0;
+
+  if(!is_positive_integer)
     THROWERR("expected a positive integer\n")
 }
 

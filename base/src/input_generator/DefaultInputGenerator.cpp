@@ -634,7 +634,9 @@ void DefaultInputGenerator::generateBatchScript()
   else
     tNumGPUsNeeded = m_InputData.objectives.size();
   size_t tNumGPUsPerNode = 6;
-  size_t tNumNodesNeeded = XMLGen::compute_number_of_nodes_needed(tNumGPUsNeeded,tNumGPUsPerNode);
+  size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
+  if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
+    ++tNumNodesNeeded;
 
   batchFile << "#BSUB -nnodes " << tNumNodesNeeded << "\n";
   batchFile << "#BSUB -J plato\n";
