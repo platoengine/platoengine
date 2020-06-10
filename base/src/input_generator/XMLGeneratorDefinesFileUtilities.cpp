@@ -43,8 +43,7 @@ allocate_random_tractions_container_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
     std::vector<std::vector<std::vector<std::string>>> tOutput;
-    auto tSample = aRandomMetaData.sample(0);
-    auto tLoadCase = tSample.load();
+    auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
         if(tLoad.mIsRandom)
@@ -94,8 +93,7 @@ return_random_tractions_tags_for_define_xml_file
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
     XMLGen::ValidLoadAxisKeys tValidAxis;
-    auto tSample = aRandomMetaData.sample(0);
-    auto tLoadCase = tSample.load();
+    auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
         auto tLoadTagLower = Plato::tolower(tLoad.type);
@@ -127,7 +125,7 @@ prepare_tractions_for_define_xml_file
     auto tSamples = aRandomMetaData.samples();
     for(auto& tSample : tSamples)
     {
-        auto tLoadCase = tSample.load();
+        auto tLoadCase = tSample.loadcase();
         for(auto& tLoad : tLoadCase.loads)
         {
             if(tLoad.mIsRandom)

@@ -639,7 +639,7 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::addPlatoMainOutputOperation(pugi
         for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
         {
             tmp_node1 = tmp_node.append_child("Input");
-            addChild(tmp_node1, "ArgumentName", cur_obj.performer_name + "_" + cur_obj.output_for_plotting[j]);
+            addChild(tmp_node1, "ArgumentName", cur_obj.mPerformerName + "_" + cur_obj.output_for_plotting[j]);
             if(cur_obj.output_for_plotting[j] == "vonmises" ||
                 cur_obj.output_for_plotting[j] == "Vonmises")
               addChild(tmp_node1, "Layout", "Element Field");
@@ -729,7 +729,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::outputObjectiveStage(pugi::xml_d
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute Objective Value");
-        addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
@@ -806,7 +806,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::outputObjectiveGradientStage(pug
         XMLGen::Objective cur_obj = m_InputData.objectives[i];
         op_node = cur_parent.append_child("Operation");
         addChild(op_node, "Name", "Compute Objective Gradient");
-        addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+        addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
         input_node = op_node.append_child("Input");
         addChild(input_node, "ArgumentName", "Topology");
         addChild(input_node, "SharedDataName", "Topology");
@@ -892,7 +892,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         performer_node = doc.append_child("Performer");
-        addChild(performer_node, "Name", m_InputData.objectives[i].performer_name);
+        addChild(performer_node, "Name", m_InputData.objectives[i].mPerformerName);
         addChild(performer_node, "Code", m_InputData.objectives[i].code_name);
         sprintf(tmp_buf, "%d", (int)(i+1));
         addChild(performer_node, "PerformerID", tmp_buf);
@@ -907,12 +907,12 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     {
         // create shared data for objectives
         sprintf(tmp_buf, "Objective Value %d", (int)(i+1));
-        createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+        createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
 
         if(m_InputData.mUseNormalizationInAggregator == "true")
         {
             sprintf(tmp_buf, "Initial Objective Value %d", (int)(i+1));
-            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].performer_name, "PlatoMain");
+            createSingleUserGlobalSharedData(doc, tmp_buf, "Scalar", "1", m_InputData.objectives[i].mPerformerName, "PlatoMain");
         }
     }
 
@@ -920,7 +920,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
     {
         sprintf(tmp_buf, "Objective %d Gradient", (int)(i+1));
-        createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].performer_name, "PlatoMain");
+        createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", m_InputData.objectives[i].mPerformerName, "PlatoMain");
     }
 
     // Aggregated Objective
@@ -936,23 +936,23 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
         for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
         {
             // create shared data for objectives
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+            sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
             if(cur_obj.output_for_plotting[j] == "vonmises")
-                createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                createSingleUserElementSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
             else
-                createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.performer_name, "PlatoMain");
+                createSingleUserNodalSharedData(doc, tmp_buf, "Scalar", cur_obj.mPerformerName, "PlatoMain");
         }
     }
 
     // Optimization DOFs
     sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+        addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
 
     // Topology
     sd_node = createSingleUserNodalSharedData(doc, "Topology", "Scalar", "PlatoMain", "PlatoMain");
     for(size_t i=0; i<m_InputData.objectives.size(); ++i)
-        addChild(sd_node, "UserName", m_InputData.objectives[i].performer_name);
+        addChild(sd_node, "UserName", m_InputData.objectives[i].mPerformerName);
 
     // Volume
     createSingleUserGlobalSharedData(doc, "Volume", "Scalar", "1", "PlatoMain", "PlatoMain");
@@ -1172,7 +1172,7 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::outputInitializeOptimizationStag
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             op_node = stage_node.append_child("Operation");
             addChild(op_node, "Name", "Compute Objective Value");
-            addChild(op_node, "PerformerName", cur_obj.performer_name.c_str());
+            addChild(op_node, "PerformerName", cur_obj.mPerformerName.c_str());
 
             input_node = op_node.append_child("Input");
             addChild(input_node, "ArgumentName", "Topology");
@@ -1211,10 +1211,10 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::outputOutputToFileStage(pugi::xm
             {
                 op_node = stage_node.append_child("Operation");
                 addChild(op_node, "Name", "Write Output");
-                addChild(op_node, "PerformerName", cur_obj.performer_name);
+                addChild(op_node, "PerformerName", cur_obj.mPerformerName);
                 tFirstTime = false;
             }
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+            sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
             output_node = op_node.append_child("Output");
             addChild(output_node, "SharedDataName", tmp_buf);
             if(cur_obj.output_for_plotting[j] == "dispx")
@@ -1257,7 +1257,7 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::outputOutputToFileStage(pugi::xm
         for(size_t j=0; j<cur_obj.output_for_plotting.size(); j++)
         {
             input_node = op_node.append_child("Input");
-            sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+            sprintf(tmp_buf, "%s_%s", cur_obj.mPerformerName.c_str(), cur_obj.output_for_plotting[j].c_str());
             addChild(input_node, "ArgumentName", tmp_buf);
             addChild(input_node, "SharedDataName", tmp_buf);
         }

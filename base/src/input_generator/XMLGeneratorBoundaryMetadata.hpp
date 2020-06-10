@@ -26,6 +26,7 @@ struct Load
 
 struct LoadCase
 {
+    std::string mPerformerName = "plato_analyze";
     std::vector<XMLGen::Load> loads;
     std::string id; // note LoadCase id is not necessarily shared with its Loads
 };

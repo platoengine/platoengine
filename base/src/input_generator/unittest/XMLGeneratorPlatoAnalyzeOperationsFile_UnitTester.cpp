@@ -9,6 +9,7 @@
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
@@ -25,7 +26,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tConstraint.mPerformerName = "plato_analyze";
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispx", "Solution X"});
     tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispy", "Solution Y"});
@@ -1185,7 +1186,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "sierra_sd";
+    tObjective.mPerformerName = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument));
 
@@ -1199,7 +1200,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
     tInputData.objectives.push_back(tObjective);
     ASSERT_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
 }
@@ -1210,7 +1211,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
 
     // POSE MATERIAL SET 1
@@ -1341,7 +1342,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "sierra_sd";
+    tObjective.mPerformerName = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument));
 
@@ -1355,7 +1356,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
     tInputData.objectives.push_back(tObjective);
     ASSERT_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
 }
@@ -1366,7 +1367,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.performer_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
 
     // POSE MATERIAL SET 1
@@ -1489,21 +1490,21 @@ TEST(PlatoTestXMLGenerator, IsAnyObjectiveComputedByPlatoAnalyze)
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
     XMLGen::Objective tObjective1;
-    tObjective1.performer_name = "sierra_sd";
+    tObjective1.mPerformerName = "sierra_sd";
     tInputData.objectives.push_back(tObjective1);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
     XMLGen::Objective tObjective2;
-    tObjective2.performer_name = "plato_analyze";
+    tObjective2.mPerformerName = "plato_analyze";
     tInputData.objectives.push_back(tObjective2);
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.performer_name = "sierra_sd";
+    tObjective2.mPerformerName = "sierra_sd";
     tInputData.objectives.pop_back();
     tInputData.objectives.push_back(tObjective2);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.performer_name = "PLATO_Analyze";
+    tObjective2.mPerformerName = "PLATO_Analyze";
     tInputData.objectives.pop_back();
     tInputData.objectives.push_back(tObjective2);
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));

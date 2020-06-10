@@ -25,41 +25,6 @@ using MaterialMetadata = std::unordered_map<std::string, XMLGen::Analyze::Materi
 // namespace Analyze
 
 /******************************************************************************//**
- * \fn is_plato_analyze_performer
- * \brief Returns true if Plato Analyze is used to compute physical quantities of \n
- * interest during optimization, i.e. Plato Analyze is an active performer.
- * \param [in] aPerformer physics app name, i.e. performer name
- * \return Flag
-**********************************************************************************/
-bool is_plato_analyze_performer(const std::string& aPerformer);
-
-/******************************************************************************//**
- * \fn is_plato_analyze_performer
- * \brief Returns true if solving a topology optimization problem.
- * \param [in] aProblemType optimization problem type, i.e. shape, topology, inverse, others.
- * \return Flag
-**********************************************************************************/
-bool is_topology_optimization_problem(const std::string& aProblemType);
-
-/******************************************************************************//**
- * \fn is_any_objective_computed_by_plato_analyze
- * \brief Returns true if any objective is computed by a Plato Analyze performer.
- * \param [in] aXMLMetaData Plato problem input data
- * \return Flag
-**********************************************************************************/
-bool is_any_objective_computed_by_plato_analyze
-(const XMLGen::InputData& aXMLMetaData);
-
-/******************************************************************************//**
- * \fn is_any_constraint_computed_by_plato_analyze
- * \brief Returns true if any constraint is computed by a Plato Analyze performer.
- * \param [in] aXMLMetaData Plato problem input data
- * \return Flag
-**********************************************************************************/
-bool is_any_constraint_computed_by_plato_analyze
-(const XMLGen::InputData& aXMLMetaData);
-
-/******************************************************************************//**
  * \fn append_update_problem_to_plato_analyze_operation
  * \brief Append update problem operation to PUGI XML document. The update problem \n
  * operation is used to enable safe non-Plato parameter, e.g. physics-only parameters \n

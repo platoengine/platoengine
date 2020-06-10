@@ -105,7 +105,7 @@ public:
     std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
     std::string getObjectiveType(const int &aIndex) {return m_InputData.objectives[aIndex].type;}
     std::string getObjCodeName(const int &aIndex) {return m_InputData.objectives[aIndex].code_name;}
-    std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].performer_name;}
+    std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].mPerformerName;}
     std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
     std::string getObjFreqMax(const int &aIndex) {return m_InputData.objectives[aIndex].freq_max;}
     std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
