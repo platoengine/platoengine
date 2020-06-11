@@ -61,6 +61,7 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorLaunchScriptUtilities.hpp"
+#include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
@@ -108,11 +109,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInputFiles()
         return false;
     }
 
-    if(!generateLaunchScript())
-    {
-        std::cout << "Failed to generate mpirun.source" << std::endl;
-        return false;
-    }
+    XMLGen::generate_launch_script(m_InputData);
 
     std::cout << "Successfully wrote XML files." << std::endl;
     return true;
