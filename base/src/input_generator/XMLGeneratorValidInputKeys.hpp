@@ -12,10 +12,10 @@
 namespace XMLGen
 {
 
-struct ValidLoadAxisKeys
+struct ValidAxesKeys
 {
-    /*!< valid load vector axis, i.e. {x,y,z} axes */
-    std::vector<std::string> mKeys = {"x", "y", "z"};
+    /*!< map from dimension to axis name, i.e. map<dimension, axis> */
+    std::unordered_map<size_t, std::string> mKeys = { {0, "x"}, {1, "y"}, {2, "z"} };
 };
 // struct ValidLoadAxisKeys
 

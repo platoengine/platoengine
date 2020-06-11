@@ -60,7 +60,10 @@ typedef void (*MaterialFunction)(void);
 typedef void (*NaturalBCFunction)(void);
 
 /*!< define natural boundary condition name function pointer type */
-typedef std::string (*NaturalBCNameFunction)(void);
+typedef std::string (*NaturalBCTagFunction)(void);
+
+/*!< define essential boundary condition name function pointer type */
+typedef std::string (*EssentialBCTagFunction)(void);
 
 /*!< criterion function pointer type */
 typedef void (*CriterionFunction)(void);
@@ -74,8 +77,12 @@ typedef std::unordered_map<std::string, MaterialFunction> MaterialFunctionMap;
 typedef std::unordered_map<std::string, NaturalBCFunction> NaturalBCFunctionMap;
 
 /*!< map from natural boundary condition (bc) category to natural bc function used to define \n
- * natural bc name, i.e. map<natural_bc_category, define_natural_bc_name_function> */
-typedef std::unordered_map<std::string, NaturalBCNameFunction> NaturalBCNameFunctionMap;
+ * the natural bcs tags, i.e. map<natural_bc_category, define_natural_bc_tag_function> */
+typedef std::unordered_map<std::string, NaturalBCTagFunction> NaturalBCTagFunctionMap;
+
+/*!< map from essential boundary condition (bc) category to essential bc function used to define \n
+ * the essential bcs tags, i.e. map<essential_bc_category, define_essential_bc_tag_function> */
+typedef std::unordered_map<std::string, EssentialBCTagFunction> EssentialBCTagFunctionMap;
 
 /*!< map from design criterion category to design criterion function used to append design \n
  * criterion and respective parameters, i.e. map<design_criterion_category, criterion_function> */
@@ -144,49 +151,49 @@ std::string return_surface_flux_load_name
 
 /******************************************************************************//**
  * \struct The goal of this C++ struct is to provide an interface for the \n
- * functions used to define natural boundary conditions' names for \n
+ * functions used to define natural boundary conditions' tags for \n
  * plato_analyze_input_deck.xml. This interface reduces cyclomatic complexity \n
  * due to multiple natural boundary conditions categories in Plato Analyze.
 **********************************************************************************/
-struct NaturalBCNameFunctionInterface
+struct NaturalBoundaryConditionTag
 {
 private:
-    /*!< map from Neumman load category to function used to define its name */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCNameFunction, std::type_index>> mMap;
+    /*!< map from natural boundary condition category to function used to define its tag */
+    std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCTagFunction, std::type_index>> mMap;
 
     /******************************************************************************//**
      * \fn insert
-     * \brief Insert functions to Neumann load function map.
+     * \brief Insert functions to natural boundary condition functions map.
      **********************************************************************************/
     void insert()
     {
         // traction load
         auto tFuncIndex = std::type_index(typeid(return_traction_load_name));
         mMap.insert(std::make_pair("traction",
-          std::make_pair((XMLGen::Analyze::NaturalBCNameFunction)return_traction_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_traction_load_name, tFuncIndex)));
 
         // pressure load
         tFuncIndex = std::type_index(typeid(return_pressure_load_name));
         mMap.insert(std::make_pair("pressure",
-          std::make_pair((XMLGen::Analyze::NaturalBCNameFunction)return_pressure_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_pressure_load_name, tFuncIndex)));
 
         // surface potential
         tFuncIndex = std::type_index(typeid(return_surface_potential_load_name));
         mMap.insert(std::make_pair("surface potential",
-          std::make_pair((XMLGen::Analyze::NaturalBCNameFunction)return_surface_potential_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_surface_potential_load_name, tFuncIndex)));
 
         // surface flux
         tFuncIndex = std::type_index(typeid(return_surface_flux_load_name));
         mMap.insert(std::make_pair("surface flux",
-          std::make_pair((XMLGen::Analyze::NaturalBCNameFunction)return_surface_flux_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_surface_flux_load_name, tFuncIndex)));
     }
 
 public:
     /******************************************************************************//**
-     * \fn NaturalBCNameFunctionInterface
+     * \fn NaturalBoundaryConditionTag
      * \brief Default constructor
     **********************************************************************************/
-    NaturalBCNameFunctionInterface()
+    NaturalBoundaryConditionTag()
     {
         this->insert();
     }
@@ -216,8 +223,7 @@ public:
         return tName;
     }
 };
-// struct NaturalBCNameFunctionInterface
-
+// struct NaturalBoundaryConditionTag
 
 void append_parameter_plus_attributes
 (const std::vector<std::string>& aKeys,
@@ -486,7 +492,7 @@ void append_pnorm_criterion
  * criteria in Plato Analyze.
 **********************************************************************************/
 template<typename CriterionType>
-struct CriterionFunctionInterface
+struct AppendCriterionParameters
 {
 private:
     /*!< map from design criterion category to function used to append design criterion and respective parameters */
@@ -542,10 +548,10 @@ private:
 
 public:
     /******************************************************************************//**
-     * \fn CriterionFunctionInterface
+     * \fn AppendCriterionParameters
      * \brief Default constructor
     **********************************************************************************/
-    CriterionFunctionInterface()
+    AppendCriterionParameters()
     {
         this->insert();
     }
@@ -578,13 +584,13 @@ public:
         tTypeCastedFunc(aCriterion, aParentNode);
     }
 };
-// struct CriterionFunctionInterface
+// struct AppendCriterionParameters
 
 void append_objective_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::CriterionFunctionInterface<XMLGen::Objective> tFunctionInterface;
+    XMLGen::AppendCriterionParameters<XMLGen::Objective> tFunctionInterface;
     for(auto& tObjective : aXMLMetaData.objectives)
     {
         tFunctionInterface.call(tObjective, aParentNode);
@@ -608,7 +614,7 @@ void append_constraint_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::CriterionFunctionInterface<XMLGen::Constraint> tFunctionInterface;
+    XMLGen::AppendCriterionParameters<XMLGen::Constraint> tFunctionInterface;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
         tFunctionInterface.call(tConstraint, aParentNode);
@@ -778,7 +784,7 @@ void append_orthotropic_linear_elastic_material_to_plato_problem
  * This interface reduces cyclomatic complexity due to having multiple material \n
  * models in Plato Analyze.
 **********************************************************************************/
-struct MaterialModelFunctionInterface
+struct AppendMaterialModelParameters
 {
 private:
     /*!< map from material model category to function used to append material properties and respective values */
@@ -818,10 +824,10 @@ private:
 
 public:
     /******************************************************************************//**
-     * \fn MaterialModelFunctionInterface
+     * \fn AppendMaterialModelParameters
      * \brief Default constructor
     **********************************************************************************/
-    MaterialModelFunctionInterface()
+    AppendMaterialModelParameters()
     {
         this->insert();
     }
@@ -853,7 +859,7 @@ public:
         tTypeCastedFunc(aMaterial, aParentNode);
     }
 };
-// struct MaterialModelFunctionInterface
+// struct AppendMaterialModelParameters
 
 void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
@@ -861,7 +867,7 @@ void append_material_model_to_plato_problem
 {
     auto tProblem = aDocument.child("ParameterList");
     auto tPlatoProblem = tProblem.child("ParameterList");
-    XMLGen::MaterialModelFunctionInterface tMaterialInterface;
+    XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
         tMaterialInterface.call(tMaterial, tPlatoProblem);
@@ -943,7 +949,7 @@ void append_uniform_single_valued_load_to_plato_problem
  * plato_analyze_input_deck.xml. This interface reduces cyclomatic complexity \n
  * due to multiple natural boundary conditions categories in Plato Analyze.
 **********************************************************************************/
-struct NaturalBCFunctionInterface
+struct AppendNaturalBoundaryCondition
 {
 private:
     /*!< map from Neumman load category to function used to define its name */
@@ -978,10 +984,10 @@ private:
 
 public:
     /******************************************************************************//**
-     * \fn NaturalBCFunctionInterface
+     * \fn AppendNaturalBoundaryCondition
      * \brief Default constructor
     **********************************************************************************/
-    NaturalBCFunctionInterface()
+    AppendNaturalBoundaryCondition()
     {
         this->insert();
     }
@@ -989,7 +995,7 @@ public:
     /******************************************************************************//**
      * \fn call
      * \brief Append natural boundary condition parameters to plato_analyze_input_deck.xml.
-     * \param [in]     aName        natural boundary condition name
+     * \param [in]     aName        natural boundary condition identification name
      * \param [in]     aLoad        natural boundary condition metadata
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
@@ -1011,7 +1017,7 @@ public:
         tTypeCastedFunc(aName, aLoad, aParentNode);
     }
 };
-// struct NaturalBCFunctionInterface
+// struct AppendNaturalBoundaryCondition
 
 void append_natural_boundary_conditions_to_plato_problem
 (const XMLGen::LoadCase& aLoadCase,
@@ -1022,8 +1028,8 @@ void append_natural_boundary_conditions_to_plato_problem
     auto tNaturalBC = tPlatoProblem.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Natural Boundary Conditions"}, tNaturalBC);
 
-    XMLGen::NaturalBCFunctionInterface tNaturalBCFuncInterface;
-    XMLGen::NaturalBCNameFunctionInterface tNaturalBCNameFuncInterface;
+    XMLGen::AppendNaturalBoundaryCondition tNaturalBCFuncInterface;
+    XMLGen::NaturalBoundaryConditionTag tNaturalBCNameFuncInterface;
     for(auto& tLoad : aLoadCase.loads)
     {
         auto tName = tNaturalBCNameFuncInterface.call(tLoad);
@@ -1050,6 +1056,169 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
                 XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aDocument);
             }
         }
+    }
+}
+
+std::string return_displacement_bc_name
+(const XMLGen::BC& aBC)
+{
+    std::string tOutput;
+    if(aBC.mIsRandom)
+    {
+        tOutput = std::string("Random Displacement Boundary Condition with ID ") + aBC.bc_id;
+    }
+    else
+    {
+        tOutput = std::string("Displacement Boundary Condition with ID ") + aBC.bc_id;
+    }
+    return tOutput;
+}
+
+std::string return_potential_bc_name
+(const XMLGen::BC& aBC)
+{
+    std::string tOutput;
+    if(aBC.mIsRandom)
+    {
+        tOutput = std::string("Random Potential Boundary Condition with ID ") + aBC.bc_id;
+    }
+    else
+    {
+        tOutput = std::string("Potential Boundary Condition with ID ") + aBC.bc_id;
+    }
+    return tOutput;
+}
+
+std::string return_velocity_bc_name
+(const XMLGen::BC& aBC)
+{
+    std::string tOutput;
+    if(aBC.mIsRandom)
+    {
+        tOutput = std::string("Random Velocity Boundary Condition with ID ") + aBC.bc_id;
+    }
+    else
+    {
+        tOutput = std::string("Velocity Boundary Condition with ID ") + aBC.bc_id;
+    }
+    return tOutput;
+}
+
+std::string return_temperature_bc_name
+(const XMLGen::BC& aBC)
+{
+    std::string tOutput;
+    if(aBC.mIsRandom)
+    {
+        tOutput = std::string("Random Temperature Boundary Condition with ID ") + aBC.bc_id;
+    }
+    else
+    {
+        tOutput = std::string("Temperature Boundary Condition with ID ") + aBC.bc_id;
+    }
+    return tOutput;
+}
+
+/******************************************************************************//**
+ * \struct The goal of this C++ struct is to provide an interface for the \n
+ * functions used to define essential boundary conditions' tags for \n
+ * plato_analyze_input_deck.xml. This interface reduces cyclomatic complexity \n
+ * due to multiple essential boundary conditions categories in Plato Analyze.
+**********************************************************************************/
+struct EssentialBoundaryConditionTag
+{
+private:
+    /*!< map from Neumman load category to function used to define its tag */
+    std::unordered_map<std::string, std::pair<XMLGen::Analyze::EssentialBCTagFunction, std::type_index>> mMap;
+
+    /******************************************************************************//**
+     * \fn insert
+     * \brief Insert functions to essential boundary condition functions map.
+     **********************************************************************************/
+    void insert()
+    {
+        // traction load
+        auto tFuncIndex = std::type_index(typeid(return_temperature_bc_name));
+        mMap.insert(std::make_pair("temperature",
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_temperature_bc_name, tFuncIndex)));
+
+        // pressure load
+        tFuncIndex = std::type_index(typeid(return_velocity_bc_name));
+        mMap.insert(std::make_pair("velocity",
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_velocity_bc_name, tFuncIndex)));
+
+        // surface potential
+        tFuncIndex = std::type_index(typeid(return_potential_bc_name));
+        mMap.insert(std::make_pair("potential",
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_potential_bc_name, tFuncIndex)));
+
+        // surface flux
+        tFuncIndex = std::type_index(typeid(return_displacement_bc_name));
+        mMap.insert(std::make_pair("displacement",
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_displacement_bc_name, tFuncIndex)));
+    }
+
+public:
+    /******************************************************************************//**
+     * \fn EssentialBoundaryConditionTag
+     * \brief Default constructor
+    **********************************************************************************/
+    EssentialBoundaryConditionTag()
+    {
+        this->insert();
+    }
+
+    /******************************************************************************//**
+     * \fn call
+     * \brief Return essential boundary condition tag for plato_analyze_input_deck.xml.
+     * \param [in] aBC essential boundary condition metadata
+     * \return essential boundary condition tag
+    **********************************************************************************/
+    std::string call(const XMLGen::BC& aBC) const
+    {
+        auto tTag = Plato::tolower(aBC.type);
+        auto tMapItr = mMap.find(tTag);
+        if(tMapItr == mMap.end())
+        {
+            THROWERR(std::string("Essential Boundary Condition Tag Function Interface: Did not find essential ")
+                + "boundary condition function with tag '" + tTag + "' in list.")
+        }
+        auto tTypeCastedFunc = reinterpret_cast<std::string(*)(const XMLGen::BC&)>(tMapItr->second.first);
+        if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
+        {
+            THROWERR(std::string("Essential Boundary Condition Tag Function Interface: Reinterpret cast for essential ")
+                + "boundary condition function with tag '" + tTag + "' failed.")
+        }
+        auto tName = tTypeCastedFunc(aBC);
+        return tName;
+    }
+};
+// struct EssentialBoundaryConditionTag
+
+struct ValidEssentialBoundaryConditionKeys
+{
+    std::unordered_map<std::string, std::vector<std::string>> mKeys = { {"displacement", {"rigid", "zero value", "fixed value"} },
+        {"temperature", {"insulated", "zero value", "fixed value"} }, {"potential", {"insulated", "zero value", "fixed value"} },
+        {"velocity", {"rigid", "zero value", "fixed value"} } };
+};
+
+void append_rigid_essential_boundary_condition_to_plato_problem
+(const std::string& aName,
+ const XMLGen::BC& aBC,
+ pugi::xml_node &aParentNode)
+{
+    auto tName = aName;
+    XMLGen::ValidAxesKeys tValidAxis;
+}
+
+void append_essential_boundary_conditions_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    XMLGen::EssentialBoundaryConditionTag tTagInterface;
+    for(auto& tBC : aXMLMetaData.bcs)
+    {
+        auto tName = tTagInterface.call(tBC);
     }
 }
 

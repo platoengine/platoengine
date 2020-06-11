@@ -92,7 +92,7 @@ return_random_tractions_tags_for_define_xml_file
     // traction load index to tags map, i.e. map<load index, vector<tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
-    XMLGen::ValidLoadAxisKeys tValidAxis;
+    XMLGen::ValidAxesKeys tValidAxis;
     auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
@@ -105,6 +105,7 @@ return_random_tractions_tags_for_define_xml_file
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
+                // TODO ADD ERROR MESSAGE IF DIMENSION KEY IS GREATER THAN 2
                 auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tValidAxis.mKeys[tDimIndex] + "-axis";
                 tOutput[tLoadIndexString].push_back(tTag);
             }
