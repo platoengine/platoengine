@@ -33,6 +33,8 @@ struct LoadCase
 
 struct BC
 {
+    bool mIsRandom = false;
+    std::string mCategory = "rigid";
     std::string type;     // temperature, displacement
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id
