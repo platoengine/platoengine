@@ -96,6 +96,14 @@ inline std::string tolower(const std::string& aInput)
 }
 // function tolower
 
+/******************************************************************************//**
+ * \fn toupper
+ * \brief Convert string to upper case.
+ * \param [in] aInput word
+ * \return upper case word
+**********************************************************************************/
+std::string toupper(const std::string& aInput);
+
 void system(const char* aString);
 
 } // end namespace Plato

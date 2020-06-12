@@ -53,9 +53,11 @@
 namespace Plato
 {
 
-size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
-                                   const size_t& num_processors_in_group,
-                                   const size_t& atmost_processor_count)
+/**********************************************************************************/
+size_t divide_up_atmost_processors
+(const size_t& total_number_of_tasks,
+ const size_t& num_processors_in_group,
+ const size_t& atmost_processor_count)
 {
     // this logic is used to divide tasks into groups of processors.
     // total number of processors used will not exceed "atmost_processor_count"
@@ -66,7 +68,9 @@ size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
     // you can't do more tasks than total
     return std::min(total_number_of_tasks, equal_division_of_tasks);
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const double d)
 {
   int sig_digits = DECIMAL_DIG;
@@ -76,7 +80,9 @@ std::string to_string(const double d)
   tString = buf;
   return tString;
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const float f)
 {
   int sig_digits = DECIMAL_DIG;
@@ -86,21 +92,41 @@ std::string to_string(const float f)
   tString = buf;
   return tString;
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const int d)
 {
   return std::to_string(d);
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const size_t d)
 {
   return std::to_string(d);
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
+std::string toupper(const std::string& aInput)
+{
+    std::locale tLocale;
+    std::ostringstream tOutput;
+    for (auto& tChar : aInput)
+    {
+        tOutput << std::toupper(tChar,tLocale);
+    }
+    return (tOutput.str());
+}
+/**********************************************************************************/
+
+/**********************************************************************************/
 void system(const char* aString)
 {
   int return_val = std::system(aString);
   return_val = return_val;
 }
+/**********************************************************************************/
 
 } // end namespace Plato

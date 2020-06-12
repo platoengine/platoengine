@@ -19,8 +19,7 @@ namespace XMLGen
 
 struct Physics
 {
-    std::string mPDE = "elliptic";
-    std::string mCategory = "mechanical";
+    std::string mPhysics = "mechanical";
     std::string mPerformer = "plato_analyze";
     std::string mSpatialDims = "3";
     std::string mPenaltyParam = "3";
@@ -42,7 +41,7 @@ struct Objective
     std::string name;
     std::string type;
     std::string code_name;
-    std::string mPerformerName;
+    std::string mPerformerName = "plato_analyze";
     std::string weight;
     std::string num_procs;
     std::string mPenaltyParam = "3";

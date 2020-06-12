@@ -14,10 +14,10 @@ namespace XMLGen
 
 struct ValidAxesKeys
 {
-    /*!< map from dimension to axis name, i.e. map<dimension, axis> */
+    /*!< map from dimension to axis, i.e. map<dimension, axis> */
     std::unordered_map<size_t, std::string> mKeys = { {0, "x"}, {1, "y"}, {2, "z"} };
 };
-// struct ValidLoadAxisKeys
+// struct ValidAxesKeys
 
 struct ValidPhysicsPerformerKeys
 {

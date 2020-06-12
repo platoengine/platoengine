@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include "XMLGenerator_UnitTester_Tools.hpp"
+
 #include "pugixml.hpp"
 
 #include <typeindex>
@@ -18,31 +20,38 @@
 namespace XMLGen
 {
 
-struct ValidAnalyzePDEKeys
-{
-    std::unordered_map<std::string, std::string> mKeys = { { "elliptic", "Elliptic" }, { "parabolic", "Parabolic" }, { "hyperbolic", "Hyperbolic" },
-        {"plasticity", "Infinite Strain Plasticity"} };
-};
-
 struct ValidAnalyzePhysicsKeys
 {
-    std::unordered_map<std::string, std::string> mKeys = { { "mechanical", "Mechanical" }, { "electromechanical", "Electromechanical" },
-        { "thermal", "Thermal" }, {"stabilized mechanical", "Stabilized Mechanical"}, {"stabilized thermomechanical", "Stabilized Thermomechanical"},
-        { "thermomechanical", "Thermomechanical" }, { "thermomechanical", "Thermomechanical" } };
+    std::unordered_map<std::string, std::pair<std::string,std::string>> mKeys =
+        {
+            { "mechanical", {"Mechanical", "Elliptic"} },
+            { "transient mechanics", {"Mechanical", "Hyperbolic"} },
+            { "plasticity", {"Mechanical", "Parabolic"} },
+            { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
+            { "thermal", {"Thermal", "Elliptic"} },
+            { "heat conduction", {"Thermal", "Parabolic"} },
+            { "electromechanical", {"Electromechanical", "Elliptic"} },
+            { "stabilized thermomechanical", {"Stabilized Thermomechanical", "Elliptic"} },
+            { "thermomechanical", {"Thermomechanical", "Elliptic"} },
+            { "coupled heat conduction and mechanics", {"Thermomechanical", "Parabolic"} }
+        };
 };
 
 struct ValidAnalyzeCriteriaKeys
 {
-
-    std::unordered_map<std::string, std::string> mKeys = { { "volume", "Volume" }, { "maximize stiffness", "Internal Elastic Energy" },
-      { "local stress", "Stress Constraint Quadratic" }, {"stress p-norm", "Stress P-Norm"}, {"effective energy", "Effective Energy"},
-      { "stress constrained mass minimization", "Stress Constraint General" }, { "maximize heat conduction", "Internal Thermal Energy" },
-      { "flux p-norm", "Flux P-Norm" }, { "thermo-elastic energy", "Internal Thermoelastic Energy"}, { "electro-elastic energy", "Internal Electroelastic Energy"} };
-
-
-    std::unordered_map<std::string, bool> mSelfAdjoint = { { "volume", false }, { "maximize stiffness", true }, { "local stress", false },
-      { "stress p-norm", false }, { "effective energy", true }, { "stress constrained mass minimization ", false }, { "maximize heat conduction", true },
-      { "flux p-norm", false }, { "thermo-elastic energy", false }, { "electro-elastic energy", false } };
+    std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
+    {
+        { "volume", { "Volume", false } },
+        { "maximize stiffness", { "Internal Elastic Energy", true } },
+        { "local stress", { "Stress Constraint Quadratic", false } },
+        { "stress p-norm", { "Stress P-Norm", false } },
+        { "effective energy", { "Effective Energy", true } },
+        { "stress constrained mass minimization", { "Stress Constraint General", false } },
+        { "maximize heat conduction", { "Internal Thermal Energy", false } },
+        { "flux p-norm", { "Flux P-Norm", false } },
+        { "thermo-elastic energy", { "Internal Thermoelastic Energy", false } },
+        { "electro-elastic energy", { "Internal Electroelastic Energy", false } }
+    };
 };
 
 struct ValidSpatialDimsKeys
@@ -53,40 +62,48 @@ struct ValidSpatialDimsKeys
 namespace Analyze
 {
 
+/*!< criterion function pointer type */
+typedef void (*CriterionFunc)(void);
+
 /*!< material function pointer type */
-typedef void (*MaterialFunction)(void);
+typedef void (*MaterialModelFunc)(void);
 
 /*!< natural boundary condition function pointer type */
-typedef void (*NaturalBCFunction)(void);
+typedef void (*NaturalBCFunc)(void);
 
-/*!< define natural boundary condition name function pointer type */
-typedef std::string (*NaturalBCTagFunction)(void);
+/*!< define essential boundary condition function pointer type */
+typedef void (*EssentialBCFunc)(void);
 
-/*!< define essential boundary condition name function pointer type */
-typedef std::string (*EssentialBCTagFunction)(void);
+/*!< define natural boundary condition tag function pointer type */
+typedef std::string (*NaturalBCTagFunc)(void);
 
-/*!< criterion function pointer type */
-typedef void (*CriterionFunction)(void);
-
-/*!< map from material model category to material function used to append material properties and \n
- * respective values, i.e. map<material_model, material_function> */
-typedef std::unordered_map<std::string, MaterialFunction> MaterialFunctionMap;
-
-/*!< map from natural boundary condition (bc) category to natural bc function used to append, \n
- * natural bc parameters, i.e. map<natural_bc_category, append_natural_bc_function> */
-typedef std::unordered_map<std::string, NaturalBCFunction> NaturalBCFunctionMap;
-
-/*!< map from natural boundary condition (bc) category to natural bc function used to define \n
- * the natural bcs tags, i.e. map<natural_bc_category, define_natural_bc_tag_function> */
-typedef std::unordered_map<std::string, NaturalBCTagFunction> NaturalBCTagFunctionMap;
-
-/*!< map from essential boundary condition (bc) category to essential bc function used to define \n
- * the essential bcs tags, i.e. map<essential_bc_category, define_essential_bc_tag_function> */
-typedef std::unordered_map<std::string, EssentialBCTagFunction> EssentialBCTagFunctionMap;
+/*!< define essential boundary condition tag function pointer type */
+typedef std::string (*EssentialBCTagFunc)(void);
 
 /*!< map from design criterion category to design criterion function used to append design \n
  * criterion and respective parameters, i.e. map<design_criterion_category, criterion_function> */
-typedef std::unordered_map<std::string, CriterionFunction> CriterionFunctionMap;
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::CriterionFunc, std::type_index>> CriterionFuncMap;
+
+/*!< map from material model category to material function used to append material properties and \n
+ * respective values, i.e. map<material_model, material_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::MaterialModelFunc, std::type_index>> MaterialModelFuncMap;
+
+/*!< map from natural boundary condition (bc) category to natural bc function used to append, \n
+ * natural bc parameters, i.e. map<natural_bc_category, append_natural_bc_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCFunc, std::type_index>> NaturalBCFuncMap;
+
+/*!< map from natural boundary condition (bc) category to natural bc function used to define \n
+ * the natural bcs tags, i.e. map<natural_bc_category, define_natural_bc_tag_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCTagFunc, std::type_index>> NaturalBCTagFuncMap;
+
+/*!< map from essential boundary condition (bc) category to essential bc function used to append, \n
+ * essential bc parameters, i.e. map<essential_bc_category, append_essential_bc_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::EssentialBCFunc, std::type_index>> EssentialBCFuncMap;
+
+/*!< map from essential boundary condition (bc) category to essential bc function used to define \n
+ * the essential bcs tags, i.e. map<essential_bc_category, define_essential_bc_tag_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::EssentialBCTagFunc, std::type_index>> EssentialBCTagFuncMap;
+
 }
 
 std::string return_traction_load_name
@@ -159,7 +176,7 @@ struct NaturalBoundaryConditionTag
 {
 private:
     /*!< map from natural boundary condition category to function used to define its tag */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCTagFunction, std::type_index>> mMap;
+    XMLGen::Analyze::NaturalBCTagFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
@@ -170,22 +187,22 @@ private:
         // traction load
         auto tFuncIndex = std::type_index(typeid(return_traction_load_name));
         mMap.insert(std::make_pair("traction",
-          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_traction_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_traction_load_name, tFuncIndex)));
 
         // pressure load
         tFuncIndex = std::type_index(typeid(return_pressure_load_name));
         mMap.insert(std::make_pair("pressure",
-          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_pressure_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_pressure_load_name, tFuncIndex)));
 
         // surface potential
         tFuncIndex = std::type_index(typeid(return_surface_potential_load_name));
         mMap.insert(std::make_pair("surface potential",
-          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_surface_potential_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_potential_load_name, tFuncIndex)));
 
         // surface flux
         tFuncIndex = std::type_index(typeid(return_surface_flux_load_name));
         mMap.insert(std::make_pair("surface flux",
-          std::make_pair((XMLGen::Analyze::NaturalBCTagFunction)return_surface_flux_load_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_flux_load_name, tFuncIndex)));
     }
 
 public:
@@ -234,6 +251,15 @@ void append_parameter_plus_attributes
     XMLGen::append_attributes(aKeys, aValues, tChild);
 }
 
+void check_input_mesh_file_keyword
+(const XMLGen::InputData& aXMLMetaData)
+{
+    if (aXMLMetaData.run_mesh_name.empty())
+    {
+        THROWERR("Check Input Mesh File Keyword: Input mesh filename is empty.")
+    }
+}
+
 void append_problem_description_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -242,14 +268,20 @@ void append_problem_description_to_plato_analyze_input_deck
     auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.mPhysicsMetaData.mSpatialDims);
     if (tSpatialDim == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '") + tSpatialDim->c_str()
-            + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
+        THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '")
+            + aXMLMetaData.mPhysicsMetaData.mSpatialDims + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
     }
-    auto tProblemParamList = aDocument.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Problem"}, tProblemParamList);
-    std::vector<std::string> tKeys = {"Physics", "Spatial Dimension", "Input Mesh"};
-    std::vector<std::string> tValues = {"Plato Driver", tSpatialDim->c_str(), aXMLMetaData.run_mesh_name};
-    XMLGen::append_children(tKeys, tValues, tProblemParamList);
+    XMLGen::check_input_mesh_file_keyword(aXMLMetaData);
+
+    auto tProblem = aDocument.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Problem"}, tProblem);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Physics", "string", "Plato Driver"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
+    tValues = {"Spatial Dimension", "int", tSpatialDim->c_str()};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
+    tValues = {"Input Mesh", "string", aXMLMetaData.run_mesh_name};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
 }
 
 void append_physics_parameter_to_plato_problem
@@ -257,13 +289,15 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPhysics = tValidKeys.mKeys.find(Plato::tolower(aXMLMetaData.mPhysicsMetaData.mCategory));
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
     if (tPhysics == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Append Physics to Plato Analyze Input Deck: Physics category '") + tPhysics->first + "' is not supported.")
+        THROWERR(std::string("Append Physics to Plato Analyze Input Deck: Physics '")
+            + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Physics", "string", tPhysics->second};
+    std::vector<std::string> tValues = {"Physics", "string", tPhysics->second.first};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
@@ -271,15 +305,16 @@ void append_pde_constraint_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::ValidAnalyzePDEKeys tValidKeys;
-    auto tPDE = tValidKeys.mKeys.find(Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPDE));
-    if (tPDE == tValidKeys.mKeys.end())
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
+    if (tPhysics == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Append PDE Constraint to Plato Analyze Input Deck: PDE category '")
-            + aXMLMetaData.mPhysicsMetaData.mPDE + "' is not supported.")
+        THROWERR(std::string("Append PDE Constraint to Plato Analyze Input Deck: Physics '")
+            + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"PDE Constraint", "string", tPDE->second};
+    std::vector<std::string> tValues = {"PDE Constraint", "string", tPhysics->second.second};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
@@ -300,7 +335,7 @@ void append_objective_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData) == false)
+    if(XMLGen::is_any_objective_computed_by_plato_analyze(aXMLMetaData) == false)
     {
         return;
     }
@@ -309,32 +344,47 @@ void append_objective_parameter_to_plato_problem
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
+void check_objective_container_is_defined
+(const XMLGen::InputData& aXMLMetaData)
+{
+    if(aXMLMetaData.objectives.empty())
+    {
+        THROWERR("Check Objective is Defined: Objective container is empty.")
+    }
+}
+
 void append_self_adjoint_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    XMLGen::check_objective_container_is_defined(aXMLMetaData);
+
     std::string tIsSelfAdjoint = "false";
     if(aXMLMetaData.objectives.size() == 1u)
     {
         XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-        auto tItr = tValidKeys.mSelfAdjoint.find(Plato::tolower(aXMLMetaData.objectives[0].type));
-        if (tItr == tValidKeys.mSelfAdjoint.end())
+        auto tLowerCriterion = Plato::tolower(aXMLMetaData.objectives[0].type);
+        auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
+        if (tItr == tValidKeys.mKeys.end())
         {
-            THROWERR(std::string("Append Self Adjoint Parameter to Plato Analyze Input Deck: Objective '")
-                + aXMLMetaData.objectives[0].type + "' is not supported.")
+            THROWERR(std::string("Append Self Adjoint Parameter to Plato Analyze Input Deck: Criterion '") + tLowerCriterion + "' is not supported.")
         }
-        tIsSelfAdjoint = tItr->second ? "true" : "false";
+        tIsSelfAdjoint = tItr->second.second ? "true" : "false";
     }
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Self-Adjoint", "bool", tIsSelfAdjoint};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
-void append_plato_problem_to_plato_analyze_input_deck
+void append_plato_problem_description_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
     auto tProblem = aDocument.child("ParameterList");
+    if(tProblem.empty())
+    {
+        THROWERR("Append Plato Problem To Plato Analyze Input Deck: Parameter List with name 'Problem' is empty.")
+    }
     auto tPlatoProblem = tProblem.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Plato Problem"}, tPlatoProblem);
     XMLGen::append_physics_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
@@ -425,12 +475,13 @@ std::string is_criterion_supported_in_plato_analyze
 (const Criterion& aCriterion)
 {
     XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-    auto tItr = tValidKeys.mKeys.find(Plato::tolower(aCriterion.type));
+    auto tLowerCriterion = Plato::tolower(aCriterion.type);
+    auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
     if (tItr == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Is Criterion Supported in Plato Analyze: Criterion '") + aCriterion.type + "' is not supported.")
+        THROWERR(std::string("Is Criterion Supported in Plato Analyze: Criterion '") + tLowerCriterion + "' is not supported.")
     }
-    return tItr->second;
+    return tItr->second.first;
 }
 
 template<typename Criterion>
@@ -496,7 +547,7 @@ struct AppendCriterionParameters
 {
 private:
     /*!< map from design criterion category to function used to append design criterion and respective parameters */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::CriterionFunction, std::type_index>> mMap;
+    XMLGen::Analyze::CriterionFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
@@ -508,42 +559,42 @@ private:
         // volume
         auto tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("volume",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // maximize stiffness
         tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("maximize stiffness",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // stress p-norm
         tFuncIndex = std::type_index(typeid(append_pnorm_criterion<CriterionType>));
         mMap.insert(std::make_pair("stress p-norm",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_pnorm_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_pnorm_criterion<CriterionType>, tFuncIndex)));
 
         // effective energy
         tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("effective energy",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // maximize heat conduction
         tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("maximize heat conduction",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // thermo-elastic energy
         tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("thermo-elastic energy",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // electro-elastic energy
         tFuncIndex = std::type_index(typeid(append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("electro-elastic energy",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // flux p-norm
         tFuncIndex = std::type_index(typeid(append_pnorm_criterion<CriterionType>));
         mMap.insert(std::make_pair("flux p-norm",
-          std::make_pair((XMLGen::Analyze::CriterionFunction)append_pnorm_criterion<CriterionType>, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::CriterionFunc)append_pnorm_criterion<CriterionType>, tFuncIndex)));
     }
 
 public:
@@ -565,7 +616,8 @@ public:
     **********************************************************************************/
     void call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {
-        if(Plato::tolower(aCriterion.mPerformerName).compare("plato_analyze") != 0)
+        auto tLowerPerformer = Plato::tolower(aCriterion.mPerformerName);
+        if(tLowerPerformer.compare("plato_analyze") != 0)
         {
             return;
         }
@@ -599,10 +651,9 @@ void append_objective_criteria_to_plato_problem
 
 void append_objective_criteria_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
-    auto tProblem = aDocument.child("ParameterList");
-    auto tPlatoProblem = tProblem.child("ParameterList");
+    auto tPlatoProblem = aParentNode.child("ParameterList");
     auto tObjective = tPlatoProblem.append_child("ParameterList");
     XMLGen::append_weighted_sum_objective_to_plato_problem(aXMLMetaData, tObjective);
     XMLGen::append_functions_to_weighted_sum_objective(aXMLMetaData, tObjective);
@@ -679,24 +730,20 @@ void append_weights_to_weighted_sum_constraint
 
 void append_constraint_criteria_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
-    auto tProblem = aDocument.child("ParameterList");
-    auto tPlatoProblem = tProblem.child("ParameterList");
-    auto tObjective = tPlatoProblem.append_child("ParameterList");
+    auto tObjective = aParentNode.append_child("ParameterList");
     XMLGen::append_weighted_sum_constraint_to_plato_problem(aXMLMetaData, tObjective);
     XMLGen::append_functions_to_weighted_sum_constraint(aXMLMetaData, tObjective);
     XMLGen::append_weights_to_weighted_sum_constraint(aXMLMetaData, tObjective);
-    XMLGen::append_constraint_criteria_to_plato_problem(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_constraint_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
 
 void append_partial_differential_equation_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
-    auto tProblem = aDocument.child("ParameterList");
-    auto tPlatoProblem = tProblem.child("ParameterList");
-    auto tPhysics = tPlatoProblem.append_child("ParameterList");
+    auto tPhysics = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Elliptic"}, tPhysics);
     XMLGen::append_simp_penalty_function(aXMLMetaData.mPhysicsMetaData, tPhysics);
 }
@@ -787,8 +834,8 @@ void append_orthotropic_linear_elastic_material_to_plato_problem
 struct AppendMaterialModelParameters
 {
 private:
-    /*!< map from material model category to function used to append material properties and respective values */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::MaterialFunction, std::type_index>> mMap;
+    /*!< map from material model category to function used to append material properties and respective properties */
+    XMLGen::Analyze::MaterialModelFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
@@ -799,27 +846,27 @@ private:
         // orthotropic linear elastic material
         auto tFuncIndex = std::type_index(typeid(append_orthotropic_linear_elastic_material_to_plato_problem));
         mMap.insert(std::make_pair("orthotropic linear elastic",
-          std::make_pair((XMLGen::Analyze::MaterialFunction)append_orthotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)append_orthotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
 
         // isotropic linear electroelastic material
         tFuncIndex = std::type_index(typeid(append_isotropic_linear_electroelastic_material_to_plato_problem));
         mMap.insert(std::make_pair("isotropic linear electroelastic",
-          std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_electroelastic_material_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)append_isotropic_linear_electroelastic_material_to_plato_problem, tFuncIndex)));
 
         // isotropic linear thermoelastic material
         tFuncIndex = std::type_index(typeid(append_isotropic_linear_thermoelastic_material_to_plato_problem));
         mMap.insert(std::make_pair("isotropic linear thermoelastic",
-          std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_thermoelastic_material_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)append_isotropic_linear_thermoelastic_material_to_plato_problem, tFuncIndex)));
 
         // isotropic linear thermal material
         tFuncIndex = std::type_index(typeid(append_isotropic_linear_thermal_material_to_plato_problem));
         mMap.insert(std::make_pair("isotropic linear thermal",
-          std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_thermal_material_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)append_isotropic_linear_thermal_material_to_plato_problem, tFuncIndex)));
 
         // isotropic linear elastic material
         tFuncIndex = std::type_index(typeid(append_isotropic_linear_elastic_material_to_plato_problem));
         mMap.insert(std::make_pair("isotropic linear elastic",
-          std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)append_isotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
     }
 
 public:
@@ -849,12 +896,12 @@ public:
         auto tMapItr = mMap.find(tCategory);
         if(tMapItr == mMap.end())
         {
-            THROWERR(std::string("Material Function Interface: Did not find material function with tag '") + tCategory + "' in list.")
+            THROWERR(std::string("Material Model Function Interface: Did not find material function with tag '") + tCategory + "' in list.")
         }
         auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Material&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
         {
-            THROWERR(std::string("Material Function Interface: Reinterpret cast for material function with tag '") + tCategory + "' failed.")
+            THROWERR(std::string("Material Model Function Interface: Reinterpret cast for material function with tag '") + tCategory + "' failed.")
         }
         tTypeCastedFunc(aMaterial, aParentNode);
     }
@@ -863,30 +910,32 @@ public:
 
 void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
-    auto tProblem = aDocument.child("ParameterList");
-    auto tPlatoProblem = tProblem.child("ParameterList");
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
-        tMaterialInterface.call(tMaterial, tPlatoProblem);
+        auto tLowerPerformer = Plato::tolower(tMaterial.performer());
+        if (tLowerPerformer.compare("plato_analyze") == 0)
+        {
+            tMaterialInterface.call(tMaterial, aParentNode);
+        }
     }
 }
 
 void append_material_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
     auto tIsRandomUseCase = aXMLMetaData.mRandomMetaData.samples().empty() ? false : true;
     if(tIsRandomUseCase)
     {
         auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
-        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aDocument);
+        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
     }
     else
     {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aDocument);
+        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
     }
 }
 
@@ -952,8 +1001,8 @@ void append_uniform_single_valued_load_to_plato_problem
 struct AppendNaturalBoundaryCondition
 {
 private:
-    /*!< map from Neumman load category to function used to define its name */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::NaturalBCFunction, std::type_index>> mMap;
+    /*!< map from natural boundary condition category to function used to define its properties */
+    XMLGen::Analyze::NaturalBCFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
@@ -964,22 +1013,22 @@ private:
         // traction load
         auto tFuncIndex = std::type_index(typeid(append_uniform_vector_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("traction",
-          std::make_pair((XMLGen::Analyze::NaturalBCFunction)append_uniform_vector_valued_load_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_vector_valued_load_to_plato_problem, tFuncIndex)));
 
         // pressure load
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform pressure",
-          std::make_pair((XMLGen::Analyze::NaturalBCFunction)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
         // surface potential
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform surface potential",
-          std::make_pair((XMLGen::Analyze::NaturalBCFunction)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
         // surface flux
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform surface flux",
-          std::make_pair((XMLGen::Analyze::NaturalBCFunction)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
     }
 
 public:
@@ -1021,11 +1070,15 @@ public:
 
 void append_natural_boundary_conditions_to_plato_problem
 (const XMLGen::LoadCase& aLoadCase,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
-    auto tProblem = aDocument.child("ParameterList");
-    auto tPlatoProblem = tProblem.child("ParameterList");
-    auto tNaturalBC = tPlatoProblem.append_child("ParameterList");
+    auto tLowerPerformer = Plato::tolower(aLoadCase.mPerformerName);
+    if (tLowerPerformer.compare("plato_analyze") != 0)
+    {
+        return;
+    }
+
+    auto tNaturalBC = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Natural Boundary Conditions"}, tNaturalBC);
 
     XMLGen::AppendNaturalBoundaryCondition tNaturalBCFuncInterface;
@@ -1039,21 +1092,22 @@ void append_natural_boundary_conditions_to_plato_problem
 
 void append_natural_boundary_conditions_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
     auto tIsRandomUseCase = aXMLMetaData.mRandomMetaData.samples().empty() ? false : true;
     if(tIsRandomUseCase)
     {
         auto tRandomLoads = aXMLMetaData.mRandomMetaData.loadcase();
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tRandomLoads, aDocument);
+        XMLGen::append_natural_boundary_conditions_to_plato_problem(tRandomLoads, aParentNode);
     }
     else
     {
         for (auto &tLoadCase : aXMLMetaData.load_cases)
         {
-            if (Plato::tolower(tLoadCase.mPerformerName).compare("plato_analyze"))
+            auto tLowerPerformer = Plato::tolower(tLoadCase.mPerformerName);
+            if (tLowerPerformer.compare("plato_analyze") == 0)
             {
-                XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aDocument);
+                XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aParentNode);
             }
         }
     }
@@ -1129,7 +1183,7 @@ struct EssentialBoundaryConditionTag
 {
 private:
     /*!< map from Neumman load category to function used to define its tag */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::EssentialBCTagFunction, std::type_index>> mMap;
+    XMLGen::Analyze::EssentialBCTagFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
@@ -1140,22 +1194,22 @@ private:
         // traction load
         auto tFuncIndex = std::type_index(typeid(return_temperature_bc_name));
         mMap.insert(std::make_pair("temperature",
-          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_temperature_bc_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_temperature_bc_name, tFuncIndex)));
 
         // pressure load
         tFuncIndex = std::type_index(typeid(return_velocity_bc_name));
         mMap.insert(std::make_pair("velocity",
-          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_velocity_bc_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_velocity_bc_name, tFuncIndex)));
 
         // surface potential
         tFuncIndex = std::type_index(typeid(return_potential_bc_name));
         mMap.insert(std::make_pair("potential",
-          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_potential_bc_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_potential_bc_name, tFuncIndex)));
 
         // surface flux
         tFuncIndex = std::type_index(typeid(return_displacement_bc_name));
         mMap.insert(std::make_pair("displacement",
-          std::make_pair((XMLGen::Analyze::EssentialBCTagFunction)return_displacement_bc_name, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_displacement_bc_name, tFuncIndex)));
     }
 
 public:
@@ -1195,31 +1249,256 @@ public:
 };
 // struct EssentialBoundaryConditionTag
 
-struct ValidEssentialBoundaryConditionKeys
+struct ValidDofsKeys
 {
-    std::unordered_map<std::string, std::vector<std::string>> mKeys = { {"displacement", {"rigid", "zero value", "fixed value"} },
-        {"temperature", {"insulated", "zero value", "fixed value"} }, {"potential", {"insulated", "zero value", "fixed value"} },
-        {"velocity", {"rigid", "zero value", "fixed value"} } };
+    /*!< map from dimension to axis name, i.e. map<dimension, axis> */
+    std::unordered_map<std::string, std::unordered_map<std::string,std::string>> mKeys =
+        {
+            {"mechanical", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
+            {"thermal", { {"temp", "0"} } }, {"electrostatics", { {"potential", "0"} } },
+            {"thermalmechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
+            {"electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
+        };
 };
+// struct ValidDofsKeys
+
+void check_essential_boundary_condition_application_name_keyword
+(const XMLGen::BC& aBC)
+{
+    if(aBC.app_name.empty())
+    {
+        THROWERR(std::string("Check Essential Boundary Condition Application Set Name: ")
+            + "Application set name, e.g. sideset or nodeset, for Essential Boundary Condition "
+            + "with identification number '" + aBC.bc_id + "' is empty.")
+    }
+}
+
+void check_essential_boundary_condition_value_keyword
+(const XMLGen::BC& aBC)
+{
+    if(aBC.value.empty())
+    {
+        THROWERR(std::string("Check Essential Boundary Condition Value: Value for Essential Boundary Condition ")
+            + "with identification number '" + aBC.bc_id + "' is empty.")
+    }
+}
 
 void append_rigid_essential_boundary_condition_to_plato_problem
 (const std::string& aName,
  const XMLGen::BC& aBC,
  pugi::xml_node &aParentNode)
 {
-    auto tName = aName;
-    XMLGen::ValidAxesKeys tValidAxis;
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
+    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
+    if(tDofsKeysItr == tValidDofs.mKeys.end())
+    {
+        THROWERR(std::string("Append Rigid Essential Boundary Condition to Plato Problem: ")
+            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+    }
+    XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
+
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    for(auto& tDofNameItr : tDofsKeysItr->second)
+    {
+        auto tBCName = Plato::toupper(tDofNameItr.first) + " " + aName;
+        XMLGen::append_attributes({"name"}, {tBCName}, aParentNode);
+        std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+        tValues = {"Index", "int", tDofNameItr.second};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+        tValues = {"Sides", "string", aBC.app_name};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    }
 }
+
+void append_zero_value_essential_boundary_condition_to_plato_problem
+(const std::string& aName,
+ const XMLGen::BC& aBC,
+ pugi::xml_node &aParentNode)
+{
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
+    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
+    if(tDofsKeysItr == tValidDofs.mKeys.end())
+    {
+        THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
+            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+    }
+
+    auto tLowerDof = Plato::tolower(aBC.dof);
+    auto tDofNameItr = tDofsKeysItr->second.find(tLowerDof);
+    if(tDofNameItr == tDofsKeysItr->second.end())
+    {
+        THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
+            + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
+    }
+    XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
+
+    auto tName = Plato::toupper(tDofNameItr->first) + " " + aName;
+    XMLGen::append_attributes({"name"}, {tName}, aParentNode);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Index", "int", tDofNameItr->second};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Sides", "string", aBC.app_name};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+}
+
+void append_fixed_value_essential_boundary_condition_to_plato_problem
+(const std::string& aName,
+ const XMLGen::BC& aBC,
+ pugi::xml_node &aParentNode)
+{
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
+    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
+    if(tDofsKeysItr == tValidDofs.mKeys.end())
+    {
+        THROWERR(std::string("Append Fixed Value Essential Boundary Condition to Plato Problem: ")
+            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+    }
+
+    auto tLowerDof = Plato::tolower(aBC.dof);
+    auto tDofNameItr = tDofsKeysItr->second.find(tLowerDof);
+    if(tDofNameItr == tDofsKeysItr->second.end())
+    {
+        THROWERR(std::string("Append Fixed Value Essential Boundary Condition to Plato Problem: ")
+            + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
+    }
+    XMLGen::check_essential_boundary_condition_value_keyword(aBC);
+    XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
+
+    auto tName = Plato::toupper(tDofNameItr->first) + " " + aName;
+    XMLGen::append_attributes({"name"}, {tName}, aParentNode);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "Fixed Value"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Index", "int", tDofNameItr->second};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Sides", "string", aBC.app_name};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Value", "double", aBC.value};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+}
+
+/******************************************************************************//**
+ * \struct The goal of this C++ struct is to provide an interface for the \n
+ * functions used to define essential boundary conditions' names for \n
+ * plato_analyze_input_deck.xml. This interface reduces cyclomatic complexity \n
+ * due to multiple essential boundary conditions categories in Plato Analyze.
+**********************************************************************************/
+struct AppendEssentialBoundaryCondition
+{
+private:
+    /*!< map from essential boundary condition category to function used to append its properties */
+    XMLGen::Analyze::EssentialBCFuncMap mMap;
+
+    /******************************************************************************//**
+     * \fn insert
+     * \brief Insert essential boundary condition functions to map.
+     **********************************************************************************/
+    void insert()
+    {
+        // traction load
+        auto tFuncIndex = std::type_index(typeid(append_rigid_essential_boundary_condition_to_plato_problem));
+        mMap.insert(std::make_pair("rigid",
+          std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_rigid_essential_boundary_condition_to_plato_problem, tFuncIndex)));
+
+        // pressure load
+        tFuncIndex = std::type_index(typeid(append_zero_value_essential_boundary_condition_to_plato_problem));
+        mMap.insert(std::make_pair("zero value",
+          std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
+
+        // surface potential
+        tFuncIndex = std::type_index(typeid(append_fixed_value_essential_boundary_condition_to_plato_problem));
+        mMap.insert(std::make_pair("fixed value",
+          std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_fixed_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
+
+        // surface flux
+        tFuncIndex = std::type_index(typeid(append_zero_value_essential_boundary_condition_to_plato_problem));
+        mMap.insert(std::make_pair("insulated",
+          std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
+    }
+
+public:
+    /******************************************************************************//**
+     * \fn AppendEssentialBoundaryCondition
+     * \brief Default constructor
+    **********************************************************************************/
+    AppendEssentialBoundaryCondition()
+    {
+        this->insert();
+    }
+
+    /******************************************************************************//**
+     * \fn call
+     * \brief Append essential boundary condition parameters to plato_analyze_input_deck.xml.
+     * \param [in]     aName        essential boundary condition name
+     * \param [in]     aBC          essential boundary condition metadata
+     * \param [in/out] aParentNode  pugi::xml_node
+    **********************************************************************************/
+    void call(const std::string& aName, const XMLGen::BC& aBC, pugi::xml_node& aParentNode) const
+    {
+        auto tCategory = Plato::tolower(aBC.mCategory);
+        auto tMapItr = mMap.find(tCategory);
+        if(tMapItr == mMap.end())
+        {
+            THROWERR(std::string("Essential Boundary Condition Function Interface: Did not find essential boundary condition function with tag '")
+                + tCategory + "' in list.")
+        }
+        auto tTypeCastedFunc = reinterpret_cast<void(*)(const std::string&, const XMLGen::BC&, pugi::xml_node&)>(tMapItr->second.first);
+        if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
+        {
+            THROWERR(std::string("Essential Boundary Condition Interface: Reinterpret cast for essential boundary condition function with tag '")
+                + tCategory + "' failed.")
+        }
+        tTypeCastedFunc(aName, aBC, aParentNode);
+    }
+};
+// struct AppendEssentialBoundaryCondition
 
 void append_essential_boundary_conditions_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ pugi::xml_node& aParentNode)
 {
+    auto tEssentialBC = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Essential Boundary Conditions"}, tEssentialBC);
+
     XMLGen::EssentialBoundaryConditionTag tTagInterface;
+    XMLGen::AppendEssentialBoundaryCondition tFuncInterface;
     for(auto& tBC : aXMLMetaData.bcs)
     {
-        auto tName = tTagInterface.call(tBC);
+        auto tLowerPerformer = Plato::tolower(tBC.mPerformerName);
+        if (tLowerPerformer.compare("plato_analyze") == 0)
+        {
+            auto tName = tTagInterface.call(tBC);
+            tFuncInterface.call(tName, tBC, tEssentialBC);
+        }
     }
+}
+
+void append_plato_problem_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tProblem = aDocument.child("ParameterList");
+    if(tProblem.empty())
+    {
+        THROWERR("Append Plato Problem To Plato Analyze Input Deck: Parameter List with name 'Problem' is empty.")
+    }
+    auto tPlatoProblem = tProblem.child("ParameterList");
+    if(tPlatoProblem.empty())
+    {
+        THROWERR("Append Plato Problem To Plato Analyze Input Deck: Parameter List with name 'Plato Problem' is empty.")
+    }
+    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
 }
 
 void write_plato_analyze_input_deck_file
@@ -1228,18 +1507,144 @@ void write_plato_analyze_input_deck_file
     pugi::xml_document tDocument;
 
     XMLGen::append_problem_description_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
+    XMLGen::append_plato_problem_description_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
     XMLGen::append_plato_problem_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
+
+    tDocument.save_file("plato_analyze_input_deck.xml", "  ");
 }
 
 }
 
-namespace Plato
+namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorEmptyObjective)
+{
+    XMLGen::InputData tXMLMetaData;
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_self_adjoint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
-// namespace Plato
+
+TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorInvalidCriterion)
+{
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.type = "maximize thrust";
+    tXMLMetaData.objectives.push_back(tObjective);
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_self_adjoint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInvalidPhysics)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_pde_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhysics)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_physics_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorInvalidSpatialDim)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "1";
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorEmptyMeshFile)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tProblem = tDocument.child("ParameterList");
+    ASSERT_FALSE(tProblem.empty());
+    ASSERT_STREQ("ParameterList", tProblem.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Problem"}, tProblem);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Physics", "string", "Plato Driver"}, {"Spatial Dimension", "int", "2"}, {"Input Mesh", "string", "lbracket.exo"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+
+    auto tParameter = tProblem.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    XMLGen::Objective tObjective;
+    tObjective.type = "maximize stiffness";
+    tObjective.mPerformerName = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective);
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "volume";
+    tConstraint.mPerformerName = "plato_analyze";
+    tXMLMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    auto tProblem = tDocument.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Problem"}, tProblem);
+    XMLGen::append_plato_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    tProblem = tDocument.child("ParameterList");
+    ASSERT_FALSE(tProblem.empty());
+    ASSERT_STREQ("ParameterList", tProblem.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Problem"}, tProblem);
+
+    auto tPlatoProblem = tProblem.child("ParameterList");
+    ASSERT_FALSE(tPlatoProblem.empty());
+    ASSERT_STREQ("ParameterList", tPlatoProblem.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Plato Problem"}, tPlatoProblem);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Physics", "string", "Mechanical"}, {"PDE Constraint", "string", "Elliptic"}, {"Constraint", "string", "My Constraint"},
+          {"Objective", "string", "My Objective"}, {"Self-Adjoint", "bool", "true"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+
+    auto tParameter = tPlatoProblem.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    tDocument.save_file("dummy.xml", "  ");
+}
+
+}
+// namespace PlatoTestXMLGenerator

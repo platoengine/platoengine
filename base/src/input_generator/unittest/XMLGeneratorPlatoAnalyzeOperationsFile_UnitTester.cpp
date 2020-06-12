@@ -881,10 +881,20 @@ TEST(PlatoTestXMLGenerator, AppendComputeSolutionToPlatoAnalyzeOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
 }
 
-TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOperation_Empty)
+TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOperation_EmptyOptimizationType)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_TRUE(tOperation.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOperation_EmptyConstraint)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
     XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1026,10 +1036,20 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
+TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeOperation_EmptyOptimizationType)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_TRUE(tOperation.empty());
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeOperation_Empty)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
     XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1171,10 +1191,18 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
+TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOperation_EmptyOptimizationType)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOperation_Empty)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1327,10 +1355,18 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
+TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOperation_EmptyOptimizationType)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    ASSERT_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOperation_Empty)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
+    tInputData.optimization_type = "topology";
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());

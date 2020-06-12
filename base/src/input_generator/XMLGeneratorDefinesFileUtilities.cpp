@@ -92,7 +92,7 @@ return_random_tractions_tags_for_define_xml_file
     // traction load index to tags map, i.e. map<load index, vector<tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
-    XMLGen::ValidAxesKeys tValidAxis;
+    XMLGen::ValidAxesKeys tValidDofs;
     auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
@@ -105,8 +105,8 @@ return_random_tractions_tags_for_define_xml_file
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
-                auto tItr = tValidAxis.mKeys.find(tDimIndex);
-                if(tItr == tValidAxis.mKeys.end())
+                auto tItr = tValidDofs.mKeys.find(tDimIndex);
+                if(tItr == tValidDofs.mKeys.end())
                 {
                     THROWERR(std::string("Return Random Tractions Tags for Define XML File: Invalid dimension key '")
                         + std::to_string(tDimIndex) + "'. Valid dimensions are: 1D, 2D, and 3D.")
