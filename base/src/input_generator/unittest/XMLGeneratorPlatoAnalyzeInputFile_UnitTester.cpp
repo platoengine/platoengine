@@ -1087,7 +1087,7 @@ public:
         if(tMapItr == mMap.end())
         {
             THROWERR(std::string("Natural Boundary Condition Function Interface: Did not find natural boundary condition function with tag '")
-                + tCategory + "' in list.")
+                + tCategory + "' in natural boundary condition function list.")
         }
         auto tTypeCastedFunc = reinterpret_cast<void(*)(const std::string&, const XMLGen::Load&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
@@ -1548,6 +1548,60 @@ void write_plato_analyze_input_deck_file
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag_ErrorInvalidType)
+{
+    XMLGen::NaturalBoundaryConditionTag tInterface;
+    XMLGen::Load tLoad;
+    tLoad.type = "nonsense";
+    ASSERT_THROW(tInterface.call(tLoad), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag)
+{
+    XMLGen::NaturalBoundaryConditionTag tInterface;
+    XMLGen::Load tLoad;
+
+    // TRACTION TEST
+    tLoad.type = "traction";
+    tLoad.load_id = "1";
+    auto tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Traction Vector Boundary Condition 1", tName.c_str());
+
+    tLoad.mIsRandom = true;
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Random Traction Vector Boundary Condition 1", tName.c_str());
+
+    // PRESSURE TEST
+    tLoad.mIsRandom = false;
+    tLoad.type = "pressure";
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Pressure Boundary Condition 1", tName.c_str());
+
+    tLoad.mIsRandom = true;
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Random Pressure Boundary Condition 1", tName.c_str());
+
+    // SURFACE POTENTIAL TEST
+    tLoad.mIsRandom = false;
+    tLoad.type = "surface potential";
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Surface Potential Boundary Condition 1", tName.c_str());
+
+    tLoad.mIsRandom = true;
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Random Surface Potential Boundary Condition 1", tName.c_str());
+
+    // SURFACE POTENTIAL TEST
+    tLoad.mIsRandom = false;
+    tLoad.type = "surface flux";
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Surface Flux Boundary Condition 1", tName.c_str());
+
+    tLoad.mIsRandom = true;
+    tName = tInterface.call(tLoad);
+    ASSERT_STREQ("Random Surface Flux Boundary Condition 1", tName.c_str());
+}
+
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorEmptyMaterialContainer)
 {
     pugi::xml_document tDocument;
@@ -1614,18 +1668,236 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
-    auto tMaterialModel = tDocument.child("ParameterList");
-    ASSERT_FALSE(tMaterialModel.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModel.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModel);
-    auto tIsoLinElasticMatModel = tMaterialModel.child("Isotropic Linear Elastic");
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsoLinElasticMatModel);
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tMyMaterialModel);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
         { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "1e9"} };
     auto tGoldValuesItr = tGoldValues.begin();
-    auto tParameter = tIsoLinElasticMatModel.child("Parameter");
+    auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_IsotropicLinearThermalMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear thermal");
+    tMaterial.property("thermal conductivity coefficient", "10");
+    tMaterial.property("mass density", "200");
+    tMaterial.property("specific heat", "20");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Thermal");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Thermal"}, tMyMaterialModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Mass Density", "double", "200"}, {"Specific Heat", "double", "20"}, {"Thermal Conductivity Coefficient", "double", "10"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_OrthotropicLinearElasticMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("orthotropic linear elastic");
+    tMaterial.property("youngs modulus x", "1.0");
+    tMaterial.property("youngs modulus y", "2.0");
+    tMaterial.property("youngs modulus z", "3.0");
+    tMaterial.property("poissons ratio xy", "0.3");
+    tMaterial.property("poissons ratio xz", "0.4");
+    tMaterial.property("poissons ratio yz", "0.25");
+    tMaterial.property("shear modulus ratio xy", "1.3");
+    tMaterial.property("shear modulus ratio xz", "1.4");
+    tMaterial.property("shear modulus ratio yz", "1.25");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Orthotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Orthotropic Linear Elastic"}, tMyMaterialModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Poissons Ratio XY", "double", "0.3"}, {"Poissons Ratio XZ", "double", "0.4"}, {"Poissons Ratio YZ", "double", "0.25"},
+          {"Shear Modulus XY", "double", "1.3"}, {"Shear Modulus XZ", "double", "1.4"}, {"Shear Modulus YZ", "double", "1.25"},
+          {"Youngs Modulus X", "double", "1.0"}, {"Youngs Modulus Y", "double", "2.0"}, {"Youngs Modulus Z", "double", "3.0"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_IsotropicLinearThermoelasticMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear thermoelastic");
+    tMaterial.property("thermal conductivity coefficient", "1.0");
+    tMaterial.property("youngs modulus", "2.3");
+    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("thermal expansion coefficient", "0.4");
+    tMaterial.property("reference temperature", "1.25");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Thermoelastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Thermoelastic"}, tMyMaterialModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Poissons Ratio", "double", "0.3"}, {"Reference Temperature", "double", "1.25"}, {"Thermal Conductivity Coefficient", "double", "1.0"},
+          {"Thermal Expansion Coefficient", "double", "0.4"}, {"Youngs Modulus", "double", "2.3"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_IsotropicLinearElectroelasticMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear electroelastic");
+    tMaterial.property("youngs modulus", "2.3");
+    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("dielectric permittivity 11", "1.0");
+    tMaterial.property("dielectric permittivity 33", "0.4");
+    tMaterial.property("piezoelectric coupling 15", "1.25");
+    tMaterial.property("piezoelectric coupling 33", "2.25");
+    tMaterial.property("piezoelectric coupling 31", "3.25");
+    tMaterial.property("thermal expansion", "0.25");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Electroelastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Electroelastic"}, tMyMaterialModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"p11", "double", "1.0"}, {"p33", "double", "0.4"}, {"e15", "double", "1.25"},
+          {"e31", "double", "3.25"}, {"e33", "double", "2.25"}, {"Poissons Ratio", "double", "0.3"},
+          {"Alpha", "double", "0.25"}, {"Youngs Modulus", "double", "2.3"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIsotropicLinearElasticMatModel)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.optimization_type = "topology";
+    XMLGen::Objective tObjective;
+    tObjective.mPerformerName = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective);
+
+    // POSE MATERIAL SET 1
+    XMLGen::Material tMaterial1;
+    tMaterial1.id("1");
+    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.property("youngs modulus", "1");
+    tMaterial1.property("poissons ratio", "0.3");
+    XMLGen::MaterialSet tMaterialSetOne;
+    tMaterialSetOne.insert({"1", tMaterial1});
+    auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
+
+    // POSE MATERIAL SET 2
+    XMLGen::Material tMaterial2;
+    tMaterial2.id("1");
+    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.property("youngs modulus", "1.1");
+    tMaterial2.property("poissons ratio", "0.33");
+    XMLGen::MaterialSet tMaterialSetTwo;
+    tMaterialSetTwo.insert({"1", tMaterial2});
+    auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);
+
+    // CONSTRUCT SAMPLES SET
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tRandomMaterialCaseOne));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tRandomMaterialCaseTwo));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
+
+    // CALL FUNCTION WITH RANDOM MATERIAL
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModelParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tMyMaterialModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "1.0"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tMyMaterialModel.child("Parameter");
     while(!tParameter.empty())
     {
         ASSERT_FALSE(tParameter.empty());
