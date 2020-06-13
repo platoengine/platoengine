@@ -22,7 +22,7 @@ struct Physics
     std::string mPhysics = "mechanical";
     std::string mPerformer = "plato_analyze";
     std::string mSpatialDims = "3";
-    std::string mPenaltyParam = "3";
+    std::string mPenaltyParam = "3.0";
     std::string mMinimumErsatzValue = "1e-9";
 };
 
@@ -44,7 +44,7 @@ struct Objective
     std::string mPerformerName = "plato_analyze";
     std::string weight;
     std::string num_procs;
-    std::string mPenaltyParam = "3";
+    std::string mPenaltyParam = "3.0";
     std::string mPnormExponent = "6";
     std::string mMinimumErsatzValue = "1e-9";
     std::string analysis_solver_tolerance;
@@ -115,7 +115,7 @@ struct Constraint
     std::string mPerformerName = "PlatoMain";
     std::string mNormalizedTargetValue;
     std::string mAbsoluteTargetValue;
-    std::string mPenaltyParam = "3";
+    std::string mPenaltyParam = "3.0";
     std::string mPnormExponent = "6";
     std::string mMinimumErsatzValue = "1e-9";
     std::string surface_area;

@@ -466,7 +466,7 @@ void append_weights_to_weighted_sum_objective
     auto tTokens = XMLGen::get_list_of_objective_weights(aXMLMetaData);
     auto tWeights = XMLGen::transform_tokens_for_plato_analyze_input_deck(tTokens);
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Weights", "Array(string)", tWeights};
+    std::vector<std::string> tValues = {"Weights", "Array(double)", tWeights};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
@@ -484,18 +484,18 @@ std::string is_criterion_supported_in_plato_analyze
     return tItr->second.first;
 }
 
-template<typename Criterion>
+template<typename MetaData>
 void append_simp_penalty_function
-(const Criterion& aCriterion,
+(const MetaData& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tPenaltyFunction = aParentNode.append_child("Penalty Function");
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "SIMP"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Exponent", "double", aCriterion.mPenaltyParam};
+    tValues = {"Exponent", "double", aMetadata.mPenaltyParam};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Minimum Value", "double", aCriterion.mMinimumErsatzValue};
+    tValues = {"Minimum Value", "double", aMetadata.mMinimumErsatzValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 
@@ -653,12 +653,11 @@ void append_objective_criteria_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tPlatoProblem = aParentNode.child("ParameterList");
-    auto tObjective = tPlatoProblem.append_child("ParameterList");
+    auto tObjective = aParentNode.append_child("ParameterList");
     XMLGen::append_weighted_sum_objective_to_plato_problem(aXMLMetaData, tObjective);
     XMLGen::append_functions_to_weighted_sum_objective(aXMLMetaData, tObjective);
     XMLGen::append_weights_to_weighted_sum_objective(aXMLMetaData, tObjective);
-    XMLGen::append_objective_criteria_to_plato_problem(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_objective_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
 
 void append_constraint_criteria_to_plato_problem
@@ -724,7 +723,7 @@ void append_weights_to_weighted_sum_constraint
     auto tTokens = XMLGen::get_list_of_constraint_weights(aXMLMetaData);
     auto tWeights = XMLGen::transform_tokens_for_plato_analyze_input_deck(tTokens);
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Weights", "Array(string)", tWeights};
+    std::vector<std::string> tValues = {"Weights", "Array(double)", tWeights};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 
@@ -743,25 +742,55 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tPhysicsItr = tValidKeys.mKeys.find(tLowerPhysics);
+    if(tPhysicsItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Append Partial Differential Equation to Plato Analyze Input Deck: Physics '")
+            + tLowerPhysics + "' is not supported in Plato Analyze.")
+    }
     auto tPhysics = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Elliptic"}, tPhysics);
+    auto tPDECategory = tPhysicsItr->second.second;
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysics);
     XMLGen::append_simp_penalty_function(aXMLMetaData.mPhysicsMetaData, tPhysics);
+}
+
+void check_material_property_tags_container
+(const XMLGen::Material& aMaterial)
+{
+    auto tTags = aMaterial.tags();
+    if(tTags.empty())
+    {
+        THROWERR("Check Material Property Tags Container: Material tags container is empty, "
+            + "i.e. material properties are not defined.")
+    }
 }
 
 void append_material_properties_to_plato_analyze_material_model
 (const XMLGen::Material& aMaterial,
  pugi::xml_node& aParentNode)
 {
-    auto tTags = aMaterial.tags();
+    XMLGen::check_material_property_tags_container(aMaterial);
     XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
-    std::vector<std::string> tKeys = {"name", "type", "value"};
+    auto tLowerMaterialModel = Plato::tolower(aMaterial.category());
+    auto tMaterialModelItr = tValidKeys.mKeys.find(tLowerMaterialModel);
+    if(tMaterialModelItr == tValidKeys.mKeys.end())
+    {
+        THROWERR("Append Material Properties To Plato Analyze Material Model: Material model '"
+            + tLowerMaterialModel + "' is not supported in Plato Analyze.")
+    }
 
+    auto tTags = aMaterial.tags();
+    std::vector<std::string> tKeys = {"name", "type", "value"};
     for(auto& tTag : tTags)
     {
-        auto tItr = tValidKeys.mKeys.find(Plato::tolower(tTag));
-        if (tItr == tValidKeys.mKeys.end())
+        auto tLowerTag = Plato::tolower(tTag);
+        auto tItr = tMaterialModelItr->second.find(tLowerTag);
+        if (tItr == tMaterialModelItr->second.end())
         {
-            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property '") + tTag + "' is not supported.")
+            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
+                + tTag + "' is not supported in Plato Analyze by material model '" + tLowerMaterialModel + "'.")
         }
         auto tMaterialTag = tItr->second.first;
         auto tValueType = tItr->second.second;
@@ -887,16 +916,18 @@ public:
     **********************************************************************************/
     void call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const
     {
-        auto tCategory = Plato::tolower(aMaterial.category());
-        if(Plato::tolower(tCategory).compare("plato_analyze") != 0)
+        auto tLowerPerformer = Plato::tolower(aMaterial.performer());
+        if(Plato::tolower(tLowerPerformer).compare("plato_analyze") != 0)
         {
             return;
         }
 
+        auto tCategory = Plato::tolower(aMaterial.category());
         auto tMapItr = mMap.find(tCategory);
         if(tMapItr == mMap.end())
         {
-            THROWERR(std::string("Material Model Function Interface: Did not find material function with tag '") + tCategory + "' in list.")
+            THROWERR(std::string("Material Model Function Interface: Did not find material model function with tag '") + tCategory
+                + "' in list. " + "Material model is not supported in Plato Analyze.")
         }
         auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Material&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
@@ -912,14 +943,15 @@ void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
  pugi::xml_node& aParentNode)
 {
+    if(aMaterials.empty())
+    {
+        THROWERR("Append Material Model to Plato Problem: Material container is empty.")
+    }
+
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
-        auto tLowerPerformer = Plato::tolower(tMaterial.performer());
-        if (tLowerPerformer.compare("plato_analyze") == 0)
-        {
-            tMaterialInterface.call(tMaterial, aParentNode);
-        }
+        tMaterialInterface.call(tMaterial, aParentNode);
     }
 }
 
@@ -1104,11 +1136,7 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
     {
         for (auto &tLoadCase : aXMLMetaData.load_cases)
         {
-            auto tLowerPerformer = Plato::tolower(tLoadCase.mPerformerName);
-            if (tLowerPerformer.compare("plato_analyze") == 0)
-            {
-                XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aParentNode);
-            }
+            XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aParentNode);
         }
     }
 }
@@ -1441,6 +1469,12 @@ public:
     **********************************************************************************/
     void call(const std::string& aName, const XMLGen::BC& aBC, pugi::xml_node& aParentNode) const
     {
+        auto tLowerPerformer = Plato::tolower(aBC.mPerformerName);
+        if(tLowerPerformer.compare("plato_analyze") != 0)
+        {
+            return;
+        }
+
         auto tCategory = Plato::tolower(aBC.mCategory);
         auto tMapItr = mMap.find(tCategory);
         if(tMapItr == mMap.end())
@@ -1468,14 +1502,10 @@ void append_essential_boundary_conditions_to_plato_analyze_input_deck
 
     XMLGen::EssentialBoundaryConditionTag tTagInterface;
     XMLGen::AppendEssentialBoundaryCondition tFuncInterface;
-    for(auto& tBC : aXMLMetaData.bcs)
+    for (auto &tBC : aXMLMetaData.bcs)
     {
-        auto tLowerPerformer = Plato::tolower(tBC.mPerformerName);
-        if (tLowerPerformer.compare("plato_analyze") == 0)
-        {
-            auto tName = tTagInterface.call(tBC);
-            tFuncInterface.call(tName, tBC, tEssentialBC);
-        }
+        auto tName = tTagInterface.call(tBC);
+        tFuncInterface.call(tName, tBC, tEssentialBC);
     }
 }
 
@@ -1508,7 +1538,7 @@ void write_plato_analyze_input_deck_file
 
     XMLGen::append_problem_description_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
     XMLGen::append_plato_problem_description_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
-    XMLGen::append_plato_problem_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
+    XMLGen::append_plato_problem_to_plato_analyze_input_deck(aXMLMetaData, tDocument); // TODO: FINISH UNIT TESTING THIS FUNCTION
 
     tDocument.save_file("plato_analyze_input_deck.xml", "  ");
 }
@@ -1517,6 +1547,164 @@ void write_plato_analyze_input_deck_file
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorEmptyMaterialContainer)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Empty_MaterialIsNotFromAnalyzePerformer)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("sierra");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_TRUE(tParamList.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInvalidMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear viscoelastic");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorMatPropAreNotDefined)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInvalidProperty)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear elastic");
+    tMaterial.property("youngs modulus", "1e9");
+    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("piezoelectric coupling 33", "123");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_IsotropicLinearElasticMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear elastic");
+    tMaterial.property("youngs modulus", "1e9");
+    tMaterial.property("poissons ratio", "0.3");
+    tXMLMetaData.materials.push_back(tMaterial);
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tMaterialModel = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModel.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModel.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    auto tIsoLinElasticMatModel = tMaterialModel.child("Isotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsoLinElasticMatModel);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "1e9"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tIsoLinElasticMatModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInputDeck_ErrorInvalidPhysics)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    ASSERT_NO_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+
+    auto tPDE = tDocument.child("ParameterList");
+    ASSERT_FALSE(tPDE.empty());
+    ASSERT_STREQ("ParameterList", tPDE.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tPDE);
+
+    auto tPenaltyFunc = tPDE.child("Penalty Function");
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "SIMP"}, {"Exponent", "double", "3.0"}, {"Minimum Value", "double", "1e-9"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tPenaltyFunc.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInputDeck)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    ASSERT_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendParameter)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    XMLGen::Objective tObjective;
+    tObjective.type = "maximize stiffness";
+    tObjective.mPerformerName = "sierra";
+    tXMLMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_parameter_to_plato_problem(tXMLMetaData, tDocument);
+    auto tParameter = tDocument.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendParameter)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "maximize stiffness";
+    tConstraint.mPerformerName = "sierra";
+    tXMLMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument);
+    auto tParameter = tDocument.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
 
 TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorEmptyObjective)
 {
@@ -1565,6 +1753,193 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
     tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Objective tObjective1;
+    tObjective1.type = "maximize stiffness";
+    tObjective1.mPerformerName = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective1);
+    XMLGen::Objective tObjective2;
+    tObjective2.type = "volume";
+    tObjective2.mPenaltyParam = "1.0";
+    tObjective2.mMinimumErsatzValue = "0.0";
+    tObjective2.mPerformerName = "plato_analyze";
+    tXMLMetaData.objectives.push_back(tObjective2);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    // TEST MY OBJECTIVE
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"My Objective"}, tParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my maximize stiffness, my volume}"}, {"Weights", "Array(double)", "{1.0, 1.0}"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+
+    auto tChild = tParamList.child("Parameter");
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ("Parameter", tChild.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    // TEST MY OBJECTIVE 1 - 'my maximize stiffness'
+    tParamList = tParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my maximize stiffness"}, tParamList);
+    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Internal Elastic Energy"}, {} };
+    tGoldValuesItr = tGoldValues.begin();
+
+    tChild = tParamList.child("Parameter");
+    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "Penalty Function"};
+    auto tGoldChildItr = tGoldChildName.begin();
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ(tGoldChildItr->c_str(), tChild.name());
+        if (tGoldChildItr->compare("Parameter") == 0)
+        {
+            // TEST PARAMETER CHILDREN, SKIP PENALTY FUNCTION CHILDREN (TEST BELOW)
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        }
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+        std::advance(tGoldChildItr, 1);
+    }
+
+    auto tPenaltyModel = tParamList.child("Penalty Function");
+    tGoldValues = { {"Type", "string", "SIMP"}, {"Exponent", "double", "3.0"}, {"Minimum Value", "double", "1e-9"} };
+    tGoldValuesItr = tGoldValues.begin();
+    tChild = tPenaltyModel.child("Parameter");
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ("Parameter", tChild.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    // TEST MY OBJECTIVE 2 - 'my volume'
+    tParamList = tParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my volume"}, tParamList);
+    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Volume"}, {} };
+    tGoldValuesItr = tGoldValues.begin();
+
+    tChild = tParamList.child("Parameter");
+    tGoldChildItr = tGoldChildName.begin();
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ(tGoldChildItr->c_str(), tChild.name());
+        if (tGoldChildItr->compare("Parameter") == 0)
+        {
+            // TEST PARAMETER CHILDREN, SKIP PENALTY FUNCTION CHILDREN (TEST BELOW)
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        }
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+        std::advance(tGoldChildItr, 1);
+    }
+
+    tPenaltyModel = tParamList.child("Penalty Function");
+    tGoldValues = { {"Type", "string", "SIMP"}, {"Exponent", "double", "1.0"}, {"Minimum Value", "double", "0.0"} };
+    tGoldValuesItr = tGoldValues.begin();
+    tChild = tPenaltyModel.child("Parameter");
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ("Parameter", tChild.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "stress p-norm";
+    tConstraint.weight = "0.5";
+    tConstraint.mPerformerName = "plato_analyze";
+    tXMLMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    // TEST MY CONSTRAINT
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"My Constraint"}, tParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my stress p-norm}"},
+          {"Weights", "Array(double)", "{0.5}"}, {"Exponent", "double", "6"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+
+    auto tChild = tParamList.child("Parameter");
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ("Parameter", tChild.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    // TEST MY OBJECTIVE 1 - 'my stress p-norm'
+    tParamList = tParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my stress p-norm"}, tParamList);
+    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Stress P-Norm"}, {} };
+    tGoldValuesItr = tGoldValues.begin();
+
+    tChild = tParamList.child("Parameter");
+    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "Penalty Function"};
+    auto tGoldChildItr = tGoldChildName.begin();
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ(tGoldChildItr->c_str(), tChild.name());
+        if (tGoldChildItr->compare("Parameter") == 0)
+        {
+            // TEST PARAMETER CHILDREN, SKIP PENALTY FUNCTION CHILDREN (TEST BELOW)
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        }
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+        std::advance(tGoldChildItr, 1);
+    }
+
+    auto tPenaltyModel = tParamList.child("Penalty Function");
+    tGoldValues = { {"Type", "string", "SIMP"}, {"Exponent", "double", "3.0"}, {"Minimum Value", "double", "1e-9"} };
+    tGoldValuesItr = tGoldValues.begin();
+    tChild = tPenaltyModel.child("Parameter");
+    while(!tChild.empty())
+    {
+        ASSERT_FALSE(tChild.empty());
+        ASSERT_STREQ("Parameter", tChild.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
+        tChild = tChild.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
 }
 
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
@@ -1642,8 +2017,6 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
         tParameter = tParameter.next_sibling();
         std::advance(tGoldValuesItr, 1);
     }
-
-    tDocument.save_file("dummy.xml", "  ");
 }
 
 }

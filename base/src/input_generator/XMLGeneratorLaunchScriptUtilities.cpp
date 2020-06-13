@@ -59,8 +59,8 @@ namespace XMLGen
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
 
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || aInputData.initial_guess_filename != ""
-                                                          && aInputData.initial_guess_field_name != "";
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.initial_guess_filename != ""
+                                                          && aInputData.initial_guess_field_name != "");
     if(need_to_transfer_prune_or_refine)
     {
       XMLGen::append_prune_and_refine_command(aInputData, fp);
@@ -117,8 +117,8 @@ namespace XMLGen
   void append_decomp_lines_for_prune_and_refine(const XMLGen::InputData& aInputData, FILE*& fp)
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || aInputData.initial_guess_filename != "" 
-                                                          && aInputData.initial_guess_field_name != "";
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.initial_guess_filename != ""
+                                                          && aInputData.initial_guess_field_name != "");
     if(need_to_transfer_prune_or_refine)
     {
       int tNumberPruneAndRefineProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(aInputData);

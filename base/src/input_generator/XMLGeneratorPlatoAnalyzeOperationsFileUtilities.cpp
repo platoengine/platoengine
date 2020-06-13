@@ -206,18 +206,19 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
         THROWERR("Append Isotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidTags;
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModel;
+    auto tValidTags = tValidMaterialModel.mKeys.find("isotropic linear elastic");
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
         auto tMaterialPropertyTag = tPair.second;
-        auto tItr = tValidTags.mKeys.find(tMaterialPropertyTag);
-        if(tItr == tValidTags.mKeys.end())
+        auto tTagItr = tValidTags->second.find(tMaterialPropertyTag);
+        if(tTagItr == tValidTags->second.end())
         {
             THROWERR(std::string("Append Isotropic Material Properties to Plato Analyze Operation: Material property tag '")
-                + tMaterialPropertyTag + "' is not recognized.")
+                + tMaterialPropertyTag + "' is not supported by an 'isotropic linear elastic' material model.")
         }
-        auto tAnalyzeMaterialTag = tItr->second.first;
+        auto tAnalyzeMaterialTag = tTagItr->second.first;
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tAnalyzeMaterialTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
@@ -236,19 +237,20 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
         THROWERR("Append Isotropic Thermo-elastic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidTags;
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModel;
+    auto tValidTags = tValidMaterialModel.mKeys.find("isotropic linear thermoelastic");
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
         auto tMaterialPropertyTag = tPair.second;
-        auto tItr = tValidTags.mKeys.find(tMaterialPropertyTag);
-        if(tItr == tValidTags.mKeys.end())
+        auto tTagItr = tValidTags->second.find(tMaterialPropertyTag);
+        if(tTagItr == tValidTags->second.end())
         {
             THROWERR(std::string("Append Isotropic Thermo-elastic Material Properties to Plato Analyze Operation: Material property tag '")
-                + tMaterialPropertyTag + "' is not recognized.")
+                + tMaterialPropertyTag + "' is not supported by an 'isotropic linear thermoelastic' material model.")
         }
-        auto tAnalyzeMaterialTag = tItr->second.first;
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialTag;
+        auto tAnalyzeMaterialPropertyTag = tTagItr->second.first;
+        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);

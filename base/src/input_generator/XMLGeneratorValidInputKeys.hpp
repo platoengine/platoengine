@@ -80,16 +80,44 @@ struct ValidAnalyzeOutputKeys
 struct ValidAnalyzeMaterialPropertyKeys
 {
     /*!<
-     * valid plato analyze output keys \n
-     * \brief map from plato problem input file material property tag to pair of plato analyze input file material \n
-     *   property tag and its value type, i.e. \n
+     * valid plato analyze material models and corresponding material property keys \n
+     * \brief map from material model to map from material property tag in plato input file to \n
+     * pair of plato analyze input file material property key and its corresponding value type, i.e. \n
      *
-     * map<plato_problem_input_file_material_property_tag, pair<plato_analyze_input_xml_file_material_property_tag, value_type>>.
+     * map< material_model, map<plato_input_file_material_property_tag, pair<plato_analyze_input_file_material_property_tag, value_type>>>.
      *
      **/
-    std::unordered_map<std::string, std::pair<std::string, std::string>> mKeys = { { "youngs modulus", { "Youngs Modulus", "double" } }, { "poissons ratio", { "Poissons Ratio", "double" } },
-        { "thermal expansion coefficient", { "Thermal Expansion Coefficient", "double" } }, { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
-        { "reference temperature", { "Reference Temperature", "double" } } };
+    std::unordered_map<std::string, std::unordered_map<std::string, std::pair<std::string, std::string>>> mKeys =
+        {
+            { "isotropic linear elastic", { { "youngs modulus", {"Youngs Modulus", "double"} },
+                { "poissons ratio", {"Poissons Ratio", "double"} }, { "mass density", {"Mass Density", "double"} } }
+            },
+
+            { "orthotropic linear elastic", { { "youngs modulus x", {"Youngs Modulus X", "double"} },
+                { "youngs modulus y", {"Youngs Modulus Y", "double"} }, { "youngs modulus z", {"Youngs Modulus Z", "double"} },
+                { "poissons ratio xy", {"Poissons Ratio XY", "double"} }, { "poissons ratio xz", {"Poissons Ratio XZ", "double"} },
+                { "poissons ratio yz", {"Poissons Ratio YZ", "double"} }, { "shear modulus ratio xy", {"Shear Modulus XY", "double"} },
+                { "shear modulus ratio xz", {"Shear Modulus XZ", "double"} }, { "shear modulus ratio yz", {"Shear Modulus YZ", "double"} },
+                { "mass density", {"Mass Density", "double"} } }
+            },
+
+            { "isotropic linear electroelastic", { { "youngs modulus", {"Youngs Modulus", "double"} },
+                { "poissons ratio", {"Poissons Ratio", "double"} }, { "dielectric permittivity 11", {"p11", "double"} },
+                { "dielectric permittivity 33", {"p33", "double"} }, { "piezoelectric coupling 15", {"e15", "double"} },
+                { "piezoelectric coupling 33", {"e33", "double"} }, { "piezoelectric coupling 31", {"e31", "double"} },
+                { "thermal expansion", {"Alpha", "double"} } }
+            },
+
+            { "isotropic linear thermal", { { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
+                { "mass density", {"Mass Density", "double"} }, { "specific heat", {"Specific Heat", "double"} } }
+            },
+
+            { "isotropic linear thermoelastic", { { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
+                { "youngs modulus", {"Youngs Modulus", "double"} }, { "poissons ratio", {"Poissons Ratio", "double"} },
+                { "thermal expansion coefficient", { "Thermal Expansion Coefficient", "double" } },
+                { "reference temperature", { "Reference Temperature", "double" } }, { "mass density", {"Mass Density", "double"} } }
+            }
+        };
 };
 // struct ValidAnalyzeMaterialPropertyKeys
 
