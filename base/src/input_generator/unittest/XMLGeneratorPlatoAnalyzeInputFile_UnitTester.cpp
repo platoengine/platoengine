@@ -127,11 +127,11 @@ std::string return_pressure_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Pressure Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Pressure Boundary Condition ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Pressure Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Pressure Boundary Condition ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -142,11 +142,11 @@ std::string return_surface_potential_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Surface Potential Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Surface Potential Boundary Condition ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Surface Potential Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Surface Potential Boundary Condition ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -157,11 +157,11 @@ std::string return_surface_flux_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Surface Flux Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Surface Flux Boundary Condition ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Surface Flux Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Surface Flux Boundary Condition ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -191,17 +191,17 @@ private:
 
         // pressure load
         tFuncIndex = std::type_index(typeid(return_pressure_load_name));
-        mMap.insert(std::make_pair("pressure",
+        mMap.insert(std::make_pair("uniform pressure",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_pressure_load_name, tFuncIndex)));
 
         // surface potential
         tFuncIndex = std::type_index(typeid(return_surface_potential_load_name));
-        mMap.insert(std::make_pair("surface potential",
+        mMap.insert(std::make_pair("uniform surface potential",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_potential_load_name, tFuncIndex)));
 
         // surface flux
         tFuncIndex = std::type_index(typeid(return_surface_flux_load_name));
-        mMap.insert(std::make_pair("surface flux",
+        mMap.insert(std::make_pair("uniform surface flux",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_flux_load_name, tFuncIndex)));
     }
 
@@ -992,25 +992,25 @@ void append_uniform_vector_valued_load_to_plato_problem
     XMLGen::append_attributes({"name"}, {aName}, tVecValuedLoad);
     std::vector<std::string> tKeys = {"name", "type","value"};
     std::vector<std::string> tValues = {"Type", "string", "Uniform"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
 
     auto tVecValues = XMLGen::return_natural_boundary_condition_vector_values(aLoad);
     tValues = {"Values", "Array(double)", tVecValues};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
     tValues = {"Sides", "string", aLoad.app_name};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
 }
 
 void append_uniform_single_valued_load_to_plato_problem
 (const std::string& aName,
  const XMLGen::Load& aLoad,
- pugi::xml_node &aParentNode)
+ pugi::xml_node& aParentNode)
 {
-    auto tTraction = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {aName}, tTraction);
+    auto tUniformSingleValuedLoad = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {aName}, tUniformSingleValuedLoad);
     std::vector<std::string> tKeys = {"name", "type","value"};
     std::vector<std::string> tValues = {"Type", "string", "Uniform"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tUniformSingleValuedLoad);
 
     if(aLoad.values.size() > 1u)
     {
@@ -1018,10 +1018,10 @@ void append_uniform_single_valued_load_to_plato_problem
             + " are expected to have one value. However uniform load with name '" + aName + "' has '"
             + std::to_string(aLoad.values.size()) + "' values.");
     }
-    tValues = {"Values", "double", aLoad.values[0]};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    tValues = {"Value", "double", aLoad.values[0]};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tUniformSingleValuedLoad);
     tValues = {"Sides", "string", aLoad.app_name};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tUniformSingleValuedLoad);
 }
 
 /******************************************************************************//**
@@ -1548,6 +1548,265 @@ void write_plato_analyze_input_deck_file
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_DoNotAppend_PerformerIsNotAnalyze)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "traction";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0", "2.0", "3.0"};
+    XMLGen::LoadCase tLoadCase;
+    tLoadCase.mPerformerName = "sierra";
+    tLoadCase.loads.push_back(tLoad);
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.load_cases.push_back(tLoadCase);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_TRUE(tLoadParamList.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "traction";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0", "2.0", "3.0"};
+    XMLGen::LoadCase tLoadCase;
+    tLoadCase.mPerformerName = "plato_analyze";
+    tLoadCase.loads.push_back(tLoad);
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.load_cases.push_back(tLoadCase);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Natural Boundary Conditions"}, tLoadParamList);
+
+    auto tTraction = tLoadParamList.child("ParameterList");
+    ASSERT_FALSE(tTraction.empty());
+    ASSERT_STREQ("ParameterList", tTraction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition 1"}, tTraction);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_RandomUseCase)
+{
+    // POSE LOAD SET 1
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.mIsRandom = true;
+    tLoad1.type = "traction";
+    tLoad1.load_id = "1";
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1.0");
+    tLoad1.values.push_back("2.0");
+    tLoad1.values.push_back("3.0");
+    tLoadCase1.loads.push_back(tLoad1);
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    // POSE LOAD SET 2
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad2;
+    tLoad2.mIsRandom = true;
+    tLoad2.type = "traction";
+    tLoad1.load_id = "1";
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("11");
+    tLoad2.values.push_back("12");
+    tLoad2.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad2);
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // CONSTRUCT SAMPLES SET
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    // TEST
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Natural Boundary Conditions"}, tLoadParamList);
+
+    auto tTraction = tLoadParamList.child("ParameterList");
+    ASSERT_FALSE(tTraction.empty());
+    ASSERT_STREQ("ParameterList", tTraction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Random Traction Vector Boundary Condition 1"}, tTraction);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_ErrorInvalidType)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "nonsense";
+    pugi::xml_document tDocument;
+    XMLGen::AppendNaturalBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Traction Vector Boundary Condition 1", tLoad, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "traction";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0", "2.0", "3.0"};
+    pugi::xml_document tDocument;
+    XMLGen::AppendNaturalBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Traction Vector Boundary Condition 1", tLoad, tDocument));
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition 1"}, tLoadParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformPressure)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "uniform pressure";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0"};
+    pugi::xml_document tDocument;
+    XMLGen::AppendNaturalBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Uniform Pressure Boundary Condition 1", tLoad, tDocument));
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Pressure Boundary Condition 1"}, tLoadParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfacePotential)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "uniform surface potential";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0"};
+    pugi::xml_document tDocument;
+    XMLGen::AppendNaturalBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Uniform Surface Potential Boundary Condition 1", tLoad, tDocument));
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Surface Potential Boundary Condition 1"}, tLoadParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfaceFlux)
+{
+    XMLGen::Load tLoad;
+    tLoad.type = "uniform surface flux";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0"};
+    pugi::xml_document tDocument;
+    XMLGen::AppendNaturalBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Uniform Surface Flux Boundary Condition 1", tLoad, tDocument));
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Surface Flux Boundary Condition 1"}, tLoadParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag_ErrorInvalidType)
 {
     XMLGen::NaturalBoundaryConditionTag tInterface;
@@ -1573,33 +1832,33 @@ TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag)
 
     // PRESSURE TEST
     tLoad.mIsRandom = false;
-    tLoad.type = "pressure";
+    tLoad.type = "uniform pressure";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Pressure Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Pressure Boundary Condition 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Pressure Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Pressure Boundary Condition 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
     tLoad.mIsRandom = false;
-    tLoad.type = "surface potential";
+    tLoad.type = "uniform surface potential";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Surface Potential Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Surface Potential Boundary Condition 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Surface Potential Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Surface Potential Boundary Condition 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
     tLoad.mIsRandom = false;
-    tLoad.type = "surface flux";
+    tLoad.type = "uniform surface flux";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Surface Flux Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Surface Flux Boundary Condition 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Surface Flux Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Surface Flux Boundary Condition 1", tName.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorEmptyMaterialContainer)
