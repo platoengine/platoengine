@@ -112,11 +112,11 @@ std::string return_traction_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Traction Vector Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Traction Vector Boundary Condition with ID ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Traction Vector Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Traction Vector Boundary Condition with ID ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -127,11 +127,11 @@ std::string return_pressure_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Uniform Pressure Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Pressure Boundary Condition with ID ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Uniform Pressure Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Pressure Boundary Condition with ID ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -142,11 +142,11 @@ std::string return_surface_potential_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Uniform Surface Potential Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Surface Potential Boundary Condition with ID ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Uniform Surface Potential Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Surface Potential Boundary Condition with ID ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -157,11 +157,11 @@ std::string return_surface_flux_load_name
     std::string tOutput;
     if(aLoad.mIsRandom)
     {
-        tOutput = std::string("Random Uniform Surface Flux Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Random Uniform Surface Flux Boundary Condition with ID ") + aLoad.load_id;
     }
     else
     {
-        tOutput = std::string("Uniform Surface Flux Boundary Condition ") + aLoad.load_id;
+        tOutput = std::string("Uniform Surface Flux Boundary Condition with ID ") + aLoad.load_id;
     }
     return tOutput;
 }
@@ -1263,7 +1263,7 @@ public:
         if(tMapItr == mMap.end())
         {
             THROWERR(std::string("Essential Boundary Condition Tag Function Interface: Did not find essential ")
-                + "boundary condition function with tag '" + tTag + "' in list.")
+                + "boundary condition function with tag '" + tTag + "' in essential boundary condition function list.")
         }
         auto tTypeCastedFunc = reinterpret_cast<std::string(*)(const XMLGen::BC&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
@@ -1279,7 +1279,7 @@ public:
 
 struct ValidDofsKeys
 {
-    /*!< map from dimension to axis name, i.e. map<dimension, axis> */
+    /*!< map from physics to map from degree of freedom name to degree of freedom index, i.e. map<physics, map<dof_name, dof_index>> */
     std::unordered_map<std::string, std::unordered_map<std::string,std::string>> mKeys =
         {
             {"mechanical", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
@@ -1548,6 +1548,24 @@ void write_plato_analyze_input_deck_file
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag_InvalidTag)
+{
+    XMLGen::EssentialBoundaryConditionTag tInterface;
+    XMLGen::BC tBC;
+    tBC.type = "fluid velocity";
+    ASSERT_THROW(tInterface.call(tBC), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag)
+{
+    XMLGen::EssentialBoundaryConditionTag tInterface;
+    XMLGen::BC tBC;
+    tBC.type = "displacement";
+    tBC.bc_id = "1";
+    auto tName = tInterface.call(tBC);
+    ASSERT_STREQ("Displacement Boundary Condition with ID 1", tName.c_str());
+}
+
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_DoNotAppend_PerformerIsNotAnalyze)
 {
     XMLGen::Load tLoad;
@@ -1591,7 +1609,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     auto tTraction = tLoadParamList.child("ParameterList");
     ASSERT_FALSE(tTraction.empty());
     ASSERT_STREQ("ParameterList", tTraction.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition 1"}, tTraction);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition with ID 1"}, tTraction);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -1657,7 +1675,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     auto tTraction = tLoadParamList.child("ParameterList");
     ASSERT_FALSE(tTraction.empty());
     ASSERT_STREQ("ParameterList", tTraction.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Random Traction Vector Boundary Condition 1"}, tTraction);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Random Traction Vector Boundary Condition with ID 1"}, tTraction);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -1824,41 +1842,41 @@ TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag)
     tLoad.type = "traction";
     tLoad.load_id = "1";
     auto tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Traction Vector Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Traction Vector Boundary Condition with ID 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Traction Vector Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Traction Vector Boundary Condition with ID 1", tName.c_str());
 
     // PRESSURE TEST
     tLoad.mIsRandom = false;
     tLoad.type = "uniform pressure";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Uniform Pressure Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Pressure Boundary Condition with ID 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Uniform Pressure Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Pressure Boundary Condition with ID 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
     tLoad.mIsRandom = false;
     tLoad.type = "uniform surface potential";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Uniform Surface Potential Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Surface Potential Boundary Condition with ID 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Uniform Surface Potential Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Surface Potential Boundary Condition with ID 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
     tLoad.mIsRandom = false;
     tLoad.type = "uniform surface flux";
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Uniform Surface Flux Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Uniform Surface Flux Boundary Condition with ID 1", tName.c_str());
 
     tLoad.mIsRandom = true;
     tName = tInterface.call(tLoad);
-    ASSERT_STREQ("Random Uniform Surface Flux Boundary Condition 1", tName.c_str());
+    ASSERT_STREQ("Random Uniform Surface Flux Boundary Condition with ID 1", tName.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorEmptyMaterialContainer)
