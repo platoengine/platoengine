@@ -1560,10 +1560,30 @@ TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag)
 {
     XMLGen::EssentialBoundaryConditionTag tInterface;
     XMLGen::BC tBC;
+
+    // TEST 1
     tBC.type = "displacement";
     tBC.bc_id = "1";
     auto tName = tInterface.call(tBC);
     ASSERT_STREQ("Displacement Boundary Condition with ID 1", tName.c_str());
+
+    // TEST 2
+    tBC.type = "temperature";
+    tBC.bc_id = "1";
+    tName = tInterface.call(tBC);
+    ASSERT_STREQ("Temperature Boundary Condition with ID 1", tName.c_str());
+
+    // TEST 3
+    tBC.type = "potential";
+    tBC.bc_id = "1";
+    tName = tInterface.call(tBC);
+    ASSERT_STREQ("Potential Boundary Condition with ID 1", tName.c_str());
+
+    // TEST 4
+    tBC.type = "velocity";
+    tBC.bc_id = "1";
+    tName = tInterface.call(tBC);
+    ASSERT_STREQ("Velocity Boundary Condition with ID 1", tName.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_DoNotAppend_PerformerIsNotAnalyze)
