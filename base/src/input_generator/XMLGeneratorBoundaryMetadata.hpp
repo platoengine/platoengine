@@ -34,7 +34,7 @@ struct LoadCase
 struct BC
 {
     bool mIsRandom = false;
-    std::string mPhysics = "mechanics";
+    std::string mPhysics = "mechanical";
     std::string mCategory = "rigid";
     std::string mPerformerName = "plato_analyze";
     std::string type;     // temperature, displacement

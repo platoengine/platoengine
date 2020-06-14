@@ -1322,7 +1322,7 @@ void append_rigid_essential_boundary_condition_to_plato_problem
     if(tDofsKeysItr == tValidDofs.mKeys.end())
     {
         THROWERR(std::string("Append Rigid Essential Boundary Condition to Plato Problem: ")
-            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
     XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
 
@@ -1351,7 +1351,7 @@ void append_zero_value_essential_boundary_condition_to_plato_problem
     if(tDofsKeysItr == tValidDofs.mKeys.end())
     {
         THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
-            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
 
     auto tLowerDof = Plato::tolower(aBC.dof);
@@ -1385,7 +1385,7 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
     if(tDofsKeysItr == tValidDofs.mKeys.end())
     {
         THROWERR(std::string("Append Fixed Value Essential Boundary Condition to Plato Problem: ")
-            + "Physics tag/key '" + tLowerPhysics + "' is not supported.")
+            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
 
     auto tLowerDof = Plato::tolower(aBC.dof);
@@ -1547,6 +1547,44 @@ void write_plato_analyze_input_deck_file
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.mPhysics = "mechanical";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidPhysics)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.mPhysics = "cfd";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_PerformerNotAnalyze_DoNothing)
+{
+    XMLGen::BC tBC;
+    tBC.type = "displacement";
+    tBC.bc_id = "1";
+    tBC.mPerformerName = "sierra";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument);
+    auto tEssentialBCParamList = tDocument.child("ParameterList");
+    ASSERT_TRUE(tEssentialBCParamList.empty());
+}
 
 TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag_InvalidTag)
 {
