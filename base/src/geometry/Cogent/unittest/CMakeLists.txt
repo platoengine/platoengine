@@ -24,7 +24,7 @@ INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 set(PlatoGeometryCogent_UnitTester_LIBS ${GTEST_LIBRARY} PlatoGeometryCogent ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} )
 add_executable(PlatoGeometryCogent_UnitTester ${PlatoGeometryCogent_UnitTester_SRCS})
 target_link_libraries(PlatoGeometryCogent_UnitTester ${PlatoGeometryCogent_UnitTester_LIBS})
-add_test(NAME PlatoGeometryCogent_UnitTester COMMAND ${CMAKE_BINARY_DIR}/base/src/geometry/MovingLeastSquares/unittest/PlatoGeometryCogent_UnitTester)
+add_test(NAME PlatoGeometryCogent_UnitTester COMMAND ${CMAKE_BINARY_DIR}/base/src/geometry/Cogent/unittest/PlatoGeometryCogent_UnitTester)
 
 if( CMAKE_INSTALL_PREFIX )
   install( TARGETS PlatoGeometryCogent_UnitTester DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
