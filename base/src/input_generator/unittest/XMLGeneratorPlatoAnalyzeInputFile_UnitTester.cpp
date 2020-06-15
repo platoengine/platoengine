@@ -189,17 +189,17 @@ private:
         mMap.insert(std::make_pair("traction",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_traction_load_name, tFuncIndex)));
 
-        // pressure load
+        // uniform pressure load
         tFuncIndex = std::type_index(typeid(return_pressure_load_name));
         mMap.insert(std::make_pair("uniform pressure",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_pressure_load_name, tFuncIndex)));
 
-        // surface potential
+        // uniform surface potential
         tFuncIndex = std::type_index(typeid(return_surface_potential_load_name));
         mMap.insert(std::make_pair("uniform surface potential",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_potential_load_name, tFuncIndex)));
 
-        // surface flux
+        // uniform surface flux
         tFuncIndex = std::type_index(typeid(return_surface_flux_load_name));
         mMap.insert(std::make_pair("uniform surface flux",
           std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)return_surface_flux_load_name, tFuncIndex)));
@@ -1047,17 +1047,17 @@ private:
         mMap.insert(std::make_pair("traction",
           std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_vector_valued_load_to_plato_problem, tFuncIndex)));
 
-        // pressure load
+        // uniform pressure load
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform pressure",
           std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
-        // surface potential
+        // uniform surface potential
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform surface potential",
           std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
-        // surface flux
+        // uniform surface flux
         tFuncIndex = std::type_index(typeid(append_uniform_single_valued_load_to_plato_problem));
         mMap.insert(std::make_pair("uniform surface flux",
           std::make_pair((XMLGen::Analyze::NaturalBCFunc)append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
@@ -1219,22 +1219,22 @@ private:
      **********************************************************************************/
     void insert()
     {
-        // traction load
+        // temperature
         auto tFuncIndex = std::type_index(typeid(return_temperature_bc_name));
         mMap.insert(std::make_pair("temperature",
           std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_temperature_bc_name, tFuncIndex)));
 
-        // pressure load
+        // velocity
         tFuncIndex = std::type_index(typeid(return_velocity_bc_name));
         mMap.insert(std::make_pair("velocity",
           std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_velocity_bc_name, tFuncIndex)));
 
-        // surface potential
+        // potential
         tFuncIndex = std::type_index(typeid(return_potential_bc_name));
         mMap.insert(std::make_pair("potential",
           std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_potential_bc_name, tFuncIndex)));
 
-        // surface flux
+        // displacement
         tFuncIndex = std::type_index(typeid(return_displacement_bc_name));
         mMap.insert(std::make_pair("displacement",
           std::make_pair((XMLGen::Analyze::EssentialBCTagFunc)return_displacement_bc_name, tFuncIndex)));
@@ -1306,7 +1306,7 @@ void check_essential_boundary_condition_value_keyword
 {
     if(aBC.value.empty())
     {
-        THROWERR(std::string("Check Essential Boundary Condition Value: Value for Essential Boundary Condition ")
+        THROWERR(std::string("Check Essential Boundary Condition Value: Value parameter for Essential Boundary Condition ")
             + "with identification number '" + aBC.bc_id + "' is empty.")
     }
 }
@@ -1329,14 +1329,15 @@ void append_rigid_essential_boundary_condition_to_plato_problem
     std::vector<std::string> tKeys = {"name", "type", "value"};
     for(auto& tDofNameItr : tDofsKeysItr->second)
     {
-        auto tBCName = Plato::toupper(tDofNameItr.first) + " " + aName;
-        XMLGen::append_attributes({"name"}, {tBCName}, aParentNode);
+        auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr.first);
+        auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
         std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
-        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
         tValues = {"Index", "int", tDofNameItr.second};
-        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
         tValues = {"Sides", "string", aBC.app_name};
-        XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     }
 }
 
@@ -1363,15 +1364,16 @@ void append_zero_value_essential_boundary_condition_to_plato_problem
     }
     XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
 
-    auto tName = Plato::toupper(tDofNameItr->first) + " " + aName;
-    XMLGen::append_attributes({"name"}, {tName}, aParentNode);
+    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
+    auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Index", "int", tDofNameItr->second};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Sides", "string", aBC.app_name};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
 }
 
 void append_fixed_value_essential_boundary_condition_to_plato_problem
@@ -1398,17 +1400,18 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
     XMLGen::check_essential_boundary_condition_value_keyword(aBC);
     XMLGen::check_essential_boundary_condition_application_name_keyword(aBC);
 
-    auto tName = Plato::toupper(tDofNameItr->first) + " " + aName;
-    XMLGen::append_attributes({"name"}, {tName}, aParentNode);
+    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
+    auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "Fixed Value"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Index", "int", tDofNameItr->second};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Sides", "string", aBC.app_name};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Value", "double", aBC.value};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
 }
 
 /******************************************************************************//**
@@ -1429,22 +1432,22 @@ private:
      **********************************************************************************/
     void insert()
     {
-        // traction load
+        // rigid
         auto tFuncIndex = std::type_index(typeid(append_rigid_essential_boundary_condition_to_plato_problem));
         mMap.insert(std::make_pair("rigid",
           std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_rigid_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
-        // pressure load
+        // zero value
         tFuncIndex = std::type_index(typeid(append_zero_value_essential_boundary_condition_to_plato_problem));
         mMap.insert(std::make_pair("zero value",
           std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
-        // surface potential
+        // fixed value
         tFuncIndex = std::type_index(typeid(append_fixed_value_essential_boundary_condition_to_plato_problem));
         mMap.insert(std::make_pair("fixed value",
           std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_fixed_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
-        // surface flux
+        // insulated
         tFuncIndex = std::type_index(typeid(append_zero_value_essential_boundary_condition_to_plato_problem));
         mMap.insert(std::make_pair("insulated",
           std::make_pair((XMLGen::Analyze::EssentialBCFunc)append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
@@ -1480,7 +1483,7 @@ public:
         if(tMapItr == mMap.end())
         {
             THROWERR(std::string("Essential Boundary Condition Function Interface: Did not find essential boundary condition function with tag '")
-                + tCategory + "' in list.")
+                + tCategory + "' in list. Essential boundary condition '" + tCategory + "' is not supported in Plato Analyze.")
         }
         auto tTypeCastedFunc = reinterpret_cast<void(*)(const std::string&, const XMLGen::BC&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
@@ -1548,6 +1551,81 @@ void write_plato_analyze_input_deck_file
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
+{
+    // POSE PROBLEM ESSENTIAL BC
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_2";
+    tBC.type = "displacement";
+    tBC.mPhysics = "mechanical";
+    tBC.mCategory = "rigid";
+    tBC.mPerformerName = "plato_analyze";
+
+    // POSE DESIGN INTENTS
+    XMLGen::Objective tObjective;
+    tObjective.type = "maximize stiffness";
+    tObjective.mPerformerName = "plato_analyze";
+    XMLGen::Constraint tConstraint;
+    tConstraint.type = "volume";
+    tConstraint.mPenaltyParam = "1.0";
+    tConstraint.mMinimumErsatzValue = "0.0";
+    tConstraint.mPerformerName = "plato_analyze";
+
+    // POSE MATERIAL
+    XMLGen::Material tMaterial;
+    tMaterial.performer("plato_analyze");
+    tMaterial.category("isotropic linear elastic");
+    tMaterial.property("youngs modulus", "1e9");
+    tMaterial.property("poissons ratio", "0.3");
+
+    // POSE NATURAL BC
+    XMLGen::Load tLoad;
+    tLoad.type = "traction";
+    tLoad.load_id = "1";
+    tLoad.app_name = "ss_1";
+    tLoad.values = {"1.0", "2.0", "3.0"};
+    XMLGen::LoadCase tLoadCase;
+    tLoadCase.mPerformerName = "plato_analyze";
+    tLoadCase.loads.push_back(tLoad);
+
+    // SET INPUT METADATA
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.bcs.push_back(tBC);
+    tXMLMetaData.materials.push_back(tMaterial);
+    tXMLMetaData.load_cases.push_back(tLoadCase);
+    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.constraints.push_back(tConstraint);
+    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "3";
+    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+
+    // CALL FUNCTION
+    XMLGen::write_plato_analyze_input_deck_file(tXMLMetaData);
+
+    // TEST OUTPUT
+    auto tData = XMLGen::read_data_from_file("plato_analyze_input_deck.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><ParameterListname=\"Problem\"><Parametername=\"Physics\"type=\"string\"value=\"PlatoDriver\"/><Parametername=\"SpatialDimension\"type=\"int\"value=\"3\"/>")
+    +"<Parametername=\"InputMesh\"type=\"string\"value=\"lbracket.exo\"/><ParameterListname=\"PlatoProblem\"><Parametername=\"Physics\"type=\"string\"value=\"Mechanical\"/><Parametername=\"PDEConstraint\"type=\"string\"value=\"Elliptic\"/>"
+    +"<Parametername=\"Constraint\"type=\"string\"value=\"MyConstraint\"/><Parametername=\"Objective\"type=\"string\"value=\"MyObjective\"/><Parametername=\"Self-Adjoint\"type=\"bool\"value=\"true\"/><ParameterListname=\"MyObjective\">"
+    +"<Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{mymaximizestiffness}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/></ParameterList>"
+    +"<ParameterListname=\"mymaximizestiffness\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"InternalElasticEnergy\"/><PenaltyFunction>"
+    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/></PenaltyFunction></ParameterList>"
+    +"<ParameterListname=\"MyConstraint\"><Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{myvolume}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/>"
+    +"</ParameterList><ParameterListname=\"myvolume\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"Volume\"/><PenaltyFunction>"
+    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"1.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"0.0\"/></PenaltyFunction></ParameterList>"
+    +"<ParameterListname=\"Elliptic\"><PenaltyFunction><Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/>"
+    +"</PenaltyFunction></ParameterList><ParameterListname=\"MaterialModel\"><ParameterListname=\"IsotropicLinearElastic\"><Parametername=\"PoissonsRatio\"type=\"double\"value=\"0.3\"/><Parametername=\"YoungsModulus\"type=\"double\"value=\"1e9\"/>"
+    +"</ParameterList></ParameterList><ParameterListname=\"NaturalBoundaryConditions\"><ParameterListname=\"TractionVectorBoundaryConditionwithID1\"><Parametername=\"Type\"type=\"string\"value=\"Uniform\"/>"
+    +"<Parametername=\"Values\"type=\"Array(double)\"value=\"{1.0,2.0,3.0}\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_1\"/></ParameterList></ParameterList><ParameterListname=\"EssentialBoundaryConditions\">"
+    +"<ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPZ\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"2\"/>"
+    +"<Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList><ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPY\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/>"
+    +"<Parametername=\"Index\"type=\"int\"value=\"1\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList><ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPX\">"
+    +"<Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList></ParameterList></ParameterList></ParameterList>";
+    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    Plato::system("rm -f plato_analyze_input_deck.xml");
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
 {
     XMLGen::BC tBC;
@@ -1572,6 +1650,318 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidPhysics
     ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
 }
 
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidCategory)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "mechanical";
+    tBC.mCategory = "pin";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorInvalidPhysics)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "cfd";
+    tBC.mCategory = "zero value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorEmptyDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "zero value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorInvalidDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "dispx";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "zero value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "mechanical";
+    tBC.mCategory = "rigid";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument));
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_1"} };
+    std::vector<std::string> tGoldParameterListNames =
+        {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPX"};
+
+    auto tParamList = tDocument.child("ParameterList");
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tGoldParameterListNamesItr = tGoldParameterListNames.begin();
+    while(!tParamList.empty())
+    {
+        ASSERT_FALSE(tParamList.empty());
+        ASSERT_STREQ("ParameterList", tParamList.name());
+        PlatoTestXMLGenerator::test_attributes({"name"}, {tGoldParameterListNamesItr->c_str()}, tParamList);
+
+        auto tParameter = tParamList.child("Parameter");
+        while(!tParameter.empty())
+        {
+            ASSERT_FALSE(tParameter.empty());
+            ASSERT_STREQ("Parameter", tParameter.name());
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+            tParameter = tParameter.next_sibling();
+            std::advance(tGoldValuesItr, 1);
+        }
+        tParamList = tParamList.next_sibling();
+        std::advance(tGoldParameterListNamesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "temp";
+    tBC.app_name = "ss_2";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "zero value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_2"} };
+
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Boundary Condition with ID 1 applied to Dof with tag TEMP"}, tParamList);
+
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorInvalidPhysics)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "cfd";
+    tBC.mCategory = "fixed value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorEmptyDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "fixed value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorInvalidDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "dispx";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "fixed value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorEmptyValue)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "temp";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "fixed value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "temp";
+    tBC.value = "10.0";
+    tBC.app_name = "ss_2";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "fixed value";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Fixed Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_2"}, {"Value", "double", "10.0"} };
+
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Boundary Condition with ID 1 applied to Dof with tag TEMP"}, tParamList);
+
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorInvalidPhysics)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "temp";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "cfd";
+    tBC.mCategory = "insulated";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorEmptyDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "insulated";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorInvalidDof)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "dispx";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "insulated";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.dof = "temp";
+    tBC.app_name = "ss_11";
+    tBC.mPhysics = "thermal";
+    tBC.mCategory = "insulated";
+    tBC.mPerformerName = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+    tDocument.save_file("dummy.xml", "  ");
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_11"} };
+
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Boundary Condition with ID 1 applied to Dof with tag TEMP"}, tParamList);
+
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_PerformerNotAnalyze_DoNothing)
 {
     XMLGen::BC tBC;
@@ -1584,6 +1974,63 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_PerformerNotAnalyze
     tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument);
     auto tEssentialBCParamList = tDocument.child("ParameterList");
     ASSERT_TRUE(tEssentialBCParamList.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInputDeck)
+{
+    // POSE PROBLEM
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.type = "displacement";
+    tBC.mPhysics = "mechanical";
+    tBC.mCategory = "rigid";
+    tBC.mPerformerName = "plato_analyze";
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.bcs.push_back(tBC);
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    tDocument.save_file("dummy.xml", " ");
+
+    // TEST
+    auto tEssentialBC = tDocument.child("ParameterList");
+    ASSERT_FALSE(tEssentialBC.empty());
+    ASSERT_STREQ("ParameterList", tEssentialBC.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Essential Boundary Conditions"}, tEssentialBC);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_1"} };
+    std::vector<std::string> tGoldParameterListNames =
+        {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPX"};
+
+    auto tParamList = tEssentialBC.child("ParameterList");
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tGoldParameterListNamesItr = tGoldParameterListNames.begin();
+    while(!tParamList.empty())
+    {
+        ASSERT_FALSE(tParamList.empty());
+        ASSERT_STREQ("ParameterList", tParamList.name());
+        PlatoTestXMLGenerator::test_attributes({"name"}, {tGoldParameterListNamesItr->c_str()}, tParamList);
+
+        auto tParameter = tParamList.child("Parameter");
+        while(!tParameter.empty())
+        {
+            ASSERT_FALSE(tParameter.empty());
+            ASSERT_STREQ("Parameter", tParameter.name());
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+            tParameter = tParameter.next_sibling();
+            std::advance(tGoldValuesItr, 1);
+        }
+        tParamList = tParamList.next_sibling();
+        std::advance(tGoldParameterListNamesItr, 1);
+    }
 }
 
 TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag_InvalidTag)
