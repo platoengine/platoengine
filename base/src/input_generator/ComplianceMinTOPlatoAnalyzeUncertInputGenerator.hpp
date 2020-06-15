@@ -70,22 +70,6 @@ public:
     virtual ~ComplianceMinTOPlatoAnalyzeUncertInputGenerator();
     virtual bool generateInputFiles();
 
-
-protected:
-
-    virtual bool generateLaunchScript();
-    virtual bool generatePhysicsInputDecks();
-    virtual bool generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
-    virtual void outputOutputToFileStage(pugi::xml_document &doc,
-                                 const bool &aHasUncertainties,
-                                 const bool &aRequestedVonMises);
-
-private:
-    virtual size_t computeNumberOfNodesNeeded();
-    virtual void generateBatchScript();
-    virtual void generateJSRunScript();
-    virtual void generateAnalyzeBashScripts();
-
 };
 
 }
