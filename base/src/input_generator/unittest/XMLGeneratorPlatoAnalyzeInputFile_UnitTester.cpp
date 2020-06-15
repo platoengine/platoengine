@@ -20,45 +20,6 @@
 namespace XMLGen
 {
 
-struct ValidAnalyzePhysicsKeys
-{
-    std::unordered_map<std::string, std::pair<std::string,std::string>> mKeys =
-        {
-            { "mechanical", {"Mechanical", "Elliptic"} },
-            { "transient mechanics", {"Mechanical", "Hyperbolic"} },
-            { "plasticity", {"Mechanical", "Parabolic"} },
-            { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
-            { "thermal", {"Thermal", "Elliptic"} },
-            { "heat conduction", {"Thermal", "Parabolic"} },
-            { "electromechanical", {"Electromechanical", "Elliptic"} },
-            { "stabilized thermomechanical", {"Stabilized Thermomechanical", "Elliptic"} },
-            { "thermomechanical", {"Thermomechanical", "Elliptic"} },
-            { "coupled heat conduction and mechanics", {"Thermomechanical", "Parabolic"} }
-        };
-};
-
-struct ValidAnalyzeCriteriaKeys
-{
-    std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
-    {
-        { "volume", { "Volume", false } },
-        { "maximize stiffness", { "Internal Elastic Energy", true } },
-        { "local stress", { "Stress Constraint Quadratic", false } },
-        { "stress p-norm", { "Stress P-Norm", false } },
-        { "effective energy", { "Effective Energy", true } },
-        { "stress constrained mass minimization", { "Stress Constraint General", false } },
-        { "maximize heat conduction", { "Internal Thermal Energy", false } },
-        { "flux p-norm", { "Flux P-Norm", false } },
-        { "thermo-elastic energy", { "Internal Thermoelastic Energy", false } },
-        { "electro-elastic energy", { "Internal Electroelastic Energy", false } }
-    };
-};
-
-struct ValidSpatialDimsKeys
-{
-    std::vector<std::string> mKeys = { "3", "2" };
-};
-
 namespace Analyze
 {
 

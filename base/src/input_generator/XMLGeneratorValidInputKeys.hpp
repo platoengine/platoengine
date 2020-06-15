@@ -121,5 +121,67 @@ struct ValidAnalyzeMaterialPropertyKeys
 };
 // struct ValidAnalyzeMaterialPropertyKeys
 
+struct ValidAnalyzePhysicsKeys
+{
+    /*!<
+     * valid plato analyze physics and corresponding PDE keys \n
+     * \brief map from physics keyword to pair of plato analyze physics and \n
+     * partial differential equations (PDE) keys, i.e. \n
+     *
+     * map< plato_main_physics_key, pair<plato_analyze_physics_key, plato_analyze_pde_key> >.
+     *
+     **/
+    std::unordered_map<std::string, std::pair<std::string,std::string>> mKeys =
+        {
+            { "mechanical", {"Mechanical", "Elliptic"} },
+            { "transient mechanics", {"Mechanical", "Hyperbolic"} },
+            { "plasticity", {"Mechanical", "Parabolic"} },
+            { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
+            { "thermal", {"Thermal", "Elliptic"} },
+            { "heat conduction", {"Thermal", "Parabolic"} },
+            { "electromechanical", {"Electromechanical", "Elliptic"} },
+            { "stabilized thermomechanical", {"Stabilized Thermomechanical", "Elliptic"} },
+            { "thermomechanical", {"Thermomechanical", "Elliptic"} },
+            { "coupled heat conduction and mechanics", {"Thermomechanical", "Parabolic"} }
+        };
+};
+// struct ValidAnalyzePhysicsKeys
+
+struct ValidAnalyzeCriteriaKeys
+{
+    /*!<
+     * valid plato analyze optimization criteria \n
+     * \brief map from plato main criterion key to pair of plato analyze criterion \n
+     * key and self-adjoint flag, i.e. \n
+     *
+     * map< plato_main_cirterion_key, pair<plato_analyze_criterion_key, plato_analyze_self_adjoint_key> >.
+     *
+     **/
+    std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
+    {
+        { "volume", { "Volume", false } },
+        { "maximize stiffness", { "Internal Elastic Energy", true } },
+        { "local stress", { "Stress Constraint Quadratic", false } },
+        { "stress p-norm", { "Stress P-Norm", false } },
+        { "effective energy", { "Effective Energy", true } },
+        { "stress constrained mass minimization", { "Stress Constraint General", false } },
+        { "maximize heat conduction", { "Internal Thermal Energy", false } },
+        { "flux p-norm", { "Flux P-Norm", false } },
+        { "thermo-elastic energy", { "Internal Thermoelastic Energy", false } },
+        { "electro-elastic energy", { "Internal Electroelastic Energy", false } }
+    };
+};
+// ValidAnalyzeCriteriaKeys
+
+/*!<
+ * \brief Valid plato problem spatial dimensions.
+ **/
+struct ValidSpatialDimsKeys
+{
+    std::vector<std::string> mKeys = { "3", "2" };
+};
+// struct ValidSpatialDimsKeys
+
+
 }
 // namespace XMLGen
