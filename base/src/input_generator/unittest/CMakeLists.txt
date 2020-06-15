@@ -20,13 +20,19 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorDefinesFileUtilities.cpp
                                       ../XMLGeneratorPlatoAnalyzeUtilities.cpp
                                       ../XMLGeneratorLaunchScriptUtilities.cpp
-                                      ../XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                                       ../XMLGeneratorInterfaceFileUtilities.cpp
                                       ../XMLGeneratorMaterialFunctionInterface.cpp
                                       ../XMLGeneratorPlatoMainInputFileUtilities.cpp
                                       ../XMLGeneratorRandomInterfaceFileUtilities.cpp
+                                      ../XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                                       ../XMLGeneratorPlatoMainOperationFileUtilities.cpp
                                       ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
+                                      ../XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                                       ../ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp

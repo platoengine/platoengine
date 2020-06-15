@@ -9,6 +9,7 @@
 #include "pugixml.hpp"
 
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorAnalyzeFunctionMapTypes.hpp"
 
 namespace XMLGen
 {
@@ -17,10 +18,10 @@ namespace Analyze
 {
 /*!< information used to identify materials, \n
  * i.e. pair<material_category, vector<pair<material_property_argument_name_tag, material_property_tag> > > */
-using MaterialInfo = std::pair<std::string, std::vector<std::pair<std::string, std::string>>>;
+using MaterialPropertyTags = std::pair<std::string, std::vector<std::pair<std::string, std::string>>>;
 
 /*!< map from element block identification number to material metadata, i.e. map< block_id, MaterialInfo > */
-using MaterialMetadata = std::unordered_map<std::string, XMLGen::Analyze::MaterialInfo>;
+using MaterialPropertyMetadata = std::unordered_map<std::string, XMLGen::Analyze::MaterialPropertyTags>;
 }
 // namespace Analyze
 
@@ -107,7 +108,7 @@ void append_write_output_to_plato_analyze_operation
  * \return map from element block identification number to material property tags, \n
  * i.e. map< block_id, pair< material_category, vector< pair<material_property_argument_name_tag, material_property_tag> > > >
 **********************************************************************************/
-XMLGen::Analyze::MaterialMetadata
+XMLGen::Analyze::MaterialPropertyMetadata
 return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
 

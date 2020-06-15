@@ -4,6 +4,8 @@
  *  Created on: Jun 5, 2020
  */
 
+#include <utility>
+
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
@@ -19,11 +21,11 @@ void MaterialFunctionInterface::insert()
 {
     auto tFuncIndex = std::type_index(typeid(append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation));
     mMap.insert(std::make_pair("isotropic linear elastic",
-      std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::MaterialOperationFunc)append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation));
     mMap.insert(std::make_pair("isotropic linear thermoelastic",
-      std::make_pair((XMLGen::Analyze::MaterialFunction)append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::MaterialOperationFunc)append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 }
 
 void MaterialFunctionInterface::call

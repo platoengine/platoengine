@@ -182,6 +182,21 @@ struct ValidSpatialDimsKeys
 };
 // struct ValidSpatialDimsKeys
 
+struct ValidDofsKeys
+{
+    /*!< map from physics to map from degree of freedom name to degree of freedom index, i.e. \n
+     *
+     * map<physics, map<dof_name, dof_index>>
+     * */
+    std::unordered_map<std::string, std::unordered_map<std::string,std::string>> mKeys =
+        {
+            {"mechanical", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
+            {"thermal", { {"temp", "0"} } }, {"electrostatics", { {"potential", "0"} } },
+            {"thermalmechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
+            {"electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
+        };
+};
+// struct ValidDofsKeys
 
 }
 // namespace XMLGen

@@ -165,7 +165,7 @@ void append_write_output_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-XMLGen::Analyze::MaterialMetadata
+XMLGen::Analyze::MaterialPropertyMetadata
 return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
 {
@@ -176,7 +176,7 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
     }
 
     // MaterialTags = map< block_id, pair< material_category, vector< pair< material_property_argument_name_tag, material_property_tag > > > >
-    XMLGen::Analyze::MaterialMetadata tMap;
+    XMLGen::Analyze::MaterialPropertyMetadata tMap;
     auto tSample = aRandomMetaData.sample(0);
     auto tBlockIDs = tSample.materialBlockIDs();
     for(auto& tID : tBlockIDs)

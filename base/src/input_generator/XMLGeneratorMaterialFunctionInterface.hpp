@@ -6,26 +6,13 @@
 
 #pragma once
 
-#include <string>
-#include <typeindex>
-#include <unordered_map>
 #include <vector>
-#include <utility>
 
 #include "pugixml.hpp"
+#include "XMLGeneratorAnalyzeFunctionMapTypes.hpp"
 
 namespace XMLGen
 {
-
-namespace Analyze
-{
-/*!< function pointer type */
-typedef void (*MaterialFunction)(void);
-
-/*!< map from material category to material function used to append material parameter tags, \n
- * i.e. map<material_category, function> */
-typedef std::unordered_map<std::string, MaterialFunction> MaterialFunctionMap;
-}
 
 /******************************************************************************//**
  * \struct The goal of this C++ struct is to provide an interface for the functions \n
@@ -37,7 +24,7 @@ struct MaterialFunctionInterface
 {
 private:
     /*!< map from material category to function used to append material properties */
-    std::unordered_map<std::string, std::pair<XMLGen::Analyze::MaterialFunction, std::type_index>> mMap;
+    XMLGen::Analyze::MaterialFunctionMap mMap;
 
     /******************************************************************************//**
      * \fn insert

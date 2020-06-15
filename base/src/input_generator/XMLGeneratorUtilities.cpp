@@ -270,6 +270,18 @@ void append_attributes
 /******************************************************************************/
 
 /******************************************************************************/
+void append_parameter_plus_attributes
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    auto tChild = aParentNode.append_child("Parameter");
+    XMLGen::append_attributes(aKeys, aValues, tChild);
+}
+// function append_parameter_plus_attributes
+/******************************************************************************/
+
+/******************************************************************************/
 size_t compute_greatest_divisor(const size_t& aDividend, size_t aDivisor)
 {
     if (aDivisor == 0u)

@@ -10,15 +10,22 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorInterfaceFileUtilities.cpp
                       XMLGeneratorMaterialFunctionInterface.cpp
                       XMLGeneratorRandomInterfaceFileUtilities.cpp
-                      XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoMainInputFileUtilities.cpp
+                      XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
+                      XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
                       XMLGeneratorLaunchScriptUtilities.cpp
+                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
+                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                      XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
+                      XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
+                      XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                       ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                       XMLGeneratorUtilities.cpp
                       SalinasInputDeckWriter.cpp)
+                      
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp 
                       XMLGeneratorValidInputKeys.hpp
@@ -29,11 +36,20 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorDefinesFileUtilities.hpp 
                       XMLGeneratorPlatoAnalyzeUtilities.hpp 
                       XMLGeneratorInterfaceFileUtilities.hpp 
+                      XMLGeneratorAnalyzeFunctionMapTypes.hpp
                       XMLGeneratorMaterialFunctionInterface.hpp
+                      XMLGeneratorPlatoMainInputFileUtilities.hpp
+                      XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp
-                      XMLGeneratorPlatoMainInputFileUtilities.hpp
                       XMLGeneratorLaunchScriptUtilities.hpp
+                      XMLGeneratorAnalyzeCriterionUtilities.hpp
+                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
+                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp
+                      XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp
+                      XMLGeneratorAnalyzeEssentiallBCTagFunctionInterface.hpp
+                      XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp
+                      XMLGeneratorAnalyzeAppendCriterionFunctionInterface.hpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp
                       XMLGeneratorRandomInterfaceFileUtilities.hpp 
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 

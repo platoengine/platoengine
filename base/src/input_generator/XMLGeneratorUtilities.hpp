@@ -150,6 +150,18 @@ namespace XMLGen
      pugi::xml_node& aParentNode);
 
     /******************************************************************************//**
+     * \fn append_parameter_plus_attributes
+     * \brief Append parameter child to parent node and corresponding child attributes.
+     * \param [in]     aKeywords   keys to append
+     * \param [in]     aValues     values to append
+     * \param [in/out] aParentNode PUGI XML node
+    **********************************************************************************/
+    void append_parameter_plus_attributes
+    (const std::vector<std::string>& aKeys,
+     const std::vector<std::string>& aValues,
+     pugi::xml_node& aParentNode);
+
+    /******************************************************************************//**
      * \fn transform_tokens
      * \brief Transform list of tokens into string and return its string value.
      * \param [in] aTokens list of tokens
@@ -202,6 +214,12 @@ namespace XMLGen
     std::vector<std::string> transform_value_tokens
     (const std::unordered_map<std::string, std::string> &aKeyToValueMap);
 
+    /******************************************************************************//**
+     * \fn assert_is_positive_integer
+     * \brief Assert if input string is a positive integer.
+     * \param [in] aString input string
+    **********************************************************************************/
     void assert_is_positive_integer(const std::string& aString);
+
 }
 // namespace XMLGen
