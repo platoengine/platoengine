@@ -22,7 +22,6 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
-                      ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                       XMLGeneratorUtilities.cpp
                       SalinasInputDeckWriter.cpp)
                       
@@ -33,6 +32,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorMaterialMetadata.hpp 
                       XMLGeneratorBoundaryMetadata.hpp 
                       DefaultInputGenerator.hpp 
+                      XMLGeneratorPlatoAnalyzeProblem.hpp 
                       XMLGeneratorDefinesFileUtilities.hpp 
                       XMLGeneratorPlatoAnalyzeUtilities.hpp 
                       XMLGeneratorInterfaceFileUtilities.hpp 
@@ -53,7 +53,6 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp
                       XMLGeneratorRandomInterfaceFileUtilities.hpp 
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
-                      ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp
                       XMLGeneratorDataStruct.hpp
                       PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp

@@ -61,7 +61,6 @@
 #include "XMLGenerator_UnitTester.hpp"
 #include "DefaultInputGenerator_UnitTester.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
-#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
 

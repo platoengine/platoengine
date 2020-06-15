@@ -13,7 +13,6 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGeneratorPlatoAnalyzeOperationsFile_UnitTester.cpp
                                       DefaultInputGenerator_UnitTester.cpp
                                       ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.cpp
-                                      ComplianceMinTOPlatoAnalyzeUncertInputGenerator_UnitTester.cpp
                                       Plato_Test_XMLGenerator.cpp
                                       ../XMLGenerator.cpp
                                       ../XMLGeneratorUtilities.cpp
@@ -34,7 +33,6 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
-                                      ../ComplianceMinTOPlatoAnalyzeUncertInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp
                                       ../PlatoAnalyzeInputDeckWriter.cpp
                                       ../SalinasInputDeckWriter.cpp)

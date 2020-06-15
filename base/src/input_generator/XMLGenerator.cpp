@@ -73,8 +73,8 @@
 
 #include "XMLG_Macros.hpp"
 #include "DefaultInputGenerator.hpp"
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
-#include "ComplianceMinTOPlatoAnalyzeUncertInputGenerator.hpp"
 
 namespace XMLGen
 {
@@ -144,8 +144,7 @@ void XMLGenerator::writeInputFiles()
             }
             case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
             {
-                ComplianceMinTOPlatoAnalyzeUncertInputGenerator tGenerator(m_InputData);
-                tGenerator.generateInputFiles();
+                XMLGen::Analyze::write_plato_analyze_optimization_problem(m_InputData);
                 break;
             }
             default:
