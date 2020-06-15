@@ -610,6 +610,7 @@ TEST(PlatoTestXMLGenerator, appendPruneAndRefineCommand)
   tInputData.initial_guess_field_name = "badGuess";
   tInputData.mesh_name = "dummy.exo";
   tInputData.run_mesh_name = "output.exo";
+  tInputData.m_UseLaunch = false;
   FILE* fp = fopen("command.txt", "w");
   XMLGen::append_prune_and_refine_command(tInputData, fp);
   fclose(fp);
