@@ -70,7 +70,7 @@ struct ValidAnalyzeOutputKeys
      * Basically, this maps connects the key use for any quantity of interest inside Plato's light input file to the key used in \n
      * Plato Analyze to identify the quantity of interest.
      **/
-    std::unordered_map<std::string, std::string> mKeys = { {"von_mises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
+    std::unordered_map<std::string, std::string> mKeys = { {"vonmises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
       {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
       {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
       {"dispy", "Solution Y"}, {"dispz", "Solution Z"} };
@@ -160,15 +160,22 @@ struct ValidAnalyzeCriteriaKeys
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
         { "volume", { "Volume", false } },
+        { "compliance", { "Internal Elastic Energy", true } },
         { "maximize stiffness", { "Internal Elastic Energy", true } },
         { "local stress", { "Stress Constraint Quadratic", false } },
         { "stress p-norm", { "Stress P-Norm", false } },
+        { "minimize stress", { "Stress P-Norm", false } },
         { "effective energy", { "Effective Energy", true } },
+        { "minimize effective energy", { "Effective Energy", true } },
         { "stress constrained mass minimization", { "Stress Constraint General", false } },
+        { "thermal energy", { "Internal Thermal Energy", false } },
         { "maximize heat conduction", { "Internal Thermal Energy", false } },
         { "flux p-norm", { "Flux P-Norm", false } },
-        { "thermo-elastic energy", { "Internal Thermoelastic Energy", false } },
-        { "electro-elastic energy", { "Internal Electroelastic Energy", false } }
+        { "minimize flux", { "Flux P-Norm", false } },
+        { "thermoelastic energy", { "Internal Thermoelastic Energy", false } },
+        { "minimize thermoelastic energy", { "Internal Thermoelastic Energy", false } },
+        { "electroelastic energy", { "Internal Electroelastic Energy", false } },
+        { "minimize electroelastic energy", { "Internal Electroelastic Energy", false } }
     };
 };
 // ValidAnalyzeCriteriaKeys

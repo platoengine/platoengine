@@ -5,6 +5,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGenerator.cpp
                       PlatoAnalyzeInputDeckWriter.cpp
                       DefaultInputGenerator.cpp
+                      XMLGeneratorParserUtilities.cpp
                       XMLGeneratorDefinesFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeUtilities.cpp
                       XMLGeneratorInterfaceFileUtilities.cpp
@@ -29,9 +30,9 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorDataStruct.hpp 
                       XMLGeneratorValidInputKeys.hpp
                       XMLGeneratorRandomMetadata.hpp
+                      XMLGeneratorParserUtilities.hpp 
                       XMLGeneratorMaterialMetadata.hpp 
                       XMLGeneratorBoundaryMetadata.hpp 
-                      DefaultInputGenerator.hpp 
                       XMLGeneratorPlatoAnalyzeProblem.hpp 
                       XMLGeneratorDefinesFileUtilities.hpp 
                       XMLGeneratorPlatoAnalyzeUtilities.hpp 
@@ -57,6 +58,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp
                       XMLGeneratorParser.hpp
+                      DefaultInputGenerator.hpp 
                       SalinasInputDeckWriter.hpp)
 
 find_package(MPI)

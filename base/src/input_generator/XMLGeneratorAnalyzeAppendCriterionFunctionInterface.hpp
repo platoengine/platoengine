@@ -41,35 +41,56 @@ private:
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("maximize stiffness",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
+        mMap.insert(std::make_pair("compliance",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // stress p-norm
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_pnorm_criterion<CriterionType>));
         mMap.insert(std::make_pair("stress p-norm",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_pnorm_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_pnorm_criterion<CriterionType>));
+        mMap.insert(std::make_pair("minimize stress",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_pnorm_criterion<CriterionType>, tFuncIndex)));
 
         // effective energy
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("effective energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
+        mMap.insert(std::make_pair("minimize effective energy",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // maximize heat conduction
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("maximize heat conduction",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
+        mMap.insert(std::make_pair("thermal energy",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // thermo-elastic energy
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
-        mMap.insert(std::make_pair("thermo-elastic energy",
+        mMap.insert(std::make_pair("thermoelastic energy",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
+        mMap.insert(std::make_pair("minimize thermoelastic energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // electro-elastic energy
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
-        mMap.insert(std::make_pair("electro-elastic energy",
+        mMap.insert(std::make_pair("electroelastic energy",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
+        mMap.insert(std::make_pair("minimize electroelastic energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // flux p-norm
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_pnorm_criterion<CriterionType>));
         mMap.insert(std::make_pair("flux p-norm",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_pnorm_criterion<CriterionType>, tFuncIndex)));
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_pnorm_criterion<CriterionType>));
+        mMap.insert(std::make_pair("minimize flux",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_pnorm_criterion<CriterionType>, tFuncIndex)));
     }
 

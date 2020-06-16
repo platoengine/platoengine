@@ -398,10 +398,10 @@ bool XMLGenerator::distributeObjectivesForGenerate()
     for(auto& tObjective : m_InputData.objectives)
     {
         auto tObjectiveIndex = &tObjective - &m_InputData.objectives[0];
-        const std::string thisObjective_distributeType = m_InputData.objectives[tObjectiveIndex].distribute_objective_type;
-        if(thisObjective_distributeType.empty())
+        auto tThisObjective_distributeType = XMLGen::to_lower(m_InputData.objectives[tObjectiveIndex].distribute_objective_type);
+        if( (tThisObjective_distributeType.compare("none") == 0) || tThisObjective_distributeType.empty())
         { /* no distribute; nothing to do for this objective.*/ }
-        else if(thisObjective_distributeType == "atmost")
+        else if(tThisObjective_distributeType == "atmost")
         {
             // distribute by "atmost" rule
 
