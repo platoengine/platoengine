@@ -198,6 +198,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setName
+     * \brief Set objective function's user assigned name.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setName(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("name");
@@ -207,6 +212,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setType
+     * \brief Set objective function's type, i.e. category.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setType(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("type");
@@ -220,6 +230,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setCode
+     * \brief Set code responsible for evaluating the objective function.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setCode(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("code");
@@ -233,6 +248,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNumRanks
+     * \brief Set number of ranks assign to the code responsible for evaluating the \n
+     * objective function.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setNumRanks(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("number ranks");
@@ -246,6 +267,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNumProcessors
+     * \brief Set number of processors assign to the code responsible for evaluating \n
+     * the objective function.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setNumProcessors(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("number processors");
@@ -259,6 +286,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setWeight
+     * \brief Set objective function weight.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setWeight(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("weight");
@@ -272,16 +304,17 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setPerformer
+     * \brief Set name of performer, objective function weight.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setPerformer(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("performer");
         if(tItr != mTags.end() && !tItr->second.second.empty())
         {
             aMetadata.mPerformerName = tItr->second.second;
-        }
-        else
-        {
-            aMetadata.mPerformerName = "plato_analyze";
         }
     }
 
@@ -525,14 +558,18 @@ private:
         }
     }
 
-    void checkPerformer(const XMLGen::Objective& aMetadata)
+    void checkPerformer(XMLGen::Objective& aMetadata)
     {
-        XMLGen::ValidPhysicsPerformerKeys tValidKeys;
-        if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.mPerformerName) == tValidKeys.mKeys.end())
+        if(aMetadata.mPerformerName.empty())
         {
-            std::ostringstream tMsg;
-            tMsg << "Parse Objective: 'performer' keyword '" << aMetadata.mPerformerName << "' is not supported. ";
-            THROWERR(tMsg.str().c_str())
+            aMetadata.mPerformerName = aMetadata.code_name;
+            XMLGen::ValidPhysicsPerformerKeys tValidKeys;
+            if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.mPerformerName) == tValidKeys.mKeys.end())
+            {
+                std::ostringstream tMsg;
+                tMsg << "Parse Objective: 'performer' keyword '" << aMetadata.mPerformerName << "' is not supported. ";
+                THROWERR(tMsg.str().c_str())
+            }
         }
     }
 
@@ -658,27 +695,6 @@ TEST(PlatoTestXMLGenerator, ParseObjective_ErrorDimMistmachNaturalBCArrays)
         "   type stress p-norm\n"
         "   load ids 10\n"
         "   load case weights 1 2\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidPerformer)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   performer ferrari\n"
-        "   load ids 10\n"
         "   boundary condition ids 11\n"
         "   code plato_analyze\n"
         "   number processors 1\n"
