@@ -62,7 +62,6 @@
 #include "XMLGenerator.hpp"
 
 #include "../optimize/Plato_SromXMLGenTools.hpp"
-#include "XMLGeneratorParser.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
@@ -75,6 +74,7 @@
 #include "DefaultInputGenerator.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
+#include "XMLGeneratorParseUncertainty.hpp"
 
 namespace XMLGen
 {

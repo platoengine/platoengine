@@ -24,6 +24,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                       XMLGeneratorUtilities.cpp
+                      XMLGeneratorParseUncertainty.cpp
                       SalinasInputDeckWriter.cpp)
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
@@ -57,7 +58,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorDataStruct.hpp
                       PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp
-                      XMLGeneratorParser.hpp
+                      XMLGeneratorParseUncertainty.hpp
                       DefaultInputGenerator.hpp 
                       SalinasInputDeckWriter.hpp)
 
