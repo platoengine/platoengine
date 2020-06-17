@@ -38,27 +38,6 @@ void ParseUncertainty::erase()
     }
 }
 
-void ParseUncertainty::parseMetadata(std::istream& aInputFile)
-{
-    constexpr int tMAX_CHARS_PER_LINE = 512;
-    std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
-    // found an uncertainty. parse it.
-    while (!aInputFile.eof())
-    {
-        std::vector<std::string> tTokens;
-        aInputFile.getline(tBuffer.data(), tMAX_CHARS_PER_LINE);
-        XMLGen::parse_tokens(tBuffer.data(), tTokens);
-        XMLGen::to_lower(tTokens);
-
-        std::string tTag;
-        if (XMLGen::parse_single_value(tTokens, std::vector<std::string> { "end", "uncertainty" }, tTag))
-        {
-            break;
-        }
-        XMLGen::parse_tag_values(tTokens, mTags);
-    }
-}
-
 void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
 {
     auto tItr = mTags.find("category");
@@ -280,7 +259,7 @@ void ParseUncertainty::parse(std::istream& aInputFile)
         {
             XMLGen::Uncertainty tMetadata;
             this->erase();
-            this->parseMetadata(aInputFile);
+            XMLGen::parse_input_metadata({"end","uncertainty"}, aInputFile, mTags);
             this->setMetadata(tMetadata);
             this->checkMetadata(tMetadata);
             mData.push_back(tMetadata);
