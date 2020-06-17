@@ -20,58 +20,6 @@
 namespace XMLGen
 {
 
-bool is_number(const std::string& aInput)
-{
-    auto tIsDigit = true;
-    for(auto tValue : aInput)
-    {
-        if(std::isdigit(tValue) == false)
-        {
-            tIsDigit = false;
-            break;
-        }
-    }
-    return tIsDigit;
-}
-
-void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower = true)
-{
-    std::istringstream tInputSS(aInput);
-    std::copy(std::istream_iterator<std::string>(tInputSS),
-              std::istream_iterator<std::string>(),
-              std::back_inserter(aOutput));
-
-    if(aToLower) { XMLGen::to_lower(aOutput); }
-}
-
-namespace Private
-{
-
-void parse_input_metadata
-(const std::vector<std::string>& aStopKeys,
- std::istream& aInputFile,
- XMLGen::UseCaseTags& aTags)
-{
-    constexpr int tMAX_CHARS_PER_LINE = 10000;
-    std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
-    while (!aInputFile.eof())
-    {
-        std::vector<std::string> tTokens;
-        aInputFile.getline(tBuffer.data(), tMAX_CHARS_PER_LINE);
-        XMLGen::parse_tokens(tBuffer.data(), tTokens);
-        XMLGen::to_lower(tTokens);
-
-        std::string tTag;
-        if (XMLGen::parse_single_value(tTokens, aStopKeys, tTag))
-        {
-            break;
-        }
-        XMLGen::parse_tag_values(tTokens, aTags);
-    }
-}
-
-}
-
 struct ValidCriterionKeys
 {
     /*!<
@@ -100,49 +48,6 @@ class ParseObjective
 private:
     XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
     std::vector<XMLGen::Objective> mData; /*!< objective functions metadata */
-
-public:
-    /******************************************************************************//**
-     * \fn data
-     * \brief Return objective functions metadata.
-     * \return container of objective functions and corresponding metadata
-    **********************************************************************************/
-    std::vector<XMLGen::Objective> data() const
-    {
-        return mData;
-    }
-
-    /******************************************************************************//**
-     * \fn parse
-     * \brief Parse objective functions metadata.
-     * \param [in] aInputFile parsed input file metadata
-    **********************************************************************************/
-    void parse(std::istream& aInputFile)
-    {
-        mData.clear();
-        this->allocate();
-        constexpr int MAX_CHARS_PER_LINE = 10000;
-        std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
-        while (!aInputFile.eof())
-        {
-            // read an entire line into memory
-            std::vector<std::string> tTokens;
-            aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
-            XMLGen::parse_tokens(tBuffer.data(), tTokens);
-            XMLGen::to_lower(tTokens);
-
-            std::string tTag;
-            if(XMLGen::parse_single_value(tTokens, {"begin","objective"}, tTag))
-            {
-                XMLGen::Objective tMetadata;
-                this->erase();
-                XMLGen::Private::parse_input_metadata({"end","objective"}, aInputFile, mTags);
-                this->setMetadata(tMetadata);
-                this->checkMetadata(tMetadata);
-                mData.push_back(tMetadata);
-            }
-        }
-    }
 
 private:
     /******************************************************************************//**
@@ -749,6 +654,49 @@ private:
         this->checkOutputForPlotting(aMetadata);
         this->checkDistributeObjective(aMetadata);
         this->checkEssentialBoundaryConditionIDs(aMetadata);
+    }
+
+public:
+    /******************************************************************************//**
+     * \fn data
+     * \brief Return objective functions metadata.
+     * \return container of objective functions and corresponding metadata
+    **********************************************************************************/
+    std::vector<XMLGen::Objective> data() const
+    {
+        return mData;
+    }
+
+    /******************************************************************************//**
+     * \fn parse
+     * \brief Parse objective functions metadata.
+     * \param [in] aInputFile parsed input file metadata
+    **********************************************************************************/
+    void parse(std::istream& aInputFile)
+    {
+        mData.clear();
+        this->allocate();
+        constexpr int MAX_CHARS_PER_LINE = 10000;
+        std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
+        while (!aInputFile.eof())
+        {
+            // read an entire line into memory
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer.data(), tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            if(XMLGen::parse_single_value(tTokens, {"begin","objective"}, tTag))
+            {
+                XMLGen::Objective tMetadata;
+                this->erase();
+                XMLGen::parse_input_metadata({"end","objective"}, aInputFile, mTags);
+                this->setMetadata(tMetadata);
+                this->checkMetadata(tMetadata);
+                mData.push_back(tMetadata);
+            }
+        }
     }
 };
 

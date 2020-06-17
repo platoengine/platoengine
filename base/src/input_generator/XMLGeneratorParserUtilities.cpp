@@ -13,6 +13,29 @@
 namespace XMLGen
 {
 
+void parse_input_metadata
+(const std::vector<std::string>& aStopKeys,
+ std::istream& aInputFile,
+ XMLGen::UseCaseTags& aTags)
+{
+    constexpr int tMAX_CHARS_PER_LINE = 10000;
+    std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
+    while (!aInputFile.eof())
+    {
+        std::vector<std::string> tTokens;
+        aInputFile.getline(tBuffer.data(), tMAX_CHARS_PER_LINE);
+        XMLGen::parse_tokens(tBuffer.data(), tTokens);
+        XMLGen::to_lower(tTokens);
+
+        std::string tTag;
+        if (XMLGen::parse_single_value(tTokens, aStopKeys, tTag))
+        {
+            break;
+        }
+        XMLGen::parse_tag_values(tTokens, aTags);
+    }
+}
+
 bool parse_single_value
 (const std::vector<std::string> &aTokens,
  const std::vector<std::string> &aTarget,
@@ -154,5 +177,31 @@ void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTa
     }
 }
 // function parse_tag_values
+
+bool is_number(const std::string& aInput)
+{
+    auto tIsDigit = true;
+    for(auto tValue : aInput)
+    {
+        if(std::isdigit(tValue) == false)
+        {
+            tIsDigit = false;
+            break;
+        }
+    }
+    return tIsDigit;
+}
+// function is_number
+
+void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower)
+{
+    std::istringstream tInputSS(aInput);
+    std::copy(std::istream_iterator<std::string>(tInputSS),
+              std::istream_iterator<std::string>(),
+              std::back_inserter(aOutput));
+
+    if(aToLower) { XMLGen::to_lower(aOutput); }
+}
+// function split
 
 }
