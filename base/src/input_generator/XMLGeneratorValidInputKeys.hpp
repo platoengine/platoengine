@@ -7,6 +7,8 @@
 #pragma once
 
 
+#include <vector>
+#include <string>
 #include <unordered_map>
 
 namespace XMLGen
@@ -33,7 +35,7 @@ struct ValidOutputKeys
     std::vector<std::string> mKeys =
         {"vonmises", "dispx", "dispy", "dispz", "temperature", "accumulated_plastic_strain", "potential"};
 };
-// struct ValidCriterionKeys
+// struct ValidOutputKeys
 
 struct ValidAxesKeys
 {
@@ -203,11 +205,11 @@ struct ValidAnalyzeCriteriaKeys
 };
 // ValidAnalyzeCriteriaKeys
 
-/*!<
- * \brief Valid plato problem spatial dimensions.
- **/
 struct ValidSpatialDimsKeys
 {
+    /*!<
+     * \brief Valid plato problem spatial dimensions.
+     **/
     std::vector<std::string> mKeys = { "3", "2" };
 };
 // struct ValidSpatialDimsKeys

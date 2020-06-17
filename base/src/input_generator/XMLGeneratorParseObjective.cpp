@@ -1,0 +1,497 @@
+/*
+ * XMLGeneratorParseObjective.cpp
+ *
+ *  Created on: Jun 17, 2020
+ */
+
+#include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorParseObjective.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
+
+namespace XMLGen
+{
+
+void ParseObjective::allocate()
+{
+    mTags.clear();
+
+    mTags.insert({ "type", { {"type"}, "" } });
+    mTags.insert({ "code", { {"code"}, "" } });
+    mTags.insert({ "name", { {"name"}, "" } });
+    mTags.insert({ "weight", { {"weight"}, "" } });
+    mTags.insert({ "load ids", { {"load", "ids"}, "" } });
+    mTags.insert({ "stress limit", { {"stress","limit"}, "" } });
+    mTags.insert({ "ls tet type", { {"ls","tet","type"}, "" } });
+    mTags.insert({ "number ranks", { {"number", "ranks"}, "" } });
+    mTags.insert({ "multi load case", { {"multi","load","case"}, "" } });
+    mTags.insert({ "number processors", { {"number", "processors"}, "" } });
+    mTags.insert({ "load case weights", { {"load","case","weights"}, "" } });
+    mTags.insert({ "normalize objective", { {"normalize","objective"}, "" } });
+    mTags.insert({ "frf match nodesets", { {"frf","match","nodesets"}, "" } });
+    mTags.insert({ "reference frf file", { {"reference","frf","file"}, "" } });
+    mTags.insert({ "distribute objective", { {"distribute","objective"}, "" } });
+    mTags.insert({ "output for plotting", { {"output", "for", "plotting"}, "" } });
+    mTags.insert({ "raleigh damping beta", { {"raleigh","damping","beta"}, "" } });
+    mTags.insert({ "raleigh damping alpha", { {"raleigh","damping","alpha"}, "" } });
+    mTags.insert({ "relative stress limit", { {"relative","stress","limit"}, "" } });
+    mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
+    mTags.insert({ "complex error measure", { {"complex","error","measure"}, "" } });
+    mTags.insert({ "boundary condition ids", { {"boundary","condition", "ids"}, "" } });
+    mTags.insert({ "weightmass scale factor", { {"weightmass","scale","factor"}, "" } });
+    mTags.insert({ "scmm constraint exponent", { {"scmm", "constraint", "exponent"}, "" } });
+    mTags.insert({ "analysis solver tolerance", { {"analysis","solver","tolerance"}, "" } });
+    mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
+
+    mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
+    mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
+    mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
+}
+
+void ParseObjective::erase()
+{
+    for (auto &tTag : mTags)
+    {
+        tTag.second.second.clear();
+    }
+}
+
+void ParseObjective::setName(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("name");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.name = tItr->second.second;
+    }
+}
+
+void ParseObjective::setType(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("type");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.type = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.type = "compliance";
+    }
+}
+
+void ParseObjective::setCode(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("code");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.code_name = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.code_name = "plato_analyze";
+    }
+}
+
+void ParseObjective::setNumRanks(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("number ranks");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.num_ranks = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.num_ranks = "1";
+    }
+}
+
+void ParseObjective::setNumProcessors(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("number processors");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.num_procs = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.num_procs = "1";
+    }
+}
+
+void ParseObjective::setWeight(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("weight");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.weight = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.weight = "1.0";
+    }
+}
+
+void ParseObjective::setPenaltyPower(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("penalty power");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.mPenaltyParam = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.mPenaltyParam = "3.0";
+    }
+}
+
+void ParseObjective::setPnormExponent(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("pnorm exponent");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.mPnormExponent = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.mPnormExponent = "6.0";
+    }
+}
+
+void ParseObjective::setNormalizeObjective(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("normalize objective");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.normalize_objective = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.normalize_objective = "true";
+    }
+}
+
+void ParseObjective::setMinimumErsatzValue(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("minimum ersatz material value");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.mMinimumErsatzValue = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.mMinimumErsatzValue = "1e-9";
+    }
+}
+
+void ParseObjective::setAnalysisSolverTolerance(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("analysis solver tolerance");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.analysis_solver_tolerance = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.analysis_solver_tolerance = "1e-7";
+    }
+}
+
+void ParseObjective::setNaturalBoundaryConditionsCaseIDs(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("load ids");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tItr->second.second, tTokens);
+        for (auto &tToken : tTokens)
+        {
+            aMetadata.load_case_ids.push_back(tToken);
+        }
+    }
+}
+
+void ParseObjective::setNaturalBoundaryConditionsCaseWeights(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("load case weights");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tItr->second.second, tTokens);
+        for (auto &tToken : tTokens)
+        {
+            aMetadata.load_case_weights.push_back(tToken);
+        }
+    }
+}
+
+void ParseObjective::setEssentialBoundaryConditionsCaseIDs(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("boundary condition ids");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tItr->second.second, tTokens);
+        for (auto &tToken : tTokens)
+        {
+            aMetadata.bc_ids.push_back(tToken);
+        }
+    }
+}
+
+void ParseObjective::setFrequencyResponseFunctionMatchNodesets(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("frf match nodesets");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tItr->second.second, tTokens);
+        for (auto &tToken : tTokens)
+        {
+            aMetadata.frf_match_nodesets.push_back(tToken);
+        }
+    }
+}
+
+void ParseObjective::setOutputForPlotting(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("output for plotting");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tItr->second.second, tTokens);
+        for (auto &tToken : tTokens)
+        {
+            aMetadata.output_for_plotting.push_back(tToken);
+        }
+    }
+}
+
+void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
+{
+    // original token names: distribute objective at most {number} processors
+    // token index: 0          1         2  3    4        5
+    // split token names: at most {number} processors
+    // token index:       0  1    2        3
+    auto tOuterItr = mTags.find("distribute objective");
+    if (tOuterItr != mTags.end() && !tOuterItr->second.second.empty())
+    {
+        std::vector<std::string> tTokens;
+        XMLGen::split(tOuterItr->second.second, tTokens);
+        auto tInnerItr = std::find(tTokens.begin(), tTokens.end(), "none");
+        if (tInnerItr != tTokens.end())
+        {
+            aMetadata.multi_load_case = "false";
+            aMetadata.distribute_objective_type = "none";
+        }
+        else
+        {
+            if (tTokens.size() < 4u)
+            {
+                THROWERR(
+                    "Parse Objective: 'atmost' distributed objective expects at least six input tokens, " + "e.g. expects 'distribute objective at most {number} processors' input keyword. Replace " + "'{number}' with an integer denoting the number of available processors.")
+            }
+
+            auto tItrOne = std::find(tTokens.begin(), tTokens.end(), "at");
+            auto tItrTwo = std::find(tTokens.begin(), tTokens.end(), "most");
+            if ((tItrOne != tTokens.end()) && (tItrTwo != tTokens.end()))
+            {
+                aMetadata.multi_load_case = "true";
+                aMetadata.distribute_objective_type = "atmost";
+                aMetadata.atmost_total_num_processors = tTokens[2];
+            }
+        }
+    }
+    else
+    {
+        aMetadata.distribute_objective_type = "none";
+    }
+}
+
+void ParseObjective::setMetadata(XMLGen::Objective &aMetadata)
+{
+    this->setType(aMetadata);
+    this->setName(aMetadata);
+    this->setWeight(aMetadata);
+    this->setPenaltyPower(aMetadata);
+    this->setPnormExponent(aMetadata);
+    this->setNormalizeObjective(aMetadata);
+    this->setMinimumErsatzValue(aMetadata);
+    aMetadata.stress_limit = mTags.find("stress limit")->second.second;
+    aMetadata.scmm_initial_penalty = mTags.find("scmm initial penalty")->second.second;
+    aMetadata.complex_error_measure = mTags.find("complex error measure")->second.second;
+    aMetadata.relative_stress_limit = mTags.find("relative stress limit")->second.second;
+    aMetadata.scmm_constraint_exponent = mTags.find("scmm constraint exponent")->second.second;
+    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm penalty expansion factor")->second.second;
+
+    // scenario info
+    this->setCode(aMetadata);
+    this->setNumRanks(aMetadata);
+    this->setNumProcessors(aMetadata);
+    this->setAnalysisSolverTolerance(aMetadata);
+    this->setDistributeObjectiveType(aMetadata);
+    aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.second;
+    aMetadata.ref_frf_file = mTags.find("reference frf file")->second.second;
+    aMetadata.raleigh_damping_beta = mTags.find("raleigh damping beta")->second.second;
+    aMetadata.raleigh_damping_alpha = mTags.find("raleigh damping alpha")->second.second;
+    aMetadata.wtmass_scale_factor = mTags.find("weightmass scale factor")->second.second;
+
+    // array info, plus these should be inside the scenario block, excluding the output for plotting
+    this->setOutputForPlotting(aMetadata);
+    this->setNaturalBoundaryConditionsCaseIDs(aMetadata);
+    this->setEssentialBoundaryConditionsCaseIDs(aMetadata);
+    this->setNaturalBoundaryConditionsCaseWeights(aMetadata);
+    this->setFrequencyResponseFunctionMatchNodesets(aMetadata);
+}
+
+void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
+{
+    XMLGen::ValidCriterionKeys tValidKeys;
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.type);
+    if (tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Parse Objective: 'type' keyword '") + aMetadata.type + "' is not supported. ")
+    }
+}
+
+void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
+{
+    XMLGen::ValidPhysicsPerformerKeys tValidKeys;
+    if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
+    {
+        std::ostringstream tMsg;
+        tMsg << "Parse Objective: 'code' keyword '" << aMetadata.code_name << "' is not supported. ";
+        THROWERR(tMsg.str().c_str())
+    }
+}
+
+void ParseObjective::checkPerformer(XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.mPerformerName.empty())
+    {
+        aMetadata.mPerformerName = aMetadata.code_name;
+        XMLGen::ValidPhysicsPerformerKeys tValidKeys;
+        if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.mPerformerName) == tValidKeys.mKeys.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Objective: 'performer' keyword '" << aMetadata.mPerformerName << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+}
+
+void ParseObjective::checkLoadCases(XMLGen::Objective &aMetadata)
+{
+    this->checkLoadCaseIDs(aMetadata);
+    this->checkLoadCaseWeights(aMetadata);
+    this->checkMultiLoadCaseFlag(aMetadata);
+    if (aMetadata.load_case_ids.size() != aMetadata.load_case_weights.size())
+    {
+        THROWERR(
+            std::string("Parse Objective: Length mismatch in load case ids and weights. Check that the 'load_case_ids'") + " and 'load_case_weights' keywords have the same number of inputs.")
+    }
+}
+
+void ParseObjective::checkMultiLoadCaseFlag(XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.distribute_objective_type.compare("none") == 0)
+    {
+        aMetadata.multi_load_case = "false";
+    }
+}
+
+void ParseObjective::checkLoadCaseIDs(const XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.load_case_ids.empty())
+    {
+        THROWERR("Parse Objective: 'load case ids' keyword is empty, at least one load case id should be defined.")
+    }
+}
+
+void ParseObjective::checkLoadCaseWeights(XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.load_case_weights.empty())
+    {
+        for (auto tItr = aMetadata.load_case_ids.begin(); tItr != aMetadata.load_case_ids.end(); ++tItr)
+        {
+            aMetadata.load_case_weights.push_back("1.0");
+        }
+    }
+}
+
+void ParseObjective::checkEssentialBoundaryConditionIDs(const XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.bc_ids.empty())
+    {
+        THROWERR("Parse Objective: 'boundary condition ids' keyword is empty, at least one essential boundary condition id should be defined.")
+    }
+}
+
+void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutputKeys)
+{
+    XMLGen::ValidOutputKeys tValidKeys;
+    for (auto &tToken : ValidOutputKeys.output_for_plotting)
+    {
+        if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tToken) == tValidKeys.mKeys.end())
+        {
+            std::ostringstream tMsg;
+            tMsg << "Parse Objective: 'output' keyword '" << tToken << "' is not supported. ";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+}
+
+void ParseObjective::checkDistributeObjective(const XMLGen::Objective &aMetadata)
+{
+    if (aMetadata.distribute_objective_type.compare("atmost") == 0)
+    {
+        if (!XMLGen::is_number(aMetadata.atmost_total_num_processors))
+        {
+            THROWERR("Parse Objective: distributed objective is of type 'at most' and the number of processors is not a finite number.")
+        }
+    }
+}
+
+void ParseObjective::checkMetadata(XMLGen::Objective &aMetadata)
+{
+    this->checkType(aMetadata);
+    this->checkCode(aMetadata);
+    this->checkPerformer(aMetadata);
+    this->checkLoadCases(aMetadata);
+    this->checkMultiLoadCaseFlag(aMetadata);
+    this->checkOutputForPlotting(aMetadata);
+    this->checkDistributeObjective(aMetadata);
+    this->checkEssentialBoundaryConditionIDs(aMetadata);
+}
+
+std::vector<XMLGen::Objective> ParseObjective::data() const
+{
+    return mData;
+}
+
+void ParseObjective::parse(std::istream &aInputFile)
+{
+    mData.clear();
+    this->allocate();
+    constexpr int MAX_CHARS_PER_LINE = 10000;
+    std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
+    while (!aInputFile.eof())
+    {
+        // read an entire line into memory
+        std::vector<std::string> tTokens;
+        aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
+        XMLGen::parse_tokens(tBuffer.data(), tTokens);
+        XMLGen::to_lower(tTokens);
+
+        std::string tTag;
+        if (XMLGen::parse_single_value(tTokens, { "begin", "objective" }, tTag))
+        {
+            XMLGen::Objective tMetadata;
+            this->erase();
+            XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
+            this->setMetadata(tMetadata);
+            this->checkMetadata(tMetadata);
+            mData.push_back(tMetadata);
+        }
+    }
+}
+
+}
+// namespace XMLGen
