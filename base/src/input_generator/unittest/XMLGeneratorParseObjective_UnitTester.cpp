@@ -20,6 +20,20 @@
 namespace XMLGen
 {
 
+bool is_number(const std::string& aInput)
+{
+    auto tIsDigit = true;
+    for(auto tValue : aInput)
+    {
+        if(std::isdigit(tValue) == false)
+        {
+            tIsDigit = false;
+            break;
+        }
+    }
+    return tIsDigit;
+}
+
 void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower = true)
 {
     std::istringstream tInputSS(aInput);
@@ -587,16 +601,9 @@ private:
     {
         if(aMetadata.distribute_objective_type.compare("atmost") == 0)
         {
-            if(aMetadata.atmost_total_num_processors.empty())
+            if(!XMLGen::is_number(aMetadata.atmost_total_num_processors))
             {
-                THROWERR("Parse Objective: distributed objective is of type 'at most' and the number of processors is empty.")
-            }
-
-            if(aMetadata.multi_load_case.compare("true") != 0)
-            {
-                THROWERR("Parse Objective: Parsed input is ambiguous.\n"
-                    + "Distributed objectives must have \"multi load case true\".\n"
-                    + "Or set \"distribute objective none\".\n")
+                THROWERR("Parse Objective: distributed objective is of type 'at most' and the number of processors is not a finite number.")
             }
         }
     }
@@ -756,6 +763,27 @@ TEST(PlatoTestXMLGenerator, ParseObjective_ErrorEmptyEssentialBCIDs)
         "   weight 1.0\n"
         "   number ranks 1\n"
         "   output for plotting DISpx dispy dispz\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNumProcessorIsNotNumber)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type compliance\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1.0\n"
+        "   number ranks 1\n"
+        "   output for plotting DISpx dispy dispz\n"
+        "   distribute objective at most P3 processors\n"
         "end objective\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
