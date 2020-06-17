@@ -254,8 +254,7 @@ void ParseUncertainty::parse(std::istream& aInputFile)
         XMLGen::to_lower(tTokens);
 
         std::string tTag;
-        std::vector<std::string> tMatchTokens;
-        if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","uncertainty"}, tTag))
+        if(XMLGen::parse_single_value(tTokens, {"begin","uncertainty"}, tTag))
         {
             XMLGen::Uncertainty tMetadata;
             this->erase();
