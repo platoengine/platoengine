@@ -471,9 +471,6 @@ private:
         this->setNumProcessors(aMetadata);
         this->setAnalysisSolverTolerance(aMetadata);
         this->setDistributeObjectiveType(aMetadata);
-        aMetadata.freq_min = mTags.find("freq min")->second.second;
-        aMetadata.freq_max = mTags.find("freq max")->second.second;
-        aMetadata.freq_step = mTags.find("freq step")->second.second;
         aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.second;
         aMetadata.ref_frf_file = mTags.find("reference frf file")->second.second;
         aMetadata.raleigh_damping_beta = mTags.find("raleigh damping beta")->second.second;
@@ -629,6 +626,26 @@ TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCriterion)
         "   load ids 10\n"
         "   boundary condition ids 11\n"
         "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1.0\n"
+        "   number ranks 1\n"
+        "   output for plotting DISpx dispy dispz\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCode)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type compliance\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code dog\n"
         "   number processors 1\n"
         "   weight 1.0\n"
         "   number ranks 1\n"
