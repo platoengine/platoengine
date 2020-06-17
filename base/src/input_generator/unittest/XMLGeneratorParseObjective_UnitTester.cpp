@@ -20,29 +20,6 @@
 namespace XMLGen
 {
 
-struct ValidCriterionKeys
-{
-    /*!<
-     * \brief Valid plato xml generator parser criterion keys.
-     **/
-    std::vector<std::string> mKeys =
-        {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
-         "volume", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
-         "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
-         "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
-};
-// struct ValidCriterionKeys
-
-struct ValidOutputKeys
-{
-    /*!<
-     * \brief Valid plato xml generator parser output keys.
-     **/
-    std::vector<std::string> mKeys =
-        {"vonmises", "dispx", "dispy", "dispz", "temperature", "accumulated_plastic_strain", "potential"};
-};
-// struct ValidCriterionKeys
-
 class ParseObjective
 {
 private:
