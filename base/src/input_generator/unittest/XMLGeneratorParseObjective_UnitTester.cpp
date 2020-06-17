@@ -180,7 +180,6 @@ private:
         mTags.insert({ "analysis solver tolerance", { {"analysis","solver","tolerance"}, "" } });
         mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
 
-        mTags.insert({ "performer", { {"performer"}, "" } });
         mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
         mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
         mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
@@ -305,19 +304,10 @@ private:
     }
 
     /******************************************************************************//**
-     * \fn setPerformer
-     * \brief Set name of performer, objective function weight.
+     * \fn setPenaltyPower
+     * \brief Set exponent for material density penalty function.
      * \param [in/out] aInputFile parsed input file metadata
     **********************************************************************************/
-    void setPerformer(XMLGen::Objective& aMetadata)
-    {
-        auto tItr = mTags.find("performer");
-        if(tItr != mTags.end() && !tItr->second.second.empty())
-        {
-            aMetadata.mPerformerName = tItr->second.second;
-        }
-    }
-
     void setPenaltyPower(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("penalty power");
@@ -331,6 +321,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setPnormExponent
+     * \brief Set p-norm exponent.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setPnormExponent(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("pnorm exponent");
@@ -344,6 +339,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNormalizeObjective
+     * \brief Set normalize objective function flag.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setNormalizeObjective(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("normalize objective");
@@ -357,6 +357,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setMinimumErsatzValue
+     * \brief Set minimum Ersatz material parameter used in material density penalty function.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setMinimumErsatzValue(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("minimum ersatz material value");
@@ -370,6 +375,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setAnalysisSolverTolerance
+     * \brief Set solver tolerance for solver use to solve the finite element system of equations.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setAnalysisSolverTolerance(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("analysis solver tolerance");
@@ -383,6 +393,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNaturalBoundaryConditionsCaseIDs
+     * \brief Set identification numbers associated with each natural boundary condition case.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setNaturalBoundaryConditionsCaseIDs(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("load ids");
@@ -397,6 +412,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNaturalBoundaryConditionsCaseIDs
+     * \brief Set weights associated with each natural boundary conditions.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setNaturalBoundaryConditionsCaseWeights(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("load case weights");
@@ -411,6 +431,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setNaturalBoundaryConditionsCaseIDs
+     * \brief Set identification numbers associated with the essential boundary conditions.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setEssentialBoundaryConditionsCaseIDs(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("boundary condition ids");
@@ -439,6 +464,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setOutputForPlotting
+     * \brief Set keywords for output quantities of interests.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setOutputForPlotting(XMLGen::Objective& aMetadata)
     {
         auto tItr = mTags.find("output for plotting");
@@ -453,6 +483,13 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn setDistributeObjectiveType
+     * \brief Set parameters used to identify if we are running multiple performers in \n
+     * using the multiple program, multiple data parallel programming model as well as
+     * the number of processors used for each criterion use case.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
     void setDistributeObjectiveType(XMLGen::Objective& aMetadata)
     {
         // original token names: distribute objective at most {number} processors
@@ -505,7 +542,6 @@ private:
         this->setType(aMetadata);
         this->setName(aMetadata);
         this->setWeight(aMetadata);
-        this->setPerformer(aMetadata);
         this->setPenaltyPower(aMetadata);
         this->setPnormExponent(aMetadata);
         this->setNormalizeObjective(aMetadata);
@@ -537,6 +573,11 @@ private:
         this->setFrequencyResponseFunctionMatchNodesets(aMetadata);
     }
 
+    /******************************************************************************//**
+     * \fn checkType
+     * \brief Throw error if input objective function category is not supported.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkType(const XMLGen::Objective& aMetadata)
     {
         XMLGen::ValidCriterionKeys tValidKeys;
@@ -547,6 +588,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkCode
+     * \brief Throw error if simulation code is not supported.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkCode(const XMLGen::Objective& aMetadata)
     {
         XMLGen::ValidPhysicsPerformerKeys tValidKeys;
@@ -558,6 +604,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkPerformer
+     * \brief Check if performer keyword is empty, if empty, set to the code name. \n
+     * Furthermore, check if simulation code is supported, if not, throw error.
+     * \param [in/out] aMetadata objective metadata
+    **********************************************************************************/
     void checkPerformer(XMLGen::Objective& aMetadata)
     {
         if(aMetadata.mPerformerName.empty())
@@ -573,6 +625,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkLoadCases
+     * \brief Throw error if load cases are not properly defined.
+     * \param [in/out] aMetadata objective metadata
+    **********************************************************************************/
     void checkLoadCases(XMLGen::Objective& aMetadata)
     {
         this->checkLoadCaseIDs(aMetadata);
@@ -585,6 +642,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkMultiLoadCaseFlag
+     * \brief Check if multi-laod case flag has been properly set.
+     * \param [in/out] aMetadata objective metadata
+    **********************************************************************************/
     void checkMultiLoadCaseFlag(XMLGen::Objective& aMetadata)
     {
         if(aMetadata.distribute_objective_type.compare("none") == 0)
@@ -593,6 +655,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkLoadCaseIDs
+     * \brief Throw error if list of natural boundary conditions identification numbers is empty.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkLoadCaseIDs(const XMLGen::Objective& aMetadata)
     {
         if (aMetadata.load_case_ids.empty())
@@ -601,6 +668,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkLoadCaseWeights
+     * \brief Set weights associated with each natural boundary condition case to 1.0 \n
+     * if not defined in the input file.
+     * \param [in/out] aMetadata objective metadata
+    **********************************************************************************/
     void checkLoadCaseWeights(XMLGen::Objective& aMetadata)
     {
         if (aMetadata.load_case_weights.empty())
@@ -612,6 +685,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkEssentialBoundaryConditionIDs
+     * \brief Throw error if list of essential boundary conditions identification numbers is empty.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkEssentialBoundaryConditionIDs(const XMLGen::Objective& aMetadata)
     {
         if (aMetadata.bc_ids.empty())
@@ -620,6 +698,11 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkEssentialBoundaryConditionIDs
+     * \brief Throw error if output keyword is not supported.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkOutputForPlotting(const XMLGen::Objective& ValidOutputKeys)
     {
         XMLGen::ValidOutputKeys tValidKeys;
@@ -634,6 +717,12 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * \fn checkDistributeObjective
+     * \brief Throw error if number of processors assigned to distributed objective \n
+     * use case is not a finite number.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
     void checkDistributeObjective(const XMLGen::Objective& aMetadata)
     {
         if(aMetadata.distribute_objective_type.compare("atmost") == 0)
