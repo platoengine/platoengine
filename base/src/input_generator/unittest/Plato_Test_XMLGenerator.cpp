@@ -115,7 +115,7 @@ private:
         mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
         mTags.insert({ "stress favor updates", { {"stress", "favor", "updates"}, "" } });
         mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
-        mTags.insert({ "stress p norm power", { {"stress", "p", "norm", "power"}, "" } });
+        mTags.insert({ "stress p-norm power", { {"stress", "p", "norm", "power"}, "" } });
         mTags.insert({ "raleigh damping beta", { {"raleigh", "damping", "beta"}, "" } });
         mTags.insert({ "raleigh damping alpha", { {"raleigh", "damping", "alpha"}, "" } });
         mTags.insert({ "complex error measure", { {"complex", "error", "measure"}, "" } });
@@ -4091,26 +4091,26 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.publicParseObjectives(iss), false);
     tester.clearInputData();
 
-    // Test the "stress p norm"
+    // Test the "stress p-norm"
     stringInput = "begin objective\n"
-            "type stress p norm\n"
+            "type stress p-norm\n"
             "stress limit 39.5\n"
             "stress ramp factor 0.22\n"
-            "stress p norm power 7\n"
+            "stress p-norm power 7\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].type, "stress p norm");
+    EXPECT_EQ(tester.exposeInputData()->objectives[0].type, "stress p-norm");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_limit, "39.5");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_ramp_factor, "0.22");
     EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_p_norm_power, "7");
     tester.clearInputData();
 
     stringInput = "begin objective\n"
-            "type stress p norm\n"
-            "stress p norm power\n"
+            "type stress p-norm\n"
+            "stress p-norm power\n"
             "end objective\n";
     iss.str(stringInput);
     iss.clear();
@@ -4119,7 +4119,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     tester.clearInputData();
 
     stringInput = "begin objective\n"
-            "type stress p norm\n"
+            "type stress p-norm\n"
             "stress ramp factor\n"
             "end objective\n";
     iss.str(stringInput);
