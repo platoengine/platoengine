@@ -30,6 +30,9 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
     if(aToLower) { XMLGen::to_lower(aOutput); }
 }
 
+namespace Private
+{
+
 void parse_input_metadata
 (const std::vector<std::string>& aStopKeys,
  std::istream& aInputFile,
@@ -51,6 +54,8 @@ void parse_input_metadata
         }
         XMLGen::parse_tag_values(tTokens, aTags);
     }
+}
+
 }
 
 struct ValidCriterionKeys
@@ -117,7 +122,7 @@ public:
             {
                 XMLGen::Objective tMetadata;
                 this->erase();
-                XMLGen::parse_input_metadata({"end","objective"}, aInputFile, mTags);
+                XMLGen::Private::parse_input_metadata({"end","objective"}, aInputFile, mTags);
                 this->setMetadata(tMetadata);
                 this->checkMetadata(tMetadata);
                 mData.push_back(tMetadata);
@@ -524,7 +529,8 @@ private:
         this->checkMultiLoadCaseFlag(aMetadata);
         if(aMetadata.load_case_ids.size() != aMetadata.load_case_weights.size())
         {
-            THROWERR("Parse Objective: Length mismatch in load case ids and weights.")
+            THROWERR(std::string("Parse Objective: Length mismatch in load case ids and weights. Check that the 'load_case_ids'") +
+                " and 'load_case_weights' keywords have the same number of inputs.")
         }
     }
 
@@ -623,6 +629,48 @@ TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCriterion)
     std::string tStringInput =
         "begin objective\n"
         "   type hippo\n"
+        "   load ids 10\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1.0\n"
+        "   number ranks 1\n"
+        "   output for plotting DISpx dispy dispz\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorDimMistmachNaturalBCArrays)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type stress p-norm\n"
+        "   load ids 10\n"
+        "   load case weights 1 2\n"
+        "   boundary condition ids 11\n"
+        "   code plato_analyze\n"
+        "   number processors 1\n"
+        "   weight 1.0\n"
+        "   number ranks 1\n"
+        "   output for plotting DISpx dispy dispz\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidPerformer)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "   type compliance\n"
+        "   performer ferrari\n"
         "   load ids 10\n"
         "   boundary condition ids 11\n"
         "   code plato_analyze\n"
