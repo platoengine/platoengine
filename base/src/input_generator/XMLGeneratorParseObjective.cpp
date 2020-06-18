@@ -373,9 +373,7 @@ void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
     XMLGen::ValidPhysicsPerformerKeys tValidKeys;
     if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
     {
-        std::ostringstream tMsg;
-        tMsg << "Parse Objective: 'code' keyword '" << aMetadata.code_name << "' is not supported. ";
-        THROWERR(tMsg.str().c_str())
+        THROWERR(std::string("Parse Objective: 'code' keyword '") + aMetadata.code_name + "' is not supported. ")
     }
 }
 
@@ -387,9 +385,7 @@ void ParseObjective::checkPerformer(XMLGen::Objective &aMetadata)
         XMLGen::ValidPhysicsPerformerKeys tValidKeys;
         if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.mPerformerName) == tValidKeys.mKeys.end())
         {
-            std::ostringstream tMsg;
-            tMsg << "Parse Objective: 'performer' keyword '" << aMetadata.mPerformerName << "' is not supported. ";
-            THROWERR(tMsg.str().c_str())
+            THROWERR(std::string("Parse Objective: 'performer' keyword '") + aMetadata.mPerformerName + "' is not supported. ")
         }
     }
 }
@@ -401,8 +397,8 @@ void ParseObjective::checkLoadCases(XMLGen::Objective &aMetadata)
     this->checkMultiLoadCaseFlag(aMetadata);
     if (aMetadata.load_case_ids.size() != aMetadata.load_case_weights.size())
     {
-        THROWERR(
-            std::string("Parse Objective: Length mismatch in load case ids and weights. Check that the 'load_case_ids'") + " and 'load_case_weights' keywords have the same number of inputs.")
+        THROWERR(std::string("Parse Objective: Length mismatch in load case ids and weights. Check that the 'load_case_ids'")
+            + " and 'load_case_weights' keywords have the same number of inputs.")
     }
 }
 
@@ -448,9 +444,7 @@ void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutput
     {
         if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tToken) == tValidKeys.mKeys.end())
         {
-            std::ostringstream tMsg;
-            tMsg << "Parse Objective: 'output' keyword '" << tToken << "' is not supported. ";
-            THROWERR(tMsg.str().c_str())
+            THROWERR(std::string("Parse Objective: 'output' keyword '") + tToken + "' is not supported. ")
         }
     }
 }

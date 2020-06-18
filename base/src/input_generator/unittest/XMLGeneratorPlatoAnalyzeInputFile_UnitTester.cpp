@@ -65,8 +65,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     tXMLMetaData.objectives.push_back(tObjective);
     tXMLMetaData.constraints.push_back(tConstraint);
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "3";
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    tXMLMetaData.mScenarios.mSpatialDims = "3";
+    tXMLMetaData.mScenarios.mPhysics = "mechanical";
 
     // CALL FUNCTION
     XMLGen::write_plato_analyze_input_deck_file(tXMLMetaData);
@@ -1160,7 +1160,7 @@ TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInput
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
+    tXMLMetaData.mScenarios.mPhysics = "mechanical";
     ASSERT_NO_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tPDE = tDocument.child("ParameterList");
@@ -1188,7 +1188,7 @@ TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInput
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    tXMLMetaData.mScenarios.mPhysics = "computational fluid dynamics";
     ASSERT_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -1196,8 +1196,8 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendPa
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    tXMLMetaData.mScenarios.mPhysics = "mechanical";
+    tXMLMetaData.mScenarios.mSpatialDims = "2";
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
     tObjective.mPerformerName = "sierra";
@@ -1213,8 +1213,8 @@ TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendP
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    tXMLMetaData.mScenarios.mPhysics = "mechanical";
+    tXMLMetaData.mScenarios.mSpatialDims = "2";
     XMLGen::Constraint tConstraint;
     tConstraint.type = "maximize stiffness";
     tConstraint.mPerformerName = "sierra";
@@ -1246,7 +1246,7 @@ TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorInvali
 TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    tXMLMetaData.mScenarios.mPhysics = "computational fluid dynamics";
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_pde_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1254,7 +1254,7 @@ TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInva
 TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "computational fluid dynamics";
+    tXMLMetaData.mScenarios.mPhysics = "computational fluid dynamics";
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_physics_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1262,7 +1262,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhy
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorInvalidSpatialDim)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "1";
+    tXMLMetaData.mScenarios.mSpatialDims = "1";
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1270,7 +1270,7 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorEmptyMeshFile)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    tXMLMetaData.mScenarios.mSpatialDims = "2";
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1466,7 +1466,7 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    tXMLMetaData.mScenarios.mSpatialDims = "2";
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
@@ -1496,8 +1496,8 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mPhysicsMetaData.mPhysics = "mechanical";
-    tXMLMetaData.mPhysicsMetaData.mSpatialDims = "2";
+    tXMLMetaData.mScenarios.mPhysics = "mechanical";
+    tXMLMetaData.mScenarios.mSpatialDims = "2";
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
     tObjective.mPerformerName = "plato_analyze";

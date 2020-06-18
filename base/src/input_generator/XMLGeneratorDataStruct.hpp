@@ -17,8 +17,9 @@
 namespace XMLGen
 {
 
-struct Physics
+struct Scenario
 {
+    std::string mID;
     std::string mPhysics = "mechanical";
     std::string mPerformer = "plato_analyze";
     std::string mSpatialDims = "3";
@@ -28,12 +29,34 @@ struct Physics
 
 struct Output
 {
+private:
     // note: vector<pair<qoi_shared_data_name, qoi_layout>>, where qoi_layout denotes the
     // data layout, i.e. element, nodal, etc., and qoi_shared_data_name denotes the keyword
     // used in the plato light-weight input file to denote the output data. the output keyword
     // is used to define the shared data name in the interface.xml file.
     std::vector<std::pair<std::string, std::string>> mRandomQuantitiesOfInterest;
     std::vector<std::pair<std::string, std::string>> mDeterministicQuantitiesOfInterest;
+
+public:
+    void appendRandomQoI(const std::string& aSharedDataName, const std::string& aDataLayout)
+    {
+        mRandomQuantitiesOfInterest.push_back(std::make_pair(aSharedDataName, aDataLayout));
+    }
+
+    void appendDeterminsiticQoI(const std::string& aSharedDataName, const std::string& aDataLayout)
+    {
+        mDeterministicQuantitiesOfInterest.push_back(std::make_pair(aSharedDataName, aDataLayout));
+    }
+
+    const std::vector<std::pair<std::string, std::string>>& getRandomQoI() const
+    {
+        return mRandomQuantitiesOfInterest;
+    }
+
+    const std::vector<std::pair<std::string, std::string>>& getDeterminsiticQoI() const
+    {
+        return mDeterministicQuantitiesOfInterest;
+    }
 };
 
 struct Objective
@@ -295,8 +318,8 @@ struct InputData
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
 
+    XMLGen::Scenario mScenarios;
     XMLGen::Output mOutputMetaData;
-    XMLGen::Physics mPhysicsMetaData;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;

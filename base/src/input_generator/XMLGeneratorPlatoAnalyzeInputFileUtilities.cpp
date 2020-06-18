@@ -131,11 +131,11 @@ void append_problem_description_to_plato_analyze_input_deck
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidSpatialDimsKeys tValidKeys;
-    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.mPhysicsMetaData.mSpatialDims);
+    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.mScenarios.mSpatialDims);
     if (tSpatialDim == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '")
-            + aXMLMetaData.mPhysicsMetaData.mSpatialDims + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
+            + aXMLMetaData.mScenarios.mSpatialDims + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
     }
     XMLGen::check_input_mesh_file_keyword(aXMLMetaData);
 
@@ -158,7 +158,7 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
     auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
     if (tPhysics == tValidKeys.mKeys.end())
     {
@@ -178,7 +178,7 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
     auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
     if (tPhysics == tValidKeys.mKeys.end())
     {
@@ -441,7 +441,7 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mPhysicsMetaData.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
     auto tPhysicsItr = tValidKeys.mKeys.find(tLowerPhysics);
     if(tPhysicsItr == tValidKeys.mKeys.end())
     {
@@ -451,7 +451,7 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
     auto tPhysics = aParentNode.append_child("ParameterList");
     auto tPDECategory = tPhysicsItr->second.second;
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysics);
-    XMLGen::Private::append_simp_penalty_function(aXMLMetaData.mPhysicsMetaData, tPhysics);
+    XMLGen::Private::append_simp_penalty_function(aXMLMetaData.mScenarios, tPhysics);
 }
 // function append_partial_differential_equation_to_plato_analyze_input_deck
 /**********************************************************************************/

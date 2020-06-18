@@ -28,9 +28,9 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Objective tObjective;
     tObjective.mPerformerName = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispx", "Solution X"});
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispy", "Solution Y"});
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispz", "Solution Z"});
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
 
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
@@ -807,7 +807,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation_InvalidKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"fluid pressure", "fpressure"});
+    tInputData.mOutputMetaData.appendDeterminsiticQoI("fluid pressure", "fpressure");
     ASSERT_THROW(XMLGen::append_write_output_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
 }
 
@@ -815,9 +815,9 @@ TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispx", "Solution X"});
-    tInputData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispy", "Solution Y"});
-    tInputData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back({"dispz", "Solution Z"});
+    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
+    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
     ASSERT_NO_THROW(XMLGen::append_write_output_to_plato_analyze_operation(tInputData, tDocument));
 
     auto tOperation = tDocument.child("Operation");

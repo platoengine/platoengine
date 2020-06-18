@@ -140,7 +140,7 @@ void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.empty())
+    if(aXMLMetaData.mOutputMetaData.getDeterminsiticQoI().empty())
     {
         return;
     }
@@ -149,17 +149,18 @@ void append_write_output_to_plato_analyze_operation
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperation);
 
     XMLGen::ValidAnalyzeOutputKeys tValidKeys;
-    for(auto& tTag : aXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest)
+    for(auto& tTag : aXMLMetaData.mOutputMetaData.getDeterminsiticQoI())
     {
         auto tLowerTag = Plato::tolower(tTag.first);
         auto tKeyItr = tValidKeys.mKeys.find(tLowerTag);
         if(tKeyItr == tValidKeys.mKeys.end())
         {
-            THROWERR(std::string("Append Write Output To Plato Analyze Operation: ") + "Output tag '" + tTag.first + "' is not a valid output key.")
+            THROWERR(std::string("Append Write Output To Plato Analyze Operation: ")
+                + "Output tag '" + tTag.first + "' is not a valid output key.")
         }
 
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children({"ArgumentName"}, {tTag.second}, tOutput);
+        XMLGen::append_children({"ArgumentName"}, {tKeyItr->second}, tOutput);
     }
 }
 /******************************************************************************/

@@ -859,7 +859,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Von Mises Stress", "quadrature point field"));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "quadrature point field");
     ASSERT_THROW(XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -867,7 +867,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Von Mises Stress", "element field"));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "element field");
     ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -1176,7 +1176,7 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation_Err
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Von Mises", "quadrature point field"));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises", "quadrature point field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_THROW(XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation), std::runtime_error);
 }
@@ -1185,9 +1185,9 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Von Mises", "element field"));
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Cauchy Stress", "element field"));
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Displacement X", "nodal field"));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy Stress", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Displacement X", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1218,7 +1218,7 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation_ErrorI
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back(std::make_pair("Von Mises", "quadrature point field"));
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Von Mises", "quadrature point field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_THROW(XMLGen::append_deterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation), std::runtime_error);
 }
@@ -1227,9 +1227,9 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back(std::make_pair("Von Mises", "element field"));
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back(std::make_pair("Cauchy Stress", "element field"));
-    tXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest.push_back(std::make_pair("Displacement X", "nodal field"));
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Von Mises", "element field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy Stress", "element field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Displacement X", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1340,7 +1340,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.discretization = "density";
     tXMLMetaData.objective_number_standard_deviations = "1";
-    tXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest.push_back(std::make_pair("Von Mises Stress", "element field"));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "element field");
     XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(tXMLMetaData);
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");

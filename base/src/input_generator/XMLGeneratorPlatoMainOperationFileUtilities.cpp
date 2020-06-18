@@ -152,13 +152,14 @@ void append_deterministic_qoi_inputs_to_output_operation
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.mDeterministicQuantitiesOfInterest)
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getDeterminsiticQoI())
     {
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Deterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
+                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
         }
         auto tInput= aParentNode.append_child("Input");
         XMLGen::append_children( { "ArgumentName", "Layout" }, { tPair.first, tValidLayoutItr->second }, tInput);
@@ -173,19 +174,21 @@ void append_nondeterministic_qoi_inputs_to_output_operation
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest)
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoI())
     {
         auto tFor = aParentNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+
+        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Nondeterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
+                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
         }
         auto tInput= tFor.append_child("Input");
-        auto tSharedDataName = tPair.first + " {SampleIndex}";
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tSharedDataName, tValidLayoutItr->second }, tInput);
+        auto tArgumentName = tPair.first + " {SampleIndex}";
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayoutItr->second }, tInput);
     }
 }
 // function append_nondeterministic_qoi_inputs_to_output_operation
@@ -361,10 +364,10 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
  pugi::xml_document &aDocument)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.mRandomQuantitiesOfInterest)
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoI())
     {
-        auto tOperation = aDocument.append_child("Operation");
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tPair.second);
+        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Nondeterministic QOI to Statistics Operation: ")
@@ -373,6 +376,7 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
         auto tName = tPair.first + " Statistics";
         std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
         std::vector<std::string> tValues = { "MeanPlusStdDev", tName, tValidLayoutItr->second };
+        auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children(tKeys, tValues, tOperation);
 
         auto tOuterFor = tOperation.append_child("For");
