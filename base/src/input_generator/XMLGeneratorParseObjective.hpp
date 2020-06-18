@@ -45,11 +45,13 @@ private:
     void setObjectiveIDs();
 
     /******************************************************************************//**
-     * \fn setPerfomerNames
-     * \brief Set objective functions performer names.
+     * \fn checkPerfomerNames
+     * \brief If performer keywords are empty, set to default value 'code_name' + 'id', \n
+     * where 'code_name' denotes the input code name provided by the user and 'id' \n
+     * denotes the identification name/number for an objective function.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void setPerfomerNames();
+    void checkPerfomerNames();
 
     /******************************************************************************//**
      * \fn setName
@@ -94,6 +96,14 @@ private:
      * \param [in/out] aInputFile parsed input file metadata
     **********************************************************************************/
     void setWeight(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn setPerformer
+     * \brief Set objective function performer, i.e. name use to denote simulation \n
+     * code responsible of evaluating the objective function.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
+    void setPerformer(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setPenaltyPower
@@ -197,14 +207,6 @@ private:
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
     void checkCode(const XMLGen::Objective& aMetadata);
-
-    /******************************************************************************//**
-     * \fn checkPerformer
-     * \brief Check if performer keyword is empty, if empty, set to the code name. \n
-     * Furthermore, check if simulation code is supported, if not, throw error.
-     * \param [in/out] aMetadata objective metadata
-    **********************************************************************************/
-    void checkPerformer(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn checkLoadCases

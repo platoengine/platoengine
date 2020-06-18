@@ -44,6 +44,7 @@ void ParseObjective::allocate()
     mTags.insert({ "analysis solver tolerance", { {"analysis","solver","tolerance"}, "" } });
     mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
 
+    mTags.insert({ "performer", { {"performer"}, "" } });
     mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
     mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
     mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
@@ -128,6 +129,20 @@ void ParseObjective::setWeight(XMLGen::Objective &aMetadata)
     else
     {
         aMetadata.weight = "1.0";
+    }
+}
+
+void ParseObjective::setPerformer(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("performer");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.mPerformerName = tItr->second.second;
+    }
+    else
+    {
+        // erase any value, keyword will be redefined in this->checkPerfomerNames
+        aMetadata.mPerformerName.clear();
     }
 }
 
@@ -325,6 +340,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setType(aMetadata);
     this->setName(aMetadata);
     this->setWeight(aMetadata);
+    this->setPerformer(aMetadata);
     this->setPenaltyPower(aMetadata);
     this->setPnormExponent(aMetadata);
     this->setNormalizeObjective(aMetadata);
@@ -373,19 +389,6 @@ void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
     if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Parse Objective: 'code' keyword '") + aMetadata.code_name + "' is not supported. ")
-    }
-}
-
-void ParseObjective::checkPerformer(XMLGen::Objective &aMetadata)
-{
-    if (aMetadata.mPerformerName.empty())
-    {
-        aMetadata.mPerformerName = aMetadata.code_name;
-        XMLGen::ValidPhysicsPerformerKeys tValidKeys;
-        if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.mPerformerName) == tValidKeys.mKeys.end())
-        {
-            THROWERR(std::string("Parse Objective: 'performer' keyword '") + aMetadata.mPerformerName + "' is not supported. ")
-        }
     }
 }
 
@@ -465,7 +468,6 @@ void ParseObjective::checkMetaData(XMLGen::Objective &aMetadata)
 {
     this->checkType(aMetadata);
     this->checkCode(aMetadata);
-    this->checkPerformer(aMetadata);
     this->checkLoadCases(aMetadata);
     this->checkMultiLoadCaseFlag(aMetadata);
     this->checkOutputForPlotting(aMetadata);
@@ -494,11 +496,14 @@ void ParseObjective::setObjectiveIDs()
     }
 }
 
-void ParseObjective::setPerfomerNames()
+void ParseObjective::checkPerfomerNames()
 {
     for(auto& tObjective : mData)
     {
-        tObjective.mPerformerName = tObjective.code_name + "_" + tObjective.name;
+        if(tObjective.mPerformerName.empty())
+        {
+            tObjective.mPerformerName = tObjective.code_name + "_" + tObjective.name;
+        }
     }
 }
 
@@ -534,7 +539,7 @@ void ParseObjective::parse(std::istream &aInputFile)
     }
 
     this->setObjectiveIDs();
-    this->setPerfomerNames();
+    this->checkPerfomerNames();
 }
 
 }

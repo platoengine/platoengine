@@ -404,6 +404,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_OneObjective)
         "   load ids 10\n"
         "   boundary condition ids 11\n"
         "   code plato_analyze\n"
+        "   performer ferrari\n"
         "   number processors 1\n"
         "   weight 1.0\n"
         "   number ranks 1\n"
@@ -425,7 +426,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_OneObjective)
     ASSERT_STREQ("6.0", tObjectiveMetadata[0].mPnormExponent.c_str());
     ASSERT_STREQ("1e-9", tObjectiveMetadata[0].mMinimumErsatzValue.c_str());
     ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].code_name.c_str());
-    ASSERT_STREQ("plato_analyze_1", tObjectiveMetadata[0].mPerformerName.c_str());
+    ASSERT_STREQ("ferrari", tObjectiveMetadata[0].mPerformerName.c_str());
     ASSERT_STREQ("true", tObjectiveMetadata[0].normalize_objective.c_str());
     ASSERT_STREQ("1e-7", tObjectiveMetadata[0].analysis_solver_tolerance.c_str());
     ASSERT_STREQ("false", tObjectiveMetadata[0].multi_load_case.c_str());
