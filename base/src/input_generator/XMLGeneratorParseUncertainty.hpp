@@ -7,16 +7,17 @@
 #pragma once
 
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorParseMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {
 
 /******************************************************************************//**
- * \fn ParseUncertainty
- * \brief Class responsible for parsing uncertainty blocks.
+ * \class ParseUncertainty
+ * \brief Parse uncertainty blocks.
 **********************************************************************************/
-class ParseUncertainty
+class ParseUncertainty : public XMLGen::ParseMetadata<std::vector<XMLGen::Uncertainty>>
 {
 private:
     XMLGen::UseCaseTags mTags; /*!< map from valid tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */

@@ -30,6 +30,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp 
+                      XMLGeneratorParseMetadata.hpp 
                       XMLGeneratorValidInputKeys.hpp
                       XMLGeneratorRandomMetadata.hpp
                       XMLGeneratorParserUtilities.hpp 

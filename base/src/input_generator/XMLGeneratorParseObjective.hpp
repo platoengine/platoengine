@@ -7,12 +7,13 @@
 #pragma once
 
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorParseMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {
 
-class ParseObjective
+class ParseObjective : public XMLGen::ParseMetadata<std::vector<XMLGen::Objective>>
 {
 private:
     XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
@@ -265,14 +266,14 @@ public:
      * \brief Return objective functions metadata.
      * \return container of objective functions and corresponding metadata
     **********************************************************************************/
-    std::vector<XMLGen::Objective> data() const;
+    std::vector<XMLGen::Objective> data() const override;
 
     /******************************************************************************//**
      * \fn parse
      * \brief Parse objective functions metadata.
      * \param [in] aInputFile parsed input file metadata
     **********************************************************************************/
-    void parse(std::istream& aInputFile);
+    void parse(std::istream& aInputFile) override;
 };
 // class ParseObjective
 
