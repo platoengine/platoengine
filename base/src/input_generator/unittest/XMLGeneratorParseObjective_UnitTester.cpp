@@ -77,6 +77,7 @@ private:
         mTags.clear();
         mTags.insert({ "code", { {"code"}, "" } });
         mTags.insert({ "physics", { {"physics"}, "" } });
+        mTags.insert({ "performer", { {"performer"}, "" } });
         mTags.insert({ "dimensions", { {"dimensions"}, "" } });
         mTags.insert({ "scenario_id", { {"scenario_id"}, "" } });
         mTags.insert({ "material_penalty_exponent", { {"material_penalty_exponent"}, "" } });
@@ -96,6 +97,20 @@ private:
         {
             auto tValidTag = XMLGen::check_code_keyword("plato_analyze");
             mData.code(tValidTag);
+        }
+    }
+
+    void setPerformer()
+    {
+        auto tItr = mTags.find("performer");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            mData.performer(tItr->second.second);
+        }
+        else
+        {
+            auto tPerformer = mData.code() + "_0";
+            mData.performer(tPerformer);
         }
     }
 
@@ -147,12 +162,11 @@ private:
         auto tItr = mTags.find("material_penalty_exponent");
         if (tItr != mTags.end() && !tItr->second.second.empty())
         {
-            XMLGen::check_number(tItr->second.second);
             mData.materialPenaltyExponent(tItr->second.second);
         }
         else
         {
-            mData.materialPenaltyExponent("3");
+            mData.materialPenaltyExponent("3.0");
         }
     }
 
@@ -161,12 +175,11 @@ private:
         auto tItr = mTags.find("minimum_ersatz_material_value");
         if (tItr != mTags.end() && !tItr->second.second.empty())
         {
-            XMLGen::check_number(tItr->second.second);
             mData.minErsatzMaterialConstant(tItr->second.second);
         }
         else
         {
-            mData.minErsatzMaterialConstant("3");
+            mData.minErsatzMaterialConstant("1e-9");
         }
     }
 
@@ -215,6 +228,7 @@ public:
                 this->setMetaData();
             }
         }
+        this->setPerformer();
         this->setScenarioID();
     }
 };
@@ -224,7 +238,7 @@ public:
 namespace PlatoTestXMLGenerator
 {
 
-TEST(PlatoTestXMLGenerator, ParseOutput_EmptyScenarioMetadata)
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorEmptyScenarioMetadata)
 {
     std::string tStringInput =
         "begin scenario\n"
@@ -234,6 +248,99 @@ TEST(PlatoTestXMLGenerator, ParseOutput_EmptyScenarioMetadata)
 
     XMLGen::ParseScenario tScenarioParser;
     ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidPhysics)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanics\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidDimensions)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanical\n"
+        "   code sierra_sd\n"
+        "   dimensions 1\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidCode)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanical\n"
+        "   dimensions 3\n"
+        "   code dog\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanical\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarioMetadata = tScenarioParser.data();
+
+    ASSERT_STREQ("plato_analyze", tScenarioMetadata.code().c_str());
+    ASSERT_STREQ("mechanical", tScenarioMetadata.physics().c_str());
+    ASSERT_STREQ("plato_analyze_0", tScenarioMetadata.performer().c_str());
+    ASSERT_STREQ("plato_analyze_mechanical_0", tScenarioMetadata.id().c_str());
+    ASSERT_STREQ("3", tScenarioMetadata.dimensions().c_str());
+    ASSERT_STREQ("3.0", tScenarioMetadata.materialPenaltyExponent().c_str());
+    ASSERT_STREQ("1e-9", tScenarioMetadata.minErsatzMaterialConstant().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics thermal\n"
+        "   dimensions 2\n"
+        "   code sierra_sd\n"
+        "   performer sierra_sd_0\n"
+        "   material_penalty_exponent 1.0\n"
+        "   minimum_ersatz_material_value 1e-6\n"
+        "   scenario_id air_force_one\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarioMetadata = tScenarioParser.data();
+
+    ASSERT_STREQ("sierra_sd", tScenarioMetadata.code().c_str());
+    ASSERT_STREQ("thermal", tScenarioMetadata.physics().c_str());
+    ASSERT_STREQ("sierra_sd_0", tScenarioMetadata.performer().c_str());
+    ASSERT_STREQ("air_force_one", tScenarioMetadata.id().c_str());
+    ASSERT_STREQ("2", tScenarioMetadata.dimensions().c_str());
+    ASSERT_STREQ("1.0", tScenarioMetadata.materialPenaltyExponent().c_str());
+    ASSERT_STREQ("1e-6", tScenarioMetadata.minErsatzMaterialConstant().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)
