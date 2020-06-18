@@ -6,18 +6,149 @@
 
 #include <gtest/gtest.h>
 
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
+#include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
+
+    auto tOutputMetadata = tOutputParser.data();
+    ASSERT_TRUE(tOutputMetadata.getRandomQoI().empty());
+    ASSERT_TRUE(tOutputMetadata.getDeterminsiticQoI().empty());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidQoI)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "   quantities_of_interest dispx dispy dispz hippo\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_THROW(tOutputParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidRandomQoI)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "   quantities_of_interest dispx dispy dispz\n"
+        "   random_quantities_of_interest dispx dispy hippo dispz\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_THROW(tOutputParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "   quantities_of_interest dispx dispy dispz temperature\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
+    auto tOutputMetadata = tOutputParser.data();
+    ASSERT_TRUE(tOutputMetadata.getRandomQoI().empty());
+    ASSERT_FALSE(tOutputMetadata.getDeterminsiticQoI().empty());
+
+    std::vector<std::string> tGoldDeterministic = {"dispx", "dispy", "dispz", "temperature"};
+    for(auto& tValue : tOutputMetadata.getDeterminsiticQoI())
+    {
+        auto tItr = std::find(tGoldDeterministic.begin(), tGoldDeterministic.end(), tValue.first);
+        ASSERT_TRUE(tItr != tGoldDeterministic.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.first.c_str());
+        ASSERT_STREQ("nodal field", tValue.second.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "   random_quantities_of_interest accumulated_plastic_strain temperature\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
+    auto tOutputMetadata = tOutputParser.data();
+    ASSERT_FALSE(tOutputMetadata.getRandomQoI().empty());
+    ASSERT_TRUE(tOutputMetadata.getDeterminsiticQoI().empty());
+
+    std::vector<std::string> tGoldRandom = {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
+    for(auto& tValue : tOutputMetadata.getRandomQoI())
+    {
+        auto tItr = std::find(tGoldRandom.begin(), tGoldRandom.end(), tValue.first);
+        ASSERT_TRUE(tItr != tGoldRandom.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.first.c_str());
+
+        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tValue.second);
+        ASSERT_TRUE(tItr != tGoldRandomLayout.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.second.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "   quantities_of_interest dispx dispy dispz temperature\n"
+        "   random_quantities_of_interest accumulated_plastic_strain temperature\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
+    auto tOutputMetadata = tOutputParser.data();
+    ASSERT_FALSE(tOutputMetadata.getRandomQoI().empty());
+    ASSERT_FALSE(tOutputMetadata.getDeterminsiticQoI().empty());
+
+    std::vector<std::string> tGoldRandom = {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
+    for(auto& tValue : tOutputMetadata.getRandomQoI())
+    {
+        auto tItr = std::find(tGoldRandom.begin(), tGoldRandom.end(), tValue.first);
+        ASSERT_TRUE(tItr != tGoldRandom.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.first.c_str());
+
+        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tValue.second);
+        ASSERT_TRUE(tItr != tGoldRandomLayout.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.second.c_str());
+    }
+    std::vector<std::string> tGoldDeterministic = {"dispx", "dispy", "dispz", "temperature"};
+    for(auto& tValue : tOutputMetadata.getDeterminsiticQoI())
+    {
+        auto tItr = std::find(tGoldDeterministic.begin(), tGoldDeterministic.end(), tValue.first);
+        ASSERT_TRUE(tItr != tGoldDeterministic.end());
+        ASSERT_STREQ(tItr->c_str(), tValue.first.c_str());
+        ASSERT_STREQ("nodal field", tValue.second.c_str());
+    }
+}
 
 TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCriterion)
 {
