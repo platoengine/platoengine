@@ -51,6 +51,7 @@
 
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include <cstring>
 
 namespace XMLGen
 {

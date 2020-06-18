@@ -8,6 +8,7 @@
 
 #include <map>
 #include <vector>
+#include <cstring>
 
 namespace XMLGen
 {
