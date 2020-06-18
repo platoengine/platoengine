@@ -32,6 +32,21 @@ private:
     void erase();
 
     /******************************************************************************//**
+     * \fn setObjectiveIDs
+     * \brief Set objective functions identification number/name. If there are objective \n
+     * functions without an identification number/name, assign default values.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
+    void setObjectiveIDs();
+
+    /******************************************************************************//**
+     * \fn setPerfomerNames
+     * \brief Set objective functions performer names.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
+    void setPerfomerNames();
+
+    /******************************************************************************//**
      * \fn setName
      * \brief Set objective function's user assigned name.
      * \param [in/out] aInputFile parsed input file metadata
@@ -102,6 +117,14 @@ private:
      * \param [in/out] aInputFile parsed input file metadata
     **********************************************************************************/
     void setMinimumErsatzValue(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn setAnalyzeNewWorkflow
+     * \brief Use new analyze's uncertainty quantification workflow to solve optimization \n
+     * under uncertainty problems.
+     * \param [in/out] aInputFile parsed input file metadata
+    **********************************************************************************/
+    void setAnalyzeNewWorkflow(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setAnalysisSolverTolerance

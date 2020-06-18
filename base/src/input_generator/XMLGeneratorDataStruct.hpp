@@ -47,6 +47,7 @@ struct Objective
     std::string mPenaltyParam = "3.0";
     std::string mPnormExponent = "6";
     std::string mMinimumErsatzValue = "1e-9";
+    std::string mUseNewPlatoAnalyzeUQWorkflow = "true";
     std::string analysis_solver_tolerance;
     std::string multi_load_case;
     std::vector<std::string> output_for_plotting;

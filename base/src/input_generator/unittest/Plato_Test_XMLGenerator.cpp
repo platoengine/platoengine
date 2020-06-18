@@ -52,7 +52,7 @@
 #include <cmath>
 #include <numeric>
 
-#include "../XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParseUncertainty.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
@@ -68,162 +68,6 @@
 #include "XMLG_Macros.hpp"
 
 const int MAX_CHARS_PER_LINE = 512;
-
-namespace XMLGen
-{
-
-struct ParseObjective
-{
-private:
-    XMLGen::UseCaseTags mTags; /*!< map from valid tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
-    std::vector<XMLGen::Objective> mData; /*!< list of uncertainty metadata */
-
-private:
-    /******************************************************************************//**
-     * \fn allocate
-     * \brief Allocate map from valid tags to valid tokens-value pair
-    **********************************************************************************/
-    void allocate()
-    {
-        mTags.clear();
-        mTags.insert({ "code", { {"code"}, "" } });
-        mTags.insert({ "type", { {"type"}, "" } });
-        mTags.insert({ "name", { {"name"}, "" } });
-        mTags.insert({ "weight", { {"weight"}, "" } });
-        mTags.insert({ "load ids", { {"load", "ids"}, "" } });
-        mTags.insert({ "stress limit", { {"stress", "limit"}, "" } });
-        mTags.insert({ "number ranks", { {"number", "ranks"}, "" } });
-        mTags.insert({ "min frequency", { {"min", "frequency"}, "" } });
-        mTags.insert({ "max frequency", { {"max", "frequency"}, "" } });
-        mTags.insert({ "frequency step", { {"frequency", "step"}, "" } });
-        mTags.insert({ "normalize objective", { {"normalize", "objective"}, "" } });
-        mTags.insert({ "distribute objective", { {"distribute", "objective"}, "" } });
-        mTags.insert({ "ls tet type", { {"ls", "tet", "type"}, "" } });
-        mTags.insert({ "multi load case", { {"multi", "load", "case"}, "" } });
-        mTags.insert({ "limit power max", { {"limit", "power", "max"}, "" } });
-        mTags.insert({ "limit power min", { {"limit", "power", "min"}, "" } });
-        mTags.insert({ "load case weights", { {"load", "case", "weights"}, "" } });
-        mTags.insert({ "limit reset count", { {"limit", "reset", "count"}, "" } });
-        mTags.insert({ "reference frf file", { {"reference", "frf", "file"}, "" } });
-        mTags.insert({ "frf match nodesets", { {"frf", "match", "nodesets"}, "" } });
-        mTags.insert({ "stress ramp factor", { {"stress", "ramp", "factor"}, "" } });
-        mTags.insert({ "stress favor final", { {"stress", "favor", "final"}, "" } });
-        mTags.insert({ "output for plotting", { {"output", "for", "plotting"}, "" } });
-        mTags.insert({ "volume penalty bias", { {"volume", "penalty", "bias"}, "" } });
-        mTags.insert({ "volume penalty power", { {"volume", "penalty", "power"}, "" } });
-        mTags.insert({ "volume misfit target", { {"volume", "misfit", "target"}, "" } });
-        mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
-        mTags.insert({ "stress favor updates", { {"stress", "favor", "updates"}, "" } });
-        mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
-        mTags.insert({ "stress p norm power", { {"stress", "p", "norm", "power"}, "" } });
-        mTags.insert({ "raleigh damping beta", { {"raleigh", "damping", "beta"}, "" } });
-        mTags.insert({ "raleigh damping alpha", { {"raleigh", "damping", "alpha"}, "" } });
-        mTags.insert({ "complex error measure", { {"complex", "error", "measure"}, "" } });
-        mTags.insert({ "relative stress limit", { {"relative", "stress", "limit"}, "" } });
-        mTags.insert({ "volume penalty divisor", { {"volume", "penalty", "divisor"}, "" } });
-        mTags.insert({ "boundary condition ids", { {"boundary", "condition", "ids"}, "" } });
-        mTags.insert({ "weightmass scale factor", { {"weightmass", "scale", "factor"}, "" } });
-        mTags.insert({ "stress inequality power", { {"stress", "inequality", "power"}, "" } });
-        mTags.insert({ "scmm constraint exponent", { {"scmm", "constraint", "exponent"}, "" } });
-        mTags.insert({ "limit reset subfrequency", { {"limit", "reset", "subfrequency"}, "" } });
-        mTags.insert({ "analysis solver tolerance", { {"analysis", "solver", "tolerance"}, "" } });
-        mTags.insert({ "limit power feasible bias", { {"limit", "power", "feasible", "bias"}, "" } });
-        mTags.insert({ "inequality feasibility scale", { {"inequality","feasibility","scale"}, "" } });
-        mTags.insert({ "limit power feasible slope", { {"limit", "power", "feasible", "slope"}, "" } });
-        mTags.insert({ "limit power infeasible bias", { {"limit", "power", "infeasible", "bias"}, "" } });
-        mTags.insert({ "limit power infeasible slope", { {"limit", "power", "infeasible", "slope"}, "" } });
-        mTags.insert({ "distribute objective at most", { {"distribute", "objective", "at", "most"}, "" } });
-        mTags.insert({ "inequality infeasibility scale", { {"inequality", "infeasibility", "scale"}, "" } });
-        mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
-        mTags.insert({ "inequality allowable feasibility upper", { {"inequality", "allowable", "feasibility", "upper"}, "" } });
-    }
-
-    /******************************************************************************//**
-     * \fn erase
-     * \brief Erases value key content in map from valid tags to valid tokens-value pair.
-    **********************************************************************************/
-    void erase()
-    {
-        for(auto& tTag : mTags)
-        {
-            tTag.second.second.clear();
-        }
-    }
-
-    /******************************************************************************//**
-     * \fn parseMetadata
-     * \brief Parse uncertainty blocks.
-     * \param [in] aInputFile input file metadata
-    **********************************************************************************/
-    void parseMetadata(std::istream& aInputFile)
-    {
-        constexpr int tMAX_CHARS_PER_LINE = 512;
-        std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
-        // found an uncertainty. parse it.
-        while (!aInputFile.eof())
-        {
-            std::vector<std::string> tTokens;
-            aInputFile.getline(tBuffer.data(), tMAX_CHARS_PER_LINE);
-            XMLGen::parse_tokens(tBuffer.data(), tTokens);
-            XMLGen::to_lower(tTokens);
-
-            std::string tTag;
-            if (XMLGen::parse_single_value(tTokens, std::vector<std::string> { "end", "objective" }, tTag))
-            {
-                break;
-            }
-            XMLGen::parse_tag_values(tTokens, mTags);
-        }
-    }
-
-public:
-    /******************************************************************************//**
-     * \fn data
-     * \brief Return objectives metadata.
-     * \return objectives metadata
-    **********************************************************************************/
-    std::vector<XMLGen::Objective> data() const
-    {
-        return mData;
-    }
-
-    /******************************************************************************//**
-     * \fn parse
-     * \brief Parse objectives metadata.
-     * \param [in] aInputFile input file metadata
-    **********************************************************************************/
-    void parse(std::istream& aInputFile)
-    {
-        mData.clear();
-        this->allocate();
-        constexpr int MAX_CHARS_PER_LINE = 512;
-        std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
-        while (!aInputFile.eof())
-        {
-            // read an entire line into memory
-            std::vector<std::string> tTokens;
-            aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
-            XMLGen::parse_tokens(tBuffer.data(), tTokens);
-            XMLGen::to_lower(tTokens);
-
-            std::string tTag;
-            std::vector<std::string> tMatchTokens;
-            if(XMLGen::parse_single_value(tTokens, tMatchTokens = {"begin","objective"}, tTag))
-            {
-                XMLGen::Objective tMetadata;
-                this->erase();
-                this->parseMetadata(aInputFile);
-                //this->setMetadata(tMetadata);
-                //this->checkMetadata(tMetadata);
-                mData.push_back(tMetadata);
-            }
-        }
-    }
-};
-// struct ParseObjective
-
-}
-// namespace XMLGen
 
 namespace PlatoTestXMLGenerator
 {
@@ -3881,6 +3725,8 @@ TEST(PlatoTestXMLGenerator, parseMaterials)
     EXPECT_EQ(tester.getMaterialThermalConductivity(1), ".03");
     EXPECT_EQ(tester.getMaterialDensity(1), ".009");
 }
+
+/*
 TEST(PlatoTestXMLGenerator, parseObjectives)
 {
     XMLGenerator_UnitTester tester;
@@ -4573,6 +4419,7 @@ TEST(PlatoTestXMLGenerator, parseObjectives)
     EXPECT_EQ(tester.getObjPerfName(3), "sierra_sd_3");
     EXPECT_EQ(tester.getObjPerfName(4), "lightmp_1");
 }
+*/
 
 TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
 {

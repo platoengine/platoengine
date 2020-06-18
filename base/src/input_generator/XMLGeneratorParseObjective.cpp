@@ -4,6 +4,8 @@
  *  Created on: Jun 17, 2020
  */
 
+#include <iostream>
+
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
@@ -36,6 +38,7 @@ void ParseObjective::allocate()
     mTags.insert({ "relative stress limit", { {"relative","stress","limit"}, "" } });
     mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
     mTags.insert({ "complex error measure", { {"complex","error","measure"}, "" } });
+    mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
     mTags.insert({ "boundary condition ids", { {"boundary","condition", "ids"}, "" } });
     mTags.insert({ "weightmass scale factor", { {"weightmass","scale","factor"}, "" } });
     mTags.insert({ "scmm constraint exponent", { {"scmm", "constraint", "exponent"}, "" } });
@@ -178,6 +181,19 @@ void ParseObjective::setMinimumErsatzValue(XMLGen::Objective &aMetadata)
     else
     {
         aMetadata.mMinimumErsatzValue = "1e-9";
+    }
+}
+
+void ParseObjective::setAnalyzeNewWorkflow(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("analyze new workflow");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        aMetadata.mUseNewPlatoAnalyzeUQWorkflow = tItr->second.second;
+    }
+    else
+    {
+        aMetadata.mUseNewPlatoAnalyzeUQWorkflow = "false";
     }
 }
 
@@ -325,6 +341,7 @@ void ParseObjective::setMetadata(XMLGen::Objective &aMetadata)
     this->setCode(aMetadata);
     this->setNumRanks(aMetadata);
     this->setNumProcessors(aMetadata);
+    this->setAnalyzeNewWorkflow(aMetadata);
     this->setAnalysisSolverTolerance(aMetadata);
     this->setDistributeObjectiveType(aMetadata);
     aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.second;
@@ -461,6 +478,35 @@ void ParseObjective::checkMetadata(XMLGen::Objective &aMetadata)
     this->checkEssentialBoundaryConditionIDs(aMetadata);
 }
 
+void ParseObjective::setObjectiveIDs()
+{
+    for (auto &tOuterObjective : mData)
+    {
+        // For each code name we will make sure there are names set
+        auto tMyCodeName = tOuterObjective.code_name;
+        size_t tObjectiveIdentificationNumber = 0;
+        for (auto &tInnerObjective : mData)
+        {
+            if (!tInnerObjective.code_name.compare(tMyCodeName))
+            {
+                tObjectiveIdentificationNumber++;
+                if (tInnerObjective.name.empty())
+                {
+                    tInnerObjective.name = std::to_string(tObjectiveIdentificationNumber);
+                }
+            }
+        }
+    }
+}
+
+void ParseObjective::setPerfomerNames()
+{
+    for(auto& tObjective : mData)
+    {
+        tObjective.mPerformerName = tObjective.code_name + "_" + tObjective.name;
+    }
+}
+
 std::vector<XMLGen::Objective> ParseObjective::data() const
 {
     return mData;
@@ -491,6 +537,9 @@ void ParseObjective::parse(std::istream &aInputFile)
             mData.push_back(tMetadata);
         }
     }
+
+    this->setObjectiveIDs();
+    this->setPerfomerNames();
 }
 
 }

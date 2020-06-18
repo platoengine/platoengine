@@ -188,7 +188,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_OneObjective)
     ASSERT_STREQ("6.0", tObjectiveMetadata[0].mPnormExponent.c_str());
     ASSERT_STREQ("1e-9", tObjectiveMetadata[0].mMinimumErsatzValue.c_str());
     ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].code_name.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].mPerformerName.c_str());
+    ASSERT_STREQ("plato_analyze_1", tObjectiveMetadata[0].mPerformerName.c_str());
     ASSERT_STREQ("true", tObjectiveMetadata[0].normalize_objective.c_str());
     ASSERT_STREQ("1e-7", tObjectiveMetadata[0].analysis_solver_tolerance.c_str());
     ASSERT_STREQ("false", tObjectiveMetadata[0].multi_load_case.c_str());
@@ -247,7 +247,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_TwoObjective)
     ASSERT_STREQ("6.0", tObjectiveMetadata[0].mPnormExponent.c_str());
     ASSERT_STREQ("1e-9", tObjectiveMetadata[0].mMinimumErsatzValue.c_str());
     ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].code_name.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].mPerformerName.c_str());
+    ASSERT_STREQ("plato_analyze_1", tObjectiveMetadata[0].mPerformerName.c_str());
     ASSERT_STREQ("true", tObjectiveMetadata[0].normalize_objective.c_str());
     ASSERT_STREQ("1e-7", tObjectiveMetadata[0].analysis_solver_tolerance.c_str());
     ASSERT_STREQ("false", tObjectiveMetadata[0].multi_load_case.c_str());
@@ -275,7 +275,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_TwoObjective)
     ASSERT_STREQ("6.0", tObjectiveMetadata[1].mPnormExponent.c_str());
     ASSERT_STREQ("1e-9", tObjectiveMetadata[1].mMinimumErsatzValue.c_str());
     ASSERT_STREQ("plato_analyze", tObjectiveMetadata[1].code_name.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[1].mPerformerName.c_str());
+    ASSERT_STREQ("plato_analyze_2", tObjectiveMetadata[1].mPerformerName.c_str());
     ASSERT_STREQ("false", tObjectiveMetadata[1].normalize_objective.c_str());
     ASSERT_STREQ("1e-7", tObjectiveMetadata[1].analysis_solver_tolerance.c_str());
     ASSERT_STREQ("true", tObjectiveMetadata[1].multi_load_case.c_str());
