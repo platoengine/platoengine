@@ -102,6 +102,7 @@ protected:
     bool parseFile();
     bool parseMesh(std::istream &fin);
     bool parseOutput(std::istream &fin);
+    bool parseScenario(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
     bool parseMaterials(std::istream &fin);
     bool parseBlocks(std::istream &fin);

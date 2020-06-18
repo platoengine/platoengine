@@ -8,7 +8,6 @@
 
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParseObjective.hpp"
-#include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {

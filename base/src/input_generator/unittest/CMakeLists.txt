@@ -18,6 +18,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGenerator.cpp
                                       ../XMLGeneratorUtilities.cpp
                                       ../XMLGeneratorParseOutput.cpp
+                                      ../XMLGeneratorParseScenario.cpp
                                       ../XMLGeneratorParseObjective.cpp
                                       ../XMLGeneratorParserUtilities.cpp
                                       ../XMLGeneratorParseUncertainty.cpp

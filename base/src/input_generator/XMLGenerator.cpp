@@ -74,7 +74,9 @@
 #include "DefaultInputGenerator.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
+
 #include "XMLGeneratorParseOutput.hpp"
+#include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 
@@ -521,6 +523,16 @@ bool XMLGenerator::parseOutput(std::istream &aInputFile)
     XMLGen::ParseOutput tParseOutput;
     tParseOutput.parse(aInputFile);
     m_InputData.mOutputMetaData = tParseOutput.data();
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseScenario(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseScenario tParseScenario;
+    tParseScenario.parse(aInputFile);
+    m_InputData.mScenarioMetaData = tParseScenario.data();
     return true;
 }
 
@@ -2874,6 +2886,10 @@ bool XMLGenerator::parseFile()
 
   tInputFile.open(m_InputFilename.c_str()); // open a file
   this->parseOutput(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseScenario(tInputFile);
   tInputFile.close();
 
   // If we will need to run the prune_and_refine executable for any
