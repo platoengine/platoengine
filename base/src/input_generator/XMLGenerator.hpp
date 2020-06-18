@@ -101,6 +101,7 @@ protected:
     bool distributeObjectivesForGenerate();
     bool parseFile();
     bool parseMesh(std::istream &fin);
+    bool parseOutput(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
     bool parseMaterials(std::istream &fin);
     bool parseBlocks(std::istream &fin);

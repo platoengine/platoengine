@@ -74,6 +74,7 @@
 #include "DefaultInputGenerator.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
+#include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 
@@ -510,6 +511,16 @@ bool XMLGenerator::parseTokens(char *buffer, std::vector<std::string> &tokens)
     for(int i=0; i<n; ++i)
         tokens.push_back(token[i]);
 
+    return true;
+}
+
+/******************************************************************************/
+bool XMLGenerator::parseOutput(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseOutput tParseOutput;
+    tParseOutput.parse(aInputFile);
+    m_InputData.mOutputMetaData = tParseOutput.data();
     return true;
 }
 
@@ -2836,7 +2847,7 @@ bool XMLGenerator::parseFile()
   parseLoads(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  parseObjectives(tInputFile);
+  this->parseObjectives(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
   parseOptimizationParameters(tInputFile);
@@ -2858,7 +2869,11 @@ bool XMLGenerator::parseFile()
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  parseUncertainties(tInputFile);
+  this->parseUncertainties(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseOutput(tInputFile);
   tInputFile.close();
 
   // If we will need to run the prune_and_refine executable for any
