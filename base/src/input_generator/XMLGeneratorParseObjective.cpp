@@ -442,9 +442,11 @@ void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutput
     XMLGen::ValidOutputKeys tValidKeys;
     for (auto &tToken : ValidOutputKeys.output_for_plotting)
     {
-        if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tToken) == tValidKeys.mKeys.end())
+        auto tLowerToken = Plato::tolower(tToken);
+        auto tItr = tValidKeys.mKeys.find(tLowerToken);
+        if (tItr == tValidKeys.mKeys.end())
         {
-            THROWERR(std::string("Parse Objective: 'output' keyword '") + tToken + "' is not supported. ")
+            THROWERR(std::string("Parse Objective: 'output' keyword '") + tLowerToken + "' is not supported. ")
         }
     }
 }

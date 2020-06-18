@@ -3,8 +3,8 @@
 ###############################################################################
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
-                      PlatoAnalyzeInputDeckWriter.cpp
                       DefaultInputGenerator.cpp
+                      XMLGeneratorParseOutput.cpp
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParserUtilities.cpp
                       XMLGeneratorParseUncertainty.cpp
@@ -25,11 +25,13 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
+                      PlatoAnalyzeInputDeckWriter.cpp
                       XMLGeneratorUtilities.cpp
                       SalinasInputDeckWriter.cpp)
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp 
+                      XMLGeneratorParseOutput.hpp 
                       XMLGeneratorParseMetadata.hpp 
                       XMLGeneratorValidInputKeys.hpp
                       XMLGeneratorRandomMetadata.hpp

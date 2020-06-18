@@ -373,7 +373,7 @@ struct InputData
     std::string m_filterType_kernelThenTANH_generatorName;
     std::string m_filterType_kernelThenTANH_XMLName;
 
-    XMLGen::Scenario mScenarios;
+    XMLGen::Scenario mScenario;
     XMLGen::Output mOutputMetaData;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;

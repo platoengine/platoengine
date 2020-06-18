@@ -13,6 +13,10 @@
 namespace XMLGen
 {
 
+/******************************************************************************//**
+ * \class ParseObjective
+ * \brief Parse inputs in objective function blocks and store values in XMLGen::Objective metadata.
+**********************************************************************************/
 class ParseObjective : public XMLGen::ParseMetadata<std::vector<XMLGen::Objective>>
 {
 private:
@@ -271,7 +275,7 @@ public:
     /******************************************************************************//**
      * \fn parse
      * \brief Parse objective functions metadata.
-     * \param [in] aInputFile parsed input file metadata
+     * \param [in] aInputFile input file metadata
     **********************************************************************************/
     void parse(std::istream& aInputFile) override;
 };

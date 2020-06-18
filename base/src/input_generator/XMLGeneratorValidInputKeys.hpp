@@ -30,10 +30,12 @@ struct ValidCriterionKeys
 struct ValidOutputKeys
 {
     /*!<
-     * \brief Valid plato xml generator parser output keys.
+     * \brief Valid plato input file output keywords. \n
+     *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
      **/
-    std::vector<std::string> mKeys =
-        {"vonmises", "dispx", "dispy", "dispz", "temperature", "accumulated_plastic_strain", "potential"};
+    std::unordered_map<std::string, std::string> mKeys =
+        { {"vonmises","element field"}, {"dispx","nodal field"}, {"dispy","nodal field"}, {"dispz","nodal field"},
+          {"temperature","nodal field"}, {"accumulated_plastic_strain","element field"}, {"potential","nodal field"} };
 };
 // struct ValidOutputKeys
 
