@@ -6,11 +6,6 @@
 
 #include <gtest/gtest.h>
 
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
