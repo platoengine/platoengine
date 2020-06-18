@@ -15,12 +15,12 @@ namespace XMLGen
 
 /******************************************************************************//**
  * \class ParseOutput
- * \brief Parse inputs in output block and store values in XMLGen::Output metadata.
+ * \brief Parse inputs in output block and store values in XMLGen::Output.
 **********************************************************************************/
 class ParseOutput : public XMLGen::ParseMetadata<XMLGen::Output>
 {
 private:
-    XMLGen::Output mData; /*!< objective functions metadata */
+    XMLGen::Output mData; /*!< output metadata */
     XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
 
 private:

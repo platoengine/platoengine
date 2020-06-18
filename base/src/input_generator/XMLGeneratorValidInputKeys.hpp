@@ -39,6 +39,17 @@ struct ValidOutputKeys
 };
 // struct ValidOutputKeys
 
+struct ValidPhysicsKeys
+{
+    /*!<
+     * \brief Valid plato input file physics keywords.
+     **/
+    std::vector<std::string> mKeys =
+        { "mechanical", "transient mechanics", "plasticity", "stabilized mechanical", "thermal", "heat conduction",
+            "electromechanical", "stabilized thermomechanical", "thermomechanical", "coupled heat conduction and mechanics" };
+};
+// struct ValidPhysicsKeys
+
 struct ValidAxesKeys
 {
     /*!< map from dimension to axis, i.e. map<dimension, axis> */

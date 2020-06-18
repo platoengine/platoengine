@@ -58,11 +58,11 @@ private:
     void setIdentificationNumber(XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
-     * \fn setMetadata
+     * \fn setMetaData
      * \brief Set uncertainty metadata.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
-    void setMetadata(XMLGen::Uncertainty& aMetadata);
+    void setMetaData(XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
      * \fn checkCategory
@@ -163,11 +163,11 @@ private:
     void checkStatistics(const XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
-     * \fn checkMetadata
+     * \fn checkMetaData
      * \brief Check if uncertainty metadata is defined accordingly.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
-    void checkMetadata(const XMLGen::Uncertainty& aMetadata);
+    void checkMetaData(const XMLGen::Uncertainty& aMetadata);
 
 public:
     /******************************************************************************//**

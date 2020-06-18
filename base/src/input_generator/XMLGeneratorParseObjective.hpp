@@ -15,7 +15,7 @@ namespace XMLGen
 
 /******************************************************************************//**
  * \class ParseObjective
- * \brief Parse inputs in objective function blocks and store values in XMLGen::Objective metadata.
+ * \brief Parse inputs in objective function blocks and store values in XMLGen::Objective.
 **********************************************************************************/
 class ParseObjective : public XMLGen::ParseMetadata<std::vector<XMLGen::Objective>>
 {
@@ -178,11 +178,11 @@ private:
     void setDistributeObjectiveType(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn setMetadata
+     * \fn setMetaData
      * \brief Set objective metadata.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void setMetadata(XMLGen::Objective& aMetadata);
+    void setMetaData(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn checkType
@@ -258,11 +258,11 @@ private:
     void checkDistributeObjective(const XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn checkMetadata
+     * \fn checkMetaData
      * \brief Check if objective metadata is properly defined.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void checkMetadata(XMLGen::Objective& aMetadata);
+    void checkMetaData(XMLGen::Objective& aMetadata);
 
 public:
     /******************************************************************************//**

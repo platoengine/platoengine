@@ -20,6 +20,7 @@ namespace XMLGen
 struct Scenario
 {
     std::string mID = "0";
+    std::string mCode = "plato_analyze";
     std::string mPhysics = "mechanical";
     std::string mPerformer = "plato_analyze";
     std::string mSpatialDims = "3";
@@ -34,6 +35,15 @@ public:
     std::string id() const
     {
         return mID;
+    }
+
+    void code(const std::string& aInput)
+    {
+        mCode = aInput;
+    }
+    std::string code() const
+    {
+        return mCode;
     }
 
     void physics(const std::string& aInput)

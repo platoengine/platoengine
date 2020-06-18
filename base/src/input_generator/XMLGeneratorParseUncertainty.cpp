@@ -58,7 +58,7 @@ void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
 
 }
 
-void ParseUncertainty::setMetadata(XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
     this->setCategory(aMetadata);
     this->setIdentificationNumber(aMetadata);
@@ -225,7 +225,7 @@ void ParseUncertainty::checkStatistics(const XMLGen::Uncertainty& aMetadata)
     }
 }
 
-void ParseUncertainty::checkMetadata(const XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::checkMetaData(const XMLGen::Uncertainty& aMetadata)
 {
     this->checkID(aMetadata);
     this->checkTag(aMetadata);
@@ -259,8 +259,8 @@ void ParseUncertainty::parse(std::istream& aInputFile)
             XMLGen::Uncertainty tMetadata;
             this->erase();
             XMLGen::parse_input_metadata({"end","uncertainty"}, aInputFile, mTags);
-            this->setMetadata(tMetadata);
-            this->checkMetadata(tMetadata);
+            this->setMetaData(tMetadata);
+            this->checkMetaData(tMetadata);
             mData.push_back(tMetadata);
         }
     }

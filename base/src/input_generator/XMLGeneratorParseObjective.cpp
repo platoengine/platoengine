@@ -321,7 +321,7 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
     }
 }
 
-void ParseObjective::setMetadata(XMLGen::Objective &aMetadata)
+void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
 {
     this->setType(aMetadata);
     this->setName(aMetadata);
@@ -462,7 +462,7 @@ void ParseObjective::checkDistributeObjective(const XMLGen::Objective &aMetadata
     }
 }
 
-void ParseObjective::checkMetadata(XMLGen::Objective &aMetadata)
+void ParseObjective::checkMetaData(XMLGen::Objective &aMetadata)
 {
     this->checkType(aMetadata);
     this->checkCode(aMetadata);
@@ -528,8 +528,8 @@ void ParseObjective::parse(std::istream &aInputFile)
             XMLGen::Objective tMetadata;
             this->erase();
             XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
-            this->setMetadata(tMetadata);
-            this->checkMetadata(tMetadata);
+            this->setMetaData(tMetadata);
+            this->checkMetaData(tMetadata);
             mData.push_back(tMetadata);
         }
     }
