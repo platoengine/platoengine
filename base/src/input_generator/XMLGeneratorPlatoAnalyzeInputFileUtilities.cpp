@@ -131,11 +131,11 @@ void append_problem_description_to_plato_analyze_input_deck
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidSpatialDimsKeys tValidKeys;
-    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.mScenarios.mSpatialDims);
+    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.mScenarios.dimensions());
     if (tSpatialDim == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '")
-            + aXMLMetaData.mScenarios.mSpatialDims + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
+            + aXMLMetaData.mScenarios.dimensions() + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
     }
     XMLGen::check_input_mesh_file_keyword(aXMLMetaData);
 
@@ -158,7 +158,7 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.physics());
     auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
     if (tPhysics == tValidKeys.mKeys.end())
     {
@@ -178,7 +178,7 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.physics());
     auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
     if (tPhysics == tValidKeys.mKeys.end())
     {
@@ -441,7 +441,7 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.mPhysics);
+    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarios.physics());
     auto tPhysicsItr = tValidKeys.mKeys.find(tLowerPhysics);
     if(tPhysicsItr == tValidKeys.mKeys.end())
     {

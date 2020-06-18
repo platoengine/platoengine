@@ -19,12 +19,67 @@ namespace XMLGen
 
 struct Scenario
 {
-    std::string mID;
+    std::string mID = "0";
     std::string mPhysics = "mechanical";
     std::string mPerformer = "plato_analyze";
     std::string mSpatialDims = "3";
     std::string mPenaltyParam = "3.0";
     std::string mMinimumErsatzValue = "1e-9";
+
+public:
+    void id(const std::string& aInput)
+    {
+        mID = aInput;
+    }
+    std::string id() const
+    {
+        return mID;
+    }
+
+    void physics(const std::string& aInput)
+    {
+        mPhysics = aInput;
+    }
+    std::string physics() const
+    {
+        return mPhysics;
+    }
+
+    void performer(const std::string& aInput)
+    {
+        mPerformer = aInput;
+    }
+    std::string performer() const
+    {
+        return mPerformer;
+    }
+
+    void dimensions(const std::string& aInput)
+    {
+        mSpatialDims = aInput;
+    }
+    std::string dimensions() const
+    {
+        return mSpatialDims;
+    }
+
+    void materialPenaltyExponent(const std::string& aInput)
+    {
+        mPenaltyParam = aInput;
+    }
+    std::string materialPenaltyExponent() const
+    {
+        return mPenaltyParam;
+    }
+
+    void minErsatzMaterialConstant(const std::string& aInput)
+    {
+        mMinimumErsatzValue = aInput;
+    }
+    std::string minErsatzMaterialConstant() const
+    {
+        return mMinimumErsatzValue;
+    }
 };
 
 struct Output
