@@ -55,11 +55,11 @@ private:
     void setName(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn setType
-     * \brief Set objective function's type, i.e. category.
+     * \fn setCategory
+     * \brief Set objective function category.
      * \param [in/out] aInputFile parsed input file metadata
     **********************************************************************************/
-    void setType(XMLGen::Objective& aMetadata);
+    void setCategory(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setCode

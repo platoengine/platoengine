@@ -59,7 +59,7 @@ void ParseObjective::setName(XMLGen::Objective &aMetadata)
     }
 }
 
-void ParseObjective::setType(XMLGen::Objective &aMetadata)
+void ParseObjective::setCategory(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("type");
     if (tItr != mTags.end() && !tItr->second.second.empty())
@@ -329,7 +329,7 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
 
 void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
 {
-    this->setType(aMetadata);
+    this->setCategory(aMetadata);
     this->setName(aMetadata);
     this->setWeight(aMetadata);
     this->setPerformer(aMetadata);
@@ -377,7 +377,7 @@ void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
 
 void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
 {
-    XMLGen::ValidPhysicsPerformerKeys tValidKeys;
+    XMLGen::ValidPerformerKeys tValidKeys;
     if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Parse Objective: 'code' keyword '") + aMetadata.code_name + "' is not supported. ")

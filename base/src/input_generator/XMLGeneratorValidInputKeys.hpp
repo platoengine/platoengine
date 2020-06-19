@@ -57,12 +57,12 @@ struct ValidAxesKeys
 };
 // struct ValidAxesKeys
 
-struct ValidPhysicsPerformerKeys
+struct ValidPerformerKeys
 {
     /*!< valid physics performers supported by plato */
-    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd"};
+    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "platomain"};
 };
-// struct ValidPhysicsPerformerKeys
+// struct ValidPerformerKeys
 
 struct ValidDiscretizationKeys
 {

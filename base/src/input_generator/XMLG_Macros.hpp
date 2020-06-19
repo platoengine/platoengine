@@ -41,7 +41,7 @@
 */
 
 /*
- * Plato_Macros.hpp
+ * XMLG_Macros.hpp
  *
  *  Created on: Jun 21, 2019
  */

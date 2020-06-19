@@ -8,6 +8,8 @@
 #include <sstream>
 #include <numeric>
 
+#include "XMLG_Macros.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
@@ -209,6 +211,20 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
               std::back_inserter(aOutput));
 
     if(aToLower) { XMLGen::to_lower(aOutput); }
+}
+// function split
+
+std::string check_code_keyword(const std::string& aInput)
+{
+    auto tLowerInput = aInput;
+    XMLGen::to_lower(tLowerInput);
+    XMLGen::ValidPerformerKeys tValidKeys;
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
+    if(tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Check Code Keyword: keyword 'code' with tag '") + tLowerInput + "' is not supported.")
+    }
+    return (tItr.operator*());
 }
 // function split
 

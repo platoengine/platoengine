@@ -13,9 +13,25 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
+#include "XMLGeneratorValidInputKeys.hpp"
+
 namespace XMLGen
 {
 
+std::string check_criterion_category_keyword(const std::string& aInput)
+{
+    auto tLowerInput = Plato::tolower(aInput);
+    XMLGen::ValidCriterionKeys tValidKeys;
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
+    if(tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + tLowerInput + "' is not supported.")
+    }
+    return (tItr.operator*());
+}
+
+// TODO: FINISH, DO I NEED TO PARSE THE CODE FOR NOW UNTIL THE OBJECTIVE IS REFACTOR AND
+// TODO: PHYSICS QoI GO IN THE SCENARIO BLOCK.
 class ParseConstraint : public XMLGen::ParseMetadata<std::vector<XMLGen::Constraint>>
 {
 private:
@@ -28,8 +44,154 @@ private:
         mTags.clear();
 
         mTags.insert({ "type", { {"type"}, "" } });
-        mTags.insert({ "code", { {"code"}, "" } });
         mTags.insert({ "name", { {"name"}, "" } });
+        mTags.insert({ "weight", { {"weight"}, "" } });
+        mTags.insert({ "performer", { {"performer"}, "" } });
+        mTags.insert({ "volume fraction", { {"volume","fraction"}, "" } });
+        mTags.insert({ "volume absolute", { {"volume","absolute"}, "" } });
+        mTags.insert({ "surface area", { {"surface","area"}, "" } });
+        mTags.insert({ "surface area sideset id", { {"surface","area","sideset","id"}, "" } });
+        mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
+        mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
+        mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
+    }
+
+    void setName(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("name");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.name(tItr->second.second);
+        }
+    }
+
+    void setCategory(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("type");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            auto tCategory = XMLGen::check_criterion_category_keyword(tItr->second.second);
+            aMetadata.category();
+        }
+        else
+        {
+            auto tCategory = XMLGen::check_criterion_category_keyword("volume");
+            aMetadata.category(tCategory);
+        }
+    }
+
+    void setWeight(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("weight");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.weight(tItr->second.second);
+        }
+        else
+        {
+            aMetadata.weight("1.0");
+        }
+    }
+
+    void setPerformer(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("performer");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.performer(tItr->second.second);
+        }
+        else
+        {
+            // erase any value, keyword will be redefined in this->checkPerfomerNames
+            aMetadata.performer("");
+        }
+    }
+
+    void setPnormExponent(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("pnorm exponent");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.pnormExponent(tItr->second.second);
+        }
+        else
+        {
+            aMetadata.pnormExponent("6.0");
+        }
+    }
+
+    void setNormalizedTarget(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("volume fraction");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.normalizedTarget(tItr->second.second);
+        }
+    }
+
+    void setAbsoluteTarget(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("volume absolute");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.absoluteTarget(tItr->second.second);
+        }
+    }
+
+    void setSurfaceArea(XMLGen::Constraint &aMetadata)
+    {
+        // TO BE DEPRECATED SOON!
+        auto tItr = mTags.find("surface area");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.surface_area = tItr->second.second;
+        }
+
+        tItr = mTags.find("surface area sideset id");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.surface_area_ssid = tItr->second.second;
+        }
+    }
+
+    void setMinimumErsatzValue(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("minimum ersatz material value");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.minErsatzMaterialConstant(tItr->second.second);
+        }
+        else
+        {
+            aMetadata.minErsatzMaterialConstant("1e-9");
+        }
+    }
+
+    void setPenaltyPower(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("penalty power");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            aMetadata.materialPenaltyExponent(tItr->second.second);
+        }
+        else
+        {
+            aMetadata.materialPenaltyExponent("3.0");
+        }
+    }
+
+    void setMetaData(XMLGen::Constraint& aMetadata)
+    {
+        this->setName(aMetadata);
+        this->setWeight(aMetadata);
+        this->setCategory(aMetadata);
+        this->setPerformer(aMetadata);
+        this->setSurfaceArea(aMetadata);
+        this->setPenaltyPower(aMetadata);
+        this->setPnormExponent(aMetadata);
+        this->setAbsoluteTarget(aMetadata);
+        this->setNormalizedTarget(aMetadata);
+        this->setMinimumErsatzValue(aMetadata);
     }
 
 public:
@@ -53,13 +215,12 @@ public:
             XMLGen::to_lower(tTokens);
 
             std::string tTag;
-            if (XMLGen::parse_single_value(tTokens, { "begin", "objective" }, tTag))
+            if (XMLGen::parse_single_value(tTokens, { "begin", "constraint" }, tTag))
             {
                 XMLGen::Constraint tMetadata;
                 XMLGen::erase_tags(mTags);
-                XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
-                //this->setMetaData(tMetadata);
-                //this->checkMetaData(tMetadata);
+                XMLGen::parse_input_metadata( { "end", "constraint" }, aInputFile, mTags);
+                this->setMetaData(tMetadata);
                 mData.push_back(tMetadata);
             }
         }

@@ -104,5 +104,12 @@ bool is_number(const std::string& aInput);
 **********************************************************************************/
 void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower = true);
 
+/******************************************************************************//**
+ * \fn check_code_keyword
+ * \brief Throw error if code name is not supported.
+ * \param [in] aInput 'code' keyword
+**********************************************************************************/
+std::string check_code_keyword(const std::string& aInput);
+
 }
 // namespace XMLGen

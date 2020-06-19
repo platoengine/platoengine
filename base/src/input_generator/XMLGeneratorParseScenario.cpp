@@ -10,18 +10,6 @@
 namespace XMLGen
 {
 
-std::string check_code_keyword(const std::string& aInput)
-{
-    auto tLowerInput = Plato::tolower(aInput);
-    XMLGen::ValidPhysicsPerformerKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Check Code Keyword: keyword 'code' with tag '") + tLowerInput + "' is not supported.")
-    }
-    return (tItr.operator*());
-}
-
 std::string check_physics_keyword(const std::string& aInput)
 {
     auto tLowerInput = Plato::tolower(aInput);
