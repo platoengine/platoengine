@@ -31,12 +31,6 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn erase
-     * \brief Erases value key content in map from valid tags to valid tokens-value pair.
-    **********************************************************************************/
-    void erase();
-
-    /******************************************************************************//**
      * \fn parseMetadata
      * \brief Parse uncertainty blocks.
      * \param [in] aInputFile input file metadata

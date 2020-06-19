@@ -13,6 +13,65 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
+namespace XMLGen
+{
+
+class ParseConstraint : public XMLGen::ParseMetadata<std::vector<XMLGen::Constraint>>
+{
+private:
+    XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    std::vector<XMLGen::Constraint> mData; /*!< constraint functions metadata */
+
+private:
+    void allocate()
+    {
+        mTags.clear();
+
+        mTags.insert({ "type", { {"type"}, "" } });
+        mTags.insert({ "code", { {"code"}, "" } });
+        mTags.insert({ "name", { {"name"}, "" } });
+    }
+
+public:
+    std::vector<XMLGen::Constraint> data() const
+    {
+        return mData;
+    }
+
+    void parse(std::istream &aInputFile)
+    {
+        mData.clear();
+        this->allocate();
+        constexpr int MAX_CHARS_PER_LINE = 10000;
+        std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
+        while (!aInputFile.eof())
+        {
+            // read an entire line into memory
+            std::vector<std::string> tTokens;
+            aInputFile.getline(tBuffer.data(), MAX_CHARS_PER_LINE);
+            XMLGen::parse_tokens(tBuffer.data(), tTokens);
+            XMLGen::to_lower(tTokens);
+
+            std::string tTag;
+            if (XMLGen::parse_single_value(tTokens, { "begin", "objective" }, tTag))
+            {
+                XMLGen::Constraint tMetadata;
+                XMLGen::erase_tags(mTags);
+                XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
+                //this->setMetaData(tMetadata);
+                //this->checkMetaData(tMetadata);
+                mData.push_back(tMetadata);
+            }
+        }
+
+        //this->setObjectiveIDs();
+        //this->checkPerfomerNames();
+    }
+};
+
+}
+// namespace XMLGen
+
 namespace PlatoTestXMLGenerator
 {
 

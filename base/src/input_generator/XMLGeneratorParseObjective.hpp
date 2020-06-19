@@ -31,12 +31,6 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn erase
-     * \brief Erases value key content in map from valid tags to valid tokens-value pair.
-    **********************************************************************************/
-    void erase();
-
-    /******************************************************************************//**
      * \fn setObjectiveIDs
      * \brief Set objective functions identification number/name. If there are objective \n
      * functions without an identification number/name, assign default values.

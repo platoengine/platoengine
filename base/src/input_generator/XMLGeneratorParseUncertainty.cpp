@@ -30,14 +30,6 @@ void ParseUncertainty::allocate()
     mTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
 }
 
-void ParseUncertainty::erase()
-{
-    for(auto& tTag : mTags)
-    {
-        tTag.second.second.clear();
-    }
-}
-
 void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
 {
     auto tItr = mTags.find("category");
@@ -257,7 +249,7 @@ void ParseUncertainty::parse(std::istream& aInputFile)
         if(XMLGen::parse_single_value(tTokens, {"begin","uncertainty"}, tTag))
         {
             XMLGen::Uncertainty tMetadata;
-            this->erase();
+            XMLGen::erase_tags(mTags);
             XMLGen::parse_input_metadata({"end","uncertainty"}, aInputFile, mTags);
             this->setMetaData(tMetadata);
             this->checkMetaData(tMetadata);

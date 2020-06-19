@@ -16,6 +16,14 @@ namespace XMLGen
 /*!< map from tag to container of token-value pairs, i.e. map<tag, pair<tokens,value> > */
 using UseCaseTags = std::map<std::string, std::pair<std::vector<std::string>,std::string>>;
 
+
+/******************************************************************************//**
+ * \fn erase_tags
+ * \brief Erase input tag values in map.
+ * \param [in/out] aTags map from tag to container of token-value pairs
+**********************************************************************************/
+void erase_tags(XMLGen::UseCaseTags& aTags);
+
 /******************************************************************************//**
  * \fn parse_input_metadata
  * \brief Parse input metadata and set token-value pairs in XMLGen::UseCaseTags map.

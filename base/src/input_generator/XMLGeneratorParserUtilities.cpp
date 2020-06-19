@@ -13,6 +13,14 @@
 namespace XMLGen
 {
 
+void erase_tags(XMLGen::UseCaseTags& aTags)
+{
+    for (auto &tTag : aTags)
+    {
+        tTag.second.second.clear();
+    }
+}
+
 void parse_input_metadata
 (const std::vector<std::string>& aStopKeys,
  std::istream& aInputFile,

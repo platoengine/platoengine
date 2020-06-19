@@ -50,14 +50,6 @@ void ParseObjective::allocate()
     mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
 }
 
-void ParseObjective::erase()
-{
-    for (auto &tTag : mTags)
-    {
-        tTag.second.second.clear();
-    }
-}
-
 void ParseObjective::setName(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("name");
@@ -530,7 +522,7 @@ void ParseObjective::parse(std::istream &aInputFile)
         if (XMLGen::parse_single_value(tTokens, { "begin", "objective" }, tTag))
         {
             XMLGen::Objective tMetadata;
-            this->erase();
+            XMLGen::erase_tags(mTags);
             XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
             this->setMetaData(tMetadata);
             this->checkMetaData(tMetadata);
