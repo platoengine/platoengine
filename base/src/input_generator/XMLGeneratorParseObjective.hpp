@@ -54,21 +54,21 @@ private:
     /******************************************************************************//**
      * \fn setName
      * \brief Set objective function's user assigned name.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setName(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setCategory
      * \brief Set objective function category.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setCategory(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setCode
      * \brief Set code responsible for evaluating the objective function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setCode(XMLGen::Objective& aMetadata);
 
@@ -76,7 +76,7 @@ private:
      * \fn setNumRanks
      * \brief Set number of ranks assign to the code responsible for evaluating the \n
      * objective function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setNumRanks(XMLGen::Objective& aMetadata);
 
@@ -84,50 +84,50 @@ private:
      * \fn setNumProcessors
      * \brief Set number of processors assign to the code responsible for evaluating \n
      * the objective function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setNumProcessors(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setWeight
      * \brief Set objective function weight.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setWeight(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setPerformer
      * \brief Set objective function performer, i.e. name use to denote simulation \n
-     * code responsible of evaluating the objective function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * code responsible for evaluating the objective function.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setPerformer(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setPenaltyPower
      * \brief Set exponent for material density penalty function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setPenaltyPower(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setPnormExponent
      * \brief Set p-norm exponent.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setPnormExponent(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setNormalizeObjective
      * \brief Set normalize objective function flag.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setNormalizeObjective(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setMinimumErsatzValue
      * \brief Set minimum Ersatz material parameter used in material density penalty function.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setMinimumErsatzValue(XMLGen::Objective& aMetadata);
 
@@ -135,35 +135,35 @@ private:
      * \fn setAnalyzeNewWorkflow
      * \brief Use new analyze's uncertainty quantification workflow to solve optimization \n
      * under uncertainty problems.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setAnalyzeNewWorkflow(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setAnalysisSolverTolerance
      * \brief Set solver tolerance for solver use to solve the finite element system of equations.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setAnalysisSolverTolerance(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setNaturalBoundaryConditionsCaseIDs
      * \brief Set identification numbers associated with each natural boundary condition case.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setNaturalBoundaryConditionsCaseIDs(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setNaturalBoundaryConditionsCaseIDs
      * \brief Set weights associated with each natural boundary conditions.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setNaturalBoundaryConditionsCaseWeights(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn setNaturalBoundaryConditionsCaseIDs
      * \brief Set identification numbers associated with the essential boundary conditions.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setEssentialBoundaryConditionsCaseIDs(XMLGen::Objective& aMetadata);
 
@@ -172,7 +172,7 @@ private:
     /******************************************************************************//**
      * \fn setOutputForPlotting
      * \brief Set keywords for output quantities of interests.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setOutputForPlotting(XMLGen::Objective& aMetadata);
 
@@ -181,7 +181,7 @@ private:
      * \brief Set parameters used to identify if we are running multiple performers in \n
      * using the multiple program, multiple data parallel programming model as well as
      * the number of processors used for each criterion use case.
-     * \param [in/out] aInputFile parsed input file metadata
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
     void setDistributeObjectiveType(XMLGen::Objective& aMetadata);
 
@@ -275,7 +275,7 @@ public:
     /******************************************************************************//**
      * \fn parse
      * \brief Parse objective functions metadata.
-     * \param [in] aInputFile input file metadata
+     * \param [in] aInputFile input metadata
     **********************************************************************************/
     void parse(std::istream& aInputFile) override;
 };

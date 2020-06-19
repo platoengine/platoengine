@@ -88,14 +88,14 @@ public:
      * \brief Return output metadata.
      * \return metadata
     **********************************************************************************/
-    XMLGen::Scenario data() const;
+    XMLGen::Scenario data() const override;
 
     /******************************************************************************//**
      * \fn parse
      * \brief Parse output metadata.
      * \param [in] aInputFile input file metadata.
     **********************************************************************************/
-    void parse(std::istream &aInputFile);
+    void parse(std::istream &aInputFile) override;
 };
 
 }

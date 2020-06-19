@@ -169,14 +169,14 @@ public:
      * \brief Return list of uncertainty metadata.
      * \return list of uncertainty metadata
     **********************************************************************************/
-    std::vector<XMLGen::Uncertainty> data() const;
+    std::vector<XMLGen::Uncertainty> data() const override;
 
     /******************************************************************************//**
      * \fn parse
      * \brief Parse uncertainty metadata.
      * \param [in] aInputFile parsed input file metadata
     **********************************************************************************/
-    void parse(std::istream& aInputFile);
+    void parse(std::istream& aInputFile) override;
 };
 // class ParseUncertainty
 

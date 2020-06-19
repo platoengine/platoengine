@@ -50,6 +50,24 @@ struct ValidPhysicsKeys
 };
 // struct ValidPhysicsKeys
 
+struct ValidConstraintTargetAbsoluteKeys
+{
+    /*!<
+     * \brief Valid plato xml generator parser constraint absolute target keys.
+     **/
+    std::vector<std::string> mKeys = {"volume absolute", "target absolute"};
+};
+// struct ValidConstraintTargetAbsoluteKeys
+
+struct ValidConstraintTargetNormalizedKeys
+{
+    /*!<
+     * \brief Valid plato xml generator parser constraint normalized target keys.
+     **/
+    std::vector<std::string> mKeys = {"volume fraction", "target normalized"};
+};
+// struct ValidConstraintTargetNormalizedKeys
+
 struct ValidAxesKeys
 {
     /*!< map from dimension to axis, i.e. map<dimension, axis> */

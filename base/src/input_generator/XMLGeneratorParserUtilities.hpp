@@ -106,10 +106,17 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
 
 /******************************************************************************//**
  * \fn check_code_keyword
- * \brief Throw error if code name is not supported.
+ * \brief Throw error if code 'name' is not supported.
  * \param [in] aInput 'code' keyword
 **********************************************************************************/
 std::string check_code_keyword(const std::string& aInput);
+
+/******************************************************************************//**
+ * \fn check_criterion_category_keyword
+ * \brief Throw error if criterion 'category' is not supported.
+ * \param [in] aInput 'category' keyword
+**********************************************************************************/
+std::string check_criterion_category_keyword(const std::string& aInput);
 
 }
 // namespace XMLGen

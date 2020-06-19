@@ -226,6 +226,20 @@ std::string check_code_keyword(const std::string& aInput)
     }
     return (tItr.operator*());
 }
-// function split
+// function check_code_keyword
+
+std::string check_criterion_category_keyword(const std::string& aInput)
+{
+    auto tLowerInput = aInput;
+    XMLGen::to_lower(tLowerInput);
+    XMLGen::ValidCriterionKeys tValidKeys;
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
+    if(tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + tLowerInput + "' is not supported.")
+    }
+    return (tItr.operator*());
+}
+// function check_criterion_category_keyword
 
 }
