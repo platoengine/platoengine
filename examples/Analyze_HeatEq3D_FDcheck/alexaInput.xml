@@ -65,7 +65,7 @@
         <Parameter  name="Specific Heat" type="double" value="900.0"/>
       </ParameterList>
       <ParameterList name="Thermal Conduction">
-        <Parameter  name="Conductivity Coefficient" type="double" value="210.0"/>
+        <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
       </ParameterList>
     </ParameterList>
   

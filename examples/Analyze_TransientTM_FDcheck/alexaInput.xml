@@ -45,14 +45,18 @@
     </ParameterList>
 
     <ParameterList name="Material Model">
-      <ParameterList name="Isotropic Linear Thermoelastic">
-        <Parameter  name="Mass Density" type="double" value="2703.0"/>
-        <Parameter  name="Specific Heat" type="double" value="900.0"/>
-        <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1.0e11"/>
-        <Parameter  name="Thermal Expansion Coefficient" type="double" value="1.0e-5"/>
-        <Parameter  name="Thermal Conductivity Coefficient" type="double" value="910.0"/>
-        <Parameter  name="Reference Temperature" type="double" value="10.0"/>
+      <ParameterList name="Thermal Mass">
+        <Parameter name="Specific Heat" type="double" value="900.0"/>
+        <Parameter name="Mass Density" type="double" value="2703.0"/>
+      </ParameterList>
+      <ParameterList name="Thermoelastic">
+        <Parameter name="Reference Temperature" type="double" value="10.0"/>
+        <Parameter name="Thermal Conductivity" type="double" value="910.0"/>
+        <Parameter name="Thermal Expansivity" type="double" value="1.0e-5"/>
+        <ParameterList name="Elastic Stiffness">
+          <Parameter name="Youngs Modulus" type="double" value="1.0e11"/>
+          <Parameter name="Poissons Ratio" type="double" value="0.3"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
 
