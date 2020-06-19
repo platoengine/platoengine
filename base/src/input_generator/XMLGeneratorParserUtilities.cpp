@@ -5,6 +5,7 @@
  */
 
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <numeric>
 
@@ -144,7 +145,7 @@ bool parse_tokens(char *aBuffer, std::vector<std::string> &aTokens)
 }
 // function parse_tokens
 
-std::string transform_tag_values(const std::vector<std::string>& aTokens)
+std::string transform_keyword_values(const std::vector<std::string>& aTokens)
 {
     std::ostringstream tOutput;
     for(auto& tToken : aTokens)
@@ -158,37 +159,59 @@ std::string transform_tag_values(const std::vector<std::string>& aTokens)
     }
     return (tOutput.str());
 }
-// function transform_tag_values
+// function transform_keyword_values
+
+void is_input_keyword_empty
+(const std::vector<std::string>& aInputTokens,
+ const std::vector<std::string>& aTargetKey)
+{
+    if(aTargetKey.size() == aInputTokens.size())
+    {
+        auto tKeyword = XMLGen::transform_keyword_values(aTargetKey);
+        THROWERR(std::string("Is Input Keyword Empty: Input keyword '") + tKeyword + "' value is empty.")
+    }
+}
+// function is_input_keyword_empty
+
+bool tokens_match
+(const std::vector<std::string>& aInputTokens,
+ const std::vector<std::string>& aTargetKey)
+{
+    std::vector<size_t> tMatch(aTargetKey.size());
+    for (auto& tToken : aTargetKey)
+    {
+        auto tIndex = &tToken - &aTargetKey[0];
+        tMatch[tIndex] = tToken == aInputTokens[tIndex] ? 1 : 0;
+    }
+    auto tSum = std::accumulate(tMatch.begin(), tMatch.end(), 0);
+    auto tFoundMatch = tSum == tMatch.size() ? true : false;
+    return tFoundMatch;
+}
+// function tokens_match
 
 void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags)
 {
     for (auto& tTag : aTags)
     {
-        std::vector<size_t> tMatch(tTag.second.first.size());
-        for (auto& tToken : tTag.second.first)
-        {
-            auto tIndex = &tToken - &tTag.second.first[0];
-            tMatch[tIndex] = tToken == aTokens[tIndex] ? 1 : 0;
-        }
-        auto tSum = std::accumulate(tMatch.begin(), tMatch.end(), 0);
-        bool tFoundMatch = tSum == tMatch.size() ? true : false;
+        auto tFoundMatch = XMLGen::tokens_match(aTokens, tTag.second.first);
         if (tFoundMatch)
         {
+            XMLGen::is_input_keyword_empty(aTokens, tTag.second.first);
             auto tBeginItr = aTokens.begin();
-            auto tBeginIndex = tMatch.size();
+            auto tBeginIndex = tTag.second.first.size();
             std::vector<std::string> tTokenList;
             for (auto tItr = std::next(tBeginItr, tBeginIndex); tItr != aTokens.end(); tItr++)
             {
                 tTokenList.push_back(tItr.operator*());
             }
-            tTag.second.second = XMLGen::transform_tag_values(tTokenList);
+            tTag.second.second = XMLGen::transform_keyword_values(tTokenList);
             break;
         }
     }
 }
 // function parse_tag_values
 
-bool is_number(const std::string& aInput)
+bool is_integer(const std::string& aInput)
 {
     auto tIsDigit = true;
     for(auto tValue : aInput)
@@ -201,7 +224,7 @@ bool is_number(const std::string& aInput)
     }
     return tIsDigit;
 }
-// function is_number
+// function is_integer
 
 void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower)
 {

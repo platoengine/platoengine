@@ -21,7 +21,7 @@ struct ValidCriterionKeys
      **/
     std::vector<std::string> mKeys =
         {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
-         "volume", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
+         "volume", "surface area", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
          "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
          "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
 };
@@ -55,7 +55,7 @@ struct ValidConstraintTargetAbsoluteKeys
     /*!<
      * \brief Valid plato xml generator parser constraint absolute target keys.
      **/
-    std::vector<std::string> mKeys = {"volume absolute", "target absolute"};
+    std::vector<std::string> mKeys = {"volume absolute", "target absolute", "surface_area"};
 };
 // struct ValidConstraintTargetAbsoluteKeys
 

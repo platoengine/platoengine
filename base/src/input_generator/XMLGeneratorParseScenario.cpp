@@ -36,7 +36,7 @@ std::string check_spatial_dimensions_keyword(const std::string& aInput)
 
 void check_number(const std::string& aInput)
 {
-    if(!XMLGen::is_number(aInput))
+    if(!XMLGen::is_integer(aInput))
     {
         THROWERR(std::string("Parse Scenario: keyword 'minimum_ersatz_material_value' with tag '") + aInput + "'is not a finite number.")
     }

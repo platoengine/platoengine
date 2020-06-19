@@ -72,12 +72,33 @@ void to_lower(std::vector<std::string>& aInput);
 bool parse_tokens(char *aBuffer, std::vector<std::string> &aTokens);
 
 /******************************************************************************//**
- * \fn transform_tag_values
+ * \fn transform_keyword_values
  * \brief Convert tokens into string.
  * \param [in] aTokens tokens
  * \return transformed tokens, i.e. tag
 **********************************************************************************/
-std::string transform_tag_values(const std::vector<std::string>& aTokens);
+std::string transform_keyword_values(const std::vector<std::string>& aTokens);
+
+/******************************************************************************//**
+ * \fn is_input_keyword_empty
+ * \brief Throws error if input keyword is empty.
+ * \param [in] aInputTokens input tokens, i.e. tokens parsed
+ * \param [in] aTargetKey   target keyword
+**********************************************************************************/
+void is_input_keyword_empty
+(const std::vector<std::string>& aInputTokens,
+ const std::vector<std::string>& aTargetKey);
+
+/******************************************************************************//**
+ * \fn tokens_match
+ * \brief Returns true if input tokens match target key.
+ * \param [in] aInputTokens input tokens, i.e. tokens parsed
+ * \param [in] aTargetKey   target keyword
+ * \return flag
+**********************************************************************************/
+bool tokens_match
+(const std::vector<std::string>& aInputTokens,
+ const std::vector<std::string>& aTargetKey);
 
 /******************************************************************************//**
  * \fn parse_tag_values
@@ -88,15 +109,15 @@ std::string transform_tag_values(const std::vector<std::string>& aTokens);
 void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags);
 
 /******************************************************************************//**
- * \fn is_number
+ * \fn is_integer
  * \brief Return false if input string is not a finite number.
  * \param [in]  aInput input token
  * \return flag
 **********************************************************************************/
-bool is_number(const std::string& aInput);
+bool is_integer(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn is_number
+ * \fn is_integer
  * \brief Split input string into list of tokens
  * \param [in]      aInput   input string
  * \param [in/out]  aOutput  list of tokens

@@ -3401,7 +3401,7 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
+    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
     stringInput = "begin constraint\n"
             "name\n"
             "end constraint\n";
@@ -3409,31 +3409,17 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
+    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
     stringInput = "begin constraint\n"
             "volume fraction\n"
             "end constraint\n";
+
     iss.str(stringInput);
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
-    stringInput = "begin constraint\n"
-            "surface area\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
-    stringInput = "begin constraint\n"
-            "surface area sideset id\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
+    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+
     stringInput = "begin constraint\n"
             "bad_keyword\n"
             "end constraint\n";
@@ -3441,7 +3427,8 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     iss.clear();
     iss.seekg (0);
     tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), false);
+    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+
     stringInput = "begin constraint\n"
             "type volume\n"
             "name vol1\n"
@@ -3455,11 +3442,12 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     EXPECT_EQ(tester.getConstraintName(0), "vol1");
     EXPECT_EQ(tester.getConstraintType(0), "volume");
     EXPECT_EQ(tester.getConstraintVolFrac(0), ".5");
+
     stringInput = "begin constraint\n"
             "type surface area\n"
             "name surf1\n"
-            "surface area 23\n"
-            "surface area sideset id 20\n"
+            "surface_area 23\n"
+            "surface_area_sideset_id 20\n"
             "end constraint\n";
     iss.str(stringInput);
     iss.clear();
@@ -3471,6 +3459,7 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     EXPECT_EQ(tester.getConstraintSurfArea(0), "23");
     EXPECT_EQ(tester.getConstraintSurfAreaSidesetID(0), "20");
 }
+
 TEST(PlatoTestXMLGenerator, parseMesh)
 {
     XMLGenerator_UnitTester tester;

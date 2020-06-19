@@ -78,6 +78,7 @@
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseObjective.hpp"
+#include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 
 namespace XMLGen
@@ -2712,125 +2713,13 @@ bool XMLGenerator::parseMaterials(std::istream &fin)
   return true;
 }
 /******************************************************************************/
-bool XMLGenerator::parseConstraints(std::istream &fin)
+bool XMLGenerator::parseConstraints(std::istream &aInput)
 /******************************************************************************/
 {
-  std::string tStringValue;
-  std::vector<std::string> tInputStringList;
-
-  // read each line of the file
-  while (!fin.eof())
-  {
-    // read an entire line into memory
-    char buf[MAX_CHARS_PER_LINE];
-    fin.getline(buf, MAX_CHARS_PER_LINE);
-    std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
-
-    // process the tokens
-    if(tokens.size() > 0)
-    {
-      for(size_t j=0; j<tokens.size(); ++j)
-        tokens[j] = toLower(tokens[j]);
-
-      if(parseSingleValue(tokens, tInputStringList = {"begin","constraint"}, tStringValue))
-      {
-        XMLGen::Constraint tNewConstraint;
-        // found constraint
-        while (!fin.eof())
-        {
-          fin.getline(buf, MAX_CHARS_PER_LINE);
-          tokens.clear();
-          parseTokens(buf, tokens);
-          // process the tokens
-          if(tokens.size() > 0)
-          {
-            for(size_t j=0; j<tokens.size(); ++j)
-              tokens[j] = toLower(tokens[j]);
-
-            if(parseSingleValue(tokens, tInputStringList = {"end","constraint"}, tStringValue))
-            {
-              break;
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"type"}, tStringValue))
-            {
-              if(tokens.size() < 2)
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not enough params after \"type\" keyword.\n";
-                return false;
-              }
-              auto tCategory = tokens[1];
-              for(size_t j=2; j<tokens.size(); ++j)
-              {
-                  tCategory += " ";
-                  tCategory += tokens[j];
-              }
-              tNewConstraint.category(tCategory);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
-            {
-              if(tokens.size() < 2)
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not enough params after \"name\" keyword.\n";
-                return false;
-              }
-              auto tName = tokens[1];
-              for(size_t j=2; j<tokens.size(); ++j)
-              {
-                  tName += " ";
-                  tName += tokens[j];
-              }
-              tNewConstraint.name(tName);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"volume","fraction"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume fraction\".\n";
-                return false;
-              }
-              tNewConstraint.normalizedTarget(tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"volume","absolute"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume absolute\".\n";
-                return false;
-              }
-              tNewConstraint.absoluteTarget(tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"surface","area","sideset","id"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"surface area sideset id\".\n";
-                return false;
-              }
-              tNewConstraint.surface_area_ssid = tStringValue;
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"surface","area"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"surface area\".\n";
-                return false;
-              }
-              tNewConstraint.surface_area = tStringValue;
-            }
-            else
-            {
-              std::cout << "ERROR:XMLGenerator:parseConstraints: Invalid keyword.\n";
-              return false;
-            }
-          }
-        }
-        m_InputData.constraints.push_back(tNewConstraint);
-      }
-    }
-  }
-
-  return true;
+    XMLGen::ParseConstraint tParseConstraint;
+    tParseConstraint.parse(aInput);
+    m_InputData.constraints = tParseConstraint.data();
+    return true;
 }
 
 /******************************************************************************/
@@ -2861,9 +2750,6 @@ bool XMLGenerator::parseFile()
   parseLoads(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  this->parseObjectives(tInputFile);
-  tInputFile.close();
-  tInputFile.open(m_InputFilename.c_str()); // open a file
   parseOptimizationParameters(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
@@ -2880,6 +2766,14 @@ bool XMLGenerator::parseFile()
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
   parseCodePaths(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseObjectives(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseConstraints(tInputFile);
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file
@@ -2987,9 +2881,4 @@ void XMLGenerator::getUncertaintyFlags()
     }
 }
 
-
-
-
 }
-
-

@@ -450,7 +450,7 @@ void ParseObjective::checkDistributeObjective(const XMLGen::Objective &aMetadata
 {
     if (aMetadata.distribute_objective_type.compare("atmost") == 0)
     {
-        if (!XMLGen::is_number(aMetadata.atmost_total_num_processors))
+        if (!XMLGen::is_integer(aMetadata.atmost_total_num_processors))
         {
             THROWERR("Parse Objective: distributed objective is of type 'at most' and the number of processors is not a finite number.")
         }
