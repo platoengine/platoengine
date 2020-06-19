@@ -31,21 +31,25 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn setObjectiveIDs
+     * \fn setIdentification
      * \brief Set objective functions identification number/name. If there are objective \n
      * functions without an identification number/name, assign default values.
-     * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void setObjectiveIDs();
+    void setIdentification();
 
     /******************************************************************************//**
      * \fn checkPerfomerNames
      * \brief If performer keywords are empty, set to default value 'code_name' + 'id', \n
      * where 'code_name' denotes the input code name provided by the user and 'id' \n
      * denotes the identification name/number for an objective function.
-     * \param [in] aMetadata objective metadata
     **********************************************************************************/
     void checkPerfomerNames();
+
+    /******************************************************************************//**
+     * \fn finalize
+     * \brief Perform final checks and member data definitions for objective functions.
+    **********************************************************************************/
+    void finalize();
 
     /******************************************************************************//**
      * \fn setName

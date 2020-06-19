@@ -209,6 +209,7 @@ struct Constraint
 {
 private:
     std::string mName;
+    std::string mCode;
     std::string mCategory;
     std::string mPerformerName = "PlatoMain";
     std::string mNormalizedTargetValue;
@@ -229,6 +230,15 @@ public:
     std::string name() const
     {
         return mName;
+    }
+
+    void code(const std::string& aInput)
+    {
+        mCode = aInput;
+    }
+    std::string code() const
+    {
+        return mCode;
     }
 
     void weight(const std::string& aInput)

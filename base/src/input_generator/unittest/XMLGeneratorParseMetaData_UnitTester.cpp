@@ -18,6 +18,24 @@
 namespace XMLGen
 {
 
+struct ValidConstraintTargetAbsoluteKeys
+{
+    /*!<
+     * \brief Valid plato xml generator parser constraint target keys.
+     **/
+    std::vector<std::string> mKeys = {"volume absolute", "target absolute"};
+};
+// struct ValidConstraintTargetAbsoluteKeys
+
+struct ValidConstraintTargetNormalizedKeys
+{
+    /*!<
+     * \brief Valid plato xml generator parser constraint target keys.
+     **/
+    std::vector<std::string> mKeys = {"volume fraction", "target normalized"};
+};
+// struct ValidConstraintTargetNormalizedKeys
+
 std::string check_criterion_category_keyword(const std::string& aInput)
 {
     auto tLowerInput = Plato::tolower(aInput);
@@ -44,16 +62,76 @@ private:
         mTags.clear();
 
         mTags.insert({ "type", { {"type"}, "" } });
+        mTags.insert({ "code", { {"code"}, "" } });
         mTags.insert({ "name", { {"name"}, "" } });
+        mTags.insert({ "target absolute", { {"target", "absolute"}, "" } });
+        mTags.insert({ "target normalized", { {"target", "normalized"}, "" } });
         mTags.insert({ "weight", { {"weight"}, "" } });
         mTags.insert({ "performer", { {"performer"}, "" } });
-        mTags.insert({ "volume fraction", { {"volume","fraction"}, "" } });
-        mTags.insert({ "volume absolute", { {"volume","absolute"}, "" } });
         mTags.insert({ "surface area", { {"surface","area"}, "" } });
         mTags.insert({ "surface area sideset id", { {"surface","area","sideset","id"}, "" } });
         mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
         mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
         mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
+
+        // TO BE DEPRECATED SOON!
+        mTags.insert({ "volume absolute", { {"volume", "absolute"}, "" } });
+        mTags.insert({ "volume fraction", { {"volume", "fraction"}, "" } });
+    }
+
+    void finalize()
+    {
+        this->setIdentification();
+        this->checkTargeValue();
+    }
+
+    void checkTargeValue()
+    {
+        for(auto& tConstraint : mData)
+        {
+            if ((tConstraint.normalizedTarget().empty()) && (tConstraint.absoluteTarget().empty()))
+            {
+                THROWERR(std::string("Parse Constraint: 'target normalized' and 'target absolute' keywords are empty in constraint with category '")
+                  + tConstraint.category() + "', tag '" + tConstraint.name() + "', and computed by '" + tConstraint.code()
+                  + "'.\nOne of the two keywords: 'target normalized' or 'target absolute' " + "must be defined in a constrained optimization problem.")
+            }
+        }
+    }
+
+    void setIdentification()
+    {
+        for (auto &tOuterCriterion : mData)
+        {
+            // For each code name we will make sure there are names set
+            auto tMyCodeName = tOuterCriterion.code();
+            size_t tObjectiveIdentificationNumber = 0;
+            for (auto &tInnerCriterion : mData)
+            {
+                if (!tInnerCriterion.code().compare(tMyCodeName))
+                {
+                    tObjectiveIdentificationNumber++;
+                    if (tInnerCriterion.name().empty())
+                    {
+                        tInnerCriterion.name(std::to_string(tObjectiveIdentificationNumber));
+                    }
+                }
+            }
+        }
+    }
+
+    void setCode(XMLGen::Constraint &aMetadata)
+    {
+        auto tItr = mTags.find("code");
+        if (tItr != mTags.end() && !tItr->second.second.empty())
+        {
+            auto tValidTag = XMLGen::check_code_keyword(tItr->second.second);
+            aMetadata.code(tValidTag);
+        }
+        else
+        {
+            auto tValidTag = XMLGen::check_code_keyword("plato_analyze");
+            aMetadata.code(tValidTag);
+        }
     }
 
     void setName(XMLGen::Constraint &aMetadata)
@@ -71,12 +149,12 @@ private:
         if (tItr != mTags.end() && !tItr->second.second.empty())
         {
             auto tCategory = XMLGen::check_criterion_category_keyword(tItr->second.second);
-            aMetadata.category();
+            aMetadata.category(tCategory);
         }
         else
         {
-            auto tCategory = XMLGen::check_criterion_category_keyword("volume");
-            aMetadata.category(tCategory);
+            THROWERR(std::string("Parse Constraint: constraint 'type' keyword is empty. ")
+                + "At least one constraint must be defined for a constrained optimization problem.")
         }
     }
 
@@ -102,8 +180,7 @@ private:
         }
         else
         {
-            // erase any value, keyword will be redefined in this->checkPerfomerNames
-            aMetadata.performer("");
+            aMetadata.performer("plato_analyze_1");
         }
     }
 
@@ -122,19 +199,29 @@ private:
 
     void setNormalizedTarget(XMLGen::Constraint &aMetadata)
     {
-        auto tItr = mTags.find("volume fraction");
-        if (tItr != mTags.end() && !tItr->second.second.empty())
+        XMLGen::ValidConstraintTargetNormalizedKeys tValidKeys;
+        for(auto tKey : tValidKeys.mKeys)
         {
-            aMetadata.normalizedTarget(tItr->second.second);
+            auto tItr = mTags.find(tKey);
+            if (tItr != mTags.end() && !tItr->second.second.empty())
+            {
+                aMetadata.normalizedTarget(tItr->second.second);
+                break;
+            }
         }
     }
 
     void setAbsoluteTarget(XMLGen::Constraint &aMetadata)
     {
-        auto tItr = mTags.find("volume absolute");
-        if (tItr != mTags.end() && !tItr->second.second.empty())
+        XMLGen::ValidConstraintTargetAbsoluteKeys tValidKeys;
+        for(auto tKey : tValidKeys.mKeys)
         {
-            aMetadata.absoluteTarget(tItr->second.second);
+            auto tItr = mTags.find(tKey);
+            if (tItr != mTags.end() && !tItr->second.second.empty())
+            {
+                aMetadata.absoluteTarget(tItr->second.second);
+                break;
+            }
         }
     }
 
@@ -182,6 +269,7 @@ private:
 
     void setMetaData(XMLGen::Constraint& aMetadata)
     {
+        this->setCode(aMetadata);
         this->setName(aMetadata);
         this->setWeight(aMetadata);
         this->setCategory(aMetadata);
@@ -204,6 +292,7 @@ public:
     {
         mData.clear();
         this->allocate();
+
         constexpr int MAX_CHARS_PER_LINE = 10000;
         std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
         while (!aInputFile.eof())
@@ -225,8 +314,7 @@ public:
             }
         }
 
-        //this->setObjectiveIDs();
-        //this->checkPerfomerNames();
+        this->finalize();
     }
 };
 
@@ -235,6 +323,152 @@ public:
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyConstraintMetadata)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorInvalidConstraintType)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "   type hippo\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyTarget)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "   type volume\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "   type volume\n"
+        "   volume fraction 0.2\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    ASSERT_NO_THROW(tConstraintParser.parse(tInputSS));
+    auto tConstraintMetadata = tConstraintParser.data();
+
+    for (auto& tConstraint : tConstraintMetadata)
+    {
+        ASSERT_TRUE(tConstraint.absoluteTarget().empty());
+        ASSERT_STREQ("0.2", tConstraint.normalizedTarget().c_str());
+        ASSERT_STREQ("volume", tConstraint.category().c_str());
+        ASSERT_STREQ("plato_analyze", tConstraint.code().c_str());
+        ASSERT_STREQ("3.0", tConstraint.materialPenaltyExponent().c_str());
+        ASSERT_STREQ("1e-9", tConstraint.minErsatzMaterialConstant().c_str());
+        ASSERT_STREQ("1", tConstraint.name().c_str());
+        ASSERT_STREQ("plato_analyze_1", tConstraint.performer().c_str());
+        ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
+        ASSERT_STREQ("1.0", tConstraint.weight().c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_OneConstraint)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "   type volume\n"
+        "   name dog\n"
+        "   weight 2.0\n"
+        "   performer sierra_sd_0\n"
+        "   volume absolute 40.0\n"
+        "   code sierra_sd\n"
+        "   penalty power 1.0\n"
+        "   minimum ersatz material value 1e-6\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    tConstraintParser.parse(tInputSS);
+    auto tConstraintMetadata = tConstraintParser.data();
+
+    for (auto& tConstraint : tConstraintMetadata)
+    {
+        ASSERT_TRUE(tConstraint.normalizedTarget().empty());
+        ASSERT_STREQ("40.0", tConstraint.absoluteTarget().c_str());
+        ASSERT_STREQ("volume", tConstraint.category().c_str());
+        ASSERT_STREQ("sierra_sd", tConstraint.code().c_str());
+        ASSERT_STREQ("1.0", tConstraint.materialPenaltyExponent().c_str());
+        ASSERT_STREQ("1e-6", tConstraint.minErsatzMaterialConstant().c_str());
+        ASSERT_STREQ("dog", tConstraint.name().c_str());
+        ASSERT_STREQ("sierra_sd_0", tConstraint.performer().c_str());
+        ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
+        ASSERT_STREQ("2.0", tConstraint.weight().c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
+{
+    std::string tStringInput =
+        "begin constraint\n"
+        "   type volume\n"
+        "   volume absolute 10.0\n"
+        "end constraint\n"
+        "begin constraint\n"
+        "   type stress p-norm\n"
+        "   target normalized 0.4\n"
+        "   pnorm exponent 30.0\n"
+        "end constraint\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseConstraint tConstraintParser;
+    ASSERT_NO_THROW(tConstraintParser.parse(tInputSS));
+    auto tConstraintMetadata = tConstraintParser.data();
+
+    // Constraint One
+    ASSERT_TRUE(tConstraintMetadata[0].normalizedTarget().empty());
+    ASSERT_STREQ("1", tConstraintMetadata[0].name().c_str());
+    ASSERT_STREQ("1.0", tConstraintMetadata[0].weight().c_str());
+    ASSERT_STREQ("volume", tConstraintMetadata[0].category().c_str());
+    ASSERT_STREQ("6.0", tConstraintMetadata[0].pnormExponent().c_str());
+    ASSERT_STREQ("plato_analyze", tConstraintMetadata[0].code().c_str());
+    ASSERT_STREQ("10.0", tConstraintMetadata[0].absoluteTarget().c_str());
+    ASSERT_STREQ("plato_analyze_1", tConstraintMetadata[0].performer().c_str());
+    ASSERT_STREQ("3.0", tConstraintMetadata[0].materialPenaltyExponent().c_str());
+    ASSERT_STREQ("1e-9", tConstraintMetadata[0].minErsatzMaterialConstant().c_str());
+
+    // Constraint Two
+    ASSERT_TRUE(tConstraintMetadata[1].absoluteTarget().empty());
+    ASSERT_STREQ("2", tConstraintMetadata[1].name().c_str());
+    ASSERT_STREQ("1.0", tConstraintMetadata[1].weight().c_str());
+    ASSERT_STREQ("stress p-norm", tConstraintMetadata[1].category().c_str());
+    ASSERT_STREQ("30.0", tConstraintMetadata[1].pnormExponent().c_str());
+    ASSERT_STREQ("plato_analyze", tConstraintMetadata[1].code().c_str());
+    ASSERT_STREQ("0.4", tConstraintMetadata[1].normalizedTarget().c_str());
+    ASSERT_STREQ("plato_analyze_1", tConstraintMetadata[1].performer().c_str());
+    ASSERT_STREQ("3.0", tConstraintMetadata[1].materialPenaltyExponent().c_str());
+    ASSERT_STREQ("1e-9", tConstraintMetadata[1].minErsatzMaterialConstant().c_str());
+}
 
 TEST(PlatoTestXMLGenerator, ParseScenario_ErrorEmptyScenarioMetadata)
 {
@@ -670,6 +904,7 @@ TEST(PlatoTestXMLGenerator, ParseObjective_TwoObjective)
 {
     std::string tStringInput =
         "begin objective\n"
+        "   type compliance\n"
         "   load ids 10\n"
         "   boundary condition ids 11\n"
         "   number processors 1\n"

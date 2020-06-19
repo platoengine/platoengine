@@ -68,7 +68,8 @@ void ParseObjective::setCategory(XMLGen::Objective &aMetadata)
     }
     else
     {
-        aMetadata.type = "compliance";
+        THROWERR(std::string("Parse Objective: objective 'type' keyword is empty. ")
+            + "At least one objective must be defined for an optimization problem.")
     }
 }
 
@@ -467,7 +468,7 @@ void ParseObjective::checkMetaData(XMLGen::Objective &aMetadata)
     this->checkEssentialBoundaryConditionIDs(aMetadata);
 }
 
-void ParseObjective::setObjectiveIDs()
+void ParseObjective::setIdentification()
 {
     for (auto &tOuterObjective : mData)
     {
@@ -497,6 +498,12 @@ void ParseObjective::checkPerfomerNames()
             tObjective.mPerformerName = tObjective.code_name + "_" + tObjective.name;
         }
     }
+}
+
+void ParseObjective::finalize()
+{
+    this->setIdentification();
+    this->checkPerfomerNames();
 }
 
 std::vector<XMLGen::Objective> ParseObjective::data() const
@@ -529,9 +536,7 @@ void ParseObjective::parse(std::istream &aInputFile)
             mData.push_back(tMetadata);
         }
     }
-
-    this->setObjectiveIDs();
-    this->checkPerfomerNames();
+    this->finalize();
 }
 
 }
