@@ -384,7 +384,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "plato analyze";
+    tConstraint.performer("plato analyze");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
 
@@ -914,8 +914,8 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "volume";
-    tConstraint.mPerformerName = "PlatoMain";
+    tConstraint.category("volume");
+    tConstraint.performer("PlatoMain");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_constraint_value_stage(tInputData, tDocument);
@@ -975,8 +975,8 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "volume";
-    tConstraint.mPerformerName = "PlatoMain";
+    tConstraint.category("volume");
+    tConstraint.performer("PlatoMain");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_constraint_gradient_stage(tInputData, tDocument);
@@ -2250,7 +2250,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
 
     // CASE 2: NORMALIZED TARGET VALUE IS DEFINED
     tOptimizerNode = tDocument.append_child("Optimizer");
-    tXMLMetaData.constraints[0].mNormalizedTargetValue = "1.0";
+    tXMLMetaData.constraints[0].normalizedTarget("1.0");
     XMLGen::append_optimization_constraint_options(tXMLMetaData, tOptimizerNode);
 
     tGoldKeys = {"Constraint"};
@@ -2393,8 +2393,8 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
 
     // DEFINE CONSTRAINT
     XMLGen::Constraint tConstraint;
-    tConstraint.mNormalizedTargetValue = "1.0";
-    tConstraint.type = "volume";
+    tConstraint.normalizedTarget("1.0");
+    tConstraint.category("volume");
 
     // DEFINE OBJECTIVE
     XMLGen::Objective tObjective;

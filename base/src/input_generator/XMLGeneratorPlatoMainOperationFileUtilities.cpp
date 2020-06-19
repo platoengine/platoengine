@@ -48,7 +48,8 @@ bool is_volume_constraint_defined
     auto tVolumeConstraintDefined = false;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        tVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
+        auto tLowerCategory = Plato::tolower(tConstraint.category());
+        tVolumeConstraintDefined = tLowerCategory.compare("volume") == 0;
         if (tVolumeConstraintDefined == true)
         {
             break;
@@ -66,8 +67,10 @@ bool is_volume_constraint_defined_and_computed_by_platomain
     auto tIsVolumeDefinedAndComputedByPlatoMain = false;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tIsVolumeConstraintDefined = Plato::tolower(tConstraint.type).compare("volume") == 0;
-        auto tIsVolumeComputedByPlatoMain = Plato::tolower(tConstraint.mPerformerName).compare("platomain") == 0;
+        auto tLowerCategory = Plato::tolower(tConstraint.category());
+        auto tIsVolumeConstraintDefined = tLowerCategory.compare("volume") == 0;
+        auto tLowerPerformer = Plato::tolower(tConstraint.performer());
+        auto tIsVolumeComputedByPlatoMain = tLowerPerformer.compare("platomain") == 0;
         tIsVolumeDefinedAndComputedByPlatoMain = tIsVolumeConstraintDefined && tIsVolumeComputedByPlatoMain;
         if (tIsVolumeDefinedAndComputedByPlatoMain == true)
         {

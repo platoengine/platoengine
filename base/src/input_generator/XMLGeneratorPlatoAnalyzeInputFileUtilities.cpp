@@ -79,7 +79,7 @@ std::vector<std::string> return_list_of_constraint_functions
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tToken = std::string("my ") + Plato::tolower(tConstraint.type);
+        auto tToken = std::string("my ") + Plato::tolower(tConstraint.category());
         tTokens.push_back(tToken);
     }
     return tTokens;
@@ -94,8 +94,9 @@ std::vector<std::string> return_list_of_constraint_weights
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tWeight = tConstraint.weight.empty() ? "1.0" : tConstraint.weight;
-        tTokens.push_back(tWeight);
+        auto tCurrentWeight = tConstraint.weight();
+        auto tProposedWeight = tCurrentWeight.empty() ? "1.0" : tCurrentWeight;
+        tTokens.push_back(tProposedWeight);
     }
     return tTokens;
 }

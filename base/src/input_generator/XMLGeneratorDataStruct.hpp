@@ -19,6 +19,7 @@ namespace XMLGen
 
 struct Scenario
 {
+private:
     std::string mID = "0";
     std::string mCode = "plato_analyze";
     std::string mPhysics = "mechanical";
@@ -127,14 +128,21 @@ public:
 struct Objective
 {
     std::string name;
-    std::string type;
     std::string code_name;
+
+    std::string type;
+    std::string category() const {return type;}
     std::string mPerformerName = "plato_analyze";
+    std::string performer() const { return mPerformerName; }
+    std::string mMinimumErsatzValue = "1e-9";
+    std::string minErsatzMaterialConstant() const { return mMinimumErsatzValue; }
+    std::string mPenaltyParam = "3.0";
+    std::string materialPenaltyExponent() const { return mPenaltyParam; }
+    std::string mPnormExponent = "6";
+    std::string pnormExponent() const { return mPnormExponent; }
+
     std::string weight;
     std::string num_procs;
-    std::string mPenaltyParam = "3.0";
-    std::string mPnormExponent = "6";
-    std::string mMinimumErsatzValue = "1e-9";
     std::string mUseNewPlatoAnalyzeUQWorkflow = "true";
     std::string analysis_solver_tolerance;
     std::string multi_load_case;
@@ -199,17 +207,101 @@ struct Objective
 
 struct Constraint
 {
-    std::string name;
-    std::string type;
+private:
+    std::string mName;
+    std::string mCategory;
     std::string mPerformerName = "PlatoMain";
     std::string mNormalizedTargetValue;
     std::string mAbsoluteTargetValue;
     std::string mPenaltyParam = "3.0";
     std::string mPnormExponent = "6";
     std::string mMinimumErsatzValue = "1e-9";
-    std::string surface_area;
-    std::string surface_area_ssid;
-    std::string weight;
+    std::string mWeight;
+
+public:
+    std::string surface_area; // TO BE DEPRECATED SOON!
+    std::string surface_area_ssid; // TO BE DEPRECATED SOON!
+
+    void name(const std::string& aInput)
+    {
+        mName = aInput;
+    }
+    std::string name() const
+    {
+        return mName;
+    }
+
+    void weight(const std::string& aInput)
+    {
+        mWeight = aInput;
+    }
+    std::string weight() const
+    {
+        return mWeight;
+    }
+
+    void category(const std::string& aInput)
+    {
+        mCategory = aInput;
+    }
+    std::string category() const
+    {
+        return mCategory;
+    }
+
+    void performer(const std::string& aInput)
+    {
+        mPerformerName = aInput;
+    }
+    std::string performer() const
+    {
+        return mPerformerName;
+    }
+
+    void pnormExponent(const std::string& aInput)
+    {
+        mPnormExponent = aInput;
+    }
+    std::string pnormExponent() const
+    {
+        return mPnormExponent;
+    }
+
+    void normalizedTarget(const std::string& aInput)
+    {
+        mNormalizedTargetValue = aInput;
+    }
+    std::string normalizedTarget() const
+    {
+        return mNormalizedTargetValue;
+    }
+
+    void absoluteTarget(const std::string& aInput)
+    {
+        mAbsoluteTargetValue = aInput;
+    }
+    std::string absoluteTarget() const
+    {
+        return mAbsoluteTargetValue;
+    }
+
+    void materialPenaltyExponent(const std::string& aInput)
+    {
+        mPenaltyParam = aInput;
+    }
+    std::string materialPenaltyExponent() const
+    {
+        return mPenaltyParam;
+    }
+
+    void minErsatzMaterialConstant(const std::string& aInput)
+    {
+        mMinimumErsatzValue = aInput;
+    }
+    std::string minErsatzMaterialConstant() const
+    {
+        return mMinimumErsatzValue;
+    }
 };
 
 struct Block

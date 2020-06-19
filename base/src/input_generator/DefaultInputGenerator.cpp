@@ -3280,12 +3280,12 @@ void DefaultInputGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc
     addChild(tmp_node1, "ArgumentName", "Optimization DOFs");
     if(m_InputData.constraints.size() > 0)
     {
-        if(m_InputData.constraints[0].type == "volume")
+        if(m_InputData.constraints[0].category() == "volume")
         {
             tmp_node1 = tmp_node.append_child("Input");
             addChild(tmp_node1, "ArgumentName", "Volume Gradient");
         }
-        else if(m_InputData.constraints[0].type == "surface area")
+        else if(m_InputData.constraints[0].category() == "surface area")
         {
             tmp_node1 = tmp_node.append_child("Input");
             addChild(tmp_node1, "ArgumentName", "Surface Area Gradient");
@@ -5699,7 +5699,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         for(size_t b=0; b<m_InputData.constraints.size(); ++b)
         {
             tTmpNode = tMiscNode.append_child("Constraint");
-            if(m_InputData.constraints[b].type == "volume")
+            if(m_InputData.constraints[b].category() == "volume")
             {
                 addChild(tTmpNode, "Equality", "True");
                 addChild(tTmpNode, "Linear", "True");
@@ -5708,13 +5708,13 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
                 addChild(tTmpNode, "GradientName", "Volume Gradient");
                 addChild(tTmpNode, "ValueStageName", "Volume");
                 addChild(tTmpNode, "GradientStageName", "Volume Gradient");
-                if(m_InputData.constraints[b].mNormalizedTargetValue != "")
-                    addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].mNormalizedTargetValue);
-                if(m_InputData.constraints[b].mAbsoluteTargetValue != "")
-                    addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].mAbsoluteTargetValue);
+                if(m_InputData.constraints[b].normalizedTarget() != "")
+                    addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].normalizedTarget());
+                if(m_InputData.constraints[b].absoluteTarget() != "")
+                    addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].absoluteTarget());
                 addChild(tTmpNode, "Tolerance", "1e-3");
             }
-            else if(m_InputData.constraints[b].type == "surface area")
+            else if(m_InputData.constraints[b].category() == "surface area")
             {
                 addChild(tTmpNode, "Equality", "True");
                 addChild(tTmpNode, "Linear", "True");
@@ -5735,8 +5735,8 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
         addChild(tTmpNode, "ValueStageName", "Constraint");
         addChild(tTmpNode, "GradientName", "Constraint Gradient");
         addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
-        if(m_InputData.constraints[0].mAbsoluteTargetValue != "")
-            addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].mAbsoluteTargetValue);
+        if(m_InputData.constraints[0].absoluteTarget() != "")
+            addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].absoluteTarget());
     }
 
     if(m_InputData.optimization_algorithm != "mma")
@@ -5998,8 +5998,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     addChild(tTmpNode, "ValueStageName", "Constraint");
     addChild(tTmpNode, "GradientName", "Constraint Gradient");
     addChild(tTmpNode, "GradientStageName", "Constraint Gradient");
-    if(m_InputData.constraints[0].mAbsoluteTargetValue != "")
-        addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].mAbsoluteTargetValue);
+    if(m_InputData.constraints[0].absoluteTarget() != "")
+        addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[0].absoluteTarget());
 
     if(m_InputData.optimization_algorithm != "mma")
     {
@@ -6417,13 +6417,13 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
 
         if(m_InputData.constraints.size() > 0)
         {
-            if(m_InputData.constraints[0].type == "volume")
+            if(m_InputData.constraints[0].category() == "volume")
             {
                 input_node = op_node.append_child("Input");
                 addChild(input_node, "ArgumentName", "Volume Gradient");
                 addChild(input_node, "SharedDataName", "Volume Gradient");
             }
-            else if(m_InputData.constraints[0].type == "surface area")
+            else if(m_InputData.constraints[0].category() == "surface area")
             {
                 input_node = op_node.append_child("Input");
                 addChild(input_node, "ArgumentName", "Surface Area Gradient");

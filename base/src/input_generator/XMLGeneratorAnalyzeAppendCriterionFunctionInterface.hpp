@@ -113,22 +113,22 @@ public:
     **********************************************************************************/
     void call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {
-        auto tLowerPerformer = Plato::tolower(aCriterion.mPerformerName);
+        auto tLowerPerformer = Plato::tolower(aCriterion.performer());
         if(tLowerPerformer.compare("plato_analyze") != 0)
         {
             return;
         }
 
-        auto tLowerFuncLabel = Plato::tolower(aCriterion.type);
-        auto tMapItr = mMap.find(tLowerFuncLabel);
+        auto tLowerCategory = Plato::tolower(aCriterion.category());
+        auto tMapItr = mMap.find(tLowerCategory);
         if(tMapItr == mMap.end())
         {
-            THROWERR(std::string("Criterion Function Interface: Did not find criterion function with tag '") + tLowerFuncLabel + "' in list.")
+            THROWERR(std::string("Criterion Function Interface: Did not find criterion function with tag '") + tLowerCategory + "' in list.")
         }
         auto tTypeCastedFunc = reinterpret_cast<void(*)(const CriterionType&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
         {
-            THROWERR(std::string("Criterion Function Interface: Reinterpret cast for criterion function with tag '") + tLowerFuncLabel + "' failed.")
+            THROWERR(std::string("Criterion Function Interface: Reinterpret cast for criterion function with tag '") + tLowerCategory + "' failed.")
         }
         tTypeCastedFunc(aCriterion, aParentNode);
     }

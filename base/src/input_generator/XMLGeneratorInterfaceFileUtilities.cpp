@@ -101,7 +101,7 @@ void append_constraint_shared_data
         auto tIndex = &tConstraint - &aXMLMetaData.constraints[0];
         // shared data - deterministic criterion value
         auto tTag = std::string("Constraint Value ID-") + std::to_string(tIndex);
-        auto tOwnerName = aOwnerName.empty() ? tConstraint.mPerformerName : aOwnerName;
+        auto tOwnerName = aOwnerName.empty() ? tConstraint.performer() : aOwnerName;
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain" };
         auto tSharedDataNode = aDocument.append_child("SharedData");
@@ -338,13 +338,13 @@ void append_constraint_value_stage
         auto tStageNode = aDocument.append_child("Stage");
         auto tIndex = &tConstraint - &aXMLMetaData.constraints[0];
         auto tStageName = std::string("Compute Constraint Value ID-") + std::to_string(tIndex);
-        XMLGen::append_children({"Name", "Type"}, {tStageName, tConstraint.type}, tStageNode);
+        XMLGen::append_children({"Name", "Type"}, {tStageName, tConstraint.category()}, tStageNode);
         auto tInputNode = tStageNode.append_child("Input");
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
         XMLGen::append_filter_control_operation(tStageNode);
         auto tSharedDataName = std::string("Constraint Value ID-") + std::to_string(tIndex);
-        XMLGen::append_constraint_value_operation(tConstraint.mPerformerName, tSharedDataName, tStageNode);
+        XMLGen::append_constraint_value_operation(tConstraint.performer(), tSharedDataName, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
         XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
@@ -379,13 +379,13 @@ void append_constraint_gradient_stage
         auto tStageNode = aDocument.append_child("Stage");
         auto tIndex = &tConstraint - &aXMLMetaData.constraints[0];
         auto tStageName = std::string("Compute Constraint Gradient ID-") + std::to_string(tIndex);
-        XMLGen::append_children({"Name", "Type"}, {tStageName, tConstraint.type}, tStageNode);
+        XMLGen::append_children({"Name", "Type"}, {tStageName, tConstraint.category()}, tStageNode);
         auto tInputNode = tStageNode.append_child("Input");
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
         XMLGen::append_filter_control_operation(tStageNode);
         auto tSharedDataName = std::string("Constraint Gradient ID-") + std::to_string(tIndex);
-        XMLGen::append_constraint_gradient_operation(tConstraint.mPerformerName, tSharedDataName, tStageNode);
+        XMLGen::append_constraint_gradient_operation(tConstraint.performer(), tSharedDataName, tStageNode);
         XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
@@ -579,8 +579,8 @@ void append_optimization_constraint_options
         tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Constraint Value ID-") + tIndex;
         tKeyToValueMap.find("GradientName")->second = std::string("Constraint Gradient ID-") + tIndex;
         tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Constraint Gradient ID-") + tIndex;
-        XMLGen::set_key_value("AbsoluteTargetValue", tConstraint.mAbsoluteTargetValue, tKeyToValueMap);
-        XMLGen::set_key_value("NormalizedTargetValue", tConstraint.mNormalizedTargetValue, tKeyToValueMap);
+        XMLGen::set_key_value("AbsoluteTargetValue", tConstraint.absoluteTarget(), tKeyToValueMap);
+        XMLGen::set_key_value("NormalizedTargetValue", tConstraint.normalizedTarget(), tKeyToValueMap);
 
         auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
         auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);

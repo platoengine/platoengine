@@ -35,10 +35,10 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     tObjective.type = "maximize stiffness";
     tObjective.mPerformerName = "plato_analyze";
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "volume";
-    tConstraint.mPenaltyParam = "1.0";
-    tConstraint.mMinimumErsatzValue = "0.0";
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.category("volume");
+    tConstraint.materialPenaltyExponent("1.0");
+    tConstraint.minErsatzMaterialConstant("0.0");
+    tConstraint.performer("plato_analyze");
 
     // POSE MATERIAL
     XMLGen::Material tMaterial;
@@ -1216,8 +1216,8 @@ TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendP
     tXMLMetaData.mScenarioMetaData.physics("mechanical");
     tXMLMetaData.mScenarioMetaData.dimensions("2");
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "maximize stiffness";
-    tConstraint.mPerformerName = "sierra";
+    tConstraint.category("maximize stiffness");
+    tConstraint.performer("sierra");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -1393,9 +1393,9 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "stress p-norm";
-    tConstraint.weight = "0.5";
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.category("stress p-norm");
+    tConstraint.weight("0.5");
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -1503,8 +1503,8 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
     tObjective.mPerformerName = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     XMLGen::Constraint tConstraint;
-    tConstraint.type = "volume";
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.category("volume");
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;

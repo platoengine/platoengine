@@ -26,11 +26,12 @@ std::string is_criterion_supported_in_plato_analyze
 (const Criterion& aCriterion)
 {
     XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-    auto tLowerCriterion = Plato::tolower(aCriterion.type);
+    auto tLowerCriterion = Plato::tolower(aCriterion.category());
     auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
     if (tItr == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Is Criterion Supported in Plato Analyze: Criterion '") + tLowerCriterion + "' is not supported.")
+        THROWERR(std::string("Is Criterion Supported in Plato Analyze: Criterion '")
+            + tLowerCriterion + "' is not supported.")
     }
     return tItr->second.first;
 }
@@ -51,9 +52,9 @@ void append_simp_penalty_function
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "SIMP"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Exponent", "double", aMetadata.mPenaltyParam};
+    tValues = {"Exponent", "double", aMetadata.materialPenaltyExponent()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Minimum Value", "double", aMetadata.mMinimumErsatzValue};
+    tValues = {"Minimum Value", "double", aMetadata.minErsatzMaterialConstant()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 
@@ -71,7 +72,7 @@ void append_scalar_function_criterion
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
 
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.type);
+    auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
     auto tObjective = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
@@ -104,7 +105,7 @@ void append_pnorm_criterion
             + "there was an error appending the scalar function criterion.")
     }
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Exponent", "double", aCriterion.mPnormExponent};
+    std::vector<std::string> tValues = {"Exponent", "double", aCriterion.pnormExponent()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
 }
 

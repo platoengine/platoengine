@@ -59,7 +59,7 @@ bool is_any_constraint_computed_by_plato_analyze
     auto tAtLeastOnePerformerIsPlatoAnalyze = false;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if(XMLGen::is_plato_analyze_performer(tConstraint.mPerformerName))
+        if(XMLGen::is_plato_analyze_performer(tConstraint.performer()))
         {
             tAtLeastOnePerformerIsPlatoAnalyze = true;
             break;

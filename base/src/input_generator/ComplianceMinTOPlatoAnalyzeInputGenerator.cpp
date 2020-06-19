@@ -626,7 +626,7 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::addPlatoMainOutputOperation(pugi
     addChild(tmp_node1, "ArgumentName", "Optimization DOFs");
     if(m_InputData.constraints.size() > 0)
     {
-        if(m_InputData.constraints[0].type == "volume")
+        if(m_InputData.constraints[0].category() == "volume")
         {
             tmp_node1 = tmp_node.append_child("Input");
             addChild(tmp_node1, "ArgumentName", "Volume Gradient");
@@ -1065,7 +1065,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     for(size_t b=0; b<m_InputData.constraints.size(); ++b)
     {
         tTmpNode = tMiscNode.append_child("Constraint");
-        if(m_InputData.constraints[b].type == "volume")
+        if(m_InputData.constraints[b].category() == "volume")
         {
             addChild(tTmpNode, "Equality", "True");
             addChild(tTmpNode, "Linear", "True");
@@ -1074,10 +1074,10 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
             addChild(tTmpNode, "GradientName", "Volume Gradient");
             addChild(tTmpNode, "ValueStageName", "Volume");
             addChild(tTmpNode, "GradientStageName", "Volume Gradient");
-            if(m_InputData.constraints[b].mNormalizedTargetValue != "")
-                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].mNormalizedTargetValue);
-            if(m_InputData.constraints[b].mAbsoluteTargetValue != "")
-                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].mAbsoluteTargetValue);
+            if(m_InputData.constraints[b].normalizedTarget() != "")
+                addChild(tTmpNode, "NormalizedTargetValue", m_InputData.constraints[b].normalizedTarget());
+            if(m_InputData.constraints[b].absoluteTarget() != "")
+                addChild(tTmpNode, "AbsoluteTargetValue", m_InputData.constraints[b].absoluteTarget());
             addChild(tTmpNode, "Tolerance", "1e-3");
         }
     }
@@ -1244,7 +1244,7 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::outputOutputToFileStage(pugi::xm
 
     if(m_InputData.constraints.size() > 0)
     {
-        if(m_InputData.constraints[0].type == "volume")
+        if(m_InputData.constraints[0].category() == "volume")
         {
             input_node = op_node.append_child("Input");
             addChild(input_node, "ArgumentName", "Volume Gradient");

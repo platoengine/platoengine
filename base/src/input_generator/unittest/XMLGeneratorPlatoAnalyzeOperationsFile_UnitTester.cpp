@@ -23,7 +23,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tXMLMetaData.mProblemUpdateFrequency = "5";
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::Objective tObjective;
     tObjective.mPerformerName = "plato_analyze";
@@ -271,7 +271,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1
@@ -906,7 +906,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "sierra_sd";
+    tConstraint.performer("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(tInputData, tDocument);
 
@@ -920,7 +920,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1
@@ -1061,7 +1061,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "sierra_sd";
+    tConstraint.performer("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument);
 
@@ -1075,7 +1075,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.mPerformerName = "plato_analyze";
+    tConstraint.performer("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1

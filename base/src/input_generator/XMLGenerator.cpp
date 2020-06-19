@@ -2735,7 +2735,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
 
       if(parseSingleValue(tokens, tInputStringList = {"begin","constraint"}, tStringValue))
       {
-        XMLGen::Constraint new_constraint;
+        XMLGen::Constraint tNewConstraint;
         // found constraint
         while (!fin.eof())
         {
@@ -2759,12 +2759,13 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not enough params after \"type\" keyword.\n";
                 return false;
               }
-              new_constraint.type = tokens[1];
+              auto tCategory = tokens[1];
               for(size_t j=2; j<tokens.size(); ++j)
               {
-                new_constraint.type += " ";
-                new_constraint.type += tokens[j];
+                  tCategory += " ";
+                  tCategory += tokens[j];
               }
+              tNewConstraint.category(tCategory);
             }
             else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
             {
@@ -2773,12 +2774,13 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not enough params after \"name\" keyword.\n";
                 return false;
               }
-              new_constraint.name = tokens[1];
+              auto tName = tokens[1];
               for(size_t j=2; j<tokens.size(); ++j)
               {
-                new_constraint.name += " ";
-                new_constraint.name += tokens[j];
+                  tName += " ";
+                  tName += tokens[j];
               }
+              tNewConstraint.name(tName);
             }
             else if(parseSingleValue(tokens, tInputStringList = {"volume","fraction"}, tStringValue))
             {
@@ -2787,7 +2789,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume fraction\".\n";
                 return false;
               }
-              new_constraint.mNormalizedTargetValue = tStringValue;
+              tNewConstraint.normalizedTarget(tStringValue);
             }
             else if(parseSingleValue(tokens, tInputStringList = {"volume","absolute"}, tStringValue))
             {
@@ -2796,7 +2798,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"volume absolute\".\n";
                 return false;
               }
-              new_constraint.mAbsoluteTargetValue = tStringValue;
+              tNewConstraint.absoluteTarget(tStringValue);
             }
             else if(parseSingleValue(tokens, tInputStringList = {"surface","area","sideset","id"}, tStringValue))
             {
@@ -2805,7 +2807,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"surface area sideset id\".\n";
                 return false;
               }
-              new_constraint.surface_area_ssid = tStringValue;
+              tNewConstraint.surface_area_ssid = tStringValue;
             }
             else if(parseSingleValue(tokens, tInputStringList = {"surface","area"}, tStringValue))
             {
@@ -2814,7 +2816,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
                 std::cout << "ERROR:XMLGenerator:parseConstraints: Not value specified for \"surface area\".\n";
                 return false;
               }
-              new_constraint.surface_area = tStringValue;
+              tNewConstraint.surface_area = tStringValue;
             }
             else
             {
@@ -2823,7 +2825,7 @@ bool XMLGenerator::parseConstraints(std::istream &fin)
             }
           }
         }
-        m_InputData.constraints.push_back(new_constraint);
+        m_InputData.constraints.push_back(tNewConstraint);
       }
     }
   }
