@@ -26,7 +26,7 @@ struct Load
 
 struct LoadCase
 {
-    std::string mPerformerName = "plato_analyze";
+    std::string mCode = "plato_analyze";
     std::vector<XMLGen::Load> loads;
     std::string id; // note LoadCase id is not necessarily shared with its Loads
 };
@@ -36,7 +36,7 @@ struct BC
     bool mIsRandom = false;
     std::string mPhysics = "mechanical";
     std::string mCategory = "rigid";
-    std::string mPerformerName = "plato_analyze";
+    std::string mCode = "plato_analyze";
     std::string type;     // temperature, displacement
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id

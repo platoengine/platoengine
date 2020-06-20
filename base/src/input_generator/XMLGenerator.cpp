@@ -1085,6 +1085,7 @@ bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
   size_t tTokenIndex = 1;
   bool tNameOrIDSpecified = false;
 
+  new_bc.mCategory = tokens[0];
   if(tokens[++tTokenIndex] != "nodeset" && tokens[tTokenIndex] != "sideset")
   {
     std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";

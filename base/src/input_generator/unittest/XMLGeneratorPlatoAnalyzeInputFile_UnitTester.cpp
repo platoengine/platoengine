@@ -28,7 +28,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     tBC.type = "displacement";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "rigid";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
 
     // POSE DESIGN INTENTS
     XMLGen::Objective tObjective;
@@ -54,7 +54,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     tLoad.app_name = "ss_1";
     tLoad.values = {"1.0", "2.0", "3.0"};
     XMLGen::LoadCase tLoadCase;
-    tLoadCase.mPerformerName = "plato_analyze";
+    tLoadCase.mCode = "plato_analyze";
     tLoadCase.loads.push_back(tLoad);
 
     // SET INPUT METADATA
@@ -99,7 +99,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
     XMLGen::BC tBC;
     tBC.bc_id = "1";
     tBC.mPhysics = "mechanical";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -111,7 +111,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidPhysics
     XMLGen::BC tBC;
     tBC.bc_id = "1";
     tBC.mPhysics = "cfd";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -125,7 +125,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidCategor
     tBC.app_name = "ss_1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "pin";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -139,7 +139,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "zero value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -153,7 +153,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -168,7 +168,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -182,7 +182,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
     tBC.app_name = "ss_1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "rigid";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -229,7 +229,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
     tBC.app_name = "ss_2";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -263,7 +263,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "fixed value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -277,7 +277,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -292,7 +292,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -307,7 +307,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -323,7 +323,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
     tBC.app_name = "ss_2";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -358,7 +358,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "insulated";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -372,7 +372,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -387,7 +387,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -402,7 +402,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
     tBC.app_name = "ss_11";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -434,7 +434,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_PerformerNotAnalyze
     XMLGen::BC tBC;
     tBC.type = "displacement";
     tBC.bc_id = "1";
-    tBC.mPerformerName = "sierra";
+    tBC.mCode = "sierra";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -452,7 +452,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
     tBC.type = "displacement";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "rigid";
-    tBC.mPerformerName = "plato_analyze";
+    tBC.mCode = "plato_analyze";
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.bcs.push_back(tBC);
 
@@ -545,7 +545,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     tLoad.app_name = "ss_1";
     tLoad.values = {"1.0", "2.0", "3.0"};
     XMLGen::LoadCase tLoadCase;
-    tLoadCase.mPerformerName = "sierra";
+    tLoadCase.mCode = "sierra";
     tLoadCase.loads.push_back(tLoad);
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.load_cases.push_back(tLoadCase);
@@ -564,7 +564,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     tLoad.app_name = "ss_1";
     tLoad.values = {"1.0", "2.0", "3.0"};
     XMLGen::LoadCase tLoadCase;
-    tLoadCase.mPerformerName = "plato_analyze";
+    tLoadCase.mCode = "plato_analyze";
     tLoadCase.loads.push_back(tLoad);
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.load_cases.push_back(tLoadCase);

@@ -500,7 +500,7 @@ void append_natural_boundary_conditions_to_plato_problem
 (const XMLGen::LoadCase& aLoadCase,
  pugi::xml_node& aParentNode)
 {
-    auto tLowerPerformer = Plato::tolower(aLoadCase.mPerformerName);
+    auto tLowerPerformer = Plato::tolower(aLoadCase.mCode);
     if (tLowerPerformer.compare("plato_analyze") != 0)
     {
         return;
