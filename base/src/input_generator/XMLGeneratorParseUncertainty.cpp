@@ -38,6 +38,11 @@ void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
     {
         aMetadata.variable_type = tItr->second.second;
     }
+    else
+    {
+        THROWERR(std::string("Parse Uncertainty: 'category' keyword is not defined. User must define")
+            + "the uncertain parameter 'category'. Supported options are 'load' and 'material'.")
+    }
 }
 
 void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
@@ -46,7 +51,9 @@ void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
         ? mTags.find("load id")->second.second : mTags.find("material id")->second.second;
     if(aMetadata.id.empty())
     {
-        THROWERR("Parse Uncertainty: Failed to parse identification number.")
+        THROWERR(std::string("Parse Uncertainty: Failed to parse uncertain parameter identification number. ")
+            + "User must define the 'load id' or 'material id' keyword based on the uncertain parameter category. "
+            + "For instance, if the uncertain parameter 'category' is 'load', then the 'load id' keyword must be defined.")
     }
 
 }
@@ -67,11 +74,6 @@ void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.variable_type.empty())
-    {
-        THROWERR("Parse Uncertainty: 'category' keyword is empty.")
-    }
-
     std::vector<std::string> tValidTags = {"load", "material"};
     if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.variable_type) == tValidTags.end())
     {
