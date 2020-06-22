@@ -40,7 +40,7 @@ void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
     }
     else
     {
-        THROWERR(std::string("Parse Uncertainty: 'category' keyword is not defined. User must define")
+        THROWERR(std::string("Parse Uncertainty: 'category' keyword is not defined. User must define ")
             + "the uncertain parameter 'category'. Supported options are 'load' and 'material'.")
     }
 }
