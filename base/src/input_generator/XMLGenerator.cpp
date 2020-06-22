@@ -2754,9 +2754,6 @@ bool XMLGenerator::parseFile()
   parseOptimizationParameters(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  parseConstraints(tInputFile);
-  tInputFile.close();
-  tInputFile.open(m_InputFilename.c_str()); // open a file
   parseMesh(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
