@@ -5,9 +5,11 @@
  */
 
 #include <string>
-#include <iostream>
-#include <sstream>
 #include <numeric>
+#include <sstream>
+#include <iostream>
+#include <iterator>
+#include <algorithm>
 
 #include "XMLG_Macros.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"

@@ -4,6 +4,8 @@
  *  Created on: Jun 18, 2020
  */
 
+#include <algorithm>
+
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 

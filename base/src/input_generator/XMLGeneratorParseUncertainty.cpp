@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <numeric>
+#include <algorithm>
 
 #include "XMLGeneratorParseUncertainty.hpp"
 

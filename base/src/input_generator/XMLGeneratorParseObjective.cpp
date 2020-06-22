@@ -5,6 +5,7 @@
  */
 
 #include <iostream>
+#include <algorithm>
 
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParseObjective.hpp"
