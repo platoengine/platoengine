@@ -231,6 +231,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
     tScenarioParser.parse(tInputSS);
     auto tScenarioMetadata = tScenarioParser.data();
 
+    ASSERT_FALSE(tScenarioMetadata.useNewAnalyzeUQWorkflow());
     ASSERT_STREQ("plato_analyze", tScenarioMetadata.code().c_str());
     ASSERT_STREQ("mechanical", tScenarioMetadata.physics().c_str());
     ASSERT_STREQ("plato_analyze_0", tScenarioMetadata.performer().c_str());
@@ -245,6 +246,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     std::string tStringInput =
         "begin scenario\n"
         "   physics thermal\n"
+        "   use_new_analyze_uq_workflow true\n"
         "   dimensions 2\n"
         "   code sierra_sd\n"
         "   performer sierra_sd_0\n"
@@ -259,6 +261,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     tScenarioParser.parse(tInputSS);
     auto tScenarioMetadata = tScenarioParser.data();
 
+    ASSERT_TRUE(tScenarioMetadata.useNewAnalyzeUQWorkflow());
     ASSERT_STREQ("sierra_sd", tScenarioMetadata.code().c_str());
     ASSERT_STREQ("thermal", tScenarioMetadata.physics().c_str());
     ASSERT_STREQ("sierra_sd_0", tScenarioMetadata.performer().c_str());

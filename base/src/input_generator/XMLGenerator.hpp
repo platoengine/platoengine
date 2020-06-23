@@ -76,6 +76,7 @@ public:
     ~XMLGenerator();
     bool generate();
     const InputData& getInputData(){ return m_InputData; }
+    bool parseScenario(std::istream &fin);
 
 protected:
 
@@ -102,7 +103,6 @@ protected:
     bool parseFile();
     bool parseMesh(std::istream &fin);
     bool parseOutput(std::istream &fin);
-    bool parseScenario(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
     bool parseMaterials(std::istream &fin);
     bool parseBlocks(std::istream &fin);

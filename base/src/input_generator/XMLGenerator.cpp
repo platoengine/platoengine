@@ -115,7 +115,7 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
   m_InputData.m_filterType_kernelThenTANH_XMLName = "KernelThenTANH";
   m_InputData.m_HasUncertainties = false;
   m_InputData.m_RequestedVonMisesOutput = false;
-  m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow = false;
+  m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow(false);
 }
 
 /******************************************************************************/
@@ -257,7 +257,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
             std::cout << "ERROR: Only one objective is supported for optimization under uncertainty problem." << std::endl;
             return false;
         }
-        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
+        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow())
         {
             if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].num_samples)
             {
@@ -283,7 +283,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
 void XMLGenerator::setNumPerformers()
 /******************************************************************************/
 {
-    if (m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow)
+    if (m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow())
     {
         m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
@@ -544,15 +544,6 @@ bool XMLGenerator::parseObjectives(std::istream &aInputFile)
     XMLGen::ParseObjective tParseObjective;
     tParseObjective.parse(aInputFile);
     m_InputData.objectives = tParseObjective.data();
-    // NOTE THIS INFORMATION, IF NEEDED GOING FORWARD, SHOULD BE IN THE SCENARIO/PHYSICS BLOCK AND NOT IN THE OBJECTIVE BLOCK
-    if(m_InputData.objectives[0].mUseNewPlatoAnalyzeUQWorkflow.compare("true") == 0)
-    {
-        m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow = true;
-    }
-    else
-    {
-        m_InputData.m_UseNewPlatoAnalyzeUncertaintyWorkflow = false;
-    }
     return true;
 }
 

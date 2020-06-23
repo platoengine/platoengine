@@ -132,14 +132,6 @@ private:
     void setMinimumErsatzValue(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn setAnalyzeNewWorkflow
-     * \brief Use new analyze's uncertainty quantification workflow to solve optimization \n
-     * under uncertainty problems.
-     * \param [in/out] aInputFile parsed input metadata
-    **********************************************************************************/
-    void setAnalyzeNewWorkflow(XMLGen::Objective& aMetadata);
-
-    /******************************************************************************//**
      * \fn setAnalysisSolverTolerance
      * \brief Set solver tolerance for solver use to solve the finite element system of equations.
      * \param [in/out] aInputFile parsed input metadata

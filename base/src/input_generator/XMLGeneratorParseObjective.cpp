@@ -192,19 +192,6 @@ void ParseObjective::setMinimumErsatzValue(XMLGen::Objective &aMetadata)
     }
 }
 
-void ParseObjective::setAnalyzeNewWorkflow(XMLGen::Objective &aMetadata)
-{
-    auto tItr = mTags.find("analyze new workflow");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        aMetadata.mUseNewPlatoAnalyzeUQWorkflow = tItr->second.second;
-    }
-    else
-    {
-        aMetadata.mUseNewPlatoAnalyzeUQWorkflow = "false";
-    }
-}
-
 void ParseObjective::setAnalysisSolverTolerance(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("analysis solver tolerance");
@@ -350,7 +337,6 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setCode(aMetadata);
     this->setNumRanks(aMetadata);
     this->setNumProcessors(aMetadata);
-    this->setAnalyzeNewWorkflow(aMetadata);
     this->setAnalysisSolverTolerance(aMetadata);
     this->setDistributeObjectiveType(aMetadata);
     aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.second;

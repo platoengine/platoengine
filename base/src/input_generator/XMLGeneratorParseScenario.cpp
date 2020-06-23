@@ -12,6 +12,20 @@
 namespace XMLGen
 {
 
+bool check_boolean_key(const std::string& aInput)
+{
+    auto tLowerInput = XMLGen::to_lower(aInput);
+    XMLGen::ValidBoolKeys tValidKeys;
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
+    if(tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR(std::string("Check Boolean Keyword: boolean keyword with value '")
+            + tLowerInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
+    }
+    auto tFlag = tLowerInput.compare("true") == 0 ? true : false;
+    return tFlag;
+}
+
 std::string check_physics_keyword(const std::string& aInput)
 {
     auto tLowerInput = Plato::tolower(aInput);
@@ -36,14 +50,6 @@ std::string check_spatial_dimensions_keyword(const std::string& aInput)
     return (tItr.operator*());
 }
 
-void check_number(const std::string& aInput)
-{
-    if(!XMLGen::is_integer(aInput))
-    {
-        THROWERR(std::string("Parse Scenario: keyword 'minimum_ersatz_material_value' with tag '") + aInput + "'is not a finite number.")
-    }
-}
-
 void ParseScenario::allocate()
 {
     mTags.clear();
@@ -52,8 +58,10 @@ void ParseScenario::allocate()
     mTags.insert({ "performer", { {"performer"}, "" } });
     mTags.insert({ "dimensions", { {"dimensions"}, "" } });
     mTags.insert({ "scenario_id", { {"scenario_id"}, "" } });
+    mTags.insert({ "analyze_new_workflow", { {"analyze_new_workflow"}, "" } });
     mTags.insert({ "material_penalty_exponent", { {"material_penalty_exponent"}, "" } });
     mTags.insert({ "minimum_ersatz_material_value", { {"minimum_ersatz_material_value"}, "" } });
+    mTags.insert({ "use_new_analyze_uq_workflow", { {"use_new_analyze_uq_workflow"}, "" } });
 }
 
 void ParseScenario::setCode()
@@ -154,6 +162,20 @@ void ParseScenario::setMinimumErsatzMaterialValue()
     }
 }
 
+void ParseScenario::setUseAnalyzeNewUQWorkflow()
+{
+    auto tItr = mTags.find("use_new_analyze_uq_workflow");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
+        mData.useNewAnalyzeUQWorkflow(tFlag);
+    }
+    else
+    {
+        mData.useNewAnalyzeUQWorkflow(false);
+    }
+}
+
 void ParseScenario::setMetaData()
 {
     this->setCode();
@@ -161,6 +183,7 @@ void ParseScenario::setMetaData()
     this->setDimensions();
     this->setMateriaPenaltyExponent();
     this->setMinimumErsatzMaterialValue();
+    this->setUseAnalyzeNewUQWorkflow();
 }
 
 XMLGen::Scenario ParseScenario::data() const

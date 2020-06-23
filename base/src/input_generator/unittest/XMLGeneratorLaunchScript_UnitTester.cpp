@@ -390,6 +390,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesToMPILaunchScript)
 TEST(PlatoTestXMLGenerator, appendEngineMPIRunLines)
 {
   XMLGen::InputData tInputData;
+  tInputData.m_UseLaunch = false;
   tInputData.run_mesh_name = "dummy_mesh.exo";
   tInputData.num_opt_processors = "10";
   FILE* fp=fopen("appendEngineMPIRunLines.txt", "w");

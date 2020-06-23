@@ -20,6 +20,8 @@ namespace XMLGen
 struct Scenario
 {
 private:
+    bool mUseNewAnalyzeUQWorkflow = false;
+
     std::string mID = "0";
     std::string mCode = "plato_analyze";
     std::string mPhysics = "mechanical";
@@ -91,6 +93,15 @@ public:
     {
         return mMinimumErsatzValue;
     }
+
+    void useNewAnalyzeUQWorkflow(const bool& aInput)
+    {
+        mUseNewAnalyzeUQWorkflow = aInput;
+    }
+    bool useNewAnalyzeUQWorkflow() const
+    {
+        return mUseNewAnalyzeUQWorkflow;
+    }
 };
 
 struct Output
@@ -143,7 +154,6 @@ struct Objective
 
     std::string weight;
     std::string num_procs;
-    std::string mUseNewPlatoAnalyzeUQWorkflow = "true";
     std::string analysis_solver_tolerance;
     std::string multi_load_case;
     std::vector<std::string> output_for_plotting;

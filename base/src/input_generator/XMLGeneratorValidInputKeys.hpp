@@ -14,6 +14,15 @@
 namespace XMLGen
 {
 
+struct ValidBoolKeys
+{
+    /*!<
+     * \brief Valid plato xml generator parser boolean keys.
+     **/
+    std::vector<std::string> mKeys = {"true", "false"};
+};
+// struct ValidCriterionKeys
+
 struct ValidCriterionKeys
 {
     /*!<

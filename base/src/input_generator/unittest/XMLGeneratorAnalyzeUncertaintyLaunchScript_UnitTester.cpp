@@ -38,6 +38,7 @@ TEST(PlatoTestXMLGenerator, generateAnalyzeBashScript)
 TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines)
 {
   XMLGen::InputData tInputData;
+  tInputData.m_UseLaunch = false;
   tInputData.run_mesh_name = "dummy_mesh.exo";
   tInputData.num_opt_processors = "10";
   tInputData.m_UncertaintyMetaData.numPerformers = 5;

@@ -5028,6 +5028,10 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   XMLGenerator_UnitTester tTester;
   std::istringstream iss;
   std::string stringInput =
+  "begin scenario\n"
+  "   physics mechanical\n"
+  "   use_new_analyze_uq_workflow true\n"
+  "end scenario\n"
   "begin objective\n"
   "   type maximize stiffness\n"
   "   load ids 10\n"
@@ -5035,7 +5039,6 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   "   code plato_analyze\n"
   "   number processors 1\n"
   "   weight 1\n"
-  "   analyze new workflow true\n"
   "   number ranks 1\n"
   "end objective\n"
   "begin boundary conditions\n"
@@ -5058,15 +5061,23 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   "end uncertainty\n";
   // do parse
   iss.str(stringInput);
+
   iss.clear();
   iss.seekg(0);
   EXPECT_EQ(tTester.publicParseObjectives(iss), true);
+
   iss.clear();
   iss.seekg(0);
   EXPECT_EQ(tTester.publicParseLoads(iss), true);
+
   iss.clear();
   iss.seekg(0);
   EXPECT_EQ(tTester.publicParseBCs(iss), true);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.parseScenario(iss), true);
+
   iss.clear();
   iss.seekg(0);
   EXPECT_EQ(tTester.publicParseUncertainties(iss), true);
@@ -5115,6 +5126,10 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
+    "begin scenario\n"
+    "   physics mechanical\n"
+    "   use_new_analyze_uq_workflow true\n"
+    "end scenario\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10 1\n"
@@ -5146,6 +5161,10 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     "end uncertainty\n";
     // do parse
     tInputSS.str(tStringInput);
+
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    EXPECT_EQ(tTester.parseScenario(tInputSS), true);
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_EQ(tTester.publicParseObjectives(tInputSS), true);

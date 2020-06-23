@@ -77,6 +77,12 @@ private:
     void setMinimumErsatzMaterialValue();
 
     /******************************************************************************//**
+     * \fn setUseAnalyzeNewUQWorkflow
+     * \brief Set use analyze new uncertainty quantification workflow flag, default = false.
+    **********************************************************************************/
+    void setUseAnalyzeNewUQWorkflow();
+
+    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set XMLGen::Scenario metadata.
     **********************************************************************************/
