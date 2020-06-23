@@ -265,11 +265,6 @@ bool XMLGenerator::runSROMForUncertainVariables()
                 return false;
             }
         }
-        if (m_InputData.objectives[0].weight != "1")
-        {
-            std::cout << "Objective weight must be equal to 1 for optimization under uncertainty problem." << std::endl;
-            return false;
-        }
 
         Plato::srom::solve(m_InputData);
 
