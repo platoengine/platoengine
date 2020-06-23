@@ -9,13 +9,13 @@
 #include <map>
 #include <vector>
 #include <cstring>
+#include <unordered_map>
 
 namespace XMLGen
 {
 
 /*!< map from tag to container of token-value pairs, i.e. map<tag, pair<tokens,value> > */
-using UseCaseTags = std::map<std::string, std::pair<std::vector<std::string>,std::string>>;
-
+using UseCaseTags = std::unordered_map<std::string, std::pair<std::vector<std::string>,std::string>>;
 
 /******************************************************************************//**
  * \fn erase_tags
