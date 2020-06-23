@@ -477,6 +477,24 @@ void append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
+void append_random_material_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
+    if(tRandomMaterials.empty())
+    {
+        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
+    }
+    else
+    {
+        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
+    }
+}
+// function append_random_material_to_plato_analyze_input_deck
+/**********************************************************************************/
+
+/**********************************************************************************/
 void append_material_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -484,8 +502,7 @@ void append_material_model_to_plato_analyze_input_deck
     auto tIsRandomUseCase = aXMLMetaData.mRandomMetaData.samples().empty() ? false : true;
     if(tIsRandomUseCase)
     {
-        auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
-        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
+        XMLGen::append_random_material_to_plato_analyze_input_deck(aXMLMetaData, aParentNode);
     }
     else
     {

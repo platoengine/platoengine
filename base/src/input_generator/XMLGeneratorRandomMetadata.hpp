@@ -358,14 +358,14 @@ public:
 
     /******************************************************************************//**
      * \fn materials
-     * \brief Return list of random materials.
+     * \brief Return random materials.
      * \return list of random materials
     **********************************************************************************/
     std::vector<XMLGen::Material> materials() const
     {
         if(mSamples.empty())
         {
-            THROWERR("Random MetaData: Samples container is empty.")
+            THROWERR("Random MetaData: Requested random materials; however, samples container is empty.")
         }
         std::vector<XMLGen::Material> tMaterials;
         auto tBlockIDs = mSamples[0].materialBlockIDs();
@@ -385,7 +385,7 @@ public:
     {
         if(mSamples.empty())
         {
-            THROWERR("Random MetaData: Samples container is empty.")
+            THROWERR("Random MetaData: Requested random load cases; however, samples container is empty.")
         }
         return (mSamples[0].loadcase());
     }

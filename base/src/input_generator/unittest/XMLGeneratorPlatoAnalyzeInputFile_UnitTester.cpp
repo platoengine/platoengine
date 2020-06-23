@@ -1070,7 +1070,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     tMaterial.property("piezoelectric coupling 31", "3.25");
     tMaterial.property("thermal expansion", "0.25");
     tXMLMetaData.materials.push_back(tMaterial);
-    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+    XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
 
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
