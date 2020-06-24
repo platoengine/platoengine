@@ -225,7 +225,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
 {
     XMLGen::BC tBC;
     tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
+    tBC.app_id = "1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "fixed";
     tBC.mCode = "plato_analyze";
@@ -236,9 +236,9 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "ss_1"},
-          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "ss_1"},
-          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "1"} };
     std::vector<std::string> tGoldParameterListNames =
         {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
          "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",

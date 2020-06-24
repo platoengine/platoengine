@@ -14,15 +14,17 @@ namespace XMLGen
 namespace Private
 {
 
-void check_essential_boundary_condition_application_name_keyword
+std::string check_essential_boundary_condition_application_name_keyword
 (const XMLGen::BC& aBC)
 {
-    if(aBC.app_name.empty())
+    if(aBC.app_name.empty() && aBC.app_id.empty())
     {
         THROWERR(std::string("Check Essential Boundary Condition Application Set Name: ")
             + "Application set name, e.g. sideset or nodeset, for Essential Boundary Condition "
             + "with identification number '" + aBC.bc_id + "' is empty.")
     }
+    auto tOutput = aBC.app_name.empty() ? aBC.app_id : aBC.app_name;
+    return tOutput;
 }
 // function check_essential_boundary_condition_application_name_keyword
 
@@ -50,7 +52,7 @@ void append_rigid_essential_boundary_condition_to_plato_problem
         THROWERR(std::string("Append Rigid Essential Boundary Condition to Plato Problem: ")
             + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
     }
-    XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
 
     std::vector<std::string> tKeys = {"name", "type", "value"};
     for(auto& tDofNameItr : tDofsKeysItr->second)
@@ -62,7 +64,7 @@ void append_rigid_essential_boundary_condition_to_plato_problem
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
         tValues = {"Index", "int", tDofNameItr.second};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-        tValues = {"Sides", "string", aBC.app_name};
+        tValues = {"Sides", "string", tSetName};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     }
 }
@@ -89,7 +91,7 @@ void append_zero_value_essential_boundary_condition_to_plato_problem
         THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
             + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
     }
-    XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
 
     auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
     auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
@@ -99,7 +101,7 @@ void append_zero_value_essential_boundary_condition_to_plato_problem
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Index", "int", tDofNameItr->second};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-    tValues = {"Sides", "string", aBC.app_name};
+    tValues = {"Sides", "string", tSetName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
 }
 // function append_zero_value_essential_boundary_condition_to_plato_problem
@@ -126,7 +128,7 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
             + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
     }
     XMLGen::Private::check_essential_boundary_condition_value_keyword(aBC);
-    XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
 
     auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
     auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
@@ -136,7 +138,7 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Index", "int", tDofNameItr->second};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-    tValues = {"Sides", "string", aBC.app_name};
+    tValues = {"Sides", "string", tSetName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
     tValues = {"Value", "double", aBC.value};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
