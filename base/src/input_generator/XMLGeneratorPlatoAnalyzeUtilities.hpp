@@ -12,13 +12,13 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \fn is_plato_analyze_performer
+ * \fn is_plato_analyze_code
  * \brief Returns true if Plato Analyze is used to compute physical quantities of \n
  * interest during optimization, i.e. Plato Analyze is an active performer.
- * \param [in] aPerformer physics app name, i.e. performer name
+ * \param [in] aCode simulation code name
  * \return Flag
 **********************************************************************************/
-bool is_plato_analyze_performer(const std::string& aPerformer);
+bool is_plato_analyze_code(const std::string& aCode);
 
 /******************************************************************************//**
  * \fn is_plato_analyze_performer

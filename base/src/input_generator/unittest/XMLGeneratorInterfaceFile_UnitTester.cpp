@@ -483,7 +483,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
-    tObjective.code_name = "analyze";
+    tObjective.code_name = "plato_analyze";
     tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
@@ -503,7 +503,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tForNode);
 
     tGoldKeys = {"Name", "Code"};
-    tGoldValues = {"plato analyze {PerformerIndex}", "analyze"};
+    tGoldValues = {"plato analyze {PerformerIndex}", "plato_analyze"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tForNode);
 }
 

@@ -23,10 +23,10 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tXMLMetaData.mProblemUpdateFrequency = "5";
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
@@ -271,7 +271,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1
@@ -906,7 +906,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("sierra_sd");
+    tConstraint.code("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(tInputData, tDocument);
 
@@ -920,7 +920,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1
@@ -1061,7 +1061,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("sierra_sd");
+    tConstraint.code("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument);
 
@@ -1075,7 +1075,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     // POSE MATERIAL SET 1
@@ -1214,7 +1214,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "sierra_sd";
+    tObjective.code_name = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument));
 
@@ -1228,7 +1228,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tInputData.objectives.push_back(tObjective);
     ASSERT_THROW(XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
 }
@@ -1239,7 +1239,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
 
     // POSE MATERIAL SET 1
@@ -1378,7 +1378,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "sierra_sd";
+    tObjective.code_name = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
     ASSERT_NO_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument));
 
@@ -1392,7 +1392,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tInputData;
     tInputData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tInputData.objectives.push_back(tObjective);
     ASSERT_THROW(XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
 }
@@ -1403,7 +1403,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
 
     // POSE MATERIAL SET 1
@@ -1526,21 +1526,21 @@ TEST(PlatoTestXMLGenerator, IsAnyObjectiveComputedByPlatoAnalyze)
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
     XMLGen::Objective tObjective1;
-    tObjective1.mPerformerName = "sierra_sd";
+    tObjective1.code_name = "sierra_sd";
     tInputData.objectives.push_back(tObjective1);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
     XMLGen::Objective tObjective2;
-    tObjective2.mPerformerName = "plato_analyze";
+    tObjective2.code_name = "plato_analyze";
     tInputData.objectives.push_back(tObjective2);
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.mPerformerName = "sierra_sd";
+    tObjective2.code_name = "sierra_sd";
     tInputData.objectives.pop_back();
     tInputData.objectives.push_back(tObjective2);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.mPerformerName = "PLATO_Analyze";
+    tObjective2.code_name = "PLATO_Analyze";
     tInputData.objectives.pop_back();
     tInputData.objectives.push_back(tObjective2);
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
@@ -1548,11 +1548,11 @@ TEST(PlatoTestXMLGenerator, IsAnyObjectiveComputedByPlatoAnalyze)
 
 TEST(PlatoTestXMLGenerator, IsPlatoAnalyzePerformer)
 {
-    ASSERT_FALSE(XMLGen::is_plato_analyze_performer("plato_main"));
-    ASSERT_TRUE(XMLGen::is_plato_analyze_performer("plato_analyze"));
-    ASSERT_TRUE(XMLGen::is_plato_analyze_performer("plAto_anAlyZe"));
-    ASSERT_FALSE(XMLGen::is_plato_analyze_performer("plato analyze"));
-    ASSERT_FALSE(XMLGen::is_plato_analyze_performer("plAto anAlyZe"));
+    ASSERT_FALSE(XMLGen::is_plato_analyze_code("plato_main"));
+    ASSERT_TRUE(XMLGen::is_plato_analyze_code("plato_analyze"));
+    ASSERT_TRUE(XMLGen::is_plato_analyze_code("plAto_anAlyZe"));
+    ASSERT_FALSE(XMLGen::is_plato_analyze_code("plato analyze"));
+    ASSERT_FALSE(XMLGen::is_plato_analyze_code("plAto anAlyZe"));
 }
 
 TEST(PlatoTestXMLGenerator, IsTopologyOptimizationProblem)

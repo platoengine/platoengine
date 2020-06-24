@@ -113,7 +113,7 @@ public:
     **********************************************************************************/
     void call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {
-        auto tLowerPerformer = Plato::tolower(aCriterion.performer());
+        auto tLowerPerformer = Plato::tolower(aCriterion.code());
         if(tLowerPerformer.compare("plato_analyze") != 0)
         {
             return;

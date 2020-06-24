@@ -33,12 +33,12 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     // POSE DESIGN INTENTS
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
     tConstraint.materialPenaltyExponent("1.0");
     tConstraint.minErsatzMaterialConstant("0.0");
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
 
     // POSE MATERIAL
     XMLGen::Material tMaterial;
@@ -1148,7 +1148,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
 
     // POSE MATERIAL SET 1
@@ -1246,7 +1246,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendPa
     tXMLMetaData.mScenarioMetaData.dimensions("2");
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
-    tObjective.mPerformerName = "sierra";
+    tObjective.code_name = "sierra";
     tXMLMetaData.objectives.push_back(tObjective);
 
     pugi::xml_document tDocument;
@@ -1263,7 +1263,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendP
     tXMLMetaData.mScenarioMetaData.dimensions("2");
     XMLGen::Constraint tConstraint;
     tConstraint.category("maximize stiffness");
-    tConstraint.performer("sierra");
+    tConstraint.code("sierra_sd");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -1326,13 +1326,13 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
     XMLGen::InputData tXMLMetaData;
     XMLGen::Objective tObjective1;
     tObjective1.type = "maximize stiffness";
-    tObjective1.mPerformerName = "plato_analyze";
+    tObjective1.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective1);
     XMLGen::Objective tObjective2;
     tObjective2.type = "volume";
     tObjective2.mPenaltyParam = "1.0";
     tObjective2.mMinimumErsatzValue = "0.0";
-    tObjective2.mPerformerName = "plato_analyze";
+    tObjective2.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective2);
 
     pugi::xml_document tDocument;
@@ -1441,7 +1441,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
     XMLGen::Constraint tConstraint;
     tConstraint.category("stress p-norm");
     tConstraint.weight("0.5");
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -1546,11 +1546,11 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
     tXMLMetaData.mScenarioMetaData.dimensions("2");
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
-    tObjective.mPerformerName = "plato_analyze";
+    tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
-    tConstraint.performer("plato_analyze");
+    tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;

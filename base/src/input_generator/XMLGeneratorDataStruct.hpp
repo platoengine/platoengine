@@ -138,9 +138,8 @@ public:
 
 struct Objective
 {
-    std::string name;
     std::string code_name;
-
+    std::string code() const {return code_name;}
     std::string type;
     std::string category() const {return type;}
     std::string mPerformerName = "plato_analyze";
@@ -152,6 +151,7 @@ struct Objective
     std::string mPnormExponent = "6";
     std::string pnormExponent() const { return mPnormExponent; }
 
+    std::string name;
     std::string weight;
     std::string num_procs;
     std::string analysis_solver_tolerance;

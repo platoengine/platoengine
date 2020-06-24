@@ -10,13 +10,13 @@ namespace XMLGen
 {
 
 /******************************************************************************/
-bool is_plato_analyze_performer(const std::string& aPerformer)
+bool is_plato_analyze_code(const std::string& aCode)
 {
-    if(aPerformer.empty())
+    if(aCode.empty())
     {
-        THROWERR("Is Plato Analyze Performer?: Input argument is empty.")
+        THROWERR("Is Plato Analyze Code: Input argument is empty.")
     }
-    auto tLowerKey = Plato::tolower(aPerformer);
+    auto tLowerKey = Plato::tolower(aCode);
     auto tIsPlatoAnalyze = tLowerKey.compare("plato_analyze") == 0;
     return (tIsPlatoAnalyze);
 }
@@ -42,7 +42,7 @@ bool is_any_objective_computed_by_plato_analyze
     auto tAtLeastOnePerformerIsPlatoAnalyze = false;
     for(auto& tObjective : aXMLMetaData.objectives)
     {
-        if(XMLGen::is_plato_analyze_performer(tObjective.mPerformerName))
+        if(XMLGen::is_plato_analyze_code(tObjective.code_name))
         {
             tAtLeastOnePerformerIsPlatoAnalyze = true;
             break;
@@ -59,7 +59,7 @@ bool is_any_constraint_computed_by_plato_analyze
     auto tAtLeastOnePerformerIsPlatoAnalyze = false;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if(XMLGen::is_plato_analyze_performer(tConstraint.performer()))
+        if(XMLGen::is_plato_analyze_code(tConstraint.code()))
         {
             tAtLeastOnePerformerIsPlatoAnalyze = true;
             break;
