@@ -187,6 +187,11 @@ bool tokens_match
 (const std::vector<std::string>& aInputTokens,
  const std::vector<std::string>& aTargetKey)
 {
+    if(aTargetKey.size() > aInputTokens.size())
+    {
+        return false;
+    }
+
     std::vector<size_t> tMatch(aTargetKey.size());
     for (auto& tToken : aTargetKey)
     {
