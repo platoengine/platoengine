@@ -4604,7 +4604,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
         { "0.000000000000000000000e+00", "-4.486609665898913226556e+04", "-2.206883256056478785467e+04" } };
 
     // TEST RESULTS
-    constexpr double tTolerance = 1e-8;
+    constexpr double tTolerance = 1e-6;
     auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
     for (auto &tSample : tSamples)
     {
