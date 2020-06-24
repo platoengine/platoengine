@@ -77,13 +77,13 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     +"<Parametername=\"InputMesh\"type=\"string\"value=\"lbracket.exo\"/><ParameterListname=\"PlatoProblem\"><Parametername=\"Physics\"type=\"string\"value=\"Mechanical\"/><Parametername=\"PDEConstraint\"type=\"string\"value=\"Elliptic\"/>"
     +"<Parametername=\"Constraint\"type=\"string\"value=\"MyConstraint\"/><Parametername=\"Objective\"type=\"string\"value=\"MyObjective\"/><Parametername=\"Self-Adjoint\"type=\"bool\"value=\"true\"/><ParameterListname=\"MyObjective\">"
     +"<Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{mymaximizestiffness}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/></ParameterList>"
-    +"<ParameterListname=\"mymaximizestiffness\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"InternalElasticEnergy\"/><PenaltyFunction>"
-    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/></PenaltyFunction></ParameterList>"
+    +"<ParameterListname=\"mymaximizestiffness\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"InternalElasticEnergy\"/><ParameterListname=\"PenaltyFunction\">"
+    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/></ParameterList></ParameterList>"
     +"<ParameterListname=\"MyConstraint\"><Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{myvolume}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/>"
-    +"</ParameterList><ParameterListname=\"myvolume\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"Volume\"/><PenaltyFunction>"
-    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"1.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"0.0\"/></PenaltyFunction></ParameterList>"
-    +"<ParameterListname=\"Elliptic\"><PenaltyFunction><Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/>"
-    +"</PenaltyFunction></ParameterList><ParameterListname=\"MaterialModel\"><ParameterListname=\"IsotropicLinearElastic\"><Parametername=\"PoissonsRatio\"type=\"double\"value=\"0.3\"/><Parametername=\"YoungsModulus\"type=\"double\"value=\"1e9\"/>"
+    +"</ParameterList><ParameterListname=\"myvolume\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"Volume\"/><ParameterListname=\"PenaltyFunction\">"
+    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"1.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"0.0\"/></ParameterList></ParameterList>"
+    +"<ParameterListname=\"Elliptic\"><ParameterListname=\"PenaltyFunction\"><Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/>"
+    +"</ParameterList></ParameterList><ParameterListname=\"MaterialModel\"><ParameterListname=\"IsotropicLinearElastic\"><Parametername=\"PoissonsRatio\"type=\"double\"value=\"0.3\"/><Parametername=\"YoungsModulus\"type=\"double\"value=\"1e9\"/>"
     +"</ParameterList></ParameterList><ParameterListname=\"NaturalBoundaryConditions\"><ParameterListname=\"TractionVectorBoundaryConditionwithID1\"><Parametername=\"Type\"type=\"string\"value=\"Uniform\"/>"
     +"<Parametername=\"Values\"type=\"Array(double)\"value=\"{1.0,2.0,3.0}\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_1\"/></ParameterList></ParameterList><ParameterListname=\"EssentialBoundaryConditions\">"
     +"<ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPZ\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"2\"/>"
@@ -1368,7 +1368,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
     tGoldValuesItr = tGoldValues.begin();
 
     tChild = tParamList.child("Parameter");
-    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "Penalty Function"};
+    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "ParameterList"};
     auto tGoldChildItr = tGoldChildName.begin();
     while(!tChild.empty())
     {
@@ -1478,7 +1478,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
     tGoldValuesItr = tGoldValues.begin();
 
     tChild = tParamList.child("Parameter");
-    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "Penalty Function"};
+    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "ParameterList"};
     auto tGoldChildItr = tGoldChildName.begin();
     while(!tChild.empty())
     {

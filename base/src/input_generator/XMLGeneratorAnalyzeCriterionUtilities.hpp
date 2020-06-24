@@ -48,7 +48,9 @@ void append_simp_penalty_function
 (const MetaData& aMetadata,
  pugi::xml_node& aParentNode)
 {
-    auto tPenaltyFunction = aParentNode.append_child("Penalty Function");
+    auto tPenaltyFunction = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "SIMP"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
