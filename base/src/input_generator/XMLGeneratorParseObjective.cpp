@@ -365,7 +365,7 @@ void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
 
 void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
 {
-    XMLGen::ValidPerformerKeys tValidKeys;
+    XMLGen::ValidCodeKeys tValidKeys;
     if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Parse Objective: 'code' keyword '") + aMetadata.code_name + "' is not supported. ")

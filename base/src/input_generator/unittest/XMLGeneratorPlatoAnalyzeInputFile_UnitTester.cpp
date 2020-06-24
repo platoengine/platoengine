@@ -221,6 +221,52 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
+{
+    XMLGen::BC tBC;
+    tBC.bc_id = "1";
+    tBC.app_name = "ss_1";
+    tBC.mPhysics = "mechanical";
+    tBC.mCategory = "fixed";
+    tBC.mCode = "plato_analyze";
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument));
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "ss_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_1"} };
+    std::vector<std::string> tGoldParameterListNames =
+        {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",
+         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPX"};
+
+    auto tParamList = tDocument.child("ParameterList");
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tGoldParameterListNamesItr = tGoldParameterListNames.begin();
+    while(!tParamList.empty())
+    {
+        ASSERT_FALSE(tParamList.empty());
+        ASSERT_STREQ("ParameterList", tParamList.name());
+        PlatoTestXMLGenerator::test_attributes({"name"}, {tGoldParameterListNamesItr->c_str()}, tParamList);
+
+        auto tParameter = tParamList.child("Parameter");
+        while(!tParameter.empty())
+        {
+            ASSERT_FALSE(tParameter.empty());
+            ASSERT_STREQ("Parameter", tParameter.name());
+            PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+            tParameter = tParameter.next_sibling();
+            std::advance(tGoldValuesItr, 1);
+        }
+        tParamList = tParamList.next_sibling();
+        std::advance(tGoldParameterListNamesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
 {
     XMLGen::BC tBC;

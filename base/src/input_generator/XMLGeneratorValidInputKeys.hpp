@@ -26,7 +26,7 @@ struct ValidBoolKeys
 struct ValidCriterionKeys
 {
     /*!<
-     * \brief Valid plato xml generator parser criterion keys.
+     * \brief Valid plato input deck criterion keywords.
      **/
     std::vector<std::string> mKeys =
         {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
@@ -36,10 +36,19 @@ struct ValidCriterionKeys
 };
 // struct ValidCriterionKeys
 
+struct ValidEssentialBoundaryConditionsKeys
+{
+    /*!<
+     * \brief Valid plato input deck essential boundary condition keywords.
+     **/
+    std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed value", "insulated"};
+};
+// struct ValidCriterionKeys
+
 struct ValidOutputKeys
 {
     /*!<
-     * \brief Valid plato input file output keywords. \n
+     * \brief Valid plato input deck output keywords. \n
      *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
      **/
     std::unordered_map<std::string, std::string> mKeys =
@@ -51,7 +60,7 @@ struct ValidOutputKeys
 struct ValidPhysicsKeys
 {
     /*!<
-     * \brief Valid plato input file physics keywords.
+     * \brief Valid plato input deck physics keywords.
      **/
     std::vector<std::string> mKeys =
         { "mechanical", "transient mechanics", "plasticity", "stabilized mechanical", "thermal", "heat conduction",
@@ -62,7 +71,7 @@ struct ValidPhysicsKeys
 struct ValidMaterialPropertyKeys
 {
     /*!<
-     * \brief Valid plato input deck material property keys \n
+     * \brief Valid plato input deck material property keywords \n
      **/
     std::vector<std::string> mKeys = { "youngs modulus", "poissons ratio", "mass density", "youngs modulus x", "youngs modulus y", "youngs modulus z",
         "poissons ratio xy", "poissons ratio xz", "poissons ratio yz", "shear modulus ratio xy", "shear modulus ratio xz", "shear modulus ratio yz",
@@ -74,7 +83,7 @@ struct ValidMaterialPropertyKeys
 struct ValidMaterialModelKeys
 {
     /*!<
-     * \brief Valid plato input deck material model keys \n
+     * \brief Valid plato input deck material model keywords \n
      **/
     std::vector<std::string> mKeys = { "isotropic linear elastic", "orthotropic linear elastic", "isotropic linear electroelastic", "isotropic linear thermal",
         "isotropic linear thermoelastic" };
@@ -84,7 +93,7 @@ struct ValidMaterialModelKeys
 struct ValidConstraintTargetAbsoluteKeys
 {
     /*!<
-     * \brief Valid plato xml generator parser constraint absolute target keys.
+     * \brief Valid plato input deck constraint absolute target keywords.
      **/
     std::vector<std::string> mKeys = {"volume absolute", "target absolute", "surface_area"};
 };
@@ -93,7 +102,7 @@ struct ValidConstraintTargetAbsoluteKeys
 struct ValidConstraintTargetNormalizedKeys
 {
     /*!<
-     * \brief Valid plato xml generator parser constraint normalized target keys.
+     * \brief Valid plato deck constraint normalized target keywords.
      **/
     std::vector<std::string> mKeys = {"volume fraction", "target normalized"};
 };
@@ -106,16 +115,16 @@ struct ValidAxesKeys
 };
 // struct ValidAxesKeys
 
-struct ValidPerformerKeys
+struct ValidCodeKeys
 {
-    /*!< valid physics performers supported by plato */
+    /*!< valid plato input deck code keywords supported in plato */
     std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "platomain"};
 };
-// struct ValidPerformerKeys
+// struct ValidCodeKeys
 
 struct ValidDiscretizationKeys
 {
-    /*!< valid physical design variables, i.e. discretization */
+    /*!< valid abstract design variables supported in plato, i.e. control variables discretization */
     std::vector<std::string> mKeys = {"density", "levelset"};
 };
 // struct ValidLevelSetInitKeys
@@ -152,7 +161,7 @@ struct ValidFilterKeys
 struct ValidAnalyzeOutputKeys
 {
     /*!<
-     * valid plato analyze output keys \n
+     * valid plato analyze output keywords \n
      * \brief map from light-input file output key to plato analyze key, i.e. map<light_input_file_output key, plato_analyze_output_key>. \n
      * Basically, this maps connects the key use for any quantity of interest inside Plato's light input file to the key used in \n
      * Plato Analyze to identify the quantity of interest.
@@ -167,7 +176,7 @@ struct ValidAnalyzeOutputKeys
 struct ValidAnalyzeMaterialPropertyKeys
 {
     /*!<
-     * valid plato analyze material models and corresponding material property keys \n
+     * valid plato analyze material models and corresponding material property keywords \n
      * \brief map from material model to map from material property tag in plato input file to \n
      * pair of plato analyze input file material property key and its corresponding value type, i.e. \n
      *
@@ -211,9 +220,9 @@ struct ValidAnalyzeMaterialPropertyKeys
 struct ValidAnalyzePhysicsKeys
 {
     /*!<
-     * valid plato analyze physics and corresponding PDE keys \n
+     * valid plato analyze physics and corresponding PDE keywords \n
      * \brief map from physics keyword to pair of plato analyze physics and \n
-     * partial differential equations (PDE) keys, i.e. \n
+     * partial differential equations (PDE) keywords, i.e. \n
      *
      * map< plato_main_physics_key, pair<plato_analyze_physics_key, plato_analyze_pde_key> >.
      *

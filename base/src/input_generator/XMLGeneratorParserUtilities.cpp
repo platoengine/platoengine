@@ -256,7 +256,7 @@ std::string check_code_keyword(const std::string& aInput)
 {
     auto tLowerInput = aInput;
     XMLGen::to_lower(tLowerInput);
-    XMLGen::ValidPerformerKeys tValidKeys;
+    XMLGen::ValidCodeKeys tValidKeys;
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
     if(tItr == tValidKeys.mKeys.end())
     {

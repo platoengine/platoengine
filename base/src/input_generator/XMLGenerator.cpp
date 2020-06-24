@@ -78,6 +78,7 @@
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
@@ -1037,9 +1038,13 @@ bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
         std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
         return false;
     }
-    if(tokens[0] != "fixed")
+
+    XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
+    auto tLowerKey = XMLGen::to_lower(tokens[0]);
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
+    if (tItr == tValidKeys.mKeys.end())
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: First boundary condition token must be \"fixed\".\n";
+        std::cout << "ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" << tLowerKey << "' is not supported.";
         return false;
     }
     new_bc.type = tokens[1];
