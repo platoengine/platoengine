@@ -59,6 +59,28 @@ struct ValidPhysicsKeys
 };
 // struct ValidPhysicsKeys
 
+struct ValidMaterialPropertyKeys
+{
+    /*!<
+     * \brief Valid plato input deck material property keys \n
+     **/
+    std::vector<std::string> mKeys = { "youngs modulus", "poissons ratio", "mass density", "youngs modulus x", "youngs modulus y", "youngs modulus z",
+        "poissons ratio xy", "poissons ratio xz", "poissons ratio yz", "shear modulus ratio xy", "shear modulus ratio xz", "shear modulus ratio yz",
+        "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33", "piezoelectric coupling 31",
+        "thermal conductivity coefficient", "specific heat", "reference temperature", "thermal expansion coefficient" };
+};
+// struct ValidMaterialPropertyKeys
+
+struct ValidMaterialModelKeys
+{
+    /*!<
+     * \brief Valid plato input deck material model keys \n
+     **/
+    std::vector<std::string> mKeys = { "isotropic linear elastic", "orthotropic linear elastic", "isotropic linear electroelastic", "isotropic linear thermal",
+        "isotropic linear thermoelastic" };
+};
+// struct ValidMaterialModelKeys
+
 struct ValidConstraintTargetAbsoluteKeys
 {
     /*!<
@@ -170,7 +192,7 @@ struct ValidAnalyzeMaterialPropertyKeys
                 { "poissons ratio", {"Poissons Ratio", "double"} }, { "dielectric permittivity 11", {"p11", "double"} },
                 { "dielectric permittivity 33", {"p33", "double"} }, { "piezoelectric coupling 15", {"e15", "double"} },
                 { "piezoelectric coupling 33", {"e33", "double"} }, { "piezoelectric coupling 31", {"e31", "double"} },
-                { "thermal expansion", {"Alpha", "double"} } }
+                { "thermal expansion coefficient", {"Alpha", "double"} } }
             },
 
             { "isotropic linear thermal", { { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },

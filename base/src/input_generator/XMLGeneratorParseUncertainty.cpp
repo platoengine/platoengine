@@ -91,7 +91,7 @@ void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
     }
 
     std::vector<std::string> tValidTags = {"angle variation", "poissons ratio", "elastic modulus",
-        "yield stress", "thermal conductivity", "density"};
+        "yield stress", "thermal conductivity coefficient", "mass density"};
     if (std::find(tValidTags.begin(), tValidTags.end(), aMetadata.type) == tValidTags.end())
     {
         std::ostringstream tMsg;

@@ -18,6 +18,14 @@
 namespace XMLGen
 {
 
+bool unique(const std::vector<std::string>& aInput)
+{
+    auto tCopy = aInput;
+    std::sort(tCopy.begin(), tCopy.end());
+    auto tItr = std::unique( tCopy.begin(), tCopy.end() );
+    return (tItr == tCopy.end());
+}
+
 void erase_tags(XMLGen::UseCaseTags& aTags)
 {
     for (auto &tTag : aTags)
@@ -51,27 +59,27 @@ void parse_input_metadata
 
 bool parse_single_value
 (const std::vector<std::string> &aTokens,
- const std::vector<std::string> &aTarget,
+ const std::vector<std::string> &aTargetTokens,
  std::string &aKeyword)
 {
     aKeyword = "";
-    if(aTarget.size() < 1 || aTokens.size() < 1 || aTokens.size() < aTarget.size())
+    if(aTargetTokens.size() < 1 || aTokens.size() < 1 || aTokens.size() < aTargetTokens.size())
     {
         return false;
     }
 
-    for(auto& tString : aTarget)
+    for(auto& tTargetToken : aTargetTokens)
     {
-        auto tIndex = &tString - &aTarget[0];
-        if(aTokens[tIndex].compare(tString))
+        auto tIndex = &tTargetToken - &aTargetTokens[0];
+        if(aTokens[tIndex].compare(tTargetToken))
         {
             return false;
         }
     }
 
-    if(aTokens.size() == (aTarget.size() + 1))
+    if(aTokens.size() == (aTargetTokens.size() + 1u))
     {
-        auto tIndex = aTokens.size() + 1;
+        auto tIndex = aTargetTokens.size();
         aKeyword = aTokens[tIndex];
     }
 

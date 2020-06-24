@@ -24,8 +24,8 @@ struct Material
 {
 private:
     std::string mID; /*!< material identification number */
+    std::string mCode = "plato_analyze";  /*!< performer/owner of material model, default: plato_analyze */
     std::string mCategory = "isotropic linear elastic";  /*!< material category, default: isotropic linear elastic */
-    std::string mPerformerName = "plato_analyze";  /*!< performer/owner of material model, default: plato_analyze */
     std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:
@@ -49,23 +49,23 @@ public:
         mID = aID;
     }
     /******************************************************************************//**
-     * \fn performer
-     * \brief Return performer/owner of material.
-     * \return performer name
+     * \fn code
+     * \brief Return code responsible for material definition.
+     * \return simulation code name
     **********************************************************************************/
-    std::string performer() const
+    std::string code() const
     {
-        return mPerformerName;
+        return mCode;
     }
 
     /******************************************************************************//**
-     * \fn performer
-     * \brief Set performer/owner of material.
-     * \param [in] aPerformer performer name
+     * \fn code
+     * \brief Set code responsible for material definition.
+     * \param [in] aCode simulation code name
     **********************************************************************************/
-    void performer(const std::string& aPerformer)
+    void code(const std::string& aCode)
     {
-        mPerformerName = aPerformer;
+        mCode = aCode;
     }
 
     /******************************************************************************//**

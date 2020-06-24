@@ -776,7 +776,7 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
                         if(!m_InputData.materials[n].property("poissons ratio").empty())
                             addNTVParameter(n6, "Poissons Ratio", "double", m_InputData.materials[n].property("poissons ratio"));
                         if(!m_InputData.materials[n].property("thermal conductivity").empty())
-                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].property("thermal conductivity"));
+                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].property("thermal conductivity coefficient"));
                         break;
                     }
                 }

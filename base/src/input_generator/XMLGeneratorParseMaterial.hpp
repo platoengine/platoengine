@@ -1,27 +1,23 @@
 /*
- * XMLGeneratorParseScenario.hpp
+ * XMLGeneratorParseMaterial.hpp
  *
- *  Created on: Jun 18, 2020
+ *  Created on: Jun 23, 2020
  */
 
 #pragma once
 
-#include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorParseMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorMaterialMetadata.hpp"
 
 namespace XMLGen
 {
 
-/******************************************************************************//**
- * \class ParseScenario
- * \brief Parse inputs in scenario block and store values in XMLGen::Scenario.
-**********************************************************************************/
-class ParseScenario : public XMLGen::ParseMetadata<XMLGen::Scenario>
+class ParseMaterial : public XMLGen::ParseMetadata<std::vector<XMLGen::Material>>
 {
 private:
-    XMLGen::Scenario mData; /*!< scenario metadata */
     XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    std::vector<XMLGen::Material> mData; /*!< materials metadata */
 
 private:
     /******************************************************************************//**
@@ -33,68 +29,65 @@ private:
     /******************************************************************************//**
      * \fn setCode
      * \brief Set 'code' keyword, default = 'plato_analyze'.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setCode();
+    void setCode(XMLGen::Material& aMetadata);
 
     /******************************************************************************//**
-     * \fn setPhysics
-     * \brief Set 'physics' keyword, throw error if input keyword is empty.
+     * \fn setMaterialModel
+     * \brief Set 'material model' keyword, throw error if it is not defined.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setPhysics();
+    void setMaterialModel(XMLGen::Material& aMetadata);
 
     /******************************************************************************//**
-     * \fn setPhysics
-     * \brief Set 'performer' keyword, default = 'code_keyword' + '0', where \n
-     * 'code_keyword' denotes the value set for 'code' keyword.
+     * \fn setMaterialIdentification
+     * \brief Set 'id' keyword, throw error if it is not defined.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setPerformer();
+    void setMaterialIdentification(XMLGen::Material& aMetadata);
 
     /******************************************************************************//**
-     * \fn setScenarioID
-     * \brief Set 'scenario_id' keyword, default = 'code_keyword' + \n
-     * 'physics_keyword' + '0', where \n 'code_keyword' denotes the value set for \n
-     * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
+     * \fn setMaterialProperties
+     * \brief Set material properties, throw error if not defined.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setScenarioID();
-
-    /******************************************************************************//**
-     * \fn setScenarioID
-     * \brief Set 'dimensions' keyword, throw error if input spatial dimensions \n
-     * are not supported.
-    **********************************************************************************/
-    void setDimensions();
-
-    /******************************************************************************//**
-     * \fn setMateriaPenaltyExponent
-     * \brief Set 'material_penalty_exponent' keyword, default = '3.0'.
-    **********************************************************************************/
-    void setMateriaPenaltyExponent();
-
-    /******************************************************************************//**
-     * \fn setMinimumErsatzMaterialValue
-     * \brief Set 'minimum_ersatz_material_value' keyword, default = '1e-9'.
-    **********************************************************************************/
-    void setMinimumErsatzMaterialValue();
-
-    /******************************************************************************//**
-     * \fn setUseAnalyzeNewUQWorkflow
-     * \brief Set use analyze new uncertainty quantification workflow flag, default = false.
-    **********************************************************************************/
-    void setUseAnalyzeNewUQWorkflow();
+    void setMaterialProperties(XMLGen::Material& aMetadata);
 
     /******************************************************************************//**
      * \fn setMetaData
-     * \brief Set XMLGen::Scenario metadata.
+     * \brief Set XMLGen::Material metadata.
+     * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setMetaData();
+    void setMetadata(XMLGen::Material& aMetadata);
+
+    /******************************************************************************//**
+     * \fn setPenaltyExponent
+     * \brief Set penalty model exponent value.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setPenaltyExponent(XMLGen::Material& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkMaterialProperties
+     * \brief Throw error if material properties are not defined.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void checkMaterialProperties(XMLGen::Material& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkUniqueIDs
+     * \brief Throw error if material block identification numbers are not unique.
+    **********************************************************************************/
+    void checkUniqueIDs();
 
 public:
     /******************************************************************************//**
      * \fn data
-     * \brief Return scenario metadata.
+     * \brief Return material metadata.
      * \return metadata
     **********************************************************************************/
-    XMLGen::Scenario data() const override;
+    std::vector<XMLGen::Material> data() const override;
 
     /******************************************************************************//**
      * \fn parse
@@ -103,6 +96,7 @@ public:
     **********************************************************************************/
     void parse(std::istream &aInputFile) override;
 };
+// class ParseMaterial
 
 }
 // namespace XMLGen

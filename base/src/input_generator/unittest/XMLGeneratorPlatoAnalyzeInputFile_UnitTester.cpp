@@ -42,7 +42,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
 
     // POSE MATERIAL
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
     tMaterial.property("youngs modulus", "1e9");
     tMaterial.property("poissons ratio", "0.3");
@@ -862,7 +862,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Empty_Mat
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("sierra");
+    tMaterial.code("sierra");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
     auto tParamList = tDocument.child("ParameterList");
@@ -874,7 +874,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInva
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear viscoelastic");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
@@ -885,7 +885,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorMatP
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -895,7 +895,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInva
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
     tMaterial.property("youngs modulus", "1e9");
     tMaterial.property("poissons ratio", "0.3");
@@ -909,7 +909,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
     tMaterial.property("youngs modulus", "1e9");
     tMaterial.property("poissons ratio", "0.3");
@@ -943,7 +943,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear thermal");
     tMaterial.property("thermal conductivity coefficient", "10");
     tMaterial.property("mass density", "200");
@@ -978,7 +978,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("orthotropic linear elastic");
     tMaterial.property("youngs modulus x", "1.0");
     tMaterial.property("youngs modulus y", "2.0");
@@ -1021,7 +1021,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear thermoelastic");
     tMaterial.property("thermal conductivity coefficient", "1.0");
     tMaterial.property("youngs modulus", "2.3");
@@ -1059,7 +1059,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
-    tMaterial.performer("plato_analyze");
+    tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear electroelastic");
     tMaterial.property("youngs modulus", "2.3");
     tMaterial.property("poissons ratio", "0.3");
@@ -1068,7 +1068,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     tMaterial.property("piezoelectric coupling 15", "1.25");
     tMaterial.property("piezoelectric coupling 33", "2.25");
     tMaterial.property("piezoelectric coupling 31", "3.25");
-    tMaterial.property("thermal expansion", "0.25");
+    tMaterial.property("thermal expansion coefficient", "0.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 

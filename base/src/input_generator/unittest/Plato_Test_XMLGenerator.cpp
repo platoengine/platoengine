@@ -1043,11 +1043,10 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1096,11 +1095,10 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1198,11 +1196,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1268,11 +1265,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1372,18 +1368,19 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
+            "thermal conductivity coefficient .02\n"
+            "mass density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity\n"
+        "    tag thermal conductivity coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1437,7 +1434,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     // 1.2. TEST STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST STATISTICS
@@ -1454,7 +1451,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Deterministic)
@@ -1479,13 +1476,15 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
+            "thermal conductivity coefficient .02\n"
+            "mass density .001\n"
         "end material\n"
         "begin material 2\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 5e6\n"
             "poissons ratio 0.28\n"
@@ -1498,7 +1497,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity\n"
+        "    tag thermal conductivity coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1551,7 +1550,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
 
     // 1.2. TEST STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
@@ -1569,7 +1568,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());
@@ -1616,18 +1615,19 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
+            "thermal conductivity coefficient .02\n"
+            "mass density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity\n"
+        "    tag thermal conductivity coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1692,7 +1692,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     EXPECT_FALSE(tMaterials[0].isDeterministic());
 
     // 1.2. TEST MATERIAL STRINGS
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
@@ -1710,7 +1710,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(1u, tLoads.size());
@@ -1764,13 +1764,15 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "    traction sideset name 3 value 0 -1e4 0 load id 1\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
+            "thermal conductivity coefficient 0.33\n"
+            "mass density 1.0\n"
         "end material\n"
         "begin material 2\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 5e6\n"
             "poissons ratio 0.28\n"
@@ -1783,7 +1785,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity\n"
+        "    tag thermal conductivity coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1850,7 +1852,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     // 1.2. TEST MATERIAL STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST MATERIAL STATISTICS
@@ -1867,7 +1869,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 1.4 TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());
@@ -1953,11 +1955,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
         "    traction sideset name 3 value 0 -1e4 0 load id 1\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -2110,11 +2111,10 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
+            "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -2171,11 +2171,9 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
         "end loads\n"
         "begin material 1\n"
-            "penalty exponent 3\n"
+            "material_model isotropic linear elastic\n"
             "youngs modulus 1e6\n"
             "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -3607,801 +3605,6 @@ TEST(PlatoTestXMLGenerator, parseBlocks)
     EXPECT_EQ(tester.getBlockID(1), "33");
     EXPECT_EQ(tester.getBlockMaterialID(1), "34");
 }
-TEST(PlatoTestXMLGenerator, parseMaterials)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
-
-    stringInput = "begin material 1\n"
-            "penalty exponent\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 1\n"
-            "youngs modulus\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 1\n"
-            "poissons ratio\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 1\n"
-            "density\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 1\n"
-            "thermal conductivity\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 1\n"
-            "bad_keyword\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), false);
-    stringInput = "begin material 34\n"
-            "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
-            "thermal conductivity .02\n"
-            "density .001\n"
-            "end material\n"
-            "begin material 388\n"
-            "penalty exponent 5\n"
-            "youngs modulus 1e7\n"
-            "poissons ratio 0.34\n"
-            "thermal conductivity .03\n"
-            "density .009\n"
-            "end material\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-    EXPECT_EQ(tester.getMaterialID(0), "34");
-    EXPECT_EQ(tester.getMaterialPenaltyExponent(0), "3");
-    EXPECT_EQ(tester.getMaterialYoungsModulus(0), "1e6");
-    EXPECT_EQ(tester.getMaterialPoissonsRatio(0), "0.33");
-    EXPECT_EQ(tester.getMaterialThermalConductivity(0), ".02");
-    EXPECT_EQ(tester.getMaterialDensity(0), ".001");
-    EXPECT_EQ(tester.getMaterialID(1), "388");
-    EXPECT_EQ(tester.getMaterialPenaltyExponent(1), "5");
-    EXPECT_EQ(tester.getMaterialYoungsModulus(1), "1e7");
-    EXPECT_EQ(tester.getMaterialPoissonsRatio(1), "0.34");
-    EXPECT_EQ(tester.getMaterialThermalConductivity(1), ".03");
-    EXPECT_EQ(tester.getMaterialDensity(1), ".009");
-}
-
-/*
-TEST(PlatoTestXMLGenerator, parseObjectives)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
-
-    // Test some examples of valid objectives.
-    stringInput = "begin objective\n"
-            "type match frf data\n"
-            "code sierra_sd\n"
-            "end objective\n"
-            "begin objective\n"
-            "type match frf data\n"
-            "name frf_1\n"
-            "end objective\n";
-    iss.str(stringInput);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjectiveName(0), "1");
-    EXPECT_EQ(tester.getObjectiveName(1), "frf_1");
-
-    // Test the unrecognized keyword
-    stringInput = "begin objective\n"
-            "hippo \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "fire fly\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "begin\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "type" keyword
-    stringInput = "begin objective\n"
-            "type \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "distribute objective" keyword
-    stringInput = "begin objective\n"
-            "distribute\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "distribute objective\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "distribute objective kangaroo\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    stringInput = "begin objective\n"
-            "distribute objective none\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    stringInput = "begin objective\n"
-            "multi load case true\n"
-            "distribute objective at most 256 processors\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-
-    // Test the "name" keyword
-    stringInput = "begin objective\n"
-            "name \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "code" keyword
-    stringInput = "begin objective\n"
-            "code \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "complex error measure" keywords
-    stringInput = "begin objective\n"
-            "complex error measure \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "number processors" keywords
-    stringInput = "begin objective\n"
-            "number processors\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "weight" keyword
-    stringInput = "begin objective\n"
-            "weight \n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "frf match nodesets" keywords
-    stringInput = "begin objective\n"
-            "frf match nodesets\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "sierra_sd weightmass scale factor" keywords
-    stringInput = "begin objective\n"
-            "weightmass scale factor\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "sierra_sd analysis solver tolerance" keywords
-    stringInput = "begin objective\n"
-            "analysis solver tolerance\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "reference frf file" keywords
-    stringInput = "begin objective\n"
-            "reference frf file\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "raleigh damping alpha" keywords
-    stringInput = "begin objective\n"
-            "raleigh damping alpha\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-
-    // Test the "raleigh damping beta" keywords
-    stringInput = "begin objective\n"
-            "raleigh damping beta\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    // Test the "volume misfit target"
-    stringInput = "begin objective\n"
-            "volume misfit target 0.5125\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_misfit_target, "0.5125");
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "volume misfit target\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    // Test the "stress p norm"
-    stringInput = "begin objective\n"
-            "type stress p norm\n"
-            "stress limit 39.5\n"
-            "stress ramp factor 0.22\n"
-            "stress p norm power 7\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].type, "stress p norm");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_limit, "39.5");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_ramp_factor, "0.22");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_p_norm_power, "7");
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type stress p norm\n"
-            "stress p norm power\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type stress p norm\n"
-            "stress ramp factor\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    // Test the "stress limit" keywords
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "stress limit 42.5\n"
-            "stress ramp factor 0.24\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
-    EXPECT_EQ(tester.getObjStressLimit(0), "42.5");
-    EXPECT_EQ(tester.getObjStressRampFactor(0), "0.24");
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
-    EXPECT_EQ(tester.getObjStressLimit(0), "");
-    EXPECT_EQ(tester.getObjStressRampFactor(0), "");
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "limit power min 2.1\n"
-            "limit power max 42.3\n"
-            "limit power feasible bias 1.1\n"
-            "limit power feasible slope 1.9\n"
-            "limit power infeasible bias -0.51\n"
-            "limit power infeasible slope 0.92\n"
-            "limit reset subfrequency 11\n"
-            "limit reset count 3\n"
-            "inequality allowable feasibility upper 0.045\n"
-            "stress inequality power 1.51\n"
-            "volume penalty power 1.254\n"
-            "volume penalty divisor 5.124\n"
-            "volume penalty bias 0.4242\n"
-            "inequality feasibility scale 2.2\n"
-            "inequality infeasibility scale 0.48\n"
-            "stress favor final 10.12\n"
-            "stress favor updates 39\n"
-            "relative stress limit 1.57\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjectiveType(0), "limit stress");
-    EXPECT_EQ(tester.getObjStressLimit(0), "");
-    EXPECT_EQ(tester.getObjStressRampFactor(0), "");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_min, "2.1");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_max, "42.3");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_feasible_bias, "1.1");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_feasible_slope, "1.9");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_bias, "-0.51");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_power_infeasible_slope, "0.92");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_allowable_feasiblity_upper, "0.045");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_inequality_power, "1.51");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_power, "1.254");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_divisor, "5.124");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].volume_penalty_bias, "0.4242");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_reset_subfrequency, "11");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].limit_reset_count, "3");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_feasibility_scale, "2.2");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].inequality_infeasibility_scale, "0.48");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_final, "10.12");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].stress_favor_updates, "39");
-    EXPECT_EQ(tester.exposeInputData()->objectives[0].relative_stress_limit, "1.57");
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "stress limit\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "stress limit 1.5\n"
-            "relative stress limit 2.5\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "relative stress limit 1.3\n"
-            "stress limit 2.1\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    stringInput = "begin objective\n"
-            "type limit stress\n"
-            "stress ramp factor\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    tester.clearInputData();
-
-    // Test the "bcs" keywords
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed displacement nodeset 1 bc id 33\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    EXPECT_EQ(tester.getBCApplicationType("33"), "nodeset");
-    EXPECT_EQ(tester.getBCApplicationID("33"), "1");
-    EXPECT_EQ(tester.getBCApplicationDOF("33"), "");
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed displacement nodeset 2 x bc id 33\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    EXPECT_EQ(tester.getBCApplicationType("33"), "nodeset");
-    EXPECT_EQ(tester.getBCApplicationID("33"), "2");
-    EXPECT_EQ(tester.getBCApplicationDOF("33"), "x");
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed displacement\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), false);
-    stringInput =
-            "begin boundary conditions\n"
-            "displacement nodeset 1 x\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), false);
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed flux nodeset 1 x\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), false);
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed displacement sideset 1 x bc id 33\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    stringInput =
-            "begin boundary conditions\n"
-            "fixed displacement nodeset 1 truck bc id 33\n"
-            "end boundary conditions\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBCs(iss), false);
-
-    // Test loads.
-    // Check for known load types.
-    stringInput =
-            "begin loads\n"
-            "pressure blah blah blah\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-
-    // Tractions
-    // check number of parameters
-    stringInput =
-            "begin loads\n"
-            "traction\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check for direction keyword
-    stringInput =
-            "begin loads\n"
-            "traction sideset 1 bad_keyword 0 0 1 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // Do a correct example
-    stringInput =
-            "begin loads\n"
-            "traction sideset 3 value 990 0 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34",0), "traction");
-    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34",0), "3");
-    EXPECT_EQ(tester.getLoadDirectionX("34",0), "990");
-    EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ("34",0), "1000");
-
-    // Pressure
-    // check number of parameters
-    stringInput =
-            "begin loads\n"
-            "pressure\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check applying to correct mesh type
-    stringInput =
-            "begin loads\n"
-            "pressure nodeset 1 value 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check for value keyword
-    stringInput =
-            "begin loads\n"
-            "pressure sideset 1 bad_keyword 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // Do a correct example
-    stringInput =
-            "begin loads\n"
-            "pressure sideset 3 value 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34",0), "pressure");
-    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34",0), "3");
-
-    // Heat Flux
-    // check number of parameters
-    stringInput =
-            "begin loads\n"
-            "heat flux\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check applying to correct mesh type
-    stringInput =
-            "begin loads\n"
-            "heat flux nodeset 1 value 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // Do a correct example
-    stringInput =
-            "begin loads\n"
-            "heat flux sideset 4 value 90 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34",0), "heat");
-    EXPECT_EQ(tester.getLoadApplicationType("34",0), "sideset");
-    EXPECT_EQ(tester.getLoadApplicationID("34",0), "4");
-
-    // Force
-    // check number of parameters
-    stringInput =
-            "begin loads\n"
-            "force\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check applying to correct mesh type
-    stringInput =
-            "begin loads\n"
-            "force block 1 value 0 0 1000 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // check for direction keyword
-    stringInput =
-            "begin loads\n"
-            "force nodeset 1 bad_keyword 0 0 1 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), false);
-    // Do a good example
-    stringInput =
-            "begin loads\n"
-            "force nodeset 2 value 222 0 0 load id 34\n"
-            "end loads\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    EXPECT_EQ(tester.getLoadType("34",0), "force");
-    EXPECT_EQ(tester.getLoadApplicationType("34",0), "nodeset");
-    EXPECT_EQ(tester.getLoadApplicationID("34",0), "2");
-    EXPECT_EQ(tester.getLoadDirectionX("34",0), "222");
-    EXPECT_EQ(tester.getLoadDirectionY("34",0), "0");
-    EXPECT_EQ(tester.getLoadDirectionZ("34",0), "0");
-
-    // Test frequency block
-    // check for scale keyword
-    stringInput = "begin objective\n"
-            "begin frequency\n"
-            "bad_keyword\n"
-            "end frequency\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    // check for missing info
-    stringInput = "begin objective\n"
-            "begin frequency\n"
-            "min 100\n"
-            "step 4\n"
-            "end frequency\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), false);
-    // Do good example
-    stringInput = "begin objective\n"
-            "begin frequency\n"
-            "min 100\n"
-            "max 900\n"
-            "step 4\n"
-            "end frequency\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjFreqMin(0), "100");
-    EXPECT_EQ(tester.getObjFreqMax(0), "900");
-    EXPECT_EQ(tester.getObjFreqStep(0), "4");
-
-    // Some checks for objective names
-    stringInput = "begin objective\n"
-            "code sierra_sd\n"
-            "name obj1\n"
-            "end objective\n"
-            "begin objective\n"
-            "code sierra_sd\n"
-            "end objective\n"
-            "begin objective\n"
-            "code albany\n"
-            "end objective\n"
-            "begin objective\n"
-            "code sierra_sd\n"
-            "end objective\n"
-            "begin objective\n"
-            "code lightmp\n"
-            "end objective\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    EXPECT_EQ(tester.getObjectiveName(0), "obj1");
-    EXPECT_EQ(tester.getObjectiveName(1), "2");
-    EXPECT_EQ(tester.getObjectiveName(2), "1");
-    EXPECT_EQ(tester.getObjectiveName(3), "3");
-    EXPECT_EQ(tester.getObjectiveName(4), "1");
-    EXPECT_EQ(tester.getObjCodeName(0), "sierra_sd");
-    EXPECT_EQ(tester.getObjCodeName(1), "sierra_sd");
-    EXPECT_EQ(tester.getObjCodeName(2), "albany");
-    EXPECT_EQ(tester.getObjCodeName(3), "sierra_sd");
-    EXPECT_EQ(tester.getObjCodeName(4), "lightmp");
-    EXPECT_EQ(tester.getObjPerfName(0), "sierra_sd_obj1");
-    EXPECT_EQ(tester.getObjPerfName(1), "sierra_sd_2");
-    EXPECT_EQ(tester.getObjPerfName(2), "albany_1");
-    EXPECT_EQ(tester.getObjPerfName(3), "sierra_sd_3");
-    EXPECT_EQ(tester.getObjPerfName(4), "lightmp_1");
-}
-*/
 
 TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
 {
@@ -5441,6 +4644,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
             "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear elastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e8\n"
             "end material\n"
@@ -5487,6 +4691,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_val
             "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear elastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e8\n"
             "end material\n"
@@ -5533,6 +4738,7 @@ TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeWriter)
             "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear elastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e8\n"
             "end material\n"
@@ -5580,6 +4786,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
             "    traction sideset name 1 value 0 -3e3 0 load id 1\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear elastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e8\n"
             "end material\n"
@@ -5627,6 +4834,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_dup
             "    traction sideset name 1 value 0 -3e3 0 load id 1\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear elastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e8\n"
             "end material\n"
@@ -5675,9 +4883,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
             "    heat flux sideset name ss_1 value -1e2 load id 1\n"
             "end loads\n"
             "begin material 1\n"
-            "    density 2703\n"
+            "    material_model isotropic linear thermal\n"
+            "    mass density 2703\n"
             "    specific heat 900\n"
-            "    thermal conductivity 210.0\n"
+            "    thermal conductivity coefficient 210.0\n"
             "end material\n"
             "begin boundary conditions\n"
             "    fixed temperature nodeset name 1 bc id 1\n"
@@ -5725,10 +4934,11 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
             "    heat flux sideset name ss_1 value 0.0 load id 2\n"
             "end loads\n"
             "begin material 1\n"
+            "    material_model isotropic linear thermoelastic\n"
             "    poissons ratio 0.3\n"
             "    youngs modulus 1e11\n"
             "    thermal expansion coefficient 1e-5\n"
-            "    thermal conductivity 910.0\n"
+            "    thermal conductivity coefficient 910.0\n"
             "    reference temperature 1e-2\n"
             "end material\n"
             "begin boundary conditions\n"

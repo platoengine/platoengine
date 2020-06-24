@@ -18,6 +18,14 @@ namespace XMLGen
 using UseCaseTags = std::unordered_map<std::string, std::pair<std::vector<std::string>,std::string>>;
 
 /******************************************************************************//**
+ * \fn unique
+ * \brief Returns true if each string element is unique.
+ * \param [in] aInput string container
+ * \return Flag
+**********************************************************************************/
+bool unique(const std::vector<std::string>& aInput);
+
+/******************************************************************************//**
  * \fn erase_tags
  * \brief Erase input tag values in map.
  * \param [in/out] aTags map from tag to container of token-value pairs

@@ -77,6 +77,7 @@
 
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
+#include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
@@ -2561,143 +2562,13 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
   return true;
 }
 /******************************************************************************/
-bool XMLGenerator::parseMaterials(std::istream &fin)
+bool XMLGenerator::parseMaterials(std::istream &aInput)
 /******************************************************************************/
 {
-  std::string tStringValue;
-  std::vector<std::string> tInputStringList;
-
-  // read each line of the file
-  while (!fin.eof())
-  {
-    // read an entire line into memory
-    char buf[MAX_CHARS_PER_LINE];
-    fin.getline(buf, MAX_CHARS_PER_LINE);
-    std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
-
-    // process the tokens
-    if(tokens.size() > 0)
-    {
-      for(size_t j=0; j<tokens.size(); ++j)
-        tokens[j] = toLower(tokens[j]);
-
-      if(parseSingleValue(tokens, tInputStringList = {"begin","material"}, tStringValue))
-      {
-        XMLGen::Material new_material;
-        new_material.property("penalty exponent", "3.0");
-        if(tStringValue == "")
-        {
-          std::cout << "ERROR:XMLGenerator:parseMaterials: No material id specified.\n";
-          return false;
-        }
-        new_material.id(tStringValue);
-        // found mesh block
-        while (!fin.eof())
-        {
-          fin.getline(buf, MAX_CHARS_PER_LINE);
-          tokens.clear();
-          parseTokens(buf, tokens);
-          // process the tokens
-          if(tokens.size() > 0)
-          {
-            for(size_t j=0; j<tokens.size(); ++j)
-              tokens[j] = toLower(tokens[j]);
-
-            if(parseSingleValue(tokens, tInputStringList = {"end","material"}, tStringValue))
-            {
-              if(new_material.id().empty())
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: Material ids was not specified for material.\n";
-                return false;
-              }
-              break;
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"penalty","exponent"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"penalty exponent\" keywords.\n";
-                return false;
-              }
-              new_material.property("penalty exponent", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"youngs","modulus"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"youngs modulus\" keywords.\n";
-                return false;
-              }
-              new_material.property("youngs modulus", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"specific","heat"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"specific heat\" keywords.\n";
-                return false;
-              }
-              new_material.property("specific heat", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"poissons","ratio"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"poissons ratio\" keywords.\n";
-                return false;
-              }
-              new_material.property("poissons ratio", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"thermal","conductivity"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"thermal conductivity coefficient\" keywords.\n";
-                return false;
-              }
-              new_material.property("thermal conductivity", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"thermal","expansion","coefficient"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"thermal expansion coefficient\" keywords.\n";
-                return false;
-              }
-              new_material.property("thermal expansion", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"reference","temperature"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"reference temperature\" keywords.\n";
-                return false;
-              }
-              new_material.property("reference temperature", tStringValue);
-            }
-            else if(parseSingleValue(tokens, tInputStringList = {"density"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseMaterials: No value specified after \"density\" keywords.\n";
-                return false;
-              }
-              new_material.property("density", tStringValue);
-            }
-            else
-            {
-              PrintUnrecognizedTokens(tokens);
-              std::cout << "ERROR:XMLGenerator:parseMaterials: Unrecognized keyword.\n";
-              return false;
-            }
-          }
-        }
-        m_InputData.materials.push_back(new_material);
-      }
-    }
-  }
-  return true;
+    XMLGen::ParseMaterial tParseMaterial;
+    tParseMaterial.parse(aInput);
+    m_InputData.materials = tParseMaterial.data();
+    return true;
 }
 /******************************************************************************/
 bool XMLGenerator::parseConstraints(std::istream &aInput)
@@ -2743,13 +2614,14 @@ bool XMLGenerator::parseFile()
   parseMesh(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  parseMaterials(tInputFile);
-  tInputFile.close();
-  tInputFile.open(m_InputFilename.c_str()); // open a file
   parseBlocks(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
   parseCodePaths(tInputFile);
+  tInputFile.close();
+
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseMaterials(tInputFile);
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file

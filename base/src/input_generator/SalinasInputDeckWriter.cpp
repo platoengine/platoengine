@@ -387,8 +387,8 @@ void SalinasInputDeckWriter::writeMaterialBlocks(FILE *aFilePtr, const bool &aFR
         fprintf(aFilePtr, "  isotropic\n");
         fprintf(aFilePtr, "  E = %s\n", mInputData.materials[n].property("youngs modulus").c_str());
         fprintf(aFilePtr, "  nu = %s\n", mInputData.materials[n].property("poissons ratio").c_str());
-        if(mInputData.materials[n].property("density").empty() == false)
-            fprintf(aFilePtr, "  density = %s\n", mInputData.materials[n].property("density").c_str());
+        if(mInputData.materials[n].property("mass density").empty() == false)
+            fprintf(aFilePtr, "  density = %s\n", mInputData.materials[n].property("mass density").c_str());
         fprintf(aFilePtr, "  material_penalty_model = simp\n");
         if(mInputData.discretization.compare("density") == 0)
         {

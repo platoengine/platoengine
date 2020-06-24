@@ -50,7 +50,7 @@ void append_material_properties_to_plato_analyze_material_model
         if (tItr == tMaterialModelItr->second.end())
         {
             THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
-                + tTag + "' is not supported in Plato Analyze by material model '" + tLowerMaterialModel + "'.")
+                + tTag + "' is not supported in Plato Analyze by '" + tLowerMaterialModel + "' material model.")
         }
         auto tMaterialTag = tItr->second.first;
         auto tValueType = tItr->second.second;
@@ -164,7 +164,7 @@ void AppendMaterialModelParameters::insert()
 
 void AppendMaterialModelParameters::call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const
 {
-    auto tLowerPerformer = Plato::tolower(aMaterial.performer());
+    auto tLowerPerformer = Plato::tolower(aMaterial.code());
     if(Plato::tolower(tLowerPerformer).compare("plato_analyze") != 0)
     {
         return;
