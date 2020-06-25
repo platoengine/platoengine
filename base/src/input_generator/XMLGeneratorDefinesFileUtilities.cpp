@@ -7,6 +7,7 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
 
 namespace XMLGen
 {
@@ -89,19 +90,20 @@ return_random_tractions_tags_for_define_xml_file
         THROWERR("Return Random Tractions Tags For Define Xml File: Samples vector is empty.")
     }
 
-    // traction load index to tags map, i.e. map<load index, vector<tags>>
+    // traction load index to tags map, i.e. map<load_identifier, vector<load_component_tags>>
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
     XMLGen::ValidAxesKeys tValidDofs;
+    XMLGen::NaturalBoundaryConditionTag tNaturalBCNameFuncInterface;
+
     auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
         auto tLoadTagLower = Plato::tolower(tLoad.type);
         auto tIsTractionLoad = tLoadTagLower == "traction";
+        auto tLoadIdentifier = tNaturalBCNameFuncInterface.call(tLoad);
         if(tLoad.mIsRandom && tIsTractionLoad)
         {
-            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-            auto tLoadIndexString = std::to_string(tLoadIndex);
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
@@ -111,8 +113,8 @@ return_random_tractions_tags_for_define_xml_file
                     THROWERR(std::string("Return Random Tractions Tags for Define XML File: Invalid dimension key '")
                         + std::to_string(tDimIndex) + "'. Valid dimensions are: 1D, 2D, and 3D.")
                 }
-                auto tTag = tLoadTagLower + " load-id-" + tLoadIndexString + " " + tItr->second + "-axis";
-                tOutput[tLoadIndexString].push_back(tTag);
+                auto tTag = tLoadTagLower + " load-id-" + tLoad.load_id + " " + tItr->second + "-axis";
+                tOutput[tLoadIdentifier].push_back(tTag);
             }
         }
     }
@@ -188,8 +190,8 @@ void append_tractions_to_define_xml_file
             auto tTagItr = aTags.find(tLoadIndexString);
             if(tTagItr == aTags.end())
             {
-                THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load index '"
-                    + tLoadIndexString + "' in Load Index to Tags Map. ")
+                THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
+                    + tLoadIndexString + "' in map from load identifier to load component tags.")
             }
             auto tTag = tTagItr->second[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());

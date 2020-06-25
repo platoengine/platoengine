@@ -283,13 +283,11 @@ void append_random_traction_vector_to_plato_analyze_operation
     auto tLoadsTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
     for(auto& tPair : tLoadsTags)
     {
-        auto tLoadIndex = tPair.first;
-        auto tRandomLoadLabel = std::string("[Random Traction Vector Boundary Condition ") + tLoadIndex + "]:";
         for(auto& tArgumentNameTag : tPair.second)
         {
             auto tDim = &tArgumentNameTag - &tPair.second[0];
             auto tValue = std::string("Values(") + std::to_string(tDim) + ")";
-            auto tTarget = std::string("[Plato Problem]:[Natural Boundary Conditions]:") + tRandomLoadLabel + tValue;
+            auto tTarget = std::string("[Plato Problem]:[Natural Boundary Conditions]:[") + tPair.first + "]:" + tValue;
             std::vector<std::string> tValues = { tArgumentNameTag, tTarget, "0.0" };
             auto tParameter = aParentNode.append_child("Parameter");
             XMLGen::append_children(tKeys, tValues, tParameter);

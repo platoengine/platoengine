@@ -161,6 +161,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -169,6 +170,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -177,6 +179,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.mIsRandom = false;
     tLoad3.type = "traction";
     tLoad3.app_name = "sideset";
@@ -189,6 +192,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -197,6 +201,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -222,42 +227,42 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     std::vector<std::string> tValues =
-        {"traction load-id-1 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(0)", "0.0"};
+        {"traction load-id-2 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(0)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-1 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(1)", "0.0"};
+    tValues = {"traction load-id-2 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(1)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-1 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(2)", "0.0"};
+    tValues = {"traction load-id-2 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(2)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-0 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(0)", "0.0"};
+    tValues = {"traction load-id-1 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(0)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-0 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(1)", "0.0"};
+    tValues = {"traction load-id-1 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(1)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-0 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(2)", "0.0"};
+    tValues = {"traction load-id-1 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(2)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     // EXPECT NEXT SIBLING TO BE EMPTY SINCE PREVIOUS PARAMETER IS THE LAST SIBLING ON THE LIST
@@ -312,6 +317,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -320,6 +326,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -328,6 +335,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -342,6 +350,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
     tLoad4.mIsRandom = true;
+    tLoad4.load_id = "1";
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("11");
@@ -350,6 +359,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
     tLoad5.mIsRandom = true;
+    tLoad5.load_id = "2";
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
     tLoad5.values.push_back("14");
@@ -393,15 +403,15 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
     std::vector<std::string> tGoldArgumentNames = {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis",
-        "traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis", "poissons ratio block-id-1",
+        "traction load-id-2 x-axis", "traction load-id-2 y-axis", "traction load-id-2 z-axis", "poissons ratio block-id-1",
         "poissons ratio block-id-2", "youngs modulus block-id-1", "youngs modulus block-id-2"};
     std::vector<std::string> tGoldTargetNames =
-        {"[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(0)",
-         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(1)",
-         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 1]:Values(2)",
-         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(0)",
-         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(1)",
-         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition 0]:Values(2)",
+        {"[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(0)",
+         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(1)",
+         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(2)",
+         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(0)",
+         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(1)",
+         "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(2)",
          "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio",
          "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus"};
     while(!tParameter.empty())

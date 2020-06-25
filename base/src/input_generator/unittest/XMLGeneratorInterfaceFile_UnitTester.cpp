@@ -1092,6 +1092,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -1100,6 +1101,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -1108,6 +1110,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -1121,6 +1124,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -1129,6 +1133,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -1189,6 +1194,25 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-2 x-axis",
+                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 y-axis",
+                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 z-axis",
+                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
     tGoldValues = {"traction load-id-1 x-axis",
                    "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
@@ -1203,25 +1227,6 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     ASSERT_FALSE(tParameter.empty());
     tGoldValues = {"traction load-id-1 z-axis",
                    "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-0 x-axis",
-                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 y-axis",
-                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 z-axis",
-                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES
@@ -1289,6 +1294,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -1297,6 +1303,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -1305,6 +1312,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -1318,6 +1326,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -1326,6 +1335,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -1421,6 +1431,25 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-2 x-axis",
+                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 y-axis",
+                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 z-axis",
+                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
     tGoldValues = {"traction load-id-1 x-axis",
                    "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
@@ -1435,25 +1464,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     ASSERT_FALSE(tParameter.empty());
     tGoldValues = {"traction load-id-1 z-axis",
                    "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-0 x-axis",
-                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 y-axis",
-                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 z-axis",
-                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // ****** 4.2) TEST SAMPLE OBJECTIVE OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******
@@ -1507,6 +1517,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -1515,6 +1526,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -1523,6 +1535,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -1536,6 +1549,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -1544,6 +1558,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -1602,6 +1617,25 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-2 x-axis",
+                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 y-axis",
+                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 z-axis",
+                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
     tGoldValues = {"traction load-id-1 x-axis",
                    "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
@@ -1616,25 +1650,6 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     ASSERT_FALSE(tParameter.empty());
     tGoldValues = {"traction load-id-1 z-axis",
                    "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-0 x-axis",
-                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 y-axis",
-                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 z-axis",
-                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES
@@ -1707,6 +1722,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -1715,6 +1731,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -1723,6 +1740,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -1736,6 +1754,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -1744,6 +1763,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -1875,6 +1895,25 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
+    tGoldValues = {"traction load-id-2 x-axis",
+                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 y-axis",
+                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldValues = {"traction load-id-2 z-axis",
+                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
+
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tGoldKeys = {"ArgumentName", "ArgumentValue"};
     tGoldValues = {"traction load-id-1 x-axis",
                    "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
@@ -1889,25 +1928,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     ASSERT_FALSE(tParameter.empty());
     tGoldValues = {"traction load-id-1 z-axis",
                    "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-0 x-axis",
-                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 y-axis",
-                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 z-axis",
-                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // ****** 4.2) TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******

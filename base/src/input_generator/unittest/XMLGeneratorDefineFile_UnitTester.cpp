@@ -75,7 +75,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tUncertaintyMetaData.numPerformers = 2;
 
     // 3. CALL FUNCTION
-    ASSERT_NO_THROW(XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData));
+    XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData);
 
     // 4. TEST OUTPUT FILE
     auto tReadData = XMLGen::read_data_from_file("defines.xml");
@@ -248,8 +248,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     // 3. POSE GOLD LOAD VALUES AND TEST
     std::vector<std::vector<std::vector<std::string>>> tGoldValues =
         {
-          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
-          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+          { {"1", "11"}, {"2", "12"}, {"3", "13"} }, // Load One
+          { {"4", "14"}, {"5", "15"}, {"6", "16"} }  // Load Two
         };
 
     for(auto& tDims : tTractionValues)
@@ -617,6 +617,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -625,6 +626,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -633,6 +635,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.mIsRandom = false;
     tLoad3.type = "traction";
     tLoad3.app_name = "sideset";
@@ -645,6 +648,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -653,6 +657,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -676,8 +681,8 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     // 4. TEST RESULTS
     std::unordered_map<std::string, std::vector<std::string>> tGold =
         {
-          {"0", {"traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis"} },
-          {"1", {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
+          {"Random Traction Vector Boundary Condition with ID 2", {"traction load-id-2 x-axis", "traction load-id-2 y-axis", "traction load-id-2 z-axis"} },
+          {"Random Traction Vector Boundary Condition with ID 1", {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
         };
 
     for(auto& tPair : tMap)
