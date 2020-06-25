@@ -456,6 +456,73 @@ preprocess_srom_problem_load_inputs
 // function preprocess_srom_problem_load_inputs
 
 /******************************************************************************//**
+ * \fn return_load_identification_numbers
+ * \brief Return load identification numbers.
+ * \param [in] aInputMetadata  Plato problem input metadata
+ * \return load identification numbers
+**********************************************************************************/
+inline std::vector<std::string>
+return_load_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    std::vector<std::string> tOutput;
+    for(auto& tLoadCase : aInputMetadata.load_cases)
+    {
+        for(auto& tLoad : tLoadCase.loads)
+        {
+            tOutput.push_back(tLoad.load_id);
+        }
+    }
+    return tOutput;
+}
+// function return_load_identification_numbers
+
+/******************************************************************************//**
+ * \fn return_random_load_identification_numbers
+ * \brief Return random load identification numbers.
+ * \param [in] aInputMetadata  Plato problem input metadata
+ * \return random load identification numbers
+**********************************************************************************/
+inline std::vector<std::string>
+return_random_load_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    std::vector<std::string> tOutput;
+    for(auto& tUQCase : aInputMetadata.uncertainties)
+    {
+        if(tUQCase.variable_type.compare("load") == 0)
+        {
+            tOutput.push_back(tUQCase.id);
+        }
+    }
+    return tOutput;
+}
+// function return_random_load_identification_numbers
+
+/******************************************************************************//**
+ * \fn check_random_load_identification_numbers
+ * \brief Throw an error if any load identification number in the uncertainty \n
+ * blocks does not match any of the load identification numbers in the load blocks.
+ * \param [in] aInputMetadata  Plato problem input metadata
+**********************************************************************************/
+inline void check_random_load_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    auto tRandomLoadIDs = Plato::srom::return_random_load_identification_numbers(aInputMetadata);
+    auto tDeterministicLoadIDs = Plato::srom::return_load_identification_numbers(aInputMetadata);
+    for(auto& tID : tRandomLoadIDs)
+    {
+        auto tItr = std::find(tDeterministicLoadIDs.begin(), tDeterministicLoadIDs.end(), tID);
+        if(tItr == tDeterministicLoadIDs.end())
+        {
+            THROWERR(std::string("Check Random Load Identification Numbers: Load ID '") + tID + "' is not a valid load id. "
+                + "Any load id defined in the uncertainty blocks must match a load id defined in the load blocks.")
+        }
+    }
+}
+// function check_random_load_identification_numbers
+
+/******************************************************************************//**
  * \fn preprocess_load_inputs
  * \brief Pre-process non-deterministic load inputs.
  * \param [in/out] aInputMetadata  Plato problem input metadata
@@ -465,6 +532,8 @@ inline void preprocess_load_inputs
 (const XMLGen::InputData& aInputMetadata,
  Plato::srom::InputMetaData& aSromInputs)
 {
+    Plato::srom::check_random_load_identification_numbers(aInputMetadata);
+
     auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
     auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::LOAD);
     if(tIterator == tCategoriesToUncertaintiesMap.end())

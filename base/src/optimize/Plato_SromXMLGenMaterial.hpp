@@ -166,6 +166,71 @@ inline void set_block_identification_number
 // function set_block_identification_number
 
 /******************************************************************************//**
+ * \fn return_material_identification_numbers
+ * \brief Return material identification numbers.
+ * \param [in] aInputMetadata  Plato problem input metadata
+ * \return material identification numbers
+**********************************************************************************/
+inline std::vector<std::string>
+return_material_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    std::vector<std::string> tOutput;
+    for (auto &tMaterial : aInputMetadata.materials)
+    {
+        tOutput.push_back(tMaterial.id());
+    }
+    return tOutput;
+}
+// function return_material_identification_numbers
+
+/******************************************************************************//**
+ * \fn return_random_material_identification_numbers
+ * \brief Return random material identification numbers.
+ * \param [in] aInputMetadata  Plato problem input metadata
+ * \return random material identification numbers
+**********************************************************************************/
+inline std::vector<std::string>
+return_random_material_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    std::vector<std::string> tOutput;
+    for(auto& tUQCase : aInputMetadata.uncertainties)
+    {
+        if(tUQCase.variable_type.compare("material") == 0)
+        {
+            tOutput.push_back(tUQCase.id);
+        }
+    }
+    return tOutput;
+}
+// function return_random_material_identification_numbers
+
+/******************************************************************************//**
+ * \fn check_random_load_identification_numbers
+ * \brief Throw an error if any material identification number in the uncertainty \n
+ * blocks does not match any of the material identification number in the material \n
+ * blocks.
+ * \param [in] aInputMetadata  Plato problem input metadata
+**********************************************************************************/
+inline void check_random_material_identification_numbers
+(const XMLGen::InputData& aInputMetadata)
+{
+    auto tRandomLoadIDs = Plato::srom::return_random_material_identification_numbers(aInputMetadata);
+    auto tDeterministicLoadIDs = Plato::srom::return_material_identification_numbers(aInputMetadata);
+    for(auto& tID : tRandomLoadIDs)
+    {
+        auto tItr = std::find(tDeterministicLoadIDs.begin(), tDeterministicLoadIDs.end(), tID);
+        if(tItr == tDeterministicLoadIDs.end())
+        {
+            THROWERR(std::string("Check Random Material Identification Numbers: Material ID '") + tID + "' is not a valid material id. "
+                + "Any material id defined in the uncertainty blocks must match a material id defined in the material blocks.")
+        }
+    }
+}
+// function check_random_material_identification_numbers
+
+/******************************************************************************//**
  * \fn preprocess_material_inputs
  * \brief Pre-process non-deterministic material inputs, i.e. prepare inputs for \n
  *   Stochastic Reducded Order Model (SROM) problem.
@@ -181,6 +246,7 @@ inline void preprocess_material_inputs
             + "Plato problem has no material defined in input file.")
     }
 
+    Plato::srom::check_random_material_identification_numbers(aInputMetadata);
     auto tCategoriesToUncertaintiesMap = Plato::srom::split_uncertainties_into_categories(aInputMetadata);
     auto tIterator = tCategoriesToUncertaintiesMap.find(Plato::srom::category::MATERIAL);
     if(tIterator == tCategoriesToUncertaintiesMap.end())

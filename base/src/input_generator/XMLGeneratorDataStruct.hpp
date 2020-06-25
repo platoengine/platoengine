@@ -343,7 +343,7 @@ struct Uncertainty
 {
     std::string variable_type = "load"; // Load or material
     std::string type; // currently always "angle variation"
-    std::string id; // which random variable to vary
+    std::string id; // which random category identification number, i.e. material or load id
     std::string axis; // x, y, z
     std::string distribution; // normal, uniform, beta
     std::string mean; // scalar value

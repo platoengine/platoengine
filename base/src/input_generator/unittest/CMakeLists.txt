@@ -3,6 +3,7 @@
 ###############################################################################
 SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGenerator_UnitTester.cpp
+                                      XMLGeneratorSrom_UnitTester.cpp
                                       XMLGeneratorDefineFile_UnitTester.cpp
                                       XMLGeneratorLaunchScript_UnitTester.cpp
                                       XMLGeneratorAnalyzeUncertaintyLaunchScript_UnitTester.cpp
