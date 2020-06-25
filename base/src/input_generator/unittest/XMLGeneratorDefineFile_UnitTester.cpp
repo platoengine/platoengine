@@ -517,8 +517,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
 {
     // CALL FUNCTION
     std::unordered_map<std::string, std::vector<std::string>> tData =
-            { {"elastic modulus block-id-1", {"1", "1.1"} },
-              {"elastic modulus block-id-2", {"1", "1"} },
+            { {"youngs modulus block-id-1", {"1", "1.1"} },
+              {"youngs modulus block-id-2", {"1", "1"} },
               {"poissons ratio block-id-1", {"0.3", "0.33"} },
               {"poissons ratio block-id-2", {"0.3", "0.3"} } };
 
@@ -527,7 +527,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldNames =
-        {"elastic modulus block-id-1", "elastic modulus block-id-2", "poissons ratio block-id-1","poissons ratio block-id-2"};
+        {"youngs modulus block-id-1", "youngs modulus block-id-2", "poissons ratio block-id-1","poissons ratio block-id-2"};
     std::vector<std::string> tGoldValues = {"1, 1.1", "1, 1", "0.3, 0.33", "0.3, 0.3"};
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -551,12 +551,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic");
-    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("youngs modulus", "1");
     tMaterial1.property("poissons ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic");
-    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("youngs modulus", "1");
     tMaterial2.property("poissons ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetOne;
@@ -568,12 +568,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic");
-    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("youngs modulus", "1.1");
     tMaterial3.property("poissons ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic");
-    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("youngs modulus", "1");
     tMaterial4.property("poissons ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetTwo;
@@ -594,8 +594,8 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     // 4. TEST RESULTS
     std::unordered_map<std::string, std::vector<std::string>> tGold =
         {
-          {"1", {"elastic modulus block-id-1", "poissons ratio block-id-1"} },
-          {"2", {"elastic modulus block-id-2", "poissons ratio block-id-2"} }
+          {"1", {"poissons ratio block-id-1", "youngs modulus block-id-1"} },
+          {"2", {"poissons ratio block-id-2", "youngs modulus block-id-2"} }
         };
 
     for(auto& tPair : tMap)
@@ -739,12 +739,12 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic");
-    tMaterial1.property("elastic modulus", "1");
+    tMaterial1.property("youngs modulus", "1");
     tMaterial1.property("poissons ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic");
-    tMaterial2.property("elastic modulus", "1");
+    tMaterial2.property("youngs modulus", "1");
     tMaterial2.property("poissons ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetOne;
@@ -756,12 +756,12 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic");
-    tMaterial3.property("elastic modulus", "1.1");
+    tMaterial3.property("youngs modulus", "1.1");
     tMaterial3.property("poissons ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic");
-    tMaterial4.property("elastic modulus", "1");
+    tMaterial4.property("youngs modulus", "1");
     tMaterial4.property("poissons ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetTwo;
@@ -781,8 +781,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
 
     // POSE GOLD LOAD VALUES AND TEST
     std::unordered_map<std::string, std::vector<std::string>> tGold =
-            { {"elastic modulus block-id-1", {"1", "1.1"} },
-              {"elastic modulus block-id-2", {"1", "1"} },
+            { {"youngs modulus block-id-1", {"1", "1.1"} },
+              {"youngs modulus block-id-2", {"1", "1"} },
               {"poissons ratio block-id-1", {"0.3", "0.33"} },
               {"poissons ratio block-id-2", {"0.3", "0.3"} } };
     for(auto& tPair : tMaterialValues)

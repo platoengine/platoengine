@@ -401,7 +401,7 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error1)
     Plato::srom::Material tMaterial;
     tMaterial.category("isotropic linear elastic");
     tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
@@ -414,7 +414,7 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error2)
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
     tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
@@ -427,7 +427,7 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error3)
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
     tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", ""});
@@ -440,7 +440,7 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber1)
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
     tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", "10"});
@@ -455,7 +455,7 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber2)
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
     tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("elastic modulus", "homogeneous", "2.5e8");
+    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", "10"});

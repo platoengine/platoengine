@@ -36,6 +36,56 @@ struct ValidCriterionKeys
 };
 // struct ValidCriterionKeys
 
+struct ValidRandomCategoryKeys
+{
+    /*!<
+     * \brief Valid plato input deck random categories keywords.
+     **/
+    std::vector<std::string> mKeys = {"load", "material"};
+};
+// struct ValidRandomCategoryKeys
+
+struct ValidRandomPropertyKeys
+{
+    /*!<
+     * \brief Valid plato input deck random properties keywords.
+     **/
+    std::vector<std::string> mKeys = { "angle variation", "youngs modulus", "poissons ratio", "mass density", "youngs modulus x", "youngs modulus y",
+        "youngs modulus z", "poissons ratio xy", "poissons ratio xz", "poissons ratio yz", "shear modulus ratio xy", "shear modulus ratio xz",
+        "shear modulus ratio yz", "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33",
+        "piezoelectric coupling 31", "thermal conductivity coefficient", "specific heat", "reference temperature", "thermal expansion coefficient",
+        "yield stress" };
+};
+// struct ValidRandomPropertyKeys
+
+struct ValidRandomAttributeKeys
+{
+    /*!<
+     * \brief Valid plato input deck random attributes keywords.
+     **/
+    std::vector<std::string> mKeys = {"x", "y", "z", "homogeneous"};
+};
+// struct ValidRandomAttributeKeys
+
+struct ValidRandomIdentificationKeys
+{
+    /*!<
+     * \brief Valid plato input deck identification keywords.
+     * Map from random 'category' keyword to identification keyword, i.e. map<category_key, identification_key>.
+     **/
+    std::unordered_map<std::string, std::string> mKeys = { { "load", "load id" }, { "material", "material id" } };
+};
+// struct ValidStatisticalDistributionKeys
+
+struct ValidStatisticalDistributionKeys
+{
+    /*!<
+     * \brief Valid plato input deck statistical distribution keywords.
+     **/
+    std::vector<std::string> mKeys = {"normal", "beta", "uniform"};
+};
+// struct ValidStatisticalDistributionKeys
+
 struct ValidEssentialBoundaryConditionsKeys
 {
     /*!<
