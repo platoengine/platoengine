@@ -49,8 +49,11 @@ std::vector<std::string> return_list_of_objective_functions
     std::vector<std::string> tTokens;
     for(auto& tObjective : aXMLMetaData.objectives)
     {
-        auto tToken = std::string("my ") + Plato::tolower(tObjective.type);
-        tTokens.push_back(tToken);
+        if (tObjective.code().compare("plato_analyze") == 0)
+        {
+            auto tToken = std::string("my ") + Plato::tolower(tObjective.type);
+            tTokens.push_back(tToken);
+        }
     }
     return tTokens;
 }
@@ -64,8 +67,11 @@ std::vector<std::string> return_list_of_objective_weights
     std::vector<std::string> tTokens;
     for(auto& tObjective : aXMLMetaData.objectives)
     {
-        auto tWeight = tObjective.weight.empty() ? "1.0" : tObjective.weight;
-        tTokens.push_back(tWeight);
+        if (tObjective.code().compare("plato_analyze") == 0)
+        {
+            auto tWeight = tObjective.weight.empty() ? "1.0" : tObjective.weight;
+            tTokens.push_back(tWeight);
+        }
     }
     return tTokens;
 }
@@ -79,8 +85,11 @@ std::vector<std::string> return_list_of_constraint_functions
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tToken = std::string("my ") + Plato::tolower(tConstraint.category());
-        tTokens.push_back(tToken);
+        if (tConstraint.code().compare("plato_analyze") == 0)
+        {
+            auto tToken = std::string("my ") + Plato::tolower(tConstraint.category());
+            tTokens.push_back(tToken);
+        }
     }
     return tTokens;
 }
@@ -94,9 +103,12 @@ std::vector<std::string> return_list_of_constraint_weights
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tCurrentWeight = tConstraint.weight();
-        auto tProposedWeight = tCurrentWeight.empty() ? "1.0" : tCurrentWeight;
-        tTokens.push_back(tProposedWeight);
+        if (tConstraint.code().compare("plato_analyze") == 0)
+        {
+            auto tCurrentWeight = tConstraint.weight();
+            auto tProposedWeight = tCurrentWeight.empty() ? "1.0" : tCurrentWeight;
+            tTokens.push_back(tProposedWeight);
+        }
     }
     return tTokens;
 }
@@ -347,7 +359,10 @@ void append_objective_criteria_to_plato_problem
     XMLGen::AppendCriterionParameters<XMLGen::Objective> tFunctionInterface;
     for(auto& tObjective : aXMLMetaData.objectives)
     {
-        tFunctionInterface.call(tObjective, aParentNode);
+        if(tObjective.code().compare("plato_analyze") == 0)
+        {
+            tFunctionInterface.call(tObjective, aParentNode);
+        }
     }
 }
 // function append_objective_criteria_to_plato_problem
@@ -358,6 +373,11 @@ void append_objective_criteria_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    if(XMLGen::is_any_objective_computed_by_plato_analyze(aXMLMetaData) == false)
+    {
+        return;
+    }
+
     auto tObjective = aParentNode.append_child("ParameterList");
     XMLGen::append_weighted_sum_objective_to_plato_problem(aXMLMetaData, tObjective);
     XMLGen::append_functions_to_weighted_sum_objective(aXMLMetaData, tObjective);
@@ -427,10 +447,14 @@ void append_constraint_criteria_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tObjective = aParentNode.append_child("ParameterList");
-    XMLGen::append_weighted_sum_constraint_to_plato_problem(aXMLMetaData, tObjective);
-    XMLGen::append_functions_to_weighted_sum_constraint(aXMLMetaData, tObjective);
-    XMLGen::append_weights_to_weighted_sum_constraint(aXMLMetaData, tObjective);
+    if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData) == false)
+    {
+        return;
+    }
+    auto tConstraint = aParentNode.append_child("ParameterList");
+    XMLGen::append_weighted_sum_constraint_to_plato_problem(aXMLMetaData, tConstraint);
+    XMLGen::append_functions_to_weighted_sum_constraint(aXMLMetaData, tConstraint);
+    XMLGen::append_weights_to_weighted_sum_constraint(aXMLMetaData, tConstraint);
     XMLGen::append_constraint_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
 // function append_constraint_criteria_to_plato_analyze_input_deck

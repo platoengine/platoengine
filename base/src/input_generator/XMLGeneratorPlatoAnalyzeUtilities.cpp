@@ -69,5 +69,39 @@ bool is_any_constraint_computed_by_plato_analyze
 }
 /******************************************************************************/
 
+/******************************************************************************/
+std::vector<std::string>
+return_constraints_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData)
+{
+    std::vector<std::string> tCategories;
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        if(tConstraint.code().compare("plato_analyze") == 0)
+        {
+            tCategories.push_back(tConstraint.category());
+        }
+    }
+    return tCategories;
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::vector<std::string>
+return_objectives_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData)
+{
+    std::vector<std::string> tCategories;
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        if(tObjective.code().compare("plato_analyze") == 0)
+        {
+            tCategories.push_back(tObjective.category());
+        }
+    }
+    return tCategories;
+}
+/******************************************************************************/
+
 }
 // namespace XMLGen

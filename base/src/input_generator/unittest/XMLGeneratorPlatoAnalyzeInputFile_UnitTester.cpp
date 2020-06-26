@@ -9,6 +9,7 @@
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
 #include "XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
@@ -18,6 +19,42 @@
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ReturnObjectivesComputedByPlatoAnalyze)
+{
+    XMLGen::Objective tObjective1;
+    tObjective1.code_name = "plato_analyze";
+    tObjective1.type = "internal elastic energy";
+    XMLGen::Objective tObjective2;
+    tObjective2.code_name = "aria";
+    tObjective2.type = "internal thermal energy";
+
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objectives.push_back(tObjective1);
+    tXMLMetaData.objectives.push_back(tObjective2);
+
+    auto tCategories = XMLGen::return_objectives_computed_by_plato_analyze(tXMLMetaData);
+    ASSERT_EQ(1u, tCategories.size());
+    ASSERT_STREQ("internal elastic energy", tCategories[0].c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ReturnConstraintsComputedByPlatoAnalyze)
+{
+    XMLGen::Constraint tConstraint1;
+    tConstraint1.code("plato_analyze");
+    tConstraint1.category("internal elastic energy");
+    XMLGen::Constraint tConstraint2;
+    tConstraint2.code("aria");
+    tConstraint2.category("internal thermal energy");
+
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.constraints.push_back(tConstraint1);
+    tXMLMetaData.constraints.push_back(tConstraint2);
+
+    auto tCategories = XMLGen::return_constraints_computed_by_plato_analyze(tXMLMetaData);
+    ASSERT_EQ(1u, tCategories.size());
+    ASSERT_STREQ("internal elastic energy", tCategories[0].c_str());
+}
 
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
 {

@@ -46,5 +46,25 @@ bool is_any_objective_computed_by_plato_analyze
 bool is_any_constraint_computed_by_plato_analyze
 (const XMLGen::InputData& aXMLMetaData);
 
+/******************************************************************************//**
+ * \fn return_constraints_computed_by_plato_analyze
+ * \brief Returns categories of constraints computed by plato analyze.
+ * \param [in] aXMLMetaData Plato problem input data
+ * \return list of constraint categories computed by plato analyze
+**********************************************************************************/
+std::vector<std::string>
+return_constraints_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn return_objectives_computed_by_plato_analyze
+ * \brief Returns categories of objectives computed by plato analyze.
+ * \param [in] aXMLMetaData Plato problem input data
+ * \return list of objectives categories computed by plato analyze
+**********************************************************************************/
+std::vector<std::string>
+return_objectives_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData);
+
 }
 // namespace Plato
