@@ -766,23 +766,72 @@ inline bool generate_set_random_loads(const Plato::srom::Load & aOriginalLoad,
 }
 
 /******************************************************************************//**
- * \brief Assign an identification number to each load case in the set.
- * \param [out] aSetLoadCases set of load cases
+ * \fn return_unique_load_identification_number
+ * \brief Return container with all the unique load identification numbers in the \n
+ * set of random load cases.
+ * \param [in\out] aRandomLoadCases set of load cases
+ * \return unique load identification numbers
 **********************************************************************************/
-inline void assign_load_case_identification_number(std::vector<Plato::srom::RandomLoadCase> & aSetLoadCases)
+inline std::vector<int>
+return_unique_load_identification_number
+(std::vector<Plato::srom::RandomLoadCase> & aRandomLoadCases)
 {
-    Plato::UniqueCounter tLoadCounter, tLoadCaseCounter;
-    tLoadCounter.mark(0); tLoadCaseCounter.mark(0);
-
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < aSetLoadCases.size(); tLoadCaseIndex++)
+    std::vector<int> tLoadIDS;
+    for(auto& tLoad : aRandomLoadCases[0].loads())
     {
-        Plato::srom::RandomLoadCase& tMyLoadCase = aSetLoadCases[tLoadCaseIndex];
-        tMyLoadCase.caseID(std::to_string(tLoadCaseCounter.assignNextUnique()));
-        for(size_t tLoadIndex = 0; tLoadIndex < tMyLoadCase.numLoads(); tLoadIndex++)
+        auto tLoadID = &tLoad - &aRandomLoadCases[0].loads()[0] + 1;
+        tLoadIDS.push_back(tLoadID);
+    }
+    return tLoadIDS;
+}
+
+/******************************************************************************//**
+ * \fn assign_identification_number_to_loads
+ * \brief Assign an identification number to each load case in the set.
+ * \param [in\out] aRandomLoadCases set of load cases
+**********************************************************************************/
+inline void assign_unique_identification_number_to_loads
+(std::vector<Plato::srom::RandomLoadCase> & aRandomLoadCases)
+{
+    if(aRandomLoadCases.empty())
+    {
+        THROWERR("Assign Unique Identification Number to Loads: Input container with random load cases is empty.")
+    }
+
+    auto tLoadIDs = Plato::srom::return_unique_load_identification_number(aRandomLoadCases);
+    for(auto& tRandomLoadCase : aRandomLoadCases)
+    {
+        if(tRandomLoadCase.numLoads() != tLoadIDs.size())
         {
-            auto tLoadID = tLoadCounter.assignNextUnique();
-            tMyLoadCase.loadID(tLoadIndex, tLoadID);
+            THROWERR(std::string("Assign Unique Identification Number to Loads: Size mismatch. Number of unique ")
+                + "load identification numbers must match the number of loads in all random load cases. Random "
+                + "load case with identification number '" + tRandomLoadCase.caseID() + "' has '"
+                + std::to_string(tRandomLoadCase.numLoads()) + "' loads while there are '" + std::to_string(tLoadIDs.size())
+                + "' unique load identification numbers.")
         }
+
+        for(auto& tID : tLoadIDs)
+        {
+            auto tLoadIndex = &tID - &tLoadIDs[0];
+            tRandomLoadCase.loadID(tLoadIndex, tID);
+        }
+    }
+}
+
+/******************************************************************************//**
+ * \fn assign_unique_identification_number_to_load_cases
+ * \brief Assign an identification number to each load case in the set.
+ * \param [in\out] aSetLoadCases set of load cases
+**********************************************************************************/
+inline void assign_unique_identification_number_to_load_cases
+(std::vector<Plato::srom::RandomLoadCase> & aRandomLoadCases)
+{
+    Plato::UniqueCounter tLoadCaseCounter;
+    tLoadCaseCounter.mark(0);
+    for(auto& tRandomLoadCase : aRandomLoadCases)
+    {
+        auto tID = std::to_string(tLoadCaseCounter.assignNextUnique());
+        tRandomLoadCase.caseID(tID);
     }
 }
 
@@ -791,7 +840,8 @@ inline void assign_load_case_identification_number(std::vector<Plato::srom::Rand
  * \param [in] aDeterministicLoads set of deterministic loads
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool check_deterministic_loads(const std::vector<Plato::srom::Load>& aDeterministicLoads)
+inline bool check_deterministic_loads
+(const std::vector<Plato::srom::Load>& aDeterministicLoads)
 {
     for(auto& tLoad : aDeterministicLoads)
     {
@@ -861,7 +911,8 @@ inline bool generate_output_random_load_cases
     }
 
     Plato::srom::append_deterministic_loads(aDeterministicLoads, aSetRandomLoadCases);
-    Plato::srom::assign_load_case_identification_number(aSetRandomLoadCases);
+    Plato::srom::assign_unique_identification_number_to_load_cases(aSetRandomLoadCases);
+    Plato::srom::assign_unique_identification_number_to_loads(aSetRandomLoadCases);
 
     return (true);
 }

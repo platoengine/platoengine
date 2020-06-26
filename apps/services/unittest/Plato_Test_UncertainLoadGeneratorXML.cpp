@@ -2193,9 +2193,7 @@ TEST(PlatoTest, generate_output_random_load_cases)
     std::vector<double> tGoldLoadCasesProbs =
             {0.160857230304970, 0.118639480992335, 0.0847557373684797,  0.0867412302322639, 0.0639755795613402, 0.0457039880311642,
              0.101584192161421, 0.0749229351531628, 0.0535247504591439, 0.0923587620945064, 0.0681187633233061, 0.0486638677597447};
-    std::vector<std::string> tGoldLoadIDs =
-        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-         "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
+    std::vector<std::string> tGoldLoadIDs = {"1", "2"};
     std::vector<std::string> tGoldLoadCaseIDs = {"1", "2", "3", "4", "5", "6" , "7", "8", "9", "10", "11", "12"};
 
     const double tTolerance = 1e-6;
@@ -2207,8 +2205,7 @@ TEST(PlatoTest, generate_output_random_load_cases)
         const size_t tNumLoads = tLoadCase.numLoads();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
         {
-            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
-            ASSERT_STREQ(tGoldLoadIDs[tIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldLoadIDs[tLoadIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][0], tLoadCase.loadValue(tLoadIndex,0), tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][1], tLoadCase.loadValue(tLoadIndex,1), tTolerance);
             ASSERT_NEAR(tGoldLoadCases[tLoadCaseIndex][tLoadIndex][2], tLoadCase.loadValue(tLoadIndex,2), tTolerance);
@@ -2347,26 +2344,22 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads)
             { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
               {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
 
-    std::vector<std::string> tGoldLoadIDs =
-        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-         "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-         "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36",
-         "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48"};
+    std::vector<std::string> tGoldLoadIDs = {"1", "2", "3"};
 
     // TEST OUTPUT
     double tSum = 0;
     double tTolerance = 1e-6;
-    for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tOutputs.size(); tLoadCaseIndex++)
+    for(auto& tLoadCase : tOutputs)
     {
-        const Plato::srom::RandomLoadCase& tLoadCase = tOutputs[tLoadCaseIndex];
         tSum += tLoadCase.probability();
+
+        auto tLoadCaseIndex = &tLoadCase - &tOutputs[0];
         ASSERT_STREQ(tGoldLoadCaseIDs[tLoadCaseIndex].c_str(), tLoadCase.caseID().c_str());
         ASSERT_NEAR(tGoldLoadCasesProbs[tLoadCaseIndex], tLoadCase.probability(), tTolerance);
-        const size_t tNumLoads = tLoadCase.numLoads();
-        for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
+        for(auto& tLoad : tLoadCase.loads())
         {
-            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
-            ASSERT_STREQ(tGoldLoadIDs[tIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
+            auto tLoadIndex = &tLoad - &tLoadCase.loads()[0];
+            ASSERT_STREQ(tGoldLoadIDs[tLoadIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
@@ -2521,11 +2514,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
             { {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"},
               {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"}, {"1", "2", "3"} };
 
-    std::vector<std::string> tGoldLoadIDs =
-        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
-         "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-         "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36",
-         "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48"};
+    std::vector<std::string> tGoldLoadIDs = {"1", "2", "3"};
 
     // TEST OUTPUT
     double tSum = 0;
@@ -2539,8 +2528,7 @@ TEST(PlatoTest, generate_load_sroms_both_random_and_deterministic_loads_from_par
         const size_t tNumLoads = tLoadCase.numLoads();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
         {
-            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
-            ASSERT_STREQ(tGoldLoadIDs[tIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldLoadIDs[tLoadIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());
@@ -2627,7 +2615,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
 
     std::vector<std::vector<std::string>> tGoldAppIDs = { {"1", "2"}, {"1", "2"}, {"1", "2"}, {"1", "2"} };
 
-    std::vector<std::string> tGoldLoadIDs = {"1", "2", "3", "4", "5", "6", "7", "8"};
+    std::vector<std::string> tGoldLoadIDs = {"1", "2"};
 
     // TEST OUTPUT
     double tSum = 0;
@@ -2641,8 +2629,7 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
         const size_t tNumLoads = tLoadCase.numLoads();
         for(size_t tLoadIndex = 0; tLoadIndex < tNumLoads; tLoadIndex++)
         {
-            size_t tIndex = tLoadCaseIndex * tNumLoads + tLoadIndex;
-            ASSERT_STREQ(tGoldLoadIDs[tIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
+            ASSERT_STREQ(tGoldLoadIDs[tLoadIndex].c_str(), tLoadCase.loadID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppIDs[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationID(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldLoadType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.loadType(tLoadIndex).c_str());
             ASSERT_STREQ(tGoldAppType[tLoadCaseIndex][tLoadIndex].c_str(), tLoadCase.applicationType(tLoadIndex).c_str());

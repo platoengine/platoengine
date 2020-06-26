@@ -571,7 +571,6 @@ inline void postprocess_load_outputs
         auto tIndex = &tLoadCase - &tLoadCases[0];
         auto tLoadCaseID = tIndex + 1u;
         tNewLoadCase.id = std::to_string(tLoadCaseID);
-
         for (size_t tLoadIndex = 0; tLoadIndex < tLoadCase.numLoads(); ++tLoadIndex)
         {
             XMLGen::Load tNewLoad;
