@@ -9,94 +9,6 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 
-#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
-
-namespace XMLGen
-{
-
-std::map<std::string, std::vector<std::vector<std::string>>>
-allocate_map_from_random_load_identifier_to_load_samples
-(const XMLGen::RandomMetaData& aRandomMetaData)
-{
-    std::map<std::string, std::vector<std::vector<std::string>>> tOutput;
-
-    auto tLoadCase = aRandomMetaData.loadcase();
-    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
-    for(auto& tLoad : tLoadCase.loads)
-    {
-        if(tLoad.mIsRandom)
-        {
-            auto tIdentifier = tIdentifierInterface.call(tLoad);
-            for (auto &tValue : tLoad.values)
-            {
-                tOutput[tIdentifier].push_back({});
-            }
-        }
-    }
-    return (tOutput);
-}
-
-std::map<std::string, std::vector<std::vector<std::string>>>
-prepare_tractions_for_define_xml_file_2
-(const XMLGen::RandomMetaData& aRandomMetaData)
-{
-    auto tMapFromIdentifierToLoadValues =
-        XMLGen::allocate_map_from_random_load_identifier_to_load_samples(aRandomMetaData);
-
-    auto tSamples = aRandomMetaData.samples();
-    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
-    for(auto& tSample : tSamples)
-    {
-        auto tLoadCase = tSample.loadcase();
-        for(auto& tLoad : tLoadCase.loads)
-        {
-            if(tLoad.mIsRandom)
-            {
-                // append random load values for this sample
-                auto tIdentifier = tIdentifierInterface.call(tLoad);
-                for(auto& tValue : tLoad.values)
-                {
-                    auto tDimIndex = &tValue - &tLoad.values[0];
-                    tMapFromIdentifierToLoadValues[tIdentifier][tDimIndex].push_back(tValue);
-                }
-            }
-        }
-    }
-    return (tMapFromIdentifierToLoadValues);
-}
-
-void append_tractions_to_define_xml_file_2
-(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
- const std::map<std::string, std::vector<std::vector<std::string>>>& aValues,
- pugi::xml_document& aDocument)
-{
-    if(aValues.empty())
-    {
-        return;
-    }
-
-    for(auto& tPair : aValues)
-    {
-        auto tTagsItr = aTags.find(tPair.first);
-        if(tTagsItr == aTags.end())
-        {
-            THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
-                + tPair.first + "' in map from load identifier to load component tags.")
-        }
-
-        for(auto& tLoadComponentSamples : tPair.second)
-        {
-            auto tDimIndex = &tLoadComponentSamples - &tPair.second[0];
-            auto tTag = tTagsItr->second[tDimIndex];
-            auto tValues = XMLGen::transform_tokens(tLoadComponentSamples);
-            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
-        }
-    }
-}
-// TODO: REPLACE EXISTING FUNCTIONS WITH THESE NEW FUNCTIONS ABOVE.  FIX UNIT TESTS.
-
-}
-
 namespace PlatoTestXMLGenerator
 {
 
@@ -165,7 +77,7 @@ TEST(PlatoTestXMLGenerator, Test)
 
     // 2. CALL FUNCTION
     auto tMapFromIdentifierToLoadValues =
-        XMLGen::prepare_tractions_for_define_xml_file_2(tRandomMetaData);
+        XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
     ASSERT_FALSE(tMapFromIdentifierToLoadValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
@@ -198,6 +110,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
     tLoad1.mIsRandom = true;
+    tLoad1.load_id = "1";
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
@@ -205,6 +118,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -213,6 +127,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.mIsRandom = false;
     tLoad3.type = "traction";
     tLoad3.app_name = "sideset";
@@ -225,6 +140,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -233,6 +149,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -265,12 +182,12 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
             + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
             + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
             + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-            + "<Arrayname=\"tractionload-id-0x-axis\"type=\"real\"value=\"1,11\"/>"
-            + "<Arrayname=\"tractionload-id-0y-axis\"type=\"real\"value=\"2,12\"/>"
-            + "<Arrayname=\"tractionload-id-0z-axis\"type=\"real\"value=\"3,13\"/>"
-            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"4,14\"/>"
-            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"5,15\"/>"
-            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"6,16\"/>"
+            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"1,11\"/>"
+            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"2,12\"/>"
+            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"3,13\"/>"
+            + "<Arrayname=\"tractionload-id-2x-axis\"type=\"real\"value=\"4,14\"/>"
+            + "<Arrayname=\"tractionload-id-2y-axis\"type=\"real\"value=\"5,15\"/>"
+            + "<Arrayname=\"tractionload-id-2z-axis\"type=\"real\"value=\"6,16\"/>"
             + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
@@ -327,6 +244,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
+    tLoad1.type = "traction";
     tLoad1.mIsRandom = true;
     tLoad1.values.push_back("1");
     tLoad1.values.push_back("2");
@@ -338,6 +257,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "1";
+    tLoad2.type = "traction";
     tLoad2.mIsRandom = true;
     tLoad2.values.push_back("11");
     tLoad2.values.push_back("12");
@@ -353,23 +274,26 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tTractionValues.empty());
+    auto tMapFromIDtoTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIDtoTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
-    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
-        { { {"1", "11"}, {"2", "12"}, {"3", "13"} } };
-
-    for(auto& tDims : tTractionValues)
-    {
-        auto tLoadIndex = &tDims - &tTractionValues[0];
-        for(auto& tDim : tDims)
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
         {
-            auto tDimIndex = &tDim - &tDims[0];
-            for(auto& tSample : tDim)
+            {"Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"}, {"3", "13"} } }
+        };
+
+    for(auto& tPair : tMapFromIDtoTractionValues)
+    {
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tLoadComponent : tPair.second)
+        {
+            auto tDimIndex = &tLoadComponent - &tPair.second[0];
+            for(auto& tSample : tLoadComponent)
             {
-                auto tSampleIndex = &tSample - &tDim[0];
-                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                auto tSampleIndex = &tSample - &tLoadComponent[0];
+                ASSERT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -381,6 +305,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
+    tLoad1.type = "traction";
     tLoad1.mIsRandom = true;
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
@@ -388,6 +314,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
+    tLoad2.type = "traction";
     tLoad2.mIsRandom = true;
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
@@ -399,6 +327,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "1";
+    tLoad3.type = "traction";
     tLoad3.mIsRandom = true;
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("11");
@@ -406,6 +336,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tLoad3.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad3);
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "2";
+    tLoad4.type = "traction";
     tLoad4.mIsRandom = true;
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("14");
@@ -421,26 +353,27 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tTractionValues.empty());
+    auto tMapFromIDtoTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIDtoTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
-    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
         {
-          { {"1", "11"}, {"2", "12"}, {"3", "13"} }, // Load One
-          { {"4", "14"}, {"5", "15"}, {"6", "16"} }  // Load Two
+          { "Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"}, {"3", "13"} } }, // Load One
+          { "Random Traction Vector Boundary Condition with ID 2", { {"4", "14"}, {"5", "15"}, {"6", "16"} } } // Load Two
         };
 
-    for(auto& tDims : tTractionValues)
+    for(auto& tPair : tMapFromIDtoTractionValues)
     {
-        auto tLoadIndex = &tDims - &tTractionValues[0];
-        for(auto& tDim : tDims)
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tLoadComponent : tPair.second)
         {
-            auto tDimIndex = &tDim - &tDims[0];
-            for(auto& tSample : tDim)
+            auto tDimIndex = &tLoadComponent - &tPair.second[0];
+            for(auto& tSample : tLoadComponent)
             {
-                auto tSampleIndex = &tSample - &tDim[0];
-                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                auto tSampleIndex = &tSample - &tLoadComponent[0];
+                ASSERT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -452,6 +385,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
+    tLoad1.type = "traction";
     tLoad1.mIsRandom = true;
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
@@ -459,6 +394,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
+    tLoad2.type = "traction";
     tLoad2.mIsRandom = true;
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
@@ -466,6 +403,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
+    tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("7");
@@ -477,6 +416,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
+    tLoad4.type = "traction";
     tLoad4.mIsRandom = true;
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("11");
@@ -484,6 +425,8 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
+    tLoad5.type = "traction";
     tLoad5.mIsRandom = true;
     tLoad5.app_name = "sideset";
     tLoad5.values.push_back("14");
@@ -500,26 +443,27 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tTractionValues.empty());
+    auto tMapFromIDtoTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIDtoTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
-    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
         {
-          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
-          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+          { "Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"}, {"3", "13"} } },
+          { "Random Traction Vector Boundary Condition with ID 2", { {"4", "14"}, {"5", "15"}, {"6", "16"} } }
         };
 
-    for(auto& tDims : tTractionValues)
+    for(auto& tPair : tMapFromIDtoTractionValues)
     {
-        auto tLoadIndex = &tDims - &tTractionValues[0];
-        for(auto& tDim : tDims)
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tLoadComponent : tPair.second)
         {
-            auto tDimIndex = &tDim - &tDims[0];
-            for(auto& tSample : tDim)
+            auto tDimIndex = &tLoadComponent - &tPair.second[0];
+            for(auto& tSample : tLoadComponent)
             {
-                auto tSampleIndex = &tSample - &tDim[0];
-                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                auto tSampleIndex = &tSample - &tLoadComponent[0];
+                EXPECT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -531,12 +475,16 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
+    tLoad1.type = "traction";
     tLoad1.mIsRandom = true;
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
     tLoad1.values.push_back("2");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
+    tLoad2.type = "traction";
     tLoad2.mIsRandom = true;
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
@@ -547,12 +495,16 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "1";
+    tLoad3.type = "traction";
     tLoad3.mIsRandom = true;
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("11");
     tLoad3.values.push_back("12");
     tLoadCase2.loads.push_back(tLoad3);
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "2";
+    tLoad4.type = "traction";
     tLoad4.mIsRandom = true;
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("14");
@@ -567,26 +519,27 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tTractionValues.empty());
+    auto tMapFromIDtoTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIDtoTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
-    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
         {
-          { {"1", "11"}, {"2", "12"} },
-          { {"4", "14"}, {"5", "15"} }
+          { "Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"} } },
+          { "Random Traction Vector Boundary Condition with ID 2", { {"4", "14"}, {"5", "15"} } }
         };
 
-    for(auto& tDims : tTractionValues)
+    for(auto& tPair : tMapFromIDtoTractionValues)
     {
-        auto tLoadIndex = &tDims - &tTractionValues[0];
-        for(auto& tDim : tDims)
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tLoadComponent : tPair.second)
         {
-            auto tDimIndex = &tDim - &tDims[0];
-            for(auto& tSample : tDim)
+            auto tDimIndex = &tLoadComponent - &tPair.second[0];
+            for(auto& tSample : tLoadComponent)
             {
-                auto tSampleIndex = &tSample - &tDim[0];
-                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                auto tSampleIndex = &tSample - &tLoadComponent[0];
+                ASSERT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -598,18 +551,24 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
+    tLoad1.type = "traction";
     tLoad1.mIsRandom = true;
     tLoad1.app_name = "sideset";
     tLoad1.values.push_back("1");
     tLoad1.values.push_back("2");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
+    tLoad2.type = "traction";
     tLoad2.mIsRandom = true;
     tLoad2.app_name = "sideset";
     tLoad2.values.push_back("4");
     tLoad2.values.push_back("5");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
+    tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
     tLoad3.values.push_back("7");
@@ -620,12 +579,16 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
+    tLoad4.type = "traction";
     tLoad4.mIsRandom = true;
     tLoad4.app_name = "sideset";
     tLoad4.values.push_back("11");
     tLoad4.values.push_back("12");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
+    tLoad5.type = "traction";
     tLoad5.mIsRandom = true;
     tLoad5.app_name = "sideset";
     tLoad5.values.push_back("14");
@@ -641,26 +604,27 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     ASSERT_NO_THROW(tRandomMetaData.finalize());
 
     // 2. CALL FUNCTION
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
-    ASSERT_FALSE(tTractionValues.empty());
+    auto tMapFromIDtoTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIDtoTractionValues.empty());
 
     // 3. POSE GOLD LOAD VALUES AND TEST
-    std::vector<std::vector<std::vector<std::string>>> tGoldValues =
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
         {
-          { {"1", "11"}, {"2", "12"} },
-          { {"4", "14"}, {"5", "15"} }
+          { "Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"} } },
+          { "Random Traction Vector Boundary Condition with ID 2", { {"4", "14"}, {"5", "15"} } }
         };
 
-    for(auto& tDims : tTractionValues)
+    for(auto& tPair : tMapFromIDtoTractionValues)
     {
-        auto tLoadIndex = &tDims - &tTractionValues[0];
-        for(auto& tDim : tDims)
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tLoadComponent : tPair.second)
         {
-            auto tDimIndex = &tDim - &tDims[0];
-            for(auto& tSample : tDim)
+            auto tDimIndex = &tLoadComponent - &tPair.second[0];
+            for(auto& tSample : tLoadComponent)
             {
-                auto tSampleIndex = &tSample - &tDim[0];
-                ASSERT_STREQ(tGoldValues[tLoadIndex][tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+                auto tSampleIndex = &tSample - &tLoadComponent[0];
+                ASSERT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
             }
         }
     }
@@ -892,7 +856,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
 
     pugi::xml_document tDocument;
 
-    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file_2(tTractionTags, tTractionValues, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, tDocument));
 
     // 4. POSE GOLD VALUES
     std::vector<std::string> tGoldTypes =

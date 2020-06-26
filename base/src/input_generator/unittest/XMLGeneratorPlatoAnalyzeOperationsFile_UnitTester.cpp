@@ -56,6 +56,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
     XMLGen::Load tLoad1;
+    tLoad1.load_id = "1";
     tLoad1.mIsRandom = true;
     tLoad1.type = "traction";
     tLoad1.app_name = "sideset";
@@ -64,6 +65,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tLoad1.values.push_back("3");
     tLoadCase1.loads.push_back(tLoad1);
     XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
     tLoad2.mIsRandom = true;
     tLoad2.type = "traction";
     tLoad2.app_name = "sideset";
@@ -72,6 +74,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tLoad2.values.push_back("6");
     tLoadCase1.loads.push_back(tLoad2);
     XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
     tLoad3.type = "traction";
     tLoad3.mIsRandom = false;
     tLoad3.app_name = "sideset";
@@ -85,6 +88,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
     XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
     tLoad4.mIsRandom = true;
     tLoad4.type = "traction";
     tLoad4.app_name = "sideset";
@@ -93,6 +97,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tLoad4.values.push_back("13");
     tLoadCase2.loads.push_back(tLoad4);
     XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
     tLoad5.mIsRandom = true;
     tLoad5.type = "traction";
     tLoad5.app_name = "sideset";
@@ -116,39 +121,39 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
     +"</Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
     +"<Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
     +"<Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter>"+"<Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter>"+"<Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"</Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
-    +"</Output><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-0z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryCondition0]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Output><Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());

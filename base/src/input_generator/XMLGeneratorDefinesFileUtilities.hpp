@@ -27,16 +27,6 @@ void append_basic_attributes_to_define_xml_file
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn allocate_random_tractions_container_for_define_xml_file
- * \brief Return allocated random tractions container.
- * \param [in]     aRandomMetaData       random samples metadata
- * \return random tractions container
-**********************************************************************************/
-std::vector<std::vector<std::vector<std::string>>>
-allocate_random_tractions_container_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData);
-
-/******************************************************************************//**
  * \fn prepare_probabilities_for_define_xml_file
  * \brief Return probabilities in the format needed by the define XML file.
  * \param [in] aRandomMetaData random samples metadata
@@ -44,16 +34,6 @@ allocate_random_tractions_container_for_define_xml_file
 **********************************************************************************/
 std::vector<std::string>
 prepare_probabilities_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData);
-
-/******************************************************************************//**
- * \fn prepare_tractions_for_define_xml_file
- * \brief Return traction loads in the format needed by the define XML file.
- * \param [in] aRandomMetaData random samples metadata
- * \return formatted traction loads container
-**********************************************************************************/
-std::vector<std::vector<std::vector<std::string>>>
-prepare_tractions_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
 
 /******************************************************************************//**
@@ -129,6 +109,40 @@ void append_material_properties_to_define_xml_file
 void write_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData,
  const XMLGen::UncertaintyMetaData& aUncertaintyMetaData);
+
+/******************************************************************************//**
+ * \fn allocate_map_from_random_load_identifier_to_load_samples
+ * \brief Allocate map from random load identifier to samples' load component values, \n
+ * i.e. map< random_load_identifier, vector[DimIndex][SampleIndex] >.
+ * \param [in] aRandomMetaData      random samples metadata
+ * \return map from random load identifier to samples' load component values
+**********************************************************************************/
+std::map<std::string, std::vector<std::vector<std::string>>>
+allocate_map_from_random_load_identifier_to_load_samples
+(const XMLGen::RandomMetaData& aRandomMetaData);
+
+/******************************************************************************//**
+ * \fn prepare_tractions_for_define_xml_file
+ * \brief Return initialized map from random load identifier to samples' load \n
+ * component values, i.e. map< random_load_identifier, vector[DimIndex][SampleIndex] >.
+ * \param [in] aRandomMetaData      random samples metadata
+ * \return map from random load identifier to samples' load component values
+**********************************************************************************/
+std::map<std::string, std::vector<std::vector<std::string>>>
+prepare_tractions_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData);
+
+/******************************************************************************//**
+ * \fn append_tractions_to_define_xml_file
+ * \brief Append random traction loads to define.xml file.
+ * \param [in]     aTags     map from random load identifier to random load tags
+ * \param [in]     aValues   map from random load identifier to samples' load component values
+ * \param [in/out] aDocument xml document
+**********************************************************************************/
+void append_tractions_to_define_xml_file
+(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
+ const std::map<std::string, std::vector<std::vector<std::string>>>& aValues,
+ pugi::xml_document& aDocument);
 
 }
 // namespace XMLGen

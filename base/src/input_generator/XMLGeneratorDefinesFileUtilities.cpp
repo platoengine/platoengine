@@ -39,31 +39,6 @@ void append_basic_attributes_to_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
-std::vector<std::vector<std::vector<std::string>>>
-allocate_random_tractions_container_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
-{
-    std::vector<std::vector<std::vector<std::string>>> tOutput;
-    auto tLoadCase = aRandomMetaData.loadcase();
-    for(auto& tLoad : tLoadCase.loads)
-    {
-        if(tLoad.mIsRandom)
-        {
-            // allocate storage
-            tOutput.push_back({});
-            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-            for (auto &tValue : tLoad.values)
-            {
-                tOutput[tLoadIndex].push_back({});
-            }
-        }
-    }
-    return (tOutput);
-}
-// function allocate_random_tractions_container_for_define_xml_file
-/******************************************************************************/
-
-/******************************************************************************/
 std::vector<std::string>
 prepare_probabilities_for_define_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
@@ -122,35 +97,6 @@ return_random_tractions_tags_for_define_xml_file
     return (tOutput);
 }
 // function return_random_tractions_tags_for_define_xml_file
-/******************************************************************************/
-
-/******************************************************************************/
-std::vector<std::vector<std::vector<std::string>>>
-prepare_tractions_for_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData)
-{
-    auto tValues = XMLGen::allocate_random_tractions_container_for_define_xml_file(aRandomMetaData);
-    auto tSamples = aRandomMetaData.samples();
-    for(auto& tSample : tSamples)
-    {
-        auto tLoadCase = tSample.loadcase();
-        for(auto& tLoad : tLoadCase.loads)
-        {
-            if(tLoad.mIsRandom)
-            {
-                // append values
-                auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-                for(auto& tValue : tLoad.values)
-                {
-                    auto tDimIndex = &tValue - &tLoad.values[0];
-                    tValues[tLoadIndex][tDimIndex].push_back(tValue);
-                }
-            }
-        }
-    }
-    return tValues;
-}
-// function prepare_tractions_for_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
@@ -277,6 +223,95 @@ void append_material_properties_to_define_xml_file
     }
 }
 // function append_material_properties_to_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
+std::map<std::string, std::vector<std::vector<std::string>>>
+allocate_map_from_random_load_identifier_to_load_samples
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    std::map<std::string, std::vector<std::vector<std::string>>> tOutput;
+
+    auto tLoadCase = aRandomMetaData.loadcase();
+    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    for(auto& tLoad : tLoadCase.loads)
+    {
+        if(tLoad.mIsRandom)
+        {
+            auto tIdentifier = tIdentifierInterface.call(tLoad);
+            for (auto &tValue : tLoad.values)
+            {
+                tOutput[tIdentifier].push_back({});
+            }
+        }
+    }
+    return (tOutput);
+}
+// function allocate_map_from_random_load_identifier_to_load_samples
+/******************************************************************************/
+
+/******************************************************************************/
+std::map<std::string, std::vector<std::vector<std::string>>>
+prepare_tractions_for_define_xml_file
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    auto tMapFromIdentifierToLoadValues =
+        XMLGen::allocate_map_from_random_load_identifier_to_load_samples(aRandomMetaData);
+
+    auto tSamples = aRandomMetaData.samples();
+    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    for(auto& tSample : tSamples)
+    {
+        auto tLoadCase = tSample.loadcase();
+        for(auto& tLoad : tLoadCase.loads)
+        {
+            if(tLoad.mIsRandom)
+            {
+                // append random load values for this sample
+                auto tIdentifier = tIdentifierInterface.call(tLoad);
+                for(auto& tValue : tLoad.values)
+                {
+                    auto tDimIndex = &tValue - &tLoad.values[0];
+                    tMapFromIdentifierToLoadValues[tIdentifier][tDimIndex].push_back(tValue);
+                }
+            }
+        }
+    }
+    return (tMapFromIdentifierToLoadValues);
+}
+// function prepare_tractions_for_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
+void append_tractions_to_define_xml_file
+(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
+ const std::map<std::string, std::vector<std::vector<std::string>>>& aValues,
+ pugi::xml_document& aDocument)
+{
+    if(aValues.empty())
+    {
+        return;
+    }
+
+    for(auto& tPair : aValues)
+    {
+        auto tTagsItr = aTags.find(tPair.first);
+        if(tTagsItr == aTags.end())
+        {
+            THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
+                + tPair.first + "' in map from load identifier to load component tags.")
+        }
+
+        for(auto& tLoadComponentSamples : tPair.second)
+        {
+            auto tDimIndex = &tLoadComponentSamples - &tPair.second[0];
+            auto tTag = tTagsItr->second[tDimIndex];
+            auto tValues = XMLGen::transform_tokens(tLoadComponentSamples);
+            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
+        }
+    }
+}
+// function append_tractions_to_define_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
