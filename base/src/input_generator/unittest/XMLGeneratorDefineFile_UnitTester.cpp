@@ -9,8 +9,187 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 
+#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
+
+namespace XMLGen
+{
+
+std::map<std::string, std::vector<std::vector<std::string>>>
+allocate_map_from_random_load_identifier_to_load_samples
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    std::map<std::string, std::vector<std::vector<std::string>>> tOutput;
+
+    auto tLoadCase = aRandomMetaData.loadcase();
+    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    for(auto& tLoad : tLoadCase.loads)
+    {
+        if(tLoad.mIsRandom)
+        {
+            auto tIdentifier = tIdentifierInterface.call(tLoad);
+            for (auto &tValue : tLoad.values)
+            {
+                tOutput[tIdentifier].push_back({});
+            }
+        }
+    }
+    return (tOutput);
+}
+
+std::map<std::string, std::vector<std::vector<std::string>>>
+prepare_tractions_for_define_xml_file_2
+(const XMLGen::RandomMetaData& aRandomMetaData)
+{
+    auto tMapFromIdentifierToLoadValues =
+        XMLGen::allocate_map_from_random_load_identifier_to_load_samples(aRandomMetaData);
+
+    auto tSamples = aRandomMetaData.samples();
+    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    for(auto& tSample : tSamples)
+    {
+        auto tLoadCase = tSample.loadcase();
+        for(auto& tLoad : tLoadCase.loads)
+        {
+            if(tLoad.mIsRandom)
+            {
+                // append random load values for this sample
+                auto tIdentifier = tIdentifierInterface.call(tLoad);
+                for(auto& tValue : tLoad.values)
+                {
+                    auto tDimIndex = &tValue - &tLoad.values[0];
+                    tMapFromIdentifierToLoadValues[tIdentifier][tDimIndex].push_back(tValue);
+                }
+            }
+        }
+    }
+    return (tMapFromIdentifierToLoadValues);
+}
+
+void append_tractions_to_define_xml_file_2
+(const std::unordered_map<std::string, std::vector<std::string>>& aTags,
+ const std::map<std::string, std::vector<std::vector<std::string>>>& aValues,
+ pugi::xml_document& aDocument)
+{
+    if(aValues.empty())
+    {
+        return;
+    }
+
+    for(auto& tPair : aValues)
+    {
+        auto tTagsItr = aTags.find(tPair.first);
+        if(tTagsItr == aTags.end())
+        {
+            THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
+                + tPair.first + "' in map from load identifier to load component tags.")
+        }
+
+        for(auto& tLoadComponentSamples : tPair.second)
+        {
+            auto tDimIndex = &tLoadComponentSamples - &tPair.second[0];
+            auto tTag = tTagsItr->second[tDimIndex];
+            auto tValues = XMLGen::transform_tokens(tLoadComponentSamples);
+            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
+        }
+    }
+}
+// TODO: REPLACE EXISTING FUNCTIONS WITH THESE NEW FUNCTIONS ABOVE.  FIX UNIT TESTS.
+
+}
+
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, Test)
+{
+    // 1.1 APPEND LOADS
+    XMLGen::LoadCase tLoadCase1;
+    tLoadCase1.id = "1";
+    XMLGen::Load tLoad1;
+    tLoad1.type = "traction";
+    tLoad1.load_id = "1";
+    tLoad1.mIsRandom = true;
+    tLoad1.app_name = "sideset";
+    tLoad1.values.push_back("1");
+    tLoad1.values.push_back("2");
+    tLoad1.values.push_back("3");
+    tLoadCase1.loads.push_back(tLoad1);
+    XMLGen::Load tLoad2;
+    tLoad2.load_id = "2";
+    tLoad2.type = "traction";
+    tLoad2.mIsRandom = true;
+    tLoad2.app_name = "sideset";
+    tLoad2.values.push_back("4");
+    tLoad2.values.push_back("5");
+    tLoad2.values.push_back("6");
+    tLoadCase1.loads.push_back(tLoad2);
+    XMLGen::Load tLoad3;
+    tLoad3.load_id = "3";
+    tLoad3.type = "traction";
+    tLoad3.mIsRandom = false;
+    tLoad3.app_name = "sideset";
+    tLoad3.values.push_back("7");
+    tLoad3.values.push_back("8");
+    tLoad3.values.push_back("9");
+    tLoadCase1.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
+
+    XMLGen::LoadCase tLoadCase2;
+    tLoadCase2.id = "2";
+    XMLGen::Load tLoad4;
+    tLoad4.load_id = "1";
+    tLoad4.type = "traction";
+    tLoad4.mIsRandom = true;
+    tLoad4.app_name = "sideset";
+    tLoad4.values.push_back("11");
+    tLoad4.values.push_back("12");
+    tLoad4.values.push_back("13");
+    tLoadCase2.loads.push_back(tLoad4);
+    XMLGen::Load tLoad5;
+    tLoad5.load_id = "2";
+    tLoad5.type = "traction";
+    tLoad5.mIsRandom = true;
+    tLoad5.app_name = "sideset";
+    tLoad5.values.push_back("14");
+    tLoad5.values.push_back("15");
+    tLoad5.values.push_back("16");
+    tLoadCase2.loads.push_back(tLoad5);
+    tLoadCase2.loads.push_back(tLoad3); // append deterministic load
+    auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
+
+    // 1.2 CONSTRUCT SAMPLES SET
+    XMLGen::RandomMetaData tRandomMetaData;
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet1));
+    ASSERT_NO_THROW(tRandomMetaData.append(tLoadSet2));
+    ASSERT_NO_THROW(tRandomMetaData.finalize());
+
+    // 2. CALL FUNCTION
+    auto tMapFromIdentifierToLoadValues =
+        XMLGen::prepare_tractions_for_define_xml_file_2(tRandomMetaData);
+    ASSERT_FALSE(tMapFromIdentifierToLoadValues.empty());
+
+    // 3. POSE GOLD LOAD VALUES AND TEST
+    std::map<std::string, std::vector<std::vector<std::string>>> tGold =
+        {
+          { "Random Traction Vector Boundary Condition with ID 1", { {"1", "11"}, {"2", "12"}, {"3", "13"} } },
+          { "Random Traction Vector Boundary Condition with ID 2", { {"4", "14"}, {"5", "15"}, {"6", "16"} } }
+        };
+
+    for(auto& tPair : tMapFromIdentifierToLoadValues)
+    {
+        auto tGoldItr = tGold.find(tPair.first);
+        ASSERT_TRUE(tGoldItr != tGold.end());
+        for(auto& tComponent : tPair.second)
+        {
+            auto tDimIndex = &tComponent - &tPair.second[0];
+            for(auto& tSample : tComponent)
+            {
+                auto tSampleIndex = &tSample - &tComponent[0];
+                ASSERT_STREQ(tGoldItr->second[tDimIndex][tSampleIndex].c_str(), tSample.c_str());
+            }
+        }
+    }
+}
 
 TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
 {
@@ -705,15 +884,15 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
           {"0", {"traction load-id-0 x-axis","traction load-id-0 y-axis", "traction load-id-0 z-axis"} },
           {"1", {"traction load-id-1 x-axis","traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
         };
-    std::vector<std::vector<std::vector<std::string>>> tTractionValues =
+    std::map<std::string, std::vector<std::vector<std::string>>> tTractionValues =
         {
-          { {"1", "11"}, {"2", "12"}, {"3", "13"} },
-          { {"4", "14"}, {"5", "15"}, {"6", "16"} }
+          { "0", { {"1", "11"}, {"2", "12"}, {"3", "13"} } },
+          { "1", { {"4", "14"}, {"5", "15"}, {"6", "16"} } }
         };
 
     pugi::xml_document tDocument;
 
-    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_tractions_to_define_xml_file_2(tTractionTags, tTractionValues, tDocument));
 
     // 4. POSE GOLD VALUES
     std::vector<std::string> tGoldTypes =

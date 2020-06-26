@@ -184,15 +184,16 @@ void append_tractions_to_define_xml_file
     {
         auto tLoadIndex = std::distance(aValues.begin(), tLoadItr);
         auto tLoadIndexString = std::to_string(tLoadIndex);
+        auto tTagItr = aTags.find(tLoadIndexString);
+        if(tTagItr == aTags.end())
+        {
+            THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
+                + tLoadIndexString + "' in map from load identifier to load component tags.")
+        }
+
         for(auto tDimItr = tLoadItr->begin(); tDimItr != tLoadItr->end(); ++tDimItr)
         {
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
-            auto tTagItr = aTags.find(tLoadIndexString);
-            if(tTagItr == aTags.end())
-            {
-                THROWERR(std::string("Append Tractions To Define XML File: ") + "Did not find load identifier '"
-                    + tLoadIndexString + "' in map from load identifier to load component tags.")
-            }
             auto tTag = tTagItr->second[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
             XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
