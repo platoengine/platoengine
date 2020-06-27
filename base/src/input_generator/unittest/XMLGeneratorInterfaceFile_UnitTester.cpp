@@ -171,11 +171,11 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
     tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
 
     tTemp = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "PlatoMain"};
+        "Scalar", "Global", "1", "plato analyze_{PerformerIndex}", "PlatoMain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
     tTemp = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Nodal Field", "plato analyze {PerformerIndex}", "PlatoMain"};
+        "Scalar", "Nodal Field", "plato analyze_{PerformerIndex}", "PlatoMain"};
     tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -236,7 +236,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
     tGoldSharedDataKeys.push_back(std::make_pair("Von Mises", tTemp));
     tTemp = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Element Field", "plato analyze {PerformerIndex}", "PlatoMain"};
+        "Scalar", "Element Field", "plato analyze_{PerformerIndex}", "PlatoMain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Von Mises", tTemp));
 
@@ -456,7 +456,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
     tGoldValues = {"PerformerIndex", "Performers"};
     auto tForNode = tSharedData.child("For");
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tForNode);
-    PlatoTestXMLGenerator::test_children({"UserName"}, {"plato analyze {PerformerIndex}"}, tForNode);
+    PlatoTestXMLGenerator::test_children({"UserName"}, {"plato analyze_{PerformerIndex}"}, tForNode);
 }
 
 TEST(PlatoTestXMLGenerator, AppendPlatoMainPerformer)
@@ -503,7 +503,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tForNode);
 
     tGoldKeys = {"Name", "Code"};
-    tGoldValues = {"plato analyze {PerformerIndex}", "plato_analyze"};
+    tGoldValues = {"plato analyze_{PerformerIndex}", "plato_analyze"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tForNode);
 }
 
@@ -681,7 +681,7 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
 
     auto tOperation = tInnerFor.child("Operation");
     tGoldKeys = {"Name", "PerformerName"};
-    tGoldValues = {"Cache State", "plato analyze {PerformerIndex}"};
+    tGoldValues = {"Cache State", "plato analyze_{PerformerIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 }
 
@@ -720,7 +720,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
 
     auto tOperation = tInnerFor.child("Operation");
     tGoldKeys = {"Name", "PerformerName"};
-    tGoldValues = {"Update Problem", "plato analyze {PerformerIndex}"};
+    tGoldValues = {"Update Problem", "plato analyze_{PerformerIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 }
 
@@ -1186,7 +1186,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Input", "Output"};
-    tGoldValues = {"Compute Objective Value", "plato analyze {PerformerIndex}",
+    tGoldValues = {"Compute Objective Value", "plato analyze_{PerformerIndex}",
         "", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
@@ -1423,7 +1423,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Input", "Output"};
-    tGoldValues = {"Compute Objective Value", "plato analyze {PerformerIndex}",
+    tGoldValues = {"Compute Objective Value", "plato analyze_{PerformerIndex}",
         "", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
@@ -1609,7 +1609,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Input", "Output"};
-    tGoldValues = {"Compute Objective Gradient", "plato analyze {PerformerIndex}",
+    tGoldValues = {"Compute Objective Gradient", "plato analyze_{PerformerIndex}",
         "", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
@@ -1887,7 +1887,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Parameter", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Input", "Output"};
-    tGoldValues = {"Compute Objective Gradient", "plato analyze {PerformerIndex}",
+    tGoldValues = {"Compute Objective Gradient", "plato analyze_{PerformerIndex}",
         "", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
