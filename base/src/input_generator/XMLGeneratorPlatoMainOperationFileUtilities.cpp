@@ -69,8 +69,8 @@ bool is_volume_constraint_defined_and_computed_by_platomain
     {
         auto tLowerCategory = Plato::tolower(tConstraint.category());
         auto tIsVolumeConstraintDefined = tLowerCategory.compare("volume") == 0;
-        auto tLowerPerformer = Plato::tolower(tConstraint.performer());
-        auto tIsVolumeComputedByPlatoMain = tLowerPerformer.compare("platomain") == 0;
+        auto tLowerCode = Plato::tolower(tConstraint.code());
+        auto tIsVolumeComputedByPlatoMain = tLowerCode.compare("platomain") == 0;
         tIsVolumeDefinedAndComputedByPlatoMain = tIsVolumeConstraintDefined && tIsVolumeComputedByPlatoMain;
         if (tIsVolumeDefinedAndComputedByPlatoMain == true)
         {

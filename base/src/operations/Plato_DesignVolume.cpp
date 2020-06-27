@@ -47,30 +47,54 @@
  */
 
 #include "PlatoApp.hpp"
+#include "Plato_Macros.hpp"
 #include "Plato_InputData.hpp"
 #include "Plato_DesignVolume.hpp"
 
 namespace Plato
 {
 
-DesignVolume::DesignVolume(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
-        Plato::LocalOp(aPlatoApp),
-        mOutValueName("Design Volume")
+DesignVolume::DesignVolume(PlatoApp* aPlatoApp, Plato::InputData& aOperationNode) :
+        Plato::LocalOp(aPlatoApp)
 {
+    this->initialize(aOperationNode);
+}
+
+void DesignVolume::initialize(Plato::InputData& aOperationNode)
+{
+    for(auto& tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
+    {
+        auto tArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
+        mLocalArguments.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, tArgumentName, 1 /* number of scalar values, i.e. array length */});
+    }
+
+    if(mLocalArguments.empty())
+    {
+        THROWERR("DesignVolume Operation: Empty container of output arguments. The 'DesignVolume' Operation must have one output argument.")
+    }
+
+    if(mLocalArguments.size() > 1u)
+    {
+        THROWERR("DesignVolume Operation: The 'DesignVolume' Operation must have only one output argument.")
+    }
 }
 
 void DesignVolume::operator()()
 {
-    double tVolume = mPlatoApp->getMeshServices()->getTotalVolume();
-    std::vector<double>* tData = mPlatoApp->getValue(mOutValueName);
-    (*tData)[0] = tVolume;
+    for(auto& tArgument : mLocalArguments)
+    {
+        auto tIndex = &tArgument - &mLocalArguments[0];
+        auto tVolume = mPlatoApp->getMeshServices()->getTotalVolume();
+        std::vector<double>* tData = mPlatoApp->getValue(mLocalArguments[tIndex].mName);
+        (*tData)[tIndex] = tVolume;
+    }
 
     return;
 }
 
 void DesignVolume::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
 {
-    aLocalArgs.push_back(Plato::LocalArg { Plato::data::layout_t::SCALAR, mOutValueName,/*length=*/1 });
+    aLocalArgs = mLocalArguments;
 }
 
 }

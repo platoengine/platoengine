@@ -209,7 +209,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeVolumeGradientToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
     tConstraint.category("VoLuMe");
-    tConstraint.performer("platomain");
+    tConstraint.code("platomain");
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -245,7 +245,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeVolumeToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
     tConstraint.category("VoLuMe");
-    tConstraint.performer("platomain");
+    tConstraint.code("platomain");
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::append_compute_volume_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -352,7 +352,7 @@ TEST(PlatoTestXMLGenerator, IsVolumeConstraintDefinedAndComputedByPlatomain_Volu
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
-    tConstraint.performer("analyze");
+    tConstraint.code("analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
     ASSERT_FALSE(XMLGen::is_volume_constraint_defined_and_computed_by_platomain(tXMLMetaData));
 }
@@ -362,7 +362,7 @@ TEST(PlatoTestXMLGenerator, IsVolumeConstraintDefinedAndComputedByPlatomain_Yes)
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
-    tConstraint.performer("PlatoMain");
+    tConstraint.code("PlatoMain");
     tXMLMetaData.constraints.push_back(tConstraint);
     ASSERT_TRUE(XMLGen::is_volume_constraint_defined_and_computed_by_platomain(tXMLMetaData));
 }
