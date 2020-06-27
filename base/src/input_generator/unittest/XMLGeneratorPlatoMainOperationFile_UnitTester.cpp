@@ -217,8 +217,8 @@ TEST(PlatoTestXMLGenerator, AppendComputeVolumeGradientToPlatoMainOperation)
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     ASSERT_STREQ("Operation", tOperation.name());
-    std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel", "Input", "Output", "SIMP"};
-    std::vector<std::string> tValues = {"ComputeVolume", "Compute Constraint Gradient", "SIMP", "", "", ""};
+    std::vector<std::string> tKeys = {"Function", "Name", "PenaltyModel", "Input", "Output", "Output", "SIMP"};
+    std::vector<std::string> tValues = {"ComputeVolume", "Compute Constraint Gradient", "SIMP", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.child("Input");
@@ -227,6 +227,11 @@ TEST(PlatoTestXMLGenerator, AppendComputeVolumeGradientToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
 
     auto tOutput = tOperation.child("Output");
+    ASSERT_STREQ("Output", tOutput.name());
+    tKeys = {"ArgumentName"}; tValues = {"Constraint Value"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+
+    tOutput = tOutput.next_sibling("Output");
     ASSERT_STREQ("Output", tOutput.name());
     tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);

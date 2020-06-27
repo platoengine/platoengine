@@ -678,6 +678,10 @@ void append_compute_volume_to_plato_main_operation
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 
+        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        tOutput = tOperation.append_child("Output");
+        XMLGen::append_children(tKeys, tValues, tOutput);
+
         tKeys = {"PenaltyExponent", "MinimumValue"}; tValues = {"1.0", "0.0"};
         auto tSIMP = tOperation.append_child("SIMP");
         XMLGen::append_children(tKeys, tValues, tSIMP);
@@ -702,8 +706,12 @@ void append_compute_volume_gradient_to_plato_main_operation
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children(tKeys, tValues, tInput);
 
-        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        tKeys = {"ArgumentName"}; tValues = {"Constraint Value"};
         auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children(tKeys, tValues, tOutput);
+
+        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 
         tKeys = {"PenaltyExponent", "MinimumValue"}; tValues = {"1.0", "0.0"};
