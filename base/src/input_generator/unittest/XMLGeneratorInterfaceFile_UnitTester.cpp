@@ -364,13 +364,6 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase_ErrorEmptyObjectiveList)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
@@ -378,6 +371,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
+    tInputData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
 
     ASSERT_NO_THROW(XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());

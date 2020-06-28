@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
@@ -60,19 +61,17 @@ void append_qoi_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    XMLGen::ValidLayoutKeys tValidLayouts;
+    auto tRandomQoIs = aXMLMetaData.mOutputMetaData.getRandomQoI();
+    for(auto tPair : tRandomQoIs)
     {
-        THROWERR(std::string("Append QOI Shared Data For Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+        auto tLayout = tValidLayouts.mKeys.find(tPair.second)->second;
+        auto tSharedDataName = tPair.first + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
+        std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
+        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
     }
-    // shared data - QOI statistics
-    // 1 loop over QOI
-    // 2 define tag/name and set "Name" key
-    auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}", "Scalar",
-                                        "Element Field", "IGNORE", tOwnerName, "platomain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 }
 //function append_qoi_shared_data_for_nondeterministic_usecase
 /******************************************************************************/

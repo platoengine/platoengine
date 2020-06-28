@@ -98,12 +98,14 @@ struct ValidEssentialBoundaryConditionsKeys
 struct ValidOutputKeys
 {
     /*!<
-     * \brief Valid plato input deck output keywords. \n
+     * \brief Valid plato main output keywords. \n
      *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
      **/
     std::unordered_map<std::string, std::string> mKeys =
         { {"vonmises","element field"}, {"dispx","nodal field"}, {"dispy","nodal field"}, {"dispz","nodal field"},
-          {"temperature","nodal field"}, {"accumulated_plastic_strain","element field"}, {"potential","nodal field"} };
+          {"temperature","nodal field"}, {"accumulated_plastic_strain","element field"}, {"potential","nodal field"},
+          {"objective_gradient","nodal field"}, {"constraint_gradient","nodal field"}, {"topology","nodal field"},
+          {"control","nodal field"} };
 };
 // struct ValidOutputKeys
 
@@ -193,7 +195,7 @@ struct ValidLayoutKeys
      * \brief map from light-input file key to Plato layout, i.e. map<light_input_file_key, plato_layout_key>
      **/
     std::unordered_map<std::string, std::string> mKeys =
-        { {"element field", "Element Field"}, {"nodal field", "Nodal Field"} };
+        { {"element field", "Element Field"}, {"nodal field", "Nodal Field"}, {"global", "Global"} };
 };
 // struct ValidLayoutKeys
 
