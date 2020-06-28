@@ -373,7 +373,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     tInputData.objectives.push_back(tObjective);
     tInputData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
 
-    ASSERT_NO_THROW(XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES

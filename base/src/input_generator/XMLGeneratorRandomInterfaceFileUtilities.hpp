@@ -39,13 +39,13 @@ void append_criterion_shared_data_for_nondeterministic_usecase
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_qoi_shared_data_for_nondeterministic_usecase
+ * \fn append_nondeterministic_qoi_shared_data
  * \brief Append Quantities of Interest (QOI) shared data to PUGI XML document.\n
  * QOI denote problem quantities the user requested statistics to be computed.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_qoi_shared_data_for_nondeterministic_usecase
+void append_nondeterministic_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 

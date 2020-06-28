@@ -57,10 +57,15 @@ void append_criterion_shared_data_for_nondeterministic_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_qoi_shared_data_for_nondeterministic_usecase
+void append_nondeterministic_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.objectives.empty())
+    {
+        THROWERR("Append Nondeterministic QoI Shared Data: Objective metadata is empty.")
+    }
+
     XMLGen::ValidLayoutKeys tValidLayouts;
     auto tRandomQoIs = aXMLMetaData.mOutputMetaData.getRandomQoI();
     for(auto tPair : tRandomQoIs)
@@ -73,7 +78,7 @@ void append_qoi_shared_data_for_nondeterministic_usecase
         XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
     }
 }
-//function append_qoi_shared_data_for_nondeterministic_usecase
+//function append_nondeterministic_qoi_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
@@ -138,7 +143,7 @@ void append_shared_data_for_nondeterministic_usecase
     XMLGen::append_constraint_shared_data(aXMLMetaData, aDocument);
 
     // nondeterministic shared data
-    XMLGen::append_qoi_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_nondeterministic_qoi_shared_data(aXMLMetaData, aDocument);
     XMLGen::append_topology_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
     XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", aXMLMetaData, aDocument);
 }
