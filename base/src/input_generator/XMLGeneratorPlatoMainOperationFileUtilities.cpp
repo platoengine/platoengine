@@ -674,11 +674,11 @@ void append_compute_volume_to_plato_main_operation
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children(tKeys, tValues, tInput);
 
-        tKeys = {"ArgumentName"}; tValues = {"Constraint Value"};
+        tKeys = {"ArgumentName"}; tValues = {"Volume"};
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 
-        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        tKeys = {"ArgumentName"}; tValues = {"Volume Gradient"};
         tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 
@@ -706,11 +706,11 @@ void append_compute_volume_gradient_to_plato_main_operation
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children(tKeys, tValues, tInput);
 
-        tKeys = {"ArgumentName"}; tValues = {"Constraint Value"};
+        tKeys = {"ArgumentName"}; tValues = {"Volume"};
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 
-        tKeys = {"ArgumentName"}; tValues = {"Constraint Gradient"};
+        tKeys = {"ArgumentName"}; tValues = {"Volume Gradient"};
         tOutput = tOperation.append_child("Output");
         XMLGen::append_children(tKeys, tValues, tOutput);
 

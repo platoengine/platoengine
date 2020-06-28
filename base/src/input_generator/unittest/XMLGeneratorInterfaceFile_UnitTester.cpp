@@ -12,6 +12,84 @@
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 
+namespace Plato
+{
+
+void append_compute_constraint_value_operation_platomain
+(const XMLGen::Constraint& aConstraint,
+ pugi::xml_node& aParentNode)
+{
+    auto tPerformer = aConstraint.performer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+
+    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume", tSharedDataName}, tOutputNode);
+
+    tSharedDataName = std::string("Constraint Gradient ID-") + aConstraint.name();
+    tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume Gradient", tSharedDataName}, tOutputNode);
+}
+
+void append_compute_constraint_gradient_operation_platomain
+(const XMLGen::Constraint& aConstraint,
+ pugi::xml_node& aParentNode)
+{
+    auto tPerformer = aConstraint.performer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", tPerformer}, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+
+    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume", tSharedDataName}, tOutputNode);
+
+    tSharedDataName = std::string("Constraint Gradient ID-") + aConstraint.name();
+    tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume Gradient", tSharedDataName}, tOutputNode);
+}
+
+void append_compute_constraint_value_operation_platoanalyze
+(const XMLGen::Constraint& aConstraint,
+ pugi::xml_node& aParentNode)
+{
+    auto tPerformer = aConstraint.performer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+
+    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Value", tSharedDataName}, tOutputNode);
+}
+
+void append_compute_constraint_gradient_operation_platoanalyze
+(const XMLGen::Constraint& aConstraint,
+ pugi::xml_node& aParentNode)
+{
+    auto tPerformer = aConstraint.performer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", tPerformer}, tOperationNode);
+
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+
+    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", tSharedDataName}, tOutputNode);
+}
+
+}
+// namespace Plato
+
 namespace PlatoTestXMLGenerator
 {
 
@@ -350,6 +428,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
+    tObjective.name = "0";
     tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
     tInputData.objectives.push_back(tObjective);
@@ -384,6 +463,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
+    tConstraint.name("0");
     tConstraint.performer("plato analyze");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
@@ -914,6 +994,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
+    tConstraint.name("0");
     tConstraint.category("volume");
     tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
@@ -975,6 +1056,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
+    tConstraint.name("0");
     tConstraint.category("volume");
     tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
@@ -1354,6 +1436,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
+    tObjective.name = "0";
     tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
@@ -1782,6 +1865,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
 
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
+    tObjective.name = "0";
     tObjective.mPerformerName = "plato analyze";
 
     // DEFINE XML GENERATOR INPUT DATA
@@ -2232,6 +2316,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationObjectiveOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
+    tObjective.name = "0";
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.objectives.push_back(tObjective);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
@@ -2252,6 +2337,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
+    tConstraint.name("0");
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.constraints.push_back(tConstraint);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
