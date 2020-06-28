@@ -667,7 +667,7 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
     // TEST RESULTS AGAINST GOLD VALUES
     auto tStage = tDocument.child("Stage");
     std::vector<std::string> tGoldKeys = {"Name", "For"};
-    std::vector<std::string> tGoldValues = {"Cache State : plato analyze 0", ""};
+    std::vector<std::string> tGoldValues = {"Cache State", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOuterFor = tDocument.child("For");

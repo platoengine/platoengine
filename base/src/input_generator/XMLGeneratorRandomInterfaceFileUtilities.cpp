@@ -201,7 +201,7 @@ void append_cache_state_stage_for_nondeterministic_usecase
     {
         auto tStageNode = aDocument.append_child("Stage");
         auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Cache State : ") + tObjective.mPerformerName + " " + std::to_string(tIndex);
+        auto tStageName = std::string("Cache State");
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
 
         auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";

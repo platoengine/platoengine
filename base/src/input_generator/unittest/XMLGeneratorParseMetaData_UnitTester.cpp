@@ -205,7 +205,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
         ASSERT_STREQ("3.0", tConstraint.materialPenaltyExponent().c_str());
         ASSERT_STREQ("1e-9", tConstraint.minErsatzMaterialConstant().c_str());
         ASSERT_STREQ("1", tConstraint.name().c_str());
-        ASSERT_STREQ("plato_analyze_1", tConstraint.performer().c_str());
+        ASSERT_STREQ("plato_analyze", tConstraint.performer().c_str());
         ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
         ASSERT_STREQ("1.0", tConstraint.weight().c_str());
     }
@@ -273,7 +273,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
     ASSERT_STREQ("6.0", tConstraintMetadata[0].pnormExponent().c_str());
     ASSERT_STREQ("plato_analyze", tConstraintMetadata[0].code().c_str());
     ASSERT_STREQ("10.0", tConstraintMetadata[0].absoluteTarget().c_str());
-    ASSERT_STREQ("plato_analyze_1", tConstraintMetadata[0].performer().c_str());
+    ASSERT_STREQ("plato_analyze", tConstraintMetadata[0].performer().c_str());
     ASSERT_STREQ("3.0", tConstraintMetadata[0].materialPenaltyExponent().c_str());
     ASSERT_STREQ("1e-9", tConstraintMetadata[0].minErsatzMaterialConstant().c_str());
 
@@ -285,7 +285,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
     ASSERT_STREQ("30.0", tConstraintMetadata[1].pnormExponent().c_str());
     ASSERT_STREQ("plato_analyze", tConstraintMetadata[1].code().c_str());
     ASSERT_STREQ("0.4", tConstraintMetadata[1].normalizedTarget().c_str());
-    ASSERT_STREQ("plato_analyze_1", tConstraintMetadata[1].performer().c_str());
+    ASSERT_STREQ("plato_analyze", tConstraintMetadata[1].performer().c_str());
     ASSERT_STREQ("3.0", tConstraintMetadata[1].materialPenaltyExponent().c_str());
     ASSERT_STREQ("1e-9", tConstraintMetadata[1].minErsatzMaterialConstant().c_str());
 }

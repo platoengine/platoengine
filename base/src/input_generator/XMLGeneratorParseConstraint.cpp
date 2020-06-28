@@ -135,7 +135,12 @@ void ParseConstraint::setPerformer(XMLGen::Constraint &aMetadata)
     }
     else
     {
-        aMetadata.performer("plato_analyze_1");
+        auto tPerformer = aMetadata.code();
+        if(tPerformer.empty())
+        {
+            THROWERR("Parse Constraint: 'code' keyword is empty. Default performer is set to the 'code' keyword.")
+        }
+        aMetadata.performer(tPerformer);
     }
 }
 
