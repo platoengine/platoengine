@@ -176,18 +176,6 @@ void append_design_volume_stage
 (pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_constraint_value_operation
- * \brief Append constraint value operation to PUGI XML document.
- * \param [in]     aPerformerName  operation performer's name
- * \param [in]     aSharedDataName constraint value shared data name
- * \param [in/out] aParentNode     pugi::xml_node
-**********************************************************************************/
-void append_constraint_value_operation
-(const std::string& aPerformerName,
- const std::string& aSharedDataName,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
  * \fn append_constraint_value_stage
  * \brief Append constraint value stage to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -196,18 +184,6 @@ void append_constraint_value_operation
 void append_constraint_value_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
-
-/******************************************************************************//**
- * \fn append_constraint_gradient_operation
- * \brief Append constraint gradient operation to PUGI XML document.
- * \param [in]     aPerformerName  operation performer's name
- * \param [in]     aSharedDataName constraint gradient shared data name
- * \param [in/out] aParentNode     pugi::xml_node
-**********************************************************************************/
-void append_constraint_gradient_operation
-(const std::string& aPerformerName,
- const std::string& aSharedDataName,
- pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_constraint_gradient_stage

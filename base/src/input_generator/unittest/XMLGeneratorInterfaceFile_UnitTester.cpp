@@ -11,87 +11,165 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
-
-namespace Plato
-{
-
-void append_compute_constraint_value_operation_platomain
-(const XMLGen::Constraint& aConstraint,
- pugi::xml_node& aParentNode)
-{
-    auto tPerformer = aConstraint.performer();
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
-
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume", tSharedDataName}, tOutputNode);
-
-    tSharedDataName = std::string("Constraint Gradient ID-") + aConstraint.name();
-    tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume Gradient", tSharedDataName}, tOutputNode);
-}
-
-void append_compute_constraint_gradient_operation_platomain
-(const XMLGen::Constraint& aConstraint,
- pugi::xml_node& aParentNode)
-{
-    auto tPerformer = aConstraint.performer();
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", tPerformer}, tOperationNode);
-
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume", tSharedDataName}, tOutputNode);
-
-    tSharedDataName = std::string("Constraint Gradient ID-") + aConstraint.name();
-    tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume Gradient", tSharedDataName}, tOutputNode);
-}
-
-void append_compute_constraint_value_operation_platoanalyze
-(const XMLGen::Constraint& aConstraint,
- pugi::xml_node& aParentNode)
-{
-    auto tPerformer = aConstraint.performer();
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
-
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Value", tSharedDataName}, tOutputNode);
-}
-
-void append_compute_constraint_gradient_operation_platoanalyze
-(const XMLGen::Constraint& aConstraint,
- pugi::xml_node& aParentNode)
-{
-    auto tPerformer = aConstraint.performer();
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", tPerformer}, tOperationNode);
-
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", tSharedDataName}, tOutputNode);
-}
-
-}
-// namespace Plato
+#include "XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp"
+#include "XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp"
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ConstraintValueOperation_ErrorInvalidCode)
+{
+    XMLGen::ConstraintValueOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("hippo");
+    ASSERT_THROW(tInterface.call(tConstraint, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ConstraintValueOperation_PlatoMain)
+{
+    XMLGen::ConstraintValueOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tConstraint.code("platomain");
+    tConstraint.performer("platomain");
+    ASSERT_NO_THROW(tInterface.call(tConstraint, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Output", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Value", "platomain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Volume", "Constraint Value ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Volume Gradient", "Constraint Gradient ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, ConstraintValueOperation_PlatoAnalyze)
+{
+    XMLGen::ConstraintValueOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tConstraint.code("plato_analyze");
+    tConstraint.performer("plato_analyze_1");
+    ASSERT_NO_THROW(tInterface.call(tConstraint, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Value", "plato_analyze_1", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Constraint Value", "Constraint Value ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_ErrorInvalidCode)
+{
+    XMLGen::ConstraintGradientOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("hippo");
+    ASSERT_THROW(tInterface.call(tConstraint, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_PlatoMain)
+{
+    XMLGen::ConstraintGradientOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tConstraint.code("platomain");
+    tConstraint.performer("platomain");
+    ASSERT_NO_THROW(tInterface.call(tConstraint, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Output", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Gradient", "platomain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Volume", "Constraint Value ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Volume Gradient", "Constraint Gradient ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_PlatoAnalyze)
+{
+    XMLGen::ConstraintGradientOperation tInterface;
+    pugi::xml_document tDocument;
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tConstraint.code("plato_analyze");
+    tConstraint.performer("plato_analyze_1");
+    ASSERT_NO_THROW(tInterface.call(tConstraint, tDocument));
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Constraint Gradient", "plato_analyze_1", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Topology", "Topology"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Constraint Gradient", "Constraint Gradient ID-1"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
+}
 
 TEST(PlatoTestXMLGenerator, SetKeyValue)
 {
@@ -995,6 +1073,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
     tConstraint.name("0");
+    tConstraint.code("platomain");
     tConstraint.category("volume");
     tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
@@ -1009,17 +1088,17 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     std::vector<std::string> tGoldValues = {"Compute Constraint Value ID-0", "volume", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
-    auto tOuterInput = tStage.child("Input");
-    ASSERT_FALSE(tOuterInput.empty());
+    auto tStageInput = tStage.child("Input");
+    ASSERT_FALSE(tStageInput.empty());
     tGoldKeys = {"SharedDataName"};
     tGoldValues = {"Control"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterInput);
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageInput);
 
-    auto tOuterOutput = tStage.child("Output");
-    ASSERT_FALSE(tOuterOutput.empty());
+    auto tStageOutput = tStage.child("Output");
+    ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
     tGoldValues = {"Constraint Value ID-0"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
@@ -1038,17 +1117,22 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
 
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
-    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Constraint Value", "platomain", "", ""};
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output", "Output"};
+    tGoldValues = {"Compute Constraint Value", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
     tGoldValues = {"Topology", "Topology"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
+
     auto tConstraintOutput = tOperation.child("Output");
     ASSERT_FALSE(tConstraintOutput.empty());
-    tGoldValues = {"Constraint Value", "Constraint Value ID-0"};
+    tGoldValues = {"Volume", "Constraint Value ID-0"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
+    tConstraintOutput = tConstraintOutput.next_sibling("Output");
+    ASSERT_FALSE(tConstraintOutput.empty());
+    tGoldValues = {"Volume Gradient", "Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
 }
 
@@ -1057,6 +1141,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
     tConstraint.name("0");
+    tConstraint.code("platomain");
     tConstraint.category("volume");
     tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
@@ -1100,8 +1185,8 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
 
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
-    tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Constraint Gradient", "platomain", "", ""};
+    tGoldKeys = {"Name", "PerformerName", "Input", "Output", "Output"};
+    tGoldValues = {"Compute Constraint Gradient", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
@@ -1110,7 +1195,11 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintInput);
     auto tConstraintOutput = tOperation.child("Output");
     ASSERT_FALSE(tConstraintOutput.empty());
-    tGoldValues = {"Constraint Gradient", "Constraint Gradient ID-0"};
+    tGoldValues = {"Volume", "Constraint Value ID-0"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
+    tConstraintOutput = tOperation.next_sibling("Output");
+    ASSERT_FALSE(tConstraintOutput.empty());
+    tGoldValues = {"Volume Gradient", "Constraint Gradient ID-0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintOutput);
 
     tOperation = tOperation.next_sibling("Operation");

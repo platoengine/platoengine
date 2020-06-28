@@ -26,6 +26,8 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
                       XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
                       XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
+                      XMLGeneratorPlatoMainConstraintValueOperationInterface.cpp
+                      XMLGeneratorPlatoMainConstraintGradientOperationInterface.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                       PlatoAnalyzeInputDeckWriter.cpp
@@ -57,8 +59,11 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorAnalyzeEssentiallBCTagFunctionInterface.hpp
                       XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp
                       XMLGeneratorAnalyzeAppendCriterionFunctionInterface.hpp
+                      XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp
+                      XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp
                       XMLGeneratorRandomInterfaceFileUtilities.hpp 
+                      XMLGeneratorPlatoMainFunctionMapTypes.hpp
                       ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
                       XMLGeneratorDataStruct.hpp
                       PlatoAnalyzeInputDeckWriter.hpp

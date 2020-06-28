@@ -40,6 +40,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
+                                      ../XMLGeneratorPlatoMainConstraintValueOperationInterface.cpp
+                                      ../XMLGeneratorPlatoMainConstraintGradientOperationInterface.cpp
                                       ../XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                                       ../ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
                                       ../DefaultInputGenerator.cpp

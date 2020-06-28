@@ -241,8 +241,6 @@ TEST(PlatoTestXMLGenerator, AppendComputeVolumeGradientToPlatoMainOperation)
     ASSERT_STREQ("SIMP", tSIMP.name());
     tKeys = {"PenaltyExponent", "MinimumValue"}; tValues = {"1.0", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSIMP);
-
-    tDocument.save_file("dummy.xml", "  ");
 }
 
 TEST(PlatoTestXMLGenerator, AppendComputeVolumeToPlatoMainOperation)

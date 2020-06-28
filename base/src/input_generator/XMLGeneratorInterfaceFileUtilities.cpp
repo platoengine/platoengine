@@ -6,6 +6,8 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
+#include "XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp"
+#include "XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp"
 
 namespace XMLGen
 {
@@ -311,26 +313,11 @@ void append_design_volume_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_constraint_value_operation
-(const std::string& aPerformerName,
- const std::string& aSharedDataName,
- pugi::xml_node& aParentNode)
-{
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", aPerformerName}, tOperationNode);
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Value", aSharedDataName}, tOutputNode);
-}
-// function append_constraint_value_operation
-/******************************************************************************/
-
-/******************************************************************************/
 void append_constraint_value_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    XMLGen::ConstraintValueOperation tValueOperationInterface;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
         auto tStageNode = aDocument.append_child("Stage");
@@ -340,10 +327,10 @@ void append_constraint_value_stage
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
         XMLGen::append_filter_control_operation(tStageNode);
-        auto tSharedDataName = std::string("Constraint Value ID-") + tConstraint.name();
-        XMLGen::append_constraint_value_operation(tConstraint.performer(), tSharedDataName, tStageNode);
+        tValueOperationInterface.call(tConstraint, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
+        auto tSharedDataName = std::string("Constraint Value ID-") + tConstraint.name();
         XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
     }
 }
@@ -351,26 +338,11 @@ void append_constraint_value_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_constraint_gradient_operation
-(const std::string& aPerformerName,
- const std::string& aSharedDataName,
- pugi::xml_node& aParentNode)
-{
-    auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", aPerformerName}, tOperationNode);
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Gradient", aSharedDataName}, tOutputNode);
-}
-// function append_constraint_gradient_operation
-/******************************************************************************/
-
-/******************************************************************************/
 void append_constraint_gradient_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    XMLGen::ConstraintGradientOperation tGradOperationInterface;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
         auto tStageNode = aDocument.append_child("Stage");
@@ -380,8 +352,8 @@ void append_constraint_gradient_stage
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
 
         XMLGen::append_filter_control_operation(tStageNode);
+        tGradOperationInterface.call(tConstraint, tStageNode);
         auto tSharedDataName = std::string("Constraint Gradient ID-") + tConstraint.name();
-        XMLGen::append_constraint_gradient_operation(tConstraint.performer(), tSharedDataName, tStageNode);
         XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
