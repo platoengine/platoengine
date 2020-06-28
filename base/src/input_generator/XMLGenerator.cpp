@@ -993,7 +993,7 @@ bool XMLGenerator::parseBCs(std::istream &fin)
 
     if(!bc_block_found)
     {
-      std::cout << "ERROR:XMLGenerator:parseLoads: No boundary condition block found \n";
+      std::cout << "ERROR:XMLGenerator:parseBCs: No boundary condition block found \n";
       return false;
     }
 
