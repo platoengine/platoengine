@@ -333,7 +333,7 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeToPlatoMainOperation)
 
     auto tOutput = tOperation.child("Output");
     ASSERT_STREQ("Output", tOutput.name());
-    tKeys = {"ArgumentName"}; tValues = {"Reference Value"};
+    tKeys = {"ArgumentName"}; tValues = {"Design Volume"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
 }
 

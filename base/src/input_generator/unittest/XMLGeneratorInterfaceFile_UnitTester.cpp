@@ -98,7 +98,7 @@ TEST(PlatoTestXMLGenerator, AppendChilds)
     auto tSharedData = tDocument.append_child("SharedData");
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 }
@@ -119,7 +119,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicSharedData)
     pugi::xml_document tDocument;
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "PlatoMain"};
+        "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "platomain"};
     XMLGen::append_nondeterministic_shared_data(tKeys, tValues, tDocument);
 
     // TEST RESULTS AGAINS GOLD VALUES
@@ -171,11 +171,11 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
     tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
 
     tTemp = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Global", "1", "plato analyze_{PerformerIndex}", "PlatoMain"};
+        "Scalar", "Global", "1", "plato analyze_{PerformerIndex}", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
     tTemp = {"Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Nodal Field", "plato analyze_{PerformerIndex}", "PlatoMain"};
+        "Scalar", "Nodal Field", "plato analyze_{PerformerIndex}", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -236,7 +236,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
     tGoldSharedDataKeys.push_back(std::make_pair("Von Mises", tTemp));
     tTemp = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-        "Scalar", "Element Field", "plato analyze_{PerformerIndex}", "PlatoMain"};
+        "Scalar", "Element Field", "plato analyze_{PerformerIndex}", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Von Mises", tTemp));
 
@@ -282,10 +282,10 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundsSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Lower Bound Vector", tTemp));
 
-    tTemp = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    tTemp = {"Lower Bound Value", "Scalar", "Global", "1", "platomain", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Lower Bound Value", tTemp));
-    tTemp = {"Lower Bound Vector", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+    tTemp = {"Lower Bound Vector", "Scalar", "Nodal Field", "platomain", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Lower Bound Vector", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -310,10 +310,10 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundsSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Upper Bound Vector", tTemp));
 
-    tTemp = {"Upper Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    tTemp = {"Upper Bound Value", "Scalar", "Global", "1", "platomain", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Upper Bound Value", tTemp));
-    tTemp = {"Upper Bound Vector", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+    tTemp = {"Upper Bound Vector", "Scalar", "Nodal Field", "platomain", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Upper Bound Vector", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -335,7 +335,7 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeSaredData)
     auto tSharedData = tDocument.child("SharedData");
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tGoldValues = {"Reference Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tGoldValues = {"Reference Value", "Scalar", "Global", "1", "platomain", "platomain"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSharedData);
 }
 
@@ -364,10 +364,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
 
-    tTemp = {"Objective Value ID-0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
+    tTemp = {"Objective Value ID-0", "Scalar", "Global", "1", "plato analyze", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
-    tTemp = {"Objective Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
+    tTemp = {"Objective Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -398,10 +398,10 @@ TEST(PlatoTestXMLGenerator, AppendConstraintSharedData)
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Constraint Gradient", tTemp));
 
-    tTemp = {"Constraint Value ID-0", "Scalar", "Global", "1", "plato analyze", "PlatoMain"};
+    tTemp = {"Constraint Value ID-0", "Scalar", "Global", "1", "plato analyze", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
     tGoldSharedDataValues.push_back(std::make_pair("Constraint Value", tTemp));
-    tTemp = {"Constraint Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "PlatoMain"};
+    tTemp = {"Constraint Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Constraint Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -423,7 +423,7 @@ TEST(PlatoTestXMLGenerator, AppendControlSharedData)
     auto tSharedData = tDocument.child("SharedData");
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
-    std::vector<std::string> tGoldValues = {"Control", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tGoldValues = {"Control", "Scalar", "Nodal Field", "platomain", "platomain"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSharedData);
 }
 
@@ -449,7 +449,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
     auto tSharedData = tDocument.child("SharedData");
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "OwnerName", "UserName", "For"};
-    std::vector<std::string> tGoldValues = {"Topology", "Scalar", "Nodal Field", "PlatoMain", "PlatoMain", ""};
+    std::vector<std::string> tGoldValues = {"Topology", "Scalar", "Nodal Field", "platomain", "platomain", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSharedData);
 
     tGoldKeys = {"var", "in"};
@@ -468,7 +468,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainPerformer)
     // TEST RESULTS AGAINST GOLD VALUES
     auto tPerformer = tDocument.child("Performer");
     std::vector<std::string> tGoldKeys = {"Name", "Code", "PerformerID"};
-    std::vector<std::string> tGoldValues = {"PlatoMain", "PlatoMain", "0"};
+    std::vector<std::string> tGoldValues = {"platomain", "platomain", "0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tPerformer);
 }
 
@@ -516,7 +516,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterControlOperation)
     // TEST RESULTS AGAINST GOLD VALUES
     auto tOperation = tDocument.child("Operation");
     std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    std::vector<std::string> tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    std::vector<std::string> tGoldValues = {"Filter Control", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tInput = tDocument.child("Input");
@@ -548,7 +548,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientSamplesOperation)
 
     auto tOperation = tInnerFor.child("Operation");
     tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
-    tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tOutput = tOperation.child("Output");
@@ -576,7 +576,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientOperation)
     // TEST RESULTS AGAINST GOLD VALUES
     auto tOperation = tDocument.child("Operation");
     std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
-    std::vector<std::string> tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tOutput = tOperation.child("Output");
@@ -609,7 +609,7 @@ TEST(PlatoTestXMLGenerator, AppendInitialGuessStage)
 
     auto tOperation = tStage.child("Operation");
     tGoldKeys = {"Name", "PerformerName", "Output"};
-    tGoldValues = {"Initialize Field", "PlatoMain", ""};
+    tGoldValues = {"Initialize Field", "platomain", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tOutput = tOperation.child("Output");
@@ -706,7 +706,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
     // TEST RESULTS AGAINST GOLD VALUES
     auto tStage = tDocument.child("Stage");
     std::vector<std::string> tGoldKeys = {"Name", "For"};
-    std::vector<std::string> tGoldValues = {"Update Problem : plato analyze 0", ""};
+    std::vector<std::string> tGoldValues = {"Update Problem", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOuterFor = tDocument.child("For");
@@ -775,7 +775,7 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage)
 
     auto tOperation = tStage.child("Operation");
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Lower Bounds", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Lower Bounds", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tInnerInput = tOperation.child("Input");
     tGoldKeys = {"ArgumentName", "SharedDataName"};
@@ -836,7 +836,7 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage)
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Upper Bounds", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Upper Bounds", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tInnerInput = tOperation.child("Input");
     ASSERT_FALSE(tInnerInput.empty());
@@ -894,13 +894,13 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeStage)
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Output"};
-    tGoldValues = {"Compute Design Domain Volume", "PlatoMain", ""};
+    tGoldValues = {"Compute Design Domain Volume", "platomain", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tInnerOutput = tOperation.child("Output");
     ASSERT_FALSE(tInnerOutput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Reference Value", "Reference Value"};
+    tGoldValues = {"Design Volume", "Reference Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerOutput);
 
     auto tOuterOutput = tStage.child("Output");
@@ -915,7 +915,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
-    tConstraint.performer("PlatoMain");
+    tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_constraint_value_stage(tInputData, tDocument);
@@ -943,7 +943,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    tGoldValues = {"Filter Control", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tFilterInput = tOperation.child("Input");
     ASSERT_FALSE(tFilterInput.empty());
@@ -958,7 +958,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Constraint Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Constraint Value", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
@@ -976,7 +976,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
     tConstraint.category("volume");
-    tConstraint.performer("PlatoMain");
+    tConstraint.performer("platomain");
     XMLGen::InputData tInputData;
     tInputData.constraints.push_back(tConstraint);
     XMLGen::append_constraint_gradient_stage(tInputData, tDocument);
@@ -1004,7 +1004,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    tGoldValues = {"Filter Control", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tFilterInput = tOperation.child("Input");
     ASSERT_FALSE(tFilterInput.empty());
@@ -1019,7 +1019,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Compute Constraint Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Constraint Gradient", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tConstraintInput = tOperation.child("Input");
     ASSERT_FALSE(tConstraintInput.empty());
@@ -1034,7 +1034,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
-    tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     tFilterInput = tOperation.child("Input");
     ASSERT_FALSE(tFilterInput.empty());
@@ -1260,7 +1260,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperatio
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Compute Non-Deterministic Objective Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Value", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tFor = tOperation.child("For");
@@ -1390,7 +1390,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tStageOperation = tStage.child("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    tGoldValues = {"Filter Control", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     auto tFilterInput = tStageOperation.child("Input");
@@ -1483,7 +1483,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tStageOperation = tStageOperation.next_sibling("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Compute Non-Deterministic Objective Value", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Value", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     tFor = tStageOperation.child("For");
@@ -1683,7 +1683,7 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOpera
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tFor = tOperation.child("For");
@@ -1818,7 +1818,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tStageOperation = tStage.child("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Output"};
-    tGoldValues = {"Filter Control", "PlatoMain", "", ""};
+    tGoldValues = {"Filter Control", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     auto tFilterInput = tStageOperation.child("Input");
@@ -1837,7 +1837,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tStageOperation = tStageOperation.next_sibling("Operation");
     ASSERT_FALSE(tStageOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "For", "Output"};
-    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "PlatoMain", "", ""};
+    tGoldValues = {"Compute Non-Deterministic Objective Gradient", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     auto tFor = tStageOperation.child("For");
@@ -1958,7 +1958,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tFilterGradOperation = tStageInnerFor.child("Operation");
     ASSERT_FALSE(tFilterGradOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
-    tGoldValues = {"Filter Gradient", "PlatoMain", "", "", ""};
+    tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tFilterGradOperation);
 
     auto tFilterGradOutput = tFilterGradOperation.child("Output");

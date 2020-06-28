@@ -652,7 +652,7 @@ void append_design_volume_to_plato_main_operation
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Compute Design Domain Volume"}, tOperation);
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children({"ArgumentName"}, {"Reference Value"}, tOutput);
+        XMLGen::append_children({"ArgumentName"}, {"Design Volume"}, tOutput);
     }
 }
 // function append_design_volume_to_plato_main_operation

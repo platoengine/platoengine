@@ -44,12 +44,12 @@ void append_criterion_shared_data_for_nondeterministic_usecase
     auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
     auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain"};
+    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "platomain"};
     XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
     // shared data - nondeterministic criterion gradient
     tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain"};
+    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain"};
     XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 }
 //function append_criterion_shared_data_for_nondeterministic_usecase
@@ -71,7 +71,7 @@ void append_qoi_shared_data_for_nondeterministic_usecase
     auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}", "Scalar",
-                                        "Element Field", "IGNORE", tOwnerName, "PlatoMain"};
+                                        "Element Field", "IGNORE", tOwnerName, "platomain"};
     XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 }
 //function append_qoi_shared_data_for_nondeterministic_usecase
@@ -90,7 +90,7 @@ void append_topology_shared_data_for_nondeterministic_usecase
 
     auto tSharedData = aDocument.append_child("SharedData");
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
     auto tForNode = tSharedData.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
@@ -135,7 +135,7 @@ void append_shared_data_for_nondeterministic_usecase
     XMLGen::append_lower_bounds_shared_data(aDocument);
     XMLGen::append_upper_bounds_shared_data(aDocument);
     XMLGen::append_design_volume_shared_data(aDocument);
-    XMLGen::append_objective_shared_data(aXMLMetaData, aDocument, "PlatoMain");
+    XMLGen::append_objective_shared_data(aXMLMetaData, aDocument, "platomain");
     XMLGen::append_constraint_shared_data(aXMLMetaData, aDocument);
 
     // nondeterministic shared data
@@ -157,7 +157,7 @@ void append_filter_criterion_gradient_samples_operation
     tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
     tOperationNode = tForNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "platomain"}, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
@@ -228,7 +228,7 @@ void append_update_problem_stage_for_nondeterministic_usecase
     {
         auto tStageNode = aDocument.append_child("Stage");
         auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Update Problem : ") + tObjective.mPerformerName + " " + std::to_string(tIndex);
+        auto tStageName = std::string("Update Problem");
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
 
         auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";
@@ -296,7 +296,7 @@ void append_evaluate_nondeterministic_objective_value_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Compute Non-Deterministic Objective Value");
-    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "platomain"}, tOperationNode);
 
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
@@ -382,7 +382,7 @@ void append_evaluate_nondeterministic_objective_gradient_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Compute Non-Deterministic Objective Gradient");
-    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "platomain"}, tOperationNode);
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tForNode = tForNode.append_child("For");

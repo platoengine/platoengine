@@ -16,12 +16,12 @@ void append_lower_bounds_shared_data
 {
     // shared data - lower bound value
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Lower Bound Value", "Scalar", "Global", "1", "platomain", "platomain"};
     auto tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
     // shared data - lower bound vector
-    tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 }
@@ -34,12 +34,12 @@ void append_upper_bounds_shared_data
 {
     // shared data - upper bound value
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Upper Bound Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Upper Bound Value", "Scalar", "Global", "1", "platomain", "platomain"};
     auto tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
     // shared data - upper bound vector
-    tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 }
@@ -51,7 +51,7 @@ void append_design_volume_shared_data
 (pugi::xml_document& aDocument)
 {
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Reference Value", "Scalar", "Global", "1", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Reference Value", "Scalar", "Global", "1", "platomain", "platomain"};
     auto tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 }
@@ -76,13 +76,13 @@ void append_objective_shared_data
         auto tTag = std::string("Objective Value ID-") + std::to_string(tIndex);
         auto tOwnerName = aOwnerName.empty() ? tObjective.mPerformerName : aOwnerName;
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
-        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain" };
+        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
         // shared data - deterministic criterion gradient
         tTag = std::string("Objective Gradient ID-") + std::to_string(tIndex);
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain" };
+        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
         tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
     }
@@ -103,13 +103,13 @@ void append_constraint_shared_data
         auto tTag = std::string("Constraint Value ID-") + std::to_string(tIndex);
         auto tOwnerName = aOwnerName.empty() ? tConstraint.performer() : aOwnerName;
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
-        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "PlatoMain" };
+        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
         // shared data - deterministic criterion gradient
         tTag = std::string("Constraint Gradient ID-") + std::to_string(tIndex);
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "PlatoMain" };
+        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
         tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
     }
@@ -123,7 +123,7 @@ void append_control_shared_data
 {
     auto tSharedData = aDocument.append_child("SharedData");
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "PlatoMain", "PlatoMain"};
+    std::vector<std::string> tValues = {"Control", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
 }
 // function append_control_shared_data
@@ -134,7 +134,7 @@ void append_plato_main_performer
 (pugi::xml_document& aDocument)
 {
     auto tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {"PlatoMain", "PlatoMain", "0"}, tPerformerNode);
+    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {"platomain", "platomain", "0"}, tPerformerNode);
 }
 // function append_plato_main_performer
 /******************************************************************************/
@@ -144,7 +144,7 @@ void append_filter_control_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"Filter Control", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"},{"Filter Control", "platomain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
@@ -159,7 +159,7 @@ void append_filter_criterion_gradient_operation
  pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "platomain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
     tInputNode = tOperationNode.append_child("Input");
@@ -175,7 +175,7 @@ void append_initial_field_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"Initialize Field", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"},{"Initialize Field", "platomain"}, tOperationNode);
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Initialized Field", "Control"}, tOutputNode);
 }
@@ -224,7 +224,7 @@ void append_lower_bound_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Lower Bounds", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Lower Bounds", "platomain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Lower Bound Vector", "Lower Bound Vector"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
@@ -258,7 +258,7 @@ void append_upper_bound_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Upper Bounds", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Upper Bounds", "platomain"}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Upper Bound Vector", "Upper Bound Vector"}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
@@ -292,9 +292,9 @@ void append_design_volume_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Design Domain Volume", "PlatoMain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Design Domain Volume", "platomain"}, tOperationNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Reference Value", "Reference Value"}, tOutputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Design Volume", "Reference Value"}, tOutputNode);
 }
 // function append_design_volume_stage
 /******************************************************************************/
