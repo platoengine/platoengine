@@ -156,6 +156,21 @@ void ParseUncertainty::checkMean(const XMLGen::Uncertainty& aMetadata)
     {
         THROWERR("Parse Uncertainty: 'mean' keyword is empty.")
     }
+
+    if(!aMetadata.lower.empty() && !aMetadata.upper.empty())
+    {
+        auto tMean = std::stod(aMetadata.mean);
+        auto tLower = std::stod(aMetadata.lower);
+        auto tUpper = std::stod(aMetadata.upper);
+        auto tIsGreaterThanUpper = tMean > tUpper;
+        auto tIsLesserThanLower = tMean < tLower;
+        if(tIsGreaterThanUpper || tIsLesserThanLower)
+        {
+            THROWERR(std::string("Parse Uncertainty: Mean is not within the lower and upper bounds, ")
+                + "mean must be within the bounds. The condition lower bound = '" + aMetadata.lower
+                + "' < mean = '" + aMetadata.mean + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+        }
+    }
 }
 
 void ParseUncertainty::checkID(const XMLGen::Uncertainty& aMetadata)
