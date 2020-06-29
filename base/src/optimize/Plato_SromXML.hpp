@@ -295,7 +295,7 @@ inline void build_sroms
         {
             std::ostringstream tMsg;
             tMsg << "Build SROMs: Input use case '" << Plato::srom::to_string(aInput.usecase())
-                << "' is not supported. " << "Supported options are: 'load' and 'material'.";
+                << "' is not supported. " << "Supported options are: 'load', 'material', and 'material+load'.";
             THROWERR(tMsg.str().c_str())
         }
     }
