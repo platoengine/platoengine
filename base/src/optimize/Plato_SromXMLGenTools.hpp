@@ -109,6 +109,45 @@ inline void postprocess_srom_problem_outputs
 // function postprocess_srom_problem_outputs
 
 /******************************************************************************//**
+ * \fn set_stochastic_problem_usecase
+ * \brief Set stochastic problem use case.
+ * \param [in]  aXMLMetaData  Plato problem input metadata
+ * \param [out] aSromInputs   Stochastic Reduced Order Model (SROM) problem input metadata
+**********************************************************************************/
+inline void set_stochastic_problem_usecase
+(const XMLGen::InputData& aXMLMetaData,
+ Plato::srom::InputMetaData& aSromInputs)
+{
+    std::vector<std::string> tCategories;
+    for(auto& tCase : aXMLMetaData.uncertainties)
+    {
+        auto tLowerCategory = Plato::tolower(tCase.variable_type);
+        tCategories.push_back(tLowerCategory);
+    }
+
+    auto tItrLoad = std::find(tCategories.begin(), tCategories.end(), "load");
+    auto tItrMaterial = std::find(tCategories.begin(), tCategories.end(), "material");
+    if(tItrLoad != tCategories.end() && tItrMaterial == tCategories.end())
+    {
+        aSromInputs.usecase(Plato::srom::usecase::LOAD);
+    }
+    else if(tItrLoad == tCategories.end() && tItrMaterial != tCategories.end())
+    {
+        aSromInputs.usecase(Plato::srom::usecase::MATERIAL);
+    }
+    else if(tItrLoad != tCategories.end() && tItrMaterial != tCategories.end())
+    {
+        aSromInputs.usecase(Plato::srom::usecase::MATERIAL_PLUS_LOAD);
+    }
+    else
+    {
+        THROWERR(std::string("Set Stochastic Problem Use Case: Stochasti Reduced Order Model problem use case was not defined. ")
+            + "The following use case are supported: load uncertainty, material uncertainty, or material plus load uncertainties.")
+    }
+}
+// function set_stochastic_problem_usecase
+
+/******************************************************************************//**
  * \fn solve
  * \brief Solve optimization problem to form stochastic reduced order model.
  * \param [in/out] aXMLGenMetaData  Plato problem input metadata
@@ -116,6 +155,7 @@ inline void postprocess_srom_problem_outputs
 inline void solve(XMLGen::InputData& aXMLGenMetaData)
 {
     Plato::srom::InputMetaData tSromInputs;
+    Plato::srom::set_stochastic_problem_usecase(aXMLGenMetaData, tSromInputs);
     Plato::srom::preprocess_srom_problem_inputs(aXMLGenMetaData, tSromInputs);
     Plato::srom::OutputMetaData tSromOutputs;
     Plato::srom::build_sroms(tSromInputs, tSromOutputs);
