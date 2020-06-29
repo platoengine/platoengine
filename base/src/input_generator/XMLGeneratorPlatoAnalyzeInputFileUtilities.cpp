@@ -598,8 +598,7 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
 {
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
-        auto tRandomLoads = aXMLMetaData.mRandomMetaData.loadcase();
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tRandomLoads, aParentNode);
+        XMLGen::append_random_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
     }
     else
     {
