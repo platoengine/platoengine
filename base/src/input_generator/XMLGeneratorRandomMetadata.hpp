@@ -391,9 +391,20 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn samplesDrawn
+     * \brief Return true if samples were drawn.
+     * \return flag
+    **********************************************************************************/
+    bool samplesDrawn() const
+    {
+        auto tIsRandomUseCase = mSamples.empty() ? false : true;
+        return tIsRandomUseCase;
+    }
+
+    /******************************************************************************//**
      * \fn loadSamplesDrawn
      * \brief Return true if random load samples were drawn.
-     * \return list of random load case
+     * \return flag
     **********************************************************************************/
     bool loadSamplesDrawn() const
     {
@@ -402,6 +413,20 @@ public:
             THROWERR("Random MetaData: Samples container is empty.")
         }
         return (mSamples[0].loadSampleDrawn());
+    }
+
+    /******************************************************************************//**
+     * \fn materialSamplesDrawn
+     * \brief Return true if random material samples were drawn.
+     * \return flag
+    **********************************************************************************/
+    bool materialSamplesDrawn() const
+    {
+        if(mSamples.empty())
+        {
+            THROWERR("Random MetaData: Samples container is empty.")
+        }
+        return (mSamples[0].materialSampleDrawn());
     }
 };
 // struct RandomMetaData

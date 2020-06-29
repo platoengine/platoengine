@@ -306,6 +306,26 @@ void append_natural_boundary_conditions_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_deterministic_natural_boundary_conditions_to_plato_problem
+ * \brief Append deterministic natural boundary condition to problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_deterministic_natural_boundary_conditions_to_plato_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_random_natural_boundary_conditions_to_plato_problem
+ * \brief Append random natural boundary condition to problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_random_natural_boundary_conditions_to_plato_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_natural_boundary_conditions_to_plato_analyze_input_deck
  * \brief Append natural boundary condition to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
