@@ -279,12 +279,22 @@ inline void build_sroms
             aOutput.materials(tMaterialCases);
             break;
         }
-        default:
-        case Plato::srom::usecase::UNDEFINED:
         case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
         {
+            std::vector<Plato::srom::RandomLoadCase> tLoadCases;
+            Plato::srom::build_load_sroms(aInput.loads(), tLoadCases);
+            aOutput.loads(tLoadCases);
+
+            std::vector<Plato::srom::RandomMaterialCase> tMaterialCases;
+            Plato::srom::build_material_sroms(aInput.materials(), tMaterialCases);
+            aOutput.materials(tMaterialCases);
+            break;
+        }
+        default:
+        case Plato::srom::usecase::UNDEFINED:
+        {
             std::ostringstream tMsg;
-            tMsg << "Build SROMs: Input use case '" << Plato::srom::to_string(Plato::srom::usecase::UNDEFINED)
+            tMsg << "Build SROMs: Input use case '" << Plato::srom::to_string(aInput.usecase())
                 << "' is not supported. " << "Supported options are: 'load' and 'material'.";
             THROWERR(tMsg.str().c_str())
         }
