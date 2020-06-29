@@ -2718,27 +2718,9 @@ std::string XMLGenerator::toUpper(const std::string &s)
 void XMLGenerator::getUncertaintyFlags()
 /******************************************************************************/
 {
-    for(size_t i=0; i<m_InputData.objectives.size(); ++i)
+    if(!m_InputData.uncertainties.empty())
     {
-        const XMLGen::Objective cur_obj = m_InputData.objectives[i];
-        for(size_t k=0; k<cur_obj.load_case_ids.size(); k++)
-        {
-            std::string cur_load_string = cur_obj.load_case_ids[k];
-            for(size_t j=0; m_InputData.m_RequestedVonMisesOutput == false && j<cur_obj.output_for_plotting.size(); j++)
-            {
-                if(cur_obj.output_for_plotting[j] == "vonmises")
-                {
-                    m_InputData.m_RequestedVonMisesOutput = true;
-                }
-            }
-            for(size_t j=0; m_InputData.m_HasUncertainties == false && j<m_InputData.uncertainties.size(); ++j)
-            {
-                if(cur_load_string == m_InputData.uncertainties[j].id)
-                {
-                    m_InputData.m_HasUncertainties = true;
-                }
-            }
-        }
+        m_InputData.m_HasUncertainties = true;
     }
 }
 
