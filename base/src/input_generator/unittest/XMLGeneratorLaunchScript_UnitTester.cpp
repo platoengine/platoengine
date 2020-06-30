@@ -398,7 +398,7 @@ TEST(PlatoTestXMLGenerator, appendEngineMPIRunLines)
   fclose(fp);
 
   auto tReadData = XMLGen::read_data_from_file("appendEngineMPIRunLines.txt");
-  auto tGold = std::string("mpiexec-np10-xPLATO_PERFORMER_ID=0\\-xPLATO_INTERFACE_FILE=interface.xml\\-xPLATO_APP_FILE=plato_main_operations.xml\\plato_mainplato_main_input_deck.xml\\");
+  auto tGold = std::string("mpiexec-np10-xPLATO_PERFORMER_ID=0\\-xPLATO_INTERFACE_FILE=interface.xml\\-xPLATO_APP_FILE=plato_main_operations.xml\\PlatoMainplato_main_input_deck.xml\\");
 
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
   Plato::system("rm -rf appendEngineMPIRunLines.txt");

@@ -26,9 +26,10 @@ namespace XMLGen
       std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
       std::vector<std::string> tValues = {"unstructured", "exodus", "true", aInputData.run_mesh_name};
       XMLGen::append_children(tKeys, tValues, tMesh);
+      XMLGen::append_block_metadata_to_mesh_node(aInputData,tMesh);
     }
 
-  void append_block_metadata_to_plato_main_input_deck
+  void append_block_metadata_to_mesh_node
     (const XMLGen::InputData& aInputData,
      pugi::xml_node& aParentNode)
     {
@@ -72,7 +73,6 @@ namespace XMLGen
       pugi::xml_document tDocument;
       append_version_entry(tDocument);
       append_mesh_metadata_to_plato_main_input_deck(aInputData,tDocument);
-      append_block_metadata_to_plato_main_input_deck(aInputData,tDocument);
       append_output_metadata_to_plato_main_input_deck(aInputData, tDocument);
       tDocument.save_file("plato_main_input_deck.xml", "  ");
     }

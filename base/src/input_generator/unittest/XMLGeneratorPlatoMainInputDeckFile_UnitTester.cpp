@@ -20,7 +20,7 @@ TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck_EmptyBlockNo
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    XMLGen::append_block_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument);
+    XMLGen::append_block_metadata_to_mesh_node(tXMLMetaData, tDocument);
 
     auto tBlock = tDocument.child("block");
     ASSERT_TRUE(tBlock.empty());
@@ -32,7 +32,7 @@ TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck_ErrorEmptyBl
     XMLGen::InputData tXMLMetaData;
     XMLGen::Block tBlock;
     tXMLMetaData.blocks.push_back(tBlock);
-    ASSERT_THROW(XMLGen::append_block_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_block_metadata_to_mesh_node(tXMLMetaData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck_ErrorEmptyMaterialID)
@@ -42,7 +42,7 @@ TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck_ErrorEmptyMa
     XMLGen::Block tBlock;
     tBlock.block_id = "1";
     tXMLMetaData.blocks.push_back(tBlock);
-    ASSERT_THROW(XMLGen::append_block_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_block_metadata_to_mesh_node(tXMLMetaData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck)
@@ -57,7 +57,7 @@ TEST(PlatoTestXMLGenerator, AppendBlockMetadataToPlatoMainInputDeck)
     tBlock2.block_id = "2";
     tBlock2.material_id = "12";
     tXMLMetaData.blocks.push_back(tBlock2);
-    ASSERT_NO_THROW(XMLGen::append_block_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_block_metadata_to_mesh_node(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     auto tBlock = tDocument.child("block");
@@ -131,8 +131,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainInputDeck)
     auto tReadData = XMLGen::read_data_from_file("plato_main_input_deck.xml");
     auto tGold =
       std::string("<?xmlversion=\"1.0\"?><mesh><type>unstructured</type><format>exodus</format>") + 
-      std::string("<ignore_node_map>true</ignore_node_map><mesh>dummy.exo</mesh></mesh><block><index>1</index>") +
-      std::string("<material>11</material><integration><type>gauss</type><order>2</order></integration></block>") + 
+      std::string("<ignore_node_map>true</ignore_node_map><mesh>dummy.exo</mesh><block><index>1</index>") +
+      std::string("<material>11</material><integration><type>gauss</type><order>2</order></integration></block></mesh>") + 
       std::string("<output><file>platomain</file><format>exodus</format></output>");
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_input_deck.xml");
