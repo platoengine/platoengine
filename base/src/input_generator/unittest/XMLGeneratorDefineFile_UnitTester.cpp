@@ -179,16 +179,16 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Definename=\"NumSamples\"type=\"int\"value=\"2\"/>")
             + "<Definename=\"NumPerformers\"type=\"int\"value=\"2\"/>"
             + "<Definename=\"NumSamplesPerPerformer\"type=\"int\"value=\"{NumSamples/NumPerformers}\"/>"
-            + "<Definename=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
-            + "<Definename=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
-            + "<Definename=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"value=\"1,11\"/>"
-            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"value=\"2,12\"/>"
-            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"value=\"3,13\"/>"
-            + "<Arrayname=\"tractionload-id-2x-axis\"type=\"real\"value=\"4,14\"/>"
-            + "<Arrayname=\"tractionload-id-2y-axis\"type=\"real\"value=\"5,15\"/>"
-            + "<Arrayname=\"tractionload-id-2z-axis\"type=\"real\"value=\"6,16\"/>"
-            + "<Arrayname=\"Probabilities\"type=\"real\"value=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
+            + "<Arrayname=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
+            + "<Arrayname=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
+            + "<Arrayname=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
+            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"values=\"1,11\"/>"
+            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"values=\"2,12\"/>"
+            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"values=\"3,13\"/>"
+            + "<Arrayname=\"tractionload-id-2x-axis\"type=\"real\"values=\"4,14\"/>"
+            + "<Arrayname=\"tractionload-id-2y-axis\"type=\"real\"values=\"5,15\"/>"
+            + "<Arrayname=\"tractionload-id-2z-axis\"type=\"real\"values=\"6,16\"/>"
+            + "<Arrayname=\"Probabilities\"type=\"real\"values=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
     Plato::system("rm -f defines.xml");
@@ -651,7 +651,7 @@ TEST(PlatoTestXMLGenerator, AppendProbabilitiesToDefineXmlFile)
         std::advance(tNamesIterator, 1);
         ASSERT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
         std::advance(tTypesIterator, 1);
-        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("values").value());
         std::advance(tValuesIterator, 1);
     }
 }
@@ -673,18 +673,22 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
         {"youngs modulus block-id-1", "youngs modulus block-id-2", "poissons ratio block-id-1","poissons ratio block-id-2"};
     std::vector<std::string> tGoldValues = {"1, 1.1", "1, 1", "0.3, 0.33", "0.3, 0.3"};
 
-    // TEST RESULTS AGAINST GOLD VALUES
-    for(pugi::xml_node tNode : tDocument.children("Array"))
+    for(pugi::xml_node tArray : tDocument.children("Array"))
     {
-        auto tGoldNameItr = std::find(tGoldNames.begin(), tGoldNames.end(), tNode.attribute("name").value());
+        ASSERT_FALSE(tArray.empty());
+        auto tAttribute = tArray.attribute("name");
+        ASSERT_FALSE(tAttribute.empty());
+        auto tGoldNameItr = std::find(tGoldNames.begin(), tGoldNames.end(), tAttribute.value());
         ASSERT_TRUE(tGoldNameItr != tGoldNames.end());
-        ASSERT_STREQ(tGoldNameItr->c_str(), tNode.attribute("name").value());
+        ASSERT_STREQ(tGoldNameItr->c_str(), tAttribute.value());
 
-        auto tGoldValueItr = std::find(tGoldValues.begin(), tGoldValues.end(), tNode.attribute("value").value());
+        tAttribute = tArray.attribute("values");
+        ASSERT_FALSE(tAttribute.empty());
+        auto tGoldValueItr = std::find(tGoldValues.begin(), tGoldValues.end(), tAttribute.value());
         ASSERT_TRUE(tGoldValueItr != tGoldNames.end());
-        ASSERT_STREQ(tGoldValueItr->c_str(), tNode.attribute("value").value());
+        ASSERT_STREQ(tGoldValueItr->c_str(), tAttribute.value());
 
-        ASSERT_STREQ("real", tNode.attribute("type").value());
+        ASSERT_STREQ("real", tArray.attribute("type").value());
     }
 }
 
@@ -876,7 +880,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
         std::advance(tNamesIterator, 1);
         ASSERT_STREQ(tTypesIterator.operator*().c_str(), tNode.attribute("type").value());
         std::advance(tTypesIterator, 1);
-        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("value").value());
+        ASSERT_STREQ(tValuesIterator.operator*().c_str(), tNode.attribute("values").value());
         std::advance(tValuesIterator, 1);
     }
 }

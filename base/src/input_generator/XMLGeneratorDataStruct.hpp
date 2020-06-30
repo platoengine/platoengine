@@ -107,7 +107,7 @@ public:
 struct Output
 {
 private:
-    // note: vector<pair<qoi_shared_data_name, qoi_layout>>, where qoi_layout denotes the
+    // note: vector<pair<qoi_argument_name, qoi_layout>>, where qoi_layout denotes the
     // data layout, i.e. element, nodal, etc., and qoi_shared_data_name denotes the keyword
     // used in the plato light-weight input file to denote the output data. the output keyword
     // is used to define the shared data name in the interface.xml file.
@@ -115,14 +115,14 @@ private:
     std::vector<std::pair<std::string, std::string>> mDeterministicQuantitiesOfInterest;
 
 public:
-    void appendRandomQoI(const std::string& aSharedDataName, const std::string& aDataLayout)
+    void appendRandomQoI(const std::string& aArgumentName, const std::string& aDataLayout)
     {
-        mRandomQuantitiesOfInterest.push_back(std::make_pair(aSharedDataName, aDataLayout));
+        mRandomQuantitiesOfInterest.push_back(std::make_pair(aArgumentName, aDataLayout));
     }
 
-    void appendDeterminsiticQoI(const std::string& aSharedDataName, const std::string& aDataLayout)
+    void appendDeterminsiticQoI(const std::string& aArgumentName, const std::string& aDataLayout)
     {
-        mDeterministicQuantitiesOfInterest.push_back(std::make_pair(aSharedDataName, aDataLayout));
+        mDeterministicQuantitiesOfInterest.push_back(std::make_pair(aArgumentName, aDataLayout));
     }
 
     const std::vector<std::pair<std::string, std::string>>& getRandomQoI() const
