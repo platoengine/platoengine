@@ -214,7 +214,7 @@ namespace XMLGen
     if(aInputData.plato_main_path.length() != 0)
       fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.plato_main_path.c_str());
     else
-      fprintf(fp, "plato_main plato_main_input_deck.xml \\\n");
+      fprintf(fp, "PlatoMain plato_main_input_deck.xml \\\n");
   }
 
   void determine_mpi_env_and_separation_strings(std::string& envString, std::string& separationString)

@@ -62,7 +62,7 @@ DesignVolume::DesignVolume(PlatoApp* aPlatoApp, Plato::InputData& aOperationNode
 
 void DesignVolume::initialize(Plato::InputData& aOperationNode)
 {
-    for(auto& tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
+    for(auto& tInputNode : aOperationNode.getByName<Plato::InputData>("Output"))
     {
         auto tArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         mLocalArguments.push_back(Plato::LocalArg {Plato::data::layout_t::SCALAR, tArgumentName, 1 /* number of scalar values, i.e. array length */});
