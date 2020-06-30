@@ -5,12 +5,8 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "interface.xml;alexaInput.xml;alexaApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.exo;bolted_bracket_assoc.txt")
+set( testFiles "interface.xml;alexaInput.xml;alexaApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.exo")
 Plato_add_test_files("${testFiles}")
-
-## Plato_add_test_files() only works for files.  *.osh is a directory.
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bolted_bracket.osh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 
 # Set number of processors for PlatoMain comm
 set( PLATOMAIN_NP 1 )
