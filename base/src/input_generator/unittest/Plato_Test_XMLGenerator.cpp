@@ -144,6 +144,28 @@ TEST(PlatoTestXMLGenerator, ParseTagValues)
     ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.second.c_str());
 }
 
+TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
+{
+    std::string tStringInput =
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean -50.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n";
+
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
 {
     std::string tStringInput =

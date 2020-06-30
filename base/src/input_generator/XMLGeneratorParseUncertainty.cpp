@@ -156,6 +156,21 @@ void ParseUncertainty::checkMean(const XMLGen::Uncertainty& aMetadata)
     {
         THROWERR("Parse Uncertainty: 'mean' keyword is empty.")
     }
+
+    if(!aMetadata.lower.empty() && !aMetadata.upper.empty())
+    {
+        auto tMean = std::stod(aMetadata.mean);
+        auto tLower = std::stod(aMetadata.lower);
+        auto tUpper = std::stod(aMetadata.upper);
+        auto tIsGreaterThanUpper = tMean > tUpper;
+        auto tIsLesserThanLower = tMean < tLower;
+        if(tIsGreaterThanUpper || tIsLesserThanLower)
+        {
+            THROWERR(std::string("Parse Uncertainty: Mean is not within the lower and upper bounds, ")
+                + "mean must be within the bounds. The condition lower bound = '" + aMetadata.lower
+                + "' < mean = '" + aMetadata.mean + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+        }
+    }
 }
 
 void ParseUncertainty::checkID(const XMLGen::Uncertainty& aMetadata)
@@ -188,6 +203,16 @@ void ParseUncertainty::checkUpperBound(const XMLGen::Uncertainty& aMetadata)
     {
         THROWERR("Parse Uncertainty: 'upper bound' keyword is empty.")
     }
+
+    auto tLower = std::stod(aMetadata.lower);
+    auto tUpper = std::stod(aMetadata.upper);
+    auto tIsUpperLesserThanLower = tUpper <= tLower;
+    if(tIsUpperLesserThanLower)
+    {
+        THROWERR(std::string("Parse Uncertainty: Upper bound is lesser or equal than the lower bound. ")
+            + "Upper bound must be greater than the lower bound. The condition upper bound = '"
+            + aMetadata.upper + "' > lower bound = '" + aMetadata.lower + "' is not met.")
+    }
 }
 
 void ParseUncertainty::checkStandardDeviation(const XMLGen::Uncertainty& aMetadata)
@@ -196,13 +221,28 @@ void ParseUncertainty::checkStandardDeviation(const XMLGen::Uncertainty& aMetada
     {
         THROWERR("Parse Uncertainty: 'standard deviation' keyword is empty.")
     }
+
+    auto tLower = std::stod(aMetadata.lower);
+    auto tUpper = std::stod(aMetadata.upper);
+    auto tLowerIsGreaterThanUpper = tLower >= tUpper;
+    if(tLowerIsGreaterThanUpper)
+    {
+        THROWERR(std::string("Parse Uncertainty: Lower bound is greater or equal than the upper bound. ")
+            + "Lower bound must be less than the upper bound. The condition lower bound = '"
+            + aMetadata.lower + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+    }
+}
+
+void ParseUncertainty::checkBounds(const XMLGen::Uncertainty& aMetadata)
+{
+    this->checkLowerBound(aMetadata);
+    this->checkUpperBound(aMetadata);
 }
 
 void ParseUncertainty::checkBeta(const XMLGen::Uncertainty& aMetadata)
 {
     this->checkMean(aMetadata);
-    this->checkLowerBound(aMetadata);
-    this->checkUpperBound(aMetadata);
+    this->checkBounds(aMetadata);
     this->checkNumSamples(aMetadata);
     this->checkStandardDeviation(aMetadata);
 }
@@ -216,9 +256,8 @@ void ParseUncertainty::checkNormal(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkUniform(const XMLGen::Uncertainty& aMetadata)
 {
+    this->checkBounds(aMetadata);
     this->checkNumSamples(aMetadata);
-    this->checkLowerBound(aMetadata);
-    this->checkUpperBound(aMetadata);
 }
 
 void ParseUncertainty::checkStatistics(const XMLGen::Uncertainty& aMetadata)

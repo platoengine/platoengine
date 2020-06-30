@@ -108,15 +108,22 @@ private:
     void checkNumSamples(const XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
+     * \fn checkBounds
+     * \brief Check if lower and upper bounds are properly defined.
+     * \param [in] aMetadata uncertainty metadata
+    **********************************************************************************/
+    void checkBounds(const XMLGen::Uncertainty& aMetadata);
+
+    /******************************************************************************//**
      * \fn checkLowerBound
-     * \brief Check if lower bounds keyword is empty.
+     * \brief Check if lower bound keyword is properly defined.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
     void checkLowerBound(const XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
      * \fn checkUpperBound
-     * \brief Check if upper bounds keyword is empty.
+     * \brief Check if upper bound keyword is properly defined.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
     void checkUpperBound(const XMLGen::Uncertainty& aMetadata);
