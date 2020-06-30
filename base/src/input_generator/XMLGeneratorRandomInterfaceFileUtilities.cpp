@@ -155,20 +155,20 @@ void append_filter_criterion_gradient_samples_operation
 (const std::string& aCriterionName,
  pugi::xml_node& aParentNode)
 {
-    auto tForNode = aParentNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
-    auto tOperationNode = tForNode.append_child("Operation");
-    tForNode = tOperationNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-    tOperationNode = tForNode.append_child("Operation");
+    auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "platomain"}, tOperationNode);
-
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
-    tInputNode = tOperationNode.append_child("Input");
+
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
+    tForNode = aParentNode.append_child("For");
+    XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+
+    tInputNode = tForNode.append_child("Input");
     auto tSharedDataName = aCriterionName + " Gradient" + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", tSharedDataName}, tInputNode);
-    auto tOutputNode = tOperationNode.append_child("Output");
+    auto tOutputNode = tForNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tSharedDataName}, tOutputNode);
 }
 // function append_filter_criterion_gradient_samples_operation
