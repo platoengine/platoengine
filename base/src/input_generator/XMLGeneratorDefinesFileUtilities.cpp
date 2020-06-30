@@ -31,9 +31,9 @@ void append_basic_attributes_to_define_xml_file
     XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumPerformers", "int", tNumPerformersString}, aDocument);
     XMLGen::append_attributes("Define", {"name", "type", "value"}, {"NumSamplesPerPerformer", "int", "{NumSamples/NumPerformers}"}, aDocument);
 
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Samples", "int", "0", "{NumSamples-1}"}, aDocument);
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"Performers", "int", "0", "{NumPerformers-1}"}, aDocument);
-    XMLGen::append_attributes("Define", {"name", "type", "from", "to"}, {"PerformerSamples", "int", "0", "{NumSamplesPerPerformer-1}"}, aDocument);
+    XMLGen::append_attributes("Array", {"name", "type", "from", "to"}, {"Samples", "int", "0", "{NumSamples-1}"}, aDocument);
+    XMLGen::append_attributes("Array", {"name", "type", "from", "to"}, {"Performers", "int", "0", "{NumPerformers-1}"}, aDocument);
+    XMLGen::append_attributes("Array", {"name", "type", "from", "to"}, {"PerformerSamples", "int", "0", "{NumSamplesPerPerformer-1}"}, aDocument);
 }
 // function append_basic_attributes_to_define_xml_file
 /******************************************************************************/
@@ -110,7 +110,7 @@ void append_probabilities_to_define_xml_file
     }
 
     auto tValues = XMLGen::transform_tokens(aProbabilities);
-    XMLGen::append_attributes("Array", {"name", "type", "value"}, {"Probabilities", "real", tValues}, aDocument);
+    XMLGen::append_attributes("Array", {"name", "type", "values"}, {"Probabilities", "real", tValues}, aDocument);
 }
 // function append_probabilities_to_define_xml_file
 /******************************************************************************/
@@ -142,7 +142,7 @@ void append_tractions_to_define_xml_file
             auto tDimIndex = std::distance(tLoadItr->begin(), tDimItr);
             auto tTag = tTagItr->second[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tDimItr.operator*());
-            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
+            XMLGen::append_attributes("Array", {"name", "type", "values"}, {tTag, "real", tValues}, aDocument);
         }
     }
 }
@@ -219,7 +219,7 @@ void append_material_properties_to_define_xml_file
     for(auto& tPair : aMaterials)
     {
         auto tValues = XMLGen::transform_tokens(tPair.second);
-        XMLGen::append_attributes("Array", {"name", "type", "value"}, {tPair.first, "real", tValues}, aDocument);
+        XMLGen::append_attributes("Array", {"name", "type", "values"}, {tPair.first, "real", tValues}, aDocument);
     }
 }
 // function append_material_properties_to_define_xml_file
@@ -307,7 +307,7 @@ void append_tractions_to_define_xml_file
             auto tDimIndex = &tLoadComponentSamples - &tPair.second[0];
             auto tTag = tTagsItr->second[tDimIndex];
             auto tValues = XMLGen::transform_tokens(tLoadComponentSamples);
-            XMLGen::append_attributes("Array", {"name", "type", "value"}, {tTag, "real", tValues}, aDocument);
+            XMLGen::append_attributes("Array", {"name", "type", "values"}, {tTag, "real", tValues}, aDocument);
         }
     }
 }
