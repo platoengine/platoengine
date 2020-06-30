@@ -188,7 +188,7 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
         for(auto& tTag : tMaterialPropertiesTags)
         {
             auto tMaterialPropertyTag = Plato::tolower(tTag);
-            auto tArgumentNameTag = tMaterialPropertyTag + " block-id-" + tID;
+            auto tArgumentNameTag = tMaterialPropertyTag + "_block_id_" + tID;
             tMap[tID].second.push_back(std::make_pair(tArgumentNameTag, tMaterialPropertyTag));
         }
     }

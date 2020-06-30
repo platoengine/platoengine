@@ -36,8 +36,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
     auto tRandomMaterialCase1 = std::make_pair(0.5, tMaterialSetOne);
@@ -46,8 +46,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear elastic");
-    tMaterial2.property("youngs modulus", "1.1");
-    tMaterial2.property("poissons ratio", "0.33");
+    tMaterial2.property("youngs_modulus", "1.1");
+    tMaterial2.property("poissons_ratio", "0.33");
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial2});
     auto tRandomMaterialCase2 = std::make_pair(0.5, tMaterialSetTwo);
@@ -121,41 +121,41 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
     +"</Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
-    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
+    +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
     +"<Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
-    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
+    +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
     +"<Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output>"
-    +"<Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter>"+"<Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
-    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter>"+"<Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"</Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
-    +"</Output><Parameter><ArgumentName>tractionload-id-2x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-2z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1x-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1y-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>tractionload-id-1z-axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
-    +"</Parameter><Parameter><ArgumentName>poissonsratioblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
-    +"<Parameter><ArgumentName>youngsmodulusblock-id-1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
+    +"</Output><Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(0)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(1)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
+    +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
+    +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
     Plato::system("rm -f plato_analyze_operations.xml");
 }
@@ -232,42 +232,42 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     std::vector<std::string> tValues =
-        {"traction load-id-2 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(0)", "0.0"};
+        {"traction_load_id_2_x_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(0)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-2 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(1)", "0.0"};
+    tValues = {"traction_load_id_2_y_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(1)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-2 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(2)", "0.0"};
+    tValues = {"traction_load_id_2_z_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(2)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-1 x-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(0)", "0.0"};
+    tValues = {"traction_load_id_1_x_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(0)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-1 y-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(1)", "0.0"};
+    tValues = {"traction_load_id_1_y_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(1)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling();
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"traction load-id-1 z-axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(2)", "0.0"};
+    tValues = {"traction_load_id_1_z_axis", "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 1]:Values(2)", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     // EXPECT NEXT SIBLING TO BE EMPTY SINCE PREVIOUS PARAMETER IS THE LAST SIBLING ON THE LIST
@@ -288,13 +288,13 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear elastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -305,13 +305,13 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear elastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -407,9 +407,9 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
-    std::vector<std::string> tGoldArgumentNames = {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis",
-        "traction load-id-2 x-axis", "traction load-id-2 y-axis", "traction load-id-2 z-axis", "poissons ratio block-id-1",
-        "poissons ratio block-id-2", "youngs modulus block-id-1", "youngs modulus block-id-2"};
+    std::vector<std::string> tGoldArgumentNames = {"traction_load_id_1_x_axis", "traction_load_id_1_y_axis", "traction_load_id_1_z_axis",
+        "traction_load_id_2_x_axis", "traction_load_id_2_y_axis", "traction_load_id_2_z_axis", "poissons_ratio_block_id_1",
+        "poissons_ratio_block_id_2", "youngs_modulus_block_id_1", "youngs_modulus_block_id_2"};
     std::vector<std::string> tGoldTargetNames =
         {"[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(0)",
          "[Plato Problem]:[Natural Boundary Conditions]:[Random Traction Vector Boundary Condition with ID 2]:Values(1)",
@@ -443,16 +443,16 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -463,16 +463,16 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -493,43 +493,43 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    std::vector<std::string> tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -537,7 +537,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_ErrorInvalidCategory)
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "youngs modulus"}, {"poissons ratio block-id-1", "poissons ratio"} };
+    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
 
     XMLGen::MaterialFunctionInterface tInterface;
     ASSERT_THROW(tInterface.call("viscoelastic", tTags, tDocument), std::runtime_error);
@@ -547,7 +547,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_Elastic)
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "youngs modulus"}, {"poissons ratio block-id-1", "poissons ratio"} };
+    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
 
     XMLGen::MaterialFunctionInterface tInterface;
     ASSERT_NO_THROW(tInterface.call("isotropic linear elastic", tTags, tDocument));
@@ -556,14 +556,14 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_Elastic)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs modulus block-id-1",
+    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
         "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -571,10 +571,10 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_ThermoElastic)
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "youngs modulus"}, {"poissons ratio block-id-1", "poissons ratio"},
-      {"thermal expansion coefficient block-id-1", "thermal expansion coefficient"},
-      {"thermal conductivity coefficient block-id-1", "thermal conductivity coefficient"},
-      {"reference temperature block-id-1", "reference temperature"} };
+    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"},
+      {"thermal_expansion_coefficient_block_id_1", "thermal_expansion_coefficient"},
+      {"thermal_conductivity_coefficient_block_id_1", "thermal_conductivity_coefficient"},
+      {"reference_temperature_block_id_1", "reference_temperature"} };
 
     XMLGen::MaterialFunctionInterface tInterface;
     ASSERT_NO_THROW(tInterface.call("isotropic linear thermoelastic", tTags, tDocument));
@@ -583,32 +583,32 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_ThermoElastic)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs modulus block-id-1",
+    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
         "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -624,16 +624,16 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -644,16 +644,16 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -669,11 +669,11 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     // CALL FUNCTION
     std::vector<std::string> tGoldBlockIDs = {"1", "2"};
     std::vector<std::string> tGoldCategories = {"isotropic linear elastic", "isotropic linear thermoelastic"};
-    std::vector<std::string> tGoldMatPropTags = {"youngs modulus", "poissons ratio", "thermal expansion coefficient",
-        "thermal conductivity coefficient", "reference temperature"};
-    std::vector<std::string> tGoldArgumentTags = {"youngs modulus block-id-1", "poissons ratio block-id-1",
-        "youngs modulus block-id-2", "poissons ratio block-id-2", "thermal expansion coefficient block-id-2",
-        "thermal conductivity coefficient block-id-2", "reference temperature block-id-2"};
+    std::vector<std::string> tGoldMatPropTags = {"youngs_modulus", "poissons_ratio", "thermal_expansion_coefficient",
+        "thermal_conductivity_coefficient", "reference_temperature"};
+    std::vector<std::string> tGoldArgumentTags = {"youngs_modulus_block_id_1", "poissons_ratio_block_id_1",
+        "youngs_modulus_block_id_2", "poissons_ratio_block_id_2", "thermal_expansion_coefficient_block_id_2",
+        "thermal_conductivity_coefficient_block_id_2", "reference_temperature_block_id_2"};
     auto tMaterials = XMLGen::return_random_material_metadata_for_plato_analyze_operation_xml_file(tRandomMetaData);
     for(auto& tMaterial : tMaterials)
     {
@@ -709,10 +709,10 @@ TEST(PlatoTestXMLGenerator, AppendIsotropicLinearThermoElasticMaterialProperties
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "young modulu"}, {"poissons ratio block-id-1", "poissons ratio"},
-      {"thermal expansion coefficient block-id-1", "ther expann cocient"},
-      {"thermal conductivity coefficient block-id-1", "thermal conductivity coefficient"},
-      {"reference temperature block-id-1", "reference temperature"} };
+    { {"youngs_modulus_block_id_1", "young modulu"}, {"poissons_ratio_block_id_1", "poissons_ratio"},
+      {"thermal_expansion_coefficient_block_id_1", "ther expann cocient"},
+      {"thermal_conductivity_coefficient_block_id_1", "thermal_conductivity_coefficient"},
+      {"reference_temperature_block_id_1", "reference_temperature"} };
     ASSERT_THROW(XMLGen::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
 }
 
@@ -720,42 +720,42 @@ TEST(PlatoTestXMLGenerator, AppendIsotropicLinearThermoElasticMaterialProperties
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "youngs modulus"}, {"poissons ratio block-id-1", "poissons ratio"},
-      {"thermal expansion coefficient block-id-1", "thermal expansion coefficient"},
-      {"thermal conductivity coefficient block-id-1", "thermal conductivity coefficient"},
-      {"reference temperature block-id-1", "reference temperature"} };
+    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"},
+      {"thermal_expansion_coefficient_block_id_1", "thermal_expansion_coefficient"},
+      {"thermal_conductivity_coefficient_block_id_1", "thermal_conductivity_coefficient"},
+      {"reference_temperature_block_id_1", "reference_temperature"} };
     XMLGen::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation(tTags, tDocument);
 
     auto tParameter = tDocument.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs modulus block-id-1",
+    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
         "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -770,7 +770,7 @@ TEST(PlatoTestXMLGenerator, AppendIsotropicLinearElasticMaterialPropertiesToPlat
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "young modulu"}, {"poissons ratio block-id-1", "poissons ratio"} };
+    { {"youngs_modulus_block_id_1", "young modulu"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
     ASSERT_THROW(XMLGen::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
 }
 
@@ -778,21 +778,21 @@ TEST(PlatoTestXMLGenerator, AppendIsotropicLinearElasticMaterialPropertiesToPlat
 {
     pugi::xml_document tDocument;
     std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs modulus block-id-1", "youngs modulus"}, {"poissons ratio block-id-1", "poissons ratio"} };
+    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
     XMLGen::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument);
 
     auto tParameter = tDocument.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs modulus block-id-1",
+    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
         "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -942,16 +942,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -962,16 +962,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -1011,43 +1011,43 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -1097,16 +1097,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -1117,16 +1117,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -1166,43 +1166,43 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -1261,16 +1261,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -1281,16 +1281,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -1330,43 +1330,43 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 
@@ -1425,16 +1425,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic linear thermoelastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
-    tMaterial2.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial2.property("Thermal Conductivity Coefficient", "9");
-    tMaterial2.property("Reference Temperature", "1e-4");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
+    tMaterial2.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial2.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial2.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -1445,16 +1445,16 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic linear elastic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic linear thermoelastic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
-    tMaterial4.property("Thermal Expansion Coefficient", "1.0e-8");
-    tMaterial4.property("Thermal Conductivity Coefficient", "9");
-    tMaterial4.property("Reference Temperature", "1e-4");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
+    tMaterial4.property("Thermal_Expansion_Coefficient", "1.0e-8");
+    tMaterial4.property("Thermal_Conductivity_Coefficient", "9");
+    tMaterial4.property("Reference_Temperature", "1e-4");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -1494,43 +1494,43 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tKeys = {"ArgumentName", "Target", "InitialValue"};
-    tValues = {"poissons ratio block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference temperature block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
+    tValues = {"reference_temperature_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal conductivity coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
+    tValues = {"thermal_conductivity_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal expansion coefficient block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
+    tValues = {"thermal_expansion_coefficient_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansion Coefficient", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons ratio block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
+    tValues = {"poissons_ratio_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs modulus block-id-2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
+    tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
 

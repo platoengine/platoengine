@@ -1223,7 +1223,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicParameters)
     pugi::xml_document tDocument;
     auto tOperation = tDocument.append_child("Operation");
     std::unordered_map<std::string, std::vector<std::string>> tTags =
-        { { "0", {"traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis"} } };
+        { { "0", {"traction_load_id_0_x_axis", "traction_load_id_0_y_axis", "traction_load_id_0_z_axis"} } };
     XMLGen::append_nondeterministic_parameters(tTags, tOperation);
     ASSERT_FALSE(tOperation.empty());
 
@@ -1235,20 +1235,20 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicParameters)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-0 x-axis",
-                   "{traction load-id-0 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_0_x_axis",
+                   "{traction_load_id_0_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 y-axis",
-                   "{traction load-id-0 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_0_y_axis",
+                   "{traction_load_id_0_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-0 z-axis",
-                   "{traction load-id-0 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_0_z_axis",
+                   "{traction_load_id_0_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 }
 
@@ -1360,39 +1360,39 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-2 x-axis",
-                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_x_axis",
+                   "{traction_load_id_2_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 y-axis",
-                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_y_axis",
+                   "{traction_load_id_2_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 z-axis",
-                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_z_axis",
+                   "{traction_load_id_2_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-1 x-axis",
-                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_x_axis",
+                   "{traction_load_id_1_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 y-axis",
-                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_y_axis",
+                   "{traction_load_id_1_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 z-axis",
-                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_z_axis",
+                   "{traction_load_id_1_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES
@@ -1598,39 +1598,39 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-2 x-axis",
-                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_x_axis",
+                   "{traction_load_id_2_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 y-axis",
-                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_y_axis",
+                   "{traction_load_id_2_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 z-axis",
-                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_z_axis",
+                   "{traction_load_id_2_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-1 x-axis",
-                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_x_axis",
+                   "{traction_load_id_1_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 y-axis",
-                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_y_axis",
+                   "{traction_load_id_1_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 z-axis",
-                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_z_axis",
+                   "{traction_load_id_1_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // ****** 4.2) TEST SAMPLE OBJECTIVE OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******
@@ -1784,39 +1784,39 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-2 x-axis",
-                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_x_axis",
+                   "{traction_load_id_2_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 y-axis",
-                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_y_axis",
+                   "{traction_load_id_2_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 z-axis",
-                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_z_axis",
+                   "{traction_load_id_2_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-1 x-axis",
-                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_x_axis",
+                   "{traction_load_id_1_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 y-axis",
-                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_y_axis",
+                   "{traction_load_id_1_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 z-axis",
-                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_z_axis",
+                   "{traction_load_id_1_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES
@@ -2025,39 +2025,39 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tParameter = tOperation.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-2 x-axis",
-                   "{traction load-id-2 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_x_axis",
+                   "{traction_load_id_2_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 y-axis",
-                   "{traction load-id-2 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_y_axis",
+                   "{traction_load_id_2_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-2 z-axis",
-                   "{traction load-id-2 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_2_z_axis",
+                   "{traction_load_id_2_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tGoldKeys = {"ArgumentName", "ArgumentValue"};
-    tGoldValues = {"traction load-id-1 x-axis",
-                   "{traction load-id-1 x-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_x_axis",
+                   "{traction_load_id_1_x_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 y-axis",
-                   "{traction load-id-1 y-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_y_axis",
+                   "{traction_load_id_1_y_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
-    tGoldValues = {"traction load-id-1 z-axis",
-                   "{traction load-id-1 z-axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+    tGoldValues = {"traction_load_id_1_z_axis",
+                   "{traction_load_id_1_z_axis[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tParameter);
 
     // ****** 3.2) TEST OPERATION INPUTS AND OUTPUTS AGAINST GOLD VALUES ******

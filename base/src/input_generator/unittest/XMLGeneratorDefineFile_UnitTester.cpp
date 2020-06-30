@@ -182,12 +182,12 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
             + "<Arrayname=\"Samples\"type=\"int\"from=\"0\"to=\"{NumSamples-1}\"/>"
             + "<Arrayname=\"Performers\"type=\"int\"from=\"0\"to=\"{NumPerformers-1}\"/>"
             + "<Arrayname=\"PerformerSamples\"type=\"int\"from=\"0\"to=\"{NumSamplesPerPerformer-1}\"/>"
-            + "<Arrayname=\"tractionload-id-1x-axis\"type=\"real\"values=\"1,11\"/>"
-            + "<Arrayname=\"tractionload-id-1y-axis\"type=\"real\"values=\"2,12\"/>"
-            + "<Arrayname=\"tractionload-id-1z-axis\"type=\"real\"values=\"3,13\"/>"
-            + "<Arrayname=\"tractionload-id-2x-axis\"type=\"real\"values=\"4,14\"/>"
-            + "<Arrayname=\"tractionload-id-2y-axis\"type=\"real\"values=\"5,15\"/>"
-            + "<Arrayname=\"tractionload-id-2z-axis\"type=\"real\"values=\"6,16\"/>"
+            + "<Arrayname=\"traction_load_id_1_x_axis\"type=\"real\"values=\"1,11\"/>"
+            + "<Arrayname=\"traction_load_id_1_y_axis\"type=\"real\"values=\"2,12\"/>"
+            + "<Arrayname=\"traction_load_id_1_z_axis\"type=\"real\"values=\"3,13\"/>"
+            + "<Arrayname=\"traction_load_id_2_x_axis\"type=\"real\"values=\"4,14\"/>"
+            + "<Arrayname=\"traction_load_id_2_y_axis\"type=\"real\"values=\"5,15\"/>"
+            + "<Arrayname=\"traction_load_id_2_z_axis\"type=\"real\"values=\"6,16\"/>"
             + "<Arrayname=\"Probabilities\"type=\"real\"values=\"5.000000000000000000000e-01,5.000000000000000000000e-01\"/>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
 
@@ -660,17 +660,17 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
 {
     // CALL FUNCTION
     std::unordered_map<std::string, std::vector<std::string>> tData =
-            { {"youngs modulus block-id-1", {"1", "1.1"} },
-              {"youngs modulus block-id-2", {"1", "1"} },
-              {"poissons ratio block-id-1", {"0.3", "0.33"} },
-              {"poissons ratio block-id-2", {"0.3", "0.3"} } };
+            { {"youngs_modulus_block_id_1", {"1", "1.1"} },
+              {"youngs_modulus_block_id_2", {"1", "1"} },
+              {"poissons_ratio_block_id_1", {"0.3", "0.33"} },
+              {"poissons_ratio_block_id_2", {"0.3", "0.3"} } };
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_material_properties_to_define_xml_file(tData, tDocument));
 
     // POSE GOLD VALUES
     std::vector<std::string> tGoldNames =
-        {"youngs modulus block-id-1", "youngs modulus block-id-2", "poissons ratio block-id-1","poissons ratio block-id-2"};
+        {"youngs_modulus_block_id_1", "youngs_modulus_block_id_2", "poissons_ratio_block_id_1","poissons_ratio_block_id_2"};
     std::vector<std::string> tGoldValues = {"1, 1.1", "1, 1", "0.3, 0.33", "0.3, 0.3"};
 
     for(pugi::xml_node tArray : tDocument.children("Array"))
@@ -698,13 +698,13 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -715,13 +715,13 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -741,8 +741,8 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     // 4. TEST RESULTS
     std::unordered_map<std::string, std::vector<std::string>> tGold =
         {
-          {"1", {"poissons ratio block-id-1", "youngs modulus block-id-1"} },
-          {"2", {"poissons ratio block-id-2", "youngs modulus block-id-2"} }
+          {"1", {"poissons_ratio_block_id_1", "youngs_modulus_block_id_1"} },
+          {"2", {"poissons_ratio_block_id_2", "youngs_modulus_block_id_2"} }
         };
 
     for(auto& tPair : tMap)
@@ -828,8 +828,8 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     // 4. TEST RESULTS
     std::unordered_map<std::string, std::vector<std::string>> tGold =
         {
-          {"Random Traction Vector Boundary Condition with ID 2", {"traction load-id-2 x-axis", "traction load-id-2 y-axis", "traction load-id-2 z-axis"} },
-          {"Random Traction Vector Boundary Condition with ID 1", {"traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
+          {"Random Traction Vector Boundary Condition with ID 2", {"traction_load_id_2_x_axis", "traction_load_id_2_y_axis", "traction_load_id_2_z_axis"} },
+          {"Random Traction Vector Boundary Condition with ID 1", {"traction_load_id_1_x_axis", "traction_load_id_1_y_axis", "traction_load_id_1_z_axis"} }
         };
 
     for(auto& tPair : tMap)
@@ -849,8 +849,8 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
 {
     std::unordered_map<std::string, std::vector<std::string>> tTractionTags =
         {
-          {"0", {"traction load-id-0 x-axis","traction load-id-0 y-axis", "traction load-id-0 z-axis"} },
-          {"1", {"traction load-id-1 x-axis","traction load-id-1 y-axis", "traction load-id-1 z-axis"} }
+          {"0", {"traction_load_id_0_x_axis","traction_load_id_0_y_axis", "traction_load_id_0_z_axis"} },
+          {"1", {"traction_load_id_1_x_axis","traction_load_id_1_y_axis", "traction_load_id_1_z_axis"} }
         };
     std::map<std::string, std::vector<std::vector<std::string>>> tTractionValues =
         {
@@ -866,8 +866,8 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionsToDefineXmlFile)
     std::vector<std::string> tGoldTypes =
         {"real", "real", "real", "real", "real", "real"};
     std::vector<std::string> tGoldNames =
-        {"traction load-id-0 x-axis", "traction load-id-0 y-axis", "traction load-id-0 z-axis",
-         "traction load-id-1 x-axis", "traction load-id-1 y-axis", "traction load-id-1 z-axis"};
+        {"traction_load_id_0_x_axis", "traction_load_id_0_y_axis", "traction_load_id_0_z_axis",
+         "traction_load_id_1_x_axis", "traction_load_id_1_y_axis", "traction_load_id_1_z_axis"};
     std::vector<std::string> tGoldValues = {"1, 11", "2, 12", "3, 13", "4, 14", "5, 15", "6, 16"};
 
     // 4. TEST RESULTS AGAINST GOLD VALUES
@@ -891,13 +891,13 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
     tMaterial1.category("isotropic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.category("isotropic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
@@ -908,13 +908,13 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
     tMaterial3.category("isotropic");
-    tMaterial3.property("youngs modulus", "1.1");
-    tMaterial3.property("poissons ratio", "0.33");
+    tMaterial3.property("youngs_modulus", "1.1");
+    tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
     tMaterial4.category("isotropic");
-    tMaterial4.property("youngs modulus", "1");
-    tMaterial4.property("poissons ratio", "0.3");
+    tMaterial4.property("youngs_modulus", "1");
+    tMaterial4.property("poissons_ratio", "0.3");
 
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial3});
@@ -933,10 +933,10 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
 
     // POSE GOLD LOAD VALUES AND TEST
     std::unordered_map<std::string, std::vector<std::string>> tGold =
-            { {"youngs modulus block-id-1", {"1", "1.1"} },
-              {"youngs modulus block-id-2", {"1", "1"} },
-              {"poissons ratio block-id-1", {"0.3", "0.33"} },
-              {"poissons ratio block-id-2", {"0.3", "0.3"} } };
+            { {"youngs_modulus_block_id_1", {"1", "1.1"} },
+              {"youngs_modulus_block_id_2", {"1", "1"} },
+              {"poissons_ratio_block_id_1", {"0.3", "0.33"} },
+              {"poissons_ratio_block_id_2", {"0.3", "0.3"} } };
     for(auto& tPair : tMaterialValues)
     {
         auto tGoldItr = tGold.find(tPair.first);

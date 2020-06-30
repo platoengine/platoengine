@@ -771,12 +771,12 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
                 {
                     if(m_InputData.materials[n].id().compare(m_InputData.blocks[j].material_id) == 0)
                     {
-                        if(!m_InputData.materials[n].property("youngs modulus").empty())
-                            addNTVParameter(n6, "Elastic Modulus", "double", m_InputData.materials[n].property("youngs modulus"));
-                        if(!m_InputData.materials[n].property("poissons ratio").empty())
-                            addNTVParameter(n6, "Poissons Ratio", "double", m_InputData.materials[n].property("poissons ratio"));
+                        if(!m_InputData.materials[n].property("youngs_modulus").empty())
+                            addNTVParameter(n6, "Elastic Modulus", "double", m_InputData.materials[n].property("youngs_modulus"));
+                        if(!m_InputData.materials[n].property("poissons_ratio").empty())
+                            addNTVParameter(n6, "Poissons Ratio", "double", m_InputData.materials[n].property("poissons_ratio"));
                         if(!m_InputData.materials[n].property("thermal conductivity").empty())
-                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].property("thermal conductivity coefficient"));
+                            addNTVParameter(n6, "Isotropic Modulus", "double", m_InputData.materials[n].property("thermal_conductivity_coefficient"));
                         break;
                     }
                 }
@@ -1186,8 +1186,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeInputDeckForNewUncertaintyWorkfl
 
   n4 = n3.append_child("ParameterList");
   n4.append_attribute("name") = "Isotropic Linear Elastic";
-  addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].property("poissons ratio").c_str());
-  addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].property("youngs modulus").c_str());
+  addNTVParameter(n4, "Poissons Ratio", "double", m_InputData.materials[0].property("poissons_ratio").c_str());
+  addNTVParameter(n4, "Youngs Modulus", "double", m_InputData.materials[0].property("youngs_modulus").c_str());
 
 
   n3 = n2.append_child("ParameterList");
@@ -1344,10 +1344,10 @@ bool DefaultInputGenerator::generateLightMPInputDecks()
                 node1 = node1.append_child("linear_elastic");
                 node2 = node1.append_child("poissons_ratio");
                 node3 = node2.append_child(pugi::node_pcdata);
-                node3.set_value(m_InputData.materials[n].property("poissons ratio").c_str());
+                node3.set_value(m_InputData.materials[n].property("poissons_ratio").c_str());
                 node2 = node1.append_child("youngs_modulus");
                 node3 = node2.append_child(pugi::node_pcdata);
-                node3.set_value(m_InputData.materials[n].property("youngs modulus").c_str());
+                node3.set_value(m_InputData.materials[n].property("youngs_modulus").c_str());
             }
 
             node1 = doc.append_child("mesh");

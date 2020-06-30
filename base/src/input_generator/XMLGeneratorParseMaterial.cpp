@@ -36,15 +36,15 @@ void ParseMaterial::allocate()
 
     mTags.insert({ "mass density", { {"mass", "density"}, "" } });
     mTags.insert({ "specific heat", { {"specific","heat"}, "" } });
-    mTags.insert({ "youngs modulus", { {"youngs","modulus"}, "" } });
-    mTags.insert({ "poissons ratio", { {"poissons","ratio"}, "" } });
-    mTags.insert({ "youngs modulus x", { {"youngs","modulus", "x"}, "" } });
-    mTags.insert({ "youngs modulus y", { {"youngs","modulus", "y"}, "" } });
-    mTags.insert({ "youngs modulus z", { {"youngs","modulus", "z"}, "" } });
-    mTags.insert({ "poissons ratio xy", { {"poissons","ratio", "xy"}, "" } });
-    mTags.insert({ "poissons ratio xz", { {"poissons","ratio", "xz"}, "" } });
-    mTags.insert({ "poissons ratio yz", { {"poissons","ratio", "yz"}, "" } });
-    mTags.insert({ "reference temperature", { {"reference", "temperature"}, "" } });
+    mTags.insert({ "youngs_modulus", { {"youngs_modulus"}, "" } });
+    mTags.insert({ "poissons_ratio", { {"poissons_ratio"}, "" } });
+    mTags.insert({ "youngs_modulus_x", { {"youngs_modulus_x"}, "" } });
+    mTags.insert({ "youngs_modulus_y", { {"youngs_modulus_y"}, "" } });
+    mTags.insert({ "youngs_modulus_z", { {"youngs_modulus_z"}, "" } });
+    mTags.insert({ "poissons_ratio_xy", { {"poissons_ratio_xy"}, "" } });
+    mTags.insert({ "poissons_ratio_xz", { {"poissons_ratio_xz"}, "" } });
+    mTags.insert({ "poissons_ratio_yz", { {"poissons_ratio_yz"}, "" } });
+    mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
     mTags.insert({ "shear modulus ratio xy", { {"shear","modulus","ratio", "xy"}, "" } });
     mTags.insert({ "shear modulus ratio xz", { {"shear","modulus","ratio", "xz"}, "" } });
     mTags.insert({ "shear modulus ratio yz", { {"shear","modulus","ratio", "yz"}, "" } });
@@ -53,8 +53,8 @@ void ParseMaterial::allocate()
     mTags.insert({ "piezoelectric coupling 31", { {"piezoelectric","coupling", "31"}, "" } });
     mTags.insert({ "dielectric permittivity 11", { {"dielectric","permittivity", "11"}, "" } });
     mTags.insert({ "dielectric permittivity 33", { {"dielectric","permittivity", "33"}, "" } });
-    mTags.insert({ "thermal expansion coefficient", { {"thermal","expansion","coefficient"}, "" } });
-    mTags.insert({ "thermal conductivity coefficient", { {"thermal","conductivity", "coefficient"}, "" } });
+    mTags.insert({ "thermal_expansion_coefficient", { {"thermal_expansion_coefficient"}, "" } });
+    mTags.insert({ "thermal_conductivity_coefficient", { {"thermal_conductivity_coefficient"}, "" } });
 }
 
 void ParseMaterial::setCode(XMLGen::Material& aMetadata)

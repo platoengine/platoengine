@@ -50,10 +50,10 @@ struct ValidRandomPropertyKeys
     /*!<
      * \brief Valid plato input deck random properties keywords.
      **/
-    std::vector<std::string> mKeys = { "angle variation", "youngs modulus", "poissons ratio", "mass density", "youngs modulus x", "youngs modulus y",
-        "youngs modulus z", "poissons ratio xy", "poissons ratio xz", "poissons ratio yz", "shear modulus ratio xy", "shear modulus ratio xz",
+    std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass density", "youngs_modulus_x", "youngs_modulus_y",
+        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear modulus ratio xy", "shear modulus ratio xz",
         "shear modulus ratio yz", "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33",
-        "piezoelectric coupling 31", "thermal conductivity coefficient", "specific heat", "reference temperature", "thermal expansion coefficient",
+        "piezoelectric coupling 31", "thermal_conductivity_coefficient", "specific heat", "reference_temperature", "thermal_expansion_coefficient",
         "yield stress" };
 };
 // struct ValidRandomPropertyKeys
@@ -125,10 +125,10 @@ struct ValidMaterialPropertyKeys
     /*!<
      * \brief Valid plato input deck material property keywords \n
      **/
-    std::vector<std::string> mKeys = { "youngs modulus", "poissons ratio", "mass density", "youngs modulus x", "youngs modulus y", "youngs modulus z",
-        "poissons ratio xy", "poissons ratio xz", "poissons ratio yz", "shear modulus ratio xy", "shear modulus ratio xz", "shear modulus ratio yz",
+    std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
+        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear modulus ratio xy", "shear modulus ratio xz", "shear modulus ratio yz",
         "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33", "piezoelectric coupling 31",
-        "thermal conductivity coefficient", "specific heat", "reference temperature", "thermal expansion coefficient" };
+        "thermal_conductivity_coefficient", "specific heat", "reference_temperature", "thermal_expansion_coefficient" };
 };
 // struct ValidMaterialPropertyKeys
 
@@ -237,33 +237,33 @@ struct ValidAnalyzeMaterialPropertyKeys
      **/
     std::unordered_map<std::string, std::unordered_map<std::string, std::pair<std::string, std::string>>> mKeys =
         {
-            { "isotropic linear elastic", { { "youngs modulus", {"Youngs Modulus", "double"} },
-                { "poissons ratio", {"Poissons Ratio", "double"} }, { "mass density", {"Mass Density", "double"} } }
+            { "isotropic linear elastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "mass density", {"Mass Density", "double"} } }
             },
 
-            { "orthotropic linear elastic", { { "youngs modulus x", {"Youngs Modulus X", "double"} },
-                { "youngs modulus y", {"Youngs Modulus Y", "double"} }, { "youngs modulus z", {"Youngs Modulus Z", "double"} },
-                { "poissons ratio xy", {"Poissons Ratio XY", "double"} }, { "poissons ratio xz", {"Poissons Ratio XZ", "double"} },
-                { "poissons ratio yz", {"Poissons Ratio YZ", "double"} }, { "shear modulus ratio xy", {"Shear Modulus XY", "double"} },
+            { "orthotropic linear elastic", { { "youngs_modulus_x", {"Youngs Modulus X", "double"} },
+                { "youngs_modulus_y", {"Youngs Modulus Y", "double"} }, { "youngs_modulus_z", {"Youngs Modulus Z", "double"} },
+                { "poissons_ratio_xy", {"Poissons Ratio XY", "double"} }, { "poissons_ratio_xz", {"Poissons Ratio XZ", "double"} },
+                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear modulus ratio xy", {"Shear Modulus XY", "double"} },
                 { "shear modulus ratio xz", {"Shear Modulus XZ", "double"} }, { "shear modulus ratio yz", {"Shear Modulus YZ", "double"} },
                 { "mass density", {"Mass Density", "double"} } }
             },
 
-            { "isotropic linear electroelastic", { { "youngs modulus", {"Youngs Modulus", "double"} },
-                { "poissons ratio", {"Poissons Ratio", "double"} }, { "dielectric permittivity 11", {"p11", "double"} },
+            { "isotropic linear electroelastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "dielectric permittivity 11", {"p11", "double"} },
                 { "dielectric permittivity 33", {"p33", "double"} }, { "piezoelectric coupling 15", {"e15", "double"} },
                 { "piezoelectric coupling 33", {"e33", "double"} }, { "piezoelectric coupling 31", {"e31", "double"} },
-                { "thermal expansion coefficient", {"Alpha", "double"} } }
+                { "thermal_expansion_coefficient", {"Alpha", "double"} } }
             },
 
-            { "isotropic linear thermal", { { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
+            { "isotropic linear thermal", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
                 { "mass density", {"Mass Density", "double"} }, { "specific heat", {"Specific Heat", "double"} } }
             },
 
-            { "isotropic linear thermoelastic", { { "thermal conductivity coefficient", { "Thermal Conductivity Coefficient", "double" } },
-                { "youngs modulus", {"Youngs Modulus", "double"} }, { "poissons ratio", {"Poissons Ratio", "double"} },
-                { "thermal expansion coefficient", { "Thermal Expansion Coefficient", "double" } },
-                { "reference temperature", { "Reference Temperature", "double" } }, { "mass density", {"Mass Density", "double"} } }
+            { "isotropic linear thermoelastic", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
+                { "youngs_modulus", {"Youngs Modulus", "double"} }, { "poissons_ratio", {"Poissons Ratio", "double"} },
+                { "thermal_expansion_coefficient", { "Thermal Expansion Coefficient", "double" } },
+                { "reference_temperature", { "Reference Temperature", "double" } }, { "mass density", {"Mass Density", "double"} } }
             }
         };
 };

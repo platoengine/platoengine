@@ -81,8 +81,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "1e9");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "1e9");
+    tMaterial.property("poissons_ratio", "0.3");
 
     // POSE NATURAL BC
     XMLGen::Load tLoad;
@@ -980,8 +980,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInva
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "1e9");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "1e9");
+    tMaterial.property("poissons_ratio", "0.3");
     tMaterial.property("piezoelectric coupling 33", "123");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
@@ -994,8 +994,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "1e9");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "1e9");
+    tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
@@ -1028,7 +1028,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear thermal");
-    tMaterial.property("thermal conductivity coefficient", "10");
+    tMaterial.property("thermal_conductivity_coefficient", "10");
     tMaterial.property("mass density", "200");
     tMaterial.property("specific heat", "20");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -1063,12 +1063,12 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("orthotropic linear elastic");
-    tMaterial.property("youngs modulus x", "1.0");
-    tMaterial.property("youngs modulus y", "2.0");
-    tMaterial.property("youngs modulus z", "3.0");
-    tMaterial.property("poissons ratio xy", "0.3");
-    tMaterial.property("poissons ratio xz", "0.4");
-    tMaterial.property("poissons ratio yz", "0.25");
+    tMaterial.property("youngs_modulus_x", "1.0");
+    tMaterial.property("youngs_modulus_y", "2.0");
+    tMaterial.property("youngs_modulus_z", "3.0");
+    tMaterial.property("poissons_ratio_xy", "0.3");
+    tMaterial.property("poissons_ratio_xz", "0.4");
+    tMaterial.property("poissons_ratio_yz", "0.25");
     tMaterial.property("shear modulus ratio xy", "1.3");
     tMaterial.property("shear modulus ratio xz", "1.4");
     tMaterial.property("shear modulus ratio yz", "1.25");
@@ -1106,11 +1106,11 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear thermoelastic");
-    tMaterial.property("thermal conductivity coefficient", "1.0");
-    tMaterial.property("youngs modulus", "2.3");
-    tMaterial.property("poissons ratio", "0.3");
-    tMaterial.property("thermal expansion coefficient", "0.4");
-    tMaterial.property("reference temperature", "1.25");
+    tMaterial.property("thermal_conductivity_coefficient", "1.0");
+    tMaterial.property("youngs_modulus", "2.3");
+    tMaterial.property("poissons_ratio", "0.3");
+    tMaterial.property("thermal_expansion_coefficient", "0.4");
+    tMaterial.property("reference_temperature", "1.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
@@ -1144,14 +1144,14 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear electroelastic");
-    tMaterial.property("youngs modulus", "2.3");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "2.3");
+    tMaterial.property("poissons_ratio", "0.3");
     tMaterial.property("dielectric permittivity 11", "1.0");
     tMaterial.property("dielectric permittivity 33", "0.4");
     tMaterial.property("piezoelectric coupling 15", "1.25");
     tMaterial.property("piezoelectric coupling 33", "2.25");
     tMaterial.property("piezoelectric coupling 31", "3.25");
-    tMaterial.property("thermal expansion coefficient", "0.25");
+    tMaterial.property("thermal_expansion_coefficient", "0.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
@@ -1192,8 +1192,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "1");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "1");
+    tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::MaterialSet tMaterialSetOne;
     tMaterialSetOne.insert({"1", tMaterial1});
     auto tRandomMaterialCaseOne = std::make_pair(0.5, tMaterialSetOne);
@@ -1202,8 +1202,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     XMLGen::Material tMaterial2;
     tMaterial2.id("1");
     tMaterial2.category("isotropic linear elastic");
-    tMaterial2.property("youngs modulus", "1.1");
-    tMaterial2.property("poissons ratio", "0.33");
+    tMaterial2.property("youngs_modulus", "1.1");
+    tMaterial2.property("poissons_ratio", "0.33");
     XMLGen::MaterialSet tMaterialSetTwo;
     tMaterialSetTwo.insert({"1", tMaterial2});
     auto tRandomMaterialCaseTwo = std::make_pair(0.5, tMaterialSetTwo);

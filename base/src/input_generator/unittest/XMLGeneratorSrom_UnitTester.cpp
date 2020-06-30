@@ -168,15 +168,15 @@ TEST(PlatoTestXMLGenerator, BuildMaterialSet)
     tRandMaterial1.blockID("0");
     tRandMaterial1.materialID("10");
     tRandMaterial1.category("isotropic linear elastic");
-    tRandMaterial1.append("youngs modulus", "homogeneous", "1");
-    tRandMaterial1.append("poissons ratio", "homogeneous", "0.3");
+    tRandMaterial1.append("youngs_modulus", "homogeneous", "1");
+    tRandMaterial1.append("poissons_ratio", "homogeneous", "0.3");
 
     Plato::srom::RandomMaterial tRandMaterial2;
     tRandMaterial2.blockID("1");
     tRandMaterial2.materialID("11");
     tRandMaterial2.category("isotropic linear elastic");
-    tRandMaterial2.append("youngs modulus", "homogeneous", "2");
-    tRandMaterial2.append("poissons ratio", "homogeneous", "0.33");
+    tRandMaterial2.append("youngs_modulus", "homogeneous", "2");
+    tRandMaterial2.append("poissons_ratio", "homogeneous", "0.33");
 
     Plato::srom::RandomMaterialCase tRandMaterialCase;
     tRandMaterialCase.caseID("0");
@@ -232,15 +232,15 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
     tRandMaterial1.blockID("0");
     tRandMaterial1.materialID("10");
     tRandMaterial1.category("isotropic linear elastic");
-    tRandMaterial1.append("youngs modulus", "homogeneous", "1");
-    tRandMaterial1.append("poissons ratio", "homogeneous", "0.3");
+    tRandMaterial1.append("youngs_modulus", "homogeneous", "1");
+    tRandMaterial1.append("poissons_ratio", "homogeneous", "0.3");
 
     Plato::srom::RandomMaterial tRandMaterial2;
     tRandMaterial2.blockID("1");
     tRandMaterial2.materialID("11");
     tRandMaterial2.category("isotropic linear elastic");
-    tRandMaterial2.append("youngs modulus", "homogeneous", "2");
-    tRandMaterial2.append("poissons ratio", "homogeneous", "0.33");
+    tRandMaterial2.append("youngs_modulus", "homogeneous", "2");
+    tRandMaterial2.append("poissons_ratio", "homogeneous", "0.33");
 
     Plato::srom::RandomMaterialCase tRandMaterialCase1;
     tRandMaterialCase1.caseID("0");
@@ -253,15 +253,15 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
     tRandMaterial3.blockID("0");
     tRandMaterial3.materialID("10");
     tRandMaterial3.category("isotropic linear elastic");
-    tRandMaterial3.append("youngs modulus", "homogeneous", "1.1");
-    tRandMaterial3.append("poissons ratio", "homogeneous", "0.31");
+    tRandMaterial3.append("youngs_modulus", "homogeneous", "1.1");
+    tRandMaterial3.append("poissons_ratio", "homogeneous", "0.31");
 
     Plato::srom::RandomMaterial tRandMaterial4;
     tRandMaterial4.blockID("1");
     tRandMaterial4.materialID("11");
     tRandMaterial4.category("isotropic linear elastic");
-    tRandMaterial4.append("youngs modulus", "homogeneous", "2.2");
-    tRandMaterial4.append("poissons ratio", "homogeneous", "0.35");
+    tRandMaterial4.append("youngs_modulus", "homogeneous", "2.2");
+    tRandMaterial4.append("poissons_ratio", "homogeneous", "0.35");
 
     Plato::srom::RandomMaterialCase tRandMaterialCase2;
     tRandMaterialCase2.caseID("1");
@@ -372,8 +372,8 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error1)
     // ERROR - EMPTY MATERIAL ID
     Plato::srom::Material tMaterial;
     tMaterial.category("isotropic linear elastic");
-    tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
+    tMaterial.append("poissons_ratio", "homogeneous", "0.35");
+    tMaterial.append("youngs_modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
@@ -385,8 +385,8 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error2)
     Plato::srom::Material tMaterial;
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
+    tMaterial.append("poissons_ratio", "homogeneous", "0.35");
+    tMaterial.append("youngs_modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     EXPECT_THROW(Plato::srom::set_block_identification_number(tMap, tMaterial), std::runtime_error);
@@ -398,8 +398,8 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber_Error3)
     Plato::srom::Material tMaterial;
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
+    tMaterial.append("poissons_ratio", "homogeneous", "0.35");
+    tMaterial.append("youngs_modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", ""});
@@ -411,8 +411,8 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber1)
     Plato::srom::Material tMaterial;
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
+    tMaterial.append("poissons_ratio", "homogeneous", "0.35");
+    tMaterial.append("youngs_modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", "10"});
@@ -426,8 +426,8 @@ TEST(PlatoTestXMLGenerator, SetBlockIdentificationNumber2)
     Plato::srom::Material tMaterial;
     tMaterial.materialID("1");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.append("poissons ratio", "homogeneous", "0.35");
-    tMaterial.append("youngs modulus", "homogeneous", "2.5e8");
+    tMaterial.append("poissons_ratio", "homogeneous", "0.35");
+    tMaterial.append("youngs_modulus", "homogeneous", "2.5e8");
 
     std::unordered_map<std::string, std::string> tMap;
     tMap.insert({"1", "10"});
@@ -449,8 +449,8 @@ TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap_Error2)
     XMLGen::Material tMaterial;
     tMaterial.id("30");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "0.5");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "0.5");
+    tMaterial.property("poissons_ratio", "0.3");
 
     XMLGen::InputData tInputMetaData;
     tInputMetaData.materials.push_back(tMaterial);
@@ -464,14 +464,14 @@ TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap)
     XMLGen::Material tMaterial1;
     tMaterial1.id("30");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "0.5");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "0.5");
+    tMaterial1.property("poissons_ratio", "0.3");
 
     XMLGen::Material tMaterial2;
     tMaterial2.id("3");
     tMaterial2.category("isotropic linear elastic");
-    tMaterial2.property("youngs modulus", "0.5");
-    tMaterial2.property("poissons ratio", "0.3");
+    tMaterial2.property("youngs_modulus", "0.5");
+    tMaterial2.property("poissons_ratio", "0.3");
 
     XMLGen::Block tBlock1;
     tBlock1.block_id = "1";
@@ -524,8 +524,8 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
     XMLGen::Material tMaterial;
     tMaterial.id("30");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "0.5");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "0.5");
+    tMaterial.property("poissons_ratio", "0.3");
 
     XMLGen::InputData tMetadata;
     tMetadata.materials.push_back(tMaterial);
@@ -573,7 +573,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tCase3.mean = "0.27";
     tCase3.standard_deviation = "0.05";
     tCase3.num_samples = "6";
-    tCase3.type = "poissons ratio";
+    tCase3.type = "poissons_ratio";
 
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(tCase1);
@@ -584,15 +584,15 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     XMLGen::Material tMaterial1;
     tMaterial1.id("30");
     tMaterial1.category("isotropic linear elastic");
-    tMaterial1.property("youngs modulus", "0.5");
-    tMaterial1.property("poissons ratio", "0.3");
+    tMaterial1.property("youngs_modulus", "0.5");
+    tMaterial1.property("poissons_ratio", "0.3");
     tMetadata.materials.push_back(tMaterial1);
 
     XMLGen::Material tMaterial2;
     tMaterial2.id("3");
     tMaterial2.category("isotropic linear elastic");
-    tMaterial2.property("youngs modulus", "1");
-    tMaterial2.property("poissons ratio", "0.3");
+    tMaterial2.property("youngs_modulus", "1");
+    tMaterial2.property("poissons_ratio", "0.3");
     tMetadata.materials.push_back(tMaterial2);
 
     // 3. POSE MATERIAL BLOCKS
@@ -622,16 +622,16 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("30", tMaterials[0].materialID().c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterials[0].category().c_str());
-    ASSERT_STREQ("poissons ratio", tMaterials[0].tags()[0].c_str());
-    ASSERT_STREQ("youngs modulus", tMaterials[0].tags()[1].c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[0].tags()[0].c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[0].tags()[1].c_str());
 
     EXPECT_FALSE(tMaterials[0].isRandom());
     EXPECT_TRUE(tMaterials[0].isDeterministic());
     EXPECT_TRUE(tMaterials[0].randomVars().empty());
-    ASSERT_STREQ("poissons ratio", tMaterials[0].deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[0].deterministicVars()[0].tag().c_str());
     ASSERT_STREQ("0.3", tMaterials[0].deterministicVars()[0].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].deterministicVars()[0].attribute().c_str());
-    ASSERT_STREQ("youngs modulus", tMaterials[0].deterministicVars()[1].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[0].deterministicVars()[1].tag().c_str());
     ASSERT_STREQ("0.5", tMaterials[0].deterministicVars()[1].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].deterministicVars()[1].attribute().c_str());
 
@@ -639,20 +639,20 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
     ASSERT_STREQ("3", tMaterials[1].materialID().c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterials[1].category().c_str());
-    ASSERT_STREQ("poissons ratio", tMaterials[1].tags()[0].c_str());
-    ASSERT_STREQ("youngs modulus", tMaterials[1].tags()[1].c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[1].tags()[0].c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[1].tags()[1].c_str());
 
     EXPECT_TRUE(tMaterials[1].isRandom());
     EXPECT_FALSE(tMaterials[1].isDeterministic());
     ASSERT_EQ(1u, tMaterials[1].deterministicVars().size());
-    ASSERT_STREQ("youngs modulus", tMaterials[1].deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[1].deterministicVars()[0].tag().c_str());
     ASSERT_STREQ("1", tMaterials[1].deterministicVars()[0].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[0].attribute().c_str());
 
     ASSERT_EQ(1u, tMaterials[1].randomVars().size());
     ASSERT_EQ(0, tMaterials[1].randomVars()[0].id());
     EXPECT_TRUE(tMaterials[1].randomVars()[0].file().empty());
-    ASSERT_STREQ("poissons ratio", tMaterials[1].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[1].randomVars()[0].tag().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].randomVars()[0].attribute().c_str());
     ASSERT_STREQ("0.05", tMaterials[1].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[1].randomVars()[0].distribution().c_str());
@@ -676,7 +676,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
     XMLGen::Uncertainty tCase1;
     tCase1.id = "3";
     tCase1.axis = "homogeneous";
-    tCase1.type = "poissons ratio";
+    tCase1.type = "poissons_ratio";
     tCase1.variable_type = "material";
     tCase1.distribution = "beta";
     tCase1.lower = "0.2";
@@ -694,8 +694,8 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
     XMLGen::Material tMaterial;
     tMaterial.id("30");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "0.5");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "0.5");
+    tMaterial.property("poissons_ratio", "0.3");
 
     // 4. APPEND MATERIAL TO SROM MATERIAL METADATA
     Plato::srom::Material tSromMaterial;
@@ -708,14 +708,14 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
     ASSERT_EQ(2u, tSromMaterial.deterministicVars().size());
     ASSERT_STREQ("30", tSromMaterial.materialID().c_str());
     ASSERT_STREQ("isotropic linear elastic", tSromMaterial.category().c_str());
-    ASSERT_STREQ("poissons ratio", tSromMaterial.tags()[0].c_str());
-    ASSERT_STREQ("youngs modulus", tSromMaterial.tags()[1].c_str());
+    ASSERT_STREQ("poissons_ratio", tSromMaterial.tags()[0].c_str());
+    ASSERT_STREQ("youngs_modulus", tSromMaterial.tags()[1].c_str());
 
     ASSERT_STREQ("0.3", tSromMaterial.deterministicVars()[0].value().c_str());
-    ASSERT_STREQ("poissons ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
     ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[0].attribute().c_str());
     ASSERT_STREQ("0.5", tSromMaterial.deterministicVars()[1].value().c_str());
-    ASSERT_STREQ("youngs modulus", tSromMaterial.deterministicVars()[1].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tSromMaterial.deterministicVars()[1].tag().c_str());
     ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[1].attribute().c_str());
 }
 
@@ -725,7 +725,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     XMLGen::Uncertainty tCase1;
     tCase1.id = "3";
     tCase1.axis = "homogeneous";
-    tCase1.type = "poissons ratio";
+    tCase1.type = "poissons_ratio";
     tCase1.variable_type = "material";
     tCase1.distribution = "beta";
     tCase1.lower = "0.2";
@@ -737,7 +737,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     XMLGen::Uncertainty tCase2;
     tCase2.id = "30";
     tCase2.axis = "homogeneous";
-    tCase2.type = "youngs modulus";
+    tCase2.type = "youngs_modulus";
     tCase2.variable_type = "material";
     tCase2.distribution = "beta";
     tCase2.lower = "1";
@@ -755,8 +755,8 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     XMLGen::Material tMaterial;
     tMaterial.id("30");
     tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs modulus", "0.5");
-    tMaterial.property("poissons ratio", "0.3");
+    tMaterial.property("youngs_modulus", "0.5");
+    tMaterial.property("poissons_ratio", "0.3");
 
     // 3. APPEND MATERIAL TO SROM MATERIAL METADATA
     Plato::srom::Material tSromMaterial;
@@ -769,11 +769,11 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     ASSERT_EQ(1u, tSromMaterial.deterministicVars().size());
     ASSERT_STREQ("30", tSromMaterial.materialID().c_str());
     ASSERT_STREQ("isotropic linear elastic", tSromMaterial.category().c_str());
-    ASSERT_STREQ("youngs modulus", tSromMaterial.tags()[0].c_str());
-    ASSERT_STREQ("poissons ratio", tSromMaterial.tags()[1].c_str());
+    ASSERT_STREQ("youngs_modulus", tSromMaterial.tags()[0].c_str());
+    ASSERT_STREQ("poissons_ratio", tSromMaterial.tags()[1].c_str());
 
     ASSERT_STREQ("0.3", tSromMaterial.deterministicVars()[0].value().c_str());
-    ASSERT_STREQ("poissons ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tSromMaterial.deterministicVars()[0].tag().c_str());
     ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[0].attribute().c_str());
 
     ASSERT_EQ(0, tSromMaterial.randomVars()[0].id());
@@ -784,7 +784,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     ASSERT_STREQ("8", tSromMaterial.randomVars()[0].samples().c_str());
     ASSERT_STREQ("0.15", tSromMaterial.randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tSromMaterial.randomVars()[0].distribution().c_str());
-    ASSERT_STREQ("youngs modulus", tSromMaterial.randomVars()[0].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tSromMaterial.randomVars()[0].tag().c_str());
     ASSERT_STREQ("homogeneous", tSromMaterial.randomVars()[0].attribute().c_str());
 }
 
@@ -793,7 +793,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
     XMLGen::Uncertainty tCase1;
     tCase1.id = "3";
     tCase1.axis = "homogeneous";
-    tCase1.type = "poissons ratio";
+    tCase1.type = "poissons_ratio";
     tCase1.variable_type = "material";
     tCase1.distribution = "beta";
     tCase1.lower = "0.2";
@@ -826,7 +826,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
     XMLGen::Uncertainty tCase1;
     tCase1.id = "3";
     tCase1.axis = "homogeneous";
-    tCase1.type = "poissons ratio";
+    tCase1.type = "poissons_ratio";
     tCase1.variable_type = "material";
     tCase1.distribution = "beta";
     tCase1.lower = "0.2";
@@ -838,7 +838,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
     XMLGen::Uncertainty tCase2;
     tCase2.id = "30";
     tCase2.axis = "homogeneous";
-    tCase2.type = "youngs modulus";
+    tCase2.type = "youngs_modulus";
     tCase2.variable_type = "material";
     tCase2.distribution = "beta";
     tCase2.lower = "1";
@@ -854,7 +854,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
     auto tRandomVarMap = Plato::srom::build_material_id_to_random_material_map(tRandomVars);
     ASSERT_EQ(2u, tRandomVarMap.size());
     std::vector<std::string> tGoldIDs = {"3", "30"};
-    std::vector<std::string> tGoldTags = {"poissons ratio", "youngs modulus"};
+    std::vector<std::string> tGoldTags = {"poissons_ratio", "youngs_modulus"};
     auto tGoldIdIterator = tGoldIDs.begin();
     auto tGoldTagIterator = tGoldTags.begin();
     for(auto& tRandomVar : tRandomVarMap)
@@ -866,28 +866,28 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
     }
 
     // TEST MATERIAL 1
-    ASSERT_TRUE(tRandomVarMap.find("3")->second.find("poissons ratio")->second.file.empty());
-    ASSERT_STREQ("3", tRandomVarMap.find("3")->second.find("poissons ratio")->second.id.c_str());
-    ASSERT_STREQ("0.27", tRandomVarMap.find("3")->second.find("poissons ratio")->second.mean.c_str());
-    ASSERT_STREQ("0.2", tRandomVarMap.find("3")->second.find("poissons ratio")->second.lower.c_str());
-    ASSERT_STREQ("0.35", tRandomVarMap.find("3")->second.find("poissons ratio")->second.upper.c_str());
-    ASSERT_STREQ("6", tRandomVarMap.find("3")->second.find("poissons ratio")->second.num_samples.c_str());
-    ASSERT_STREQ("homogeneous", tRandomVarMap.find("3")->second.find("poissons ratio")->second.axis.c_str());
-    ASSERT_STREQ("beta", tRandomVarMap.find("3")->second.find("poissons ratio")->second.distribution.c_str());
-    ASSERT_STREQ("material", tRandomVarMap.find("3")->second.find("poissons ratio")->second.variable_type.c_str());
-    ASSERT_STREQ("0.05", tRandomVarMap.find("3")->second.find("poissons ratio")->second.standard_deviation.c_str());
+    ASSERT_TRUE(tRandomVarMap.find("3")->second.find("poissons_ratio")->second.file.empty());
+    ASSERT_STREQ("3", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.id.c_str());
+    ASSERT_STREQ("0.27", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.mean.c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.lower.c_str());
+    ASSERT_STREQ("0.35", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.upper.c_str());
+    ASSERT_STREQ("6", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.num_samples.c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.axis.c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.distribution.c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.variable_type.c_str());
+    ASSERT_STREQ("0.05", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.standard_deviation.c_str());
 
     // TEST MATERIAL 2
-    ASSERT_TRUE(tRandomVarMap.find("30")->second.find("youngs modulus")->second.file.empty());
-    ASSERT_STREQ("30", tRandomVarMap.find("30")->second.find("youngs modulus")->second.id.c_str());
-    ASSERT_STREQ("0.2", tRandomVarMap.find("30")->second.find("youngs modulus")->second.mean.c_str());
-    ASSERT_STREQ("1", tRandomVarMap.find("30")->second.find("youngs modulus")->second.lower.c_str());
-    ASSERT_STREQ("2", tRandomVarMap.find("30")->second.find("youngs modulus")->second.upper.c_str());
-    ASSERT_STREQ("8", tRandomVarMap.find("30")->second.find("youngs modulus")->second.num_samples.c_str());
-    ASSERT_STREQ("homogeneous", tRandomVarMap.find("30")->second.find("youngs modulus")->second.axis.c_str());
-    ASSERT_STREQ("beta", tRandomVarMap.find("30")->second.find("youngs modulus")->second.distribution.c_str());
-    ASSERT_STREQ("material", tRandomVarMap.find("30")->second.find("youngs modulus")->second.variable_type.c_str());
-    ASSERT_STREQ("0.15", tRandomVarMap.find("30")->second.find("youngs modulus")->second.standard_deviation.c_str());
+    ASSERT_TRUE(tRandomVarMap.find("30")->second.find("youngs_modulus")->second.file.empty());
+    ASSERT_STREQ("30", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.id.c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.mean.c_str());
+    ASSERT_STREQ("1", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.lower.c_str());
+    ASSERT_STREQ("2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.upper.c_str());
+    ASSERT_STREQ("8", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.num_samples.c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.axis.c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.distribution.c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.variable_type.c_str());
+    ASSERT_STREQ("0.15", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.standard_deviation.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error1)
@@ -943,7 +943,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     tCase3.mean = "0.27";
     tCase3.standard_deviation = "0.05";
     tCase3.num_samples = "6";
-    tCase3.type = "poissons ratio";
+    tCase3.type = "poissons_ratio";
 
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(tCase1);
@@ -982,7 +982,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     auto tMaterials = tCategoriesMap.find(Plato::srom::category::MATERIAL);
     ASSERT_EQ(1u, tMaterials->second.size());
     ASSERT_STREQ("material", tMaterials->second[0].variable_type.c_str());
-    ASSERT_STREQ("poissons ratio", tMaterials->second[0].type.c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials->second[0].type.c_str());
     ASSERT_STREQ("homogeneous", tMaterials->second[0].axis.c_str());
     ASSERT_STREQ("3", tMaterials->second[0].id.c_str());
     ASSERT_STREQ("0.35", tMaterials->second[0].upper.c_str());
@@ -1017,8 +1017,8 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1069,8 +1069,8 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1170,8 +1170,8 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1239,8 +1239,8 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1342,9 +1342,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
-            "thermal conductivity coefficient .02\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
+            "thermal_conductivity_coefficient .02\n"
             "mass density .001\n"
         "end material\n"
         "begin block 1\n"
@@ -1352,7 +1352,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity coefficient\n"
+        "    tag thermal_conductivity_coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1423,7 +1423,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Deterministic)
@@ -1450,16 +1450,16 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
-            "thermal conductivity coefficient .02\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
+            "thermal_conductivity_coefficient .02\n"
             "mass density .001\n"
         "end material\n"
         "begin material 2\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 5e6\n"
-            "poissons ratio 0.28\n"
+            "youngs_modulus 5e6\n"
+            "poissons_ratio 0.28\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1469,7 +1469,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity coefficient\n"
+        "    tag thermal_conductivity_coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1540,7 +1540,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());
@@ -1558,11 +1558,11 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
 
     ASSERT_STREQ("0.28", tMaterials[1].deterministicVars()[1].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[1].attribute().c_str());
-    ASSERT_STREQ("poissons ratio", tMaterials[1].deterministicVars()[1].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[1].deterministicVars()[1].tag().c_str());
 
     ASSERT_STREQ("5e6", tMaterials[1].deterministicVars()[2].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[2].attribute().c_str());
-    ASSERT_STREQ("youngs modulus", tMaterials[1].deterministicVars()[2].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[1].deterministicVars()[2].tag().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
@@ -1589,9 +1589,9 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
-            "thermal conductivity coefficient .02\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
+            "thermal_conductivity_coefficient .02\n"
             "mass density .001\n"
         "end material\n"
         "begin block 1\n"
@@ -1599,7 +1599,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity coefficient\n"
+        "    tag thermal_conductivity_coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1682,7 +1682,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(1u, tLoads.size());
@@ -1738,16 +1738,16 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
-            "thermal conductivity coefficient 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
+            "thermal_conductivity_coefficient 0.33\n"
             "mass density 1.0\n"
         "end material\n"
         "begin material 2\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 5e6\n"
-            "poissons ratio 0.28\n"
+            "youngs_modulus 5e6\n"
+            "poissons_ratio 0.28\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1757,7 +1757,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal conductivity coefficient\n"
+        "    tag thermal_conductivity_coefficient\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1841,7 +1841,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal conductivity coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 1.4 TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());
@@ -1858,11 +1858,11 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
 
     ASSERT_STREQ("0.28", tMaterials[1].deterministicVars()[1].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[1].attribute().c_str());
-    ASSERT_STREQ("poissons ratio", tMaterials[1].deterministicVars()[1].tag().c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials[1].deterministicVars()[1].tag().c_str());
 
     ASSERT_STREQ("5e6", tMaterials[1].deterministicVars()[2].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[2].attribute().c_str());
-    ASSERT_STREQ("youngs modulus", tMaterials[1].deterministicVars()[2].tag().c_str());
+    ASSERT_STREQ("youngs_modulus", tMaterials[1].deterministicVars()[2].tag().c_str());
 
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(2u, tLoads.size());
@@ -1929,8 +1929,8 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
             "penalty exponent 3\n"
-            "youngs modulus 1e6\n"
-            "poissons ratio 0.33\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"

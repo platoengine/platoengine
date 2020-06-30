@@ -88,7 +88,7 @@ return_random_tractions_tags_for_define_xml_file
                     THROWERR(std::string("Return Random Tractions Tags for Define XML File: Invalid dimension key '")
                         + std::to_string(tDimIndex) + "'. Valid dimensions are: 1D, 2D, and 3D.")
                 }
-                auto tTag = tLoadTagLower + " load-id-" + tLoad.load_id + " " + tItr->second + "-axis";
+                auto tTag = tLoadTagLower + "_load_id_" + tLoad.load_id + "_" + tItr->second + "_axis";
                 tOutput[tLoadIdentifier].push_back(tTag);
             }
         }
@@ -169,7 +169,7 @@ return_material_property_tags_for_define_xml_file
         auto tMaterialPropertiesTags = tMaterial.tags();
         for(auto& tMaterialPropertyTag : tMaterialPropertiesTags)
         {
-            auto tArgumentNameTag = tMaterialPropertyTag + " block-id-" + tID;
+            auto tArgumentNameTag = tMaterialPropertyTag + "_block_id_" + tID;
             tBlockIdToTagsMap[tID].push_back(tArgumentNameTag);
         }
     }
@@ -195,7 +195,7 @@ prepare_material_properties_for_define_xml_file
             auto tMaterialPropertyTags = tMaterial.tags();
             for(auto& tMaterialPropertyTag : tMaterialPropertyTags)
             {
-                auto tTag = tMaterialPropertyTag + " block-id-" + tID;
+                auto tTag = tMaterialPropertyTag + "_block_id_" + tID;
                 tMatTagToSamplesMap[tTag].push_back(tMaterial.property(tMaterialPropertyTag));
             }
         }

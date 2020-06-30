@@ -95,9 +95,9 @@ public:
     std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
     std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}
     std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty exponent");}
-    std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs modulus");}
-    std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons ratio");}
-    std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal conductivity");}
+    std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs_modulus");}
+    std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons_ratio");}
+    std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal_conductivity");}
     std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].property("density");}
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}

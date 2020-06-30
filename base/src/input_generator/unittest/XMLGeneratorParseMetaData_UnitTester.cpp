@@ -61,13 +61,13 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_NonUniqueIDs)
     std::string tStringInput =
         "begin material 1\n"
         "   material_model isotropic linear elastic\n"
-        "   youngs modulus 200e9\n"
-        "   poissons ratio 0.33\n"
+        "   youngs_modulus 200e9\n"
+        "   poissons_ratio 0.33\n"
         "end material\n"
         "begin material 1\n"
         "   material_model isotropic linear elastic\n"
-        "   youngs modulus 200e9\n"
-        "   poissons ratio 0.33\n"
+        "   youngs_modulus 200e9\n"
+        "   poissons_ratio 0.33\n"
         "end material\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -81,8 +81,8 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_OneMaterial)
     std::string tStringInput =
         "begin material 1\n"
         "   material_model isotropic linear elastic\n"
-        "   youngs modulus 200e9\n"
-        "   poissons ratio 0.33\n"
+        "   youngs_modulus 200e9\n"
+        "   poissons_ratio 0.33\n"
         "end material\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -96,8 +96,8 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_OneMaterial)
     auto tTags = tMaterialMetaData[0].tags();
     ASSERT_EQ(2u, tTags.size());
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
-    ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons ratio").c_str());
-    ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs modulus").c_str());
+    ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
+    ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[0].category().c_str());
 }
 
@@ -106,15 +106,15 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     std::string tStringInput =
         "begin material 1\n"
         "   material_model isotropic linear elastic\n"
-        "   youngs modulus 200e9\n"
-        "   poissons ratio 0.33\n"
+        "   youngs_modulus 200e9\n"
+        "   poissons_ratio 0.33\n"
         "end material\n"
         "begin material\n"
         "   id 2\n"
         "   code sierra_sd\n"
         "   material_model isotropic linear elastic\n"
-        "   youngs modulus 100e9\n"
-        "   poissons ratio 0.35\n"
+        "   youngs_modulus 100e9\n"
+        "   poissons_ratio 0.35\n"
         "end material\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -131,15 +131,15 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     auto tTags = tMaterialMetaData[0].tags();
     ASSERT_EQ(2u, tTags.size());
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
-    ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons ratio").c_str());
-    ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs modulus").c_str());
+    ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
+    ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[0].category().c_str());
 
     tTags = tMaterialMetaData[1].tags();
     ASSERT_EQ(3u, tTags.size());
     ASSERT_STREQ("sierra_sd", tMaterialMetaData[1].code().c_str());
-    ASSERT_STREQ("0.35", tMaterialMetaData[1].property("poissons ratio").c_str());
-    ASSERT_STREQ("100e9", tMaterialMetaData[1].property("youngs modulus").c_str());
+    ASSERT_STREQ("0.35", tMaterialMetaData[1].property("poissons_ratio").c_str());
+    ASSERT_STREQ("100e9", tMaterialMetaData[1].property("youngs_modulus").c_str());
     ASSERT_STREQ("3.0", tMaterialMetaData[1].property("penalty exponent").c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[1].category().c_str());
 }
