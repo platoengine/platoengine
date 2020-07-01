@@ -982,7 +982,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInva
     tMaterial.category("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "1e9");
     tMaterial.property("poissons_ratio", "0.3");
-    tMaterial.property("piezoelectric coupling 33", "123");
+    tMaterial.property("piezoelectric_coupling_33", "123");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1029,8 +1029,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     tMaterial.code("plato_analyze");
     tMaterial.category("isotropic linear thermal");
     tMaterial.property("thermal_conductivity_coefficient", "10");
-    tMaterial.property("mass density", "200");
-    tMaterial.property("specific heat", "20");
+    tMaterial.property("mass_density", "200");
+    tMaterial.property("specific_heat", "20");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
@@ -1069,9 +1069,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     tMaterial.property("poissons_ratio_xy", "0.3");
     tMaterial.property("poissons_ratio_xz", "0.4");
     tMaterial.property("poissons_ratio_yz", "0.25");
-    tMaterial.property("shear modulus ratio xy", "1.3");
-    tMaterial.property("shear modulus ratio xz", "1.4");
-    tMaterial.property("shear modulus ratio yz", "1.25");
+    tMaterial.property("shear_modulus_ratio_xy", "1.3");
+    tMaterial.property("shear_modulus_ratio_xz", "1.4");
+    tMaterial.property("shear_modulus_ratio_yz", "1.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
@@ -1146,11 +1146,11 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     tMaterial.category("isotropic linear electroelastic");
     tMaterial.property("youngs_modulus", "2.3");
     tMaterial.property("poissons_ratio", "0.3");
-    tMaterial.property("dielectric permittivity 11", "1.0");
-    tMaterial.property("dielectric permittivity 33", "0.4");
-    tMaterial.property("piezoelectric coupling 15", "1.25");
-    tMaterial.property("piezoelectric coupling 33", "2.25");
-    tMaterial.property("piezoelectric coupling 31", "3.25");
+    tMaterial.property("dielectric_permittivity_11", "1.0");
+    tMaterial.property("dielectric_permittivity_33", "0.4");
+    tMaterial.property("piezoelectric_coupling_15", "1.25");
+    tMaterial.property("piezoelectric_coupling_33", "2.25");
+    tMaterial.property("piezoelectric_coupling_31", "3.25");
     tMaterial.property("thermal_expansion_coefficient", "0.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));

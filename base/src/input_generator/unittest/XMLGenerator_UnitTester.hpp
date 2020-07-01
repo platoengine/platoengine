@@ -94,7 +94,7 @@ public:
     std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area;}
     std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
     std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}
-    std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty exponent");}
+    std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty_exponent");}
     std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs_modulus");}
     std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons_ratio");}
     std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal_conductivity");}

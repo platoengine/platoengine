@@ -140,7 +140,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     ASSERT_STREQ("sierra_sd", tMaterialMetaData[1].code().c_str());
     ASSERT_STREQ("0.35", tMaterialMetaData[1].property("poissons_ratio").c_str());
     ASSERT_STREQ("100e9", tMaterialMetaData[1].property("youngs_modulus").c_str());
-    ASSERT_STREQ("3.0", tMaterialMetaData[1].property("penalty exponent").c_str());
+    ASSERT_STREQ("3.0", tMaterialMetaData[1].property("penalty_exponent").c_str());
     ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[1].category().c_str());
 }
 

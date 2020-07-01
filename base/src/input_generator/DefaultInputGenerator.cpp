@@ -745,7 +745,7 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
                     n6.append_attribute("name") = string_var;
                     addNTVParameter(n6, "Function Type", "string", "SIMP");
                     addNTVParameter(n6, "Minimum", "double", "0.001");
-                    addNTVParameter(n6, "Penalization Parameter", "double", m_InputData.materials[0].property("penalty exponent"));
+                    addNTVParameter(n6, "Penalization Parameter", "double", m_InputData.materials[0].property("penalty_exponent"));
                 }
                 addNTVParameter(n4, "Spatial Filter", "int", "0");
             }
@@ -1849,7 +1849,7 @@ bool DefaultInputGenerator::generateLightMPOperationsXML()
       tmp_node1 = tmp_node.append_child("SIMP");
       if(m_InputData.materials.size() > 0)
       {
-        addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
+        addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty_exponent").c_str());
       }
       addChild(tmp_node1, "MinimumValue", "0.001");
 
@@ -2418,7 +2418,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty_exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
 
@@ -2432,7 +2432,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty_exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
             tmp_node1 = tmp_node.append_child("OutputValue");
@@ -2448,7 +2448,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
             tmp_node1 = tmp_node.append_child("SIMP");
             if(m_InputData.materials.size() > 0)
             {
-                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
+                addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty_exponent").c_str());
             }
             addChild(tmp_node1, "MinimumValue", "0.001");
             tmp_node1 = tmp_node.append_child("OutputGradient");
@@ -2471,7 +2471,7 @@ bool DefaultInputGenerator::generateSalinasOperationsXML()
                 tmp_node1 = tmp_node.append_child("SIMP");
                 if(m_InputData.materials.size() > 0)
                 {
-                    addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty exponent").c_str());
+                    addChild(tmp_node1, "PenaltyExponent", m_InputData.materials[0].property("penalty_exponent").c_str());
                 }
                 addChild(tmp_node1, "MinimumValue", "0.001");
                 tmp_node1 = tmp_node.append_child("OutputHessian");

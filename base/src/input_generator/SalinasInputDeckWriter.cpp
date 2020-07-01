@@ -387,13 +387,13 @@ void SalinasInputDeckWriter::writeMaterialBlocks(FILE *aFilePtr, const bool &aFR
         fprintf(aFilePtr, "  isotropic\n");
         fprintf(aFilePtr, "  E = %s\n", mInputData.materials[n].property("youngs_modulus").c_str());
         fprintf(aFilePtr, "  nu = %s\n", mInputData.materials[n].property("poissons_ratio").c_str());
-        if(mInputData.materials[n].property("mass density").empty() == false)
-            fprintf(aFilePtr, "  density = %s\n", mInputData.materials[n].property("mass density").c_str());
+        if(mInputData.materials[n].property("mass_density").empty() == false)
+            fprintf(aFilePtr, "  density = %s\n", mInputData.materials[n].property("mass_density").c_str());
         fprintf(aFilePtr, "  material_penalty_model = simp\n");
         if(mInputData.discretization.compare("density") == 0)
         {
-            if(mInputData.materials[n].property("penalty exponent").length() > 0)
-                fprintf(aFilePtr, "  penalty_coefficient = %s\n", mInputData.materials[n].property("penalty exponent").c_str());
+            if(mInputData.materials[n].property("penalty_exponent").length() > 0)
+                fprintf(aFilePtr, "  penalty_coefficient = %s\n", mInputData.materials[n].property("penalty_exponent").c_str());
         }
         if(aFRF)
         {

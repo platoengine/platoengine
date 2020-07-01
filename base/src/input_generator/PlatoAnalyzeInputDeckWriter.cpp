@@ -406,8 +406,8 @@ void PlatoAnalyzeInputDeckWriter::addPAMaterialModelBlock(pugi::xml_node aNode, 
         if(std::strcmp(aMaterialModelName, "Isotropic Linear Thermal") == 0)
         {
             addNTVParameter(tPugiNode2, "Conductivity Coefficient", "double", mInputData.materials[0].property("thermal_conductivity_coefficient"));
-            addNTVParameter(tPugiNode2, "Mass Density", "double", mInputData.materials[0].property("mass density"));
-            addNTVParameter(tPugiNode2, "Specific Heat", "double", mInputData.materials[0].property("specific heat"));
+            addNTVParameter(tPugiNode2, "Mass Density", "double", mInputData.materials[0].property("mass_density"));
+            addNTVParameter(tPugiNode2, "Specific Heat", "double", mInputData.materials[0].property("specific_heat"));
         }
         else if(std::strcmp(aMaterialModelName, "Isotropic Linear Thermoelastic") == 0)
         {

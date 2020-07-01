@@ -50,11 +50,11 @@ struct ValidRandomPropertyKeys
     /*!<
      * \brief Valid plato input deck random properties keywords.
      **/
-    std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass density", "youngs_modulus_x", "youngs_modulus_y",
-        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear modulus ratio xy", "shear modulus ratio xz",
-        "shear modulus ratio yz", "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33",
-        "piezoelectric coupling 31", "thermal_conductivity_coefficient", "specific heat", "reference_temperature", "thermal_expansion_coefficient",
-        "yield stress" };
+    std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y",
+        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_ratio_xy", "shear_modulus_ratio_xz",
+        "shear_modulus_ratio_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
+        "piezoelectric_coupling_31", "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient",
+        "yield_stress" };
 };
 // struct ValidRandomPropertyKeys
 
@@ -125,10 +125,10 @@ struct ValidMaterialPropertyKeys
     /*!<
      * \brief Valid plato input deck material property keywords \n
      **/
-    std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
-        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear modulus ratio xy", "shear modulus ratio xz", "shear modulus ratio yz",
-        "dielectric permittivity 11", "dielectric permittivity 33", "piezoelectric coupling 15", "piezoelectric coupling 33", "piezoelectric coupling 31",
-        "thermal_conductivity_coefficient", "specific heat", "reference_temperature", "thermal_expansion_coefficient" };
+    std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
+        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_ratio_xy", "shear_modulus_ratio_xz", "shear_modulus_ratio_yz",
+        "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
+        "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient" };
 };
 // struct ValidMaterialPropertyKeys
 
@@ -238,32 +238,32 @@ struct ValidAnalyzeMaterialPropertyKeys
     std::unordered_map<std::string, std::unordered_map<std::string, std::pair<std::string, std::string>>> mKeys =
         {
             { "isotropic linear elastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
-                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "mass density", {"Mass Density", "double"} } }
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "mass_density", {"Mass Density", "double"} } }
             },
 
             { "orthotropic linear elastic", { { "youngs_modulus_x", {"Youngs Modulus X", "double"} },
                 { "youngs_modulus_y", {"Youngs Modulus Y", "double"} }, { "youngs_modulus_z", {"Youngs Modulus Z", "double"} },
                 { "poissons_ratio_xy", {"Poissons Ratio XY", "double"} }, { "poissons_ratio_xz", {"Poissons Ratio XZ", "double"} },
-                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear modulus ratio xy", {"Shear Modulus XY", "double"} },
-                { "shear modulus ratio xz", {"Shear Modulus XZ", "double"} }, { "shear modulus ratio yz", {"Shear Modulus YZ", "double"} },
-                { "mass density", {"Mass Density", "double"} } }
+                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear_modulus_ratio_xy", {"Shear Modulus XY", "double"} },
+                { "shear_modulus_ratio_xz", {"Shear Modulus XZ", "double"} }, { "shear_modulus_ratio_yz", {"Shear Modulus YZ", "double"} },
+                { "mass_density", {"Mass Density", "double"} } }
             },
 
             { "isotropic linear electroelastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
-                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "dielectric permittivity 11", {"p11", "double"} },
-                { "dielectric permittivity 33", {"p33", "double"} }, { "piezoelectric coupling 15", {"e15", "double"} },
-                { "piezoelectric coupling 33", {"e33", "double"} }, { "piezoelectric coupling 31", {"e31", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "dielectric_permittivity_11", {"p11", "double"} },
+                { "dielectric_permittivity_33", {"p33", "double"} }, { "piezoelectric_coupling_15", {"e15", "double"} },
+                { "piezoelectric_coupling_33", {"e33", "double"} }, { "piezoelectric_coupling_31", {"e31", "double"} },
                 { "thermal_expansion_coefficient", {"Alpha", "double"} } }
             },
 
             { "isotropic linear thermal", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
-                { "mass density", {"Mass Density", "double"} }, { "specific heat", {"Specific Heat", "double"} } }
+                { "mass_density", {"Mass Density", "double"} }, { "specific_heat", {"Specific Heat", "double"} } }
             },
 
             { "isotropic linear thermoelastic", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
                 { "youngs_modulus", {"Youngs Modulus", "double"} }, { "poissons_ratio", {"Poissons Ratio", "double"} },
                 { "thermal_expansion_coefficient", { "Thermal Expansion Coefficient", "double" } },
-                { "reference_temperature", { "Reference Temperature", "double" } }, { "mass density", {"Mass Density", "double"} } }
+                { "reference_temperature", { "Reference Temperature", "double" } }, { "mass_density", {"Mass Density", "double"} } }
             }
         };
 };

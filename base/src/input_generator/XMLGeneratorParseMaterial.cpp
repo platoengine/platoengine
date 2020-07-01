@@ -32,10 +32,10 @@ void ParseMaterial::allocate()
     mTags.insert({ "code", { {"code"}, "" } });
     mTags.insert({ "attribute", { {"attribute"}, "" } });
     mTags.insert({ "material_model", { {"material_model"}, "" } });
-    mTags.insert({ "penalty exponent", { {"penalty","exponent"}, "" } });
+    mTags.insert({ "penalty_exponent", { {"penalty_exponent"}, "" } });
 
-    mTags.insert({ "mass density", { {"mass", "density"}, "" } });
-    mTags.insert({ "specific heat", { {"specific","heat"}, "" } });
+    mTags.insert({ "mass_density", { {"mass_density"}, "" } });
+    mTags.insert({ "specific_heat", { {"specific_heat"}, "" } });
     mTags.insert({ "youngs_modulus", { {"youngs_modulus"}, "" } });
     mTags.insert({ "poissons_ratio", { {"poissons_ratio"}, "" } });
     mTags.insert({ "youngs_modulus_x", { {"youngs_modulus_x"}, "" } });
@@ -45,14 +45,14 @@ void ParseMaterial::allocate()
     mTags.insert({ "poissons_ratio_xz", { {"poissons_ratio_xz"}, "" } });
     mTags.insert({ "poissons_ratio_yz", { {"poissons_ratio_yz"}, "" } });
     mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
-    mTags.insert({ "shear modulus ratio xy", { {"shear","modulus","ratio", "xy"}, "" } });
-    mTags.insert({ "shear modulus ratio xz", { {"shear","modulus","ratio", "xz"}, "" } });
-    mTags.insert({ "shear modulus ratio yz", { {"shear","modulus","ratio", "yz"}, "" } });
-    mTags.insert({ "piezoelectric coupling 15", { {"piezoelectric","coupling", "15"}, "" } });
-    mTags.insert({ "piezoelectric coupling 33", { {"piezoelectric","coupling", "33"}, "" } });
-    mTags.insert({ "piezoelectric coupling 31", { {"piezoelectric","coupling", "31"}, "" } });
-    mTags.insert({ "dielectric permittivity 11", { {"dielectric","permittivity", "11"}, "" } });
-    mTags.insert({ "dielectric permittivity 33", { {"dielectric","permittivity", "33"}, "" } });
+    mTags.insert({ "shear_modulus_ratio_xy", { {"shear_modulus_ratio_xy"}, "" } });
+    mTags.insert({ "shear_modulus_ratio_xz", { {"shear_modulus_ratio_xz"}, "" } });
+    mTags.insert({ "shear_modulus_ratio_yz", { {"shear_modulus_ratio_yz"}, "" } });
+    mTags.insert({ "piezoelectric_coupling_15", { {"piezoelectric_coupling_15"}, "" } });
+    mTags.insert({ "piezoelectric_coupling_33", { {"piezoelectric_coupling_33"}, "" } });
+    mTags.insert({ "piezoelectric_coupling_31", { {"piezoelectric_coupling_31"}, "" } });
+    mTags.insert({ "dielectric_permittivity_11", { {"dielectric_permittivity_11"}, "" } });
+    mTags.insert({ "dielectric_permittivity_33", { {"dielectric_permittivity_33"}, "" } });
     mTags.insert({ "thermal_expansion_coefficient", { {"thermal_expansion_coefficient"}, "" } });
     mTags.insert({ "thermal_conductivity_coefficient", { {"thermal_conductivity_coefficient"}, "" } });
 }
@@ -121,17 +121,17 @@ void ParseMaterial::setMaterialIdentification(XMLGen::Material& aMetadata)
 
 void ParseMaterial::setPenaltyExponent(XMLGen::Material& aMetadata)
 {
-    auto tItr = mTags.find("penalty exponent");
+    auto tItr = mTags.find("penalty_exponent");
     if (tItr->second.second.empty())
     {
         if(aMetadata.code().compare("plato_analyze") != 0)
         {
-            aMetadata.property("penalty exponent", "3.0");
+            aMetadata.property("penalty_exponent", "3.0");
         }
     }
     else
     {
-        aMetadata.property("penalty exponent", tItr->second.second);
+        aMetadata.property("penalty_exponent", tItr->second.second);
     }
 }
 

@@ -1016,7 +1016,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
         "end material\n"
@@ -1068,7 +1068,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
         "end material\n"
@@ -1169,7 +1169,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
         "end material\n"
@@ -1238,7 +1238,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
         "end material\n"
@@ -1341,11 +1341,11 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
             "thermal_conductivity_coefficient .02\n"
-            "mass density .001\n"
+            "mass_density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1449,15 +1449,15 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
             "thermal_conductivity_coefficient .02\n"
-            "mass density .001\n"
+            "mass_density .001\n"
         "end material\n"
         "begin material 2\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 5e6\n"
             "poissons_ratio 0.28\n"
         "end material\n"
@@ -1554,7 +1554,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
 
     ASSERT_STREQ("3", tMaterials[1].deterministicVars()[0].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[0].attribute().c_str());
-    ASSERT_STREQ("penalty exponent", tMaterials[1].deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("penalty_exponent", tMaterials[1].deterministicVars()[0].tag().c_str());
 
     ASSERT_STREQ("0.28", tMaterials[1].deterministicVars()[1].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[1].attribute().c_str());
@@ -1588,11 +1588,11 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
             "thermal_conductivity_coefficient .02\n"
-            "mass density .001\n"
+            "mass_density .001\n"
         "end material\n"
         "begin block 1\n"
         "   material 1\n"
@@ -1737,15 +1737,15 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear thermoelastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
             "thermal_conductivity_coefficient 0.33\n"
-            "mass density 1.0\n"
+            "mass_density 1.0\n"
         "end material\n"
         "begin material 2\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 5e6\n"
             "poissons_ratio 0.28\n"
         "end material\n"
@@ -1854,7 +1854,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
 
     ASSERT_STREQ("3", tMaterials[1].deterministicVars()[0].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[0].attribute().c_str());
-    ASSERT_STREQ("penalty exponent", tMaterials[1].deterministicVars()[0].tag().c_str());
+    ASSERT_STREQ("penalty_exponent", tMaterials[1].deterministicVars()[0].tag().c_str());
 
     ASSERT_STREQ("0.28", tMaterials[1].deterministicVars()[1].value().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].deterministicVars()[1].attribute().c_str());
@@ -1928,7 +1928,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
         "end loads\n"
         "begin material 1\n"
             "material_model isotropic linear elastic\n"
-            "penalty exponent 3\n"
+            "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
         "end material\n"
