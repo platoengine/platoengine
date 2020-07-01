@@ -67,10 +67,9 @@ void append_nondeterministic_qoi_shared_data
     }
 
     XMLGen::ValidLayoutKeys tValidLayouts;
-    auto tRandomQoIs = aXMLMetaData.mOutputMetaData.getRandomQoI();
-    for(auto tPair : tRandomQoIs)
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
     {
-        auto tLayout = tValidLayouts.mKeys.find(tPair.second)->second;
+        auto tLayout = tValidLayouts.mKeys.find(tPair.second.second)->second;
         auto tSharedDataName = tPair.first + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};

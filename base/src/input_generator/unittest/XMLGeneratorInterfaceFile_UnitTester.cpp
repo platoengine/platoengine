@@ -384,11 +384,11 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
 
     std::vector<std::string> tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
-    tGoldSharedDataKeys.push_back(std::make_pair("Von Mises", tTemp));
-    tTemp = {"Von Mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+    tGoldSharedDataKeys.push_back(std::make_pair("von mises", tTemp));
+    tTemp = {"von mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "Scalar", "Element Field", "plato analyze_{PerformerIndex}", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
-    tGoldSharedDataValues.push_back(std::make_pair("Von Mises", tTemp));
+    tGoldSharedDataValues.push_back(std::make_pair("von mises", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
     auto tValues = tGoldSharedDataValues.begin();

@@ -155,9 +155,9 @@ void append_deterministic_qoi_inputs_to_output_operation
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getDeterminsiticQoI())
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getDeterminsiticQoIs())
     {
-        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tLowerLayout = Plato::tolower(tPair.second.second);
         auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
@@ -177,12 +177,12 @@ void append_nondeterministic_qoi_inputs_to_output_operation
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoI())
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
     {
         auto tFor = aParentNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
 
-        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tLowerLayout = Plato::tolower(tPair.second.second);
         auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
@@ -367,14 +367,14 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
  pugi::xml_document &aDocument)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoI())
+    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
     {
-        auto tLowerLayout = Plato::tolower(tPair.second);
+        auto tLowerLayout = Plato::tolower(tPair.second.second);
         auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
         if(tValidLayoutItr == tValidKeys.mKeys.end())
         {
             THROWERR(std::string("Append Nondeterministic QOI to Statistics Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tPair.second + "' is not supported.")
+                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
         }
         auto tName = tPair.first + " Statistics";
         std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};

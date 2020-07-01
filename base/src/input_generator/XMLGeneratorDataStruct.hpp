@@ -104,35 +104,75 @@ public:
     }
 };
 
+/******************************************************************************//**
+ * \struct Output
+ * \brief The Output metadata structure owns the random and deterministic output \n
+ * Quantities of Interests (QoIs) defined by the user in the plato input file.
+**********************************************************************************/
 struct Output
 {
 private:
-    // note: vector<pair<qoi_argument_name, qoi_layout>>, where qoi_layout denotes the
-    // data layout, i.e. element, nodal, etc., and qoi_shared_data_name denotes the keyword
-    // used in the plato light-weight input file to denote the output data. the output keyword
-    // is used to define the shared data name in the interface.xml file.
-    std::vector<std::pair<std::string, std::string>> mRandomQuantitiesOfInterest;
-    std::vector<std::pair<std::string, std::string>> mDeterministicQuantitiesOfInterest;
+
+    /******************************************************************************//**
+     * \var QoI maps
+     * \brief Maps from QoIs argument names to shared_data_name-data_layout pairs, i.e. \n
+     * map<qoi_argument_name, pair<qoi_shared_data_name, qoi_layout>>, where qoi_layout \n
+     * denotes the shared data layout and qoi_argument_name denotes the keyword used by \n
+     * the plato input file to denote an output QoI. The argument name keyword is used \n
+     * to define the shared data name used for the interface.xml file.
+    **********************************************************************************/
+    std::map<std::string, std::pair<std::string, std::string>> mRandomQoIs;
+    std::map<std::string, std::pair<std::string, std::string>> mDeterministicQoIs;
 
 public:
     void appendRandomQoI(const std::string& aArgumentName, const std::string& aDataLayout)
     {
-        mRandomQuantitiesOfInterest.push_back(std::make_pair(aArgumentName, aDataLayout));
+        auto tLowerLayout = Plato::tolower(aDataLayout);
+        auto tLowerArgumentName = Plato::tolower(aArgumentName);
+        auto tSharedDataName = tLowerArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        mRandomQoIs[tLowerArgumentName] = std::make_pair(tSharedDataName, tLowerLayout);
     }
 
     void appendDeterminsiticQoI(const std::string& aArgumentName, const std::string& aDataLayout)
     {
-        mDeterministicQuantitiesOfInterest.push_back(std::make_pair(aArgumentName, aDataLayout));
+        auto tLowerLayout = Plato::tolower(aDataLayout);
+        auto tLowerArgumentName = Plato::tolower(aArgumentName);
+        auto tSharedDataName = tLowerArgumentName;
+        mDeterministicQoIs[tLowerArgumentName] = std::make_pair(tSharedDataName, tLowerLayout);
     }
 
-    const std::vector<std::pair<std::string, std::string>>& getRandomQoI() const
+    const std::map<std::string, std::pair<std::string, std::string>>& getRandomQoIs() const
     {
-        return mRandomQuantitiesOfInterest;
+        return mRandomQoIs;
     }
 
-    const std::vector<std::pair<std::string, std::string>>& getDeterminsiticQoI() const
+    const std::map<std::string, std::pair<std::string, std::string>>& getDeterminsiticQoIs() const
     {
-        return mDeterministicQuantitiesOfInterest;
+        return mDeterministicQoIs;
+    }
+
+    std::string getSharedDataNameRandomQoI(const std::string& aArgumentName) const
+    {
+        auto tLowerArgumentName = Plato::tolower(aArgumentName);
+        auto tItr = mRandomQoIs.find(tLowerArgumentName);
+        if(tItr == mRandomQoIs.end())
+        {
+            THROWERR("XML Generator Output Metadata: Did not find argument name '" + tLowerArgumentName
+                + "' in map from random QoI argument name to shared_data_name-data_layout pair.")
+        }
+        return tItr->second.first;
+    }
+
+    std::string getSharedDataNameDeterministicQoI(const std::string& aArgumentName) const
+    {
+        auto tLowerArgumentName = Plato::tolower(aArgumentName);
+        auto tItr = mDeterministicQoIs.find(tLowerArgumentName);
+        if(tItr == mDeterministicQoIs.end())
+        {
+            THROWERR("XML Generator Output Metadata: Did not find argument name '" + tLowerArgumentName
+                + "' in map from deterministic QoI argument name to shared_data_name-data_layout pair.")
+        }
+        return tItr->second.first;
     }
 };
 

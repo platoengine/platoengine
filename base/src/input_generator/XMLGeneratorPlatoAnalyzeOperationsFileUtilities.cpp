@@ -140,7 +140,7 @@ void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData.getDeterminsiticQoI().empty())
+    if(aXMLMetaData.mOutputMetaData.getDeterminsiticQoIs().empty())
     {
         return;
     }
@@ -149,7 +149,7 @@ void append_write_output_to_plato_analyze_operation
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperation);
 
     XMLGen::ValidAnalyzeOutputKeys tValidKeys;
-    for(auto& tTag : aXMLMetaData.mOutputMetaData.getDeterminsiticQoI())
+    for(auto& tTag : aXMLMetaData.mOutputMetaData.getDeterminsiticQoIs())
     {
         auto tLowerTag = Plato::tolower(tTag.first);
         auto tKeyItr = tValidKeys.mKeys.find(tLowerTag);

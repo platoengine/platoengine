@@ -885,7 +885,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
     ASSERT_FALSE(tOperation.empty());
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = {"Function", "Name" , "Layout", "For", "Output", "Output"};
-    std::vector<std::string> tValues = {"MeanPlusStdDev", "Von Mises Stress Statistics",
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "von mises stress Statistics",
         "Element Field", "", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
@@ -898,16 +898,16 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
     auto tInput = tInnerFor.child("Input");
     ASSERT_FALSE(tInput.empty());
     tKeys = {"ArgumentName", "Probability"};
-    tValues = {"Von Mises Stress {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+    tValues = {"von mises stress {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
 
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "Von Mises Stress Mean"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "von mises stress Mean"}, tOutput);
     tOutput = tOutput.next_sibling("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "Von Mises Stress StdDev"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "von mises stress StdDev"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendStochasticCriterionValueOperation)
@@ -1206,21 +1206,21 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     auto tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Von Mises {SampleIndex}", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy stress {SampleIndex}", "Element Field"}, tInput);
 
     tFor = tFor.next_sibling("For");
     ASSERT_FALSE(tFor.empty());
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Cauchy Stress {SampleIndex}", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"displacement x {SampleIndex}", "Nodal Field"}, tInput);
 
     tFor = tFor.next_sibling("For");
     ASSERT_FALSE(tFor.empty());
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Displacement X {SampleIndex}", "Nodal Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"von mises {SampleIndex}", "Element Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation_ErrorInvalidLyout)
@@ -1244,11 +1244,11 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Von Mises", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy stress", "Element Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Cauchy Stress", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"displacement x", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"Displacement X", "Nodal Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"von mises", "Element Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
@@ -1355,7 +1355,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function>")
     +"<Name>PlatoMainOutput</Name><Input><ArgumentName>Topology</ArgumentName></Input><Input><ArgumentName>Control</ArgumentName></Input><Forvar=\"SampleIndex\"in=\"Samples\">"
-    +"<Input><ArgumentName>VonMisesStress{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
+    +"<Input><ArgumentName>vonmisesstress{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
     +"<Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation>"
     +"<Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName></Input>"
     +"<Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name>"
@@ -1370,9 +1370,9 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     +"</Output></CriterionValue><CriterionGradient><Layout>NodalField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
     +"<ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
     +"</Input></For></For><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName></Output></CriterionGradient></Operation><Operation>"
-    +"<Function>MeanPlusStdDev</Function><Name>VonMisesStressStatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
-    +"<ArgumentName>VonMisesStress{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>VonMisesStressMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>VonMisesStressStdDev</ArgumentName></Output>"
+    +"<Function>MeanPlusStdDev</Function><Name>vonmisesstressStatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
+    +"<ArgumentName>vonmisesstress{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
+    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesstressMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesstressStdDev</ArgumentName></Output>"
     +"</Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name><Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName>"
     +"</Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
     +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
