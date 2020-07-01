@@ -938,7 +938,7 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
     auto tInnerInput = tOperation.child("Input");
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Lower Bound Vector", "Lower Bound Vector"};
+    tGoldValues = {"Lower Bound Vector", "Lower Bound Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerInput);
     auto tInnerOutput = tOperation.child("Output");
     tGoldKeys = {"ArgumentName", "SharedDataName"};
@@ -1000,7 +1000,7 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage)
     auto tInnerInput = tOperation.child("Input");
     ASSERT_FALSE(tInnerInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Upper Bound Vector", "Upper Bound Vector"};
+    tGoldValues = {"Upper Bound Vector", "Upper Bound Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerInput);
     auto tInnerOutput = tOperation.child("Output");
     ASSERT_FALSE(tInnerOutput.empty());
