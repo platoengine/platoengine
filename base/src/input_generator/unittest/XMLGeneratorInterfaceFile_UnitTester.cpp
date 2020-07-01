@@ -176,7 +176,7 @@ TEST(PlatoTestXMLGenerator, SetKeyValue)
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
           {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
-          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
+          {"ReferenceValueName", "Design Volume"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
 
     // TEST 1: EMPTY VALUE -> RESULT = IGNORE
     XMLGen::set_key_value("AbsoluteTargetValue", "", tKeyToValueMap);
@@ -215,7 +215,7 @@ TEST(PlatoTestXMLGenerator, TransformKeyTokens)
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
           {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
-          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
+          {"ReferenceValueName", "Design Volume"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
     auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
 
     std::vector<std::string> tGold = {"ValueName", "ValueStageName", "GradientName", "GradientStageName",
@@ -234,11 +234,11 @@ TEST(PlatoTestXMLGenerator, TransformValueTokens)
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", "Constraint Value"}, {"ValueStageName", "Compute Constraint Value"},
           {"GradientName", "Constraint Gradient"}, {"GradientStageName", "Compute Constraint Gradient"},
-          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
+          {"ReferenceValueName", "Design Volume"}, {"NormalizedTargetValue", "1"}, {"AbsoluteTargetValue", "10"} };
     auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
 
     std::vector<std::string> tGold = {"Constraint Value", "Compute Constraint Value",
-        "Constraint Gradient", "Compute Constraint Gradient", "Reference Value", "1", "10"};
+        "Constraint Gradient", "Compute Constraint Gradient", "Design Volume", "1", "10"};
     ASSERT_EQ(7u, tValues.size());
     for(auto& tValue : tValues)
     {
@@ -485,7 +485,7 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeSaredData)
     auto tSharedData = tDocument.child("SharedData");
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tGoldValues = {"Reference Value", "Scalar", "Global", "1", "platomain", "platomain"};
+    std::vector<std::string> tGoldValues = {"Design Volume", "Scalar", "Global", "1", "platomain", "platomain"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tSharedData);
 }
 
@@ -1047,25 +1047,25 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeStage)
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Compute Design Domain Volume", "", ""};
+    std::vector<std::string> tGoldValues = {"Design Volume", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Output"};
-    tGoldValues = {"Compute Design Domain Volume", "platomain", ""};
+    tGoldValues = {"Design Volume", "platomain", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tInnerOutput = tOperation.child("Output");
     ASSERT_FALSE(tInnerOutput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Design Volume", "Reference Value"};
+    tGoldValues = {"Design Volume", "Design Volume"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInnerOutput);
 
     auto tOuterOutput = tStage.child("Output");
     ASSERT_FALSE(tOuterOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Reference Value"};
+    tGoldValues = {"Design Volume"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOuterOutput);
 }
 
@@ -2442,7 +2442,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     auto tConstraintNode = tOptimizerNode.child("Constraint");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName", "ReferenceValueName"};
     tGoldValues = {"Constraint Value ID-0", "Compute Constraint Value ID-0", "Constraint Gradient ID-0",
-        "Compute Constraint Gradient ID-0", "Reference Value"};
+        "Compute Constraint Gradient ID-0", "Design Volume"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintNode);
 
     // CASE 2: NORMALIZED TARGET VALUE IS DEFINED
@@ -2457,7 +2457,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName",
         "ReferenceValueName", "NormalizedTargetValue"};
     tGoldValues = {"Constraint Value ID-0", "Compute Constraint Value ID-0", "Constraint Gradient ID-0",
-        "Compute Constraint Gradient ID-0", "Reference Value", "1.0"};
+        "Compute Constraint Gradient ID-0", "Design Volume", "1.0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintNode);
 }
 

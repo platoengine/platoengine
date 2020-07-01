@@ -53,7 +53,7 @@ void append_design_volume_shared_data
 (pugi::xml_document& aDocument)
 {
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Reference Value", "Scalar", "Global", "1", "platomain", "platomain"};
+    std::vector<std::string> tValues = {"Design Volume", "Scalar", "Global", "1", "platomain", "platomain"};
     auto tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 }
@@ -292,9 +292,9 @@ void append_design_volume_operation
 (pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Design Domain Volume", "platomain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Design Volume", "platomain"}, tOperationNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Design Volume", "Reference Value"}, tOutputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Design Volume", "Design Volume"}, tOutputNode);
 }
 // function append_design_volume_stage
 /******************************************************************************/
@@ -304,10 +304,10 @@ void append_design_volume_stage
 (pugi::xml_document& aDocument)
 {
     auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"}, {"Compute Design Domain Volume"}, tStageNode);
+    XMLGen::append_children({"Name"}, {"Design Volume"}, tStageNode);
     XMLGen::append_design_volume_operation(tStageNode);
     auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children({"SharedDataName"}, {"Reference Value"}, tOutputNode);
+    XMLGen::append_children({"SharedDataName"}, {"Design Volume"}, tOutputNode);
 }
 // function append_design_volume_stage
 /******************************************************************************/
@@ -535,7 +535,7 @@ void append_optimization_constraint_options
 {
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""},
-          {"ReferenceValueName", "Reference Value"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
+          {"ReferenceValueName", "Design Volume"}, {"NormalizedTargetValue", ""}, {"AbsoluteTargetValue", ""} };
 
     for (auto &tConstraint : aXMLMetaData.constraints)
     {
