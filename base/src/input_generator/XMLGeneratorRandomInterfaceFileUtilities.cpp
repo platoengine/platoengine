@@ -161,7 +161,7 @@ void append_filter_criterion_gradient_samples_operation
 
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
-    tForNode = aParentNode.append_child("For");
+    tForNode = tForNode.append_child("For");
     XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
 
     tInputNode = tForNode.append_child("Input");

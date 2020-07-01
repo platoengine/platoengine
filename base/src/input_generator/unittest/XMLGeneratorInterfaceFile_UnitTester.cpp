@@ -690,31 +690,37 @@ TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientSamplesOperation)
 
     // TEST RESULTS AGAINST GOLD VALUES
     auto tOperation = tDocument.child("Operation");
-    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "For", "For"};
-    std::vector<std::string> tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
+    ASSERT_FALSE(tOperation.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "PerformerName", "Input", "For"};
+    std::vector<std::string> tGoldValues = {"Filter Gradient", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
     tGoldValues = {"Field", "Control"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
 
     auto tFor = tOperation.child("For");
+    ASSERT_FALSE(tFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
 
-    tFor = tFor.next_sibling("For");
+    tFor = tFor.child("For");
+    ASSERT_FALSE(tFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerIndex", "Performers"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
 
-     tInput = tFor.child("Input");
-     tGoldKeys = {"ArgumentName", "SharedDataName"};
-     tGoldValues = {"Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
-     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+    tInput = tFor.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
     
     auto tOutput = tFor.child("Output");
+    ASSERT_FALSE(tOutput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
     tGoldValues = {"Filtered Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
@@ -2075,31 +2081,37 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
 
     // ****** 4) TEST RESULTS AGAINST FILTER GRADIENT OPERATION GOLD VALUES ******
     tStageOperation = tStageOperation.next_sibling("Operation");
-    tGoldKeys = {"Name", "PerformerName", "Input", "For", "For"};
-    tGoldValues = {"Filter Gradient", "platomain", "", "", ""};
+    ASSERT_FALSE(tStageOperation.empty());
+    tGoldKeys = {"Name", "PerformerName", "Input", "For"};
+    tGoldValues = {"Filter Gradient", "platomain", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOperation);
 
     auto tInput = tStageOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
     tGoldValues = {"Field", "Control"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
 
     auto tFor = tStageOperation.child("For");
+    ASSERT_FALSE(tFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
 
-    tFor = tFor.next_sibling("For");
+    tFor = tFor.child("For");
+    ASSERT_FALSE(tFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerIndex", "Performers"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tFor);
 
      tInput = tFor.child("Input");
+     ASSERT_FALSE(tInput.empty());
      tGoldKeys = {"ArgumentName", "SharedDataName"};
      tGoldValues = {"Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
      PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
     
     auto tOutput = tFor.child("Output");
+    ASSERT_FALSE(tOutput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
     tGoldValues = {"Filtered Gradient", "Objective Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
