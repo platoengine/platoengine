@@ -679,13 +679,13 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToDefineXmlFile)
         auto tAttribute = tArray.attribute("name");
         ASSERT_FALSE(tAttribute.empty());
         auto tGoldNameItr = std::find(tGoldNames.begin(), tGoldNames.end(), tAttribute.value());
-        ASSERT_TRUE(tGoldNameItr != tGoldNames.end());
+        EXPECT_TRUE(tGoldNameItr != tGoldNames.end());
         ASSERT_STREQ(tGoldNameItr->c_str(), tAttribute.value());
 
         tAttribute = tArray.attribute("values");
         ASSERT_FALSE(tAttribute.empty());
         auto tGoldValueItr = std::find(tGoldValues.begin(), tGoldValues.end(), tAttribute.value());
-        ASSERT_TRUE(tGoldValueItr != tGoldNames.end());
+        EXPECT_TRUE(tGoldValueItr != tGoldValues.end());
         ASSERT_STREQ(tGoldValueItr->c_str(), tAttribute.value());
 
         ASSERT_STREQ("real", tArray.attribute("type").value());

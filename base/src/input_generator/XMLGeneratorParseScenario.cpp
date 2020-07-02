@@ -8,47 +8,10 @@
 
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {
-
-bool check_boolean_key(const std::string& aInput)
-{
-    auto tLowerInput = XMLGen::to_lower(aInput);
-    XMLGen::ValidBoolKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Check Boolean Keyword: boolean keyword with value '")
-            + tLowerInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
-    }
-    auto tFlag = tLowerInput.compare("true") == 0 ? true : false;
-    return tFlag;
-}
-
-std::string check_physics_keyword(const std::string& aInput)
-{
-    auto tLowerInput = Plato::tolower(aInput);
-    XMLGen::ValidPhysicsKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + tLowerInput + "' is not supported.")
-    }
-    return (tItr.operator*());
-}
-
-std::string check_spatial_dimensions_keyword(const std::string& aInput)
-{
-    auto tLowerInput = Plato::tolower(aInput);
-    XMLGen::ValidSpatialDimsKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Check Dimensions Keyword: keyword 'dimensions' with tag '") + tLowerInput + "' is not supported.")
-    }
-    return (tItr.operator*());
-}
 
 void ParseScenario::allocate()
 {

@@ -460,8 +460,13 @@ void append_optimization_algorithm_options
 
 /******************************************************************************/
 void append_optimization_output_options
-(pugi::xml_node& aParentNode)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
 {
+    if(!aXMLMetaData.mOutputMetaData.outputData())
+    {
+        return;
+    }
     auto tNode = aParentNode.append_child("Output");
     append_children({"OutputStage"}, {"Output To File"}, tNode);
 }
@@ -586,7 +591,7 @@ void append_optimizer_options
     XMLGen::append_optimization_algorithm_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_update_problem_stage_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_cache_stage_options(aXMLMetaData, tOptimizerNode);
-    XMLGen::append_optimization_output_options(tOptimizerNode);
+    XMLGen::append_optimization_output_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_variables_options(tOptimizerNode);
     XMLGen::append_optimization_objective_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_constraint_options(aXMLMetaData, tOptimizerNode);

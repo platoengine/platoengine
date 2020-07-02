@@ -2349,8 +2349,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOption)
 TEST(PlatoTestXMLGenerator, AppendOptimizationOutputOptions)
 {
     pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mOutputMetaData.outputData(true);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_optimization_output_options(tOptimizerNode);
+    XMLGen::append_optimization_output_options(tXMLMetaData, tOptimizerNode);
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
     std::vector<std::string> tGoldKeys = {"Output"};

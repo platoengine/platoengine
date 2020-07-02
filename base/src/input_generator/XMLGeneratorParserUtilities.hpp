@@ -142,10 +142,35 @@ std::string check_code_keyword(const std::string& aInput);
 
 /******************************************************************************//**
  * \fn check_criterion_category_keyword
- * \brief Throw error if criterion 'category' is not supported.
+ * \brief Throw error if criterion 'category' keyword value is not supported.
  * \param [in] aInput 'category' keyword
+ * \return valid 'category' keyword value
 **********************************************************************************/
 std::string check_criterion_category_keyword(const std::string& aInput);
+
+/******************************************************************************//**
+ * \fn check_boolean_key
+ * \brief Throw error if conversion from string to boolean fails.
+ * \param [in] aInput input string
+ * \return boolean flag
+**********************************************************************************/
+bool check_boolean_key(const std::string& aInput);
+
+/******************************************************************************//**
+ * \fn check_physics_keyword
+ * \brief Throw error if 'physics' keyword value is not supported.
+ * \param [in] aInput 'physics' keyword
+ * \return valid 'physics' keyword value
+**********************************************************************************/
+std::string check_physics_keyword(const std::string& aInput);
+
+/******************************************************************************//**
+ * \fn check_spatial_dimensions_keyword
+ * \brief Throw error if 'dimensions' keyword value is not supported.
+ * \param [in] aInput 'dimensions' keyword
+ * \return valid 'dimensions' keyword value
+**********************************************************************************/
+std::string check_spatial_dimensions_keyword(const std::string& aInput);
 
 }
 // namespace XMLGen

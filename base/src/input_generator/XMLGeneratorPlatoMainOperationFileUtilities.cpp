@@ -252,6 +252,10 @@ void append_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
+    if(!aXMLMetaData.mOutputMetaData.outputData())
+    {
+        return;
+    }
     auto tOperation = aDocument.append_child("Operation");
     XMLGen::append_children_to_output_operation(aXMLMetaData, tOperation);
     XMLGen::append_default_qoi_to_output_operation(aXMLMetaData, tOperation);

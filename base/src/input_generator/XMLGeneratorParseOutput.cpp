@@ -16,8 +16,23 @@ namespace XMLGen
 void ParseOutput::allocate()
 {
     mTags.clear();
+    mTags.insert({ "output_data", { {"output_data"}, "" } });
     mTags.insert({ "quantities_of_interest", { {"quantities_of_interest"}, "" } });
     mTags.insert({ "random_quantities_of_interest", { {"random_quantities_of_interest"}, "" } });
+}
+
+void ParseOutput::setOutputData()
+{
+    auto tItr = mTags.find("output_data");
+    if(tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
+        mData.outputData(tFlag);
+    }
+    else
+    {
+        mData.outputData(true);
+    }
 }
 
 void ParseOutput::setRandomQoI()
@@ -66,6 +81,13 @@ void ParseOutput::setDeterministicQoI()
     }
 }
 
+void ParseOutput::setMetaData()
+{
+    this->setOutputData();
+    this->setRandomQoI();
+    this->setDeterministicQoI();
+}
+
 XMLGen::Output ParseOutput::data() const
 {
     return mData;
@@ -88,8 +110,7 @@ void ParseOutput::parse(std::istream &aInputFile)
         if (XMLGen::parse_single_value(tTokens, { "begin", "output" }, tTag))
         {
             XMLGen::parse_input_metadata( { "end", "output" }, aInputFile, mTags);
-            this->setDeterministicQoI();
-            this->setRandomQoI();
+            this->setMetaData();
         }
     }
 }

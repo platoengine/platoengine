@@ -144,7 +144,18 @@ private:
     std::map<std::string, std::pair<std::string, std::string>> mRandomQoIs;
     std::map<std::string, std::pair<std::string, std::string>> mDeterministicQoIs;
 
+    bool mEnableOutputStage = false;
+
 public:
+    bool outputData() const
+    {
+        return mEnableOutputStage;
+    }
+    void outputData(const bool& aOutputData)
+    {
+        mEnableOutputStage = aOutputData;
+    }
+
     void appendRandomQoI(const std::string& aArgumentName, const std::string& aDataLayout)
     {
         auto tLowerLayout = Plato::tolower(aDataLayout);

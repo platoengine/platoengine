@@ -248,10 +248,12 @@ void append_optimization_algorithm_options
 /******************************************************************************//**
  * \fn append_optimization_algorithm_options
  * \brief Append optimization output options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_optimization_output_options
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_optimization_cache_stage_options
