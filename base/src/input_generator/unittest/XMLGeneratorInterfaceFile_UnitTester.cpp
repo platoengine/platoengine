@@ -805,81 +805,90 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicOperation)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 }
 
-TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase_ErrorEmptyObjectiveList)
+TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase_EmptyStage)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
+    auto tStage = tDocument.child("Stage");
+    ASSERT_TRUE(tStage.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    tInputData.mScenarioMetaData.cacheState(true);
 
     ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
+    tDocument.save_file("dummy.xml", " ");
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
     auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "For"};
     std::vector<std::string> tGoldValues = {"Cache State", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
-    auto tOuterFor = tDocument.child("For");
+    auto tOuterFor = tStage.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerIndex", "Performers"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
 
     auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
     tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
 
     auto tOperation = tInnerFor.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName"};
-    tGoldValues = {"Cache State", "plato analyze_{PerformerIndex}"};
+    tGoldValues = {"Cache State", "plato_analyze_{PerformerIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 }
 
-TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase_ErrorEmptyObjectiveList)
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase_EmptyStage)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_NO_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument));
+    auto tStage = tDocument.child("Stage");
+    ASSERT_TRUE(tStage.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    tInputData.mScenarioMetaData.updateProblem(true);
 
     ASSERT_NO_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
     auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "For"};
     std::vector<std::string> tGoldValues = {"Update Problem", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
-    auto tOuterFor = tDocument.child("For");
+    auto tOuterFor = tStage.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
     tGoldKeys = {"var", "in"};
     tGoldValues = {"PerformerIndex", "Performers"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tOuterFor);
 
     auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
     tGoldValues = {"PerformerSampleIndex", "PerformerSamples"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tInnerFor);
 
     auto tOperation = tInnerFor.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName"};
-    tGoldValues = {"Update Problem", "plato analyze_{PerformerIndex}"};
+    tGoldValues = {"Update Problem", "plato_analyze_{PerformerIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 }
 

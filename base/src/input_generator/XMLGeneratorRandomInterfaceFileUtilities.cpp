@@ -194,24 +194,18 @@ void append_cache_state_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(!aXMLMetaData.mScenarioMetaData.cacheState())
     {
-        THROWERR(std::string("Append Cache State Stage for a Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+        return;
     }
+    auto tStageNode = aDocument.append_child("Stage");
+    auto tStageName = std::string("Cache State");
+    XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
 
-    for (auto &tObjective : aXMLMetaData.objectives)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Cache State");
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-
-        auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Cache State", tPerformerName };
-        XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
-    }
+    auto tPerformerName = aXMLMetaData.mScenarioMetaData.performer() + "_{PerformerIndex}";
+    std::vector<std::string> tKeys = {"Name", "PerformerName"};
+    std::vector<std::string> tValues = {"Cache State", tPerformerName};
+    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 // function append_cache_state_stage_for_nondeterministic_usecase
 /******************************************************************************/
@@ -221,24 +215,19 @@ void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
     {
-        THROWERR(std::string("Append Update Problem Stage for a Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+        return;
     }
 
-    for (auto &tObjective : aXMLMetaData.objectives)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Update Problem");
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
+    auto tStageNode = aDocument.append_child("Stage");
+    auto tStageName = std::string("Update Problem");
+    XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
 
-        auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Update Problem", tPerformerName };
-        XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
-    }
+    auto tPerformerName = aXMLMetaData.mScenarioMetaData.performer() + "_{PerformerIndex}";
+    std::vector<std::string> tKeys = {"Name", "PerformerName"};
+    std::vector<std::string> tValues = {"Update Problem", tPerformerName};
+    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 // function append_update_problem_stage_for_nondeterministic_usecase
 /******************************************************************************/

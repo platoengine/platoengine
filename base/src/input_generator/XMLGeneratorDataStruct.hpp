@@ -20,6 +20,8 @@ namespace XMLGen
 struct Scenario
 {
 private:
+    bool mCacheState = false;
+    bool mUpdateProblem = false;
     bool mUseNewAnalyzeUQWorkflow = false;
 
     std::string mID = "0";
@@ -92,6 +94,24 @@ public:
     std::string minErsatzMaterialConstant() const
     {
         return mMinimumErsatzValue;
+    }
+
+    void cacheState(const bool& aInput)
+    {
+        mCacheState = aInput;
+    }
+    bool cacheState() const
+    {
+        return mCacheState;
+    }
+
+    void updateProblem(const bool& aInput)
+    {
+        mUpdateProblem = aInput;
+    }
+    bool updateProblem() const
+    {
+        return mUpdateProblem;
     }
 
     void useNewAnalyzeUQWorkflow(const bool& aInput)

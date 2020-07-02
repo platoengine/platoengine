@@ -58,7 +58,9 @@ void ParseScenario::allocate()
     mTags.insert({ "performer", { {"performer"}, "" } });
     mTags.insert({ "dimensions", { {"dimensions"}, "" } });
     mTags.insert({ "scenario_id", { {"scenario_id"}, "" } });
+    mTags.insert({ "enable_cache_state", { {"enable_cache_state"}, "" } });
     mTags.insert({ "analyze_new_workflow", { {"analyze_new_workflow"}, "" } });
+    mTags.insert({ "enable_update_problem", { {"enable_update_problem"}, "" } });
     mTags.insert({ "material_penalty_exponent", { {"material_penalty_exponent"}, "" } });
     mTags.insert({ "minimum_ersatz_material_value", { {"minimum_ersatz_material_value"}, "" } });
     mTags.insert({ "use_new_analyze_uq_workflow", { {"use_new_analyze_uq_workflow"}, "" } });
@@ -162,6 +164,34 @@ void ParseScenario::setMinimumErsatzMaterialValue()
     }
 }
 
+void ParseScenario::setCacheState()
+{
+    auto tItr = mTags.find("enable_cache_state");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
+        mData.cacheState(tFlag);
+    }
+    else
+    {
+        mData.cacheState(false);
+    }
+}
+
+void ParseScenario::setUpdateProblem()
+{
+    auto tItr = mTags.find("enable_update_problem");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
+        mData.updateProblem(tFlag);
+    }
+    else
+    {
+        mData.updateProblem(false);
+    }
+}
+
 void ParseScenario::setUseAnalyzeNewUQWorkflow()
 {
     auto tItr = mTags.find("use_new_analyze_uq_workflow");
@@ -181,9 +211,11 @@ void ParseScenario::setMetaData()
     this->setCode();
     this->setPhysics();
     this->setDimensions();
+    this->setCacheState();
+    this->setUpdateProblem();
     this->setMateriaPenaltyExponent();
-    this->setMinimumErsatzMaterialValue();
     this->setUseAnalyzeNewUQWorkflow();
+    this->setMinimumErsatzMaterialValue();
 }
 
 XMLGen::Scenario ParseScenario::data() const

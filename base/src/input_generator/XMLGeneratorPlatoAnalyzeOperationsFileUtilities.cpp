@@ -19,7 +19,7 @@ void append_update_problem_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mProblemUpdateFrequency.empty())
+    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
     {
         return;
     }

@@ -77,6 +77,20 @@ private:
     void setMinimumErsatzMaterialValue();
 
     /******************************************************************************//**
+     * \fn setCacheState
+     * \brief Set cache state flag, which is used to enable or disable the cache state \n
+     * operation, default = false.
+    **********************************************************************************/
+    void setCacheState();
+
+    /******************************************************************************//**
+     * \fn setUpdateProblem
+     * \brief Set update problem flag, which is used to enable or disable the update \n
+     * problem operation, default = false.
+    **********************************************************************************/
+    void setUpdateProblem();
+
+    /******************************************************************************//**
      * \fn setUseAnalyzeNewUQWorkflow
      * \brief Set use analyze new uncertainty quantification workflow flag, default = false.
     **********************************************************************************/

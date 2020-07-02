@@ -22,6 +22,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mProblemUpdateFrequency = "5";
     tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.mScenarioMetaData.updateProblem(true);
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
@@ -862,7 +863,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_DoNotWrit
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mProblemUpdateFrequency = "0";
+    tInputData.mProblemUpdateFrequency = "0"; // also update problem flag is disabled
     XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -873,6 +874,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     tInputData.mProblemUpdateFrequency = "5";
+    tInputData.mScenarioMetaData.updateProblem(true);
     XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
