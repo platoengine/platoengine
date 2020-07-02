@@ -470,8 +470,13 @@ void append_optimization_output_options
 
 /******************************************************************************/
 void append_optimization_cache_stage_options
-(pugi::xml_node& aParentNode)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
 {
+    if(!aXMLMetaData.mScenarioMetaData.cacheState())
+    {
+        return;
+    }
     auto tNode = aParentNode.append_child("CacheStage");
     append_children({"Name"}, {"Cache State"}, tNode);
 }
@@ -480,8 +485,13 @@ void append_optimization_cache_stage_options
 
 /******************************************************************************/
 void append_optimization_update_problem_stage_options
-(pugi::xml_node& aParentNode)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
 {
+    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
+    {
+        return;
+    }
     auto tNode = aParentNode.append_child("UpdateProblemStage");
     append_children({"Name"}, {"Update Problem"}, tNode);
 }
@@ -574,8 +584,8 @@ void append_optimizer_options
 {
     auto tOptimizerNode = aParentNode.append_child("Optimizer");
     XMLGen::append_optimization_algorithm_options(aXMLMetaData, tOptimizerNode);
-    XMLGen::append_optimization_update_problem_stage_options(tOptimizerNode);
-    XMLGen::append_optimization_cache_stage_options(tOptimizerNode);
+    XMLGen::append_optimization_update_problem_stage_options(aXMLMetaData, tOptimizerNode);
+    XMLGen::append_optimization_cache_stage_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_output_options(tOptimizerNode);
     XMLGen::append_optimization_variables_options(tOptimizerNode);
     XMLGen::append_optimization_objective_options(aXMLMetaData, tOptimizerNode);

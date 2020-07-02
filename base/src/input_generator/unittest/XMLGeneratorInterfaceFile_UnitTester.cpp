@@ -2365,14 +2365,17 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationOutputOptions)
 TEST(PlatoTestXMLGenerator, AppendOptimizationCacheStateOptions)
 {
     pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mScenarioMetaData.cacheState(true);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_optimization_cache_stage_options(tOptimizerNode);
+    XMLGen::append_optimization_cache_stage_options(tXMLMetaData, tOptimizerNode);
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
     std::vector<std::string> tGoldKeys = {"CacheStage"};
     std::vector<std::string> tGoldValues = {""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tOutputNode = tOptimizerNode.child("CacheStage");
+    ASSERT_FALSE(tOutputNode.empty());
     tGoldKeys = {"Name"};
     tGoldValues = {"Cache State"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutputNode);
@@ -2381,14 +2384,17 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationCacheStateOptions)
 TEST(PlatoTestXMLGenerator, AppendOptimizationUpdateProblemOptions)
 {
     pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mScenarioMetaData.updateProblem(true);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_optimization_update_problem_stage_options(tOptimizerNode);
+    XMLGen::append_optimization_update_problem_stage_options(tXMLMetaData, tOptimizerNode);
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
     std::vector<std::string> tGoldKeys = {"UpdateProblemStage"};
     std::vector<std::string> tGoldValues = {""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tOutputNode = tOptimizerNode.child("UpdateProblemStage");
+    ASSERT_FALSE(tOutputNode.empty());
     tGoldKeys = {"Name"};
     tGoldValues = {"Update Problem"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutputNode);
