@@ -162,7 +162,7 @@ std::string transform_keyword_values(const std::vector<std::string>& aTokens)
     {
         tOutput << tToken;
         auto tIndex = &tToken - &aTokens[0];
-        if(tIndex != aTokens.size() - 1)
+        if(static_cast<size_t>(tIndex) != (aTokens.size() - 1u))
         {
             tOutput << " ";
         }
@@ -199,7 +199,7 @@ bool tokens_match
         tMatch[tIndex] = tToken == aInputTokens[tIndex] ? 1 : 0;
     }
     auto tSum = std::accumulate(tMatch.begin(), tMatch.end(), 0);
-    auto tFoundMatch = tSum == tMatch.size() ? true : false;
+    auto tFoundMatch = static_cast<size_t>(tSum) == tMatch.size() ? true : false;
     return tFoundMatch;
 }
 // function tokens_match

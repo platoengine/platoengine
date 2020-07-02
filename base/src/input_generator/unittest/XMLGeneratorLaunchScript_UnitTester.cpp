@@ -19,17 +19,17 @@ TEST(PlatoTestXMLGenerator, ComputeNumberOfNodesNeeded_invalidDenominator)
 TEST(PlatoTestXMLGenerator, ComputeNumberOfNodesNeeded)
 {
     size_t tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,1);
-    EXPECT_EQ(tNumNodesNeeded,10);
+    EXPECT_EQ(tNumNodesNeeded,10u);
     tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,2);
-    EXPECT_EQ(tNumNodesNeeded,5);
+    EXPECT_EQ(tNumNodesNeeded,5u);
     tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,3);
-    EXPECT_EQ(tNumNodesNeeded,4);
+    EXPECT_EQ(tNumNodesNeeded,4u);
     tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,4);
-    EXPECT_EQ(tNumNodesNeeded,3);
+    EXPECT_EQ(tNumNodesNeeded,3u);
     tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,5);
-    EXPECT_EQ(tNumNodesNeeded,2);
+    EXPECT_EQ(tNumNodesNeeded,2u);
     tNumNodesNeeded = XMLGen::Internal::compute_number_of_nodes_needed(10,10);
-    EXPECT_EQ(tNumNodesNeeded,1);
+    EXPECT_EQ(tNumNodesNeeded,1u);
 }
 
 TEST(PlatoTestXMLGenerator, generateBatchScript)
