@@ -655,7 +655,7 @@ void append_design_volume_to_plato_main_operation
     if(XMLGen::is_volume_constraint_defined(aXMLMetaData))
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Compute Design Domain Volume"}, tOperation);
+        XMLGen::append_children({"Function", "Name"}, {"DesignVolume", "Design Volume"}, tOperation);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children({"ArgumentName"}, {"Design Volume"}, tOutput);
     }

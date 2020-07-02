@@ -332,7 +332,7 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeToPlatoMainOperation)
     ASSERT_FALSE(tOperation.empty());
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = {"Function", "Name", "Output"};
-    std::vector<std::string> tValues = {"DesignVolume", "Compute Design Domain Volume", ""};
+    std::vector<std::string> tValues = {"DesignVolume", "Design Volume", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tOutput = tOperation.child("Output");
