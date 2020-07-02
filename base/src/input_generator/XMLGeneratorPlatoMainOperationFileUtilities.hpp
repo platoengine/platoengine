@@ -192,10 +192,12 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
 /******************************************************************************//**
  * \fn append_update_problem_to_plato_main_operation
  * \brief Append update problem operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument  pugi::xml_document
 **********************************************************************************/
 void append_update_problem_to_plato_main_operation
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_filter_control_to_plato_main_operation

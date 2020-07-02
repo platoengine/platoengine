@@ -32,7 +32,7 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
     XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
 
-    XMLGen::append_update_problem_to_plato_main_operation(tDocument);
+    XMLGen::append_update_problem_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
     XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
 
@@ -405,8 +405,13 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
 
 /******************************************************************************/
 void append_update_problem_to_plato_main_operation
-(pugi::xml_document& aDocument)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
+    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
+    {
+        return;
+    }
     auto tOperation = aDocument.append_child("Operation");
     XMLGen::append_children({"Function", "Name"}, {"Update Problem", "Update Problem"}, tOperation);
 }
