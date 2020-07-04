@@ -1099,10 +1099,10 @@ TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name", "Input", "Input"}, {"PlatoMainOutput", "Plato Main Output", "", ""}, tOperation);
     auto tInput = tOperation.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"topology"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Control"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"control"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendSurfaceExtractionToOutputOperation)
@@ -1133,8 +1133,10 @@ TEST(PlatoTestXMLGenerator, AppendDefaultQoiToOutputOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Objective tObjective;
+    tObjective.name = "0";
     tXMLMetaData.objectives.push_back(tObjective);
     XMLGen::Constraint tConstraint;
+    tConstraint.name("0");
     tXMLMetaData.constraints.push_back(tConstraint);
     auto tOperation = tDocument.append_child("Operation");
 
@@ -1142,16 +1144,16 @@ TEST(PlatoTestXMLGenerator, AppendDefaultQoiToOutputOperation)
 
     auto tInput = tOperation.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"topology"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Control"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"control"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Gradient 0"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient id-0"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Gradient 0"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient id-0"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendChildrenToOutputOperation)
@@ -1233,7 +1235,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Objective tObjective1;
+    tObjective1.name = "1";
     XMLGen::Objective tObjective2;
+    tObjective2.name = "2";
     tXMLMetaData.objectives.push_back(tObjective1);
     tXMLMetaData.objectives.push_back(tObjective2);
     auto tOperation = tDocument.append_child("Operation");
@@ -1241,9 +1245,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Gradient 0"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient id-1"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Gradient 1"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient id-2"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
@@ -1251,7 +1255,9 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint1;
+    tConstraint1.name("0");
     XMLGen::Constraint tConstraint2;
+    tConstraint2.name("1");
     tXMLMetaData.constraints.push_back(tConstraint1);
     tXMLMetaData.constraints.push_back(tConstraint2);
     auto tOperation = tDocument.append_child("Operation");
@@ -1259,9 +1265,9 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
 
     ASSERT_FALSE(tOperation.empty());
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Gradient 0"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient id-0"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Gradient 1"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient id-1"}, tInput);
 
 }
 
@@ -1333,7 +1339,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function>")
-    +"<Name>PlatoMainOutput</Name><Input><ArgumentName>Topology</ArgumentName></Input><Input><ArgumentName>Control</ArgumentName></Input><Forvar=\"SampleIndex\"in=\"Samples\">"
+    +"<Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName></Input><Input><ArgumentName>control</ArgumentName></Input><Forvar=\"SampleIndex\"in=\"Samples\">"
     +"<Input><ArgumentName>vonmisesstress{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
     +"<Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation>"
     +"<Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName></Input>"

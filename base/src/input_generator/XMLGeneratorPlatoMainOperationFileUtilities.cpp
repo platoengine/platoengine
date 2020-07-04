@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
@@ -124,9 +125,9 @@ void append_constraint_gradient_to_output_operation
 {
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        auto tIndex = std::to_string(&tConstraint - &aXMLMetaData.constraints[0]);
         auto tInput = aParentNode.append_child("Input");
-        auto tArgumentName = std::string("Constraint Gradient ") + tIndex;
+        auto tName = std::string("Constraint Gradient ID-") + tConstraint.name();
+        auto tArgumentName = XMLGen::to_lower(tName);
         XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
 }
@@ -140,9 +141,9 @@ void append_objective_gradient_to_output_operation
 {
     for(auto& tObjective : aXMLMetaData.objectives)
     {
-        auto tIndex = std::to_string(&tObjective - &aXMLMetaData.objectives[0]);
         auto tInput = aParentNode.append_child("Input");
-        auto tArgumentName = std::string("Objective Gradient ") + tIndex;
+        auto tName = std::string("Objective Gradient ID-") + tObjective.name;
+        auto tArgumentName = XMLGen::to_lower(tName);
         XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
 }
@@ -210,9 +211,9 @@ void append_default_qoi_to_output_operation
  pugi::xml_node &aParentNode)
 {
     auto tInput = aParentNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInput);
+    XMLGen::append_children({"ArgumentName"}, {"topology"}, tInput);
     tInput = aParentNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Control"}, tInput);
+    XMLGen::append_children({"ArgumentName"}, {"control"}, tInput);
     XMLGen::append_objective_gradient_to_output_operation(aXMLMetaData, aParentNode);
     XMLGen::append_constraint_gradient_to_output_operation(aXMLMetaData, aParentNode);
 }

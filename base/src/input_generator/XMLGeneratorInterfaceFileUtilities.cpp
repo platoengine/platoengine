@@ -103,7 +103,7 @@ void append_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.mOutputMetaData.outputData())
+    if(aXMLMetaData.mOutputMetaData.outputData() == false)
     {
         return;
     }
