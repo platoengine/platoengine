@@ -61,22 +61,22 @@ void append_filter_options_to_plato_main_operation
  pugi::xml_document &aDocument);
 
 /******************************************************************************//**
- * \fn append_constraint_gradient_input_to_output_operation
+ * \fn append_constraint_gradient_to_output_operation
  * \brief Append constrain gradient inputs to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_constraint_gradient_input_to_output_operation
+void append_constraint_gradient_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
- * \fn append_objective_gradient_input_to_output_operation
+ * \fn append_objective_gradient_to_output_operation
  * \brief Append objective gradient inputs to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_objective_gradient_input_to_output_operation
+void append_objective_gradient_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode);
 

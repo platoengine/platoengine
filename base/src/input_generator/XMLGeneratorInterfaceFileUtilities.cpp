@@ -5,12 +5,118 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp"
 #include "XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp"
 
 namespace XMLGen
 {
+
+/******************************************************************************/
+void append_objective_gradient_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tInput = aParentNode.append_child("Input");
+        auto tSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
+        auto tArgumentName  = XMLGen::to_lower(tSharedDataName);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+    }
+}
+// function append_objective_gradient_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_constraint_gradient_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        auto tInput = aParentNode.append_child("Input");
+        auto tSharedDataName = std::string("Constraint Gradient ID-") + tConstraint.name();
+        auto tArgumentName  = XMLGen::to_lower(tSharedDataName);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+    }
+}
+// function append_constraint_gradient_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_default_qoi_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tInput = aParentNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"topology", "Topology"}, tInput);
+    tInput = aParentNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"control", "Control"}, tInput);
+    XMLGen::append_objective_gradient_to_plato_main_output_stage(aXMLMetaData, aParentNode);
+    XMLGen::append_constraint_gradient_to_plato_main_output_stage(aXMLMetaData, aParentNode);
+}
+// function append_default_qoi_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_random_qoi_samples_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tID : tIDs)
+    {
+        auto tOuterFor = aParentNode.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+        auto tInnerFor = tOuterFor.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+        auto tInput = tInnerFor.append_child("Input");
+        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tID);
+        auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+    }
+}
+// function append_random_qoi_samples_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_deterministic_qoi_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
+    for(auto& tID : tIDs)
+    {
+        auto tInput = aParentNode.append_child("Input");
+        auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
+        auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+    }
+}
+// function append_deterministic_qoi_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(!aXMLMetaData.mOutputMetaData.outputData())
+    {
+        return;
+    }
+    auto tOutputStage = aDocument.append_child("Stage");
+    XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+    auto tOutputOperation = tOutputStage.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"},{"PlatoMainOutput", "platomain"}, tOutputOperation);
+    XMLGen::append_default_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
+    XMLGen::append_deterministic_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
+    XMLGen::append_random_qoi_samples_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
+}
+// function append_plato_main_output_stage
+/******************************************************************************/
 
 /******************************************************************************/
 void append_lower_bounds_shared_data

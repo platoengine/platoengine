@@ -410,8 +410,8 @@ TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
 
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_TRUE(tOutputMetadata.getRandomQoIs().empty());
-    ASSERT_TRUE(tOutputMetadata.getDeterminsiticQoIs().empty());
+    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
+    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidQoI)
@@ -453,16 +453,19 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
     XMLGen::ParseOutput tOutputParser;
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_TRUE(tOutputMetadata.getRandomQoIs().empty());
-    ASSERT_FALSE(tOutputMetadata.getDeterminsiticQoIs().empty());
+    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
+    ASSERT_FALSE(tOutputMetadata.isDeterministicMapEmpty());
 
-    std::vector<std::string> tGoldDeterministic = {"dispx", "dispy", "dispz", "temperature"};
-    for(auto& tValue : tOutputMetadata.getDeterminsiticQoIs())
+    std::vector<std::string> tGoldIDs = {"dispx", "dispy", "dispz", "temperature"};
+    auto tIDs = tOutputMetadata.deterministicIDs();
+    for(auto& tID : tIDs)
     {
-        auto tItr = std::find(tGoldDeterministic.begin(), tGoldDeterministic.end(), tValue.first);
-        ASSERT_TRUE(tItr != tGoldDeterministic.end());
-        ASSERT_STREQ(tItr->c_str(), tValue.first.c_str());
-        ASSERT_STREQ("nodal field", tValue.second.second.c_str());
+        auto tItr = std::find(tGoldIDs.begin(), tGoldIDs.end(), tID);
+        ASSERT_TRUE(tItr != tGoldIDs.end());
+        ASSERT_STREQ(tItr->c_str(), tID.c_str());
+        ASSERT_STREQ("nodal field", tOutputMetadata.deterministicLayout(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicArgumentName(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicSharedDataName(tID).c_str());
     }
 }
 
@@ -478,20 +481,40 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
     XMLGen::ParseOutput tOutputParser;
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_FALSE(tOutputMetadata.getRandomQoIs().empty());
-    ASSERT_TRUE(tOutputMetadata.getDeterminsiticQoIs().empty());
+    ASSERT_FALSE(tOutputMetadata.isRandomMapEmpty());
+    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
 
-    std::vector<std::string> tGoldRandom = {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomID =
+    {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomArgumentName =
+    {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+     "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    std::vector<std::string> tGoldRandomSharedDataName =
+    {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+     "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
-    for(auto& tPair : tOutputMetadata.getRandomQoIs())
-    {
-        auto tItr = std::find(tGoldRandom.begin(), tGoldRandom.end(), tPair.first);
-        ASSERT_TRUE(tItr != tGoldRandom.end());
-        ASSERT_STREQ(tItr->c_str(), tPair.first.c_str());
 
-        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tPair.second.second);
+    auto tRandomIDs = tOutputMetadata.randomIDs();
+    for(auto& tID : tRandomIDs)
+    {
+        auto tItr = std::find(tGoldRandomID.begin(), tGoldRandomID.end(), tID);
+        ASSERT_TRUE(tItr != tGoldRandomID.end());
+        ASSERT_STREQ(tItr->c_str(), tID.c_str());
+
+        auto tLayout = tOutputMetadata.randomLayout(tID);
+        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tLayout);
         ASSERT_TRUE(tItr != tGoldRandomLayout.end());
-        ASSERT_STREQ(tItr->c_str(), tPair.second.second.c_str());
+        ASSERT_STREQ(tItr->c_str(), tLayout.c_str());
+
+        auto tArgumentName = tOutputMetadata.randomArgumentName(tID);
+        tItr = std::find(tGoldRandomArgumentName.begin(), tGoldRandomArgumentName.end(), tArgumentName);
+        ASSERT_TRUE(tItr != tGoldRandomArgumentName.end());
+        ASSERT_STREQ(tItr->c_str(), tArgumentName.c_str());
+
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
+        tItr = std::find(tGoldRandomSharedDataName.begin(), tGoldRandomSharedDataName.end(), tSharedDataName);
+        ASSERT_TRUE(tItr != tGoldRandomSharedDataName.end());
+        ASSERT_STREQ(tItr->c_str(), tSharedDataName.c_str());
     }
 }
 
@@ -508,28 +531,52 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
     XMLGen::ParseOutput tOutputParser;
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_FALSE(tOutputMetadata.getRandomQoIs().empty());
-    ASSERT_FALSE(tOutputMetadata.getDeterminsiticQoIs().empty());
+    ASSERT_FALSE(tOutputMetadata.isRandomMapEmpty());
+    ASSERT_FALSE(tOutputMetadata.isDeterministicMapEmpty());
 
-    std::vector<std::string> tGoldRandom = {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomID =
+    {"accumulated_plastic_strain", "temperature"};
+    std::vector<std::string> tGoldRandomArgumentName =
+    {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+     "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    std::vector<std::string> tGoldRandomSharedDataName =
+    {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+     "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
-    for(auto& tPair : tOutputMetadata.getRandomQoIs())
-    {
-        auto tItr = std::find(tGoldRandom.begin(), tGoldRandom.end(), tPair.first);
-        ASSERT_TRUE(tItr != tGoldRandom.end());
-        ASSERT_STREQ(tItr->c_str(), tPair.first.c_str());
 
-        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tPair.second.second);
-        ASSERT_TRUE(tItr != tGoldRandomLayout.end());
-        ASSERT_STREQ(tItr->c_str(), tPair.second.second.c_str());
-    }
-    std::vector<std::string> tGoldDeterministic = {"dispx", "dispy", "dispz", "temperature"};
-    for(auto& tPair : tOutputMetadata.getDeterminsiticQoIs())
+    auto tRandomIDs = tOutputMetadata.randomIDs();
+    for(auto& tID : tRandomIDs)
     {
-        auto tItr = std::find(tGoldDeterministic.begin(), tGoldDeterministic.end(), tPair.first);
-        ASSERT_TRUE(tItr != tGoldDeterministic.end());
-        ASSERT_STREQ(tItr->c_str(), tPair.first.c_str());
-        ASSERT_STREQ("nodal field", tPair.second.second.c_str());
+        auto tItr = std::find(tGoldRandomID.begin(), tGoldRandomID.end(), tID);
+        ASSERT_TRUE(tItr != tGoldRandomID.end());
+        ASSERT_STREQ(tItr->c_str(), tID.c_str());
+
+        auto tLayout = tOutputMetadata.randomLayout(tID);
+        tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tLayout);
+        ASSERT_TRUE(tItr != tGoldRandomLayout.end());
+        ASSERT_STREQ(tItr->c_str(), tLayout.c_str());
+
+        auto tArgumentName = tOutputMetadata.randomArgumentName(tID);
+        tItr = std::find(tGoldRandomArgumentName.begin(), tGoldRandomArgumentName.end(), tArgumentName);
+        ASSERT_TRUE(tItr != tGoldRandomArgumentName.end());
+        ASSERT_STREQ(tItr->c_str(), tArgumentName.c_str());
+
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
+        tItr = std::find(tGoldRandomSharedDataName.begin(), tGoldRandomSharedDataName.end(), tSharedDataName);
+        ASSERT_TRUE(tItr != tGoldRandomSharedDataName.end());
+        ASSERT_STREQ(tItr->c_str(), tSharedDataName.c_str());
+    }
+
+    std::vector<std::string> tGoldDeterministicIDs = {"dispx", "dispy", "dispz", "temperature"};
+    auto tIDs = tOutputMetadata.deterministicIDs();
+    for(auto& tID : tIDs)
+    {
+        auto tItr = std::find(tGoldDeterministicIDs.begin(), tGoldDeterministicIDs.end(), tID);
+        ASSERT_TRUE(tItr != tGoldDeterministicIDs.end());
+        ASSERT_STREQ(tItr->c_str(), tID.c_str());
+        ASSERT_STREQ("nodal field", tOutputMetadata.deterministicLayout(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicArgumentName(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicSharedDataName(tID).c_str());
     }
 }
 

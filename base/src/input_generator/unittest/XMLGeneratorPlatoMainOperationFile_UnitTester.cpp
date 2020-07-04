@@ -866,14 +866,6 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name"}, {"Update Problem", "Update Problem"}, tOperation);
 }
 
-TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperation_ErrorInvalidLayout)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "quadrature point field");
-    ASSERT_THROW(XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
@@ -1184,15 +1176,6 @@ TEST(PlatoTestXMLGenerator, AppendChildrenToOutputOperation)
                                          {"PlatoMainOutput", "Plato Main Output", "true", "10", "100"}, tOperation);
 }
 
-TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation_ErrorInvalidLyout)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises", "quadrature point field");
-    auto tOperation = tDocument.append_child("Operation");
-    ASSERT_THROW(XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
@@ -1226,15 +1209,6 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"von mises {SampleIndex}", "Element Field"}, tInput);
 }
 
-TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation_ErrorInvalidLyout)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Von Mises", "quadrature point field");
-    auto tOperation = tDocument.append_child("Operation");
-    ASSERT_THROW(XMLGen::append_deterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
@@ -1263,7 +1237,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
     tXMLMetaData.objectives.push_back(tObjective1);
     tXMLMetaData.objectives.push_back(tObjective2);
     auto tOperation = tDocument.append_child("Operation");
-    XMLGen::append_objective_gradient_input_to_output_operation(tXMLMetaData, tOperation);
+    XMLGen::append_objective_gradient_to_output_operation(tXMLMetaData, tOperation);
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
@@ -1281,7 +1255,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
     tXMLMetaData.constraints.push_back(tConstraint1);
     tXMLMetaData.constraints.push_back(tConstraint2);
     auto tOperation = tDocument.append_child("Operation");
-    XMLGen::append_constraint_gradient_input_to_output_operation(tXMLMetaData, tOperation);
+    XMLGen::append_constraint_gradient_to_output_operation(tXMLMetaData, tOperation);
 
     ASSERT_FALSE(tOperation.empty());
     auto tInput = tOperation.child("Input");

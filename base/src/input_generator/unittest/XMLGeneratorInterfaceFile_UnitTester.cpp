@@ -17,6 +17,141 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStage_EmptyStage_OutputDisabled)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    ASSERT_NO_THROW(XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument));
+    auto tStage = tDocument.child("Stage");
+    ASSERT_TRUE(tStage.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
+{
+    // POSE PARAMETERS
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tXMLMetaData.objectives.push_back(tObjective);
+
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tXMLMetaData.constraints.push_back(tConstraint);
+
+    tXMLMetaData.mOutputMetaData.outputData(true);
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
+
+    // TEST RESULTS
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "Operation"};
+    std::vector<std::string> tGoldValues = {"Output To File", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOperation = tStage.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Input", "Input", "Input"};
+    tGoldValues = {"PlatoMainOutput", "platomain", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    auto tGoldNumInputs = 5u;
+    std::vector<std::string> tGoldArguments = {"topology", "control", "objective gradient id-1", "constraint gradient id-1", "vonmises"};
+    std::vector<std::string> tGoldSharedData = {"Topology", "Control", "Objective Gradient ID-1", "Constraint Gradient ID-1", "vonmises"};
+    auto tInput = tOperation.child("Input");
+    auto tGoldArgItr = tGoldArguments.begin();
+    auto tGoldShrdDataItr = tGoldSharedData.begin();
+
+    auto tCounter = 0u;
+    while(!tInput.empty())
+    {
+        ASSERT_STREQ(tGoldArgItr->c_str(), tInput.child("ArgumentName").child_value());
+        ASSERT_STREQ(tGoldShrdDataItr->c_str(), tInput.child("SharedDataName").child_value());
+        tInput = tInput.next_sibling();
+        std::advance(tGoldArgItr, 1);
+        std::advance(tGoldShrdDataItr, 1);
+        if(tCounter > tGoldNumInputs)
+        {
+            break;
+        }
+        tCounter++;
+    }
+    ASSERT_EQ(tGoldNumInputs, tCounter);
+
+}
+
+TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
+{
+    // POSE PARAMETERS
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tXMLMetaData.objectives.push_back(tObjective);
+
+    XMLGen::Constraint tConstraint;
+    tConstraint.name("1");
+    tXMLMetaData.constraints.push_back(tConstraint);
+
+    tXMLMetaData.mOutputMetaData.outputData(true);
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
+    tDocument.save_file("dummy.xml", " ");
+
+    // TEST RESULTS
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    std::vector<std::string> tGoldKeys = {"Name", "Operation"};
+    std::vector<std::string> tGoldValues = {"Output To File", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
+
+    auto tOperation = tStage.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Input", "Input", "For"};
+    tGoldValues = {"PlatoMainOutput", "platomain", "", "", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
+
+    // DEFAULT QoIs
+    auto tGoldNumInputs = 5u;
+    std::vector<std::string> tGoldArguments = {"topology", "control", "objective gradient id-1", "constraint gradient id-1", ""};
+    std::vector<std::string> tGoldSharedData = {"Topology", "Control", "Objective Gradient ID-1", "Constraint Gradient ID-1", ""};
+    auto tInput = tOperation.child("Input");
+    auto tGoldArgItr = tGoldArguments.begin();
+    auto tGoldShrdDataItr = tGoldSharedData.begin();
+
+    auto tCounter = 0u;
+    while(!tInput.empty())
+    {
+        ASSERT_STREQ(tGoldArgItr->c_str(), tInput.child("ArgumentName").child_value());
+        ASSERT_STREQ(tGoldShrdDataItr->c_str(), tInput.child("SharedDataName").child_value());
+        tInput = tInput.next_sibling();
+        std::advance(tGoldArgItr, 1);
+        std::advance(tGoldShrdDataItr, 1);
+        if(tCounter > tGoldNumInputs)
+        {
+            break;
+        }
+        tCounter++;
+    }
+    ASSERT_EQ(tGoldNumInputs, tCounter);
+
+    // RANDOM QoIs
+    auto tOuterFor = tOperation.child("For");
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    tInput = tInnerFor.child("Input");
+    tGoldKeys = {"ArgumentName", "SharedDataName"};
+    tGoldValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+                   "vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
+}
+
 TEST(PlatoTestXMLGenerator, ConstraintValueOperation_ErrorInvalidCode)
 {
     XMLGen::ConstraintValueOperation tInterface;

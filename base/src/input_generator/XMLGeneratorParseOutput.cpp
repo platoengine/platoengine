@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "XMLGeneratorParseOutput.hpp"
+#include "XMLGeneratorOutputMetadata.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 

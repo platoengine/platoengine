@@ -10,9 +10,20 @@
 #include <vector>
 
 #include "pugixml.hpp"
+#include "XMLGeneratorDataStruct.hpp"
 
 namespace XMLGen
 {
+
+/******************************************************************************//**
+ * \fn append_plato_main_output_stage
+ * \brief Append plato main output stage to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_lower_bounds_shared_data

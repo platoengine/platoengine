@@ -67,13 +67,15 @@ void append_nondeterministic_qoi_shared_data
     }
 
     XMLGen::ValidLayoutKeys tValidLayouts;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
+    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tID : tIDs)
     {
-        auto tLayout = tValidLayouts.mKeys.find(tPair.second.second)->second;
-        auto tSharedDataName = tPair.first + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
+        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
+        auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
         auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayout->second, "IGNORE", tOwnerName, "platomain"};
         XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
     }
 }
@@ -428,6 +430,7 @@ void append_stages_for_nondeterministic_usecase
     XMLGen::append_initial_guess_stage(aDocument);
     XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
     XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
 
     // nondeterministic stages
     XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);

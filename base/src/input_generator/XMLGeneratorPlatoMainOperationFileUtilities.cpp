@@ -118,7 +118,7 @@ void append_filter_options_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_constraint_gradient_input_to_output_operation
+void append_constraint_gradient_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
@@ -126,15 +126,15 @@ void append_constraint_gradient_input_to_output_operation
     {
         auto tIndex = std::to_string(&tConstraint - &aXMLMetaData.constraints[0]);
         auto tInput = aParentNode.append_child("Input");
-        auto tSharedDatatName = std::string("Constraint Gradient ") + tIndex;
-        XMLGen::append_children( { "ArgumentName" }, { tSharedDatatName }, tInput);
+        auto tArgumentName = std::string("Constraint Gradient ") + tIndex;
+        XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
 }
-// function append_constraint_gradient_input_to_output_operation
+// function append_constraint_gradient_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_gradient_input_to_output_operation
+void append_objective_gradient_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
@@ -142,11 +142,11 @@ void append_objective_gradient_input_to_output_operation
     {
         auto tIndex = std::to_string(&tObjective - &aXMLMetaData.objectives[0]);
         auto tInput = aParentNode.append_child("Input");
-        auto tSharedDatatName = std::string("Objective Gradient ") + tIndex;
-        XMLGen::append_children( { "ArgumentName" }, { tSharedDatatName }, tInput);
+        auto tArgumentName = std::string("Objective Gradient ") + tIndex;
+        XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
 }
-// function append_objective_gradient_input_to_output_operation
+// function append_objective_gradient_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -154,18 +154,15 @@ void append_deterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getDeterminsiticQoIs())
+    XMLGen::ValidLayoutKeys tValidLayouts;
+    auto tIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
+    for(auto& tID : tIDs)
     {
-        auto tLowerLayout = Plato::tolower(tPair.second.second);
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
-        if(tValidLayoutItr == tValidKeys.mKeys.end())
-        {
-            THROWERR(std::string("Append Deterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
-        }
         auto tInput= aParentNode.append_child("Input");
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tPair.first, tValidLayoutItr->second }, tInput);
+        auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
+        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
+        auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout->second }, tInput);
     }
 }
 // function append_deterministic_qoi_inputs_to_output_operation
@@ -176,22 +173,18 @@ void append_nondeterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
+    XMLGen::ValidLayoutKeys tValidLayouts;
+    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tID : tIDs)
     {
         auto tFor = aParentNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
 
-        auto tLowerLayout = Plato::tolower(tPair.second.second);
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
-        if(tValidLayoutItr == tValidKeys.mKeys.end())
-        {
-            THROWERR(std::string("Append Nondeterministic QOI Inputs to Output Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
-        }
         auto tInput= tFor.append_child("Input");
-        auto tArgumentName = tPair.first + " {SampleIndex}";
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayoutItr->second }, tInput);
+        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
+        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
+        auto tArgumentName = tID + " {SampleIndex}";
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout->second }, tInput);
     }
 }
 // function append_nondeterministic_qoi_inputs_to_output_operation
@@ -220,8 +213,8 @@ void append_default_qoi_to_output_operation
     XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInput);
     tInput = aParentNode.append_child("Input");
     XMLGen::append_children({"ArgumentName"}, {"Control"}, tInput);
-    XMLGen::append_objective_gradient_input_to_output_operation(aXMLMetaData, aParentNode);
-    XMLGen::append_constraint_gradient_input_to_output_operation(aXMLMetaData, aParentNode);
+    XMLGen::append_objective_gradient_to_output_operation(aXMLMetaData, aParentNode);
+    XMLGen::append_constraint_gradient_to_output_operation(aXMLMetaData, aParentNode);
 }
 // function append_default_qoi_to_output_operation
 /******************************************************************************/
@@ -371,16 +364,12 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
  pugi::xml_document &aDocument)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    for(auto& tPair : aXMLMetaData.mOutputMetaData.getRandomQoIs())
+    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tID : tIDs)
     {
-        auto tLowerLayout = Plato::tolower(tPair.second.second);
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerLayout);
-        if(tValidLayoutItr == tValidKeys.mKeys.end())
-        {
-            THROWERR(std::string("Append Nondeterministic QOI to Statistics Operation: ")
-                + "QOI '" + tPair.first + "' layout '" + tLowerLayout + "' is not supported.")
-        }
-        auto tName = tPair.first + " Statistics";
+        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
+        auto tValidLayoutItr = tValidKeys.mKeys.find(tLayout);
+        auto tName = tID + " Statistics";
         std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
         std::vector<std::string> tValues = { "MeanPlusStdDev", tName, tValidLayoutItr->second };
         auto tOperation = aDocument.append_child("Operation");
@@ -392,15 +381,15 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
         XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
         auto tInput = tInnerFor.append_child("Input");
         tKeys = {"ArgumentName", "Probability"};
-        tValues = {tPair.first + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-            "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tID);
+        tValues = {tArgumentName, "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
         XMLGen::append_children(tKeys, tValues, tInput);
 
         auto tOutput = tOperation.append_child("Output");
-        auto tArgumentName = tPair.first + " Mean";
+        tArgumentName = tID + " Mean";
         XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", tArgumentName}, tOutput);
         tOutput = tOperation.append_child("Output");
-        tArgumentName = tPair.first + " StdDev";
+        tArgumentName = tID + " StdDev";
         XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
     }
 }
