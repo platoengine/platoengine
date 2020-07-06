@@ -78,7 +78,7 @@ void append_compute_random_objective_gradient_to_plato_analyze_operation
     if(tAppendComputeObjectiveGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveGradient", "Compute Objective Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjective", "Compute Objective Gradient" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
