@@ -418,6 +418,8 @@ void MeanPlusVarianceGradient::setStandardDeviationMultiplier(const std::string&
 
 double MeanPlusVarianceGradient::getStandardDeviationMultiplier(const std::vector<std::string>& aTokens)
 {
+    // tokens: mean_plus_k_std_dev
+    // index :    0    1 2   3   4
     try
     {
         auto tMySigmaValue = std::stod(aTokens[2]);
