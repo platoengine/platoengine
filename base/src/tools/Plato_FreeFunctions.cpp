@@ -47,7 +47,9 @@
 
 #include "Plato_FreeFunctions.hpp"
 
+#include <vector>
 #include <cstddef>
+#include <iterator>
 #include <algorithm>
 
 namespace Plato
@@ -119,6 +121,29 @@ std::string toupper(const std::string& aInput)
     }
     return (tOutput.str());
 }
+/**********************************************************************************/
+
+/**********************************************************************************/
+std::string transform_tokens(const std::vector<std::string>& aTokens)
+{
+    if(aTokens.empty())
+    {
+        return std::string("");
+    }
+
+    std::string tOutput;
+    auto tEndIndex = aTokens.size() - 1u;
+    auto tEndIterator = std::next(aTokens.begin(), tEndIndex);
+    for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
+    {
+        auto tIndex = std::distance(aTokens.begin(), tItr);
+        tOutput += aTokens[tIndex] + " ";
+    }
+    tOutput += aTokens[tEndIndex];
+
+    return tOutput;
+}
+// function transform_tokens
 /**********************************************************************************/
 
 /**********************************************************************************/

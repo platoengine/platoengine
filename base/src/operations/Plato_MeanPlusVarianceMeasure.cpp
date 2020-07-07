@@ -223,11 +223,11 @@ void MeanPlusVarianceMeasure::setMySigmaValue(const std::string &aStatisticMeasu
         THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
     }
 
-    std::vector<std::string> tStringList;
-    Plato::split(aStatisticMeasure, tStringList);
-    if (tStringList.size() > 2u)
+    std::vector<std::string> tTokens;
+    Plato::split(aStatisticMeasure, tTokens);
+    if (tTokens.size() > 2u)
     {
-        const double tMySigmaValue = this->getMySigmaValue(tStringList[2]);
+        const double tMySigmaValue = this->getMySigmaValue(tTokens[2]);
         const std::string &tOutputArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
         mOutArgumentToStdDevMultiplier[tOutputArgumentName] = tMySigmaValue;
     }

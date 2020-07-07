@@ -79,6 +79,14 @@ std::string to_string(const int d);
 std::string to_string(const size_t d);
 
 /******************************************************************************//**
+ * \fn transform_tokens
+ * \brief Convert uppercase word to lowercase.
+ * \param [in] aInput word
+ * \return lowercase word
+**********************************************************************************/
+std::string transform_tokens(const std::vector<std::string>& aTokens);
+
+/******************************************************************************//**
  * \fn tolower
  * \brief Convert uppercase word to lowercase.
  * \param [in] aInput word
