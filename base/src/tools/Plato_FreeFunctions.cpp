@@ -47,6 +47,7 @@
 
 #include "Plato_FreeFunctions.hpp"
 
+#include <cmath>
 #include <vector>
 #include <cstddef>
 #include <iterator>
@@ -120,6 +121,14 @@ std::string toupper(const std::string& aInput)
         tOutput << std::toupper(tChar,tLocale);
     }
     return (tOutput.str());
+}
+/**********************************************************************************/
+
+/**********************************************************************************/
+bool equal(const double& aA, const double& aB)
+{
+  return std::nextafter(aA, std::numeric_limits<double>::lowest()) <= aB
+    && std::nextafter(aA, std::numeric_limits<double>::max()) >= aB;
 }
 /**********************************************************************************/
 

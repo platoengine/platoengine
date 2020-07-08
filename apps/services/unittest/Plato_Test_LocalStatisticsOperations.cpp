@@ -56,6 +56,12 @@
 namespace MeanPlusVarianceMeasureTest
 {
 
+TEST(PlatoTest, IsZero)
+{
+    ASSERT_TRUE(Plato::equal(0.0, 0.0));
+    ASSERT_FALSE(Plato::equal(1.0, 0.0));
+}
+
 TEST(PlatoTest, MeanPlusVarianceMeasure)
 {
     Plato::InputData tOperations("Operation");
@@ -673,7 +679,28 @@ TEST(PlatoTest, compute_sample_set_mean_field_value)
     ASSERT_NEAR(6.35, tMean[1], tTolerance);
 }
 
-TEST(PlatoTest, compute_sample_set_standard_deviation_global_value)
+TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_1)
+{
+    std::vector<Plato::SampleProbPair<double, double>> tPairs;
+    Plato::SampleProbPair<double, double> tSample1;
+    tSample1.mLength = 1;
+    tSample1.mProbability = 0.36112468067266212;
+    tSample1.mSample = 6.0821175463902577 ;
+    tPairs.push_back(tSample1);
+    Plato::SampleProbPair<double, double> tSample2;
+    tSample2.mLength = 1;
+    tSample2.mProbability = 0.63887286897558715;
+    tSample2.mSample = 6.1586066842967053;
+    tPairs.push_back(tSample2);
+
+    double tTolerance = 1e-6;
+    auto tMean = Plato::compute_sample_set_mean(tPairs);
+    EXPECT_NEAR(6.1309694780426414, tMean, tTolerance);
+    auto tStdDev = Plato::compute_sample_set_standard_deviation(tMean, tPairs);
+    EXPECT_NEAR(0.037972551173061871, tStdDev, tTolerance);
+}
+
+TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_2)
 {
     std::vector<Plato::SampleProbPair<double, double>> tPairs;
     tPairs.push_back(Plato::SampleProbPair<double, double>{});

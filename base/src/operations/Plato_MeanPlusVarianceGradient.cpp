@@ -249,14 +249,15 @@ void MeanPlusVarianceGradient::setCriterionValueSampleProbabilityPairs()
         THROWERR("EXPECTED THE CRITERIA VALUE SAMPLE-PROBABILITY SET AND SAMPLE-PROBABILITY MAP TO HAVE THE SAME SIZE.\n")
     }
 
-    auto tVectorIterator = mCriterionValueSamplesToProbability.begin();
+    auto tSampleProbPairsItr = mCriterionValueSamplesToProbability.begin();
     // tIterator->first = Argument name & tIterator->second = Probability
     for(auto tIterator = mCriterionValueSamplesArgNameToProbability.begin();
             tIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tIterator)
     {
         std::vector<double>* tInputValue = mPlatoApp->getValue(tIterator->first);
-        tVectorIterator->mSample = (*tInputValue)[0];
-        tVectorIterator->mProbability = tIterator->second;
+        tSampleProbPairsItr->mSample = (*tInputValue)[0];
+        tSampleProbPairsItr->mProbability = tIterator->second;
+        std::advance(tSampleProbPairsItr, 1);
     }
 }
 

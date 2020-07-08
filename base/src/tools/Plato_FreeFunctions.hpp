@@ -79,6 +79,15 @@ std::string to_string(const int d);
 std::string to_string(const size_t d);
 
 /******************************************************************************//**
+ * \fn equal
+ * \brief Return true if the two floating point numbers are the same.
+ * \param [in] aA value one
+ * \param [in] aB value two
+ * \return Flag
+**********************************************************************************/
+bool equal(const double& aA, const double& aB);
+
+/******************************************************************************//**
  * \fn transform_tokens
  * \brief Convert uppercase word to lowercase.
  * \param [in] aInput word
