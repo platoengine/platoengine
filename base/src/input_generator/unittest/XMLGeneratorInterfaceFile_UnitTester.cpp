@@ -17,6 +17,21 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendTrustRegionKelleySachsOptions)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mProblemUpdateFrequency = "5";
+    tXMLMetaData.mMaxTrustRegionIterations = "10";
+    tXMLMetaData.mDisablePostSmoothingKS = "false";
+    ASSERT_NO_THROW(XMLGen::append_trust_region_kelley_sachs_options(tXMLMetaData, tDocument));
+    auto tOptions = tDocument.child("Options");
+    ASSERT_FALSE(tOptions.empty());
+    std::vector<std::string> tGoldKeys = {"KSMaxTrustRegionIterations", "ProblemUpdateFrequency", "DisablePostSmoothing"};
+    std::vector<std::string> tGoldValues = {"10", "5", "false"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptions);
+}
+
 TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStage_EmptyStage_OutputDisabled)
 {
     pugi::xml_document tDocument;
@@ -101,7 +116,6 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", " ");
 
     // TEST RESULTS
     auto tStage = tDocument.child("Stage");
@@ -956,7 +970,6 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
     tInputData.mScenarioMetaData.cacheState(true);
 
     ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
-    tDocument.save_file("dummy.xml", " ");
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -2307,7 +2320,7 @@ TEST(PlatoTestXMLGenerator, AppendDerivativeCheckerOptions)
     tXMLMetaData.check_gradient = "true";
     tXMLMetaData.check_hessian = "true";
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_derivative_checker_parameters_options(tXMLMetaData, tOptimizerNode);
+    XMLGen::append_derivative_checker_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
 
     // ****** TEST RESULTS AGAINST OPTIMIZER NODE GOLD VALUES ******
@@ -2327,7 +2340,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOC_Options)
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.max_iterations = "11";
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_optimization_algorithm_oc_parameters_options(tXMLMetaData, tOptimizerNode);
+    XMLGen::append_optimality_criteria_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
 
     // ****** TEST RESULTS AGAINST OPTIMIZER NODE GOLD VALUES ******
@@ -2348,7 +2361,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     tXMLMetaData.max_iterations = "11";
     tXMLMetaData.mMMAMoveLimit = "0.2";
     auto tOptimizerNode = tDocument1.append_child("Optimizer");
-    XMLGen::append_optimization_algorithm_mma_parameters_options(tXMLMetaData, tOptimizerNode);
+    XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
@@ -2368,7 +2381,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     tXMLMetaData.mMMAControlStagnationTolerance = "1e-3";
     tXMLMetaData.mMMAObjectiveStagnationTolerance = "1e-8";
     tOptimizerNode = tDocument2.append_child("Optimizer");
-    XMLGen::append_optimization_algorithm_mma_parameters_options(tXMLMetaData, tOptimizerNode);
+    XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
@@ -2389,6 +2402,28 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptions_ErrorOptimizerNot
     tXMLMetaData.optimization_algorithm = "stochastic gradient descent";
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsKSBC)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mTrustRegionContractionFactor = "0.5";
+    tXMLMetaData.mTrustRegionExpansionFactor = "4.0";
+    tXMLMetaData.mDisablePostSmoothingKS = "false";
+    tXMLMetaData.optimization_algorithm = "KSbc";
+    auto tOptimizerNode = tDocument.append_child("Optimizer");
+    ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode));
+    ASSERT_FALSE(tOptimizerNode.empty());
+
+    // ****** TEST RESULTS AGAINST GOLD VALUES ******
+    std::vector<std::string> tGoldKeys = {"Options"};
+    std::vector<std::string> tGoldValues = {""};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
+    auto tOptionsNode = tOptimizerNode.child("Options");
+    tGoldKeys = {"KSTrustRegionExpansionFactor", "KSTrustRegionContractionFactor", "DisablePostSmoothing"};
+    tGoldValues = {"4.0", "0.5", "false"};
+    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptionsNode);
 }
 
 TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsMMA)

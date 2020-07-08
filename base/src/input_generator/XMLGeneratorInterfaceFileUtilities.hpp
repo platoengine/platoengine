@@ -207,32 +207,42 @@ void append_constraint_gradient_stage
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_derivative_checker_parameters_options
+ * \fn append_derivative_checker_options
  * \brief Append derivative checker options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_derivative_checker_parameters_options
+void append_derivative_checker_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_optimization_algorithm_oc_parameters_options
+ * \fn append_optimality_criteria_options
  * \brief Append optimality criteria algorithm's options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_optimization_algorithm_oc_parameters_options
+void append_optimality_criteria_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_optimization_algorithm_mma_parameters_options
+ * \fn append_method_moving_asymptotes_options
  * \brief Append Method of Moving Asymptotes (MMA) algorithm's options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_optimization_algorithm_mma_parameters_options
+void append_method_moving_asymptotes_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_trust_region_kelley_sachs_options
+ * \brief Append options for trust region Kelley-Sachs optimization algorithm.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_trust_region_kelley_sachs_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 

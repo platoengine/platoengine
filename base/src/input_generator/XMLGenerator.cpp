@@ -1310,7 +1310,10 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.mMaxNumAugLagSubProbIter = "";
 
     m_InputData.mHessianType = "disabled";
-    m_InputData.mLimitedMemoryStorage = "8";
+    if(m_InputData.mHessianType.compare("lbfgs") == 0)
+    {
+        m_InputData.mLimitedMemoryStorage = "8";
+    }
     m_InputData.mDisablePostSmoothingKS = "true";
     m_InputData.mProblemUpdateFrequency = "5";
     m_InputData.mOuterGradientToleranceKS = "";

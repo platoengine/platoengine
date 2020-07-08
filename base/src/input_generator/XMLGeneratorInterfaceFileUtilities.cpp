@@ -470,7 +470,7 @@ void append_constraint_gradient_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_derivative_checker_parameters_options
+void append_derivative_checker_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -483,22 +483,22 @@ void append_derivative_checker_parameters_options
     tValues = {aXMLMetaData.mDerivativeCheckerInitialSuperscript, aXMLMetaData.mDerivativeCheckerFinalSuperscript};
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
-// function append_derivative_checker_parameters_options
+// function append_derivative_checker_options
 /******************************************************************************/
 
 /******************************************************************************/
-void append_optimization_algorithm_oc_parameters_options
+void append_optimality_criteria_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
     auto tConvergenceNode = aParentNode.append_child("Convergence");
     XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.max_iterations}, tConvergenceNode);
 }
-// function append_optimization_algorithm_oc_parameters_options
+// function append_optimality_criteria_options
 /******************************************************************************/
 
 /******************************************************************************/
-void append_optimization_algorithm_mma_parameters_options
+void append_method_moving_asymptotes_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -511,7 +511,28 @@ void append_optimization_algorithm_mma_parameters_options
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
-// function append_optimization_algorithm_mma_parameters_options
+// function append_method_moving_asymptotes_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_trust_region_kelley_sachs_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"KSTrustRegionExpansionFactor", "KSTrustRegionContractionFactor", "KSMaxTrustRegionIterations", "KSInitialRadiusScale",
+         "KSMaxRadiusScale", "HessianType", "MinTrustRegionRadius", "LimitedMemoryStorage", "KSOuterGradientTolerance", "KSOuterStationarityTolerance",
+         "KSOuterStagnationTolerance", "KSOuterControlStagnationTolerance", "KSOuterActualReductionTolerance", "ProblemUpdateFrequency", "DisablePostSmoothing",
+         "KSTrustRegionRatioLow", "KSTrustRegionRatioMid", "KSTrustRegionRatioUpper"};
+    std::vector<std::string> tValues = {aXMLMetaData.mTrustRegionExpansionFactor, aXMLMetaData.mTrustRegionContractionFactor, aXMLMetaData.mMaxTrustRegionIterations,
+        aXMLMetaData.mInitialRadiusScale, aXMLMetaData.mMaxRadiusScale, aXMLMetaData.mHessianType, aXMLMetaData.mMinTrustRegionRadius, aXMLMetaData.mLimitedMemoryStorage,
+        aXMLMetaData.mOuterGradientToleranceKS, aXMLMetaData.mOuterStationarityToleranceKS, aXMLMetaData.mOuterStagnationToleranceKS, aXMLMetaData.mOuterControlStagnationToleranceKS,
+        aXMLMetaData.mOuterActualReductionToleranceKS, aXMLMetaData.mProblemUpdateFrequency, aXMLMetaData.mDisablePostSmoothingKS, aXMLMetaData.mTrustRegionRatioLowKS,
+        aXMLMetaData.mTrustRegionRatioMidKS, aXMLMetaData.mTrustRegionRatioUpperKS};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.append_child("Options");
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+}
+// function append_trust_region_kelley_sachs_options
 /******************************************************************************/
 
 /******************************************************************************/
@@ -519,18 +540,22 @@ void append_optimization_algorithm_parameters_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tLower = Plato::tolower(aXMLMetaData.optimization_algorithm);
+    auto tLower = XMLGen::to_lower(aXMLMetaData.optimization_algorithm);
     if(tLower.compare("oc") == 0)
     {
-        XMLGen::append_optimization_algorithm_oc_parameters_options(aXMLMetaData, aParentNode);
+        XMLGen::append_optimality_criteria_options(aXMLMetaData, aParentNode);
     }
     else if(tLower.compare("mma") == 0)
     {
-        XMLGen::append_optimization_algorithm_mma_parameters_options(aXMLMetaData, aParentNode);
+        XMLGen::append_method_moving_asymptotes_options(aXMLMetaData, aParentNode);
+    }
+    else if(tLower.compare("ksbc") == 0)
+    {
+        XMLGen::append_trust_region_kelley_sachs_options(aXMLMetaData, aParentNode);
     }
     else if(tLower.compare("derivativechecker") == 0)
     {
-        XMLGen::append_derivative_checker_parameters_options(aXMLMetaData, aParentNode);
+        XMLGen::append_derivative_checker_options(aXMLMetaData, aParentNode);
     }
     else
     {
