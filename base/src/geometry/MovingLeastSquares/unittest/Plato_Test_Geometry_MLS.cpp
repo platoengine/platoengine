@@ -238,8 +238,8 @@ namespace PlatoTestGeometryMLS
     auto nodeValuesHost = Kokkos::create_mirror_view(nodeValues);
     Kokkos::deep_copy(nodeValuesHost, nodeValues);
 
-    EXPECT_NEAR(/*Gold=*/ 0.80306714048059213, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
-    EXPECT_NEAR(/*Gold=*/ 0.37153563557353658, /*Result=*/ nodeValuesHost(numNodes-1), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 0.884527284424596938, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 0.291296592937485666, /*Result=*/ nodeValuesHost(numNodes-1), /*tTolerance=*/1e-14);
   }
 
   TEST(PlatoTestGeometryMLS, MovingLeastSquaresFunction2D)
@@ -330,8 +330,8 @@ namespace PlatoTestGeometryMLS
     nodeStream.close();
 #endif
 
-    EXPECT_NEAR(/*Gold=*/  0.94780962935042312, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
-    EXPECT_NEAR(/*Gold=*/ -0.39657218575561271, /*Result=*/ nodeValuesHost(numNodes-1), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/0.988235244463390061, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/-0.475551223063872264, /*Result=*/ nodeValuesHost(numNodes-1), /*tTolerance=*/1e-14);
   }
 
   TEST(PlatoTestGeometryMLS, MovingLeastSquaresMap2D)
@@ -438,8 +438,8 @@ namespace PlatoTestGeometryMLS
     nodeStream.close();
 #endif
     
-    EXPECT_NEAR(/*Gold=*/ 0.94780962935042301, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
-    EXPECT_NEAR(/*Gold=*/ 0.92100014066799785, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 0.98823524446339006, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 1.0108182583697762, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
   }
 
   TEST(PlatoTestGeometryMLS, MovingLeastSquaresMap3D)
@@ -550,8 +550,8 @@ namespace PlatoTestGeometryMLS
     nodeStream.close();
 #endif
     
-    EXPECT_NEAR(/*Gold=*/ 0.94780962935042301, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
-    EXPECT_NEAR(/*Gold=*/ 0.92100014066799785, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 0.98823524446339006, /*Result=*/ nodeValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 1.1371705406659982, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
   }
 
   TEST(PlatoTestGeometryMLS, MovingLeastSquaresDefineField2D)
@@ -606,7 +606,7 @@ namespace PlatoTestGeometryMLS
     auto porousField = fields["Initial Porous Design"];
     auto porousFieldHost = Kokkos::create_mirror_view(porousField);
     Kokkos::deep_copy(porousFieldHost, porousField);
-    EXPECT_NEAR(/*Gold=*/ outsideValue, /*Result=*/ porousFieldHost[0], /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ insideValue, /*Result=*/ porousFieldHost[0], /*tTolerance=*/1e-14);
 
     int m1=13, m2=17;
     int numNodes = m1*m2;
@@ -642,7 +642,7 @@ namespace PlatoTestGeometryMLS
     auto mappedValuesHost = Kokkos::create_mirror_view(mappedValues);
     Kokkos::deep_copy(mappedValuesHost, mappedValues);
 
-    EXPECT_NEAR(/*Gold=*/ 1.028414953754806, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
+    EXPECT_NEAR(/*Gold=*/ 0.0027358850269484326, /*Result=*/ mappedValuesHost(0), /*tTolerance=*/1e-14);
 
 #ifdef NOPE
     std::ofstream pointsStream;
