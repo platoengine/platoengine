@@ -112,14 +112,13 @@ double compute_sample_set_standard_deviation(const double& aMean, const std::vec
         THROWERR("MEAN = " + std::to_string(aMean) + " IS NOT A FINITE NUMBER.\n")
     }
 
-    // STD_DEV(X) = sqrt( E[X^2] - E[X]^2 )
+    // STD_DEV(X) = sqrt( E( (X - E(X))^2 )
     double tVariance = 0;
     for(auto& tPair : aPairs)
     {
-        tVariance += tPair.mProbability * tPair.mSample * tPair.mSample; // compute E[X^2]
+        auto tSampleMinusMean = tPair.mSample - aMean;
+        tVariance += tPair.mProbability * std::pow(tSampleMinusMean, 2.0);
     }
-    tVariance -= aMean * aMean;
-    Plato::is_variance_negative(tVariance);
 
     const auto tOutput = std::sqrt(tVariance);
     return (tOutput);
@@ -139,20 +138,19 @@ void compute_sample_set_standard_deviation(const double* aMean,
     // 1. ZEROED VALUES
     Plato::zero(aPairs.begin()->mLength, aOutput);
 
-    // 2. COMPUTE: E[X^2]
+    // 2. COMPUTE VARIANCE = E( (X - E(X))^2 )
     for(auto& tPair : aPairs)
     {
         for(decltype(tPair.mLength) tIndex = 0; tIndex < tPair.mLength; tIndex++)
         {
-            aOutput[tIndex] += tPair.mProbability * tPair.mSample[tIndex] * tPair.mSample[tIndex];
+            auto tSampleMinusMean = tPair.mSample[tIndex] - aMean[tIndex];
+            aOutput[tIndex] += tPair.mProbability * tSampleMinusMean * tSampleMinusMean;
         }
     }
 
-    // 3. COMPUTE STANDARD DEVIATION: SQRT(E[X^2] - E[X]^2)
+    // 3. COMPUTE STANDARD DEVIATION = SQRT(VARIANCE)
     for(decltype(aPairs.begin()->mLength) tIndex = 0; tIndex < aPairs.begin()->mLength; tIndex++)
     {
-        aOutput[tIndex] -= aMean[tIndex] * aMean[tIndex];
-        Plato::is_variance_negative(aOutput[tIndex]);
         auto tStdDev = std::sqrt(aOutput[tIndex]);
         aOutput[tIndex] = tStdDev;
     }
@@ -201,19 +199,23 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
         THROWERR("CRITERION STANDARD DEVIATION '" + std::to_string(aCriterionStdDev) + "' IS ZERO.\n")
     }
 
-    auto tValueIter = aCriterionValPairs.begin();
-    Plato::zero(aCriterionGradPairs[0].mLength, aOutput);
+    Plato::zero(aCriterionGradPairs.begin()->mLength, aOutput);
+
+    // [ p_i + frac{k}{std[f(x)]} * (p_i * (f_i - E[f(x)]) * (1 - p_i)) ] * grad(f_i(x)), where i denotes sample's index
+    auto tCriterionValueIter = aCriterionValPairs.begin();
     for(auto& tPair : aCriterionGradPairs)
     {
         auto tStdDevMultOverStdDev = aStdDevMultiplier / aCriterionStdDev;
-        auto tMultiplier = static_cast<double>(1.0) + (tStdDevMultOverStdDev * (tValueIter->mSample - aCriterionMean));
 
         for(decltype(tPair.mLength) tIndex = 0; tIndex < tPair.mLength; tIndex++)
         {
-            aOutput[tIndex] += tMultiplier * tPair.mProbability * tPair.mSample[tIndex];
+            auto tMeanTermDerivative = tPair.mProbability * tPair.mSample[tIndex];
+            auto tStdTermDerivative = tStdDevMultOverStdDev * (tCriterionValueIter->mSample - aCriterionMean)
+                * (static_cast<double>(1.0) - tPair.mProbability) * tPair.mSample[tIndex];
+            aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;
         }
 
-        std::advance(tValueIter, 1);
+        std::advance(tCriterionValueIter, 1);
     }
 }
 // function compute_sample_set_mean_plus_std_dev_gradient

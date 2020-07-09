@@ -697,7 +697,7 @@ TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_1)
     auto tMean = Plato::compute_sample_set_mean(tPairs);
     EXPECT_NEAR(6.1309694780426414, tMean, tTolerance);
     auto tStdDev = Plato::compute_sample_set_standard_deviation(tMean, tPairs);
-    EXPECT_NEAR(0.037972551173061871, tStdDev, tTolerance);
+    EXPECT_NEAR(0.036739745415510963, tStdDev, tTolerance);
 }
 
 TEST(PlatoTest, compute_sample_set_standard_deviation_global_value_2)
@@ -824,7 +824,7 @@ TEST(PlatoTest, compute_sample_set_mean_plus_std_dev_gradient)
     std::vector<double> tSample5 = {8, 11};
     tGradPairs[4].mSample = tSample5.data();
 
-    const double tTolerance = 1e-6;
+    const double tTolerance = 1e-4;
     const double tStdDevMultiplier = 2;
     auto tFvalMean = Plato::compute_sample_set_mean(tFvalPairs);
     auto tFvalStdDev = Plato::compute_sample_set_standard_deviation(tFvalMean, tFvalPairs);
@@ -835,8 +835,8 @@ TEST(PlatoTest, compute_sample_set_mean_plus_std_dev_gradient)
                                                          tFvalPairs,
                                                          tGradPairs,
                                                          tGradient.data());
-    ASSERT_NEAR(-0.349302031442980, tGradient[0], tTolerance);
-    ASSERT_NEAR(2.041549321072921, tGradient[1], tTolerance);
+    ASSERT_NEAR(-8.4630266676706221, tGradient[0], tTolerance);
+    ASSERT_NEAR(-2.6198239195505337, tGradient[1], tTolerance);
 }
 
 TEST(PlatoTest, compute_sample_set_mean_global_value_error)
