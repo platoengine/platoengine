@@ -835,8 +835,8 @@ TEST(PlatoTest, compute_sample_set_mean_plus_std_dev_gradient)
                                                          tFvalPairs,
                                                          tGradPairs,
                                                          tGradient.data());
-    ASSERT_NEAR(-8.4630266676706221, tGradient[0], tTolerance);
-    ASSERT_NEAR(-2.6198239195505337, tGradient[1], tTolerance);
+    ASSERT_NEAR(0.80119057685932393, tGradient[0], tTolerance);
+    ASSERT_NEAR(3.3157395401084111, tGradient[1], tTolerance);
 }
 
 TEST(PlatoTest, compute_sample_set_mean_global_value_error)
