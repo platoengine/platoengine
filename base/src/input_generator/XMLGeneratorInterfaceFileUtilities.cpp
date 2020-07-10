@@ -474,8 +474,9 @@ void append_derivative_checker_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    auto tCheckGradient = aXMLMetaData.check_gradient.empty() ? std::string("true") : aXMLMetaData.check_gradient;
     std::vector<std::string> tKeys = {"CheckGradient", "CheckHessian", "UseUserInitialGuess"};
-    std::vector<std::string> tValues = {aXMLMetaData.check_gradient, aXMLMetaData.check_hessian, "True"};
+    std::vector<std::string> tValues = {tCheckGradient, aXMLMetaData.check_hessian, "True"};
     XMLGen::append_children(tKeys, tValues, aParentNode);
 
     auto tOptionsNode = aParentNode.append_child("Options");
