@@ -193,7 +193,8 @@ void MeanPlusVarianceGradient::checkInputProbabilityValues()
     }
 
     auto tGradIterator = mCriterionGradSamplesArgNameToProbability.begin();
-    for(auto tValIterator = mCriterionValueSamplesArgNameToProbability.begin(); tValIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tValIterator)
+    for(auto tValIterator = mCriterionValueSamplesArgNameToProbability.begin(); 
+        tValIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tValIterator)
     {
         auto tDiff = std::abs(tValIterator->second - tGradIterator->second);
         if(tDiff > std::double_t(1e-16))
@@ -205,7 +206,7 @@ void MeanPlusVarianceGradient::checkInputProbabilityValues()
                     std::to_string(tGradIterator->second) + ". THESE TWO PROBABILITIES ARE EXPECTED TO HAVE THE SAME VALUE.\n";
             THROWERR(tError)
         }
-        ++tGradIterator;
+        std::advance(tGradIterator, 1);
     }
 }
 
@@ -288,6 +289,7 @@ void MeanPlusVarianceGradient::setNodeFieldGradientSampleProbabilityPairs()
         tVectorIterator->mProbability = tIterator->second;
         tVectorIterator->mLength = mPlatoApp->getNodeFieldLength(tIterator->first);
         tVectorIterator->mSample = mPlatoApp->getNodeFieldData(tIterator->first);
+        std::advance(tVectorIterator, 1);
     }
 }
 
@@ -301,6 +303,7 @@ void MeanPlusVarianceGradient::setElementFieldGradientSampleProbabilityPairs()
         tVectorIterator->mProbability = tIterator->second;
         tVectorIterator->mLength = mPlatoApp->getLocalNumElements();
         tVectorIterator->mSample = mPlatoApp->getElementFieldData(tIterator->first);
+        std::advance(tVectorIterator, 1);
     }
 }
 

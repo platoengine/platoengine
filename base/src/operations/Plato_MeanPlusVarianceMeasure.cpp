@@ -480,7 +480,8 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevGlobalQoI()
     std::vector<double> *tOutputSigmaData = this->getOutputDataGlobalQoI("STD_DEV");
 
     // tIterator->first = statistic's measure argument name AND tIterator->second = standard deviation multiplier
-    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
+    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); 
+         tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
     {
         const std::string &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
         std::vector<double> *tOutMeanPlusSigmaData = mPlatoApp->getValue(tOutputArgumentMeanPlusSigma);
@@ -490,15 +491,16 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevGlobalQoI()
 
 void MeanPlusVarianceMeasure::computeMeanPlusStdDevFieldQoI()
 {
-    const std::string tArgumentName = this->getOutputArgument("MEAN");
+    const auto tArgumentName = this->getOutputArgument("MEAN");
     const size_t tLocalLength = this->getLocalLength(tArgumentName);
     double *tOutputMeanData = this->getOutputDataFieldQoI("MEAN");
     double *tOutputSigmaData = this->getOutputDataFieldQoI("STD_DEV");
 
     // tIterator->first = statistic's measure argument name AND tIterator->second = standard deviation multiplier
-    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
+    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); 
+         tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
     {
-        const std::string &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
+        const auto &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
         double *tOutMeanPlusSigmaData = mPlatoApp->getNodeFieldData(tOutputArgumentMeanPlusSigma);
         for (size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
         {
