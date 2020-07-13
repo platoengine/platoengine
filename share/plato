@@ -1,17 +1,76 @@
-#! /usr/bin/python3
+#!/usr/bin/env spack-python
+## /usr/bin/python3
 
-import argparse
-import plato_config
 import subprocess
+import argparse
+import spack
+import json
+import sys
+import os
+
+from inspect import currentframe, getframeinfo
+from pathlib import Path
+
+def source_dir():
+  filename = getframeinfo(currentframe()).filename
+  parent = Path(filename).resolve().parent
+  return str(parent)
+
+def loadState():
+  src_dir = source_dir()
+  fileName = src_dir + "/config.json"
+  try:
+    f = open(fileName, 'r')
+  except FileNotFoundError:
+    return {}
+  else:
+    data = json.load(f)
+    return data
+
+platoState = loadState()
+
+def is_executable(exeName):
+  command = 'which ' + exeName
+  try:
+    response = subprocess.check_output(command.split())
+  except:
+    return False
+  else:
+    return True
 
 def report(action):
-  print(" Plato CLI $>")
-  print(" Plato CLI $> " + action)
-  print(" Plato CLI $>")
+  print(" Plato CLI: " + action)
+
+def listInstalled(packageName):
+  findCommand = spack.main.SpackCommand('find')
+  try:
+    response = findCommand('-lvp', packageName).split('\n')[2:-1]
+  except:
+    report('spack find returned none. ' + packageName + ' not installed')
+  else:
+    if len(response):
+      report('available options:')
+      for pkg in response:
+        tokens = pkg.split(' ')
+        tokens = list(filter(None, tokens))
+        tokens = tokens[:4]
+        report(' '.join(tokens))
+      report("use 'spack load /<hash>' to select an option")
 
 def execute_analyze(args):
-  print("executing analyze:")
-  print("analyze --input-config=" + args.input)
+
+  if not is_file(args.input):
+    report("input file, " + args.input + ", doesn't exist.")
+    return
+
+  if not is_executable('analyze'):
+    report("'analyze' executable not found")
+    listInstalled('platoanalyze')
+    return
+
+  report("executing analyze")
+  os.system('analyze --input-config=' + args.input)
+
 
 def write_analyze_template(args):
   print("writing analyze template to console: " + args.template)
@@ -39,8 +98,30 @@ def dictToArgs(dictionary):
 
   return retVal
 
+def is_file(fileName):
+  inputFile = Path(fileName)
+  if not inputFile.is_file():
+    return False
+  else:
+    return True
+
 def esp_action(args):
+
+  if not is_executable('serveCSM'):
+    report("'esp' module not loaded")
+    listInstalled('esp')
+    return
+
   report(action="Generating exodus mesh from csm model")
+
+  if not is_file(args.input):
+    report("model file, " + args.input + ", doesn't exist.")
+    return
+
+  response = subprocess.check_output(['awk', '/attribute/{if ($2~/capsMeshLength/) print $3}', args.input])
+  if response == b'':
+    report("'capsMeshLength' attribute is not defined in the model file, " + args.input)
+    return
 
   argsDict = {'modelName': args.input}
 
@@ -56,11 +137,9 @@ def esp_action(args):
   if args.mesh_scale != None:
     argsDict['meshLengthFactor'] = args.mesh_scale
 
-  scriptFilePath = plato_config.esp_dir + "/mesh.py"
+  scriptFilePath = source_dir() + '/esp/mesh.py'
 
   shell_command = "python " + scriptFilePath + " " + dictToArgs(argsDict)
-
-  print(shell_command)
 
   subprocess.call(shell_command.split())
 
@@ -120,22 +199,46 @@ def optimize_action(args):
     list_plato_templates(args)
     return
 
+def writeState(state):
+  src_dir = source_dir()
+  fileName = src_dir + "/state.json"
+  with open(fileName, 'w') as f:
+    json.dump(state, f)
 
+def saveState(key, value):
+
+  global platoState
+
+  platoState = loadState()
+  platoState[key] = value
+  writeState(platoState)
+
+#def configure_action(args):
+#
+#  if args.spack_dir != None:
+#    saveState(key='spack_dir', value=args.spack_dir)
+#    return
 
 ## create top level parser
 #
 parser = argparse.ArgumentParser(prog='plato', description='Plato command line interface (CLI)')
-parser.set_defaults(func=lambda x: parser.print_usage())
 
 
 ## add subparsers container
 #
-subparsers = parser.add_subparsers(help='plato sub-command help', dest='plato_execmode')
+subparsers = parser.add_subparsers(help='plato sub-command help')
+
+## setup configure sub parser
+#
+#configure_parser = subparsers.add_parser('configure', help='Plato configure options', aliases=['c', 'config'])
+#c_group = configure_parser.add_mutually_exclusive_group(required=True)
+#c_group.add_argument('--spack-dir', help='Location of spack.')
+#configure_parser.set_defaults(func=configure_action)
 
 ## setup geometry sub parser
 #
 geometry_parser = subparsers.add_parser('geometry', help='Plato Geometry options', aliases=['g'])
-geometry_parser.set_defaults(func=lambda x: geometry_parser.print_usage())
+#geometry_parser.set_defaults(func=lambda x: geometry_parser.print_usage())
 geo_subparsers = geometry_parser.add_subparsers(help='geometry sub-command help', dest='geo_execmode')
 
 # geometry - esp
@@ -159,22 +262,22 @@ esp_parser.set_defaults(func=esp_action)
 
 # geometry - xtk
 xtk_parser = geo_subparsers.add_parser('xtk', help='XTK options')
-xtk_parser.add_argument('-i', '--input', help='input file name')
+xtk_parser.add_argument('--input', help='input file name')
 xtk_parser.set_defaults(func=xtk_action)
 
 # geometry - gmsh
 gmsh_parser = geo_subparsers.add_parser('gmsh', help='Gmsh options')
-gmsh_parser.add_argument('-i', '--input', help='input file name')
+gmsh_parser.add_argument('--input', help='input file name')
 gmsh_parser.set_defaults(func=gmsh_action)
 
 # geometry - cogent
 cogent_parser = geo_subparsers.add_parser('cogent', help='Cogent options')
-cogent_parser.add_argument('-i', '--input', help='input file name')
+cogent_parser.add_argument('--input', help='input file name')
 cogent_parser.set_defaults(func=cogent_action)
 
 # geometry - cubit
 cubit_parser = geo_subparsers.add_parser('cubit', help='Cubit options')
-cubit_parser.add_argument('-i', '--input', help='input file name')
+cubit_parser.add_argument('--input', help='input file name')
 cubit_parser.set_defaults(func=cubit_action)
 
 
@@ -182,18 +285,18 @@ cubit_parser.set_defaults(func=cubit_action)
 #
 analyze_parser = subparsers.add_parser('analyze', help='Plato Analyze options', aliases=['a'])
 a_group = analyze_parser.add_mutually_exclusive_group(required=True)
-a_group.add_argument('-i', '--input', help='input file name')
-a_group.add_argument('-t', '--template', help='template name')
-a_group.add_argument('-l', '--list-templates', dest='list_templates', action='store_true', help='list available templates')
+a_group.add_argument('--input', help='input file name')
+a_group.add_argument('--template', help='template name')
+a_group.add_argument('--list-templates', dest='list_templates', action='store_true', help='list available templates')
 analyze_parser.set_defaults(func=analyze_action)
 
 ## setup optimize sub parser
 #
 optimize_parser = subparsers.add_parser('optimize', help='Plato Optimize options', aliases=['o'])
 o_group = optimize_parser.add_mutually_exclusive_group(required=True)
-o_group.add_argument('-i', '--input', help='input file name')
-o_group.add_argument('-t', '--template', help='template name')
-o_group.add_argument('-l', '--list-templates', dest='list_templates', action='store_true', help='list available templates')
+o_group.add_argument('--input', help='input file name')
+o_group.add_argument('--template', help='template name')
+o_group.add_argument('--list-templates', dest='list_templates', action='store_true', help='list available templates')
 optimize_parser.set_defaults(func=optimize_action)
 
 

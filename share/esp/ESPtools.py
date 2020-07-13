@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+from shutil import copyfile
 from pyCAPS import capsProblem
 from contextlib import contextmanager
 
@@ -118,9 +119,11 @@ def getInitialValues(modelName):
     tokens = param.split(' ')
     tokens = list(filter(None, tokens)) ## filter out empty strings
 
-    if len(tokens) != 9:
-      print "Expected line in the form:"
+    if len(tokens) != 9 and len(tokens) != 3:
+      print "Expected line either in the form:"
       print "despmtr <name> <value> lbound <value> ubound <value> initial <value>"
+      print "or in the form:"
+      print "despmtr <name> <value>"
       print "got: " + param
       raise Exception("Parsing error: reading initial values failed.")
 
@@ -128,12 +131,18 @@ def getInitialValues(modelName):
     if tokens[0] != 'despmtr':
       raise Exception("unknown error: expected 'despmtr' token, got '" + tokens[0] + "'" )
 
-    ## eighth token should be 'initial'
-    if tokens[7] != 'initial':
-      raise Exception("parsing error: expected 'initial' token, got '" + tokens[7] + "'" )
+    if len(tokens) == 9:
+      ## eighth token should be 'initial'
+      if tokens[7] != 'initial':
+        raise Exception("parsing error: expected 'initial' token, got '" + tokens[7] + "'" )
 
-    ## get current value
-    initialValue = float(tokens[8])
+      ## get current value
+      initialValue = float(tokens[8])
+
+    elif len(tokens) == 3:
+
+      ## get current value
+      initialValue = float(tokens[2])
 
     initialValues.append(initialValue)
   
@@ -164,15 +173,40 @@ def toExo(modelName, meshName):
 ##############################################################################
 def updateModel(modelName, paramVals):
 
+  response = subprocess.check_output(['awk', '/attribute/{if ($2~/capsMeshLength/) print $3}', modelName])
+  capsMeshLength = str(response)
+
+  modedName = modelName + ".tmp"
+
+  f_in = open(modelName)
+  f_out = open(modedName, 'w')
+
+  for line in f_in:
+    if line.strip().lower() == 'end':
+      f_out.write("select body\n")
+      f_out.write("attribute capsAIM $aflr4AIM;aflr3AIM\n")
+      f_out.write("attribute capsGroup $solid_group\n")
+      f_out.write("attribute capsMeshLength " + capsMeshLength + "\n")
+
+      f_out.write("select face\n")
+      f_out.write("attribute capsGroup $solid_group\n")
+      f_out.write("attribute capsMeshLength " + capsMeshLength + "\n")
+
+    f_out.write(line)
+
+  f_out.close()
+
+
   for ip in range(len(paramVals)):
     p = paramVals[ip]
     f = open('tmp.file', "w")
     command = 'BEGIN{ip=0};{if($1~"despmtr"){if(ip=='+str(ip)+'){print $1, $2, val, $4, $5, $6, $7, $8, $9}else{print $0}ip++}else{print $0}}'
     print "command: ", command
-    subprocess.call(['awk', '-v', 'val='+str(paramVals[ip]), command, modelName], stdout=f)
+    subprocess.call(['awk', '-v', 'val='+str(paramVals[ip]), command, modedName], stdout=f)
     f.close()
-    subprocess.call(['mv', 'tmp.file', modelName])
+    subprocess.call(['mv', 'tmp.file', modedName])
 
+  subprocess.call(['mv', modedName, modelName])
 
 
 ##############################################################################
