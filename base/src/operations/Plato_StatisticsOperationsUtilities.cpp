@@ -157,8 +157,8 @@ void compute_sample_set_standard_deviation(const double* aMean,
 }
 // function compute_sample_set_standard_deviation
 
-void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
-                                                   const double& aCriterionStdDev,
+void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionValueMean,
+                                                   const double& aCriterionValueStdDev,
                                                    const double& aStdDevMultiplier,
                                                    const std::vector<Plato::SampleProbPair<double, double>>& aCriterionValPairs,
                                                    const std::vector<Plato::SampleProbPair<double*, double>>& aCriterionGradPairs,
@@ -179,14 +179,14 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
         THROWERR("CRITERION VALUE AND CRITERION GRADIENT CONTAINERS DO NOT HAVE THE SAME SIZE.\n")
     }
 
-    if(std::isfinite(aCriterionMean) == false)
+    if(std::isfinite(aCriterionValueMean) == false)
     {
-        THROWERR("MEAN, MU = " + std::to_string(aCriterionMean) + ", IS NOT A FINITE NUMBER.\n")
+        THROWERR("MEAN, MU = " + std::to_string(aCriterionValueMean) + ", IS NOT A FINITE NUMBER.\n")
     }
 
-    if(std::isfinite(aCriterionStdDev) == false)
+    if(std::isfinite(aCriterionValueStdDev) == false)
     {
-        THROWERR("STANDARD DEVIATION, SIGMA = " + std::to_string(aCriterionStdDev) + ", IS NOT A FINITE NUMBER.\n")
+        THROWERR("STANDARD DEVIATION, SIGMA = " + std::to_string(aCriterionValueStdDev) + ", IS NOT A FINITE NUMBER.\n")
     }
 
     if(std::isfinite(aStdDevMultiplier) == false)
@@ -194,27 +194,27 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
         THROWERR("STANDARD DEVIATION MULTIPLIER, k = " + std::to_string(aStdDevMultiplier) + ", IS NOT A FINITE NUMBER.\n")
     }
 
-    if(Plato::equal(aCriterionStdDev, 0.0) == true)
+    if(Plato::equal(aCriterionValueStdDev, 0.0) == true)
     {
-        THROWERR("CRITERION STANDARD DEVIATION '" + std::to_string(aCriterionStdDev) + "' IS ZERO.\n")
+        THROWERR("CRITERION STANDARD DEVIATION '" + std::to_string(aCriterionValueStdDev) + "' IS ZERO.\n")
     }
 
     Plato::zero(aCriterionGradPairs.begin()->mLength, aOutput);
 
     // [ p_i + frac{k}{std[f(x)]} * ( p_i * ( f_i - E[f(x)] ) * ( grad(f_i(x)) - E[grad(f(x))] ) ) ], where i denotes sample's index
-    std::vector<double> tMeanCriterionGrad(aCriterionGradPairs.begin()->mLength);
-    Plato::compute_sample_set_mean(aCriterionGradPairs, tMeanCriterionGrad.data());
+    std::vector<double> tCriterionGradMean(aCriterionGradPairs.begin()->mLength);
+    Plato::compute_sample_set_mean(aCriterionGradPairs, tCriterionGradMean.data());
 
     auto tCriterionValueIter = aCriterionValPairs.begin();
     for(auto& tPair : aCriterionGradPairs)
     {
-        auto tStdDevMultOverStdDev = aStdDevMultiplier / aCriterionStdDev;
-        auto tStdDevConstant = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionMean);;
+        auto tStdDevMultOverStdDev = aStdDevMultiplier / aCriterionValueStdDev;
+        auto tStdDevConstant = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionValueMean);;
 
         for(decltype(tPair.mLength) tIndex = 0; tIndex < tPair.mLength; tIndex++)
         {
             auto tMeanTermDerivative = tPair.mProbability * tPair.mSample[tIndex];
-            auto tStdTermDerivative = tStdDevConstant * (tPair.mSample[tIndex] - tMeanCriterionGrad[tIndex]);
+            auto tStdTermDerivative = tStdDevConstant * (tPair.mSample[tIndex] - tCriterionGradMean[tIndex]);
             aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;
         }
 
