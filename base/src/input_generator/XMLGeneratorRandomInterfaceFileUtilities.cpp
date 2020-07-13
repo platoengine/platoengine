@@ -404,17 +404,17 @@ void append_objective_gradient_stage_for_nondeterministic_usecase
         auto tStageNode = aDocument.append_child("Stage");
         auto tStageName = std::string("Compute Objective Gradient ID-") + tObjective.name;
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tInputNode);
+        auto tStageInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
 
         XMLGen::append_filter_control_operation(tStageNode);
         XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
-        XMLGen::append_filter_criterion_gradient_samples_operation("Objective", tStageNode);
-        auto tOutputDataName = std::string("Objective Gradient ID-") + tObjective.name;
-        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tOutputDataName, aXMLMetaData, tStageNode);
+        auto tOutputSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
+        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tOutputSharedDataName, aXMLMetaData, tStageNode);
+        XMLGen::append_filter_criterion_gradient_operation(tOutputSharedDataName, tStageNode);
 
-        auto tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children( { "SharedDataName" }, { tOutputDataName }, tOutputNode);
+        auto tStageOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children( { "SharedDataName" }, { tOutputSharedDataName }, tStageOutputNode);
     }
 }
 // function append_objective_gradient_stage_for_nondeterministic_usecase
