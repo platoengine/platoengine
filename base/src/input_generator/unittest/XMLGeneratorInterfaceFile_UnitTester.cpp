@@ -2125,7 +2125,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     pugi::xml_document tDocument;
     XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
-    tDocument.save_file("dummy.xml", " ");
 
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
     auto tStage = tDocument.child("Stage");
