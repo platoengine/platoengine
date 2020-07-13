@@ -10,7 +10,7 @@
   
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Thermal"/>
-    <Parameter name="PDE Constraint"     type="string"  value="Heat Equation"/>
+    <Parameter name="PDE Constraint"     type="string"  value="Parabolic"/>
     <Parameter name="Constraint"  type="string"  value="My Volume"/>
     <Parameter name="Objective"          type="string"  value="My Internal Thermal Energy"/>
 
@@ -41,7 +41,7 @@
       <Parameter name="Time Step" type="double" value="10000.0"/>
     </ParameterList>
 
-    <ParameterList name="Heat Equation">
+    <ParameterList name="Parabolic">
       <ParameterList name="Penalty Function">
         <Parameter name="Type" type="string" value="SIMP"/>
         <Parameter name="Exponent" type="double" value="3.0"/>
