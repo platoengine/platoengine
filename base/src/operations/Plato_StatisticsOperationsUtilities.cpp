@@ -201,19 +201,21 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
 
     Plato::zero(aCriterionGradPairs.begin()->mLength, aOutput);
 
-    // [ p_i + frac{k}{std[f(x)]} * (p_i * (f_i - E[f(x)]) * (1 - p_i)) ] * grad(f_i(x)), where i denotes sample's index
+    // [ p_i + frac{k}{std[f(x)]} * ( p_i * ( f_i - E[f(x)] ) * ( grad(f_i(x)) - E[grad(f(x))] ) ) ], where i denotes sample's index
+    std::vector<double> tMeanCriterionGrad(aCriterionGradPairs.begin()->mLength);
+    Plato::compute_sample_set_mean(aCriterionGradPairs, tMeanCriterionGrad.data());
+
     auto tCriterionValueIter = aCriterionValPairs.begin();
     for(auto& tPair : aCriterionGradPairs)
     {
         auto tStdDevMultOverStdDev = aStdDevMultiplier / aCriterionStdDev;
+        auto tStdDevConstant = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionMean);;
 
         for(decltype(tPair.mLength) tIndex = 0; tIndex < tPair.mLength; tIndex++)
         {
             auto tMeanTermDerivative = tPair.mProbability * tPair.mSample[tIndex];
-            /*auto tStdTermDerivative = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionMean)
-                * (static_cast<double>(1.0) - tPair.mProbability) * tPair.mSample[tIndex];
-            aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;*/
-            aOutput[tIndex] += tMeanTermDerivative;
+            auto tStdTermDerivative = tStdDevConstant * (tPair.mSample[tIndex] - tMeanCriterionGrad[tIndex]);
+            aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;
         }
 
         std::advance(tCriterionValueIter, 1);
