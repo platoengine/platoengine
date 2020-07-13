@@ -485,7 +485,10 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevGlobalQoI()
     {
         const std::string &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
         std::vector<double> *tOutMeanPlusSigmaData = mPlatoApp->getValue(tOutputArgumentMeanPlusSigma);
+/*
         (*tOutMeanPlusSigmaData)[0] = (*tOutputMeanData)[0] + (tOuterIterator->second * (*tOutputSigmaData)[0]); // tIterator->second = sigma multiplier
+*/
+        (*tOutMeanPlusSigmaData)[0] = (*tOutputMeanData)[0];
     }
 }
 

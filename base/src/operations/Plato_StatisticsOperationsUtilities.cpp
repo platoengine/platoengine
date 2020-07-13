@@ -210,9 +210,10 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionMean,
         for(decltype(tPair.mLength) tIndex = 0; tIndex < tPair.mLength; tIndex++)
         {
             auto tMeanTermDerivative = tPair.mProbability * tPair.mSample[tIndex];
-            auto tStdTermDerivative = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionMean)
+            /*auto tStdTermDerivative = tStdDevMultOverStdDev * tPair.mProbability * (tCriterionValueIter->mSample - aCriterionMean)
                 * (static_cast<double>(1.0) - tPair.mProbability) * tPair.mSample[tIndex];
-            aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;
+            aOutput[tIndex] += tMeanTermDerivative + tStdTermDerivative;*/
+            aOutput[tIndex] += tMeanTermDerivative;
         }
 
         std::advance(tCriterionValueIter, 1);
