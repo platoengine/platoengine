@@ -178,6 +178,13 @@ private:
     void setDistributeObjectiveType(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
+     * \fn setStressConstrainedParam
+     * \brief Set parameters for stress constrained mass minimization problem.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setStressConstrainedParam(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set objective metadata.
      * \param [in] aMetadata objective metadata

@@ -36,6 +36,9 @@ void ParseObjective::allocate()
     mTags.insert({ "raleigh damping beta", { {"raleigh","damping","beta"}, "" } });
     mTags.insert({ "raleigh damping alpha", { {"raleigh","damping","alpha"}, "" } });
     mTags.insert({ "relative stress limit", { {"relative","stress","limit"}, "" } });
+    mTags.insert({ "scmm_mass_criterion_weight", { {"scmm_mass_criterion_weight"}, "" } });
+    mTags.insert({ "scmm_stress_criterion_weight", { {"scmm_stress_criterion_weight"}, "" } });
+    mTags.insert({ "scmm_penalty_upper_bound", { {"scmm_penalty_upper_bound"}, "" } });
     mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
     mTags.insert({ "complex error measure", { {"complex","error","measure"}, "" } });
     mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
@@ -316,6 +319,23 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
     }
 }
 
+void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
+{
+    aMetadata.stress_limit = mTags.find("stress limit")->second.second;
+    aMetadata.scmm_initial_penalty = mTags.find("scmm initial penalty")->second.second;
+    aMetadata.relative_stress_limit = mTags.find("relative stress limit")->second.second;
+    aMetadata.scmm_constraint_exponent = mTags.find("scmm constraint exponent")->second.second;
+    aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.second;
+    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm penalty expansion factor")->second.second;
+
+    auto tItr = mTags.find("scmm_mass_criterion_weight");
+    auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    aMetadata.scmm_criterion_weights["mass"] = tWeight;
+    tItr = mTags.find("scmm_stress_criterion_weight");
+    tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    aMetadata.scmm_criterion_weights["stress"] = tWeight;
+}
+
 void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
 {
     this->setCategory(aMetadata);
@@ -326,12 +346,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setPnormExponent(aMetadata);
     this->setNormalizeObjective(aMetadata);
     this->setMinimumErsatzValue(aMetadata);
-    aMetadata.stress_limit = mTags.find("stress limit")->second.second;
-    aMetadata.scmm_initial_penalty = mTags.find("scmm initial penalty")->second.second;
-    aMetadata.complex_error_measure = mTags.find("complex error measure")->second.second;
-    aMetadata.relative_stress_limit = mTags.find("relative stress limit")->second.second;
-    aMetadata.scmm_constraint_exponent = mTags.find("scmm constraint exponent")->second.second;
-    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm penalty expansion factor")->second.second;
+    this->setStressConstrainedParam(aMetadata);
 
     // scenario info
     this->setCode(aMetadata);
@@ -344,6 +359,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     aMetadata.raleigh_damping_beta = mTags.find("raleigh damping beta")->second.second;
     aMetadata.raleigh_damping_alpha = mTags.find("raleigh damping alpha")->second.second;
     aMetadata.wtmass_scale_factor = mTags.find("weightmass scale factor")->second.second;
+    aMetadata.complex_error_measure = mTags.find("complex error measure")->second.second;
 
     // array info, plus these should be inside the scenario block, excluding the output for plotting
     this->setOutputForPlotting(aMetadata);
