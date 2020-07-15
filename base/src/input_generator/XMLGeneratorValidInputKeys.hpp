@@ -51,8 +51,8 @@ struct ValidRandomPropertyKeys
      * \brief Valid plato input deck random properties keywords.
      **/
     std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y",
-        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_ratio_xy", "shear_modulus_ratio_xz",
-        "shear_modulus_ratio_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
+        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz",
+        "shear_modulus_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
         "piezoelectric_coupling_31", "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient",
         "yield_stress" };
 };
@@ -126,7 +126,7 @@ struct ValidMaterialPropertyKeys
      * \brief Valid plato input deck material property keywords \n
      **/
     std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
-        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_ratio_xy", "shear_modulus_ratio_xz", "shear_modulus_ratio_yz",
+        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz", "shear_modulus_yz",
         "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
         "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient" };
 };
@@ -244,8 +244,8 @@ struct ValidAnalyzeMaterialPropertyKeys
             { "orthotropic linear elastic", { { "youngs_modulus_x", {"Youngs Modulus X", "double"} },
                 { "youngs_modulus_y", {"Youngs Modulus Y", "double"} }, { "youngs_modulus_z", {"Youngs Modulus Z", "double"} },
                 { "poissons_ratio_xy", {"Poissons Ratio XY", "double"} }, { "poissons_ratio_xz", {"Poissons Ratio XZ", "double"} },
-                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear_modulus_ratio_xy", {"Shear Modulus XY", "double"} },
-                { "shear_modulus_ratio_xz", {"Shear Modulus XZ", "double"} }, { "shear_modulus_ratio_yz", {"Shear Modulus YZ", "double"} },
+                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear_modulus_xy", {"Shear Modulus XY", "double"} },
+                { "shear_modulus_xz", {"Shear Modulus XZ", "double"} }, { "shear_modulus_yz", {"Shear Modulus YZ", "double"} },
                 { "mass_density", {"Mass Density", "double"} } }
             },
 

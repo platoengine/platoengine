@@ -41,13 +41,13 @@ void ParseMaterial::allocate()
     mTags.insert({ "youngs_modulus_x", { {"youngs_modulus_x"}, "" } });
     mTags.insert({ "youngs_modulus_y", { {"youngs_modulus_y"}, "" } });
     mTags.insert({ "youngs_modulus_z", { {"youngs_modulus_z"}, "" } });
+    mTags.insert({ "shear_modulus_xy", { {"shear_modulus_xy"}, "" } });
+    mTags.insert({ "shear_modulus_xz", { {"shear_modulus_xz"}, "" } });
+    mTags.insert({ "shear_modulus_yz", { {"shear_modulus_yz"}, "" } });
     mTags.insert({ "poissons_ratio_xy", { {"poissons_ratio_xy"}, "" } });
     mTags.insert({ "poissons_ratio_xz", { {"poissons_ratio_xz"}, "" } });
     mTags.insert({ "poissons_ratio_yz", { {"poissons_ratio_yz"}, "" } });
     mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
-    mTags.insert({ "shear_modulus_ratio_xy", { {"shear_modulus_ratio_xy"}, "" } });
-    mTags.insert({ "shear_modulus_ratio_xz", { {"shear_modulus_ratio_xz"}, "" } });
-    mTags.insert({ "shear_modulus_ratio_yz", { {"shear_modulus_ratio_yz"}, "" } });
     mTags.insert({ "piezoelectric_coupling_15", { {"piezoelectric_coupling_15"}, "" } });
     mTags.insert({ "piezoelectric_coupling_33", { {"piezoelectric_coupling_33"}, "" } });
     mTags.insert({ "piezoelectric_coupling_31", { {"piezoelectric_coupling_31"}, "" } });

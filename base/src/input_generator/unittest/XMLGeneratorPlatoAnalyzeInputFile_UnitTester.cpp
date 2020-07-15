@@ -1069,9 +1069,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     tMaterial.property("poissons_ratio_xy", "0.3");
     tMaterial.property("poissons_ratio_xz", "0.4");
     tMaterial.property("poissons_ratio_yz", "0.25");
-    tMaterial.property("shear_modulus_ratio_xy", "1.3");
-    tMaterial.property("shear_modulus_ratio_xz", "1.4");
-    tMaterial.property("shear_modulus_ratio_yz", "1.25");
+    tMaterial.property("shear_modulus_xy", "1.3");
+    tMaterial.property("shear_modulus_xz", "1.4");
+    tMaterial.property("shear_modulus_yz", "1.25");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
