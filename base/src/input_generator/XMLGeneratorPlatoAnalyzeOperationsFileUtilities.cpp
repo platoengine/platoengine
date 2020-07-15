@@ -259,6 +259,37 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
 /******************************************************************************/
 
 /******************************************************************************/
+void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
+(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
+ pugi::xml_node& aParentNode)
+{
+    if(aMaterialTags.empty())
+    {
+        THROWERR("Append Orthotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
+    }
+
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModel;
+    auto tValidTags = tValidMaterialModel.mKeys.find("orthotropic linear elastic");
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
+    for(auto& tPair : aMaterialTags)
+    {
+        auto tMaterialPropertyTag = tPair.second;
+        auto tTagItr = tValidTags->second.find(tMaterialPropertyTag);
+        if(tTagItr == tValidTags->second.end())
+        {
+            THROWERR(std::string("Append Orthotropic Material Properties to Plato Analyze Operation: Material property tag '")
+                + tMaterialPropertyTag + "' is not supported by an 'orthotropic linear elastic' material model.")
+        }
+        auto tAnalyzeMaterialTag = tTagItr->second.first;
+        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:") + tAnalyzeMaterialTag;
+        std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
+        auto tParameter = aParentNode.append_child("Parameter");
+        XMLGen::append_children(tKeys, tValues, tParameter);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_random_material_properties_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)

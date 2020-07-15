@@ -137,6 +137,18 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
+ * \brief Append material properties for an orthotropic linear elastic material model \n
+ * plus corresponding material property values to the plato_analyze_operation.xml file.
+ * \param [in]     aMaterialTags list of material tags, i.e. \n
+ *     vector<pair<material_property_argument_name_tag, material_property_tag>>
+ * \param [in/out] aParentNode   pugi::xml_node
+**********************************************************************************/
+void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
+(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_random_material_properties_to_plato_analyze_operation
  * \brief Append material properties to the plato analyze operation xml file.
  * \param [in]     aXMLMetaData Plato problem input data
