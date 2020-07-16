@@ -626,7 +626,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_OrthotropicLinearElastic)
     };
 
     XMLGen::MaterialFunctionInterface tInterface;
-    ASSERT_NO_THROW(tInterface.call("orthotropic linear thermoelastic", tTags, tDocument));
+    ASSERT_NO_THROW(tInterface.call("orthotropic linear elastic", tTags, tDocument));
 
     // TEST RESULTS
     auto tParameter = tDocument.child("Parameter");
