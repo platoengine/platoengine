@@ -26,6 +26,10 @@ void MaterialFunctionInterface::insert()
     tFuncIndex = std::type_index(typeid(append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation));
     mMap.insert(std::make_pair("isotropic linear thermoelastic",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
+
+    tFuncIndex = std::type_index(typeid(append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation));
+    mMap.insert(std::make_pair("orthotropic linear thermoelastic",
+      std::make_pair((XMLGen::Analyze::MaterialOperationFunc)append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 }
 
 void MaterialFunctionInterface::call
