@@ -16,6 +16,49 @@
 namespace XMLGen
 {
 
+namespace Private
+{
+
+inline void is_mean_plus_std_dev_greater_than_upper_bound
+(const XMLGen::Uncertainty& aMetadata)
+{
+    auto tMean = std::stod(aMetadata.mean);
+    auto tUpper = std::stod(aMetadata.upper);
+    auto tStdDev = std::stod(aMetadata.standard_deviation);
+
+    auto tMeanPlusStd = tMean + tStdDev;
+    auto tIsGreaterThanUpperBound = tMeanPlusStd >= tUpper;
+    if(tIsGreaterThanUpperBound)
+    {
+        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.type + "' and id '"
+            + aMetadata.id + "'. The 'mean plus standard deviation' operation must yields a value below the "
+            + "'upper bound' to avoid 'NaN' errors during the creation of the stochastic reduced order model. The "
+            + "operation 'mean + std_dev' yields '" + std::to_string(tMeanPlusStd) + "' and the 'upper bound' is set to '"
+            + std::to_string(tUpper) + "'.")
+    }
+}
+
+inline void is_mean_minus_std_dev_lesser_than_lower_bound
+(const XMLGen::Uncertainty& aMetadata)
+{
+    auto tMean = std::stod(aMetadata.mean);
+    auto tLower = std::stod(aMetadata.lower);
+    auto tStdDev = std::stod(aMetadata.standard_deviation);
+
+    auto tMeanMinusStd = tMean - tStdDev;
+    auto tIsLesserThanLowerBound = tMeanMinusStd <= tLower;
+    if(tIsLesserThanLowerBound)
+    {
+        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.type + "' and id '"
+            + aMetadata.id + "'. The 'mean minus standard deviation' operation must yields a value above the "
+            + "'lower bound' to avoid 'NaN' errors during the creation of the stochastic reduced order model. The "
+            + "operation 'mean - std_dev' yields '" + std::to_string(tMeanMinusStd) + "' and the 'lower bound' is set to '"
+            + std::to_string(tLower) + "'.")
+    }
+}
+
+}
+
 void ParseUncertainty::allocate()
 {
     mTags.clear();
@@ -195,6 +238,16 @@ void ParseUncertainty::checkLowerBound(const XMLGen::Uncertainty& aMetadata)
     {
         THROWERR("Parse Uncertainty: 'lower bound' keyword is empty.")
     }
+
+    auto tLower = std::stod(aMetadata.lower);
+    auto tUpper = std::stod(aMetadata.upper);
+    auto tLowerIsGreaterThanUpper = tLower >= tUpper;
+    if(tLowerIsGreaterThanUpper)
+    {
+        THROWERR(std::string("Parse Uncertainty: Lower bound is greater or equal than the upper bound. ")
+            + "Lower bound must be less than the upper bound. The condition lower bound = '"
+            + aMetadata.lower + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+    }
 }
 
 void ParseUncertainty::checkUpperBound(const XMLGen::Uncertainty& aMetadata)
@@ -222,15 +275,8 @@ void ParseUncertainty::checkStandardDeviation(const XMLGen::Uncertainty& aMetada
         THROWERR("Parse Uncertainty: 'standard deviation' keyword is empty.")
     }
 
-    auto tLower = std::stod(aMetadata.lower);
-    auto tUpper = std::stod(aMetadata.upper);
-    auto tLowerIsGreaterThanUpper = tLower >= tUpper;
-    if(tLowerIsGreaterThanUpper)
-    {
-        THROWERR(std::string("Parse Uncertainty: Lower bound is greater or equal than the upper bound. ")
-            + "Lower bound must be less than the upper bound. The condition lower bound = '"
-            + aMetadata.lower + "' < upper bound = '" + aMetadata.upper + "' is not met.")
-    }
+    XMLGen::Private::is_mean_plus_std_dev_greater_than_upper_bound(aMetadata);
+    XMLGen::Private::is_mean_minus_std_dev_lesser_than_lower_bound(aMetadata);
 }
 
 void ParseUncertainty::checkBounds(const XMLGen::Uncertainty& aMetadata)
