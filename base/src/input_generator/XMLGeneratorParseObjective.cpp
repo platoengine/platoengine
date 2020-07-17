@@ -346,9 +346,18 @@ inline void parse_stress_and_mass_criterion_weights
  XMLGen::Objective& aMetadata)
 {
     auto tItr = aTags.find("scmm_mass_criterion_weight");
+    if(tItr == aTags.end())
+    {
+        THROWERR("Parse Objective: 'scmm_mass_criterion_weight' keyword is not defined in keyword-to-value map.")
+    }
     auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
     aMetadata.scmm_criterion_weights["mass"] = tWeight;
+
     tItr = aTags.find("scmm_stress_criterion_weight");
+    if(tItr == aTags.end())
+    {
+        THROWERR("Parse Objective: 'scmm_stress_criterion_weight' keyword is not defined in keyword-to-value map.")
+    }
     tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
     aMetadata.scmm_criterion_weights["stress"] = tWeight;
 }
