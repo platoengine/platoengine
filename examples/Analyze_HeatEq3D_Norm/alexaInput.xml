@@ -2,12 +2,8 @@
   <Parameter name="Physics" type="string" value="Plato Driver"/>
   <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
 
-  <Parameter name="Input Mesh" type="string" value="./bolted_bracket.osh"/>
+  <Parameter name="Input Mesh" type="string" value="bolted_bracket.exo"/>
 
-  <ParameterList  name="Associations">
-    <Parameter name="File" type="string" value="./bolted_bracket_assoc.txt"/>
-  </ParameterList>
-  
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Thermal"/>
     <Parameter name="PDE Constraint"     type="string"  value="Parabolic"/>
@@ -60,10 +56,12 @@
     </ParameterList>
 
     <ParameterList name="Material Model">
-      <ParameterList name="Isotropic Linear Thermal">
-        <Parameter  name="Conductivity Coefficient" type="double" value="210.0"/>
+      <ParameterList name="Thermal Mass">
         <Parameter  name="Mass Density" type="double" value="2703.0"/>
         <Parameter  name="Specific Heat" type="double" value="900.0"/>
+      </ParameterList>
+      <ParameterList name="Thermal Conduction">
+        <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
       </ParameterList>
     </ParameterList>
   
@@ -74,15 +72,6 @@
         <Parameter  name="Sides"    type="string"   value="ss_2"/>
       </ParameterList>
     </ParameterList>
-<!--
-    <ParameterList  name="Essential Boundary Conditions">
-      <ParameterList  name="Fixed Temperature Boundary Condition">
-        <Parameter  name="Type"     type="string" value="Fixed Value"/>
-        <Parameter  name="Value"    type="double" value="-100.0"/>
-        <Parameter  name="Sides"    type="string" value="ns_1"/>
-      </ParameterList>
-    </ParameterList>
--->
   </ParameterList>
 
 </ParameterList>

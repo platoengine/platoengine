@@ -40,8 +40,10 @@
     </ParameterList>
 
     <ParameterList name="Material Model">
-      <ParameterList name="Isotropic Linear Thermal">
-        <Parameter  name="Conductivity Coefficient" type="double" value="210.0"/>
+      <ParameterList name="Thermal Conduction">
+        <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
+      </ParameterList>
+      <ParameterList name="Thermal Mass">
         <Parameter  name="Mass Density" type="double" value="2703.0"/>
         <Parameter  name="Specific Heat" type="double" value="900.0"/>
       </ParameterList>
