@@ -320,20 +320,32 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
 }
 
 inline void parse_stress_limit
-(const XMLGen::UseCaseTags& mTags,
+(const XMLGen::UseCaseTags& aTags,
  XMLGen::Objective& aMetadata)
 {
-    auto tItr = mTags.find("stress_limit");
-    if(mTags.find("stress_limit")->second.second.empty())
+    auto tItr = aTags.find("stress_limit");
+    if(aTags.find("stress_limit")->second.second.empty())
     {
-        if(mTags.find("type")->second.second.compare("stress constrained mass minimization") == 0)
+        if(aTags.find("type")->second.second.compare("stress constrained mass minimization") == 0)
         {
             THROWERR(std::string("Parse Objective: Stress Constrained Mass Minimization (SCMM) problem was ")
                 + "requested but the 'stress limit' keyword is not defined. User must defined the 'stress limit' "
                 + "for a SCMM problem.")
         }
     }
-    aMetadata.stress_limit = mTags.find("stress_limit")->second.second;
+    aMetadata.stress_limit = aTags.find("stress_limit")->second.second;
+}
+
+inline void parse_stress_and_mass_criterion_weights
+(const XMLGen::UseCaseTags& aTags,
+ XMLGen::Objective& aMetadata)
+{
+    auto tItr = aTags.find("scmm_mass_criterion_weight");
+    auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    aMetadata.scmm_criterion_weights["mass"] = tWeight;
+    tItr = aTags.find("scmm_stress_criterion_weight");
+    tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    aMetadata.scmm_criterion_weights["stress"] = tWeight;
 }
 
 void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
@@ -343,14 +355,8 @@ void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
     aMetadata.scmm_constraint_exponent = mTags.find("scmm_constraint_exponent")->second.second;
     aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.second;
     aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.second;
-
     XMLGen::parse_stress_limit(mTags, aMetadata);
-    auto tItr = mTags.find("scmm_mass_criterion_weight");
-    auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
-    aMetadata.scmm_criterion_weights["mass"] = tWeight;
-    tItr = mTags.find("scmm_stress_criterion_weight");
-    tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
-    aMetadata.scmm_criterion_weights["stress"] = tWeight;
+    XMLGen::parse_stress_and_mass_criterion_weights(mTags, aMetadata);
 }
 
 void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
