@@ -328,7 +328,7 @@ void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
     aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.second;
 
     auto tItr = mTags.find("stress_limit");
-    if(tItr == mTags.end())
+    if(tItr != mTags.end() && !tItr->second.second.empty())
     {
         THROWERR(std::string("Parse Objective: Stress Constrained Mass Minimization (SCMM) problem was ")
         + "requested but the 'stress limit' keyword is not defined. User must defined the 'stress limit' "
