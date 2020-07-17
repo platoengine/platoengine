@@ -22,7 +22,7 @@ void ParseObjective::allocate()
     mTags.insert({ "name", { {"name"}, "" } });
     mTags.insert({ "weight", { {"weight"}, "" } });
     mTags.insert({ "load ids", { {"load", "ids"}, "" } });
-    mTags.insert({ "stress limit", { {"stress","limit"}, "" } });
+    mTags.insert({ "stress_limit", { {"stress_limit"}, "" } });
     mTags.insert({ "ls tet type", { {"ls","tet","type"}, "" } });
     mTags.insert({ "number ranks", { {"number", "ranks"}, "" } });
     mTags.insert({ "multi load case", { {"multi","load","case"}, "" } });
@@ -35,18 +35,18 @@ void ParseObjective::allocate()
     mTags.insert({ "output for plotting", { {"output", "for", "plotting"}, "" } });
     mTags.insert({ "raleigh damping beta", { {"raleigh","damping","beta"}, "" } });
     mTags.insert({ "raleigh damping alpha", { {"raleigh","damping","alpha"}, "" } });
-    mTags.insert({ "relative stress limit", { {"relative","stress","limit"}, "" } });
+    mTags.insert({ "relative_stress_limit", { {"relative_stress_limit"}, "" } });
     mTags.insert({ "scmm_mass_criterion_weight", { {"scmm_mass_criterion_weight"}, "" } });
     mTags.insert({ "scmm_stress_criterion_weight", { {"scmm_stress_criterion_weight"}, "" } });
     mTags.insert({ "scmm_penalty_upper_bound", { {"scmm_penalty_upper_bound"}, "" } });
-    mTags.insert({ "scmm initial penalty", { {"scmm", "initial", "penalty"}, "" } });
+    mTags.insert({ "scmm_initial_penalty", { {"scmm_initial_penalty"}, "" } });
     mTags.insert({ "complex error measure", { {"complex","error","measure"}, "" } });
     mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
     mTags.insert({ "boundary condition ids", { {"boundary","condition", "ids"}, "" } });
     mTags.insert({ "weightmass scale factor", { {"weightmass","scale","factor"}, "" } });
-    mTags.insert({ "scmm constraint exponent", { {"scmm", "constraint", "exponent"}, "" } });
+    mTags.insert({ "scmm_constraint_exponent", { {"scmm_constraint_exponent"}, "" } });
     mTags.insert({ "analysis solver tolerance", { {"analysis","solver","tolerance"}, "" } });
-    mTags.insert({ "scmm penalty expansion factor", { {"scmm", "penalty", "expansion", "factor"}, "" } });
+    mTags.insert({ "scmm_penalty_expansion_factor", { {"scmm_penalty_expansion_factor"}, "" } });
 
     mTags.insert({ "performer", { {"performer"}, "" } });
     mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
@@ -321,12 +321,12 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
 
 void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
 {
-    aMetadata.stress_limit = mTags.find("stress limit")->second.second;
-    aMetadata.scmm_initial_penalty = mTags.find("scmm initial penalty")->second.second;
-    aMetadata.relative_stress_limit = mTags.find("relative stress limit")->second.second;
-    aMetadata.scmm_constraint_exponent = mTags.find("scmm constraint exponent")->second.second;
+    aMetadata.stress_limit = mTags.find("stress_limit")->second.second;
+    aMetadata.scmm_initial_penalty = mTags.find("scmm_initial_penalty")->second.second;
+    aMetadata.relative_stress_limit = mTags.find("relative_stress_limit")->second.second;
+    aMetadata.scmm_constraint_exponent = mTags.find("scmm_constraint_exponent")->second.second;
     aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.second;
-    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm penalty expansion factor")->second.second;
+    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.second;
 
     auto tItr = mTags.find("scmm_mass_criterion_weight");
     auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;

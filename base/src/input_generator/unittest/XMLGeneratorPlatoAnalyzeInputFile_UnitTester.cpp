@@ -17,6 +17,9 @@
 #include "XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
 
+
+#include "XMLGeneratorAnalyzeCriterionUtilities.hpp"
+
 namespace PlatoTestXMLGenerator
 {
 
@@ -1356,6 +1359,46 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
     tXMLMetaData.mScenarioMetaData.dimensions("2");
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstraintGeneral)
+{
+    XMLGen::Objective tObjective;
+    tObjective.type = "stress constrained mass minimization";
+    tObjective.stress_limit = "2.0";
+    tObjective.code_name = "plato_analyze";
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_criteria_to_plato_problem(tXMLMetaData, tDocument);
+
+    // TEST MY OBJECTIVE
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my stress constrained mass minimization"}, tParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        {
+          {"Type", "string", "Scalar Function"},
+          {"Scalar Function Type", "string", "Stress Constraint General"},
+          {"Stress Limit", "double", "2.0"},
+          {"Mass Criterion Weight", "double", "1.0"},
+          {"Stress Criterion Weight", "double", "1.0"}
+        };
+
+    auto tParam = tParamList.child("Parameter");
+    auto tValuesItr = tGoldValues.begin();
+    while(!tParam.empty())
+    {
+        ASSERT_FALSE(tParam.empty());
+        ASSERT_STREQ("Parameter", tParam.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tValuesItr.operator*(), tParam);
+        tParam = tParam.next_sibling();
+        std::advance(tValuesItr, 1);
+    }
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)

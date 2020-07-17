@@ -48,6 +48,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {
@@ -248,6 +249,7 @@ void append_attributes
     for(auto& tKeyword : aKeywords)
     {
         auto tIndex = &tKeyword - &aKeywords[0];
+        auto tLower = Plato::tolower(aValues[tIndex]);
         tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
     }
 }
@@ -263,6 +265,7 @@ void append_attributes
     for(auto& tKey : aKeys)
     {
         auto tIndex = &tKey - &aKeys[0];
+        auto tLower = Plato::tolower(aValues[tIndex]);
         aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
     }
 }
@@ -275,8 +278,14 @@ void append_parameter_plus_attributes
  const std::vector<std::string>& aValues,
  pugi::xml_node& aParentNode)
 {
-    auto tChild = aParentNode.append_child("Parameter");
-    XMLGen::append_attributes(aKeys, aValues, tChild);
+    std::vector<std::string> tCopy = aValues;
+    XMLGen::to_lower(tCopy);
+    auto tIgnoreAttribute = std::find(tCopy.begin(), tCopy.end(), "ignore");
+    if(tIgnoreAttribute == tCopy.end())
+    {
+        auto tChild = aParentNode.append_child("Parameter");
+        XMLGen::append_attributes(aKeys, aValues, tChild);
+    }
 }
 // function append_parameter_plus_attributes
 /******************************************************************************/
