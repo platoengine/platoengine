@@ -361,8 +361,8 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
     ASSERT_FALSE(tScenarioMetadata.useNewAnalyzeUQWorkflow());
     ASSERT_STREQ("plato_analyze", tScenarioMetadata.code().c_str());
     ASSERT_STREQ("mechanical", tScenarioMetadata.physics().c_str());
-    ASSERT_STREQ("plato_analyze_0", tScenarioMetadata.performer().c_str());
-    ASSERT_STREQ("plato_analyze_mechanical_0", tScenarioMetadata.id().c_str());
+    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.performer().c_str());
+    ASSERT_STREQ("plato_analyze_mechanical_1", tScenarioMetadata.id().c_str());
     ASSERT_STREQ("3", tScenarioMetadata.dimensions().c_str());
     ASSERT_STREQ("3.0", tScenarioMetadata.materialPenaltyExponent().c_str());
     ASSERT_STREQ("1e-9", tScenarioMetadata.minErsatzMaterialConstant().c_str());

@@ -53,7 +53,7 @@ void ParseScenario::setPerformer()
     }
     else
     {
-        auto tPerformer = mData.code() + "_0";
+        auto tPerformer = mData.code() + "_1";
         mData.performer(tPerformer);
     }
 }
@@ -91,7 +91,7 @@ void ParseScenario::checkScenarioID()
 {
     if (mData.id().empty())
     {
-        auto tID = mData.code() + "_" + mData.physics() + "_0";
+        auto tID = mData.code() + "_" + mData.physics() + "_1";
         mData.id(tID);
     }
 }
