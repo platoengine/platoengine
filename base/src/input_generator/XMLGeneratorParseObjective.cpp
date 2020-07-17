@@ -319,6 +319,23 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
     }
 }
 
+inline void parse_stress_limit
+(const XMLGen::UseCaseTags& mTags,
+ XMLGen::Objective& aMetadata)
+{
+    auto tItr = mTags.find("stress_limit");
+    if(mTags.find("stress_limit")->second.second.empty())
+    {
+        if(mTags.find("type")->second.second.compare("stress constrained mass minimization") == 0)
+        {
+            THROWERR(std::string("Parse Objective: Stress Constrained Mass Minimization (SCMM) problem was ")
+                + "requested but the 'stress limit' keyword is not defined. User must defined the 'stress limit' "
+                + "for a SCMM problem.")
+        }
+    }
+    aMetadata.stress_limit = mTags.find("stress_limit")->second.second;
+}
+
 void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
 {
     aMetadata.scmm_initial_penalty = mTags.find("scmm_initial_penalty")->second.second;
@@ -327,16 +344,8 @@ void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
     aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.second;
     aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.second;
 
-    auto tItr = mTags.find("stress_limit");
-    if(tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        THROWERR(std::string("Parse Objective: Stress Constrained Mass Minimization (SCMM) problem was ")
-        + "requested but the 'stress limit' keyword is not defined. User must defined the 'stress limit' "
-        + "for a SCMM problem.")
-    }
-    aMetadata.stress_limit = mTags.find("stress_limit")->second.second;
-
-    tItr = mTags.find("scmm_mass_criterion_weight");
+    XMLGen::parse_stress_limit(mTags, aMetadata);
+    auto tItr = mTags.find("scmm_mass_criterion_weight");
     auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
     aMetadata.scmm_criterion_weights["mass"] = tWeight;
     tItr = mTags.find("scmm_stress_criterion_weight");
