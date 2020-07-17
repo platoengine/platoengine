@@ -172,5 +172,12 @@ std::string check_physics_keyword(const std::string& aInput);
 **********************************************************************************/
 std::string check_spatial_dimensions_keyword(const std::string& aInput);
 
+/******************************************************************************//**
+ * \fn is_metadata_block_id_valid
+ * \brief Return error if metadata block identifier (id) is invalid.
+ * \param [in] aTokens list of tokens
+**********************************************************************************/
+void is_metadata_block_id_valid(const std::vector<std::string>& aTokens);
+
 }
 // namespace XMLGen

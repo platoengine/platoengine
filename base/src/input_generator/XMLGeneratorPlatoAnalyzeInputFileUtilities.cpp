@@ -31,7 +31,7 @@ void check_input_mesh_file_keyword
 /**********************************************************************************/
 
 /**********************************************************************************/
-void check_objective_container_is_defined
+void is_objective_container_empty
 (const XMLGen::InputData& aXMLMetaData)
 {
     if(aXMLMetaData.objectives.empty())
@@ -39,7 +39,7 @@ void check_objective_container_is_defined
         THROWERR("Check Objective is Defined: Objective container is empty.")
     }
 }
-// function check_objective_container_is_defined
+// function is_objective_container_empty
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -242,13 +242,13 @@ void append_self_adjoint_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::check_objective_container_is_defined(aXMLMetaData);
+    XMLGen::is_objective_container_empty(aXMLMetaData);
 
     std::string tIsSelfAdjoint = "false";
     if(aXMLMetaData.objectives.size() == 1u)
     {
         XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-        auto tLowerCriterion = Plato::tolower(aXMLMetaData.objectives[0].type);
+        auto tLowerCriterion = Plato::tolower(aXMLMetaData.objectives.begin()->type);
         auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
         if (tItr == tValidKeys.mKeys.end())
         {

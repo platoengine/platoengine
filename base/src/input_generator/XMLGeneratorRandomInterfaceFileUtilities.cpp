@@ -70,6 +70,9 @@ void append_nondeterministic_qoi_shared_data
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     for(auto& tID : tIDs)
     {
+        // TODO: REPLACE aXMLMetaData.objectives[0].mPerformerName WITH THE SCENARIO PERFORMER NAME
+        // SOON, THE OBJECTIVE WILL NOT HANDLE PERFORMER NAMES, PERFORMERS WILL BE TIE TO THE SCENARIO
+        // AND OBJECTIVES ARE GOING TO BE ASSOCIATED WITH SCENARIOS.
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
         auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
@@ -97,10 +100,14 @@ void append_topology_shared_data_for_nondeterministic_usecase
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
-    auto tForNode = tSharedData.append_child("For");
-    XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
-    auto tUserName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
-    XMLGen::append_children({"UserName"}, {tUserName}, tForNode);
+
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tForNode = tSharedData.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+        auto tUserName = tObjective.mPerformerName + "_{PerformerIndex}";
+        XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
+    }
 }
 //function append_topology_shared_data_for_nondeterministic_usecase
 /******************************************************************************/

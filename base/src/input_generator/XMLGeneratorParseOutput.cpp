@@ -17,14 +17,15 @@ namespace XMLGen
 void ParseOutput::allocate()
 {
     mTags.clear();
-    mTags.insert({ "output_data", { {"output_data"}, "" } });
+    mTags.insert({ "scenario", { {"scenario"}, "" } });
+    mTags.insert({ "output_data_to_file", { {"output_data_to_file"}, "" } });
     mTags.insert({ "quantities_of_interest", { {"quantities_of_interest"}, "" } });
     mTags.insert({ "random_quantities_of_interest", { {"random_quantities_of_interest"}, "" } });
 }
 
 void ParseOutput::setOutputData()
 {
-    auto tItr = mTags.find("output_data");
+    auto tItr = mTags.find("output_data_to_file");
     if(tItr != mTags.end() && !tItr->second.second.empty())
     {
         auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
@@ -33,6 +34,20 @@ void ParseOutput::setOutputData()
     else
     {
         mData.outputData(true);
+    }
+}
+
+void ParseOutput::setScenario()
+{
+    auto tItr = mTags.find("scenario");
+    if(tItr->second.second.empty())
+    {
+        THROWERR(std::string("Parse Output: Scenario identifier (id) is not defined. ")
+           + "Output quantities of interest must be associated with a Plato 'scenario'.")
+    }
+    else
+    {
+        mData.scenarioID(tItr->second.second);
     }
 }
 
@@ -84,6 +99,7 @@ void ParseOutput::setDeterministicQoI()
 
 void ParseOutput::setMetaData()
 {
+    this->setScenario();
     this->setOutputData();
     this->setRandomQoI();
     this->setDeterministicQoI();

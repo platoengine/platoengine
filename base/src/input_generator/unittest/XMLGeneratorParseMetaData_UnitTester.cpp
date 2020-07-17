@@ -368,10 +368,14 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
     ASSERT_STREQ("1e-9", tScenarioMetadata.minErsatzMaterialConstant().c_str());
 }
 
-TEST(PlatoTestXMLGenerator, ParseScenario)
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidScenarioBlockID)
 {
+    // NOTE: examples for support of scenario ids are:
+    // 1. begin scenario 1  GOOD!
+    // 2. begin scenario name1_name2_name3  GOOD!
+    // 3. begin scenario name1 name2 name3  BAD!
     std::string tStringInput =
-        "begin scenario\n"
+        "begin scenario air_force one\n"
         "   physics thermal\n"
         "   use_new_analyze_uq_workflow true\n"
         "   dimensions 2\n"
@@ -379,7 +383,29 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
         "   performer sierra_sd_0\n"
         "   material_penalty_exponent 1.0\n"
         "   minimum_ersatz_material_value 1e-6\n"
-        "   scenario_id air_force_one\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario)
+{
+    // NOTE: examples for support of scenario ids are:
+    // 1. begin scenario 1  GOOD!
+    // 2. begin scenario name1_name2_name3  GOOD!
+    // 3. begin scenario name1 name2 name3  BAD!
+    std::string tStringInput =
+        "begin scenario air_force_one\n"
+        "   physics thermal\n"
+        "   use_new_analyze_uq_workflow true\n"
+        "   dimensions 2\n"
+        "   code sierra_sd\n"
+        "   performer sierra_sd_0\n"
+        "   material_penalty_exponent 1.0\n"
+        "   minimum_ersatz_material_value 1e-6\n"
         "end scenario\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -398,10 +424,27 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     ASSERT_STREQ("1e-6", tScenarioMetadata.minErsatzMaterialConstant().c_str());
 }
 
+TEST(PlatoTestXMLGenerator, ParseOutput_ErrorScenarionIdIsNotDefined)
+{
+    std::string tStringInput =
+        "begin output\n"
+        "end output\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOutput tOutputParser;
+    ASSERT_THROW(tOutputParser.parse(tInputSS), std::runtime_error);
+
+    auto tOutputMetadata = tOutputParser.data();
+    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
+    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
+}
+
 TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -418,6 +461,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidQoI)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "   quantities_of_interest dispx dispy dispz hippo\n"
         "end output\n";
     std::istringstream tInputSS;
@@ -431,6 +475,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidRandomQoI)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "   quantities_of_interest dispx dispy dispz\n"
         "   random_quantities_of_interest dispx dispy hippo dispz\n"
         "end output\n";
@@ -445,6 +490,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "   quantities_of_interest dispx dispy dispz temperature\n"
         "end output\n";
     std::istringstream tInputSS;
@@ -473,6 +519,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "   random_quantities_of_interest accumulated_plastic_strain temperature\n"
         "end output\n";
     std::istringstream tInputSS;
@@ -522,6 +569,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
 {
     std::string tStringInput =
         "begin output\n"
+        "   scenario 1\n"
         "   quantities_of_interest dispx dispy dispz temperature\n"
         "   random_quantities_of_interest accumulated_plastic_strain temperature\n"
         "end output\n";

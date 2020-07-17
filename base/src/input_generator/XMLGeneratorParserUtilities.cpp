@@ -321,4 +321,20 @@ std::string check_spatial_dimensions_keyword(const std::string& aInput)
 }
 // function check_spatial_dimensions_keyword
 
+void is_metadata_block_id_valid(const std::vector<std::string>& tTokens)
+{
+    if(tTokens.size() > 3u)
+    {
+        XMLGen::ValidPlatoInputFileMetaDataBlockKeys tValidKeys;
+        auto tLowerInput = XMLGen::to_lower(tTokens[1]);
+        auto tInputToken = XMLGen::transform_keyword_values(tTokens);
+        THROWERR(std::string("\nIs Metadata Block ID Valid? - Input meta data block id '") + tInputToken + "' is invalid. Supported examples include:\n"
+        + "  * begin metadata_block_name ID, where ID can be an integer, e.g. '1', or a string with the following formats, e.g. 'name' or 'name1_name2'. \n"
+        + "  * Space indented formats, e.g. 'name1 name2', are not supported.\n"
+        + "  * These four examples are valid alternatives: 1) begin " + tLowerInput + " 1, 2) begin " + tLowerInput + " plato, 3) begin "
+        + tLowerInput + " plato_1,\n"
+        + "    and 4) begin " + tLowerInput + " plato_is_the_best_optimization_based_design_tool.\n")
+    }
+}
+
 }

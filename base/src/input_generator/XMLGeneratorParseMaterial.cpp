@@ -186,11 +186,11 @@ void ParseMaterial::parse(std::istream &aInputFile)
         XMLGen::parse_tokens(tBuffer.data(), tTokens);
         XMLGen::to_lower(tTokens);
 
-        std::string tTag;
-        if (XMLGen::parse_single_value(tTokens, { "begin", "material" }, tTag))
+        std::string tMaterialID;
+        if (XMLGen::parse_single_value(tTokens, { "begin", "material" }, tMaterialID))
         {
             XMLGen::Material tMetadata;
-            tMetadata.id(tTag);
+            tMetadata.id(tMaterialID);
             XMLGen::erase_tags(mTags);
             XMLGen::parse_input_metadata( { "end", "material" }, aInputFile, mTags);
             this->setMetadata(tMetadata);

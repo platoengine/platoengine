@@ -22,11 +22,11 @@ void check_input_mesh_file_keyword
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**
- * \fn check_objective_container_is_defined
+ * \fn is_objective_container_empty
  * \brief Check if objective list is defined, i.e. is not empty.
  * \param [in] aXMLMetaData Plato problem input data
 **********************************************************************************/
-void check_objective_container_is_defined
+void is_objective_container_empty
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**

@@ -13,11 +13,21 @@ namespace XMLGen
 
 bool Output::outputData() const
 {
-    return mEnableOutputStage;
+    return mOutputDataToFile;
 }
 void Output::outputData(const bool& aOutputData)
 {
-    mEnableOutputStage = aOutputData;
+    mOutputDataToFile = aOutputData;
+}
+
+void Output::scenarioID(const std::string& aID)
+{
+    mScenarioID = aID;
+}
+
+std::string Output::scenarioID() const
+{
+    return mScenarioID;
 }
 
 void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLayout)

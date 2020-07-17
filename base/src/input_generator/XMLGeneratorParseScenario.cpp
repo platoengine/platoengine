@@ -16,11 +16,11 @@ namespace XMLGen
 void ParseScenario::allocate()
 {
     mTags.clear();
+    mTags.insert({ "id", { {"id"}, "" } });
     mTags.insert({ "code", { {"code"}, "" } });
     mTags.insert({ "physics", { {"physics"}, "" } });
     mTags.insert({ "performer", { {"performer"}, "" } });
     mTags.insert({ "dimensions", { {"dimensions"}, "" } });
-    mTags.insert({ "scenario_id", { {"scenario_id"}, "" } });
     mTags.insert({ "enable_cache_state", { {"enable_cache_state"}, "" } });
     mTags.insert({ "analyze_new_workflow", { {"analyze_new_workflow"}, "" } });
     mTags.insert({ "enable_update_problem", { {"enable_update_problem"}, "" } });
@@ -87,14 +87,9 @@ void ParseScenario::setDimensions()
     }
 }
 
-void ParseScenario::setScenarioID()
+void ParseScenario::checkScenarioID()
 {
-    auto tItr = mTags.find("scenario_id");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        mData.id(tItr->second.second);
-    }
-    else
+    if (mData.id().empty())
     {
         auto tID = mData.code() + "_" + mData.physics() + "_0";
         mData.id(tID);
@@ -199,15 +194,17 @@ void ParseScenario::parse(std::istream &aInputFile)
         XMLGen::parse_tokens(tBuffer.data(), tTokens);
         XMLGen::to_lower(tTokens);
 
-        std::string tTag;
-        if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tTag))
+        std::string tScenarioID;
+        if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tScenarioID))
         {
+            XMLGen::is_metadata_block_id_valid(tTokens);
+            mData.id(tScenarioID);
             XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
             this->setMetaData();
         }
     }
     this->setPerformer();
-    this->setScenarioID();
+    this->checkScenarioID();
 }
 
 }

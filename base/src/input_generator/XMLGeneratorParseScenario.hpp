@@ -50,12 +50,12 @@ private:
     void setPerformer();
 
     /******************************************************************************//**
-     * \fn setScenarioID
-     * \brief Set 'scenario_id' keyword, default = 'code_keyword' + \n
+     * \fn checkScenarioID
+     * \brief If scenario 'id' keyword is empty, set 'id' to default = 'code_keyword' + \n
      * 'physics_keyword' + '0', where \n 'code_keyword' denotes the value set for \n
      * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
     **********************************************************************************/
-    void setScenarioID();
+    void checkScenarioID();
 
     /******************************************************************************//**
      * \fn setScenarioID
