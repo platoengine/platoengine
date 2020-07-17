@@ -323,7 +323,11 @@ inline void parse_stress_limit
 (const XMLGen::UseCaseTags& aTags,
  XMLGen::Objective& aMetadata)
 {
-    auto tItr = aTags.find("stress_limit");
+    if(aTags.find("stress_limit") == aTags.end())
+    {
+        THROWERR("Parse Objective: 'stress_limit' keyword is not defined in keyword-to-value map.")
+    }
+
     if(aTags.find("stress_limit")->second.second.empty())
     {
         if(aTags.find("type")->second.second.compare("stress constrained mass minimization") == 0)
