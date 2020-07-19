@@ -368,6 +368,7 @@ public:
 
 struct ValidAnalyzePhysicsKeys
 {
+private:
     /*!<
      * valid plato analyze physics and corresponding PDE keywords \n
      * \brief map from physics keyword to pair of plato analyze physics and \n
@@ -380,7 +381,7 @@ struct ValidAnalyzePhysicsKeys
         {
             { "mechanical", {"Mechanical", "Elliptic"} },
             { "transient mechanics", {"Mechanical", "Hyperbolic"} },
-            { "plasticity", {"Mechanical", "Parabolic"} },
+            { "plasticity", {"Mechanical", "Infinite Strain Plasticity"} },
             { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
             { "thermal", {"Thermal", "Elliptic"} },
             { "heat conduction", {"Thermal", "Parabolic"} },
@@ -389,6 +390,29 @@ struct ValidAnalyzePhysicsKeys
             { "thermomechanical", {"Thermomechanical", "Elliptic"} },
             { "coupled heat conduction and mechanics", {"Thermomechanical", "Parabolic"} }
         };
+
+public:
+    std::string pde(const std::string& aPhysicsTag) const
+    {
+        auto tLowerPhysics = XMLGen::to_lower(aPhysicsTag);
+        auto tPhysicsItr = mKeys.find(tLowerPhysics);
+        if (tPhysicsItr == mKeys.end())
+        {
+            THROWERR(std::string("Valid Analyze Physics Keys: Physics '") + tLowerPhysics + "' is not supported in Plato Analyze.")
+        }
+        return (tPhysicsItr->second.second);
+    }
+
+    std::string physics(const std::string& aPhysicsTag) const
+    {
+        auto tLowerPhysics = XMLGen::to_lower(aPhysicsTag);
+        auto tPhysicsItr = mKeys.find(tLowerPhysics);
+        if (tPhysicsItr == mKeys.end())
+        {
+            THROWERR(std::string("Valid Analyze Physics Keys: Physics '") + tLowerPhysics + "' is not supported in Plato Analyze.")
+        }
+        return (tPhysicsItr->second.first);
+    }
 };
 // struct ValidAnalyzePhysicsKeys
 

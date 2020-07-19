@@ -171,15 +171,9 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarioMetaData.physics());
-    auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
-    if (tPhysics == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Append Physics to Plato Analyze Input Deck: Physics '")
-            + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
+    auto tPhysicsTag = tValidKeys.physics(aXMLMetaData.mScenarioMetaData.physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Physics", "string", tPhysics->second.first};
+    std::vector<std::string> tValues = {"Physics", "string", tPhysicsTag};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 // function append_physics_parameter_to_plato_problem
@@ -191,15 +185,9 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarioMetaData.physics());
-    auto tPhysics = tValidKeys.mKeys.find(tLowerPhysics);
-    if (tPhysics == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Append PDE Constraint to Plato Analyze Input Deck: Physics '")
-            + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
+    auto tPDE = tValidKeys.pde(aXMLMetaData.mScenarioMetaData.physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"PDE Constraint", "string", tPhysics->second.second};
+    std::vector<std::string> tValues = {"PDE Constraint", "string", tPDE};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 // function append_physics_parameter_to_plato_problem
@@ -466,17 +454,11 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tLowerPhysics = Plato::tolower(aXMLMetaData.mScenarioMetaData.physics());
-    auto tPhysicsItr = tValidKeys.mKeys.find(tLowerPhysics);
-    if(tPhysicsItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Append Partial Differential Equation to Plato Analyze Input Deck: Physics '")
-            + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
-    auto tPhysics = aParentNode.append_child("ParameterList");
-    auto tPDECategory = tPhysicsItr->second.second;
-    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysics);
-    XMLGen::Private::append_simp_penalty_function(aXMLMetaData.mScenarioMetaData, tPhysics);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    auto tPhysicsTag = aXMLMetaData.mScenarioMetaData.physics();
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aXMLMetaData.mScenarioMetaData, tPhysicsNode);
 }
 // function append_partial_differential_equation_to_plato_analyze_input_deck
 /**********************************************************************************/
