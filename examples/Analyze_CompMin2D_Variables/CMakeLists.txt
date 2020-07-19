@@ -5,7 +5,7 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "defines.xml;interface.xml;mitchell_tri.xml;alexaApp.xml;platoApp.xml;platoMain.xml;amgx.json;mitchell_tri.gen;mitchell_tri_assoc.txt")
+set( testFiles "defines.xml;interface.xml;mitchell_tri.xml;analyzeApp.xml;platoApp.xml;platoMain.xml;amgx.json;mitchell_tri.gen;mitchell_tri_assoc.txt")
 Plato_add_test_files("${testFiles}")
 
 ## Plato_add_test_files() only works for files.  *.osh is a directory.
@@ -34,7 +34,7 @@ Plato_create_test(PLATO_NEW_TEST ${PLATOMAIN_BINARY} ${PLATOMAIN_NP} ${INTERFACE
 
 # Define/add a performer
 set( LOCAL_COMM_ID 1 )
-set(APP_FILE alexaApp.xml)
+set(APP_FILE analyzeApp.xml)
 set(INPUT_FILE --input-config=mitchell_tri.xml)
 Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
 

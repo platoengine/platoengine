@@ -1,59 +1,10 @@
 <?xml version="1.0"?>
 
-<MeshMap>
-  <FilterFirst>false</FilterFirst>
-  <Filter>
-    <Type>Linear</Type>
-    <Radius>0.15</Radius>
-  </Filter>
-  <LinearMap>
-    <Type>SymmetryPlane</Type>
-    <Origin>
-      <X>0.0</X>
-      <Y>0.0</Y>
-      <Z>0.0</Z>
-    </Origin>
-    <Normal>
-      <X>1.0</X>
-      <Y>0.0</Y>
-      <Z>0.0</Z>
-    </Normal>
-  </LinearMap>
-</MeshMap>
-
-<Operation>
-  <Name>Compute Constraint Value</Name>
-  <Function>ComputeCriterionValue</Function>
-  <Criterion>Volume</Criterion>
-  <Input>
-    <ArgumentName>Topology</ArgumentName>
-  </Input>
-  <Output>
-    <Argument>Value</Argument>
-    <ArgumentName>Constraint Value</ArgumentName>
-  </Output>
-</Operation>
-
-<Operation>
-  <Name>Compute Constraint Gradient</Name>
-  <Function>ComputeCriterionGradient</Function>
-  <Criterion>Volume</Criterion>
-  <Input>
-    <ArgumentName>Topology</ArgumentName>
-  </Input>
-  <Output>
-    <Argument>Gradient</Argument>
-    <ArgumentName>Constraint Gradient</ArgumentName>
-  </Output>
-</Operation>
 
 <Operation>
   <Name>Compute Constraint</Name>
   <Function>ComputeCriterion</Function>
   <Criterion>Volume</Criterion>
-  <Input>
-    <ArgumentName>Topology</ArgumentName>
-  </Input>
   <Output>
     <Argument>Value</Argument>
     <ArgumentName>Constraint Value</ArgumentName>
@@ -64,11 +15,29 @@
   </Output>
 </Operation>
 
+<Operation>
+  <Name>Compute Constraint Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Volume</Criterion>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+
+<Operation>
+  <Name>Compute Displacement Solution</Name>
+  <Function>ComputeSolution</Function>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
 
 <Operation>
   <Name>Compute Objective Value</Name>
-  <Function>ComputeCriterionValue</Function>
-  <Criterion>Internal Energy</Criterion>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
@@ -76,12 +45,22 @@
     <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
+  <Parameter>
+    <ArgumentName>Traction X</ArgumentName>
+    <Target>[Plato Problem]:[Natural Boundary Conditions]:[Traction Vector Boundary Condition]:Values(0)</Target>
+    <InitialValue>0.0</InitialValue>
+  </Parameter>
+  <Parameter>
+    <ArgumentName>Traction Y</ArgumentName>
+    <Target>[Plato Problem]:[Natural Boundary Conditions]:[Traction Vector Boundary Condition]:Values(1)</Target>
+    <InitialValue>0.0</InitialValue>
+  </Parameter>
 </Operation>
 
 <Operation>
   <Name>Compute Objective Gradient</Name>
-  <Function>ComputeCriterionGradient</Function>
-  <Criterion>Internal Energy</Criterion>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
@@ -89,12 +68,22 @@
     <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
+  <Parameter>
+    <ArgumentName>Traction X</ArgumentName>
+    <Target>[Plato Problem]:[Natural Boundary Conditions]:[Traction Vector Boundary Condition]:Values(0)</Target>
+    <InitialValue>0.0</InitialValue>
+  </Parameter>
+  <Parameter>
+    <ArgumentName>Traction Y</ArgumentName>
+    <Target>[Plato Problem]:[Natural Boundary Conditions]:[Traction Vector Boundary Condition]:Values(1)</Target>
+    <InitialValue>0.0</InitialValue>
+  </Parameter>
 </Operation>
 
 <Operation>
   <Name>Compute Objective</Name>
-  <Function>ComputeCriterion</Function>
-  <Criterion>Internal Energy</Criterion>
+  <Function>ComputeCriteion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
@@ -112,22 +101,13 @@
   <Function>WriteOutput</Function>
   <Name>Write Output</Name>
   <Output>
-    <ArgumentName>Topology</ArgumentName>
-  </Output>
-  <Output>
     <ArgumentName>Solution X</ArgumentName>
   </Output>
   <Output>
     <ArgumentName>Solution Y</ArgumentName>
   </Output>
   <Output>
-    <ArgumentName>Solution Z</ArgumentName>
-  </Output>
-  <Output>
     <ArgumentName>Objective Gradient</ArgumentName>
-  </Output>
-  <Output>
-    <ArgumentName>Constraint Gradient</ArgumentName>
   </Output>
 </Operation>
 

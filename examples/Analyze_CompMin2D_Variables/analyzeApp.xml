@@ -3,19 +3,23 @@
 
 <Operation>
   <Name>Compute Constraint</Name>
-  <Function>ComputeConstraint</Function>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Volume</Criterion>
   <Output>
     <ArgumentName>Constraint Value</ArgumentName>
   </Output>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Constraint Gradient</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
   <Name>Compute Constraint Value</Name>
-  <Function>ComputeConstraintValue</Function>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Volume</Criterion>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Constraint Value</ArgumentName>
   </Output>
 </Operation>
@@ -30,12 +34,14 @@
 </Operation>
 
 <Operation>
-  <Function>ComputeObjective</Function>
   <Name>Compute Objective Value</Name>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
   <Parameter>
@@ -51,12 +57,14 @@
 </Operation>
 
 <Operation>
-  <Function>ComputeObjective</Function>
   <Name>Compute Objective Gradient</Name>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
   <Parameter>
@@ -72,15 +80,18 @@
 </Operation>
 
 <Operation>
-  <Function>ComputeObjective</Function>
   <Name>Compute Objective</Name>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>
