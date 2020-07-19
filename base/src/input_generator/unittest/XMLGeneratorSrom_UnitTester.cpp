@@ -1344,7 +1344,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
             "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
-            "thermal_conductivity_coefficient .02\n"
+            "thermal_conductivity .02\n"
             "mass_density .001\n"
         "end material\n"
         "begin block 1\n"
@@ -1352,7 +1352,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal_conductivity_coefficient\n"
+        "    tag thermal_conductivity\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1423,7 +1423,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity", tMaterials[0].randomVars()[0].tag().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Deterministic)
@@ -1452,7 +1452,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
             "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
-            "thermal_conductivity_coefficient .02\n"
+            "thermal_conductivity .02\n"
             "mass_density .001\n"
         "end material\n"
         "begin material 2\n"
@@ -1469,7 +1469,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal_conductivity_coefficient\n"
+        "    tag thermal_conductivity\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1540,7 +1540,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());
@@ -1591,7 +1591,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
             "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
-            "thermal_conductivity_coefficient .02\n"
+            "thermal_conductivity .02\n"
             "mass_density .001\n"
         "end material\n"
         "begin block 1\n"
@@ -1599,7 +1599,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal_conductivity_coefficient\n"
+        "    tag thermal_conductivity\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1682,7 +1682,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(1u, tLoads.size());
@@ -1740,7 +1740,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
             "penalty_exponent 3\n"
             "youngs_modulus 1e6\n"
             "poissons_ratio 0.33\n"
-            "thermal_conductivity_coefficient 0.33\n"
+            "thermal_conductivity 0.33\n"
             "mass_density 1.0\n"
         "end material\n"
         "begin material 2\n"
@@ -1757,7 +1757,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
         "end block\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    tag thermal_conductivity_coefficient\n"
+        "    tag thermal_conductivity\n"
         "    material id 1\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
@@ -1841,7 +1841,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     ASSERT_STREQ("0.0075", tMaterials[0].randomVars()[0].deviation().c_str());
     ASSERT_STREQ("beta", tMaterials[0].randomVars()[0].distribution().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[0].randomVars()[0].attribute().c_str());
-    ASSERT_STREQ("thermal_conductivity_coefficient", tMaterials[0].randomVars()[0].tag().c_str());
+    ASSERT_STREQ("thermal_conductivity", tMaterials[0].randomVars()[0].tag().c_str());
 
     // 1.4 TEST DETERMINISTIC MATERIAL
     EXPECT_FALSE(tMaterials[1].isRandom());

@@ -47,14 +47,14 @@ void ParseMaterial::allocate()
     mTags.insert({ "poissons_ratio_xy", { {"poissons_ratio_xy"}, "" } });
     mTags.insert({ "poissons_ratio_xz", { {"poissons_ratio_xz"}, "" } });
     mTags.insert({ "poissons_ratio_yz", { {"poissons_ratio_yz"}, "" } });
+    mTags.insert({ "thermal_expansivity", { {"thermal_expansivity"}, "" } });
+    mTags.insert({ "thermal_conductivity", { {"thermal_conductivity"}, "" } });
     mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
     mTags.insert({ "piezoelectric_coupling_15", { {"piezoelectric_coupling_15"}, "" } });
     mTags.insert({ "piezoelectric_coupling_33", { {"piezoelectric_coupling_33"}, "" } });
     mTags.insert({ "piezoelectric_coupling_31", { {"piezoelectric_coupling_31"}, "" } });
     mTags.insert({ "dielectric_permittivity_11", { {"dielectric_permittivity_11"}, "" } });
     mTags.insert({ "dielectric_permittivity_33", { {"dielectric_permittivity_33"}, "" } });
-    mTags.insert({ "thermal_expansion_coefficient", { {"thermal_expansion_coefficient"}, "" } });
-    mTags.insert({ "thermal_conductivity_coefficient", { {"thermal_conductivity_coefficient"}, "" } });
 }
 
 void ParseMaterial::setCode(XMLGen::Material& aMetadata)

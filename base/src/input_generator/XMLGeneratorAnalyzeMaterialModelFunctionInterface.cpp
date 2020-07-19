@@ -6,6 +6,7 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
 
@@ -15,7 +16,7 @@ namespace XMLGen
 namespace Private
 {
 
-void check_material_property_tags_container
+void is_material_property_tags_container_empty
 (const XMLGen::Material& aMaterial)
 {
     auto tTags = aMaterial.tags();
@@ -27,34 +28,36 @@ void check_material_property_tags_container
 }
 // function check_material_property_tags_container
 
+void append_material_property
+(const std::string& aMaterialPropertyTag,
+ const XMLGen::Material& aMaterial,
+ pugi::xml_node& aParentNode)
+{
+    auto tMaterialModelTag = aMaterial.category();
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
+    auto tValueType = tValidKeys.type(tMaterialModelTag, aMaterialPropertyTag);
+    auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, aMaterial.property(aMaterialPropertyTag)};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
+}
+// function append_material_property
+
 void append_material_properties_to_plato_analyze_material_model
 (const XMLGen::Material& aMaterial,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::Private::check_material_property_tags_container(aMaterial);
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
-    auto tLowerMaterialModel = Plato::tolower(aMaterial.category());
-    auto tMaterialModelItr = tValidKeys.mKeys.find(tLowerMaterialModel);
-    if(tMaterialModelItr == tValidKeys.mKeys.end())
-    {
-        THROWERR("Append Material Properties To Plato Analyze Material Model: Material model '"
-            + tLowerMaterialModel + "' is not supported in Plato Analyze.")
-    }
+    XMLGen::Private::is_material_property_tags_container_empty(aMaterial);
 
     auto tTags = aMaterial.tags();
+    auto tMaterialModelTag = aMaterial.category();
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    for(auto& tTag : tTags)
+    for(auto& tMaterialPropTag : tTags)
     {
-        auto tLowerTag = Plato::tolower(tTag);
-        auto tItr = tMaterialModelItr->second.find(tLowerTag);
-        if (tItr == tMaterialModelItr->second.end())
-        {
-            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
-                + tTag + "' is not supported in Plato Analyze by '" + tLowerMaterialModel + "' material model.")
-        }
-        auto tMaterialTag = tItr->second.first;
-        auto tValueType = tItr->second.second;
-        std::vector<std::string> tValues = {tMaterialTag, tValueType, aMaterial.property(tTag)};
+        auto tValueType = tValidKeys.type(tMaterialModelTag, tMaterialPropTag);
+        auto tValidAnalyzeMaterialPropertyTag = tValidKeys.tag(tMaterialModelTag, tMaterialPropTag);
+        std::vector<std::string> tValues = {tValidAnalyzeMaterialPropertyTag, tValueType, aMaterial.property(tMaterialPropTag)};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
     }
 }
@@ -78,9 +81,17 @@ void append_isotropic_linear_thermal_material_to_plato_problem
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
-    auto tIsotropicLinearElasticMaterial = tMaterialModel.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Isotropic Linear Thermal"}, tIsotropicLinearElasticMaterial);
-    XMLGen::Private::append_material_properties_to_plato_analyze_material_model(aMaterial, tIsotropicLinearElasticMaterial);
+
+    // append thermal conduction property
+    auto tThermalConduction = tMaterialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Thermal Conduction"}, tThermalConduction);
+    XMLGen::Private::append_material_property("thermal_conductivity", aMaterial, tThermalConduction);
+
+    // append thermal mass properties
+    auto tThermalMass = tMaterialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Thermal Mass"}, tThermalMass);
+    XMLGen::Private::append_material_property("mass_density", aMaterial, tThermalMass);
+    XMLGen::Private::append_material_property("specific_heat", aMaterial, tThermalMass);
 }
 // function append_isotropic_linear_thermal_material_to_plato_problem
 
@@ -90,9 +101,19 @@ void append_isotropic_linear_thermoelastic_material_to_plato_problem
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
-    auto tIsotropicLinearElasticMaterial = tMaterialModel.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Isotropic Linear Thermoelastic"}, tIsotropicLinearElasticMaterial);
-    XMLGen::Private::append_material_properties_to_plato_analyze_material_model(aMaterial, tIsotropicLinearElasticMaterial);
+
+    // append thermal properties
+    auto tThermalProperties = tMaterialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Thermoelastic"}, tThermalProperties);
+    XMLGen::Private::append_material_property("thermal_expansivity", aMaterial, tThermalProperties);
+    XMLGen::Private::append_material_property("thermal_conductivity", aMaterial, tThermalProperties);
+    XMLGen::Private::append_material_property("reference_temperature", aMaterial, tThermalProperties);
+
+    // append elastic properties
+    auto tElasticProperties = tThermalProperties.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Elastic Stiffness"}, tElasticProperties);
+    XMLGen::Private::append_material_property("youngs_modulus", aMaterial, tElasticProperties);
+    XMLGen::Private::append_material_property("poissons_ratio", aMaterial, tElasticProperties);
 }
 // function append_isotropic_linear_thermoelastic_material_to_plato_problem
 

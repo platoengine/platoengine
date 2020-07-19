@@ -11,6 +11,9 @@
 #include <string>
 #include <unordered_map>
 
+#include "XMLG_Macros.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
+
 namespace XMLGen
 {
 
@@ -63,7 +66,7 @@ struct ValidRandomPropertyKeys
     std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y",
         "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz",
         "shear_modulus_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
-        "piezoelectric_coupling_31", "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient",
+        "piezoelectric_coupling_31", "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity",
         "yield_stress" };
 };
 // struct ValidRandomPropertyKeys
@@ -138,7 +141,7 @@ struct ValidMaterialPropertyKeys
     std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
         "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz", "shear_modulus_yz",
         "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
-        "thermal_conductivity_coefficient", "specific_heat", "reference_temperature", "thermal_expansion_coefficient" };
+        "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity" };
 };
 // struct ValidMaterialPropertyKeys
 
@@ -237,6 +240,7 @@ struct ValidAnalyzeOutputKeys
 
 struct ValidAnalyzeMaterialPropertyKeys
 {
+private:
     /*!<
      * valid plato analyze material models and corresponding material property keywords \n
      * \brief map from material model to map from material property tag in plato input file to \n
@@ -263,19 +267,80 @@ struct ValidAnalyzeMaterialPropertyKeys
                 { "poissons_ratio", {"Poissons Ratio", "double"} }, { "dielectric_permittivity_11", {"p11", "double"} },
                 { "dielectric_permittivity_33", {"p33", "double"} }, { "piezoelectric_coupling_15", {"e15", "double"} },
                 { "piezoelectric_coupling_33", {"e33", "double"} }, { "piezoelectric_coupling_31", {"e31", "double"} },
-                { "thermal_expansion_coefficient", {"Alpha", "double"} } }
+                { "thermal_expansivity", {"Alpha", "double"} } }
             },
 
-            { "isotropic linear thermal", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
+            { "isotropic linear thermal", { { "thermal_conductivity", { "Thermal Conductivity", "double" } },
                 { "mass_density", {"Mass Density", "double"} }, { "specific_heat", {"Specific Heat", "double"} } }
             },
 
-            { "isotropic linear thermoelastic", { { "thermal_conductivity_coefficient", { "Thermal Conductivity Coefficient", "double" } },
+            { "isotropic linear thermoelastic", { { "thermal_conductivity", { "Thermal Conductivity", "double" } },
                 { "youngs_modulus", {"Youngs Modulus", "double"} }, { "poissons_ratio", {"Poissons Ratio", "double"} },
-                { "thermal_expansion_coefficient", { "Thermal Expansion Coefficient", "double" } },
-                { "reference_temperature", { "Reference Temperature", "double" } }, { "mass_density", {"Mass Density", "double"} } }
+                { "thermal_expansivity", { "Thermal Expansivity", "double" } }, { "reference_temperature", { "Reference Temperature", "double" } },
+                { "mass_density", {"Mass Density", "double"} } }
             }
         };
+
+public:
+    std::string tag(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
+    {
+        auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
+        auto tMaterialModelItr = mKeys.find(tLowerMaterialModelTag);
+        if (tMaterialModelItr == mKeys.end())
+        {
+            THROWERR("Valid Analyze Material Property Keys: Material model '" + tLowerMaterialModelTag + "' is not supported in Plato Analyze.")
+        }
+
+        auto tLowerPropertyTag = XMLGen::to_lower(aPropertyTag);
+        auto tItr = tMaterialModelItr->second.find(tLowerPropertyTag);
+        if (tItr == tMaterialModelItr->second.end())
+        {
+            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
+                + tLowerPropertyTag + "' is not supported in Plato Analyze by '" + tLowerMaterialModelTag + "' material model.")
+        }
+
+        return tItr->second.first;
+    }
+
+    std::string type(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
+    {
+        auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
+        auto tMaterialModelItr = mKeys.find(tLowerMaterialModelTag);
+        if (tMaterialModelItr == mKeys.end())
+        {
+            THROWERR("Valid Analyze Material Property Keys: Material model '" + tLowerMaterialModelTag + "' is not supported in Plato Analyze.")
+        }
+
+        auto tLowerPropertyTag = XMLGen::to_lower(aPropertyTag);
+        auto tItr = tMaterialModelItr->second.find(tLowerPropertyTag);
+        if (tItr == tMaterialModelItr->second.end())
+        {
+            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
+                + tLowerPropertyTag + "' is not supported in Plato Analyze by '" + tLowerMaterialModelTag + "' material model.")
+        }
+
+        return tItr->second.second;
+    }
+
+    std::pair<std::string, std::string> pair(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
+    {
+        auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
+        auto tMaterialModelItr = mKeys.find(tLowerMaterialModelTag);
+        if (tMaterialModelItr == mKeys.end())
+        {
+            THROWERR("Valid Analyze Material Property Keys: Material model '" + tLowerMaterialModelTag + "' is not supported in Plato Analyze.")
+        }
+
+        auto tLowerPropertyTag = XMLGen::to_lower(aPropertyTag);
+        auto tItr = tMaterialModelItr->second.find(tLowerPropertyTag);
+        if (tItr == tMaterialModelItr->second.end())
+        {
+            THROWERR(std::string("Append Material Properties To Plato Analyze Material Model: Material property with tag '")
+                + tLowerPropertyTag + "' is not supported in Plato Analyze by '" + tLowerMaterialModelTag + "' material model.")
+        }
+
+        return tItr->second;
+    }
 };
 // struct ValidAnalyzeMaterialPropertyKeys
 
