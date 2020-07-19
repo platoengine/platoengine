@@ -282,6 +282,13 @@ private:
         };
 
 public:
+    /******************************************************************************//**
+     * \fn tag
+     * \brief Return valid Plato Analyze material property tag.
+     * \param [in] aMaterialModelTag material model tag
+     * \param [in] aPropertyTag      material property tag
+     * \return material property tag recognized by Plato Analyze
+    **********************************************************************************/
     std::string tag(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
     {
         auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
@@ -302,6 +309,13 @@ public:
         return tItr->second.first;
     }
 
+    /******************************************************************************//**
+     * \fn type
+     * \brief Return material property data type, e.g. double, int, etc.
+     * \param [in] aMaterialModelTag material model tag
+     * \param [in] aPropertyTag      material property tag
+     * \return material property data type
+    **********************************************************************************/
     std::string type(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
     {
         auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
@@ -322,6 +336,14 @@ public:
         return tItr->second.second;
     }
 
+    /******************************************************************************//**
+     * \fn pair
+     * \brief Return material property tag to material property data type pair, e.g. \n
+     *     std::pair<material property tag, material property data>
+     * \param [in] aMaterialModelTag material model tag
+     * \param [in] aPropertyTag      material property tag
+     * \return material property tag to material property data type pair
+    **********************************************************************************/
     std::pair<std::string, std::string> pair(const std::string& aMaterialModelTag, const std::string& aPropertyTag) const
     {
         auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
