@@ -26,12 +26,44 @@ namespace XMLGen
 namespace Analyze
 {
 
-/*!< partial differential equation function pointer type */
-typedef void (*PartialDiffFunc)(void);
+/*!< physics function pointer type */
+typedef void (*PhysicsFunc)(void);
 
-/*!< map from partial differential equation (PDE) category to partial differential equation \n
- * function used to append PDE and respective parameters, i.e. map<pde_category, pde_function> */
-typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::PartialDiffFunc, std::type_index>> PartialDiffFuncMap;
+/*!< map from physics category to physics function used to append PDE and respective \n
+ * parameters, i.e. map<physics_category, physics_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::PhysicsFunc, std::type_index>> PhysicsFuncMap;
+
+}
+
+namespace Private
+{
+
+void append_simp_penalty_function
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tPenaltyFunction = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+    tValues = {"Exponent", "double", aMetadata.materialPenaltyExponent()};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+    tValues = {"Minimum Value", "double", aMetadata.minErsatzMaterialConstant()};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+}
+
+void append_global_residual_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+}
 
 }
 
@@ -41,32 +73,58 @@ typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::PartialDiffFu
  * This interface reduces cyclomatic complexity due to having multiple material \n
  * models in Plato Analyze.
 **********************************************************************************/
-struct AppendPartialDiffParameters
+struct AppendPhysicsParameters
 {
 private:
-    /*!< map from material model category to function used to append material properties and respective properties */
-    XMLGen::Analyze::PartialDiffFuncMap mMap;
+    /*!< map from physics category to function used to append physics parameters */
+    XMLGen::Analyze::PhysicsFuncMap mMap;
 
     /******************************************************************************//**
      * \fn insert
-     * \brief Insert material functions to material model function map.
+     * \brief Insert physics functions to physics functions map.
      **********************************************************************************/
-    void insert(){}
+    void insert()
+    {
+    }
 
 public:
     /******************************************************************************//**
-     * \fn AppendMaterialModelParameters
+     * \fn AppendPhysicsParameters
      * \brief Default constructor
     **********************************************************************************/
-    AppendPartialDiffParameters(){}
+    AppendPhysicsParameters()
+    {
+        this->insert();
+    }
 
     /******************************************************************************//**
      * \fn call
-     * \brief Append material model and corresponding parameters to plato_analyze_input_deck.xml file.
-     * \param [in]     aMaterial    material model metadata
+     * \brief Append physics and respective parameters to plato_analyze_input_deck.xml file.
+     * \param [in]     aScenario    physics scenario metadata
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
-    void call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const{}
+    void call(const XMLGen::Scenario& aScenario, pugi::xml_node &aParentNode) const
+    {
+        auto tCode = XMLGen::to_lower(aScenario.code());
+        if(tCode.compare("plato_analyze") != 0)
+        {
+            return;
+        }
+
+        auto tPhysics = XMLGen::to_lower(aScenario.physics());
+        auto tMapItr = mMap.find(tPhysics);
+        if(tMapItr == mMap.end())
+        {
+            THROWERR(std::string("Physics Function Interface: Did not find physics function with tag '") + tPhysics
+                + "' in function list. " + "Physics '" + tPhysics + "' is not supported in Plato Analyze.")
+        }
+        auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Scenario&, pugi::xml_node&)>(tMapItr->second.first);
+        if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
+        {
+            THROWERR(std::string("Physics Function Interface: Reinterpret cast for physics function with tag '") + tPhysics + "' failed.")
+        }
+        tTypeCastedFunc(aScenario, aParentNode);
+    }
 };
 // struct AppendMaterialModelParameters
 
