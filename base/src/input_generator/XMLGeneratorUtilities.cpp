@@ -363,6 +363,16 @@ void set_key_value
 /******************************************************************************/
 
 /******************************************************************************/
+std::string set_value_keyword_to_ignore_if_empty
+(const std::string& aValue)
+{
+    auto tMyValue = aValue.empty() ? std::string("IGNORE") : aValue;
+    return tMyValue;
+}
+// function set_value_keyword_to_ignore_if_empty
+/******************************************************************************/
+
+/******************************************************************************/
 void set_value_keyword_to_ignore_if_empty
 (std::vector<std::string>& aValues)
 {

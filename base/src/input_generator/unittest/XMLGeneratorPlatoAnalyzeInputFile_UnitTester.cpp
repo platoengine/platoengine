@@ -20,6 +20,58 @@
 
 #include "XMLGeneratorAnalyzeCriterionUtilities.hpp"
 
+namespace XMLGen
+{
+
+namespace Analyze
+{
+
+/*!< partial differential equation function pointer type */
+typedef void (*PartialDiffFunc)(void);
+
+/*!< map from partial differential equation (PDE) category to partial differential equation \n
+ * function used to append PDE and respective parameters, i.e. map<pde_category, pde_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::PartialDiffFunc, std::type_index>> PartialDiffFuncMap;
+
+}
+
+/******************************************************************************//**
+ * \struct The goal of this C++ struct is to provide an interface for the \n
+ * functions used to append material models to plato_analyze_input_deck.xml. \n
+ * This interface reduces cyclomatic complexity due to having multiple material \n
+ * models in Plato Analyze.
+**********************************************************************************/
+struct AppendPartialDiffParameters
+{
+private:
+    /*!< map from material model category to function used to append material properties and respective properties */
+    XMLGen::Analyze::PartialDiffFuncMap mMap;
+
+    /******************************************************************************//**
+     * \fn insert
+     * \brief Insert material functions to material model function map.
+     **********************************************************************************/
+    void insert(){}
+
+public:
+    /******************************************************************************//**
+     * \fn AppendMaterialModelParameters
+     * \brief Default constructor
+    **********************************************************************************/
+    AppendPartialDiffParameters(){}
+
+    /******************************************************************************//**
+     * \fn call
+     * \brief Append material model and corresponding parameters to plato_analyze_input_deck.xml file.
+     * \param [in]     aMaterial    material model metadata
+     * \param [in/out] aParentNode  pugi::xml_node
+    **********************************************************************************/
+    void call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const{}
+};
+// struct AppendMaterialModelParameters
+
+}
+
 namespace PlatoTestXMLGenerator
 {
 
@@ -131,7 +183,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
     +"<Parametername=\"Index\"type=\"int\"value=\"1\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList><ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPX\">"
     +"<Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList></ParameterList></ParameterList></ParameterList>";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
-    Plato::system("rm -f plato_analyze_input_deck.xml");
+    //Plato::system("rm -f plato_analyze_input_deck.xml");
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
@@ -972,20 +1024,6 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorMatP
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
-    tXMLMetaData.materials.push_back(tMaterial);
-    ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInvalidProperty)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tXMLMetaData;
-    XMLGen::Material tMaterial;
-    tMaterial.code("plato_analyze");
-    tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs_modulus", "1e9");
-    tMaterial.property("poissons_ratio", "0.3");
-    tMaterial.property("piezoelectric_coupling_33", "123");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }

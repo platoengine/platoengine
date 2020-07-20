@@ -27,6 +27,48 @@ private:
     void allocate();
 
     /******************************************************************************//**
+     * \fn insertCoreProperties
+     * \brief Insert core material properties, e.g. identifiers, to map from plato \n
+     * input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertCoreProperties();
+
+    /******************************************************************************//**
+     * \fn insertThermalProperties
+     * \brief Insert thermal material properties, e.g. identifiers, to map from plato \n
+     * input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertThermalProperties();
+
+    /******************************************************************************//**
+     * \fn insertElasticProperties
+     * \brief Insert elastic material properties, e.g. identifiers, to map from plato \n
+     * input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertElasticProperties();
+
+    /******************************************************************************//**
+     * \fn insertPlasticProperties
+     * \brief Insert plastic material properties, e.g. identifiers, to map from plato \n
+     * input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertPlasticProperties();
+
+    /******************************************************************************//**
+     * \fn insertElectricProperties
+     * \brief Insert electric material properties, e.g. identifiers, to map from plato \n
+     * input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertElectricProperties();
+
+    /******************************************************************************//**
+     * \fn insertElasticOrthoProperties
+     * \brief Insert elastic orthotropic material properties, e.g. identifiers, to \n
+     * map from plato input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertElasticOrthoProperties();
+
+    /******************************************************************************//**
      * \fn setCode
      * \brief Set 'code' keyword, default = 'plato_analyze'.
      * \param [in/out] aInputFile parsed input metadata

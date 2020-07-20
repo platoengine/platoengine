@@ -25,19 +25,24 @@ std::string check_material_model_key
     return tLowerKey;
 }
 
-void ParseMaterial::allocate()
+void ParseMaterial::insertCoreProperties()
 {
-    mTags.clear();
     mTags.insert({ "id", { {"id"}, "" } });
     mTags.insert({ "code", { {"code"}, "" } });
     mTags.insert({ "attribute", { {"attribute"}, "" } });
     mTags.insert({ "material_model", { {"material_model"}, "" } });
     mTags.insert({ "penalty_exponent", { {"penalty_exponent"}, "" } });
+}
 
+void ParseMaterial::insertElasticProperties()
+{
     mTags.insert({ "mass_density", { {"mass_density"}, "" } });
-    mTags.insert({ "specific_heat", { {"specific_heat"}, "" } });
     mTags.insert({ "youngs_modulus", { {"youngs_modulus"}, "" } });
     mTags.insert({ "poissons_ratio", { {"poissons_ratio"}, "" } });
+}
+
+void ParseMaterial::insertElasticOrthoProperties()
+{
     mTags.insert({ "youngs_modulus_x", { {"youngs_modulus_x"}, "" } });
     mTags.insert({ "youngs_modulus_y", { {"youngs_modulus_y"}, "" } });
     mTags.insert({ "youngs_modulus_z", { {"youngs_modulus_z"}, "" } });
@@ -47,14 +52,47 @@ void ParseMaterial::allocate()
     mTags.insert({ "poissons_ratio_xy", { {"poissons_ratio_xy"}, "" } });
     mTags.insert({ "poissons_ratio_xz", { {"poissons_ratio_xz"}, "" } });
     mTags.insert({ "poissons_ratio_yz", { {"poissons_ratio_yz"}, "" } });
-    mTags.insert({ "thermal_expansivity", { {"thermal_expansivity"}, "" } });
-    mTags.insert({ "thermal_conductivity", { {"thermal_conductivity"}, "" } });
-    mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
+}
+
+void ParseMaterial::insertElectricProperties()
+{
     mTags.insert({ "piezoelectric_coupling_15", { {"piezoelectric_coupling_15"}, "" } });
     mTags.insert({ "piezoelectric_coupling_33", { {"piezoelectric_coupling_33"}, "" } });
     mTags.insert({ "piezoelectric_coupling_31", { {"piezoelectric_coupling_31"}, "" } });
     mTags.insert({ "dielectric_permittivity_11", { {"dielectric_permittivity_11"}, "" } });
     mTags.insert({ "dielectric_permittivity_33", { {"dielectric_permittivity_33"}, "" } });
+}
+
+void ParseMaterial::insertThermalProperties()
+{
+    mTags.insert({ "specific_heat", { {"specific_heat"}, "" } });
+    mTags.insert({ "thermal_expansivity", { {"thermal_expansivity"}, "" } });
+    mTags.insert({ "thermal_conductivity", { {"thermal_conductivity"}, "" } });
+    mTags.insert({ "reference_temperature", { {"reference_temperature"}, "" } });
+}
+
+void ParseMaterial::insertPlasticProperties()
+{
+    mTags.insert({ "pressure_scaling", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "initial_yield_stress", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "hardening_modulus_isotropic", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "hardening_modulus_kinematic", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "elastic_properties_penalty_exponent", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "elastic_properties_minimum_ersatz", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "plastic_properties_penalty_exponent", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "plastic_properties_minimum_ersatz", { {"pressure_scaling"}, "" } });
+}
+
+void ParseMaterial::allocate()
+{
+    mTags.clear();
+
+    this->insertCoreProperties();
+    this->insertElasticProperties();
+    this->insertThermalProperties();
+    this->insertPlasticProperties();
+    this->insertElectricProperties();
+    this->insertElasticOrthoProperties();
 }
 
 void ParseMaterial::setCode(XMLGen::Material& aMetadata)

@@ -38,7 +38,8 @@ void append_material_property
     auto tValueType = tValidKeys.type(tMaterialModelTag, aMaterialPropertyTag);
     auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, aMaterial.property(aMaterialPropertyTag)};
+    auto tProperty = XMLGen::set_value_keyword_to_ignore_if_empty(aMaterial.property(aMaterialPropertyTag));
+    std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tProperty};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 // function append_material_property
@@ -67,11 +68,12 @@ void append_isotropic_linear_elastic_material_to_plato_problem
 (const XMLGen::Material& aMaterial,
  pugi::xml_node& aParentNode)
 {
-    auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
-    auto tIsotropicLinearElasticMaterial = tMaterialModel.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsotropicLinearElasticMaterial);
-    XMLGen::Private::append_material_properties_to_plato_analyze_material_model(aMaterial, tIsotropicLinearElasticMaterial);
+    auto tElasticModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Material Model"}, tElasticModel);
+    auto tIsotropicLinearElasticModel = tElasticModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsotropicLinearElasticModel);
+    XMLGen::Private::append_material_property("poissons_ratio", aMaterial, tIsotropicLinearElasticModel);
+    XMLGen::Private::append_material_property("youngs_modulus", aMaterial, tIsotropicLinearElasticModel);
 }
 // function append_isotropic_linear_elastic_material_to_plato_problem
 
@@ -141,6 +143,37 @@ void append_orthotropic_linear_elastic_material_to_plato_problem
 }
 // function append_orthotropic_linear_elastic_material_to_plato_problem
 
+void append_j2_plasticity_material_properties
+(const XMLGen::Material& aMaterial,
+ pugi::xml_node& aParentNode)
+{
+    auto tMaterialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    auto tJ2PlasticityModel = tMaterialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"J2 Plasticity"}, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("initial_yield_stress", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("hardening_modulus_isotropic", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("hardening_modulus_kinematic", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("elastic_properties_minimum_ersatz", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("elastic_properties_penalty_exponent", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("plastic_properties_minimum_ersatz", aMaterial, tJ2PlasticityModel);
+    XMLGen::Private::append_material_property("plastic_properties_penalty_exponent", aMaterial, tJ2PlasticityModel);
+}
+// function append_j2_plasticity_material_properties
+
+void append_j2_plasticity_material_to_plato_problem
+(const XMLGen::Material& aMaterial,
+ pugi::xml_node& aParentNode)
+{
+    // elastic properties
+    XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem(aMaterial, aParentNode);
+    auto tElasticModel = aParentNode.child("ParameterList");
+    XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tElasticModel);
+    // plastic properties
+    XMLGen::Private::append_j2_plasticity_material_to_plato_problem(aMaterial, aParentNode);
+}
+// function append_j2_plasticity_material_to_plato_problem
+
 }
 // namespace Private
 
@@ -157,30 +190,35 @@ AppendMaterialModelParameters::AppendMaterialModelParameters()
 
 void AppendMaterialModelParameters::insert()
 {
-    // orthotropic linear elastic material
+    // orthotropic linear elastic material model
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_orthotropic_linear_elastic_material_to_plato_problem));
     mMap.insert(std::make_pair("orthotropic linear elastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_orthotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
 
-    // isotropic linear electroelastic material
+    // isotropic linear electroelastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_electroelastic_material_to_plato_problem));
     mMap.insert(std::make_pair("isotropic linear electroelastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_electroelastic_material_to_plato_problem, tFuncIndex)));
 
-    // isotropic linear thermoelastic material
+    // isotropic linear thermoelastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_plato_problem));
     mMap.insert(std::make_pair("isotropic linear thermoelastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_plato_problem, tFuncIndex)));
 
-    // isotropic linear thermal material
+    // isotropic linear thermal material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_thermal_material_to_plato_problem));
     mMap.insert(std::make_pair("isotropic linear thermal",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_thermal_material_to_plato_problem, tFuncIndex)));
 
-    // isotropic linear elastic material
+    // isotropic linear elastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem));
     mMap.insert(std::make_pair("isotropic linear elastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
+
+    // j2 plasticity material model
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_j2_plasticity_material_to_plato_problem));
+    mMap.insert(std::make_pair("j2 plasticity",
+      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_j2_plasticity_material_to_plato_problem, tFuncIndex)));
 }
 
 void AppendMaterialModelParameters::call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const

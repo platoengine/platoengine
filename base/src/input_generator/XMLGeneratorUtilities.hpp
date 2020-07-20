@@ -192,6 +192,14 @@ namespace XMLGen
 
     /******************************************************************************//**
      * \fn set_value_keyword_to_ignore_if_empty
+     * \brief If input string is empty, return 'IGNORE'.
+     * \param [in] aValues standard string
+     * \return if input string is empty, return 'IGNORE'; else, return input string
+    **********************************************************************************/
+    std::string set_value_keyword_to_ignore_if_empty(const std::string& aValue);
+
+    /******************************************************************************//**
+     * \fn set_value_keyword_to_ignore_if_empty
      * \brief If input value keyword is empty, set value keyword to 'IGNORE'.
      * \param [in/out] aValues list of value keywords
     **********************************************************************************/

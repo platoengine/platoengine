@@ -453,10 +453,10 @@ void append_partial_differential_equation_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPhysicsNode = aParentNode.append_child("ParameterList");
     auto tPhysicsTag = aXMLMetaData.mScenarioMetaData.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_simp_penalty_function(aXMLMetaData.mScenarioMetaData, tPhysicsNode);
 }

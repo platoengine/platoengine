@@ -278,6 +278,21 @@ private:
                 { "youngs_modulus", {"Youngs Modulus", "double"} }, { "poissons_ratio", {"Poissons Ratio", "double"} },
                 { "thermal_expansivity", { "Thermal Expansivity", "double" } }, { "reference_temperature", { "Reference Temperature", "double" } },
                 { "mass_density", {"Mass Density", "double"} } }
+            },
+
+            { "j2 plasticity",
+              {
+                { "youngs_modulus", {"Youngs Modulus", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} },
+                { "pressure_scaling", { "Pressure Scaling", "double" } },
+                { "hardening_modulus_isotropic", { "Hardening Modulus Isotropic", "double" } },
+                { "hardening_modulus_kinematic", { "Hardening Modulus Kinematic", "double" } },
+                { "initial_yield_stress", {"Initial Yield Stress", "double"} },
+                { "elastic_properties_penalty_exponent", {"Elastic Properties Penalty Exponent", "double"} },
+                { "elastic_properties_minimum_ersatz", {"Elastic Properties Minimum Ersatz", "double"} },
+                { "plastic_properties_penalty_exponent", {"Plastic Properties Penalty Exponent", "double"} },
+                { "plastic_properties_minimum_ersatz", {"Plastic Properties Minimum Ersatz", "double"} }
+              }
             }
         };
 
@@ -381,7 +396,7 @@ private:
         {
             { "mechanical", {"Mechanical", "Elliptic"} },
             { "transient mechanics", {"Mechanical", "Hyperbolic"} },
-            { "plasticity", {"Mechanical", "Infinite Strain Plasticity"} },
+            { "infinitesimal strain plasticity", {"Mechanical", "Infinitesimal Strain Plasticity"} },
             { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
             { "thermal", {"Thermal", "Elliptic"} },
             { "heat conduction", {"Thermal", "Parabolic"} },
@@ -429,6 +444,8 @@ struct ValidAnalyzeCriteriaKeys
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
         { "volume", { "Volume", false } },
+        { "elastic work", { "Elastic Work", true } },
+        { "plastic work", { "Plastic Work", false } },
         { "compliance", { "Internal Elastic Energy", true } },
         { "maximize stiffness", { "Internal Elastic Energy", true } },
         { "local stress", { "Stress Constraint Quadratic", false } },
