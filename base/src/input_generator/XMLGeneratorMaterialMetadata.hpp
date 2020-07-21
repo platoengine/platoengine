@@ -105,8 +105,22 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn value
+     * \brief If material property is defined, return its value; else, return an empty string.
+     * \param [in]  aTag    material property tag
+     * \return material property value
+    **********************************************************************************/
+    std::string value(const std::string& aTag) const
+    {
+        auto tTag = Plato::tolower(aTag);
+        auto tItr = mProperties.find(tTag);
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
      * \fn property
-     * \brief Return material property value.
+     * \brief If material property is defined, return its value; else, throw an error.
      * \param [in] aTag material property tag
      * \return material property value
     **********************************************************************************/
@@ -150,6 +164,19 @@ public:
             tTags.push_back(tProperty.first);
         }
         return tTags;
+    }
+
+    /******************************************************************************//**
+     * \fn empty
+     * \brief Throw error if material is empty, i.e. material properties are not defined.
+    **********************************************************************************/
+    void empty() const
+    {
+        if(mProperties.empty())
+        {
+            THROWERR(std::string("XML Generator Material: Material with identification (id) '")
+                + mID + "' is empty, i.e. " + "material properties are not defined.")
+        }
     }
 };
 // struct Material

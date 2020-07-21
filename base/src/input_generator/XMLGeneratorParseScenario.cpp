@@ -24,6 +24,7 @@ void ParseScenario::allocate()
     mTags.insert({ "enable_cache_state", { {"enable_cache_state"}, "" } });
     mTags.insert({ "analyze_new_workflow", { {"analyze_new_workflow"}, "" } });
     mTags.insert({ "enable_update_problem", { {"enable_update_problem"}, "" } });
+    mTags.insert({ "additive_continuation", { {"additive_continuation"}, "" } });
     mTags.insert({ "material_penalty_exponent", { {"material_penalty_exponent"}, "" } });
     mTags.insert({ "minimum_ersatz_material_value", { {"minimum_ersatz_material_value"}, "" } });
     mTags.insert({ "use_new_analyze_uq_workflow", { {"use_new_analyze_uq_workflow"}, "" } });
@@ -93,6 +94,15 @@ void ParseScenario::checkScenarioID()
     {
         auto tID = mData.code() + "_" + mData.physics() + "_1";
         mData.id(tID);
+    }
+}
+
+void ParseScenario::setAdditiveContinuation()
+{
+    auto tItr = mTags.find("additive_continuation");
+    if (tItr != mTags.end() && !tItr->second.second.empty())
+    {
+        mData.additiveContinuation(tItr->second.second);
     }
 }
 
@@ -171,6 +181,7 @@ void ParseScenario::setMetaData()
     this->setDimensions();
     this->setCacheState();
     this->setUpdateProblem();
+    this->setAdditiveContinuation();
     this->setMateriaPenaltyExponent();
     this->setUseAnalyzeNewUQWorkflow();
     this->setMinimumErsatzMaterialValue();

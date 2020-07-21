@@ -32,6 +32,7 @@ private:
     std::string mSpatialDims = "3";
     std::string mPenaltyParam = "3.0";
     std::string mMinimumErsatzValue = "1e-9";
+    std::string mAdditiveContinuation = "";
 
 public:
     void id(const std::string& aInput)
@@ -95,6 +96,15 @@ public:
     std::string minErsatzMaterialConstant() const
     {
         return mMinimumErsatzValue;
+    }
+
+    void additiveContinuation(const std::string& aInput)
+    {
+        mAdditiveContinuation = aInput;
+    }
+    std::string additiveContinuation() const
+    {
+        return mAdditiveContinuation;
     }
 
     void cacheState(const bool& aInput)

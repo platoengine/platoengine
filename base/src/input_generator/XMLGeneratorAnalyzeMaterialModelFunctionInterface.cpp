@@ -38,8 +38,8 @@ void append_material_property
     auto tValueType = tValidKeys.type(tMaterialModelTag, aMaterialPropertyTag);
     auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    auto tProperty = XMLGen::set_value_keyword_to_ignore_if_empty(aMaterial.property(aMaterialPropertyTag));
-    std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tProperty};
+    auto tMaterialPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMaterial.value(aMaterialPropertyTag));
+    std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tMaterialPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
 // function append_material_property
@@ -148,9 +148,10 @@ void append_j2_plasticity_material_properties
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {"Plasticity Model"}, tMaterialModel);
     auto tJ2PlasticityModel = tMaterialModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"J2 Plasticity"}, tJ2PlasticityModel);
+
     XMLGen::Private::append_material_property("initial_yield_stress", aMaterial, tJ2PlasticityModel);
     XMLGen::Private::append_material_property("hardening_modulus_isotropic", aMaterial, tJ2PlasticityModel);
     XMLGen::Private::append_material_property("hardening_modulus_kinematic", aMaterial, tJ2PlasticityModel);
@@ -170,7 +171,7 @@ void append_j2_plasticity_material_to_plato_problem
     auto tElasticModel = aParentNode.child("ParameterList");
     XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tElasticModel);
     // plastic properties
-    XMLGen::Private::append_j2_plasticity_material_to_plato_problem(aMaterial, aParentNode);
+    XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, aParentNode);
 }
 // function append_j2_plasticity_material_to_plato_problem
 
@@ -228,6 +229,8 @@ void AppendMaterialModelParameters::call(const XMLGen::Material& aMaterial, pugi
     {
         return;
     }
+
+    aMaterial.empty();
 
     auto tCategory = Plato::tolower(aMaterial.category());
     auto tMapItr = mMap.find(tCategory);

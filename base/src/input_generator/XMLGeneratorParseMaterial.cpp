@@ -74,13 +74,13 @@ void ParseMaterial::insertThermalProperties()
 void ParseMaterial::insertPlasticProperties()
 {
     mTags.insert({ "pressure_scaling", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "initial_yield_stress", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "hardening_modulus_isotropic", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "hardening_modulus_kinematic", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "elastic_properties_penalty_exponent", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "elastic_properties_minimum_ersatz", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "plastic_properties_penalty_exponent", { {"pressure_scaling"}, "" } });
-    mTags.insert({ "plastic_properties_minimum_ersatz", { {"pressure_scaling"}, "" } });
+    mTags.insert({ "initial_yield_stress", { {"initial_yield_stress"}, "" } });
+    mTags.insert({ "hardening_modulus_isotropic", { {"hardening_modulus_isotropic"}, "" } });
+    mTags.insert({ "hardening_modulus_kinematic", { {"hardening_modulus_kinematic"}, "" } });
+    mTags.insert({ "elastic_properties_penalty_exponent", { {"elastic_properties_penalty_exponent"}, "" } });
+    mTags.insert({ "elastic_properties_minimum_ersatz", { {"elastic_properties_minimum_ersatz"}, "" } });
+    mTags.insert({ "plastic_properties_penalty_exponent", { {"plastic_properties_penalty_exponent"}, "" } });
+    mTags.insert({ "plastic_properties_minimum_ersatz", { {"plastic_properties_minimum_ersatz"}, "" } });
 }
 
 void ParseMaterial::allocate()

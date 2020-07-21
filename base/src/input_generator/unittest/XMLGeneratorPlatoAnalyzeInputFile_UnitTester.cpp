@@ -47,9 +47,15 @@ void append_simp_penalty_function
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "SIMP"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Exponent", "double", aMetadata.materialPenaltyExponent()};
+
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.materialPenaltyExponent());
+    tValues = {"Exponent", "double", tPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Minimum Value", "double", aMetadata.minErsatzMaterialConstant()};
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.minErsatzMaterialConstant());
+    tValues = {"Minimum Value", "double", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.additiveContinuation());
+    tValues = {"Additive Continuation", "double", tPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 
@@ -63,6 +69,28 @@ void append_global_residual_to_analyze_input_deck
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+}
+
+void append_state_gradient_projection_residual_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"State Gradient Projection"}, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+}
+
+void append_plasticity_residual_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_state_gradient_projection_residual_to_analyze_input_deck(aScenario, aParentNode);
 }
 
 }
@@ -1081,6 +1109,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorMatP
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
+    tMaterial.id("1");
     tMaterial.code("plato_analyze");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
@@ -1238,6 +1267,65 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Youngs Modulus", "double", "2.3"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Poissons Ratio", "double", "0.3"}, tParameter);
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2PlasticityMatModel)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.code("plato_analyze");
+    tMaterial.category("j2 plasticity");
+    tMaterial.property("youngs_modulus", "2.3");
+    tMaterial.property("poissons_ratio", "0.3");
+    tMaterial.property("pressure_scaling", "1.0");
+    tMaterial.property("initial_yield_stress", "2.0");
+    tMaterial.property("hardening_modulus_isotropic", "0.4");
+    tMaterial.property("hardening_modulus_kinematic", "1.25");
+    tXMLMetaData.materials.push_back(tMaterial);
+    XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    // elasticity model
+    auto tElasticityParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElasticityParamList.empty());
+    ASSERT_STREQ("ParameterList", tElasticityParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tElasticityParamList);
+
+    auto tElasticModel = tElasticityParamList.child("ParameterList");
+    ASSERT_FALSE(tElasticModel.empty());
+    ASSERT_STREQ("ParameterList", tElasticModel.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tElasticModel);
+    auto tParameter = tElasticModel.child("Parameter");
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Poissons Ratio", "double", "0.3"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Youngs Modulus", "double", "2.3"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    tParameter = tElasticityParamList.child("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Pressure Scaling", "double", "1.0"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // plasticity model
+    auto tPlasticityParamList = tElasticityParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tPlasticityParamList.empty());
+    ASSERT_STREQ("ParameterList", tPlasticityParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Plasticity Model"}, tPlasticityParamList);
+
+    auto tPlasticModel = tPlasticityParamList.child("ParameterList");
+    ASSERT_FALSE(tPlasticModel.empty());
+    ASSERT_STREQ("ParameterList", tPlasticModel.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"J2 Plasticity"}, tPlasticModel);
+    tParameter = tPlasticModel.child("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Initial Yield Stress", "double", "2.0"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Hardening Modulus Isotropic", "double", "0.4"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Hardening Modulus Kinematic", "double", "1.25"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_IsotropicLinearElectroelasticMatModel)

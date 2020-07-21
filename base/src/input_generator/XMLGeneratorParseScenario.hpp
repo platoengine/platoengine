@@ -65,6 +65,13 @@ private:
     void setDimensions();
 
     /******************************************************************************//**
+     * \fn setAdditiveContinuation
+     * \brief Set 'additive_continuation' keyword. The 'additive_continuation' \n
+     * parameter is used to increase the material penalty exponent using continuation.
+    **********************************************************************************/
+    void setAdditiveContinuation();
+
+    /******************************************************************************//**
      * \fn setMateriaPenaltyExponent
      * \brief Set 'material_penalty_exponent' keyword, default = '3.0'.
     **********************************************************************************/
