@@ -1,4 +1,4 @@
-set( testFiles "opt.py;platoApp.xml;platoMain.xml;mitchell_tri.gen;alexaApp.xml;amgx.json;mitchell_tri_assoc.txt;mitchell_tri.xml")
+set( testFiles "opt.py;platoApp.xml;platoMain.xml;mitchell_tri.gen;analyzeApp.xml;amgx.json;mitchell_tri_assoc.txt;mitchell_tri.xml")
 Plato_add_test_files( "${testFiles}" )
 
 ## Plato_add_test_files() only works for files.  square_tet_bc.osh is a directory.
