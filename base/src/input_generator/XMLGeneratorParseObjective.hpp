@@ -20,7 +20,7 @@ namespace XMLGen
 class ParseObjective : public XMLGen::ParseMetadata<std::vector<XMLGen::Objective>>
 {
 private:
-    XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
     std::vector<XMLGen::Objective> mData; /*!< objective functions metadata */
 
 private:

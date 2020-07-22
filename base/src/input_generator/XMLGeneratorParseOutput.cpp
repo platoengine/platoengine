@@ -17,18 +17,18 @@ namespace XMLGen
 void ParseOutput::allocate()
 {
     mTags.clear();
-    mTags.insert({ "scenario", { {"scenario"}, "" } });
-    mTags.insert({ "output_data_to_file", { {"output_data_to_file"}, "" } });
-    mTags.insert({ "quantities_of_interest", { {"quantities_of_interest"}, "" } });
-    mTags.insert({ "random_quantities_of_interest", { {"random_quantities_of_interest"}, "" } });
+    mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
+    mTags.insert({ "output_data_to_file", { { {"output_data_to_file"}, ""}, "" } });
+    mTags.insert({ "quantities_of_interest", { { {"quantities_of_interest"}, ""}, "" } });
+    mTags.insert({ "random_quantities_of_interest", { { {"random_quantities_of_interest"}, ""}, "" } });
 }
 
 void ParseOutput::setOutputData()
 {
     auto tItr = mTags.find("output_data_to_file");
-    if(tItr != mTags.end() && !tItr->second.second.empty())
+    if(tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
+        auto tFlag = XMLGen::transform_boolean_key(tItr->second.first.second);
         mData.outputData(tFlag);
     }
     else
@@ -40,26 +40,26 @@ void ParseOutput::setOutputData()
 void ParseOutput::setScenario()
 {
     auto tItr = mTags.find("scenario");
-    if(tItr->second.second.empty())
+    if(tItr->second.first.second.empty())
     {
         THROWERR(std::string("Parse Output: Scenario identifier (id) is not defined. ")
            + "Output quantities of interest must be associated with a Plato 'scenario'.")
     }
     else
     {
-        mData.scenarioID(tItr->second.second);
+        mData.scenarioID(tItr->second.first.second);
     }
 }
 
 void ParseOutput::setRandomQoI()
 {
     auto tItr = mTags.find("random_quantities_of_interest");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputKeys tValidKeys;
 
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             auto tLowerToken = Plato::tolower(tToken);
@@ -77,12 +77,12 @@ void ParseOutput::setRandomQoI()
 void ParseOutput::setDeterministicQoI()
 {
     auto tItr = mTags.find("quantities_of_interest");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputKeys tValidKeys;
 
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             auto tLowerToken = Plato::tolower(tToken);

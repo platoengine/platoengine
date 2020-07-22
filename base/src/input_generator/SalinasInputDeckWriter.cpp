@@ -560,8 +560,8 @@ void SalinasInputDeckWriter::writeTOBlock(FILE *aFilePtr, const Objective &aObje
         {
             if(mInputData.constraints[0].category() == "surface area")
             {
-                fprintf(aFilePtr, "  surface_area_constraint_value = %s\n", mInputData.constraints[0].surface_area.c_str());
-                fprintf(aFilePtr, "  surface_area_ssid = %s\n", mInputData.constraints[0].surface_area_ssid.c_str());
+                fprintf(aFilePtr, "  surface_area_constraint_value = %s\n", mInputData.constraints[0].value("surface_area").c_str());
+                fprintf(aFilePtr, "  surface_area_ssid = %s\n", mInputData.constraints[0].value("surface_area_sideset_id").c_str());
             }
         }
     }

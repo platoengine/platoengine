@@ -234,7 +234,7 @@ struct ValidAnalyzeOutputKeys
     std::unordered_map<std::string, std::string> mKeys = { {"vonmises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
       {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
       {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
-      {"dispy", "Solution Y"}, {"dispz", "Solution Z"} };
+      {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"}, {"cauchy_stress", "cauchy stress"} };
 };
 // struct ValidAnalyzeOutputKeys
 
@@ -396,6 +396,7 @@ private:
         {
             { "mechanical", {"Mechanical", "Elliptic"} },
             { "transient mechanics", {"Mechanical", "Hyperbolic"} },
+            { "transient thermomechanics", {"Thermomechanical", "Parabolic"} },
             { "infinitesimal strain plasticity", {"Mechanical", "Infinitesimal Strain Plasticity"} },
             { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
             { "thermal", {"Thermal", "Elliptic"} },

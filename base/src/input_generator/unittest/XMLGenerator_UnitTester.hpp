@@ -91,8 +91,8 @@ public:
     std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name();}
     std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].category();}
     std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].normalizedTarget();}
-    std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area;}
-    std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].surface_area_ssid;}
+    std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].value("surface_area");}
+    std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].value("surface_area_sideset_id");}
     std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}
     std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty_exponent");}
     std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs_modulus");}

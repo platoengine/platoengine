@@ -62,25 +62,25 @@ inline void is_mean_minus_std_dev_lesser_than_lower_bound
 void ParseUncertainty::allocate()
 {
     mTags.clear();
-    mTags.insert({ "tag", { {"tag"}, "" } });
-    mTags.insert({ "mean", { {"mean"}, "" } });
-    mTags.insert({ "load id", { {"load","id"}, "" } });
-    mTags.insert({ "material id", { {"material","id"}, "" } });
-    mTags.insert({ "category", { {"category"}, "" } });
-    mTags.insert({ "attribute", { {"attribute"}, "" } });
-    mTags.insert({ "distribution", { {"distribution"}, "" } });
-    mTags.insert({ "num samples", { {"num", "samples"}, "" } });
-    mTags.insert({ "lower bound", { {"lower", "bound"}, "" } });
-    mTags.insert({ "upper bound", { {"upper", "bound"}, "" } });
-    mTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
+    mTags.insert({ "tag", { { {"tag"}, ""}, "" } });
+    mTags.insert({ "mean", { { {"mean"}, ""}, "" } });
+    mTags.insert({ "load id", { { {"load","id"}, ""}, "" } });
+    mTags.insert({ "material id", { { {"material","id"}, ""}, "" } });
+    mTags.insert({ "category", { { {"category"}, ""}, "" } });
+    mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
+    mTags.insert({ "distribution", { { {"distribution"}, ""}, "" } });
+    mTags.insert({ "num samples", { { {"num", "samples"}, ""}, "" } });
+    mTags.insert({ "lower bound", { { {"lower", "bound"}, ""}, "" } });
+    mTags.insert({ "upper bound", { { {"upper", "bound"}, ""}, "" } });
+    mTags.insert({ "standard deviation", { { {"standard", "deviation"}, ""}, "" } });
 }
 
 void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
 {
     auto tItr = mTags.find("category");
-    if(tItr != mTags.end() && !tItr->second.second.empty())
+    if(tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.variable_type = tItr->second.second;
+        aMetadata.variable_type = tItr->second.first.second;
     }
     else
     {
@@ -102,7 +102,7 @@ void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
         THROWERR(std::string("Parse Uncertainty: 'category' keyword '") + aMetadata.variable_type + "' is not supported.")
     }
     auto tID = tItr->second;
-    aMetadata.id = mTags.find(tID)->second.second;
+    aMetadata.id = mTags.find(tID)->second.first.second;
     if(aMetadata.id.empty())
     {
         THROWERR(std::string("Parse Uncertainty: Failed to parse uncertain parameter identification number. ")
@@ -116,14 +116,14 @@ void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
     this->setCategory(aMetadata);
     this->setIdentificationNumber(aMetadata);
-    aMetadata.type = mTags.find("tag")->second.second;
-    aMetadata.mean = mTags.find("mean")->second.second;
-    aMetadata.axis = mTags.find("attribute")->second.second;
-    aMetadata.lower = mTags.find("lower bound")->second.second;
-    aMetadata.upper = mTags.find("upper bound")->second.second;
-    aMetadata.num_samples = mTags.find("num samples")->second.second;
-    aMetadata.distribution = mTags.find("distribution")->second.second;
-    aMetadata.standard_deviation = mTags.find("standard deviation")->second.second;
+    aMetadata.type = mTags.find("tag")->second.first.second;
+    aMetadata.mean = mTags.find("mean")->second.first.second;
+    aMetadata.axis = mTags.find("attribute")->second.first.second;
+    aMetadata.lower = mTags.find("lower bound")->second.first.second;
+    aMetadata.upper = mTags.find("upper bound")->second.first.second;
+    aMetadata.num_samples = mTags.find("num samples")->second.first.second;
+    aMetadata.distribution = mTags.find("distribution")->second.first.second;
+    aMetadata.standard_deviation = mTags.find("standard deviation")->second.first.second;
 }
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
@@ -355,7 +355,7 @@ void ParseUncertainty::parse(std::istream& aInputFile)
         if(XMLGen::parse_single_value(tTokens, {"begin","uncertainty"}, tTag))
         {
             XMLGen::Uncertainty tMetadata;
-            XMLGen::erase_tags(mTags);
+            XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata({"end","uncertainty"}, aInputFile, mTags);
             this->setMetaData(tMetadata);
             this->checkMetaData(tMetadata);

@@ -14,8 +14,9 @@
 namespace XMLGen
 {
 
-/*!< map from tag to container of token-value pairs, i.e. map<tag, pair<tokens,value> > */
-using UseCaseTags = std::unordered_map<std::string, std::pair<std::vector<std::string>,std::string>>;
+/*!< map from property tag to pair< pair<token,input_value>, default> >, \n
+ * i.e. map< property_tag, pair< pair<tokens,input_value>, default > > */
+using MetaDataTags = std::unordered_map<std::string, std::pair<std::pair<std::vector<std::string>,std::string>, std::string>>;
 
 /******************************************************************************//**
  * \fn unique
@@ -26,23 +27,23 @@ using UseCaseTags = std::unordered_map<std::string, std::pair<std::vector<std::s
 bool unique(const std::vector<std::string>& aInput);
 
 /******************************************************************************//**
- * \fn erase_tags
+ * \fn erase_tag_values
  * \brief Erase input tag values in map.
- * \param [in/out] aTags map from tag to container of token-value pairs
+ * \param [in/out] aTags map from property tag to pair< pair<token,input_value>, default> >
 **********************************************************************************/
-void erase_tags(XMLGen::UseCaseTags& aTags);
+void erase_tag_values(XMLGen::MetaDataTags& aTags);
 
 /******************************************************************************//**
  * \fn parse_input_metadata
- * \brief Parse input metadata and set token-value pairs in XMLGen::UseCaseTags map.
+ * \brief Parse input metadata and set token-value pairs in XMLGen::MetaDataTags map.
  * \param [in]  aStopKeys   keys used to denote end of the parameter block to be parsed
  * \param [in]  aInputFile  input file string
- * \param [out] aTags       map from tag to container of token-value pairs
+ * \param [out] aTags       map from property tag to pair< pair<token,input_value>, default> >
 **********************************************************************************/
 void parse_input_metadata
 (const std::vector<std::string>& aStopKeys,
  std::istream& aInputFile,
- XMLGen::UseCaseTags& aTags);
+ XMLGen::MetaDataTags& aTags);
 
 /******************************************************************************//**
  * \fn parse_single_value
@@ -112,9 +113,9 @@ bool tokens_match
  * \fn parse_tag_values
  * \brief Parse tag values associated with input tokens.
  * \param [in]  aTokens list of tokens
- * \param [out] aTags   map from valid tags to valid tokens-value pairs
+ * \param [out] aTags   map from property tag to pair< pair<token,input_value>, default> >
 **********************************************************************************/
-void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags);
+void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::MetaDataTags& aTags);
 
 /******************************************************************************//**
  * \fn is_integer
@@ -149,12 +150,12 @@ std::string check_code_keyword(const std::string& aInput);
 std::string check_criterion_category_keyword(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn check_boolean_key
+ * \fn transform_boolean_key
  * \brief Throw error if conversion from string to boolean fails.
  * \param [in] aInput input string
  * \return boolean flag
 **********************************************************************************/
-bool check_boolean_key(const std::string& aInput);
+bool transform_boolean_key(const std::string& aInput);
 
 /******************************************************************************//**
  * \fn check_physics_keyword

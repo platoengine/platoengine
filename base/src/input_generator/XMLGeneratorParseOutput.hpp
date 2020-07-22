@@ -21,7 +21,7 @@ class ParseOutput : public XMLGen::ParseMetadata<XMLGen::Output>
 {
 private:
     XMLGen::Output mData; /*!< output metadata */
-    XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
 
 private:
     /******************************************************************************//**

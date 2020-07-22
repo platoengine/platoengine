@@ -134,14 +134,14 @@ public:
 
     /******************************************************************************//**
      * \fn randomIDs
-     * \brief Return list of all the random quantities of interest identifiers.
+     * \brief Return random quantities of interest identifiers.
      * \return random quantities of interest identifiers
     **********************************************************************************/
     std::vector<std::string> randomIDs() const;
 
     /******************************************************************************//**
      * \fn deterministicIDs
-     * \brief Return list of all the deterministic quantities of interest identifiers.
+     * \brief Return deterministic quantities of interest identifiers.
      * \return deterministic quantities of interest identifiers
     **********************************************************************************/
     std::vector<std::string> deterministicIDs() const;

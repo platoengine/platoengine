@@ -59,16 +59,52 @@ void append_simp_penalty_function
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 
-void append_global_residual_to_analyze_input_deck
-(const XMLGen::Scenario& aScenario,
+void append_implicit_time_stepping_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepping = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Time Stepping"}, tTimeStepping);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Expansion Multiplier", "double", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+    tValues = {"Initial Num. Pseudo Time Steps", "int", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+    tValues = {"Maximum Num. Pseudo Time Steps", "int", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+}
+
+void append_newton_raphson_solver_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepping = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Time Stepping"}, tTimeStepping);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Stop Measure", "string", "residual"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+    tValues = {"Stopping Tolerance", "double", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+    tValues = {"Maximum Number Iterations", "int", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
+}
+
+void append_plottable_option
+(const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tPhysicsTag = aScenario.physics();
-    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
-    auto tPhysicsNode = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
-    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    std::vector<std::string> tQoIs;
+    auto tQoiIDs = aOutput.deterministicIDs();
+    for(auto& tID : tQoiIDs)
+    {
+        tQoIs.push_back(tID);
+    }
+
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    auto tTransformQoiIDs = XMLGen::transform_tokens(tQoIs);
+    std::vector<std::string> tValues = {"Plottable", "Array(string)", tTransformQoiIDs};
+    auto tParameter = aParentNode.append_child("Parameter");
+    XMLGen::append_attributes(tKeys, tValues, tParameter);
 }
 
 void append_state_gradient_projection_residual_to_analyze_input_deck
@@ -80,8 +116,9 @@ void append_state_gradient_projection_residual_to_analyze_input_deck
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
 }
 
-void append_plasticity_residual_to_analyze_input_deck
+void append_global_residual_to_analyze_input_deck
 (const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
     auto tPhysicsTag = aScenario.physics();
@@ -89,8 +126,25 @@ void append_plasticity_residual_to_analyze_input_deck
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+}
+
+void append_plasticity_residual_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
     XMLGen::Private::append_state_gradient_projection_residual_to_analyze_input_deck(aScenario, aParentNode);
+    XMLGen::Private::append_implicit_time_stepping_option(aScenario, aParentNode);
+    XMLGen::Private::append_newton_raphson_solver_option(aScenario, aParentNode);
 }
 
 }
@@ -113,6 +167,50 @@ private:
      **********************************************************************************/
     void insert()
     {
+        // mechanical physics
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("mechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // thermal physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("thermal",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // stabilized mechanical physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("stabilized mechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // thermomechanical physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("thermomechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // transient mechanics physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("transient mechanics",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // heat conduction physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("heat conduction",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // transient thermomechanics physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("transient thermomechanics",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // electromechanical physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("electromechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
+
+        // infinitesimal strain plasticity physics
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_plasticity_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("infinitesimal strain plasticity",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_plasticity_residual_to_analyze_input_deck, tFuncIndex)));
     }
 
 public:
@@ -128,30 +226,33 @@ public:
     /******************************************************************************//**
      * \fn call
      * \brief Append physics and respective parameters to plato_analyze_input_deck.xml file.
-     * \param [in]     aScenario    physics scenario metadata
-     * \param [in/out] aParentNode  pugi::xml_node
+     * \param [in]     aScenarioMetaData    physics scenario metadata
+     * \param [in]     aOutputMetaData      physics output metadata
+     * \param [in/out] aParentNode          pugi::xml_node
     **********************************************************************************/
-    void call(const XMLGen::Scenario& aScenario, pugi::xml_node &aParentNode) const
+    void call(const XMLGen::Scenario& aScenarioMetaData,
+              const XMLGen::Output& aOutputMetaData,
+              pugi::xml_node &aParentNode) const
     {
-        auto tCode = XMLGen::to_lower(aScenario.code());
+        auto tCode = XMLGen::to_lower(aScenarioMetaData.code());
         if(tCode.compare("plato_analyze") != 0)
         {
             return;
         }
 
-        auto tPhysics = XMLGen::to_lower(aScenario.physics());
+        auto tPhysics = XMLGen::to_lower(aScenarioMetaData.physics());
         auto tMapItr = mMap.find(tPhysics);
         if(tMapItr == mMap.end())
         {
             THROWERR(std::string("Physics Function Interface: Did not find physics function with tag '") + tPhysics
                 + "' in function list. " + "Physics '" + tPhysics + "' is not supported in Plato Analyze.")
         }
-        auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Scenario&, pugi::xml_node&)>(tMapItr->second.first);
+        auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Scenario&, const XMLGen::Output&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
         {
             THROWERR(std::string("Physics Function Interface: Reinterpret cast for physics function with tag '") + tPhysics + "' failed.")
         }
-        tTypeCastedFunc(aScenario, aParentNode);
+        tTypeCastedFunc(aScenarioMetaData, aOutputMetaData, aParentNode);
     }
 };
 // struct AppendMaterialModelParameters
@@ -195,81 +296,6 @@ TEST(PlatoTestXMLGenerator, ReturnConstraintsComputedByPlatoAnalyze)
     auto tCategories = XMLGen::return_constraints_computed_by_plato_analyze(tXMLMetaData);
     ASSERT_EQ(1u, tCategories.size());
     ASSERT_STREQ("internal elastic energy", tCategories[0].c_str());
-}
-
-TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputDeckFile)
-{
-    // POSE PROBLEM ESSENTIAL BC
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_2";
-    tBC.type = "displacement";
-    tBC.mPhysics = "mechanical";
-    tBC.mCategory = "rigid";
-    tBC.mCode = "plato_analyze";
-
-    // POSE DESIGN INTENTS
-    XMLGen::Objective tObjective;
-    tObjective.type = "maximize stiffness";
-    tObjective.code_name = "plato_analyze";
-    XMLGen::Constraint tConstraint;
-    tConstraint.category("volume");
-    tConstraint.materialPenaltyExponent("1.0");
-    tConstraint.minErsatzMaterialConstant("0.0");
-    tConstraint.code("plato_analyze");
-
-    // POSE MATERIAL
-    XMLGen::Material tMaterial;
-    tMaterial.code("plato_analyze");
-    tMaterial.category("isotropic linear elastic");
-    tMaterial.property("youngs_modulus", "1e9");
-    tMaterial.property("poissons_ratio", "0.3");
-
-    // POSE NATURAL BC
-    XMLGen::Load tLoad;
-    tLoad.type = "traction";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0", "2.0", "3.0"};
-    XMLGen::LoadCase tLoadCase;
-    tLoadCase.mCode = "plato_analyze";
-    tLoadCase.loads.push_back(tLoad);
-
-    // SET INPUT METADATA
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.bcs.push_back(tBC);
-    tXMLMetaData.materials.push_back(tMaterial);
-    tXMLMetaData.load_cases.push_back(tLoadCase);
-    tXMLMetaData.objectives.push_back(tObjective);
-    tXMLMetaData.constraints.push_back(tConstraint);
-    tXMLMetaData.run_mesh_name = "lbracket.exo";
-    tXMLMetaData.mScenarioMetaData.dimensions("3");
-    tXMLMetaData.mScenarioMetaData.physics("mechanical");
-
-    // CALL FUNCTION
-    XMLGen::write_plato_analyze_input_deck_file(tXMLMetaData);
-
-    // TEST OUTPUT
-    auto tData = XMLGen::read_data_from_file("plato_analyze_input_deck.xml");
-    auto tGold = std::string("<?xmlversion=\"1.0\"?><ParameterListname=\"Problem\"><Parametername=\"Physics\"type=\"string\"value=\"PlatoDriver\"/><Parametername=\"SpatialDimension\"type=\"int\"value=\"3\"/>")
-    +"<Parametername=\"InputMesh\"type=\"string\"value=\"lbracket.exo\"/><ParameterListname=\"PlatoProblem\"><Parametername=\"Physics\"type=\"string\"value=\"Mechanical\"/><Parametername=\"PDEConstraint\"type=\"string\"value=\"Elliptic\"/>"
-    +"<Parametername=\"Constraint\"type=\"string\"value=\"MyConstraint\"/><Parametername=\"Objective\"type=\"string\"value=\"MyObjective\"/><Parametername=\"Self-Adjoint\"type=\"bool\"value=\"true\"/><ParameterListname=\"MyObjective\">"
-    +"<Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{mymaximizestiffness}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/></ParameterList>"
-    +"<ParameterListname=\"mymaximizestiffness\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"InternalElasticEnergy\"/><ParameterListname=\"PenaltyFunction\">"
-    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/></ParameterList></ParameterList>"
-    +"<ParameterListname=\"MyConstraint\"><Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{myvolume}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0}\"/>"
-    +"</ParameterList><ParameterListname=\"myvolume\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"Volume\"/><ParameterListname=\"PenaltyFunction\">"
-    +"<Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"1.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"0.0\"/></ParameterList></ParameterList>"
-    +"<ParameterListname=\"Elliptic\"><ParameterListname=\"PenaltyFunction\"><Parametername=\"Type\"type=\"string\"value=\"SIMP\"/><Parametername=\"Exponent\"type=\"double\"value=\"3.0\"/><Parametername=\"MinimumValue\"type=\"double\"value=\"1e-9\"/>"
-    +"</ParameterList></ParameterList><ParameterListname=\"MaterialModel\"><ParameterListname=\"IsotropicLinearElastic\"><Parametername=\"PoissonsRatio\"type=\"double\"value=\"0.3\"/><Parametername=\"YoungsModulus\"type=\"double\"value=\"1e9\"/>"
-    +"</ParameterList></ParameterList><ParameterListname=\"NaturalBoundaryConditions\"><ParameterListname=\"TractionVectorBoundaryConditionwithID1\"><Parametername=\"Type\"type=\"string\"value=\"Uniform\"/>"
-    +"<Parametername=\"Values\"type=\"Array(double)\"value=\"{1.0,2.0,3.0}\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_1\"/></ParameterList></ParameterList><ParameterListname=\"EssentialBoundaryConditions\">"
-    +"<ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPZ\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"2\"/>"
-    +"<Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList><ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPY\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/>"
-    +"<Parametername=\"Index\"type=\"int\"value=\"1\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList><ParameterListname=\"DisplacementBoundaryConditionwithID1appliedtoDofwithtagDISPX\">"
-    +"<Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"ss_2\"/></ParameterList></ParameterList></ParameterList></ParameterList>";
-    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
-    //Plato::system("rm -f plato_analyze_input_deck.xml");
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
@@ -1710,10 +1736,14 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
     tConstraint.category("stress p-norm");
     tConstraint.weight("0.5");
     tConstraint.code("plato_analyze");
+    tConstraint.pnormExponent("6");
+    tConstraint.materialPenaltyExponent("3.0");
+    tConstraint.minErsatzMaterialConstant("1e-9");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
     XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    tDocument.save_file("dummy.xml", " ");
 
     // TEST MY CONSTRAINT
     auto tParamList = tDocument.child("ParameterList");

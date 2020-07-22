@@ -11,7 +11,9 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
+                      XMLGeneratorScenarioMetadata.cpp
                       XMLGeneratorParseUncertainty.cpp
+                      XMLGeneratorConstraintMetadata.cpp
                       XMLGeneratorDefinesFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeUtilities.cpp
                       XMLGeneratorInterfaceFileUtilities.cpp
@@ -41,8 +43,10 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorRandomMetadata.hpp
                       XMLGeneratorOutputMetadata.hpp 
                       XMLGeneratorParserUtilities.hpp 
+                      XMLGeneratorScenarioMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
                       XMLGeneratorBoundaryMetadata.hpp 
+                      XMLGeneratorConstraintMetadata.hpp
                       XMLGeneratorPlatoAnalyzeProblem.hpp 
                       XMLGeneratorDefinesFileUtilities.hpp 
                       XMLGeneratorPlatoAnalyzeUtilities.hpp 

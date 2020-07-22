@@ -13,178 +13,96 @@
 namespace XMLGen
 {
 
+void ParseScenario::set()
+{
+    for(auto& tTag : mTags)
+    {
+        if(tTag.second.first.second.empty())
+        {
+            auto tDefaultValue = tTag.second.second;
+            mData.append(tTag.first, tDefaultValue);
+        }
+        else
+        {
+            auto tInputValue = tTag.second.first.second;
+            mData.append(tTag.first, tInputValue);
+        }
+    }
+}
+
+void ParseScenario::check()
+{
+    this->checkCode();
+    this->checkPhysics();
+    this->checkPerformer();
+    this->checkScenarioID();
+    this->checkSpatialDimensions();
+}
+
 void ParseScenario::allocate()
 {
     mTags.clear();
-    mTags.insert({ "id", { {"id"}, "" } });
-    mTags.insert({ "code", { {"code"}, "" } });
-    mTags.insert({ "physics", { {"physics"}, "" } });
-    mTags.insert({ "performer", { {"performer"}, "" } });
-    mTags.insert({ "dimensions", { {"dimensions"}, "" } });
-    mTags.insert({ "enable_cache_state", { {"enable_cache_state"}, "" } });
-    mTags.insert({ "analyze_new_workflow", { {"analyze_new_workflow"}, "" } });
-    mTags.insert({ "enable_update_problem", { {"enable_update_problem"}, "" } });
-    mTags.insert({ "additive_continuation", { {"additive_continuation"}, "" } });
-    mTags.insert({ "material_penalty_exponent", { {"material_penalty_exponent"}, "" } });
-    mTags.insert({ "minimum_ersatz_material_value", { {"minimum_ersatz_material_value"}, "" } });
-    mTags.insert({ "use_new_analyze_uq_workflow", { {"use_new_analyze_uq_workflow"}, "" } });
+    mTags.insert({ "id", { { {"id"}, ""}, "" } });
+    mTags.insert({ "code", { { {"code"}, ""}, "plato_analyze" } });
+    mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
+    mTags.insert({ "performer", { { {"performer"}, ""}, "" } });
+    mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "3" } });
+    mTags.insert({ "enable_cache_state", { { {"enable_cache_state"}, ""}, "false" } });
+    mTags.insert({ "analyze_new_workflow", { { {"analyze_new_workflow"}, ""}, "false" } });
+    mTags.insert({ "enable_update_problem", { { {"enable_update_problem"}, ""}, "false" } });
+    mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "" } });
+    mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
+    mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
+    mTags.insert({ "use_new_analyze_uq_workflow", { { {"use_new_analyze_uq_workflow"}, ""}, "false" } });
 }
 
-void ParseScenario::setCode()
+void ParseScenario::checkCode()
 {
-    auto tItr = mTags.find("code");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        auto tValidTag = XMLGen::check_code_keyword(tItr->second.second);
-        mData.code(tValidTag);
-    }
-    else
-    {
-        auto tValidTag = XMLGen::check_code_keyword("plato_analyze");
-        mData.code(tValidTag);
-    }
+    auto tValidCode = XMLGen::check_code_keyword(mData.value("code"));
+    mData.code(tValidCode);
 }
 
-void ParseScenario::setPerformer()
+void ParseScenario::checkPerformer()
 {
-    auto tItr = mTags.find("performer");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    auto tPerformer = mData.value("performer");
+    if (tPerformer.empty())
     {
-        mData.performer(tItr->second.second);
-    }
-    else
-    {
-        auto tPerformer = mData.code() + "_1";
+        tPerformer = mData.value("code") + "_1";
         mData.performer(tPerformer);
     }
 }
 
-void ParseScenario::setPhysics()
+void ParseScenario::checkSpatialDimensions()
 {
-    auto tItr = mTags.find("physics");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    XMLGen::ValidSpatialDimsKeys tValidKeys;
+    auto tDim = mData.value("dimensions");
+    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tDim);
+    if (tItr == tValidKeys.mKeys.end())
     {
-        auto tValidTag = XMLGen::check_physics_keyword(tItr->second.second);
-        mData.physics(tValidTag);
-    }
-    else
-    {
-        THROWERR("Parse Scenario: keyword 'physics' is not defined.")
+        THROWERR("Parse Scenario: Problems with " + tDim + "-D spatial dimensions are not supported.")
     }
 }
 
-void ParseScenario::setDimensions()
+void ParseScenario::checkPhysics()
 {
-    auto tItr = mTags.find("dimensions");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    auto tPhysics = mData.value("physics");
+    auto tItr = mTags.find("physics");
+    if (tPhysics.empty())
     {
-        auto tValidTag = XMLGen::check_spatial_dimensions_keyword(tItr->second.second);
-        mData.dimensions(tValidTag);
+        THROWERR("Parse Scenario: keyword 'physics' is empty.")
     }
-    else
-    {
-        auto tValidTag = XMLGen::check_spatial_dimensions_keyword("3");
-        mData.dimensions(tValidTag);
-    }
+    auto tValidPhysics = XMLGen::check_physics_keyword(tPhysics);
+    mData.physics(tValidPhysics);
 }
 
 void ParseScenario::checkScenarioID()
 {
-    if (mData.id().empty())
+    auto tID = mData.value("id");
+    if (tID.empty())
     {
-        auto tID = mData.code() + "_" + mData.physics() + "_1";
+        tID = mData.value("code") + "_" + mData.value("physics") + "_1";
         mData.id(tID);
     }
-}
-
-void ParseScenario::setAdditiveContinuation()
-{
-    auto tItr = mTags.find("additive_continuation");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        mData.additiveContinuation(tItr->second.second);
-    }
-}
-
-void ParseScenario::setMateriaPenaltyExponent()
-{
-    auto tItr = mTags.find("material_penalty_exponent");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        mData.materialPenaltyExponent(tItr->second.second);
-    }
-    else
-    {
-        mData.materialPenaltyExponent("3.0");
-    }
-}
-
-void ParseScenario::setMinimumErsatzMaterialValue()
-{
-    auto tItr = mTags.find("minimum_ersatz_material_value");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        mData.minErsatzMaterialConstant(tItr->second.second);
-    }
-    else
-    {
-        mData.minErsatzMaterialConstant("1e-9");
-    }
-}
-
-void ParseScenario::setCacheState()
-{
-    auto tItr = mTags.find("enable_cache_state");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
-        mData.cacheState(tFlag);
-    }
-    else
-    {
-        mData.cacheState(false);
-    }
-}
-
-void ParseScenario::setUpdateProblem()
-{
-    auto tItr = mTags.find("enable_update_problem");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
-        mData.updateProblem(tFlag);
-    }
-    else
-    {
-        mData.updateProblem(false);
-    }
-}
-
-void ParseScenario::setUseAnalyzeNewUQWorkflow()
-{
-    auto tItr = mTags.find("use_new_analyze_uq_workflow");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
-    {
-        auto tFlag = XMLGen::check_boolean_key(tItr->second.second);
-        mData.useNewAnalyzeUQWorkflow(tFlag);
-    }
-    else
-    {
-        mData.useNewAnalyzeUQWorkflow(false);
-    }
-}
-
-void ParseScenario::setMetaData()
-{
-    this->setCode();
-    this->setPhysics();
-    this->setDimensions();
-    this->setCacheState();
-    this->setUpdateProblem();
-    this->setAdditiveContinuation();
-    this->setMateriaPenaltyExponent();
-    this->setUseAnalyzeNewUQWorkflow();
-    this->setMinimumErsatzMaterialValue();
 }
 
 XMLGen::Scenario ParseScenario::data() const
@@ -209,13 +127,12 @@ void ParseScenario::parse(std::istream &aInputFile)
         if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tScenarioID))
         {
             XMLGen::is_metadata_block_id_valid(tTokens);
-            mData.id(tScenarioID);
             XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
-            this->setMetaData();
+            this->set();
+            mData.id(tScenarioID);
+            this->check();
         }
     }
-    this->setPerformer();
-    this->checkScenarioID();
 }
 
 }

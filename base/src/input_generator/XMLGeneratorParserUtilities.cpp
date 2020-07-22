@@ -26,18 +26,18 @@ bool unique(const std::vector<std::string>& aInput)
     return (tItr == tCopy.end());
 }
 
-void erase_tags(XMLGen::UseCaseTags& aTags)
+void erase_tag_values(XMLGen::MetaDataTags& aTags)
 {
     for (auto &tTag : aTags)
     {
-        tTag.second.second.clear();
+        tTag.second.first.second.clear();
     }
 }
 
 void parse_input_metadata
 (const std::vector<std::string>& aStopKeys,
  std::istream& aInputFile,
- XMLGen::UseCaseTags& aTags)
+ XMLGen::MetaDataTags& aTags)
 {
     constexpr int tMAX_CHARS_PER_LINE = 10000;
     std::vector<char> tBuffer(tMAX_CHARS_PER_LINE);
@@ -48,8 +48,8 @@ void parse_input_metadata
         XMLGen::parse_tokens(tBuffer.data(), tTokens);
         XMLGen::to_lower(tTokens);
 
-        std::string tTag;
-        if (XMLGen::parse_single_value(tTokens, aStopKeys, tTag))
+        std::string tID;
+        if (XMLGen::parse_single_value(tTokens, aStopKeys, tID))
         {
             break;
         }
@@ -204,22 +204,22 @@ bool tokens_match
 }
 // function tokens_match
 
-void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::UseCaseTags& aTags)
+void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::MetaDataTags& aTags)
 {
     for (auto& tTag : aTags)
     {
-        auto tFoundMatch = XMLGen::tokens_match(aTokens, tTag.second.first);
+        auto tFoundMatch = XMLGen::tokens_match(aTokens, tTag.second.first.first);
         if (tFoundMatch)
         {
-            XMLGen::is_input_keyword_empty(aTokens, tTag.second.first);
+            XMLGen::is_input_keyword_empty(aTokens, tTag.second.first.first);
             auto tBeginItr = aTokens.begin();
-            auto tBeginIndex = tTag.second.first.size();
+            auto tBeginIndex = tTag.second.first.first.size();
             std::vector<std::string> tTokenList;
             for (auto tItr = std::next(tBeginItr, tBeginIndex); tItr != aTokens.end(); tItr++)
             {
                 tTokenList.push_back(tItr.operator*());
             }
-            tTag.second.second = XMLGen::transform_keyword_values(tTokenList);
+            tTag.second.first.second = XMLGen::transform_keyword_values(tTokenList);
             break;
         }
     }
@@ -280,7 +280,7 @@ std::string check_criterion_category_keyword(const std::string& aInput)
 }
 // function check_criterion_category_keyword
 
-bool check_boolean_key(const std::string& aInput)
+bool transform_boolean_key(const std::string& aInput)
 {
     auto tLowerInput = XMLGen::to_lower(aInput);
     XMLGen::ValidBoolKeys tValidKeys;
@@ -293,7 +293,7 @@ bool check_boolean_key(const std::string& aInput)
     auto tFlag = tLowerInput.compare("true") == 0 ? true : false;
     return tFlag;
 }
-// function check_boolean_key
+// function transform_boolean_key
 
 std::string check_physics_keyword(const std::string& aInput)
 {

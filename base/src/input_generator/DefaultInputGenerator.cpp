@@ -5719,7 +5719,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
                 addChild(tTmpNode, "Equality", "True");
                 addChild(tTmpNode, "Linear", "True");
                 addChild(tTmpNode, "ValueName", "Surface Area");
-                addChild(tTmpNode, "ReferenceValue", m_InputData.constraints[b].surface_area);
+                addChild(tTmpNode, "ReferenceValue", m_InputData.constraints[b].value("surface_area"));
                 addChild(tTmpNode, "GradientName", "Surface Area Gradient");
                 addChild(tTmpNode, "NormalizedTargetValue", "1.0");
                 addChild(tTmpNode, "Tolerance", "1e-3");

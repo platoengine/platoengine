@@ -240,6 +240,22 @@ void append_children
 
 /******************************************************************************/
 void append_attributes
+(const std::vector<std::string>& aKeys,
+ const std::vector<std::string>& aValues,
+ pugi::xml_node& aParentNode)
+{
+    for(auto& tKey : aKeys)
+    {
+        auto tIndex = &tKey - &aKeys[0];
+        auto tLower = Plato::tolower(aValues[tIndex]);
+        aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
+    }
+}
+// function append_attributes
+/******************************************************************************/
+
+/******************************************************************************/
+void append_attributes
 (const std::string& aNodeName,
  const std::vector<std::string>& aKeywords,
  const std::vector<std::string>& aValues,
@@ -251,22 +267,6 @@ void append_attributes
         auto tIndex = &tKeyword - &aKeywords[0];
         auto tLower = Plato::tolower(aValues[tIndex]);
         tNode.append_attribute(tKeyword.c_str()) = aValues[tIndex].c_str();
-    }
-}
-// function append_attributes
-/******************************************************************************/
-
-/******************************************************************************/
-void append_attributes
-(const std::vector<std::string>& aKeys,
- const std::vector<std::string>& aValues,
- pugi::xml_node& aParentNode)
-{
-    for(auto& tKey : aKeys)
-    {
-        auto tIndex = &tKey - &aKeys[0];
-        auto tLower = Plato::tolower(aValues[tIndex]);
-        aParentNode.append_attribute(tKey.c_str()) = aValues[tIndex].c_str();
     }
 }
 // function append_attributes

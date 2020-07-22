@@ -855,7 +855,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mScenarioMetaData.updateProblem(true);
+    tXMLMetaData.mScenarioMetaData.updateProblem("true");
     XMLGen::append_update_problem_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1331,7 +1331,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.discretization = "density";
-    tXMLMetaData.mScenarioMetaData.updateProblem(true);
+    tXMLMetaData.mScenarioMetaData.updateProblem("true");
     tXMLMetaData.objective_number_standard_deviations = "1";
     tXMLMetaData.mOutputMetaData.outputData(true);
     tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "element field");

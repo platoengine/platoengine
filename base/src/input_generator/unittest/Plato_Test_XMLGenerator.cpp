@@ -110,38 +110,38 @@ TEST(PlatoTestXMLGenerator, TransformTokens)
 
 TEST(PlatoTestXMLGenerator, ParseTagValues)
 {
-    XMLGen::UseCaseTags tTags;
-    tTags.insert({ "tag", { {"tag"}, "" } });
-    tTags.insert({ "attribute", { {"attribute"}, "" } });
-    tTags.insert({ "load", { {"load"}, "" } });
-    tTags.insert({ "mean", { {"mean"}, "" } });
-    tTags.insert({ "distribution", { {"distribution"}, "" } });
-    tTags.insert({ "num samples", { {"num", "samples"}, "" } });
-    tTags.insert({ "lower bound", { {"lower", "bound"}, "" } });
-    tTags.insert({ "upper bound", { {"upper", "bound"}, "" } });
-    tTags.insert({ "category", { {"category"}, "" } });
-    tTags.insert({ "standard deviation", { {"standard", "deviation"}, "" } });
+    XMLGen::MetaDataTags tTags;
+    tTags.insert({ "tag", { { {"tag"}, ""}, "" } });
+    tTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
+    tTags.insert({ "load", { { {"load"}, ""}, "" } });
+    tTags.insert({ "mean", { { {"mean"}, ""}, "" } });
+    tTags.insert({ "distribution", { { {"distribution"}, ""}, "" } });
+    tTags.insert({ "num samples", { { {"num", "samples"}, ""}, "" } });
+    tTags.insert({ "lower bound", { { {"lower", "bound"}, ""}, "" } });
+    tTags.insert({ "upper bound", { { {"upper", "bound"}, ""}, "" } });
+    tTags.insert({ "category", { { {"category"}, ""}, "" } });
+    tTags.insert({ "standard deviation", { { {"standard", "deviation"}, ""}, "" } });
 
     XMLGen::parse_tag_values(std::vector<std::string>{"tag", "angle", "variation"}, tTags);
-    ASSERT_STREQ("angle variation", tTags.find("tag")->second.second.c_str());
+    ASSERT_STREQ("angle variation", tTags.find("tag")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"attribute", "x"}, tTags);
-    ASSERT_STREQ("x", tTags.find("attribute")->second.second.c_str());
+    ASSERT_STREQ("x", tTags.find("attribute")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"load", "10"}, tTags);
-    ASSERT_STREQ("10", tTags.find("load")->second.second.c_str());
+    ASSERT_STREQ("10", tTags.find("load")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"mean", "1"}, tTags);
-    ASSERT_STREQ("1", tTags.find("mean")->second.second.c_str());
+    ASSERT_STREQ("1", tTags.find("mean")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"distribution", "beta"}, tTags);
-    ASSERT_STREQ("beta", tTags.find("distribution")->second.second.c_str());
+    ASSERT_STREQ("beta", tTags.find("distribution")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"num", "samples", "4"}, tTags);
-    ASSERT_STREQ("4", tTags.find("num samples")->second.second.c_str());
+    ASSERT_STREQ("4", tTags.find("num samples")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"lower", "bound", "0.5"}, tTags);
-    ASSERT_STREQ("0.5", tTags.find("lower bound")->second.second.c_str());
+    ASSERT_STREQ("0.5", tTags.find("lower bound")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"upper", "bound", "2"}, tTags);
-    ASSERT_STREQ("2", tTags.find("upper bound")->second.second.c_str());
+    ASSERT_STREQ("2", tTags.find("upper bound")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"category", "load"}, tTags);
-    ASSERT_STREQ("load", tTags.find("category")->second.second.c_str());
+    ASSERT_STREQ("load", tTags.find("category")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"standard", "deviation", "0.2"}, tTags);
-    ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.second.c_str());
+    ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.first.second.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
@@ -1539,6 +1539,7 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
 
     stringInput = "begin constraint\n"
+            "code platomain\n"
             "type volume\n"
             "name vol1\n"
             "volume fraction .5\n"
@@ -1553,6 +1554,7 @@ TEST(PlatoTestXMLGenerator, parseConstraints)
     EXPECT_EQ(tester.getConstraintVolFrac(0), ".5");
 
     stringInput = "begin constraint\n"
+             "code platomain\n"
             "type surface area\n"
             "name surf1\n"
             "surface_area 23\n"

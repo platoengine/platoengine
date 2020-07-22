@@ -186,6 +186,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
 {
     std::string tStringInput =
         "begin constraint\n"
+        "   code plato_analyze\n"
         "   type volume\n"
         "   volume fraction 0.2\n"
         "end constraint\n";
@@ -214,7 +215,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
 TEST(PlatoTestXMLGenerator, ParseConstraint_OneConstraint)
 {
     std::string tStringInput =
-        "begin constraint\n"
+        "begin constraint 1\n"
         "   type volume\n"
         "   name dog\n"
         "   weight 2.0\n"
@@ -239,6 +240,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_OneConstraint)
         ASSERT_STREQ("sierra_sd", tConstraint.code().c_str());
         ASSERT_STREQ("1.0", tConstraint.materialPenaltyExponent().c_str());
         ASSERT_STREQ("1e-6", tConstraint.minErsatzMaterialConstant().c_str());
+        ASSERT_STREQ("1", tConstraint.id().c_str());
         ASSERT_STREQ("dog", tConstraint.name().c_str());
         ASSERT_STREQ("sierra_sd_0", tConstraint.performer().c_str());
         ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
@@ -250,10 +252,12 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
 {
     std::string tStringInput =
         "begin constraint\n"
+        "   code platomain\n"
         "   type volume\n"
         "   volume absolute 10.0\n"
         "end constraint\n"
         "begin constraint\n"
+        "   code plato_analyze\n"
         "   type stress p-norm\n"
         "   target normalized 0.4\n"
         "   pnorm exponent 30.0\n"
@@ -271,15 +275,15 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
     ASSERT_STREQ("1.0", tConstraintMetadata[0].weight().c_str());
     ASSERT_STREQ("volume", tConstraintMetadata[0].category().c_str());
     ASSERT_STREQ("6.0", tConstraintMetadata[0].pnormExponent().c_str());
-    ASSERT_STREQ("plato_analyze", tConstraintMetadata[0].code().c_str());
+    ASSERT_STREQ("platomain", tConstraintMetadata[0].code().c_str());
     ASSERT_STREQ("10.0", tConstraintMetadata[0].absoluteTarget().c_str());
-    ASSERT_STREQ("plato_analyze", tConstraintMetadata[0].performer().c_str());
+    ASSERT_STREQ("platomain", tConstraintMetadata[0].performer().c_str());
     ASSERT_STREQ("3.0", tConstraintMetadata[0].materialPenaltyExponent().c_str());
     ASSERT_STREQ("1e-9", tConstraintMetadata[0].minErsatzMaterialConstant().c_str());
 
     // Constraint Two
     ASSERT_TRUE(tConstraintMetadata[1].absoluteTarget().empty());
-    ASSERT_STREQ("2", tConstraintMetadata[1].name().c_str());
+    ASSERT_STREQ("1", tConstraintMetadata[1].name().c_str());
     ASSERT_STREQ("1.0", tConstraintMetadata[1].weight().c_str());
     ASSERT_STREQ("stress p-norm", tConstraintMetadata[1].category().c_str());
     ASSERT_STREQ("30.0", tConstraintMetadata[1].pnormExponent().c_str());
@@ -290,7 +294,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_TwoConstraint)
     ASSERT_STREQ("1e-9", tConstraintMetadata[1].minErsatzMaterialConstant().c_str());
 }
 
-TEST(PlatoTestXMLGenerator, ParseScenario_ErrorEmptyScenarioMetadata)
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorEmptyPhysicsMetadata)
 {
     std::string tStringInput =
         "begin scenario\n"
@@ -358,14 +362,14 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
     tScenarioParser.parse(tInputSS);
     auto tScenarioMetadata = tScenarioParser.data();
 
-    ASSERT_FALSE(tScenarioMetadata.useNewAnalyzeUQWorkflow());
-    ASSERT_STREQ("plato_analyze", tScenarioMetadata.code().c_str());
-    ASSERT_STREQ("mechanical", tScenarioMetadata.physics().c_str());
-    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.performer().c_str());
-    ASSERT_STREQ("plato_analyze_mechanical_1", tScenarioMetadata.id().c_str());
-    ASSERT_STREQ("3", tScenarioMetadata.dimensions().c_str());
-    ASSERT_STREQ("3.0", tScenarioMetadata.materialPenaltyExponent().c_str());
-    ASSERT_STREQ("1e-9", tScenarioMetadata.minErsatzMaterialConstant().c_str());
+    ASSERT_STREQ("false", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
+    ASSERT_STREQ("plato_analyze", tScenarioMetadata.value("code").c_str());
+    ASSERT_STREQ("mechanical", tScenarioMetadata.value("physics").c_str());
+    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.value("performer").c_str());
+    ASSERT_STREQ("plato_analyze_mechanical_1", tScenarioMetadata.value("id").c_str());
+    ASSERT_STREQ("3", tScenarioMetadata.value("dimensions").c_str());
+    ASSERT_STREQ("3.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
+    ASSERT_STREQ("1e-9", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidScenarioBlockID)
@@ -414,14 +418,14 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     tScenarioParser.parse(tInputSS);
     auto tScenarioMetadata = tScenarioParser.data();
 
-    ASSERT_TRUE(tScenarioMetadata.useNewAnalyzeUQWorkflow());
-    ASSERT_STREQ("sierra_sd", tScenarioMetadata.code().c_str());
-    ASSERT_STREQ("thermal", tScenarioMetadata.physics().c_str());
-    ASSERT_STREQ("sierra_sd_0", tScenarioMetadata.performer().c_str());
-    ASSERT_STREQ("air_force_one", tScenarioMetadata.id().c_str());
-    ASSERT_STREQ("2", tScenarioMetadata.dimensions().c_str());
-    ASSERT_STREQ("1.0", tScenarioMetadata.materialPenaltyExponent().c_str());
-    ASSERT_STREQ("1e-6", tScenarioMetadata.minErsatzMaterialConstant().c_str());
+    ASSERT_STREQ("true", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
+    ASSERT_STREQ("sierra_sd", tScenarioMetadata.value("code").c_str());
+    ASSERT_STREQ("thermal", tScenarioMetadata.value("physics").c_str());
+    ASSERT_STREQ("sierra_sd_0", tScenarioMetadata.value("performer").c_str());
+    ASSERT_STREQ("air_force_one", tScenarioMetadata.value("id").c_str());
+    ASSERT_STREQ("2", tScenarioMetadata.value("dimensions").c_str());
+    ASSERT_STREQ("1.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
+    ASSERT_STREQ("1e-6", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_ErrorScenarionIdIsNotDefined)

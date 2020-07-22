@@ -20,7 +20,7 @@ namespace XMLGen
 class ParseConstraint : public XMLGen::ParseMetadata<std::vector<XMLGen::Constraint>>
 {
 private:
-    XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
     std::vector<XMLGen::Constraint> mData; /*!< constraint functions metadata */
 
 private:
@@ -31,105 +31,69 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn finalize
-     * \brief Perform final checks and member data definitions for constraint functions.
-    **********************************************************************************/
-    void finalize();
-
-    /******************************************************************************//**
-     * \fn checkTargeValue
-     * \brief Verify that target constraint keyword is set. A target value must be \n
-     * provided for all constrained optimization problems.
-    **********************************************************************************/
-    void checkTargeValue();
-
-    /******************************************************************************//**
-     * \fn setIdentification
+     * \fn checkIDs
      * \brief Set constraint functions identification number/name. If there are constraint \n
      * functions without an identification number/name, assign default values.
     **********************************************************************************/
-    void setIdentification();
+    void checkIDs();
 
     /******************************************************************************//**
-     * \fn setCode
-     * \brief Set simulation code name.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn set
+     * \brief Set XMLGen::Scenario metadata.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setCode(XMLGen::Constraint &aMetadata);
+    void set(XMLGen::Constraint& aMetaData);
 
     /******************************************************************************//**
-     * \fn setName
-     * \brief Set user assigned constraint name.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn check
+     * \brief Check XMLGen::Scenario metadata.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setName(XMLGen::Constraint &aMetadata);
+    void check(XMLGen::Constraint& aMetaData);
 
     /******************************************************************************//**
-     * \fn setCategory
-     * \brief Set constraint category.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn checkTargeValue
+     * \brief Verify that target constraint value keyword is set.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setCategory(XMLGen::Constraint &aMetadata);
+    void checkTargeValue(XMLGen::Constraint& aMetaData);
 
     /******************************************************************************//**
-     * \fn setWeight
-     * \brief Set constraint weight.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn checkCode
+     * \brief If 'code' keyword value is not supported, throw error.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setWeight(XMLGen::Constraint &aMetadata);
+    void checkCode(XMLGen::Constraint &aMetadata);
 
     /******************************************************************************//**
-     * \fn setPerformer
-     * \brief Set constraint performer, i.e. identification name used for the simulation \n
-     * code responsible for evaluating the constraint function.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn checkPerformer
+     * \brief If 'performer' keyword value is not supported, throw error.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setPerformer(XMLGen::Constraint &aMetadata);
+    void checkPerformer(XMLGen::Constraint &aMetadata);
 
     /******************************************************************************//**
-     * \fn setPnormExponent
-     * \brief Set p-norm exponent.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn checkCode
+     * \brief If 'type' keyword value is not supported, throw error.
+     * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
-    void setPnormExponent(XMLGen::Constraint &aMetadata);
+    void checkCategory(XMLGen::Constraint &aMetadata);
 
     /******************************************************************************//**
-     * \fn setNormalizedTarget
-     * \brief Set p-norm exponent.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn returnConstraintTargetAbsoluteKeywordSet
+     * \brief Return constraint target absolute keyword defined in input file.
+     * \param [in] aMetaData XMLGen::Constraint metadata
+     * \return keyword
     **********************************************************************************/
-    void setNormalizedTarget(XMLGen::Constraint &aMetadata);
+    std::string returnConstraintTargetAbsoluteKeywordSet(XMLGen::Constraint& aMetaData) const;
 
     /******************************************************************************//**
-     * \fn setAbsoluteTarget
-     * \brief Set absolute constraint target values.
-     * \param [in/out] aInputFile parsed input metadata
+     * \fn returnConstraintTargetNormalizedKeywordSet
+     * \brief Return constraint target normalized keyword defined in input file.
+     * \param [in] aMetaData XMLGen::Constraint metadata
+     * \return keyword
     **********************************************************************************/
-    void setAbsoluteTarget(XMLGen::Constraint &aMetadata);
-
-    /******************************************************************************//**
-     * \fn setMinimumErsatzValue
-     * \brief Set minimum Ersatz material constant.
-     * \param [in/out] aInputFile parsed input metadata
-    **********************************************************************************/
-    void setMinimumErsatzValue(XMLGen::Constraint &aMetadata);
-
-    /******************************************************************************//**
-     * \fn setPenaltyPower
-     * \brief Set material penalty exponent, i.e. \f$ x^p \f$ , where \f$ p \f$ denotes the exponent.
-     * \param [in/out] aInputFile parsed input metadata
-    **********************************************************************************/
-    void setPenaltyPower(XMLGen::Constraint &aMetadata);
-
-    /******************************************************************************//**
-     * \fn setMetaData
-     * \brief Set constraint metadata.
-     * \param [in/out] aInputFile parsed input metadata
-    **********************************************************************************/
-    void setMetaData(XMLGen::Constraint& aMetadata);
-
-    // TO BE DEPRECATED SOON!
-    void setSurfaceArea(XMLGen::Constraint &aMetadata);
+    std::string returnConstraintTargetNormalizedKeywordSet(XMLGen::Constraint& aMetaData) const;
 
 public:
     /******************************************************************************//**

@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorParseMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorScenarioMetadata.hpp"
 
 namespace XMLGen
 {
@@ -21,7 +21,9 @@ class ParseScenario : public XMLGen::ParseMetadata<XMLGen::Scenario>
 {
 private:
     XMLGen::Scenario mData; /*!< scenario metadata */
-    XMLGen::UseCaseTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    /*!< map from plato input file property tags to pair< valid tokens, pair<value,default> >, \n
+     * i.e. map< tag, pair<valid tokens, pair<value,default>> > */
+    XMLGen::MetaDataTags mTags;
 
 private:
     /******************************************************************************//**
@@ -31,23 +33,42 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn setCode
-     * \brief Set 'code' keyword, default = 'plato_analyze'.
+     * \fn set
+     * \brief Set XMLGen::Scenario metadata.
     **********************************************************************************/
-    void setCode();
+    void set();
 
     /******************************************************************************//**
-     * \fn setPhysics
+     * \fn check
+     * \brief Check XMLGen::Scenario metadata.
+    **********************************************************************************/
+    void check();
+
+    /******************************************************************************//**
+     * \fn checkCode
+     * \brief If 'code' keyword value is not supported, throw error.
+    **********************************************************************************/
+    void checkCode();
+
+    /******************************************************************************//**
+     * \fn checkPhysics
      * \brief Set 'physics' keyword, throw error if input keyword is empty.
     **********************************************************************************/
-    void setPhysics();
+    void checkPhysics();
 
     /******************************************************************************//**
-     * \fn setPhysics
-     * \brief Set 'performer' keyword, default = 'code_keyword' + '0', where \n
-     * 'code_keyword' denotes the value set for 'code' keyword.
+     * \fn checkPerformer
+     * \brief If 'performer' keyword is empty, set 'performer' keyword to default \n
+     * value: 'code_keyword' + '0', where 'code_keyword' denotes the value set for \n
+     * 'code' keyword.
     **********************************************************************************/
-    void setPerformer();
+    void checkPerformer();
+
+    /******************************************************************************//**
+     * \fn checkSpatialDimensions
+     * \brief If 'dimensions' keyword value is not supported, throw error.
+    **********************************************************************************/
+    void checkSpatialDimensions();
 
     /******************************************************************************//**
      * \fn checkScenarioID
@@ -56,52 +77,6 @@ private:
      * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
     **********************************************************************************/
     void checkScenarioID();
-
-    /******************************************************************************//**
-     * \fn setScenarioID
-     * \brief Set 'dimensions' keyword, throw error if input spatial dimensions \n
-     * are not supported.
-    **********************************************************************************/
-    void setDimensions();
-
-    /******************************************************************************//**
-     * \fn setAdditiveContinuation
-     * \brief Set 'additive_continuation' keyword. The 'additive_continuation' \n
-     * parameter is used to increase the material penalty exponent using continuation.
-    **********************************************************************************/
-    void setAdditiveContinuation();
-
-    /******************************************************************************//**
-     * \fn setMateriaPenaltyExponent
-     * \brief Set 'material_penalty_exponent' keyword, default = '3.0'.
-    **********************************************************************************/
-    void setMateriaPenaltyExponent();
-
-    /******************************************************************************//**
-     * \fn setMinimumErsatzMaterialValue
-     * \brief Set 'minimum_ersatz_material_value' keyword, default = '1e-9'.
-    **********************************************************************************/
-    void setMinimumErsatzMaterialValue();
-
-    /******************************************************************************//**
-     * \fn setCacheState
-     * \brief Set cache state flag, which is used to enable or disable the cache state \n
-     * operation, default = false.
-    **********************************************************************************/
-    void setCacheState();
-
-    /******************************************************************************//**
-     * \fn setUpdateProblem
-     * \brief Set update problem flag, which is used to enable or disable the update \n
-     * problem operation, default = false.
-    **********************************************************************************/
-    void setUpdateProblem();
-
-    /******************************************************************************//**
-     * \fn setUseAnalyzeNewUQWorkflow
-     * \brief Set use analyze new uncertainty quantification workflow flag, default = false.
-    **********************************************************************************/
-    void setUseAnalyzeNewUQWorkflow();
 
     /******************************************************************************//**
      * \fn setMetaData

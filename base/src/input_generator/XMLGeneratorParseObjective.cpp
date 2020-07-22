@@ -17,58 +17,58 @@ void ParseObjective::allocate()
 {
     mTags.clear();
 
-    mTags.insert({ "type", { {"type"}, "" } });
-    mTags.insert({ "code", { {"code"}, "" } });
-    mTags.insert({ "name", { {"name"}, "" } });
-    mTags.insert({ "weight", { {"weight"}, "" } });
-    mTags.insert({ "load ids", { {"load", "ids"}, "" } });
-    mTags.insert({ "stress_limit", { {"stress_limit"}, "" } });
-    mTags.insert({ "ls tet type", { {"ls","tet","type"}, "" } });
-    mTags.insert({ "number ranks", { {"number", "ranks"}, "" } });
-    mTags.insert({ "multi load case", { {"multi","load","case"}, "" } });
-    mTags.insert({ "number processors", { {"number", "processors"}, "" } });
-    mTags.insert({ "load case weights", { {"load","case","weights"}, "" } });
-    mTags.insert({ "normalize objective", { {"normalize","objective"}, "" } });
-    mTags.insert({ "frf match nodesets", { {"frf","match","nodesets"}, "" } });
-    mTags.insert({ "reference frf file", { {"reference","frf","file"}, "" } });
-    mTags.insert({ "distribute objective", { {"distribute","objective"}, "" } });
-    mTags.insert({ "output for plotting", { {"output", "for", "plotting"}, "" } });
-    mTags.insert({ "raleigh damping beta", { {"raleigh","damping","beta"}, "" } });
-    mTags.insert({ "raleigh damping alpha", { {"raleigh","damping","alpha"}, "" } });
-    mTags.insert({ "relative_stress_limit", { {"relative_stress_limit"}, "" } });
-    mTags.insert({ "scmm_mass_criterion_weight", { {"scmm_mass_criterion_weight"}, "" } });
-    mTags.insert({ "scmm_stress_criterion_weight", { {"scmm_stress_criterion_weight"}, "" } });
-    mTags.insert({ "scmm_penalty_upper_bound", { {"scmm_penalty_upper_bound"}, "" } });
-    mTags.insert({ "scmm_initial_penalty", { {"scmm_initial_penalty"}, "" } });
-    mTags.insert({ "complex error measure", { {"complex","error","measure"}, "" } });
-    mTags.insert({ "analyze new workflow", { {"analyze", "new", "workflow"}, "" } });
-    mTags.insert({ "boundary condition ids", { {"boundary","condition", "ids"}, "" } });
-    mTags.insert({ "weightmass scale factor", { {"weightmass","scale","factor"}, "" } });
-    mTags.insert({ "scmm_constraint_exponent", { {"scmm_constraint_exponent"}, "" } });
-    mTags.insert({ "analysis solver tolerance", { {"analysis","solver","tolerance"}, "" } });
-    mTags.insert({ "scmm_penalty_expansion_factor", { {"scmm_penalty_expansion_factor"}, "" } });
+    mTags.insert({ "type", { { {"type"}, ""}, "" } });
+    mTags.insert({ "code", { { {"code"}, ""}, "" } });
+    mTags.insert({ "name", { { {"name"}, ""}, "" } });
+    mTags.insert({ "weight", { { {"weight"}, ""}, "" } });
+    mTags.insert({ "load ids", { { {"load", "ids"}, ""}, "" } });
+    mTags.insert({ "stress_limit", { { {"stress_limit"}, ""}, "" } });
+    mTags.insert({ "ls tet type", { { {"ls","tet","type"}, ""}, "" } });
+    mTags.insert({ "number ranks", { { {"number", "ranks"}, ""}, "" } });
+    mTags.insert({ "multi load case", { { {"multi","load","case"}, ""}, "" } });
+    mTags.insert({ "number processors", { { {"number", "processors"}, ""}, "" } });
+    mTags.insert({ "load case weights", { { {"load","case","weights"}, ""}, "" } });
+    mTags.insert({ "normalize objective", { { {"normalize","objective"}, ""}, "" } });
+    mTags.insert({ "frf match nodesets", { { {"frf","match","nodesets"}, ""}, "" } });
+    mTags.insert({ "reference frf file", { { {"reference","frf","file"}, ""}, "" } });
+    mTags.insert({ "distribute objective", { { {"distribute","objective"}, ""}, "" } });
+    mTags.insert({ "output for plotting", { { {"output", "for", "plotting"}, ""}, "" } });
+    mTags.insert({ "raleigh damping beta", { { {"raleigh","damping","beta"}, ""}, "" } });
+    mTags.insert({ "raleigh damping alpha", { { {"raleigh","damping","alpha"}, ""}, "" } });
+    mTags.insert({ "relative_stress_limit", { { {"relative_stress_limit"}, ""}, "" } });
+    mTags.insert({ "scmm_mass_criterion_weight", { { {"scmm_mass_criterion_weight"}, ""}, "" } });
+    mTags.insert({ "scmm_stress_criterion_weight", { { {"scmm_stress_criterion_weight"}, ""}, "" } });
+    mTags.insert({ "scmm_penalty_upper_bound", { { {"scmm_penalty_upper_bound"}, ""}, "" } });
+    mTags.insert({ "scmm_initial_penalty", { { {"scmm_initial_penalty"}, ""}, "" } });
+    mTags.insert({ "complex error measure", { { {"complex","error","measure"}, ""}, "" } });
+    mTags.insert({ "analyze new workflow", { { {"analyze", "new", "workflow"}, ""}, "" } });
+    mTags.insert({ "boundary condition ids", { { {"boundary","condition", "ids"}, ""}, "" } });
+    mTags.insert({ "weightmass scale factor", { { {"weightmass","scale","factor"}, ""}, "" } });
+    mTags.insert({ "scmm_constraint_exponent", { { {"scmm_constraint_exponent"}, ""}, "" } });
+    mTags.insert({ "analysis solver tolerance", { { {"analysis","solver","tolerance"}, ""}, "" } });
+    mTags.insert({ "scmm_penalty_expansion_factor", { { {"scmm_penalty_expansion_factor"}, ""}, "" } });
 
-    mTags.insert({ "performer", { {"performer"}, "" } });
-    mTags.insert({ "penalty power", { {"penalty", "power"}, "" } });
-    mTags.insert({ "pnorm exponent", { {"pnorm", "exponent"}, "" } });
-    mTags.insert({ "minimum ersatz material value", { {"minimum", "ersatz", "material", "value"}, "" } });
+    mTags.insert({ "performer", { { {"performer"}, ""}, "" } });
+    mTags.insert({ "penalty power", { { {"penalty", "power"}, ""}, "" } });
+    mTags.insert({ "pnorm exponent", { { {"pnorm", "exponent"}, ""}, "" } });
+    mTags.insert({ "minimum ersatz material value", { { {"minimum", "ersatz", "material", "value"}, ""}, "" } });
 }
 
 void ParseObjective::setName(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("name");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.name = tItr->second.second;
+        aMetadata.name = tItr->second.first.second;
     }
 }
 
 void ParseObjective::setCategory(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("type");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.type = tItr->second.second;
+        aMetadata.type = tItr->second.first.second;
     }
     else
     {
@@ -80,9 +80,9 @@ void ParseObjective::setCategory(XMLGen::Objective &aMetadata)
 void ParseObjective::setCode(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("code");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.code_name = tItr->second.second;
+        aMetadata.code_name = tItr->second.first.second;
     }
     else
     {
@@ -93,9 +93,9 @@ void ParseObjective::setCode(XMLGen::Objective &aMetadata)
 void ParseObjective::setNumRanks(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("number ranks");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.num_ranks = tItr->second.second;
+        aMetadata.num_ranks = tItr->second.first.second;
     }
     else
     {
@@ -106,9 +106,9 @@ void ParseObjective::setNumRanks(XMLGen::Objective &aMetadata)
 void ParseObjective::setNumProcessors(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("number processors");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.num_procs = tItr->second.second;
+        aMetadata.num_procs = tItr->second.first.second;
     }
     else
     {
@@ -119,9 +119,9 @@ void ParseObjective::setNumProcessors(XMLGen::Objective &aMetadata)
 void ParseObjective::setWeight(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("weight");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.weight = tItr->second.second;
+        aMetadata.weight = tItr->second.first.second;
     }
     else
     {
@@ -132,9 +132,9 @@ void ParseObjective::setWeight(XMLGen::Objective &aMetadata)
 void ParseObjective::setPerformer(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("performer");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.mPerformerName = tItr->second.second;
+        aMetadata.mPerformerName = tItr->second.first.second;
     }
     else
     {
@@ -146,9 +146,9 @@ void ParseObjective::setPerformer(XMLGen::Objective &aMetadata)
 void ParseObjective::setPenaltyPower(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("penalty power");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.mPenaltyParam = tItr->second.second;
+        aMetadata.mPenaltyParam = tItr->second.first.second;
     }
     else
     {
@@ -159,9 +159,9 @@ void ParseObjective::setPenaltyPower(XMLGen::Objective &aMetadata)
 void ParseObjective::setPnormExponent(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("pnorm exponent");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.mPnormExponent = tItr->second.second;
+        aMetadata.mPnormExponent = tItr->second.first.second;
     }
     else
     {
@@ -172,9 +172,9 @@ void ParseObjective::setPnormExponent(XMLGen::Objective &aMetadata)
 void ParseObjective::setNormalizeObjective(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("normalize objective");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.normalize_objective = tItr->second.second;
+        aMetadata.normalize_objective = tItr->second.first.second;
     }
     else
     {
@@ -185,9 +185,9 @@ void ParseObjective::setNormalizeObjective(XMLGen::Objective &aMetadata)
 void ParseObjective::setMinimumErsatzValue(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("minimum ersatz material value");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.mMinimumErsatzValue = tItr->second.second;
+        aMetadata.mMinimumErsatzValue = tItr->second.first.second;
     }
     else
     {
@@ -198,9 +198,9 @@ void ParseObjective::setMinimumErsatzValue(XMLGen::Objective &aMetadata)
 void ParseObjective::setAnalysisSolverTolerance(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("analysis solver tolerance");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.analysis_solver_tolerance = tItr->second.second;
+        aMetadata.analysis_solver_tolerance = tItr->second.first.second;
     }
     else
     {
@@ -211,10 +211,10 @@ void ParseObjective::setAnalysisSolverTolerance(XMLGen::Objective &aMetadata)
 void ParseObjective::setNaturalBoundaryConditionsCaseIDs(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("load ids");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             aMetadata.load_case_ids.push_back(tToken);
@@ -225,10 +225,10 @@ void ParseObjective::setNaturalBoundaryConditionsCaseIDs(XMLGen::Objective &aMet
 void ParseObjective::setNaturalBoundaryConditionsCaseWeights(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("load case weights");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             aMetadata.load_case_weights.push_back(tToken);
@@ -239,10 +239,10 @@ void ParseObjective::setNaturalBoundaryConditionsCaseWeights(XMLGen::Objective &
 void ParseObjective::setEssentialBoundaryConditionsCaseIDs(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("boundary condition ids");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             aMetadata.bc_ids.push_back(tToken);
@@ -253,10 +253,10 @@ void ParseObjective::setEssentialBoundaryConditionsCaseIDs(XMLGen::Objective &aM
 void ParseObjective::setFrequencyResponseFunctionMatchNodesets(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("frf match nodesets");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             aMetadata.frf_match_nodesets.push_back(tToken);
@@ -267,10 +267,10 @@ void ParseObjective::setFrequencyResponseFunctionMatchNodesets(XMLGen::Objective
 void ParseObjective::setOutputForPlotting(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("output for plotting");
-    if (tItr != mTags.end() && !tItr->second.second.empty())
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.second, tTokens);
+        XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
         {
             aMetadata.output_for_plotting.push_back(tToken);
@@ -285,10 +285,10 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
     // split token names: at most {number} processors
     // token index:       0  1    2        3
     auto tOuterItr = mTags.find("distribute objective");
-    if (tOuterItr != mTags.end() && !tOuterItr->second.second.empty())
+    if (tOuterItr != mTags.end() && !tOuterItr->second.first.second.empty())
     {
         std::vector<std::string> tTokens;
-        XMLGen::split(tOuterItr->second.second, tTokens);
+        XMLGen::split(tOuterItr->second.first.second, tTokens);
         auto tInnerItr = std::find(tTokens.begin(), tTokens.end(), "none");
         if (tInnerItr != tTokens.end())
         {
@@ -320,7 +320,7 @@ void ParseObjective::setDistributeObjectiveType(XMLGen::Objective &aMetadata)
 }
 
 inline void parse_stress_limit
-(const XMLGen::UseCaseTags& aTags,
+(const XMLGen::MetaDataTags& aTags,
  XMLGen::Objective& aMetadata)
 {
     auto tItr = aTags.find("stress_limit");
@@ -329,20 +329,20 @@ inline void parse_stress_limit
         THROWERR("Parse Objective: 'stress_limit' keyword is not defined in keyword-to-value map.")
     }
 
-    if(tItr->second.second.empty())
+    if(tItr->second.first.second.empty())
     {
-        if(aTags.find("type")->second.second.compare("stress constrained mass minimization") == 0)
+        if(aTags.find("type")->second.first.second.compare("stress constrained mass minimization") == 0)
         {
             THROWERR(std::string("Parse Objective: Stress Constrained Mass Minimization (SCMM) problem was ")
                 + "requested but the 'stress limit' keyword is not defined. User must defined the 'stress limit' "
                 + "for a SCMM problem.")
         }
     }
-    aMetadata.stress_limit = aTags.find("stress_limit")->second.second;
+    aMetadata.stress_limit = aTags.find("stress_limit")->second.first.second;
 }
 
 inline void parse_stress_and_mass_criterion_weights
-(const XMLGen::UseCaseTags& aTags,
+(const XMLGen::MetaDataTags& aTags,
  XMLGen::Objective& aMetadata)
 {
     auto tItr = aTags.find("scmm_mass_criterion_weight");
@@ -350,7 +350,7 @@ inline void parse_stress_and_mass_criterion_weights
     {
         THROWERR("Parse Objective: 'scmm_mass_criterion_weight' keyword is not defined in keyword-to-value map.")
     }
-    auto tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    auto tWeight = tItr->second.first.second.empty() ? std::string("1.0") : tItr->second.first.second;
     aMetadata.scmm_criterion_weights["mass"] = tWeight;
 
     tItr = aTags.find("scmm_stress_criterion_weight");
@@ -358,17 +358,17 @@ inline void parse_stress_and_mass_criterion_weights
     {
         THROWERR("Parse Objective: 'scmm_stress_criterion_weight' keyword is not defined in keyword-to-value map.")
     }
-    tWeight = tItr->second.second.empty() ? std::string("1.0") : tItr->second.second;
+    tWeight = tItr->second.first.second.empty() ? std::string("1.0") : tItr->second.first.second;
     aMetadata.scmm_criterion_weights["stress"] = tWeight;
 }
 
 void ParseObjective::setStressConstrainedParam(XMLGen::Objective& aMetadata)
 {
-    aMetadata.scmm_initial_penalty = mTags.find("scmm_initial_penalty")->second.second;
-    aMetadata.relative_stress_limit = mTags.find("relative_stress_limit")->second.second;
-    aMetadata.scmm_constraint_exponent = mTags.find("scmm_constraint_exponent")->second.second;
-    aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.second;
-    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.second;
+    aMetadata.scmm_initial_penalty = mTags.find("scmm_initial_penalty")->second.first.second;
+    aMetadata.relative_stress_limit = mTags.find("relative_stress_limit")->second.first.second;
+    aMetadata.scmm_constraint_exponent = mTags.find("scmm_constraint_exponent")->second.first.second;
+    aMetadata.scmm_penalty_upper_bound = mTags.find("scmm_penalty_upper_bound")->second.first.second;
+    aMetadata.scmm_penalty_expansion_factor = mTags.find("scmm_penalty_expansion_factor")->second.first.second;
     XMLGen::parse_stress_limit(mTags, aMetadata);
     XMLGen::parse_stress_and_mass_criterion_weights(mTags, aMetadata);
 }
@@ -391,12 +391,12 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setNumProcessors(aMetadata);
     this->setAnalysisSolverTolerance(aMetadata);
     this->setDistributeObjectiveType(aMetadata);
-    aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.second;
-    aMetadata.ref_frf_file = mTags.find("reference frf file")->second.second;
-    aMetadata.raleigh_damping_beta = mTags.find("raleigh damping beta")->second.second;
-    aMetadata.raleigh_damping_alpha = mTags.find("raleigh damping alpha")->second.second;
-    aMetadata.wtmass_scale_factor = mTags.find("weightmass scale factor")->second.second;
-    aMetadata.complex_error_measure = mTags.find("complex error measure")->second.second;
+    aMetadata.convert_to_tet10 = mTags.find("ls tet type")->second.first.second;
+    aMetadata.ref_frf_file = mTags.find("reference frf file")->second.first.second;
+    aMetadata.raleigh_damping_beta = mTags.find("raleigh damping beta")->second.first.second;
+    aMetadata.raleigh_damping_alpha = mTags.find("raleigh damping alpha")->second.first.second;
+    aMetadata.wtmass_scale_factor = mTags.find("weightmass scale factor")->second.first.second;
+    aMetadata.complex_error_measure = mTags.find("complex error measure")->second.first.second;
 
     // array info, plus these should be inside the scenario block, excluding the output for plotting
     this->setOutputForPlotting(aMetadata);
@@ -569,7 +569,7 @@ void ParseObjective::parse(std::istream &aInputFile)
         if (XMLGen::parse_single_value(tTokens, { "begin", "objective" }, tTag))
         {
             XMLGen::Objective tMetadata;
-            XMLGen::erase_tags(mTags);
+            XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "objective" }, aInputFile, mTags);
             this->setMetaData(tMetadata);
             this->checkMetaData(tMetadata);

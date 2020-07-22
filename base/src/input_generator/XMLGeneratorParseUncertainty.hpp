@@ -20,7 +20,7 @@ namespace XMLGen
 class ParseUncertainty : public XMLGen::ParseMetadata<std::vector<XMLGen::Uncertainty>>
 {
 private:
-    XMLGen::UseCaseTags mTags; /*!< map from valid tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
+    XMLGen::MetaDataTags mTags; /*!< map from valid tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
     std::vector<XMLGen::Uncertainty> mData; /*!< list of uncertainty metadata */
 
 private:

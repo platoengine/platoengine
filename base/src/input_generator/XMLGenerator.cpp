@@ -117,7 +117,7 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
   m_InputData.m_filterType_kernelThenTANH_XMLName = "KernelThenTANH";
   m_InputData.m_HasUncertainties = false;
   m_InputData.m_RequestedVonMisesOutput = false;
-  m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow(false);
+  m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow("false");
 }
 
 /******************************************************************************/
