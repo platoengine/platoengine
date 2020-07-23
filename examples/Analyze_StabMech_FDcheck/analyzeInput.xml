@@ -11,8 +11,9 @@
 
     <ParameterList name="Criteria">
       <ParameterList name="Volume">
-        <Parameter name='Type' type='string' value='Linear Scalar Function'/> 
-        <Parameter name='Linear Scalar Function Type' type='string' value='Volume'/>
+        <Parameter name='Linear' type='bool' value='true'/>
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Volume'/>
         <ParameterList name="Penalty Function">
           <Parameter name="Type" type="string" value="SIMP"/>
           <Parameter name="Exponent" type="double" value="1.0"/>
