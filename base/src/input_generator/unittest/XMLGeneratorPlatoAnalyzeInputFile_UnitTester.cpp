@@ -17,9 +17,6 @@
 #include "XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
 
-
-#include "XMLGeneratorAnalyzeCriterionUtilities.hpp"
-
 namespace XMLGen
 {
 
@@ -48,13 +45,13 @@ void append_simp_penalty_function
     std::vector<std::string> tValues = { "Type", "string", "SIMP" };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 
-    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("material_penalty_exponent"));
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.materialPenaltyExponent());
     tValues = { "Exponent", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("minimum_ersatz_material_value"));
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.minErsatzMaterialConstant());
     tValues = { "Minimum Value", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("additive_continuation"));
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.additiveContinuation());
     tValues = { "Additive Continuation", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
@@ -66,9 +63,11 @@ void append_parabolic_pde_time_step_option
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Time Integration" }, tTimeStepNode);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.numTimeSteps());
+    std::vector<std::string> tValues = { "Number Time Steps", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.timeStep());
+    tValues = { "Time Step", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
 }
 
@@ -79,13 +78,17 @@ void append_hyperbolic_pde_time_step_option
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Time Integration" }, tTimeStepNode);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.numTimeSteps());
+    std::vector<std::string> tValues = { "Number Time Steps", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.timeStep());
+    tValues = { "Time Step", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Newmark Beta", "double", aMetadata.value("newmark_beta") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.newmarkBeta());
+    tValues = { "Newmark Beta", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Newmark Gamma", "double", aMetadata.value("newmark_gamma") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.newmarkGamma());
+    tValues = { "Newmark Gamma", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
 }
 
@@ -96,9 +99,11 @@ void append_stabilized_elliptic_pde_time_step_option
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Time Stepping" }, tTimeStepNode);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.numTimeSteps());
+    std::vector<std::string> tValues = { "Number Time Steps", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.timeStep());
+    tValues = { "Time Step", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
 }
 
@@ -109,11 +114,14 @@ void append_pseudo_time_step_option
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Time Stepping" }, tTimeStepNode);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Expansion Multiplier", "double", aMetadata.value("time_step_expansion_multiplier") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.timeStepExpansion());
+    std::vector<std::string> tValues = { "Expansion Multiplier", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Initial Num. Pseudo Time Steps", "int", aMetadata.value("number_time_steps") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.numTimeSteps());
+    tValues = { "Initial Num. Pseudo Time Steps", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
-    tValues = { "Maximum Num. Pseudo Time Steps", "int", aMetadata.value("max_number_time_steps") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.maxNumTimeSteps());
+    tValues = { "Maximum Num. Pseudo Time Steps", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
 }
 
@@ -124,7 +132,8 @@ void append_stabilized_elliptic_newton_solver_option
     auto tTimeStepping = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Newton Iteration" }, tTimeStepping);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Number Iterations", "int", aMetadata.value("max_number_iterations") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverMaxNumIterations());
+    std::vector<std::string> tValues = { "Number Iterations", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
 }
 
@@ -135,11 +144,14 @@ void append_newton_raphson_solver_option
     auto tTimeStepping = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes( { "name" }, { "Newton-Raphson" }, tTimeStepping);
     std::vector<std::string> tKeys = { "name", "type", "value" };
-    std::vector<std::string> tValues = { "Stop Measure", "string", aMetadata.value("convergence_criterion") };
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverConvergenceCriterion());
+    std::vector<std::string> tValues = { "Stop Measure", "string", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = { "Stopping Tolerance", "double", aMetadata.value("tolerance") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverTolerance());
+    tValues = { "Stopping Tolerance", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = { "Maximum Number Iterations", "int", aMetadata.value("max_number_iterations") };
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverMaxNumIterations());
+    tValues = { "Maximum Number Iterations", "int", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
 }
 
@@ -147,15 +159,16 @@ void append_plottable_option
 (const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    std::vector<std::string> tQoIs;
     auto tQoiIDs = aOutput.deterministicIDs();
-    for(auto& tID : tQoiIDs)
+    if(tQoiIDs.empty())
     {
-        tQoIs.push_back(tID);
+        return;
     }
 
+    auto tTransformQoiIDs = XMLGen::transform_tokens(tQoiIDs);
+    tTransformQoiIDs.insert(0u, "{");
+    tTransformQoiIDs.insert(tTransformQoiIDs.size(), "}");
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    auto tTransformQoiIDs = XMLGen::transform_tokens(tQoIs);
     std::vector<std::string> tValues = {"Plottable", "Array(string)", tTransformQoiIDs};
     auto tParameter = aParentNode.append_child("Parameter");
     XMLGen::append_attributes(tKeys, tValues, tParameter);
@@ -255,7 +268,7 @@ void append_plasticity_residual_to_analyze_input_deck
  * This interface reduces cyclomatic complexity due to having multiple material \n
  * models in Plato Analyze.
 **********************************************************************************/
-struct AppendPhysicsParameters
+struct PhysicsFunctionInterface
 {
 // private member data
 private:
@@ -293,9 +306,9 @@ private:
     **********************************************************************************/
     void insertParabolicPhysics()
     {
-        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
         mMap.insert(std::make_pair("heat conduction",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
         mMap.insert(std::make_pair("transient thermomechanics",
@@ -320,7 +333,7 @@ private:
     void insertPlasticityPhysics()
     {
         auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_plasticity_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("infinitesimal strain plasticity",
+        mMap.insert(std::make_pair("plasticity",
           std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_plasticity_residual_to_analyze_input_deck, tFuncIndex)));
     }
 
@@ -331,7 +344,7 @@ private:
     void insertStabilizedEllipticPhysics()
     {
         auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck));
-        mMap.insert(std::make_pair("stabilized mechanical",
+        mMap.insert(std::make_pair("stabilized mechanics",
           std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
     }
 
@@ -354,7 +367,7 @@ public:
      * \fn AppendPhysicsParameters
      * \brief Default constructor
     **********************************************************************************/
-    AppendPhysicsParameters()
+    PhysicsFunctionInterface()
     {
         this->insert();
     }
@@ -397,6 +410,537 @@ public:
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
+{
+    XMLGen::Output tOutput;
+    tOutput.appendDeterminsiticQoI("dispx", "nodal field");
+    tOutput.appendDeterminsiticQoI("vonmises", "element field");
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("mechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{dispx, vonmises}"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
+{
+    XMLGen::Output tOutput;
+    tOutput.appendDeterminsiticQoI("temperature", "nodal field");
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("thermal");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{temperature}"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("thermomechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("electromechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("heat conduction");
+    tScenario.timeStep("1.0");
+    tScenario.numTimeSteps("10");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tParabolic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParabolic.empty());
+    ASSERT_STREQ("ParameterList", tParabolic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Parabolic"}, tParabolic);
+    auto tParameter = tParabolic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tParabolic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tTimeStep = tParabolic.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeStep.empty());
+    ASSERT_STREQ("ParameterList", tTimeStep.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Integration"}, tTimeStep);
+    tParameter = tTimeStep.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Number Time Steps", "int", "10"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Time Step", "double", "1.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("transient thermomechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tParabolic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParabolic.empty());
+    ASSERT_STREQ("ParameterList", tParabolic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Parabolic"}, tParabolic);
+    auto tParameter = tParabolic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tParabolic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tTimeStep = tParabolic.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeStep.empty());
+    ASSERT_STREQ("ParameterList", tTimeStep.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Integration"}, tTimeStep);
+    tParameter = tTimeStep.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Number Time Steps", "int", "20"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Time Step", "double", "2.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("transient mechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.newmarkBeta("0.25");
+    tScenario.newmarkGamma("0.5");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tParabolic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParabolic.empty());
+    ASSERT_STREQ("ParameterList", tParabolic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Hyperbolic"}, tParabolic);
+    auto tParameter = tParabolic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tParabolic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tTimeStep = tParabolic.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeStep.empty());
+    ASSERT_STREQ("ParameterList", tTimeStep.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Integration"}, tTimeStep);
+    tParameter = tTimeStep.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Number Time Steps", "int", "20"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Time Step", "double", "2.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Newmark Beta", "double", "0.25"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Newmark Gamma", "double", "0.5"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("stabilized mechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tTimeStep = tElliptic.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeStep.empty());
+    ASSERT_STREQ("ParameterList", tTimeStep.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Stepping"}, tTimeStep);
+    tParameter = tTimeStep.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Number Time Steps", "int", "20"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Time Step", "double", "2.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.physics("plasticity");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.maxNumTimeSteps("40");
+    tScenario.timeStepExpansion("1.1");
+    tScenario.solverTolerance("1e-5");
+    tScenario.solverMaxNumIterations("10");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
+    pugi::xml_document tDocument;
+    XMLGen::PhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+
+    // TEST RESULTS
+    // global residual
+    auto tElliptic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tElliptic.empty());
+    ASSERT_STREQ("ParameterList", tElliptic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Elliptic"}, tElliptic);
+    auto tParameter = tElliptic.child("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tPenaltyFunction = tElliptic.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // projected gradient residual
+    auto tStateGradProjection = tElliptic.next_sibling("ParameterList");
+    ASSERT_FALSE(tStateGradProjection.empty());
+    ASSERT_STREQ("ParameterList", tStateGradProjection.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"State Gradient Projection"}, tStateGradProjection);
+    tPenaltyFunction = tStateGradProjection.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Type", "string", "SIMP"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Minimum Value", "double", "1e-9"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tTimeStep = tStateGradProjection.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeStep.empty());
+    ASSERT_STREQ("ParameterList", tTimeStep.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Stepping"}, tTimeStep);
+    tParameter = tTimeStep.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Expansion Multiplier", "double", "1.1"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Initial Num. Pseudo Time Steps", "int", "20"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Maximum Num. Pseudo Time Steps", "int", "40"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    auto tSolver = tTimeStep.next_sibling("ParameterList");
+    ASSERT_FALSE(tSolver.empty());
+    ASSERT_STREQ("ParameterList", tSolver.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Newton-Raphson"}, tSolver);
+    tParameter = tSolver.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Stopping Tolerance", "double", "1e-5"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Maximum Number Iterations", "int", "10"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+}
 
 TEST(PlatoTestXMLGenerator, ReturnObjectivesComputedByPlatoAnalyze)
 {

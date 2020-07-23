@@ -128,7 +128,7 @@ struct ValidPhysicsKeys
      * \brief Valid plato input deck physics keywords.
      **/
     std::vector<std::string> mKeys =
-        { "mechanical", "transient mechanics", "plasticity", "stabilized mechanical", "thermal", "heat conduction",
+        { "mechanical", "transient mechanics", "plasticity", "stabilized mechanics", "thermal", "heat conduction",
             "electromechanical", "stabilized thermomechanical", "thermomechanical", "coupled heat conduction and mechanics" };
 };
 // struct ValidPhysicsKeys
@@ -395,10 +395,10 @@ private:
     std::unordered_map<std::string, std::pair<std::string,std::string>> mKeys =
         {
             { "mechanical", {"Mechanical", "Elliptic"} },
+            { "plasticity", {"Plasticity", "Elliptic"} },
             { "transient mechanics", {"Mechanical", "Hyperbolic"} },
             { "transient thermomechanics", {"Thermomechanical", "Parabolic"} },
-            { "plasticity", {"Mechanical", "Infinitesimal Strain Plasticity"} },
-            { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
+            { "stabilized mechanics", {"Stabilized Mechanical", "Elliptic"} },
             { "thermal", {"Thermal", "Elliptic"} },
             { "heat conduction", {"Thermal", "Parabolic"} },
             { "electromechanical", {"Electromechanical", "Elliptic"} },

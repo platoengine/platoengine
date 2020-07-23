@@ -143,6 +143,96 @@ std::string Scenario::additiveContinuation() const
     return (this->getValue("additive_continuation"));
 }
 
+void Scenario::timeStep(const std::string& aInput)
+{
+    mMetaData["time_step"] = aInput;
+}
+
+std::string Scenario::timeStep() const
+{
+    return (this->getValue("time_step"));
+}
+
+void Scenario::numTimeSteps(const std::string& aInput)
+{
+    mMetaData["number_time_steps"] = aInput;
+}
+
+std::string Scenario::numTimeSteps() const
+{
+    return (this->getValue("number_time_steps"));
+}
+
+void Scenario::maxNumTimeSteps(const std::string& aInput)
+{
+    mMetaData["max_number_time_steps"] = aInput;
+}
+
+std::string Scenario::maxNumTimeSteps() const
+{
+    return (this->getValue("max_number_time_steps"));
+}
+
+void Scenario::timeStepExpansion(const std::string& aInput)
+{
+    mMetaData["time_step_expansion_multiplier"] = aInput;
+}
+
+std::string Scenario::timeStepExpansion() const
+{
+    return (this->getValue("time_step_expansion_multiplier"));
+}
+
+void Scenario::newmarkBeta(const std::string& aInput)
+{
+    mMetaData["newmark_beta"] = aInput;
+}
+
+std::string Scenario::newmarkBeta() const
+{
+    return (this->getValue("newmark_beta"));
+}
+
+void Scenario::newmarkGamma(const std::string& aInput)
+{
+    mMetaData["newmark_gamma"] = aInput;
+}
+
+std::string Scenario::newmarkGamma() const
+{
+    return (this->getValue("newmark_gamma"));
+}
+
+void Scenario::solverTolerance(const std::string& aInput)
+{
+    mMetaData["tolerance"] = aInput;
+}
+
+std::string Scenario::solverTolerance() const
+{
+    return (this->getValue("tolerance"));
+}
+
+void Scenario::solverConvergenceCriterion(const std::string& aInput)
+{
+    mMetaData["convergence_criterion"] = aInput;
+}
+
+std::string Scenario::solverConvergenceCriterion() const
+{
+    return (this->getValue("convergence_criterion"));
+}
+
+void Scenario::solverMaxNumIterations(const std::string& aInput)
+{
+    mMetaData["max_number_iterations"] = aInput;
+}
+
+std::string Scenario::solverMaxNumIterations() const
+{
+    return (this->getValue("max_number_iterations"));
+}
+
 void Scenario::cacheState(const std::string& aInput)
 {
     mMetaData["enable_cache_state"] = aInput;
