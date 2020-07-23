@@ -17,6 +17,8 @@
 #include "XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
 
+#include "XMLGeneratorValidInputKeys.hpp"
+
 namespace XMLGen
 {
 
