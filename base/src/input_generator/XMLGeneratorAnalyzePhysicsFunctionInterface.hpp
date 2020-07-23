@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorPhysicsFunctionInterface.hpp
+ * XMLGeneratorAnalyzePhysicsFunctionInterface.hpp
  *
  *  Created on: Jul 23, 2020
  */
@@ -16,12 +16,13 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \struct The goal of this C++ struct is to provide an interface for the \n
- * functions used to append material models to plato_analyze_input_deck.xml. \n
- * This interface reduces cyclomatic complexity due to having multiple material \n
- * models in Plato Analyze.
+ * \struct AnalyzePhysicsFunctionInterface
+ * \brief The goal of this C++ struct is to provide a light interface for the \n
+ * functions used to append the physics and corresponding parameters to \n
+ * plato_analyze_input_deck.xml. This interface reduces cyclomatic complexity \n
+ * caused by having multiple physics in Plato Analyze.
 **********************************************************************************/
-struct PhysicsFunctionInterface
+struct AnalyzePhysicsFunctionInterface
 {
 // private member data
 private:
@@ -72,7 +73,7 @@ public:
      * \fn AppendPhysicsParameters
      * \brief Default constructor
     **********************************************************************************/
-    PhysicsFunctionInterface();
+    AnalyzePhysicsFunctionInterface();
 
     /******************************************************************************//**
      * \fn call
@@ -85,7 +86,7 @@ public:
               const XMLGen::Output& aOutputMetaData,
               pugi::xml_node &aParentNode) const;
 };
-// struct AppendMaterialModelParameters
+// struct XMLGeneratorAnalyzePhysicsFunctionInterface
 
 }
 // namespace XMLGen

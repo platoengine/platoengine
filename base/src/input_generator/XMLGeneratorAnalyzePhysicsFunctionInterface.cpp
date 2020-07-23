@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorPhysicsFunctionInterface.cpp
+ * XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
  *
  *  Created on: Jul 23, 2020
  */
@@ -7,7 +7,7 @@
 #include "XMLG_Macros.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
-#include "XMLGeneratorPhysicsFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzePhysicsFunctionInterface.hpp"
 
 namespace XMLGen
 {
@@ -243,7 +243,7 @@ inline void append_plasticity_residual_to_analyze_input_deck
 }
 // namespace Private
 
-void PhysicsFunctionInterface::insertEllipticPhysics()
+void AnalyzePhysicsFunctionInterface::insertEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("mechanical",
@@ -262,7 +262,7 @@ void PhysicsFunctionInterface::insertEllipticPhysics()
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
-void PhysicsFunctionInterface::insertParabolicPhysics()
+void AnalyzePhysicsFunctionInterface::insertParabolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("heat conduction",
@@ -273,28 +273,28 @@ void PhysicsFunctionInterface::insertParabolicPhysics()
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 }
 
-void PhysicsFunctionInterface::insertHyperbolicPhysics()
+void AnalyzePhysicsFunctionInterface::insertHyperbolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient mechanics",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
-void PhysicsFunctionInterface::insertPlasticityPhysics()
+void AnalyzePhysicsFunctionInterface::insertPlasticityPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_plasticity_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("plasticity",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_plasticity_residual_to_analyze_input_deck, tFuncIndex)));
 }
 
-void PhysicsFunctionInterface::insertStabilizedEllipticPhysics()
+void AnalyzePhysicsFunctionInterface::insertStabilizedEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("stabilized mechanics",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
-void PhysicsFunctionInterface::insert()
+void AnalyzePhysicsFunctionInterface::insert()
 {
     this->insertEllipticPhysics();
     this->insertParabolicPhysics();
@@ -303,12 +303,12 @@ void PhysicsFunctionInterface::insert()
     this->insertStabilizedEllipticPhysics();
 }
 
-PhysicsFunctionInterface::PhysicsFunctionInterface()
+AnalyzePhysicsFunctionInterface::AnalyzePhysicsFunctionInterface()
 {
     this->insert();
 }
 
-void PhysicsFunctionInterface::call(const XMLGen::Scenario& aScenarioMetaData,
+void AnalyzePhysicsFunctionInterface::call(const XMLGen::Scenario& aScenarioMetaData,
           const XMLGen::Output& aOutputMetaData,
           pugi::xml_node &aParentNode) const
 {

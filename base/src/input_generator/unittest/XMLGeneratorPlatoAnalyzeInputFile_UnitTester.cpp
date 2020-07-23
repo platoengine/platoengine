@@ -10,13 +10,13 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
-#include "XMLGeneratorPhysicsFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
+#include "XMLGeneratorAnalyzePhysicsFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp"
-#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp"
-#include "XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.hpp"
 
 namespace PlatoTestXMLGenerator
 {
@@ -33,7 +33,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -82,7 +82,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -130,7 +130,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -172,7 +172,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -215,7 +215,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -273,7 +273,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -333,7 +333,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -399,7 +399,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
@@ -461,7 +461,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
-    XMLGen::PhysicsFunctionInterface tPhysics;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
