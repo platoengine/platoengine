@@ -1746,12 +1746,13 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInputDeck_ErrorInvalidPhysics)
+TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mScenarioMetaData.code("plato_analyze");
     tXMLMetaData.mScenarioMetaData.physics("mechanical");
-    ASSERT_NO_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tPDE = tDocument.child("ParameterList");
     ASSERT_FALSE(tPDE.empty());
@@ -1774,12 +1775,13 @@ TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInput
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendPartialDifferentialEquationToPlatoAnalyzeInputDeck)
+TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck_ErrorInvalidPhysics)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mScenarioMetaData.code("plato_analyze");
     tXMLMetaData.mScenarioMetaData.physics("computational fluid dynamics");
-    ASSERT_THROW(XMLGen::append_partial_differential_equation_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendParameter)

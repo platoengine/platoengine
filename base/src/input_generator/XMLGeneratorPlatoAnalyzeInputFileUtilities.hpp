@@ -256,12 +256,12 @@ void append_constraint_criteria_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_partial_differential_equation_to_plato_analyze_input_deck
+ * \fn append_physics_to_plato_analyze_input_deck
  * \brief Append partial differential equation (pde) to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_partial_differential_equation_to_plato_analyze_input_deck
+void append_physics_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
