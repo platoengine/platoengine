@@ -349,11 +349,12 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidCode)
     ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, ParseScenario_DefaultValues)
+TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
 {
     std::string tStringInput =
         "begin scenario\n"
         "   physics mechanical\n"
+        "   dimensions 3\n"
         "end scenario\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -426,6 +427,46 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     ASSERT_STREQ("2", tScenarioMetadata.value("dimensions").c_str());
     ASSERT_STREQ("1.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
     ASSERT_STREQ("1e-6", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenarioWithTimeAndSolverBlocks)
+{
+    std::string tStringInput =
+        "begin scenario 1\n"
+        "   physics plasticity\n"
+        "   dimensions 3\n"
+        "   code plato_analyze\n"
+        "   begin time\n"
+        "     number_time_steps 80\n"
+        "     max_number_time_steps 160\n"
+        "     time_step_expansion_multiplier 1.2\n"
+        "   end time\n"
+        "   begin solver\n"
+        "     tolerance 1e-10\n"
+        "     max_number_iterations 20\n"
+        "   end solver\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarioMetadata = tScenarioParser.data();
+
+    ASSERT_STREQ("false", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
+    ASSERT_STREQ("plato_analyze", tScenarioMetadata.value("code").c_str());
+    ASSERT_STREQ("plasticity", tScenarioMetadata.value("physics").c_str());
+    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.value("performer").c_str());
+    ASSERT_STREQ("1", tScenarioMetadata.value("id").c_str());
+    ASSERT_STREQ("3", tScenarioMetadata.value("dimensions").c_str());
+    ASSERT_STREQ("3.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
+    ASSERT_STREQ("1e-9", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
+    ASSERT_STREQ("80", tScenarioMetadata.value("number_time_steps").c_str());
+    ASSERT_STREQ("160", tScenarioMetadata.value("max_number_time_steps").c_str());
+    ASSERT_STREQ("1.2", tScenarioMetadata.value("time_step_expansion_multiplier").c_str());
+    ASSERT_STREQ("1e-10", tScenarioMetadata.value("tolerance").c_str());
+    ASSERT_STREQ("20", tScenarioMetadata.value("max_number_iterations").c_str());
+    ASSERT_STREQ("residual", tScenarioMetadata.value("convergence_criterion").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_ErrorScenarionIdIsNotDefined)

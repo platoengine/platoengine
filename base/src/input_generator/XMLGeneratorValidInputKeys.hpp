@@ -397,7 +397,7 @@ private:
             { "mechanical", {"Mechanical", "Elliptic"} },
             { "transient mechanics", {"Mechanical", "Hyperbolic"} },
             { "transient thermomechanics", {"Thermomechanical", "Parabolic"} },
-            { "infinitesimal strain plasticity", {"Mechanical", "Infinitesimal Strain Plasticity"} },
+            { "plasticity", {"Mechanical", "Infinitesimal Strain Plasticity"} },
             { "stabilized mechanical", {"Stabilized Mechanical", "Elliptic"} },
             { "thermal", {"Thermal", "Elliptic"} },
             { "heat conduction", {"Thermal", "Parabolic"} },

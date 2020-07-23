@@ -23,7 +23,7 @@ private:
     XMLGen::Scenario mData; /*!< scenario metadata */
     /*!< map from main scenario tags to pair< valid tokens, pair<value,default> >, \n
      * i.e. map< tag, pair<valid tokens, pair<value,default>> > */
-    XMLGen::MetaDataTags mMainTags;
+    XMLGen::MetaDataTags mTags;
 
 private:
     /******************************************************************************//**
@@ -33,16 +33,16 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn setMainTags
-     * \brief Set main tags metadata.
+     * \fn setTags
+     * \brief Set scenario tag values.
     **********************************************************************************/
-    void setMainTags();
+    void setTags();
 
     /******************************************************************************//**
-     * \fn check
+     * \fn checkTags
      * \brief Check XMLGen::Scenario metadata.
     **********************************************************************************/
-    void check();
+    void checkTags();
 
     /******************************************************************************//**
      * \fn checkCode
@@ -77,13 +77,6 @@ private:
      * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
     **********************************************************************************/
     void checkScenarioID();
-
-    /******************************************************************************//**
-     * \fn setMainTagsMetaData
-     * \brief Set main scenario tags.
-     * \param [in] aInputFile input file metadata.
-    **********************************************************************************/
-    void setMainTagsMetaData(std::istream &aInputFile);
 
 public:
     /******************************************************************************//**

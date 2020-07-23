@@ -2342,6 +2342,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   std::string stringInput =
   "begin scenario\n"
   "   physics mechanical\n"
+  "   dimensions 3\n"
   "   use_new_analyze_uq_workflow true\n"
   "end scenario\n"
   "begin objective\n"
@@ -2440,6 +2441,7 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     std::string tStringInput =
     "begin scenario\n"
     "   physics mechanical\n"
+    "   dimensions 3\n"
     "   use_new_analyze_uq_workflow true\n"
     "end scenario\n"
     "begin objective\n"
