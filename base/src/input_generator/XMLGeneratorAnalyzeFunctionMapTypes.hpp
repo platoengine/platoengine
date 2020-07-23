@@ -15,6 +15,9 @@ namespace XMLGen
 namespace Analyze
 {
 
+/*!< physics function pointer type */
+typedef void (*PhysicsFunc)(void);
+
 /*!< criterion function pointer type */
 typedef void (*CriterionFunc)(void);
 
@@ -35,6 +38,11 @@ typedef std::string (*NaturalBCTagFunc)(void);
 
 /*!< define essential boundary condition tag function pointer type */
 typedef std::string (*EssentialBCTagFunc)(void);
+
+
+/*!< map from physics category to physics function used to append PDE and respective \n
+ * parameters, i.e. map<physics_category, physics_function> */
+typedef std::unordered_map<std::string, std::pair<XMLGen::Analyze::PhysicsFunc, std::type_index>> PhysicsFuncMap;
 
 /*!< map from design criterion category to design criterion function used to append design \n
  * criterion and respective parameters, i.e. map<design_criterion_category, criterion_function> */

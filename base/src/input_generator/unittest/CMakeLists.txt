@@ -32,6 +32,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorPlatoAnalyzeUtilities.cpp
                                       ../XMLGeneratorLaunchScriptUtilities.cpp
                                       ../XMLGeneratorInterfaceFileUtilities.cpp
+                                      ../XMLGeneratorPhysicsFunctionInterface.cpp
                                       ../XMLGeneratorMaterialFunctionInterface.cpp
                                       ../XMLGeneratorPlatoMainInputFileUtilities.cpp
                                       ../XMLGeneratorRandomInterfaceFileUtilities.cpp
