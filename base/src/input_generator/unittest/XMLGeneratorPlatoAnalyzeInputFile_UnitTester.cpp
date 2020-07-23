@@ -1879,7 +1879,6 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
 
     pugi::xml_document tDocument;
     XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", " ");
 
     // TEST MY CONSTRAINT
     auto tParamList = tDocument.child("ParameterList");
