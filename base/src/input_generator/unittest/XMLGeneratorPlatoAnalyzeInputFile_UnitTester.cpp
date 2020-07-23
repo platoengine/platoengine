@@ -43,34 +43,88 @@ void append_simp_penalty_function
  pugi::xml_node& aParentNode)
 {
     auto tPenaltyFunction = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Type", "string", "SIMP"};
+    XMLGen::append_attributes( { "name" }, { "Penalty Function" }, tPenaltyFunction);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Type", "string", "SIMP" };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 
-    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.materialPenaltyExponent());
-    tValues = {"Exponent", "double", tPropertyValue};
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("material_penalty_exponent"));
+    tValues = { "Exponent", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.minErsatzMaterialConstant());
-    tValues = {"Minimum Value", "double", tPropertyValue};
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("minimum_ersatz_material_value"));
+    tValues = { "Minimum Value", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.additiveContinuation());
-    tValues = {"Additive Continuation", "double", tPropertyValue};
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.value("additive_continuation"));
+    tValues = { "Additive Continuation", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 
-void append_implicit_time_stepping_option
+void append_parabolic_pde_time_step_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes( { "name" }, { "Time Integration" }, tTimeStepNode);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+}
+
+void append_hyperbolic_pde_time_step_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes( { "name" }, { "Time Integration" }, tTimeStepNode);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Newmark Beta", "double", aMetadata.value("newmark_beta") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Newmark Gamma", "double", aMetadata.value("newmark_gamma") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+}
+
+void append_stabilized_elliptic_pde_time_step_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes( { "name" }, { "Time Stepping" }, tTimeStepNode);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Number Time Steps", "int", aMetadata.value("number_time_steps") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Time Step", "double", aMetadata.value("time_step") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+}
+
+void append_pseudo_time_step_option
+(const XMLGen::Scenario& aMetadata,
+ pugi::xml_node& aParentNode)
+{
+    auto tTimeStepNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes( { "name" }, { "Time Stepping" }, tTimeStepNode);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Expansion Multiplier", "double", aMetadata.value("time_step_expansion_multiplier") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Initial Num. Pseudo Time Steps", "int", aMetadata.value("number_time_steps") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+    tValues = { "Maximum Num. Pseudo Time Steps", "int", aMetadata.value("max_number_time_steps") };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepNode);
+}
+
+void append_stabilized_elliptic_newton_solver_option
 (const XMLGen::Scenario& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepping = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Time Stepping"}, tTimeStepping);
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Expansion Multiplier", "double", "FINISH_ADDING_PROPERTY"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = {"Initial Num. Pseudo Time Steps", "int", "FINISH_ADDING_PROPERTY"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = {"Maximum Num. Pseudo Time Steps", "int", "FINISH_ADDING_PROPERTY"};
+    XMLGen::append_attributes( { "name" }, { "Newton Iteration" }, tTimeStepping);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Number Iterations", "int", aMetadata.value("max_number_iterations") };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
 }
 
@@ -79,13 +133,13 @@ void append_newton_raphson_solver_option
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepping = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Time Stepping"}, tTimeStepping);
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Stop Measure", "string", "residual"};
+    XMLGen::append_attributes( { "name" }, { "Newton-Raphson" }, tTimeStepping);
+    std::vector<std::string> tKeys = { "name", "type", "value" };
+    std::vector<std::string> tValues = { "Stop Measure", "string", aMetadata.value("convergence_criterion") };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = {"Stopping Tolerance", "double", "FINISH_ADDING_PROPERTY"};
+    tValues = { "Stopping Tolerance", "double", aMetadata.value("tolerance") };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tValues = {"Maximum Number Iterations", "int", "FINISH_ADDING_PROPERTY"};
+    tValues = { "Maximum Number Iterations", "int", aMetadata.value("max_number_iterations") };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
 }
 
@@ -116,7 +170,7 @@ void append_state_gradient_projection_residual_to_analyze_input_deck
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
 }
 
-void append_global_residual_to_analyze_input_deck
+void append_elliptic_pde_to_analyze_input_deck
 (const XMLGen::Scenario& aScenario,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
@@ -128,6 +182,52 @@ void append_global_residual_to_analyze_input_deck
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+}
+
+void append_hyperbolic_pde_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_hyperbolic_pde_time_step_option(aScenario, aParentNode);
+}
+
+void append_stabilized_elliptic_pde_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_stabilized_elliptic_pde_time_step_option(aScenario, aParentNode);
+    XMLGen::Private::append_stabilized_elliptic_newton_solver_option(aScenario, aParentNode);
+}
+
+void append_parabolic_residual_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_parabolic_pde_time_step_option(aScenario, aParentNode);
 }
 
 void append_plasticity_residual_to_analyze_input_deck
@@ -143,7 +243,7 @@ void append_plasticity_residual_to_analyze_input_deck
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
     XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
     XMLGen::Private::append_state_gradient_projection_residual_to_analyze_input_deck(aScenario, aParentNode);
-    XMLGen::Private::append_implicit_time_stepping_option(aScenario, aParentNode);
+    XMLGen::Private::append_pseudo_time_step_option(aScenario, aParentNode);
     XMLGen::Private::append_newton_raphson_solver_option(aScenario, aParentNode);
 }
 
@@ -157,9 +257,83 @@ void append_plasticity_residual_to_analyze_input_deck
 **********************************************************************************/
 struct AppendPhysicsParameters
 {
+// private member data
 private:
     /*!< map from physics category to function used to append physics parameters */
     XMLGen::Analyze::PhysicsFuncMap mMap;
+
+// private member functions
+private:
+    /******************************************************************************//**
+     * \fn insertEllipticPhysics
+     * \brief Insert elliptic physics to physics functions map.
+    **********************************************************************************/
+    void insertEllipticPhysics()
+    {
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("mechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("thermal",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("thermomechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("electromechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+    }
+
+    /******************************************************************************//**
+     * \fn insertParabolicPhysics
+     * \brief Insert parabolic physics to physics functions map.
+    **********************************************************************************/
+    void insertParabolicPhysics()
+    {
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("heat conduction",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("transient thermomechanics",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
+    }
+
+    /******************************************************************************//**
+     * \fn insertHyperbolicPhysics
+     * \brief Insert hyperbolic physics to physics functions map.
+    **********************************************************************************/
+    void insertHyperbolicPhysics()
+    {
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("transient mechanics",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
+    }
+
+    /******************************************************************************//**
+     * \fn insertPlasticityPhysics
+     * \brief Insert infinitesimal strain plasticity physics to physics functions map.
+    **********************************************************************************/
+    void insertPlasticityPhysics()
+    {
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_plasticity_residual_to_analyze_input_deck));
+        mMap.insert(std::make_pair("infinitesimal strain plasticity",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_plasticity_residual_to_analyze_input_deck, tFuncIndex)));
+    }
+
+    /******************************************************************************//**
+     * \fn insertStabilizedEllipticPhysics
+     * \brief Insert stabilized physics to physics functions map.
+    **********************************************************************************/
+    void insertStabilizedEllipticPhysics()
+    {
+        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck));
+        mMap.insert(std::make_pair("stabilized mechanical",
+          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+    }
 
     /******************************************************************************//**
      * \fn insert
@@ -167,52 +341,14 @@ private:
      **********************************************************************************/
     void insert()
     {
-        // mechanical physics
-        auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("mechanical",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // thermal physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("thermal",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // stabilized mechanical physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("stabilized mechanical",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // thermomechanical physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("thermomechanical",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // transient mechanics physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("transient mechanics",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // heat conduction physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("heat conduction",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // transient thermomechanics physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("transient thermomechanics",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // electromechanical physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_global_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("electromechanical",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_global_residual_to_analyze_input_deck, tFuncIndex)));
-
-        // infinitesimal strain plasticity physics
-        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_plasticity_residual_to_analyze_input_deck));
-        mMap.insert(std::make_pair("infinitesimal strain plasticity",
-          std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_plasticity_residual_to_analyze_input_deck, tFuncIndex)));
+        this->insertEllipticPhysics();
+        this->insertParabolicPhysics();
+        this->insertHyperbolicPhysics();
+        this->insertPlasticityPhysics();
+        this->insertStabilizedEllipticPhysics();
     }
 
+// public member functions
 public:
     /******************************************************************************//**
      * \fn AppendPhysicsParameters

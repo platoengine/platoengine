@@ -51,10 +51,14 @@ void ParseScenario::allocate()
     mTags.insert({ "analyze_new_workflow", { { {"analyze_new_workflow"}, ""}, "false" } });
     mTags.insert({ "enable_update_problem", { { {"enable_update_problem"}, ""}, "false" } });
     mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "" } });
+    mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
     mTags.insert({ "use_new_analyze_uq_workflow", { { {"use_new_analyze_uq_workflow"}, ""}, "false" } });
 
+    mTags.insert({ "time_step", { { {"time_step"}, ""}, "1.0" } });
+    mTags.insert({ "newmark_beta", { { {"newmark_beta"}, ""}, "0.25" } });
+    mTags.insert({ "newmark_gamma", { { {"newmark_gamma"}, ""}, "0.5" } });
     mTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
     mTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
     mTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
