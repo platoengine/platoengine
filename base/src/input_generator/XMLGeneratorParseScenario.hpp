@@ -21,9 +21,9 @@ class ParseScenario : public XMLGen::ParseMetadata<XMLGen::Scenario>
 {
 private:
     XMLGen::Scenario mData; /*!< scenario metadata */
-    /*!< map from plato input file property tags to pair< valid tokens, pair<value,default> >, \n
+    /*!< map from main scenario tags to pair< valid tokens, pair<value,default> >, \n
      * i.e. map< tag, pair<valid tokens, pair<value,default>> > */
-    XMLGen::MetaDataTags mTags;
+    XMLGen::MetaDataTags mMainTags;
 
 private:
     /******************************************************************************//**
@@ -33,10 +33,10 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn set
-     * \brief Set XMLGen::Scenario metadata.
+     * \fn setMainTags
+     * \brief Set main tags metadata.
     **********************************************************************************/
-    void set();
+    void setMainTags();
 
     /******************************************************************************//**
      * \fn check
@@ -79,10 +79,11 @@ private:
     void checkScenarioID();
 
     /******************************************************************************//**
-     * \fn setMetaData
-     * \brief Set XMLGen::Scenario metadata.
+     * \fn setMainTagsMetaData
+     * \brief Set main scenario tags.
+     * \param [in] aInputFile input file metadata.
     **********************************************************************************/
-    void setMetaData();
+    void setMainTagsMetaData(std::istream &aInputFile);
 
 public:
     /******************************************************************************//**

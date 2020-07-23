@@ -13,9 +13,9 @@
 namespace XMLGen
 {
 
-void ParseScenario::set()
+void ParseScenario::setMainTags()
 {
-    for(auto& tTag : mTags)
+    for(auto& tTag : mMainTags)
     {
         if(tTag.second.first.second.empty())
         {
@@ -41,19 +41,23 @@ void ParseScenario::check()
 
 void ParseScenario::allocate()
 {
-    mTags.clear();
-    mTags.insert({ "id", { { {"id"}, ""}, "" } });
-    mTags.insert({ "code", { { {"code"}, ""}, "plato_analyze" } });
-    mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
-    mTags.insert({ "performer", { { {"performer"}, ""}, "" } });
-    mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "3" } });
-    mTags.insert({ "enable_cache_state", { { {"enable_cache_state"}, ""}, "false" } });
-    mTags.insert({ "analyze_new_workflow", { { {"analyze_new_workflow"}, ""}, "false" } });
-    mTags.insert({ "enable_update_problem", { { {"enable_update_problem"}, ""}, "false" } });
-    mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "" } });
-    mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
-    mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
-    mTags.insert({ "use_new_analyze_uq_workflow", { { {"use_new_analyze_uq_workflow"}, ""}, "false" } });
+    mMainTags.clear();
+    mMainTags.insert({ "id", { { {"id"}, ""}, "" } });
+    mMainTags.insert({ "code", { { {"code"}, ""}, "plato_analyze" } });
+    mMainTags.insert({ "physics", { { {"physics"}, ""}, "" } });
+    mMainTags.insert({ "performer", { { {"performer"}, ""}, "" } });
+    mMainTags.insert({ "dimensions", { { {"dimensions"}, ""}, "3" } });
+    mMainTags.insert({ "enable_cache_state", { { {"enable_cache_state"}, ""}, "false" } });
+    mMainTags.insert({ "analyze_new_workflow", { { {"analyze_new_workflow"}, ""}, "false" } });
+    mMainTags.insert({ "enable_update_problem", { { {"enable_update_problem"}, ""}, "false" } });
+    mMainTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "" } });
+    mMainTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
+    mMainTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
+    mMainTags.insert({ "use_new_analyze_uq_workflow", { { {"use_new_analyze_uq_workflow"}, ""}, "false" } });
+
+    mMainTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
+    mMainTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
+    mMainTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
 }
 
 void ParseScenario::checkCode()
@@ -86,7 +90,7 @@ void ParseScenario::checkSpatialDimensions()
 void ParseScenario::checkPhysics()
 {
     auto tPhysics = mData.value("physics");
-    auto tItr = mTags.find("physics");
+    auto tItr = mMainTags.find("physics");
     if (tPhysics.empty())
     {
         THROWERR("Parse Scenario: keyword 'physics' is empty.")
@@ -105,14 +109,8 @@ void ParseScenario::checkScenarioID()
     }
 }
 
-XMLGen::Scenario ParseScenario::data() const
+void ParseScenario::setMainTagsMetaData(std::istream &aInputFile)
 {
-    return mData;
-}
-
-void ParseScenario::parse(std::istream &aInputFile)
-{
-    this->allocate();
     constexpr int MAX_CHARS_PER_LINE = 10000;
     std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
     while (!aInputFile.eof())
@@ -127,12 +125,23 @@ void ParseScenario::parse(std::istream &aInputFile)
         if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tScenarioID))
         {
             XMLGen::is_metadata_block_id_valid(tTokens);
-            XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
-            this->set();
+            XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mMainTags);
+            this->setMainTags();
             mData.id(tScenarioID);
             this->check();
         }
     }
+}
+
+XMLGen::Scenario ParseScenario::data() const
+{
+    return mData;
+}
+
+void ParseScenario::parse(std::istream &aInputFile)
+{
+    this->allocate();
+    this->setMainTagsMetaData(aInputFile);
 }
 
 }
