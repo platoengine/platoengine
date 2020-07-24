@@ -224,11 +224,11 @@ void ParseMaterial::parse(std::istream &aInputFile)
         XMLGen::parse_tokens(tBuffer.data(), tTokens);
         XMLGen::to_lower(tTokens);
 
-        std::string tMaterialID;
-        if (XMLGen::parse_single_value(tTokens, { "begin", "material" }, tMaterialID))
+        std::string tMaterialBlockID;
+        if (XMLGen::parse_single_value(tTokens, { "begin", "material" }, tMaterialBlockID))
         {
             XMLGen::Material tMetadata;
-            tMetadata.id(tMaterialID);
+            tMetadata.id(tMaterialBlockID);
             XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "material" }, aInputFile, mTags);
             this->setMetadata(tMetadata);

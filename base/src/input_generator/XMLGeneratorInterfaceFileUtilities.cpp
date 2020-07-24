@@ -610,7 +610,7 @@ void append_optimization_cache_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.mScenarioMetaData.cacheState())
+    if(!aXMLMetaData.scenario(0u).cacheState())
     {
         return;
     }
@@ -625,7 +625,7 @@ void append_optimization_update_problem_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
+    if(!aXMLMetaData.scenario(0u).updateProblem())
     {
         return;
     }

@@ -203,7 +203,7 @@ void append_cache_state_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.mScenarioMetaData.cacheState())
+    if(!aXMLMetaData.scenario(0u).cacheState())
     {
         return;
     }
@@ -211,7 +211,7 @@ void append_cache_state_stage_for_nondeterministic_usecase
     auto tStageName = std::string("Cache State");
     XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
 
-    auto tPerformerName = aXMLMetaData.mScenarioMetaData.performer() + "_{PerformerIndex}";
+    auto tPerformerName = aXMLMetaData.scenario(0u).performer() + "_{PerformerIndex}";
     std::vector<std::string> tKeys = {"Name", "PerformerName"};
     std::vector<std::string> tValues = {"Cache State", tPerformerName};
     XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
@@ -224,7 +224,7 @@ void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
+    if(!aXMLMetaData.scenario(0u).updateProblem())
     {
         return;
     }
@@ -233,7 +233,7 @@ void append_update_problem_stage_for_nondeterministic_usecase
     auto tStageName = std::string("Update Problem");
     XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
 
-    auto tPerformerName = aXMLMetaData.mScenarioMetaData.performer() + "_{PerformerIndex}";
+    auto tPerformerName = aXMLMetaData.scenario(0u).performer() + "_{PerformerIndex}";
     std::vector<std::string> tKeys = {"Name", "PerformerName"};
     std::vector<std::string> tValues = {"Update Problem", tPerformerName};
     XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);

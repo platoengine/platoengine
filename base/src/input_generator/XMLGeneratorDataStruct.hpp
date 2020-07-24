@@ -134,6 +134,36 @@ struct Uncertainty
 
 struct InputData
 {
+private:
+    std::vector<XMLGen::Scenario> mScenarios;
+
+public:
+    const XMLGen::Scenario& scenario(const size_t& aIndex) const
+    {
+        if(mScenarios.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'scenario' list is empty.")
+        }
+        else if(aIndex >= mScenarios.size())
+        {
+            THROWERR("XML Generator Input Metadata: index is out-of-bounds, 'scenario' size is '"
+                + std::to_string(mScenarios.size()) + "'.")
+        }
+        return mScenarios[aIndex];
+    }
+    const std::vector<XMLGen::Scenario>& scenarios() const
+    {
+        return mScenarios;
+    }
+    void set(const std::vector<XMLGen::Scenario>& aScenarios)
+    {
+        mScenarios = aScenarios;
+    }
+    void append(const XMLGen::Scenario& aScenario)
+    {
+        mScenarios.push_back(aScenario);
+    }
+
     std::vector<XMLGen::Objective> objectives;
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
@@ -273,7 +303,6 @@ struct InputData
     std::string m_filterType_kernelThenTANH_XMLName;
 
     XMLGen::Output mOutputMetaData;
-    XMLGen::Scenario mScenarioMetaData;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     std::string input_generator_version;

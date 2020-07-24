@@ -117,7 +117,6 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
   m_InputData.m_filterType_kernelThenTANH_XMLName = "KernelThenTANH";
   m_InputData.m_HasUncertainties = false;
   m_InputData.m_RequestedVonMisesOutput = false;
-  m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow("false");
 }
 
 /******************************************************************************/
@@ -259,7 +258,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
             std::cout << "ERROR: Only one objective is supported for optimization under uncertainty problem." << std::endl;
             return false;
         }
-        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow())
+        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
         {
             if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].num_samples)
             {
@@ -280,7 +279,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
 void XMLGenerator::setNumPerformers()
 /******************************************************************************/
 {
-    if (m_InputData.mScenarioMetaData.useNewAnalyzeUQWorkflow())
+    if (m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
     {
         m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
@@ -530,7 +529,8 @@ bool XMLGenerator::parseScenario(std::istream &aInputFile)
 {
     XMLGen::ParseScenario tParseScenario;
     tParseScenario.parse(aInputFile);
-    m_InputData.mScenarioMetaData = tParseScenario.data();
+    auto tScenarios = tParseScenario.data();
+    m_InputData.set(tScenarios);
     return true;
 }
 

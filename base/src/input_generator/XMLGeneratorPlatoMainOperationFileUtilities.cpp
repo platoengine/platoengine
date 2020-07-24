@@ -402,7 +402,7 @@ void append_update_problem_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.mScenarioMetaData.updateProblem())
+    if(!aXMLMetaData.scenario(0u).updateProblem())
     {
         return;
     }

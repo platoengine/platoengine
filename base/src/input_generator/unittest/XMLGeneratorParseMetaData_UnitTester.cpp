@@ -361,16 +361,18 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
 
     XMLGen::ParseScenario tScenarioParser;
     tScenarioParser.parse(tInputSS);
-    auto tScenarioMetadata = tScenarioParser.data();
-
-    ASSERT_STREQ("false", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
-    ASSERT_STREQ("plato_analyze", tScenarioMetadata.value("code").c_str());
-    ASSERT_STREQ("mechanical", tScenarioMetadata.value("physics").c_str());
-    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.value("performer").c_str());
-    ASSERT_STREQ("plato_analyze_mechanical_1", tScenarioMetadata.value("id").c_str());
-    ASSERT_STREQ("3", tScenarioMetadata.value("dimensions").c_str());
-    ASSERT_STREQ("3.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
-    ASSERT_STREQ("1e-9", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
+    auto tScenarios = tScenarioParser.data();
+    for (auto& tScenario : tScenarios)
+    {
+        ASSERT_STREQ("false", tScenario.value("use_new_analyze_uq_workflow").c_str());
+        ASSERT_STREQ("plato_analyze", tScenario.value("code").c_str());
+        ASSERT_STREQ("mechanical", tScenario.value("physics").c_str());
+        ASSERT_STREQ("plato_analyze_1", tScenario.value("performer").c_str());
+        ASSERT_STREQ("plato_analyze_mechanical_1", tScenario.value("id").c_str());
+        ASSERT_STREQ("3", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("3.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-9", tScenario.value("minimum_ersatz_material_value").c_str());
+    }
 }
 
 TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidScenarioBlockID)
@@ -417,16 +419,18 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
 
     XMLGen::ParseScenario tScenarioParser;
     tScenarioParser.parse(tInputSS);
-    auto tScenarioMetadata = tScenarioParser.data();
-
-    ASSERT_STREQ("true", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
-    ASSERT_STREQ("sierra_sd", tScenarioMetadata.value("code").c_str());
-    ASSERT_STREQ("thermal", tScenarioMetadata.value("physics").c_str());
-    ASSERT_STREQ("sierra_sd_0", tScenarioMetadata.value("performer").c_str());
-    ASSERT_STREQ("air_force_one", tScenarioMetadata.value("id").c_str());
-    ASSERT_STREQ("2", tScenarioMetadata.value("dimensions").c_str());
-    ASSERT_STREQ("1.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
-    ASSERT_STREQ("1e-6", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
+    auto tScenarios = tScenarioParser.data();
+    for (auto &tScenario : tScenarios)
+    {
+        ASSERT_STREQ("true", tScenario.value("use_new_analyze_uq_workflow").c_str());
+        ASSERT_STREQ("sierra_sd", tScenario.value("code").c_str());
+        ASSERT_STREQ("thermal", tScenario.value("physics").c_str());
+        ASSERT_STREQ("sierra_sd_0", tScenario.value("performer").c_str());
+        ASSERT_STREQ("air_force_one", tScenario.value("id").c_str());
+        ASSERT_STREQ("2", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("1.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-6", tScenario.value("minimum_ersatz_material_value").c_str());
+    }
 }
 
 TEST(PlatoTestXMLGenerator, ParseScenarioWithTimeAndSolverBlocks)
@@ -451,22 +455,24 @@ TEST(PlatoTestXMLGenerator, ParseScenarioWithTimeAndSolverBlocks)
 
     XMLGen::ParseScenario tScenarioParser;
     tScenarioParser.parse(tInputSS);
-    auto tScenarioMetadata = tScenarioParser.data();
-
-    ASSERT_STREQ("false", tScenarioMetadata.value("use_new_analyze_uq_workflow").c_str());
-    ASSERT_STREQ("plato_analyze", tScenarioMetadata.value("code").c_str());
-    ASSERT_STREQ("plasticity", tScenarioMetadata.value("physics").c_str());
-    ASSERT_STREQ("plato_analyze_1", tScenarioMetadata.value("performer").c_str());
-    ASSERT_STREQ("1", tScenarioMetadata.value("id").c_str());
-    ASSERT_STREQ("3", tScenarioMetadata.value("dimensions").c_str());
-    ASSERT_STREQ("3.0", tScenarioMetadata.value("material_penalty_exponent").c_str());
-    ASSERT_STREQ("1e-9", tScenarioMetadata.value("minimum_ersatz_material_value").c_str());
-    ASSERT_STREQ("80", tScenarioMetadata.value("number_time_steps").c_str());
-    ASSERT_STREQ("160", tScenarioMetadata.value("max_number_time_steps").c_str());
-    ASSERT_STREQ("1.2", tScenarioMetadata.value("time_step_expansion_multiplier").c_str());
-    ASSERT_STREQ("1e-10", tScenarioMetadata.value("tolerance").c_str());
-    ASSERT_STREQ("20", tScenarioMetadata.value("max_number_iterations").c_str());
-    ASSERT_STREQ("residual", tScenarioMetadata.value("convergence_criterion").c_str());
+    auto tScenarios = tScenarioParser.data();
+    for (auto &tScenario : tScenarios)
+    {
+        ASSERT_STREQ("false", tScenario.value("use_new_analyze_uq_workflow").c_str());
+        ASSERT_STREQ("plato_analyze", tScenario.value("code").c_str());
+        ASSERT_STREQ("plasticity", tScenario.value("physics").c_str());
+        ASSERT_STREQ("plato_analyze_1", tScenario.value("performer").c_str());
+        ASSERT_STREQ("1", tScenario.value("id").c_str());
+        ASSERT_STREQ("3", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("3.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-9", tScenario.value("minimum_ersatz_material_value").c_str());
+        ASSERT_STREQ("80", tScenario.value("number_time_steps").c_str());
+        ASSERT_STREQ("160", tScenario.value("max_number_time_steps").c_str());
+        ASSERT_STREQ("1.2", tScenario.value("time_step_expansion_multiplier").c_str());
+        ASSERT_STREQ("1e-10", tScenario.value("tolerance").c_str());
+        ASSERT_STREQ("20", tScenario.value("max_number_iterations").c_str());
+        ASSERT_STREQ("residual", tScenario.value("convergence_criterion").c_str());
+    }
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_ErrorScenarionIdIsNotDefined)

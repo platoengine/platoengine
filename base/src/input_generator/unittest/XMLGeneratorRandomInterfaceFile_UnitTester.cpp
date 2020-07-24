@@ -987,7 +987,9 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase_Empt
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mScenarioMetaData.cacheState("false");
+    XMLGen::Scenario tScenario;
+    tScenario.cacheState("false");
+    tInputData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
     auto tStage = tDocument.child("Stage");
     ASSERT_TRUE(tStage.empty());
@@ -997,8 +999,10 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mScenarioMetaData.cacheState("true");
-    tInputData.mScenarioMetaData.performer("plato_analyze");
+    XMLGen::Scenario tScenario;
+    tScenario.cacheState("true");
+    tScenario.performer("plato_analyze");
+    tInputData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_cache_state_stage_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -1031,7 +1035,9 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase_E
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mScenarioMetaData.updateProblem("false");
+    XMLGen::Scenario tScenario;
+    tScenario.updateProblem("false");
+    tInputData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument));
     auto tStage = tDocument.child("Stage");
     ASSERT_TRUE(tStage.empty());
@@ -1041,8 +1047,10 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mScenarioMetaData.updateProblem("true");
-    tInputData.mScenarioMetaData.performer("plato_analyze");
+    XMLGen::Scenario tScenario;
+    tScenario.updateProblem("true");
+    tScenario.performer("plato_analyze");
+    tInputData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_update_problem_stage_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -2557,7 +2565,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationCacheStateOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mScenarioMetaData.cacheState("true");
+    XMLGen::Scenario tScenario;
+    tScenario.cacheState("true");
+    tXMLMetaData.append(tScenario);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_optimization_cache_stage_options(tXMLMetaData, tOptimizerNode);
 
@@ -2576,7 +2586,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationUpdateProblemOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mScenarioMetaData.updateProblem("true");
+    XMLGen::Scenario tScenario;
+    tScenario.updateProblem("true");
+    tXMLMetaData.append(tScenario);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_optimization_update_problem_stage_options(tXMLMetaData, tOptimizerNode);
 

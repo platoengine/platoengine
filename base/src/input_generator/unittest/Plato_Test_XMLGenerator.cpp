@@ -2569,6 +2569,10 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
     XMLGenerator_UnitTester tTester;
     std::istringstream iss;
     std::string stringInput =
+    "begin scenario 1\n"
+    "    physics mechanical\n"
+    "    dimensions 3\n"
+    "end scenario\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10\n"
@@ -2600,6 +2604,9 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
 
     // PARSE INPUT DATA
     iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    tTester.publicParseScenario(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_TRUE(tTester.publicParseObjectives(iss));
@@ -2663,6 +2670,10 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
     XMLGenerator_UnitTester tTester;
     std::istringstream iss;
     std::string stringInput =
+    "begin scenario 1\n"
+    "    physics mechanical\n"
+    "    dimensions 3\n"
+    "end scenario\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10\n"
@@ -2694,6 +2705,9 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
 
     // PARSE INPUT DATA
     iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    tTester.publicParseScenario(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_TRUE(tTester.publicParseObjectives(iss));
@@ -2755,6 +2769,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
+            "begin scenario 1\n"
+            "    physics mechanical\n"
+            "    dimensions 3\n"
+            "end scenario\n"
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1\n"
@@ -2778,6 +2796,9 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
 
     // do parse
     iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    tester.publicParseScenario(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
@@ -2897,6 +2918,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
+            "begin scenario 1\n"
+            "    physics mechanical\n"
+            "    dimensions 3\n"
+            "end scenario\n"
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1\n"
@@ -2920,6 +2945,9 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
 
     // do parse
     iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    tester.publicParseScenario(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
@@ -2994,6 +3022,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
+            "begin scenario 1\n"
+            "    physics thermal\n"
+            "    dimensions 3\n"
+            "end scenario\n"
             "begin objective\n"
             "    type maximize heat conduction\n"
             "    load ids 1\n"
@@ -3020,6 +3052,9 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
+    tester.publicParseScenario(iss);
+    iss.clear();
+    iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
     iss.clear();
     iss.seekg(0);
@@ -3044,6 +3079,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
+            "begin scenario 1\n"
+            "    physics thermomechanical\n"
+            "    dimensions 3\n"
+            "end scenario\n"
             "begin objective\n"
             "    type minimize thermoelastic energy\n"
             "    load ids 1 2\n"
@@ -3078,6 +3117,9 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
 
     // do parse
     iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
+    EXPECT_EQ(tester.parseScenario(iss), true);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);

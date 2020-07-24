@@ -13,30 +13,30 @@
 namespace XMLGen
 {
 
-void ParseScenario::setTags()
+void ParseScenario::setTags(XMLGen::Scenario& aScenario)
 {
     for(auto& tTag : mTags)
     {
         if(tTag.second.first.second.empty())
         {
             auto tDefaultValue = tTag.second.second;
-            mData.append(tTag.first, tDefaultValue);
+            aScenario.append(tTag.first, tDefaultValue);
         }
         else
         {
             auto tInputValue = tTag.second.first.second;
-            mData.append(tTag.first, tInputValue);
+            aScenario.append(tTag.first, tInputValue);
         }
     }
 }
 
-void ParseScenario::checkTags()
+void ParseScenario::checkTags(XMLGen::Scenario& aScenario)
 {
-    this->checkCode();
-    this->checkPhysics();
-    this->checkPerformer();
-    this->checkScenarioID();
-    this->checkSpatialDimensions();
+    this->checkCode(aScenario);
+    this->checkPhysics(aScenario);
+    this->checkPerformer(aScenario);
+    this->checkScenarioID(aScenario);
+    this->checkSpatialDimensions(aScenario);
 }
 
 void ParseScenario::allocate()
@@ -68,25 +68,25 @@ void ParseScenario::allocate()
     mTags.insert({ "convergence_criterion", { { {"convergence_criterion"}, ""}, "residual" } });
 }
 
-void ParseScenario::checkCode()
+void ParseScenario::checkCode(XMLGen::Scenario& aScenario)
 {
-    auto tValidCode = XMLGen::check_code_keyword(mData.value("code"));
-    mData.code(tValidCode);
+    auto tValidCode = XMLGen::check_code_keyword(aScenario.value("code"));
+    aScenario.code(tValidCode);
 }
 
-void ParseScenario::checkPerformer()
+void ParseScenario::checkPerformer(XMLGen::Scenario& aScenario)
 {
-    auto tPerformer = mData.value("performer");
+    auto tPerformer = aScenario.value("performer");
     if (tPerformer.empty())
     {
-        tPerformer = mData.value("code") + "_1";
-        mData.performer(tPerformer);
+        tPerformer = aScenario.value("code") + "_1";
+        aScenario.performer(tPerformer);
     }
 }
 
-void ParseScenario::checkSpatialDimensions()
+void ParseScenario::checkSpatialDimensions(XMLGen::Scenario& aScenario)
 {
-    auto tDim = mData.value("dimensions");
+    auto tDim = aScenario.value("dimensions");
     if (tDim.empty())
     {
         THROWERR("Parse Scenario: 'dimensions' keyword is empty.")
@@ -99,34 +99,35 @@ void ParseScenario::checkSpatialDimensions()
     }
 }
 
-void ParseScenario::checkPhysics()
+void ParseScenario::checkPhysics(XMLGen::Scenario& aScenario)
 {
-    auto tPhysics = mData.value("physics");
+    auto tPhysics = aScenario.value("physics");
     if (tPhysics.empty())
     {
         THROWERR("Parse Scenario: 'physics' keyword is empty.")
     }
     auto tValidPhysics = XMLGen::check_physics_keyword(tPhysics);
-    mData.physics(tValidPhysics);
+    aScenario.physics(tValidPhysics);
 }
 
-void ParseScenario::checkScenarioID()
+void ParseScenario::checkScenarioID(XMLGen::Scenario& aScenario)
 {
-    auto tID = mData.value("id");
+    auto tID = aScenario.value("id");
     if (tID.empty())
     {
-        tID = mData.value("code") + "_" + mData.value("physics") + "_1";
-        mData.id(tID);
+        tID = aScenario.value("code") + "_" + aScenario.value("physics") + "_1";
+        aScenario.id(tID);
     }
 }
 
-XMLGen::Scenario ParseScenario::data() const
+std::vector<XMLGen::Scenario> ParseScenario::data() const
 {
     return mData;
 }
 
 void ParseScenario::parse(std::istream &aInputFile)
 {
+    mData.clear();
     this->allocate();
     constexpr int MAX_CHARS_PER_LINE = 10000;
     std::vector<char> tBuffer(MAX_CHARS_PER_LINE);
@@ -141,11 +142,14 @@ void ParseScenario::parse(std::istream &aInputFile)
         std::string tScenarioBlockID;
         if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tScenarioBlockID))
         {
+            XMLGen::Scenario tScenario;
             XMLGen::is_metadata_block_id_valid(tTokens);
+            XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
-            this->setTags();
-            mData.id(tScenarioBlockID);
-            this->checkTags();
+            this->setTags(tScenario);
+            tScenario.id(tScenarioBlockID);
+            this->checkTags(tScenario);
+            mData.push_back(tScenario);
         }
     }
 }
