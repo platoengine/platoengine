@@ -515,12 +515,18 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
 
 TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
 {
-    pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    pugi::xml_document tDocument;
+    XMLGen::Scenario tScenarioOne;
+    tScenarioOne.id("1");
+    tScenarioOne.performer("plato analyze");
+    tInputData.append(tScenarioOne);
+    XMLGen::Scenario tScenarioTwo;
+    tScenarioTwo.id("2");
+    tScenarioTwo.performer("sierra");
+    tInputData.append(tScenarioTwo);
     tInputData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
+    tInputData.mOutputMetaData.scenarioID("1");
 
     ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());

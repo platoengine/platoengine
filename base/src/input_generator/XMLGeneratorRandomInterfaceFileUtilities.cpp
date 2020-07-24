@@ -42,16 +42,19 @@ void append_criterion_shared_data_for_nondeterministic_usecase
     }
 
     // shared data - nondeterministic criterion value
-    auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
-    auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {tTag, "Scalar", "Global", "1", tOwnerName, "platomain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+    for (auto &tObjective : aXMLMetaData.objectives)
+    {
+        auto tOwnerName = tObjective.mPerformerName + "_{PerformerIndex}";
+        auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
+        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
+        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
 
-    // shared data - nondeterministic criterion gradient
-    tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    tValues = {tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+        // shared data - nondeterministic criterion gradient
+        tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
+        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+    }
 }
 //function append_criterion_shared_data_for_nondeterministic_usecase
 /******************************************************************************/
@@ -61,22 +64,20 @@ void append_nondeterministic_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.scenarios().empty())
     {
-        THROWERR("Append Nondeterministic QoI Shared Data: Objective metadata is empty.")
+        THROWERR("Append Nondeterministic QoI Shared Data: list of 'scenarios' is empty.")
     }
 
     XMLGen::ValidLayoutKeys tValidLayouts;
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
     for(auto& tID : tIDs)
     {
-        // TODO: REPLACE aXMLMetaData.objectives[0].mPerformerName WITH THE SCENARIO PERFORMER NAME
-        // SOON, THE OBJECTIVE WILL NOT HANDLE PERFORMER NAMES, PERFORMERS WILL BE TIE TO THE SCENARIO
-        // AND OBJECTIVES ARE GOING TO BE ASSOCIATED WITH SCENARIOS.
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
         auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
-        auto tOwnerName = aXMLMetaData.objectives[0].mPerformerName + "_{PerformerIndex}";
+        auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayout->second, "IGNORE", tOwnerName, "platomain"};
         XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);

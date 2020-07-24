@@ -151,6 +151,35 @@ public:
         }
         return mScenarios[aIndex];
     }
+    const XMLGen::Scenario& scenario(const std::string& aID) const
+    {
+        if(mScenarios.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'scenario' list is empty.")
+        }
+        else if(aID.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'scenario' identification (id) is empty.")
+        }
+        size_t tIndex = 0;
+        bool tFoundMatch = false;
+        for(auto& tScenario : mScenarios)
+        {
+            tIndex = &tScenario - &mScenarios[0];
+            if(tScenario.id().compare(aID) == 0)
+            {
+                tFoundMatch = true;
+                break;
+            }
+        }
+
+        if(!tFoundMatch)
+        {
+            THROWERR("XML Generator Input Metadata: Did not find 'scenario' with identification (id) '" + aID + "'.")
+        }
+
+        return mScenarios[tIndex];
+    }
     const std::vector<XMLGen::Scenario>& scenarios() const
     {
         return mScenarios;
