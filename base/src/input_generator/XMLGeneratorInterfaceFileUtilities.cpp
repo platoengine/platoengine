@@ -306,20 +306,20 @@ void append_update_problem_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.scenarios().empty())
     {
-        THROWERR(std::string("Append Update Problem Stage: ") + "Objective function list is empty.")
+        THROWERR("Append Update Problem Stage: Objective function list is empty.")
     }
 
-    for(auto &tObjective : aXMLMetaData.objectives)
+    for(auto &tScenario : aXMLMetaData.scenarios())
     {
         auto tStageNode = aDocument.append_child("Stage");
-        auto tIndex = &tObjective - &aXMLMetaData.objectives[0];
-        auto tStageName = std::string("Update Problem : ") + tObjective.mPerformerName + " " + std::to_string(tIndex);
+        auto tIndex = &tScenario - &aXMLMetaData.scenarios()[0];
+        auto tStageName = std::string("Update Problem : ") + tScenario.performer() + " " + std::to_string(tIndex);
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
 
         auto tOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children( { "Name", "PerformerName" }, { "Update Problem", tObjective.mPerformerName }, tOperationNode);
+        XMLGen::append_children( { "Name", "PerformerName" }, { "Update Problem", tScenario.performer() }, tOperationNode);
     }
 }
 // function append_update_problem_stage

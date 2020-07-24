@@ -455,10 +455,10 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData_ErrorEmpty
 TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
 {
     pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato analyze");
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    tInputData.append(tScenario);
 
     XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -744,10 +744,10 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase_E
 TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
 {
     pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato analyze");
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    tInputData.append(tScenario);
 
     ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
@@ -790,10 +790,10 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    XMLGen::Objective tObjective;
-    tObjective.code_name = "plato_analyze";
-    tObjective.mPerformerName = "plato_analyze";
-    tInputData.objectives.push_back(tObjective);
+    XMLGen::Scenario tScenario;
+    tScenario.code("plato_analyze");
+    tScenario.performer("plato_analyze");
+    tInputData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_physics_performers_for_nondeterministic_usecase(tInputData, tDocument));
 
     auto tPerformer = tDocument.child("Performer");
@@ -818,11 +818,10 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
 TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.code_name = "plato_analyze";
-    tObjective.mPerformerName = "plato analyze";
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato analyze");
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    tInputData.append(tScenario);
 
     ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
@@ -1094,11 +1093,11 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage_ErrorEmptyObjectiveList)
 
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
 {
-    pugi::xml_document tDocument;
-    XMLGen::Objective tObjective;
-    tObjective.mPerformerName = "plato analyze";
     XMLGen::InputData tInputData;
-    tInputData.objectives.push_back(tObjective);
+    pugi::xml_document tDocument;
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato analyze");
+    tInputData.append(tScenario);
 
     ASSERT_NO_THROW(XMLGen::append_update_problem_stage(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());

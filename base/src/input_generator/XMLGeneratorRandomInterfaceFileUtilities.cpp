@@ -35,16 +35,16 @@ void append_criterion_shared_data_for_nondeterministic_usecase
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.scenarios().empty())
     {
         THROWERR(std::string("Append Criterion Shared Data For Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+            + "Scenarios list is empty.")
     }
 
     // shared data - nondeterministic criterion value
-    for (auto &tObjective : aXMLMetaData.objectives)
+    for (auto &tScenario : aXMLMetaData.scenarios())
     {
-        auto tOwnerName = tObjective.mPerformerName + "_{PerformerIndex}";
+        auto tOwnerName = tScenario.performer() + "_{PerformerIndex}";
         auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
@@ -91,10 +91,9 @@ void append_topology_shared_data_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.scenarios().empty())
     {
-        THROWERR(std::string("Append Topology Shared Data for a Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+        THROWERR("Append Topology Shared Data for a Nondeterministic Use Case: Scenarios list is empty.")
     }
 
     auto tSharedData = aDocument.append_child("SharedData");
@@ -102,11 +101,11 @@ void append_topology_shared_data_for_nondeterministic_usecase
     std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
 
-    for(auto& tObjective : aXMLMetaData.objectives)
+    for(auto& tScenario : aXMLMetaData.scenarios())
     {
         auto tForNode = tSharedData.append_child("For");
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tUserName = tObjective.mPerformerName + "_{PerformerIndex}";
+        auto tUserName = tScenario.performer() + "_{PerformerIndex}";
         XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
     }
 }
@@ -118,21 +117,20 @@ void append_physics_performers_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.scenarios().empty())
     {
-        THROWERR(std::string("Append Physics Performer for a Nondeterministic Use Case: ")
-            + "Objective function list is empty.")
+        THROWERR("Append Physics Performer for a Nondeterministic Use Case: Scenarios list is empty.")
     }
 
-    for(auto& tObjective : aXMLMetaData.objectives)
+    for(auto& tScenario : aXMLMetaData.scenarios())
     {
-        const int tID = (&tObjective - &aXMLMetaData.objectives[0]) + 1;
+        const int tID = (&tScenario - &aXMLMetaData.scenarios()[0]) + 1;
         auto tPerformerNode = aDocument.append_child("Performer");
         XMLGen::append_children( { "PerformerID" }, { std::to_string(tID) }, tPerformerNode);
         auto tForNode = tPerformerNode.append_child("For");
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";
-        XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tObjective.code_name }, tForNode);
+        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tScenario.code() }, tForNode);
     }
 }
 // function append_physics_performers_for_nondeterministic_usecase
