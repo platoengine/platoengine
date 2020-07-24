@@ -783,6 +783,35 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase_Er
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
 {
     pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze";
+    tInputData.objectives.push_back(tObjective);
+    ASSERT_NO_THROW(XMLGen::append_physics_performers_for_nondeterministic_usecase(tInputData, tDocument));
+
+    auto tPerformer = tDocument.child("Performer");
+    ASSERT_FALSE(tPerformer.empty());
+    ASSERT_STREQ("Performer", tPerformer.name());
+    auto tPerformerID = tPerformer.child("PerformerID");
+    ASSERT_FALSE(tPerformerID.empty());
+    ASSERT_STREQ("PerformerID", tPerformerID.name());
+    auto tFor = tPerformer.child("For");
+    ASSERT_FALSE(tFor.empty());
+    ASSERT_STREQ("For", tFor.name());
+    std::vector<std::string> tKeys = {"var", "in"};
+    std::vector<std::string> tValues = {"PerformerIndex", "Performers"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tFor);
+    tKeys = {"Name", "Code"};
+    tValues = {"plato_analyze_{PerformerIndex}", "plato_analyze"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFor);
+    tFor = tFor.next_sibling("For");
+    ASSERT_TRUE(tFor.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUsecase)
+{
+    pugi::xml_document tDocument;
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tObjective.mPerformerName = "plato analyze";
