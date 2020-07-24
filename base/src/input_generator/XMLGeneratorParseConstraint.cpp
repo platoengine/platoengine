@@ -57,6 +57,7 @@ void ParseConstraint::allocate()
     mTags.insert({ "surface_area", { { {"surface_area"}, ""}, "" } });
     mTags.insert({ "volume absolute", { { {"volume", "absolute"}, ""}, "" } });
     mTags.insert({ "volume fraction", { { {"volume", "fraction"}, ""}, "" } });
+    mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
 std::string ParseConstraint::returnConstraintTargetAbsoluteKeywordSet(XMLGen::Constraint& aMetaData) const

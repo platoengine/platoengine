@@ -52,6 +52,7 @@ void ParseObjective::allocate()
     mTags.insert({ "penalty power", { { {"penalty", "power"}, ""}, "" } });
     mTags.insert({ "pnorm exponent", { { {"pnorm", "exponent"}, ""}, "" } });
     mTags.insert({ "minimum ersatz material value", { { {"minimum", "ersatz", "material", "value"}, ""}, "" } });
+    mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
 void ParseObjective::setName(XMLGen::Objective &aMetadata)
