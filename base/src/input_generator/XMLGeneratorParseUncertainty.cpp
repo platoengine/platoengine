@@ -115,15 +115,15 @@ void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
     this->setCategory(aMetadata);
     this->setIdentificationNumber(aMetadata);
-    aMetadata.type = mTags.find("tag")->second.second;
-    aMetadata.mean = mTags.find("mean")->second.second;
-    aMetadata.axis = mTags.find("attribute")->second.second;
+    aMetadata.type = mTags.find("tag")->second.first.second;
+    aMetadata.mean = mTags.find("mean")->second.first.second;
+    aMetadata.axis = mTags.find("attribute")->second.first.second;
     this->isAttributeEmpty(aMetadata);
-    aMetadata.lower = mTags.find("lower bound")->second.second;
-    aMetadata.upper = mTags.find("upper bound")->second.second;
-    aMetadata.num_samples = mTags.find("num samples")->second.second;
-    aMetadata.distribution = mTags.find("distribution")->second.second;
-    aMetadata.standard_deviation = mTags.find("standard deviation")->second.second;
+    aMetadata.lower = mTags.find("lower bound")->second.first.second;
+    aMetadata.upper = mTags.find("upper bound")->second.first.second;
+    aMetadata.num_samples = mTags.find("num samples")->second.first.second;
+    aMetadata.distribution = mTags.find("distribution")->second.first.second;
+    aMetadata.standard_deviation = mTags.find("standard deviation")->second.first.second;
 }
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
