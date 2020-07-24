@@ -165,7 +165,8 @@ void ParseUncertainty::isAttributeEmpty(XMLGen::Uncertainty& aMetadata)
     }
     else if(aMetadata.variable_type.compare("load") == 0 && aMetadata.axis.empty())
     {
-        THROWERR("Parse Uncertainty: 'attribute' keyword is empty.")
+        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword of random variable with tag '") + aMetadata.type
+                 + "', category '" + aMetadata.variable_type + "', and id '" + aMetadata.id + "' is empty.")
     }
 }
 
