@@ -73,6 +73,14 @@ private:
     void checkTag(const XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
+     * \fn isAttributeEmpty
+     * \brief If random variable is set to material and its empty, set attribute to \n
+     * homogeneous. If random variable is set to load and its empty, throw error.
+     * \param [in] aMetadata uncertainty metadata
+    **********************************************************************************/
+    void isAttributeEmpty(XMLGen::Uncertainty& aMetadata);
+
+    /******************************************************************************//**
      * \fn checkAttribute
      * \brief Check if attribute keyword is empty.
      * \param [in] aMetadata uncertainty metadata

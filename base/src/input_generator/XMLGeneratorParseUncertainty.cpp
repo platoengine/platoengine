@@ -109,21 +109,21 @@ void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
             + "User must define the 'load id' or 'material id' keyword based on the uncertain parameter category. "
             + "For instance, if the uncertain parameter 'category' is 'load', then the 'load id' keyword must be defined.")
     }
-
 }
 
 void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
     this->setCategory(aMetadata);
     this->setIdentificationNumber(aMetadata);
-    aMetadata.type = mTags.find("tag")->second.first.second;
-    aMetadata.mean = mTags.find("mean")->second.first.second;
-    aMetadata.axis = mTags.find("attribute")->second.first.second;
-    aMetadata.lower = mTags.find("lower bound")->second.first.second;
-    aMetadata.upper = mTags.find("upper bound")->second.first.second;
-    aMetadata.num_samples = mTags.find("num samples")->second.first.second;
-    aMetadata.distribution = mTags.find("distribution")->second.first.second;
-    aMetadata.standard_deviation = mTags.find("standard deviation")->second.first.second;
+    aMetadata.type = mTags.find("tag")->second.second;
+    aMetadata.mean = mTags.find("mean")->second.second;
+    aMetadata.axis = mTags.find("attribute")->second.second;
+    this->isAttributeEmpty(aMetadata);
+    aMetadata.lower = mTags.find("lower bound")->second.second;
+    aMetadata.upper = mTags.find("upper bound")->second.second;
+    aMetadata.num_samples = mTags.find("num samples")->second.second;
+    aMetadata.distribution = mTags.find("distribution")->second.second;
+    aMetadata.standard_deviation = mTags.find("standard deviation")->second.second;
 }
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
@@ -157,13 +157,20 @@ void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
     }
 }
 
-void ParseUncertainty::checkAttribute(const XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::isAttributeEmpty(XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.axis.empty())
+    if(aMetadata.variable_type.compare("material") == 0 && aMetadata.axis.empty())
+    {
+        aMetadata.axis = "homogeneous";
+    }
+    else if(aMetadata.variable_type.compare("load") == 0 && aMetadata.axis.empty())
     {
         THROWERR("Parse Uncertainty: 'attribute' keyword is empty.")
     }
+}
 
+void ParseUncertainty::checkAttribute(const XMLGen::Uncertainty& aMetadata)
+{
     XMLGen::ValidRandomAttributeKeys tValidKeys;
     auto tLowerKey = XMLGen::to_lower(aMetadata.axis);
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
