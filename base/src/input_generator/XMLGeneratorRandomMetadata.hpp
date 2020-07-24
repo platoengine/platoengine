@@ -428,6 +428,16 @@ public:
         }
         return (mSamples[0].materialSampleDrawn());
     }
+
+    /******************************************************************************//**
+     * \fn empty
+     * \brief Return 'true' if random metadata is empty; else, return 'false'.
+     * \return flag
+    **********************************************************************************/
+    bool empty() const
+    {
+        return mSamples.empty();
+    }
 };
 // struct RandomMetaData
 
