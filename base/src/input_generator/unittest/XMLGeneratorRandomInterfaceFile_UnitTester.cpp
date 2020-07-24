@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorInterfaceFile_UnitTester.cpp
+ * XMLGeneratorRandomInterfaceFile_UnitTester.cpp
  *
  *  Created on: May 28, 2020
  */
