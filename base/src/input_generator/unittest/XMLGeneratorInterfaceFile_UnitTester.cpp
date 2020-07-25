@@ -115,9 +115,9 @@ void append_cache_state_stage
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Cache State - ") + tScenario.performer();
+        auto tStageName = std::string("Cache State ID-") + tScenario.performer();
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        auto tPerformerName = tScenario.performer();
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
         std::vector<std::string> tValues = { "Cache State", tPerformerName };
         auto tOperationNode = tStageNode.append_child("Operation");
@@ -136,9 +136,9 @@ void append_update_problem_stage
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Update Problem - ") + tScenario.performer();
+        auto tStageName = std::string("Update Problem ID-") + tScenario.performer();
         XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        auto tPerformerName = tScenario.performer();
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
         std::vector<std::string> tValues = { "Update Problem", tPerformerName };
         auto tOperationNode = tStageNode.append_child("Operation");
@@ -364,6 +364,158 @@ inline void write_optimization_problem
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_gradient_stage(tMetaData, tDocument);
+
+    // STAGE INPUTS
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    ASSERT_STREQ("Stage", tStage.name());
+    auto tName = tStage.child("Name");
+    ASSERT_STREQ("Compute Objective Gradient ID-1", tName.child_value());
+    auto tType = tStage.child("Type");
+    ASSERT_STREQ("compliance", tType.child_value());
+    auto tInput = tStage.child("Input");
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Control"}, tInput);
+
+    // FILTER CONTROL OPERATION
+    auto tOperation = tStage.child("Operation");
+    std::vector<std::string> tKeys = {"Name", "PerformerName", "Input", "Output"};
+    std::vector<std::string> tValues = {"Filter Control", "platomain", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tOpInputs = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Field", "Control"}, tOpInputs);
+    auto tOpOutputs = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Field", "Topology"}, tOpOutputs);
+
+    // OBJECTIVE VALUE OPERATION
+    tOperation = tOperation.next_sibling("Operation");
+    tValues = {"Compute Objective Gradient", "plato_analyze_1", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    tOpInputs = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
+    tOpOutputs = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", "Objective Gradient ID-1"}, tOpOutputs);
+
+    // FILTER GRADIENT OPERATION
+    tOperation = tOperation.next_sibling("Operation");
+    tKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
+    tValues = {"Filter Gradient", "platomain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    tOpInputs = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Field", "Control"}, tOpInputs);
+    tOpInputs = tOpInputs.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Gradient", "Objective Gradient ID-1"}, tOpInputs);
+    tOpOutputs = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Gradient", "Objective Gradient ID-1"}, tOpOutputs);
+
+    // STAGE OUTPUT
+    auto tOutput = tStage.child("Output");
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Gradient ID-1"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_objective_value_stage(tMetaData, tDocument);
+
+    // STAGE INPUTS
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    ASSERT_STREQ("Stage", tStage.name());
+    auto tName = tStage.child("Name");
+    ASSERT_STREQ("Compute Objective Value ID-1", tName.child_value());
+    auto tType = tStage.child("Type");
+    ASSERT_STREQ("compliance", tType.child_value());
+    auto tInput = tStage.child("Input");
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Control"}, tInput);
+
+    // FILTER CONTROL OPERATION
+    auto tOperation = tStage.child("Operation");
+    std::vector<std::string> tKeys = {"Name", "PerformerName", "Input", "Output"};
+    std::vector<std::string> tValues = {"Filter Control", "platomain", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tOpInputs = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Field", "Control"}, tOpInputs);
+    auto tOpOutputs = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Field", "Topology"}, tOpOutputs);
+
+    // OBJECTIVE VALUE OPERATION
+    tOperation = tOperation.next_sibling("Operation");
+    tValues = {"Compute Objective Value", "plato_analyze_1", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    tOpInputs = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
+    tOpOutputs = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Objective Value ID-1"}, tOpOutputs);
+
+    // STAGE OUTPUT
+    auto tOutput = tStage.child("Output");
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Value ID-1"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendCacheStateStage)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato_analyze_1");
+    tScenario.cacheState("true");
+    tMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_cache_state_stage(tMetaData, tDocument));
+
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    ASSERT_STREQ("Stage", tStage.name());
+    PlatoTestXMLGenerator::test_children({"Name", "Operation"}, {"Cache State ID-plato_analyze_1", ""}, tStage);
+    auto tOperation = tStage.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    PlatoTestXMLGenerator::test_children({"Name", "PerformerName"}, {"Cache State", "plato_analyze_1"}, tOperation);
+}
+
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato_analyze_1");
+    tScenario.updateProblem("true");
+    tMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_update_problem_stage(tMetaData, tDocument));
+
+    auto tStage = tDocument.child("Stage");
+    ASSERT_FALSE(tStage.empty());
+    ASSERT_STREQ("Stage", tStage.name());
+    PlatoTestXMLGenerator::test_children({"Name", "Operation"}, {"Update Problem ID-plato_analyze_1", ""}, tStage);
+    auto tOperation = tStage.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    PlatoTestXMLGenerator::test_children({"Name", "PerformerName"}, {"Update Problem", "plato_analyze_1"}, tOperation);
+}
+
 TEST(PlatoTestXMLGenerator, AppendSharedData)
 {
     XMLGen::InputData tMetaData;
@@ -379,7 +531,7 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tMetaData.objectives.push_back(tObjective);
 
     pugi::xml_document tDocument;
-    XMLGen::append_shared_data(tMetaData, tDocument)    ;
+    XMLGen::append_shared_data(tMetaData, tDocument);
 
     // TEST
     auto tSharedData = tDocument.child("SharedData");
